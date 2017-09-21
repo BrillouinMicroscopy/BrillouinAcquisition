@@ -11,7 +11,8 @@ private slots:
 
 public:
 	BrillouinAcquisition(QWidget *parent = Q_NULLPTR);
+	~BrillouinAcquisition();
 
 private:
-	Ui::BrillouinAcquisitionClass ui;
+	Ui::BrillouinAcquisitionClass *ui;
 };

@@ -48,6 +48,9 @@
     <ClCompile Include="GeneratedFiles\qrc_BrillouinAcquisition.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="logger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -55,6 +58,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_BrillouinAcquisition.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="logger.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

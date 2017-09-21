@@ -1,10 +1,16 @@
 #include "stdafx.h"
 #include "BrillouinAcquisition.h"
 #include "version.h"
+#include "logger.h"
 
-BrillouinAcquisition::BrillouinAcquisition(QWidget *parent)
-	: QMainWindow(parent) {
-	ui.setupUi(this);
+BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
+	QMainWindow(parent), ui(new Ui::BrillouinAcquisitionClass) {
+	ui->setupUi(this);
+}
+
+BrillouinAcquisition::~BrillouinAcquisition() {
+	qInfo(logInfo()) << "BrillouinAcquisition closed.";
+	delete ui;
 }
 
 void BrillouinAcquisition::on_actionAbout_triggered() {
