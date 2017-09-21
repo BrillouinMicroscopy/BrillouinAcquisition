@@ -6,6 +6,9 @@
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
 
+private slots:
+	void on_actionAbout_triggered();
+
 public:
 	BrillouinAcquisition(QWidget *parent = Q_NULLPTR);
 
