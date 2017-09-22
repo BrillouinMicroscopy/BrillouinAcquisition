@@ -36,3 +36,8 @@ void BrillouinAcquisition::on_actionAbout_triggered() {
 
 	QMessageBox::about(this, tr("About BrillouinAcquisition"), str);
 }
+
+void BrillouinAcquisition::on_cameraButton_clicked() {
+	qDebug(logDebug()) << "Camera Button clicked";
+	andor.checkCamera();
+}
