@@ -1,30 +1,24 @@
 #pragma once
 #include "atcore.h"
+#include <QThread>
+#include <QMutex>
 
-class Andor {
+class Andor: public QThread {
+//class Andor {
 
 private:
+	bool m_abort;
+	QMutex mutex;
 	AT_H Hndl;
 	bool initialised = FALSE;
 	bool connected = FALSE;
 
 public:
-	Andor() {
-		int i_retCode;
-		i_retCode = AT_InitialiseLibrary();
-		if (i_retCode != AT_SUCCESS) {
-			//error condition, check atdebug.log file
-		} else {
-			initialised = TRUE;
-		}
-	}
-
-	~Andor() {
-		if (connected) {
-			AT_Close(Hndl);
-		}
-		AT_FinaliseLibrary();
-	}
+	Andor(QObject *parent = 0);
+	~Andor();
 
 	void checkCamera();
+
+protected:
+	void run();
 };

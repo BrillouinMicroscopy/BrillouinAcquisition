@@ -18,5 +18,5 @@ public:
 
 private:
 	Ui::BrillouinAcquisitionClass *ui;
-	Andor andor;
+	Andor *andor;
 };

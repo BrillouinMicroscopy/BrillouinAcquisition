@@ -6,6 +6,8 @@
 BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	QMainWindow(parent), ui(new Ui::BrillouinAcquisitionClass) {
 	ui->setupUi(this);
+
+	andor = new Andor();
 }
 
 BrillouinAcquisition::~BrillouinAcquisition() {
@@ -39,5 +41,5 @@ void BrillouinAcquisition::on_actionAbout_triggered() {
 
 void BrillouinAcquisition::on_cameraButton_clicked() {
 	qDebug(logDebug()) << "Camera Button clicked";
-	andor.checkCamera();
+	andor->checkCamera();
 }

@@ -2,8 +2,40 @@
 #include <iostream>
 #include "andor.h"
 #include "logger.h"
+#include <windows.h>
+
+Andor::Andor(QObject *parent)
+	: QThread(parent) {
+	m_abort = false;
+	int i_retCode;
+	i_retCode = AT_InitialiseLibrary();
+	if (i_retCode != AT_SUCCESS) {
+		//error condition, check atdebug.log file
+	}
+	else {
+		initialised = TRUE;
+	}
+}
+
+Andor::~Andor() {
+	mutex.lock();
+	m_abort = true;
+	mutex.unlock();
+
+	wait();
+
+	if (connected) {
+		AT_Close(Hndl);
+	}
+	AT_FinaliseLibrary();
+}
 
 void Andor::checkCamera() {
+	m_abort = false;
+	start();
+}
+
+void Andor::run() {
 	qInfo(logInfo()) << "Checking camera.";
 	int i_retCode;
 	AT_64 iNumberDevices = 0;
