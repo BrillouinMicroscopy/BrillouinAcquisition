@@ -3,14 +3,19 @@
 #include "version.h"
 #include "logger.h"
 
+
 BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	QMainWindow(parent), ui(new Ui::BrillouinAcquisitionClass) {
 	ui->setupUi(this);
 
 	andor = new Andor();
+
+	CameraThread.startWorker(andor);
 }
 
 BrillouinAcquisition::~BrillouinAcquisition() {
+	CameraThread.exit();
+	delete andor;
 	qInfo(logInfo()) << "BrillouinAcquisition closed.";
 	delete ui;
 }
@@ -41,5 +46,6 @@ void BrillouinAcquisition::on_actionAbout_triggered() {
 
 void BrillouinAcquisition::on_cameraButton_clicked() {
 	qDebug(logDebug()) << "Camera Button clicked";
-	andor->checkCamera();
+	QMetaObject::invokeMethod(andor, "getImages", Qt::QueuedConnection);
+	qDebug(logDebug()) << "Measurement done.";
 }

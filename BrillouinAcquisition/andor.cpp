@@ -5,25 +5,18 @@
 #include <windows.h>
 
 Andor::Andor(QObject *parent)
-	: QThread(parent) {
+	: QObject(parent) {
 	m_abort = false;
 	int i_retCode;
 	i_retCode = AT_InitialiseLibrary();
 	if (i_retCode != AT_SUCCESS) {
 		//error condition, check atdebug.log file
-	}
-	else {
+	} else {
 		initialised = TRUE;
 	}
 }
 
 Andor::~Andor() {
-	mutex.lock();
-	m_abort = true;
-	mutex.unlock();
-
-	wait();
-
 	if (connected) {
 		AT_Close(Hndl);
 	}
@@ -31,11 +24,7 @@ Andor::~Andor() {
 }
 
 void Andor::checkCamera() {
-	m_abort = false;
-	start();
-}
-
-void Andor::run() {
+	Sleep(5000);
 	qInfo(logInfo()) << "Checking camera.";
 	int i_retCode;
 	AT_64 iNumberDevices = 0;
@@ -49,8 +38,7 @@ void Andor::run() {
 			i_retCode = AT_Open(0, &Hndl);
 			if (i_retCode != AT_SUCCESS) {
 				//error condition - check atdebug.log
-			}
-			else {
+			} else {
 				connected = TRUE;
 			}
 		}
@@ -60,9 +48,14 @@ void Andor::run() {
 			//The serial number of the camera is szValue
 			qInfo(logInfo()) << "The serial number is" << szValue;
 			//wcout << L"The serial number is " << szValue << endl;
-		}
-		else {
+		} else {
 			//Serial Number feature was not found, check the error code for information
 		}
 	}
+}
+
+void Andor::getImages() {
+	qInfo(logInfo()) << "Acquisition started.";
+	Sleep(5000);
+	qInfo(logInfo()) << "Acquisition finished.";
 }

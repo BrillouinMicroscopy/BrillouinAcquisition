@@ -1,5 +1,6 @@
 #pragma once
 
+#include "thread.h"
 #include "andor.h"
 
 #include <QtWidgets/QMainWindow>
@@ -18,5 +19,6 @@ public:
 
 private:
 	Ui::BrillouinAcquisitionClass *ui;
+	Thread CameraThread;
 	Andor *andor;
 };
