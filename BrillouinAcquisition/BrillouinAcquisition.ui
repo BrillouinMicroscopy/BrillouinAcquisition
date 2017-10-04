@@ -75,7 +75,7 @@
           <string notr="true"/>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="cameraTab">
           <property name="sizePolicy">
@@ -313,7 +313,7 @@
                   <x>260</x>
                   <y>60</y>
                   <width>81</width>
-                  <height>30</height>
+                  <height>29</height>
                  </rect>
                 </property>
                 <property name="minimum">
@@ -688,6 +688,13 @@
      <widget class="QWidget" name="cameraImage" native="true">
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
+        <widget class="QPushButton" name="cameraButton">
+         <property name="text">
+          <string>PushButton</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLabel" name="cameraImageLabel">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -794,6 +801,24 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>cTScrollArea</tabstop>
+  <tabstop>settingsWidget</tabstop>
+  <tabstop>exposureTime</tabstop>
+  <tabstop>nrImages</tabstop>
+  <tabstop>tiggerMode</tabstop>
+  <tabstop>binningValue</tabstop>
+  <tabstop>ROILeft</tabstop>
+  <tabstop>ROIWidth</tabstop>
+  <tabstop>ROIBottom</tabstop>
+  <tabstop>ROIHeight</tabstop>
+  <tabstop>readoutRate</tabstop>
+  <tabstop>sensitivity</tabstop>
+  <tabstop>encoding</tabstop>
+  <tabstop>cycleMode</tabstop>
+  <tabstop>cameraButton</tabstop>
+  <tabstop>sTScrollArea</tabstop>
+ </tabstops>
  <resources>
   <include location="BrillouinAcquisition.qrc"/>
  </resources>
