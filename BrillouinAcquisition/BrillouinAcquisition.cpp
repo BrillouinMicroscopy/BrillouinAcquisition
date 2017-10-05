@@ -8,6 +8,11 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	QMainWindow(parent), ui(new Ui::BrillouinAcquisitionClass) {
 	ui->setupUi(this);
 
+	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
+	ui->settingsWidget->setTabIcon(0, icon);
+	ui->settingsWidget->setTabIcon(1, icon);
+	ui->settingsWidget->setIconSize(QSize(16, 16));
+
 	andor = new Andor();
 
 	CameraThread.startWorker(andor);
@@ -24,9 +29,13 @@ void BrillouinAcquisition::on_actionConnect_Camera_triggered() {
 	if (andor->getConnectionStatus()) {
 		andor->disconnect();
 		ui->actionConnect_Camera->setText("Connect Camera");
+		QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
+		ui->settingsWidget->setTabIcon(0, icon);
 	} else {
 		andor->connect();
 		ui->actionConnect_Camera->setText("Disconnect Camera");
+		QIcon icon(":/BrillouinAcquisition/assets/01standby.png");
+		ui->settingsWidget->setTabIcon(0, icon);
 	}
 }
 

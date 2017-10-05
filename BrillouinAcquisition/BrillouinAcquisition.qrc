@@ -1,4 +1,8 @@
 <RCC>
-    <qresource prefix="BrillouinAcquisition">
+    <qresource prefix="/BrillouinAcquisition">
+        <file>assets/00disconnected.png</file>
+        <file>assets/01standby.png</file>
+        <file>assets/02cooling.png</file>
+        <file>assets/03ready.png</file>
     </qresource>
 </RCC>
