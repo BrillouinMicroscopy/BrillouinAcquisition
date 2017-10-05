@@ -13,6 +13,7 @@ private slots:
 	void on_actionAbout_triggered();
 	void on_cameraButton_clicked();
 	void on_actionConnect_Camera_triggered();
+	void on_actionEnable_Cooling_triggered();
 
 public:
 	BrillouinAcquisition(QWidget *parent = Q_NULLPTR);

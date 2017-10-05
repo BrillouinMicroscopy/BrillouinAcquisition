@@ -13,6 +13,8 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	ui->settingsWidget->setTabIcon(1, icon);
 	ui->settingsWidget->setIconSize(QSize(16, 16));
 
+	ui->actionEnable_Cooling->setEnabled(FALSE);
+
 	andor = new Andor();
 
 	CameraThread.startWorker(andor);
@@ -29,13 +31,33 @@ void BrillouinAcquisition::on_actionConnect_Camera_triggered() {
 	if (andor->getConnectionStatus()) {
 		andor->disconnect();
 		ui->actionConnect_Camera->setText("Connect Camera");
+		ui->actionEnable_Cooling->setText("Enable Cooling");
 		QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
 		ui->settingsWidget->setTabIcon(0, icon);
+		ui->actionEnable_Cooling->setEnabled(FALSE);
 	} else {
 		andor->connect();
 		ui->actionConnect_Camera->setText("Disconnect Camera");
 		QIcon icon(":/BrillouinAcquisition/assets/01standby.png");
 		ui->settingsWidget->setTabIcon(0, icon);
+		ui->actionEnable_Cooling->setEnabled(TRUE);
+	}
+}
+
+void BrillouinAcquisition::on_actionEnable_Cooling_triggered() {
+	if (andor->getConnectionStatus()) {
+		if (andor->getSensorCooling()) {
+			andor->setSensorCooling(FALSE);
+			ui->actionEnable_Cooling->setText("Enable Cooling");
+			QIcon icon(":/BrillouinAcquisition/assets/01standby.png");
+			ui->settingsWidget->setTabIcon(0, icon);
+		}
+		else {
+			andor->setSensorCooling(TRUE);
+			ui->actionEnable_Cooling->setText("Disable Cooling");
+			QIcon icon(":/BrillouinAcquisition/assets/02cooling.png");
+			ui->settingsWidget->setTabIcon(0, icon);
+		}
 	}
 }
 
