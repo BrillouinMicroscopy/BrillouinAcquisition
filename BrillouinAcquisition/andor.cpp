@@ -23,6 +23,51 @@ Andor::~Andor() {
 	AT_FinaliseLibrary();
 }
 
+void Andor::connect() {
+	if (!connected) {
+		int i_retCode = AT_Open(0, &Hndl);
+		if (i_retCode == AT_SUCCESS) {
+			connected = TRUE;
+		}
+	}
+}
+
+void Andor::disconnect() {
+	if (connected) {
+		int i_retCode = AT_Close(Hndl);
+		if (i_retCode == AT_SUCCESS) {
+			connected = FALSE;
+		}
+	}
+}
+
+bool Andor::getConnectionStatus() {
+	return connected;
+}
+
+void Andor::setSensorCooling(bool cooling) {
+	int i_retCode = AT_SetBool(Hndl, L"SensorCooling", cooling);
+}
+
+bool Andor::getSensorCooling() {
+	AT_BOOL szValue;
+	int i_retCode = AT_GetBool(Hndl, L"SensorCooling", &szValue);
+	return szValue;
+}
+
+const wchar_t Andor::getTemperatureStatus() {
+	int i_retCode;
+	i_retCode = AT_GetEnumIndex(Hndl, L"TemperatureStatus", &temperatureStatusIndex);
+	AT_GetEnumStringByIndex(Hndl, L"TemperatureStatus", temperatureStatusIndex, temperatureStatus, 256);
+	return *temperatureStatus;
+}
+
+double Andor::getSensorTemperature() {
+	double szValue;
+	int i_retCode = AT_GetFloat(Hndl, L"SensorTemperature", &szValue);
+	return szValue;
+}
+
 void Andor::checkCamera() {
 	Sleep(5000);
 	qInfo(logInfo()) << "Checking camera.";

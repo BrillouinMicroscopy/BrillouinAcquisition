@@ -20,6 +20,16 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 	delete ui;
 }
 
+void BrillouinAcquisition::on_actionConnect_Camera_triggered() {
+	if (andor->getConnectionStatus()) {
+		andor->disconnect();
+		ui->actionConnect_Camera->setText("Connect Camera");
+	} else {
+		andor->connect();
+		ui->actionConnect_Camera->setText("Disconnect Camera");
+	}
+}
+
 void BrillouinAcquisition::on_actionAbout_triggered() {
 	QString clean = "Yes";
 	if (Version::VerDirty) {
