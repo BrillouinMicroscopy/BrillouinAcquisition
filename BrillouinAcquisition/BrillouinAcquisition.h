@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BRILLOUINACQUISITON_H
+#define BRILLOUINACQUISITON_H
 
 #include "thread.h"
 #include "andor.h"
@@ -24,3 +25,5 @@ private:
 	Thread CameraThread;
 	Andor *andor;
 };
+
+#endif // BRILLOUINACQUISITON_H

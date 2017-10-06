@@ -1,4 +1,6 @@
-#pragma once
+#ifndef ANDOR_H
+#define ANDOR_H
+
 #include "atcore.h"
 
 class Andor: public QObject {
@@ -34,3 +36,5 @@ public slots:
 	void checkCamera();
 	void getImages();
 };
+
+#endif // ANDOR_H
