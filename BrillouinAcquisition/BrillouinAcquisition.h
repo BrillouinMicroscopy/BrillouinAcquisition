@@ -17,7 +17,7 @@ private slots:
 	void on_actionConnect_Camera_triggered();
 	void on_actionEnable_Cooling_triggered();
 	void on_camera_playPause_clicked();
-	void onNewImage(unsigned short *);
+	void onNewImage(unsigned short *, AT_64, AT_64);
 	void createCameraImage();
 	void xAxisRangeChanged(const QCPRange & newRange);
 	void yAxisRangeChanged(const QCPRange & newRange);

@@ -45,7 +45,7 @@ public slots:
 	void acquireStartStop();
 
 signals:
-	void imageAcquired(unsigned short*);
+	void imageAcquired(unsigned short*, AT_64, AT_64);
 };
 
 #endif // ANDOR_H

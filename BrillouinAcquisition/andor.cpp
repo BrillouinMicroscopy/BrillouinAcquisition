@@ -79,6 +79,12 @@ void Andor::acquireStartStop() {
 
 	//Set the exposure time for this camera to 10 milliseconds
 	AT_SetFloat(Hndl, L"ExposureTime", 0.01);
+
+	//Set the AOI
+	AT_SetInt(Hndl, L"AOIWidth", 2048);
+	AT_SetInt(Hndl, L"AOILeft", 2048);
+	AT_SetInt(Hndl, L"AOIHeight", 0);
+	AT_SetInt(Hndl, L"AOITop", 0);
 	
 // Allocate a buffer
 	//Get the number of bytes required to store one frame
@@ -114,8 +120,14 @@ void Andor::acquireStartStop() {
 	/*unsigned short* unpackedBuffer = new unsigned short[static_cast<size_t>(ImageHeight*ImageWidth)];
 	AT_ConvertBuffer(Buffer, reinterpret_cast<unsigned char*>(unpackedBuffer), ImageWidth, ImageHeight, ImageStride, L"Mono12Packed", L"Mono16");*/
 
+
+	int pixelNumber = ImageWidth*ImageHeight;
+	AT_U8* ImagePixels = new AT_U8[pixelNumber*2];
+
+	AT_ConvertBuffer(Buffer, ImagePixels, ImageWidth, ImageHeight, ImageStride, L"Mono16", L"Mono16");
+
 	// Mono16
-	unpackedBuffer = reinterpret_cast<unsigned short*>(Buffer);
+	unpackedBuffer = reinterpret_cast<unsigned short*>(ImagePixels);
 
 	AT_FinaliseUtilityLibrary();
 
@@ -128,7 +140,7 @@ void Andor::acquireStartStop() {
 	//delete [] UserBuffer;
 
 	// announce image acquisition
-	emit(imageAcquired(unpackedBuffer));
+	emit(imageAcquired(unpackedBuffer, ImageWidth, ImageHeight));
 }
 
 void Andor::checkCamera() {

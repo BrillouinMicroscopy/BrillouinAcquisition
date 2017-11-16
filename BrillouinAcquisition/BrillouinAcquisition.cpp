@@ -11,9 +11,9 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	// slot for newly acquired images
 	QWidget::connect(
 		andor,
-		SIGNAL(imageAcquired(unsigned short*)),
+		SIGNAL(imageAcquired(unsigned short*, AT_64, AT_64)),
 		this,
-		SLOT(onNewImage(unsigned short*))
+		SLOT(onNewImage(unsigned short*, AT_64, AT_64))
 	);
 
 	// slot to limit the axis of the camera display after user interaction
@@ -137,20 +137,17 @@ void BrillouinAcquisition::yAxisRangeChanged(const QCPRange &newRange) {
 	ui->customplot->yAxis->setRange(newRange.bounded(0, 3000));
 }
 
-void BrillouinAcquisition::onNewImage(unsigned short* unpackedBuffer) {
+void BrillouinAcquisition::onNewImage(unsigned short* unpackedBuffer, AT_64 width, AT_64 height) {
 
-	int nx = 2560;
-	int ny = 2160;
-	colorMap->data()->setSize(nx, ny); // we want the color map to have nx * ny data points
-	colorMap->data()->setRange(QCPRange(0, nx), QCPRange(0, ny)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
-
+	colorMap->data()->setSize(width, height); // we want the color map to have nx * ny data points
+	colorMap->data()->setRange(QCPRange(0, width), QCPRange(0, height)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
 
 	double x, y;
 	int tIndex;
-	for (int yIndex = 0; yIndex<ny; ++yIndex) {
-		for (int xIndex = 0; xIndex<nx; ++xIndex) {
+	for (int xIndex = 0; xIndex<width; ++xIndex) {
+		for (int yIndex = 0; yIndex<height; ++yIndex) {
 			colorMap->data()->cellToCoord(xIndex, yIndex, &x, &y);
-			tIndex = xIndex * ny + yIndex;
+			tIndex = xIndex * height + yIndex;
 			colorMap->data()->setCell(xIndex, yIndex, unpackedBuffer[tIndex]);
 		}
 	}
