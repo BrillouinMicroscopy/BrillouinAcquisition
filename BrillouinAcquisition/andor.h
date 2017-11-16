@@ -2,9 +2,9 @@
 #define ANDOR_H
 
 #include "atcore.h"
+#include "atutility.h"
 
 class Andor: public QObject {
-//class Andor {
 	Q_OBJECT
 
 private:
@@ -12,6 +12,11 @@ private:
 	AT_H Hndl;
 	bool initialised = FALSE;
 	bool connected = FALSE;
+
+	AT_64 imageSizeBytes;
+	int i_imageSize;
+	unsigned char* gblp_Buffer = NULL;
+	unsigned char* pucAlignedBuffer = NULL;
 
 	int temperatureStatusIndex = 0;
 	wchar_t temperatureStatus[256];
@@ -31,10 +36,16 @@ public:
 
 	// setters/getters for ROI
 
+	unsigned short* unpackedBuffer;
+
 
 public slots:
 	void checkCamera();
-	void getImages();
+	void acquireSingle();
+	void acquireStartStop();
+
+signals:
+	void imageAcquired(unsigned short*);
 };
 
 #endif // ANDOR_H

@@ -642,8 +642,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>392</width>
-                <height>441</height>
+                <width>98</width>
+                <height>440</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -688,22 +688,51 @@
      <widget class="QWidget" name="cameraImage" native="true">
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QPushButton" name="cameraButton">
-         <property name="text">
-          <string>PushButton</string>
+        <widget class="QWidget" name="cameraControl" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>40</height>
+          </size>
          </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>586</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="camera_singleShot">
+            <property name="text">
+             <string>Single</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="camera_playPause">
+            <property name="text">
+             <string>Play</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="cameraImageLabel">
+        <widget class="QCustomPlot" name="customplot" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
-         </property>
-         <property name="text">
-          <string/>
          </property>
         </widget>
        </item>
@@ -801,6 +830,14 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>QCustomPlot</class>
+   <extends>QWidget</extends>
+   <header>qcustomplot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>cTScrollArea</tabstop>
   <tabstop>settingsWidget</tabstop>
@@ -816,7 +853,6 @@
   <tabstop>sensitivity</tabstop>
   <tabstop>encoding</tabstop>
   <tabstop>cycleMode</tabstop>
-  <tabstop>cameraButton</tabstop>
   <tabstop>sTScrollArea</tabstop>
  </tabstops>
  <resources>

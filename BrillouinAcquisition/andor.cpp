@@ -68,8 +68,70 @@ double Andor::getSensorTemperature() {
 	return szValue;
 }
 
+void Andor::acquireStartStop() {
+// Set the camera settings
+
+	//Set the pixel Encoding to the desired settings Mono16 Data
+	AT_SetEnumeratedString(Hndl, L"Pixel Encoding", L"Mono16");
+
+	//Set the pixel Readout Rate to slowest
+	AT_SetEnumeratedString(Hndl, L"Pixel Readout Rate", L"100 MHz");
+
+	//Set the exposure time for this camera to 10 milliseconds
+	AT_SetFloat(Hndl, L"ExposureTime", 0.01);
+	
+// Allocate a buffer
+	//Get the number of bytes required to store one frame
+	AT_64 ImageSizeBytes;
+	AT_GetInt(Hndl, L"ImageSizeBytes", &ImageSizeBytes);
+	int BufferSize = static_cast<int>(ImageSizeBytes);
+	
+	//Allocate a memory buffer to store one frame
+	unsigned char* UserBuffer = new unsigned char[BufferSize];
+	
+// Acquire images
+	//Pass this buffer to the SDK
+	AT_QueueBuffer(Hndl, UserBuffer, BufferSize);
+	//Start the Acquisition running
+	AT_Command(Hndl, L"AcquisitionStart");
+	
+	//Sleep in this thread until data is ready, in this case set
+	//the timeout to infinite for simplicity
+	unsigned char* Buffer;
+	AT_WaitBuffer(Hndl, &Buffer, &BufferSize, AT_INFINITE);
+
+// Process the image
+	//Unpack the 12 bit packed data
+	AT_InitialiseUtilityLibrary();
+	AT_64 ImageHeight;
+	AT_GetInt(Hndl, L"AOI Height", &ImageHeight);
+	AT_64 ImageWidth;
+	AT_GetInt(Hndl, L"AOI Width", &ImageWidth);
+	AT_64 ImageStride;
+	AT_GetInt(Hndl, L"AOI Stride", &ImageStride);
+	
+	// needed for Mono12Packed
+	/*unsigned short* unpackedBuffer = new unsigned short[static_cast<size_t>(ImageHeight*ImageWidth)];
+	AT_ConvertBuffer(Buffer, reinterpret_cast<unsigned char*>(unpackedBuffer), ImageWidth, ImageHeight, ImageStride, L"Mono12Packed", L"Mono16");*/
+
+	// Mono16
+	unpackedBuffer = reinterpret_cast<unsigned short*>(Buffer);
+
+	AT_FinaliseUtilityLibrary();
+
+	//Stop the acquisition
+	AT_Command(Hndl, L"AcquisitionStop");
+	AT_Flush(Hndl);
+	//Application specific data processing goes here..
+	
+	//Free the allocated buffer
+	//delete [] UserBuffer;
+
+	// announce image acquisition
+	emit(imageAcquired(unpackedBuffer));
+}
+
 void Andor::checkCamera() {
-	Sleep(5000);
 	qInfo(logInfo()) << "Checking camera.";
 	int i_retCode;
 	AT_64 iNumberDevices = 0;
@@ -99,7 +161,10 @@ void Andor::checkCamera() {
 	}
 }
 
-void Andor::getImages() {
+/*
+ *	Currently only a test function for asynchronous execution
+ */
+void Andor::acquireSingle() {
 	qInfo(logInfo()) << "Acquisition started.";
 	Sleep(5000);
 	qInfo(logInfo()) << "Acquisition finished.";
