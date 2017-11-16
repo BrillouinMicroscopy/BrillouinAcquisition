@@ -219,12 +219,16 @@ void BrillouinAcquisition::on_actionConnect_Camera_triggered() {
 		QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
 		ui->settingsWidget->setTabIcon(0, icon);
 		ui->actionEnable_Cooling->setEnabled(FALSE);
+		ui->camera_playPause->setEnabled(FALSE);
+		ui->camera_singleShot->setEnabled(FALSE);
 	} else {
 		andor->connect();
 		ui->actionConnect_Camera->setText("Disconnect Camera");
 		QIcon icon(":/BrillouinAcquisition/assets/01standby.png");
 		ui->settingsWidget->setTabIcon(0, icon);
 		ui->actionEnable_Cooling->setEnabled(TRUE);
+		ui->camera_playPause->setEnabled(TRUE);
+		ui->camera_singleShot->setEnabled(TRUE);
 	}
 }
 

@@ -711,6 +711,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="camera_singleShot">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Single</string>
             </property>
@@ -718,6 +721,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="camera_playPause">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Play</string>
             </property>
