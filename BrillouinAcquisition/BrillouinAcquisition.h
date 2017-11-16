@@ -35,6 +35,11 @@ typedef struct {
 
 } SETTINGS_STAGE;
 
+typedef struct {
+	SETTINGS_CAMERA camera;
+	SETTINGS_STAGE stage;
+} SETTINGS_DEVICES;
+
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
 
@@ -48,6 +53,14 @@ private slots:
 	void createCameraImage();
 	void xAxisRangeChanged(const QCPRange & newRange);
 	void yAxisRangeChanged(const QCPRange & newRange);
+	void settingsCameraUpdate(SETTINGS_DEVICES);
+	void on_ROILeft_valueChanged(int);
+	void on_ROIWidth_valueChanged(int);
+	void on_ROIBottom_valueChanged(int);
+	void on_ROIHeight_valueChanged(int);
+
+signals:
+	void settingsCameraChanged(SETTINGS_DEVICES);
 
 public:
 	BrillouinAcquisition(QWidget *parent = Q_NULLPTR);
@@ -58,6 +71,7 @@ private:
 	Thread CameraThread;
 	Andor *andor = new Andor();
 	QCPColorMap *colorMap;
+	SETTINGS_DEVICES settings;
 };
 
 #endif // BRILLOUINACQUISITON_H

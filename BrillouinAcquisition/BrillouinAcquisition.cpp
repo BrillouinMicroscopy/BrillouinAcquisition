@@ -30,6 +30,14 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 		SLOT(yAxisRangeChanged(QCPRange))
 	);
 
+	// slots to update the settings inputs
+	QWidget::connect(
+		this,
+		SIGNAL(settingsCameraChanged(SETTINGS_DEVICES)),
+		this,
+		SLOT(settingsCameraUpdate(SETTINGS_DEVICES))
+	);
+
 	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
 	ui->settingsWidget->setTabIcon(0, icon);
 	ui->settingsWidget->setTabIcon(1, icon);
@@ -129,12 +137,59 @@ void BrillouinAcquisition::createCameraImage() {
 
 void BrillouinAcquisition::xAxisRangeChanged(const QCPRange &newRange) {
 	// checks for certain range
-	ui->customplot->xAxis->setRange(newRange.bounded(0, 3000));
+	ui->customplot->xAxis->setRange(newRange.bounded(0, 2048));
+	if (newRange.lower >= 0) {
+		settings.camera.roi.left = newRange.lower;
+	}
+	int width = newRange.upper - newRange.lower;
+	if (width < 2048) {
+		settings.camera.roi.width = width;
+	}
+	emit(settingsCameraChanged(settings));
 }
 
 void BrillouinAcquisition::yAxisRangeChanged(const QCPRange &newRange) {
 	// checks for certain range
-	ui->customplot->yAxis->setRange(newRange.bounded(0, 3000));
+	ui->customplot->yAxis->setRange(newRange.bounded(0, 2048));
+	if (newRange.lower >= 0) {
+		settings.camera.roi.bottom = newRange.lower;
+	}
+	int height = newRange.upper - newRange.lower;
+	if (height < 2048) {
+		settings.camera.roi.height = height;
+	}
+	emit(settingsCameraChanged(settings));
+}
+
+void BrillouinAcquisition::settingsCameraUpdate(SETTINGS_DEVICES settings) {
+	ui->ROILeft->setValue(settings.camera.roi.left);
+	ui->ROIWidth->setValue(settings.camera.roi.width);
+	ui->ROIBottom->setValue(settings.camera.roi.bottom);
+	ui->ROIHeight->setValue(settings.camera.roi.height);
+}
+
+void BrillouinAcquisition::on_ROILeft_valueChanged(int left) {
+	settings.camera.roi.left = left;
+	ui->customplot->xAxis->setRange(QCPRange(left, left + settings.camera.roi.width));
+	ui->customplot->replot();
+}
+
+void BrillouinAcquisition::on_ROIWidth_valueChanged(int width) {
+	settings.camera.roi.width = width;
+	ui->customplot->xAxis->setRange(QCPRange(settings.camera.roi.left, settings.camera.roi.left + width));
+	ui->customplot->replot();
+}
+
+void BrillouinAcquisition::on_ROIBottom_valueChanged(int bottom) {
+	settings.camera.roi.bottom = bottom;
+	ui->customplot->yAxis->setRange(QCPRange(bottom, bottom + settings.camera.roi.height));
+	ui->customplot->replot();
+}
+
+void BrillouinAcquisition::on_ROIHeight_valueChanged(int height) {
+	settings.camera.roi.height = height;
+	ui->customplot->yAxis->setRange(QCPRange(settings.camera.roi.bottom, settings.camera.roi.bottom + height));
+	ui->customplot->replot();
 }
 
 void BrillouinAcquisition::onNewImage(unsigned short* unpackedBuffer, AT_64 width, AT_64 height) {
