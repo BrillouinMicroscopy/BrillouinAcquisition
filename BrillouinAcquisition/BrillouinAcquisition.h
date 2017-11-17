@@ -40,6 +40,10 @@ typedef struct {
 	SETTINGS_STAGE stage;
 } SETTINGS_DEVICES;
 
+enum CustomGradientPreset {
+	gpParula
+};
+
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
 
@@ -58,6 +62,7 @@ private slots:
 	void on_ROIWidth_valueChanged(int);
 	void on_ROIBottom_valueChanged(int);
 	void on_ROIHeight_valueChanged(int);
+	void setColormap(QCPColorGradient *, CustomGradientPreset);
 
 signals:
 	void settingsCameraChanged(SETTINGS_DEVICES);

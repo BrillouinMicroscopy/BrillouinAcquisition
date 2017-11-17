@@ -112,7 +112,12 @@ void BrillouinAcquisition::createCameraImage() {
 	colorScale->axis()->setLabel("Intensity");
 
 	// set the color gradient of the color map to one of the presets:
-	colorMap->setGradient(QCPColorGradient::gpPolar);
+	//colorMap->setGradient(QCPColorGradient::gpPolar);
+
+	QCPColorGradient gradient = QCPColorGradient();
+	setColormap(&gradient, gpParula);
+	colorMap->setGradient(gradient);
+
 	// we could have also created a QCPColorGradient instance and added own colors to
 	// the gradient, see the documentation of QCPColorGradient for what's possible.
 
@@ -281,4 +286,34 @@ void BrillouinAcquisition::on_camera_playPause_clicked() {
 void BrillouinAcquisition::on_camera_singleShot_clicked() {
 	// example for asynchronous/non-blocking execution
 	QMetaObject::invokeMethod(andor, "acquireSingle", Qt::QueuedConnection);
+}
+
+void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradientPreset preset) {
+	gradient->clearColorStops();
+	switch (preset) {
+		case gpParula:
+			gradient->setColorInterpolation(QCPColorGradient::ciRGB);
+			gradient->setColorStopAt(0.00, QColor( 53,  42, 135));
+			gradient->setColorStopAt(0.05, QColor( 53,  62, 175));
+			gradient->setColorStopAt(0.10, QColor( 27,  85, 215));
+			gradient->setColorStopAt(0.15, QColor(  2, 106, 225));
+			gradient->setColorStopAt(0.20, QColor( 15, 119, 219));
+			gradient->setColorStopAt(0.25, QColor( 20, 132, 212));
+			gradient->setColorStopAt(0.30, QColor( 13, 147, 210));
+			gradient->setColorStopAt(0.35, QColor(  6, 160, 205));
+			gradient->setColorStopAt(0.40, QColor(  7, 170, 193));
+			gradient->setColorStopAt(0.45, QColor( 24, 177, 178));
+			gradient->setColorStopAt(0.50, QColor( 51, 184, 161));
+			gradient->setColorStopAt(0.55, QColor( 85, 189, 142));
+			gradient->setColorStopAt(0.60, QColor(122, 191, 124));
+			gradient->setColorStopAt(0.65, QColor(155, 191, 111));
+			gradient->setColorStopAt(0.70, QColor(184, 189,  99));
+			gradient->setColorStopAt(0.75, QColor(211, 187,  88));
+			gradient->setColorStopAt(0.80, QColor(236, 185,  76));
+			gradient->setColorStopAt(0.85, QColor(255, 193,  58));
+			gradient->setColorStopAt(0.90, QColor(250, 209,  43));
+			gradient->setColorStopAt(0.95, QColor(245, 227,  30));
+			gradient->setColorStopAt(1.00, QColor(249, 251,  14));
+			break;
+	}
 }
