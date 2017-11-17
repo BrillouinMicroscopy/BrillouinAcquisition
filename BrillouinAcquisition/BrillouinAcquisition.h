@@ -4,6 +4,7 @@
 #include "thread.h"
 #include "andor.h"
 #include "qcustomplot.h"
+#include "external/h5bm/h5bm.h"
 
 #include <QtWidgets/QMainWindow>
 #include "ui_BrillouinAcquisition.h"
@@ -77,6 +78,7 @@ private:
 	Andor *andor = new Andor();
 	QCPColorMap *colorMap;
 	SETTINGS_DEVICES settings;
+	H5BM h5bm;
 };
 
 #endif // BRILLOUINACQUISITON_H
