@@ -78,7 +78,7 @@ private:
 	Andor *andor = new Andor();
 	QCPColorMap *colorMap;
 	SETTINGS_DEVICES settings;
-	H5BM h5bm;
+	H5BM *h5bm;
 };
 
 #endif // BRILLOUINACQUISITON_H

@@ -50,6 +50,8 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 
 	// set up the camera image plot
 	BrillouinAcquisition::createCameraImage();
+
+	h5bm = new H5BM(0, "Brillouin-0.h5", H5F_ACC_RDWR);
 }
 
 BrillouinAcquisition::~BrillouinAcquisition() {
