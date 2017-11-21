@@ -3,7 +3,6 @@
 #include "version.h"
 #include "logger.h"
 
-
 BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	QMainWindow(parent), ui(new Ui::BrillouinAcquisitionClass) {
 	ui->setupUi(this);
@@ -51,7 +50,8 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	// set up the camera image plot
 	BrillouinAcquisition::createCameraImage();
 
-	h5bm = new H5BM(0, "Brillouin-0.h5", H5F_ACC_RDWR);
+	writeExampleH5bmFile();
+
 }
 
 BrillouinAcquisition::~BrillouinAcquisition() {
@@ -59,6 +59,16 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 	delete andor;
 	qInfo(logInfo()) << "BrillouinAcquisition closed.";
 	delete ui;
+}
+
+void BrillouinAcquisition::writeExampleH5bmFile() {
+	h5bm = new H5BM(0, "Brillouin-0.h5", H5F_ACC_RDWR);
+
+	std::string now = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
+		.toString(Qt::ISODate).toStdString();
+
+	h5bm->setDate(now);
+	std::string date = h5bm->getDate();
 }
 
 void BrillouinAcquisition::createCameraImage() {

@@ -79,6 +79,7 @@ private:
 	QCPColorMap *colorMap;
 	SETTINGS_DEVICES settings;
 	H5BM *h5bm;
+	void writeExampleH5bmFile();
 };
 
 #endif // BRILLOUINACQUISITON_H
