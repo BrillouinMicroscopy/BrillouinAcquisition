@@ -69,6 +69,12 @@ void BrillouinAcquisition::writeExampleH5bmFile() {
 
 	h5bm->setDate(now);
 	std::string date = h5bm->getDate();
+
+	std::string version = h5bm->getVersion();
+
+	std::string commentIn = "Brillouin data";
+	h5bm->setComment(commentIn);
+	std::string commentOut = h5bm->getComment();
 }
 
 void BrillouinAcquisition::createCameraImage() {
