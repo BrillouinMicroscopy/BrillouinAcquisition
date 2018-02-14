@@ -2,6 +2,7 @@
 #include "BrillouinAcquisition.h"
 #include "version.h"
 #include "logger.h"
+#include "math.h"
 
 BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	QMainWindow(parent), ui(new Ui::BrillouinAcquisitionClass) {
@@ -75,6 +76,63 @@ void BrillouinAcquisition::writeExampleH5bmFile() {
 	std::string commentIn = "Brillouin data";
 	h5bm->setComment(commentIn);
 	std::string commentOut = h5bm->getComment();
+
+	int resolutionX, resolutionY, resolutionZ;
+
+	resolutionX = 11;
+	resolutionY = 13;
+	resolutionZ = 2;
+
+	h5bm->setResolution("x", resolutionX);
+	h5bm->setResolution("y", resolutionY);
+	h5bm->setResolution("z", resolutionZ);
+
+	int resolutionXout = h5bm->getResolution("x");
+
+	// Create position vector
+	double minX, maxX, minY, maxY, minZ, maxZ;
+	minX = -10;
+	maxX = 10;
+	minY = -20;
+	maxY = 20;
+	minZ = 0;
+	maxZ = 10;
+	int nrPositions = resolutionX * resolutionY * resolutionZ;
+	std::vector<double> positionsX(nrPositions);
+	std::vector<double> positionsY(nrPositions);
+	std::vector<double> positionsZ(nrPositions);
+	std::vector<double> posX = math::linspace(minX, maxX, resolutionX);
+	std::vector<double> posY = math::linspace(minY, maxY, resolutionY);
+	std::vector<double> posZ = math::linspace(minZ, maxZ, resolutionZ);
+	int ll = 0;
+	for (int ii = 0; ii < resolutionZ; ii++) {
+		for (int jj = 0; jj < resolutionX; jj++) {
+			for (int kk = 0; kk < resolutionY; kk++) {
+				positionsX[ll] = posX[jj];
+				positionsY[ll] = posY[kk];
+				positionsZ[ll] = posZ[ii];
+				ll++;
+			}
+		}
+	}
+
+	int rank = 3;
+	// For compatibility with MATLAB respect Fortran-style ordering: z, x, y
+	hsize_t *dims = new hsize_t[rank];
+	dims[0] = resolutionZ;
+	dims[1] = resolutionX;
+	dims[2] = resolutionY;
+
+	h5bm->setPositions("x", positionsX, rank, dims);
+	h5bm->setPositions("y", positionsY, rank, dims);
+	h5bm->setPositions("z", positionsZ, rank, dims);
+	delete[] dims;
+
+	positionsX = h5bm->getPositions("x");
+	positionsY = h5bm->getPositions("y");
+	positionsZ = h5bm->getPositions("z");
+
+	delete h5bm;
 }
 
 void BrillouinAcquisition::createCameraImage() {
