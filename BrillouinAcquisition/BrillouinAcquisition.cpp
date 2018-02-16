@@ -132,6 +132,21 @@ void BrillouinAcquisition::writeExampleH5bmFile() {
 	positionsY = h5bm->getPositions("y");
 	positionsZ = h5bm->getPositions("z");
 
+	// set payload data
+	std::vector<double> data(1600);
+	int rank_data = 3;
+	hsize_t dims_data[3] = {100, 80, 2};
+	for (int ii = 0; ii < resolutionZ; ii++) {
+		for (int jj = 0; jj < resolutionX; jj++) {
+			for (int kk = 0; kk < resolutionY; kk++) {
+				h5bm->setPayloadData(jj, kk, ii, data, rank, dims_data);
+			}
+		}
+	}
+
+	data = h5bm->getPayloadData(1, 1, 1);
+	date = h5bm->getPayloadDate(1, 1, 1);
+
 	delete h5bm;
 }
 
