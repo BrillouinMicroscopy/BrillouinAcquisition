@@ -135,7 +135,10 @@ void BrillouinAcquisition::writeExampleH5bmFile() {
 	// set payload data
 	std::vector<double> data(1600);
 	int rank_data = 3;
-	hsize_t dims_data[3] = {100, 80, 2};
+	hsize_t nrImages = 2;
+	hsize_t imageWidth = 100;
+	hsize_t imageHeight = 80;
+	hsize_t dims_data[3] = {nrImages, imageHeight, imageWidth};
 	for (int ii = 0; ii < resolutionZ; ii++) {
 		for (int jj = 0; jj < resolutionX; jj++) {
 			for (int kk = 0; kk < resolutionY; kk++) {
