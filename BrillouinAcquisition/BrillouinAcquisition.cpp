@@ -147,6 +147,10 @@ void BrillouinAcquisition::writeExampleH5bmFile() {
 	data = h5bm->getPayloadData(1, 1, 1);
 	date = h5bm->getPayloadDate(1, 1, 1);
 
+	h5bm->setBackgroundData(data, rank, dims_data, "2016-05-06T11:11:00+02:00");
+	data = h5bm->getBackgroundData();
+	date = h5bm->getBackgroundDate();
+
 	delete h5bm;
 }
 
