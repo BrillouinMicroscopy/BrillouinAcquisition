@@ -151,6 +151,9 @@ void BrillouinAcquisition::writeExampleH5bmFile() {
 	data = h5bm->getBackgroundData();
 	date = h5bm->getBackgroundDate();
 
+	h5bm->setCalibrationData(1, data, rank, dims_data, "methanol", 3.799);
+	h5bm->setCalibrationData(2, data, rank, dims_data, "water", 5.088);
+
 	delete h5bm;
 }
 
