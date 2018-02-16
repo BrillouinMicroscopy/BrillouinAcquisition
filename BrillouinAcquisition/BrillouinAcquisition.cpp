@@ -53,6 +53,32 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 
 	writeExampleH5bmFile();
 
+	// Set up GUI
+	std::vector<std::string> groupLabels = {"Reflector", "Objective", "Tubelens", "Baseport", "Sideport", "Mirror"};
+	std::vector<int> maxOptions = { 5, 6, 3, 3, 3, 2 };
+	QVBoxLayout *verticalLayout = new QVBoxLayout;
+	std::string buttonLabel;
+	for (int ii = 0; ii < groupLabels.size(); ii++) {
+		QHBoxLayout *layout = new QHBoxLayout();
+
+		layout->setAlignment(Qt::AlignLeft);
+		QLabel *groupLabel = new QLabel(groupLabels[ii].c_str());
+		groupLabel->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+		groupLabel->setMinimumWidth(80);
+		groupLabel->setMaximumWidth(80);
+		layout->addWidget(groupLabel);
+		for (int jj = 0; jj < maxOptions[ii]; jj++) {
+			buttonLabel = std::to_string(jj + 1);
+			QPushButton *button = new QPushButton(buttonLabel.c_str());
+			button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+			button->setMinimumWidth(40);
+			button->setMaximumWidth(40);
+			layout->addWidget(button);
+		}
+		verticalLayout->addLayout(layout);
+	}
+	ui->acquisitionWidget->setLayout(verticalLayout);
+
 }
 
 BrillouinAcquisition::~BrillouinAcquisition() {
