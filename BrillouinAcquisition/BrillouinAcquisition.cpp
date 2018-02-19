@@ -41,6 +41,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
 	ui->settingsWidget->setTabIcon(0, icon);
 	ui->settingsWidget->setTabIcon(1, icon);
+	ui->settingsWidget->setTabIcon(2, icon);
 	ui->settingsWidget->setIconSize(QSize(16, 16));
 
 	ui->actionEnable_Cooling->setEnabled(FALSE);
@@ -56,8 +57,25 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	// Set up GUI
 	std::vector<std::string> groupLabels = {"Reflector", "Objective", "Tubelens", "Baseport", "Sideport", "Mirror"};
 	std::vector<int> maxOptions = { 5, 6, 3, 3, 3, 2 };
+	std::vector<std::string> presetLabels = { "Brillouin", "Brightfield", "Eyepiece", "Calibration" };
 	QVBoxLayout *verticalLayout = new QVBoxLayout;
+	verticalLayout->setAlignment(Qt::AlignTop);
 	std::string buttonLabel;
+	QHBoxLayout *presetLayoutLabel = new QHBoxLayout();
+	std::string presetLabelString = "Presets:";
+	QLabel *presetLabel = new QLabel(presetLabelString.c_str());
+	presetLayoutLabel->addWidget(presetLabel);
+	verticalLayout->addLayout(presetLayoutLabel);
+	QHBoxLayout *layout = new QHBoxLayout();
+	for (int ii = 0; ii < presetLabels.size(); ii++) {
+		buttonLabel = std::to_string(ii + 1);
+		QPushButton *button = new QPushButton(presetLabels[ii].c_str());
+		button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+		button->setMinimumWidth(90);
+		button->setMaximumWidth(90);
+		layout->addWidget(button);
+	}
+	verticalLayout->addLayout(layout);
 	for (int ii = 0; ii < groupLabels.size(); ii++) {
 		QHBoxLayout *layout = new QHBoxLayout();
 
@@ -77,8 +95,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 		}
 		verticalLayout->addLayout(layout);
 	}
-	ui->acquisitionWidget->setLayout(verticalLayout);
-
+	ui->beamPathBox->setLayout(verticalLayout);
 }
 
 BrillouinAcquisition::~BrillouinAcquisition() {
