@@ -649,7 +649,7 @@
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>440</height>
+                <height>340</height>
                </size>
               </property>
              </widget>
