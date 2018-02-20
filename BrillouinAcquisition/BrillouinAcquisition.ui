@@ -755,7 +755,7 @@ QTabBar::tab:!selected {
          <property name="maximumSize">
           <size>
            <width>450</width>
-           <height>635</height>
+           <height>765</height>
           </size>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -825,22 +825,22 @@ QTabBar::tab:!selected {
                 <property name="geometry">
                  <rect>
                   <x>0</x>
-                  <y>0</y>
+                  <y>-232</y>
                   <width>433</width>
-                  <height>610</height>
+                  <height>740</height>
                  </rect>
                 </property>
                 <property name="minimumSize">
                  <size>
                   <width>0</width>
-                  <height>610</height>
+                  <height>740</height>
                  </size>
                 </property>
                 <widget class="QGroupBox" name="groupBox">
                  <property name="geometry">
                   <rect>
                    <x>10</x>
-                   <y>10</y>
+                   <y>60</y>
                    <width>401</width>
                    <height>181</height>
                   </rect>
@@ -1111,7 +1111,7 @@ QTabBar::tab:!selected {
                  <property name="geometry">
                   <rect>
                    <x>10</x>
-                   <y>200</y>
+                   <y>250</y>
                    <width>401</width>
                    <height>221</height>
                   </rect>
@@ -1342,7 +1342,7 @@ QTabBar::tab:!selected {
                  <property name="geometry">
                   <rect>
                    <x>10</x>
-                   <y>430</y>
+                   <y>560</y>
                    <width>401</width>
                    <height>171</height>
                   </rect>
@@ -1378,6 +1378,10 @@ QTabBar::tab:!selected {
                     <height>30</height>
                    </rect>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true">background: #E4E4E4;
+border: none;</string>
+                  </property>
                   <property name="text">
                    <string>0</string>
                   </property>
@@ -1396,6 +1400,10 @@ QTabBar::tab:!selected {
                     <width>121</width>
                     <height>30</height>
                    </rect>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background: #E4E4E4;
+border: none;</string>
                   </property>
                   <property name="text">
                    <string>0</string>
@@ -1416,6 +1424,10 @@ QTabBar::tab:!selected {
                     <height>30</height>
                    </rect>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true">background: #E4E4E4;
+border: none;</string>
+                  </property>
                   <property name="text">
                    <string>0</string>
                   </property>
@@ -1434,6 +1446,10 @@ QTabBar::tab:!selected {
                     <width>121</width>
                     <height>30</height>
                    </rect>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background: #E4E4E4;
+border: none;</string>
                   </property>
                   <property name="text">
                    <string>0</string>
@@ -1506,6 +1522,147 @@ QTabBar::tab:!selected {
                    <set>Qt::AlignCenter</set>
                   </property>
                  </widget>
+                </widget>
+                <widget class="QGroupBox" name="groupBox_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>480</y>
+                   <width>401</width>
+                   <height>71</height>
+                  </rect>
+                 </property>
+                 <property name="title">
+                  <string>Repetitions</string>
+                 </property>
+                 <widget class="QLineEdit" name="lineEdit_17">
+                  <property name="geometry">
+                   <rect>
+                    <x>150</x>
+                    <y>25</y>
+                    <width>41</width>
+                    <height>30</height>
+                   </rect>
+                  </property>
+                  <property name="text">
+                   <string>1</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="readOnly">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                 <widget class="QLabel" name="label_15">
+                  <property name="geometry">
+                   <rect>
+                    <x>10</x>
+                    <y>25</y>
+                    <width>131</width>
+                    <height>30</height>
+                   </rect>
+                  </property>
+                  <property name="text">
+                   <string>Count</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                 <widget class="QLabel" name="label_16">
+                  <property name="geometry">
+                   <rect>
+                    <x>210</x>
+                    <y>25</y>
+                    <width>131</width>
+                    <height>30</height>
+                   </rect>
+                  </property>
+                  <property name="text">
+                   <string>Time [min]</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                 <widget class="QLineEdit" name="lineEdit_18">
+                  <property name="geometry">
+                   <rect>
+                    <x>350</x>
+                    <y>25</y>
+                    <width>41</width>
+                    <height>30</height>
+                   </rect>
+                  </property>
+                  <property name="text">
+                   <string>10</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="readOnly">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </widget>
+                <widget class="QLabel" name="label_17">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>15</y>
+                   <width>71</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="frameShadow">
+                  <enum>QFrame::Raised</enum>
+                 </property>
+                 <property name="text">
+                  <string>Filename:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="lineEdit_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>90</x>
+                   <y>15</y>
+                   <width>201</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background: #E4E4E4;
+border: none;</string>
+                 </property>
+                 <property name="text">
+                  <string>Brillouin.h5</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="camera_playPause_2">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="geometry">
+                  <rect>
+                   <x>300</x>
+                   <y>15</y>
+                   <width>111</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Start</string>
+                 </property>
                 </widget>
                </widget>
               </widget>
