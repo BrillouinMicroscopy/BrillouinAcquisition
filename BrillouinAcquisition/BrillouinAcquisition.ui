@@ -72,7 +72,32 @@
           </size>
          </property>
          <property name="styleSheet">
-          <string notr="true"/>
+          <string notr="true">QTabWidget::pane {
+	border: 0.5px solid #E4E4E4;
+}
+
+QTabWidget::tab-bar {
+	top: 1px;
+}
+
+QTabBar::tab {
+	background: #D4D4D4;
+	border: 1px solid #C9C9C9;
+	min-width: 1ex;
+	padding: 4px;
+}
+
+QTabBar::tab:selected, QTabBar::tab:hover {
+	background: #F0F0F0;
+}
+QTabBar::tab:selected {
+	border-color: #E4E4E4;
+	border-bottom: none;
+}
+
+QTabBar::tab:!selected {
+	margin-top: 2px;
+}</string>
          </property>
          <property name="currentIndex">
           <number>0</number>
@@ -140,8 +165,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>442</width>
-                <height>455</height>
+                <width>446</width>
+                <height>454</height>
                </rect>
               </property>
               <property name="sizePolicy">
@@ -642,8 +667,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>442</width>
-                <height>455</height>
+                <width>446</width>
+                <height>454</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -696,8 +721,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>442</width>
-                <height>455</height>
+                <width>446</width>
+                <height>454</height>
                </rect>
               </property>
               <property name="minimumSize">
