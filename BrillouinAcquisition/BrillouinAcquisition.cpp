@@ -96,6 +96,8 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 		verticalLayout->addLayout(layout);
 	}
 	ui->beamPathBox->setLayout(verticalLayout);
+
+	ui->parametersWidget->layout()->setAlignment(Qt::AlignTop);
 }
 
 BrillouinAcquisition::~BrillouinAcquisition() {
