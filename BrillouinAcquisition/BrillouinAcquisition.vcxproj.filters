@@ -87,6 +87,9 @@
     <ClCompile Include="external\h5bm\h5bm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="scancontrol.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -100,6 +103,9 @@
     </ClInclude>
     <ClInclude Include="math.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scancontrol.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

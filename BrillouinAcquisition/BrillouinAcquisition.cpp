@@ -3,6 +3,7 @@
 #include "version.h"
 #include "logger.h"
 #include "math.h"
+#include "scancontrol.h"
 
 BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	QMainWindow(parent), ui(new Ui::BrillouinAcquisitionClass) {
