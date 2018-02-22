@@ -5,15 +5,13 @@
 
 class ScanControl {
 private:
-	class com {
-	private:
-		QSerialPort serialObject;
+	class com : public QSerialPort {
 	public:
 		std::string receive(std::string request);
-		void send();
+		void send(std::string message);
 	};
 
-	com *m_comObject;
+	com *m_comObject = NULL;
 
 	class Element {
 	private:
@@ -21,21 +19,21 @@ private:
 		com *m_comObject;
 	public:
 		Element(com *comObject, std::string prefix) : m_comObject(comObject), m_prefix(prefix) {};
+		Element(com *comObject) : m_comObject(comObject) {};
 		~Element();
 		std::string receive(std::string request);
-		void send();
+		void send(std::string message);
 		std::string dec2hex(int dec);
 		int hex2dec(std::string);
 	};
 
 	class Focus : public Element {
 	private:
-		std::string m_prefix = "F";
 		double m_umperinc = 0.025;		// [µm per increment] constant for converting µm to increments of focus z-position
 		double m_rangeFocus = 16777215;	// number of focus increments
 
 	public:
-		Focus(com *comObject);
+		Focus(com *comObject) : Element(comObject, "F") {};
 		double getZ();
 		void setZ(double position);
 
@@ -51,11 +49,8 @@ private:
 	};
 
 	class MCU : public Element {
-	private:
-		std::string m_prefix = "N";
-
 	public:
-		MCU(com *comObject);
+		MCU(com *comObject) : Element(comObject, "N") {};
 		double getX();
 		void setX(double position);
 
@@ -70,11 +65,8 @@ private:
 	};
 
 	class Stand : public Element {
-	private:
-		std::string m_prefix = "H";
-
 	public:
-		Stand(com *comObject);
+		Stand(com *comObject) : Element(comObject, "H") {};
 		int getReflector();
 		void setReflector(int position);
 
@@ -93,23 +85,25 @@ private:
 		int getMirror();
 		void setMirror(int position);
 	};
-
-	Focus *focus;
-	MCU *mcu;
-	Stand *stand;
+	bool isConnected = FALSE;
 
 public:
 	ScanControl();
 	~ScanControl();
 
-	void connect();
-	void disconnect();
+	bool connect();
+	bool disconnect();
+	bool getConnectionStatus();
 
 	void setPosition(std::vector<double> position);
 	std::vector<double> getPosition();
 
 	void moveRelative(std::vector<double> distance);
 	void moveAbsolute(std::vector<double> position);
+
+	Focus *focus;
+	MCU *mcu;
+	Stand *stand;
 };
 
 #endif // SCANCONTROL_H

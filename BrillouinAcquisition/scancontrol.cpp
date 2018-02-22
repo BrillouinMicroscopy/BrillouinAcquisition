@@ -5,19 +5,41 @@
 
 ScanControl::ScanControl() {
 	focus = new Focus(m_comObject);
+	mcu = new MCU(m_comObject);
+	stand = new Stand(m_comObject);
 }
 
 ScanControl::~ScanControl() {
 	delete focus;
+	delete mcu;
+	delete stand;
 	disconnect();
 }
 
-void ScanControl::connect() {
-
+bool ScanControl::connect() {
+	if (!m_comObject) {
+		m_comObject = new com();
+		m_comObject->setBaudRate(QSerialPort::Baud9600);
+		m_comObject->setPortName("COM1");
+	}
+	if (!isConnected) {
+		isConnected = m_comObject->open(QIODevice::ReadWrite);
+	}
+	return isConnected;
 }
 
-void ScanControl::disconnect() {
+bool ScanControl::disconnect() {
+	if (m_comObject && isConnected) {
+		m_comObject->close();
+		isConnected = FALSE;
+		delete m_comObject;
+		m_comObject = NULL;
+	}
+	return isConnected;
+}
 
+bool ScanControl::getConnectionStatus() {
+	return isConnected;
 }
 
 void ScanControl::setPosition(std::vector<double> position) {
@@ -33,21 +55,35 @@ std::vector<double> ScanControl::getPosition() {
 	return std::vector<double> {x, y, z};
 }
 
-ScanControl::Focus::Focus(com *comObject) : Element(comObject, m_prefix) {}
 
-double ScanControl::Focus::getZ() {
-	std::string s = "0x" + receive("Zp");
-	return m_umperinc * hex2dec(s);
+/*
+* Functions regarding the serial communication
+*
+*/
+
+std::string ScanControl::com::receive(std::string request) {
+	return std::string();
 }
 
-void ScanControl::Focus::setZ(double position) {
+void ScanControl::com::send(std::string message) {
+	write(message.c_str());
 }
+
+
+/*
+* Functions of the parent class for all elements
+*
+*/
 
 ScanControl::Element::~Element() {
 }
 
 std::string ScanControl::Element::receive(std::string request) {
 	return m_comObject->receive(m_prefix + request);
+}
+
+void ScanControl::Element::send(std::string message) {
+	m_comObject->send(m_prefix + message);
 }
 
 std::string ScanControl::Element::dec2hex(int dec) {
@@ -60,8 +96,25 @@ int ScanControl::Element::hex2dec(std::string s) {
 	return std::stoul(s, nullptr, 16);
 }
 
-ScanControl::MCU::MCU(com *comObject) : Element(comObject, m_prefix) {
+
+/*
+* Functions regarding the objective focus
+*
+*/
+
+double ScanControl::Focus::getZ() {
+	std::string s = "0x" + receive("Zp");
+	return m_umperinc * hex2dec(s);
 }
+
+void ScanControl::Focus::setZ(double position) {
+}
+
+
+/*
+ * Functions regarding the stage of the microscope
+ *
+ */
 
 double ScanControl::MCU::getX() {
 	return 0.0;
@@ -77,6 +130,44 @@ double ScanControl::MCU::getY() {
 void ScanControl::MCU::setY(double position) {
 }
 
-std::string ScanControl::com::receive(std::string request) {
-	return std::string();
+
+/*
+ * Functions regarding the stand of the microscope
+ *
+ */
+
+void ScanControl::Stand::setReflector(int position) {
+	if (position > 0 && position < 6) {
+		send("CR1," + std::to_string(position));
+	}
+}
+
+void ScanControl::Stand::setObjective(int position) {
+	if (position > 0 && position < 7) {
+		send("CR2," + std::to_string(position));
+	}
+}
+
+void ScanControl::Stand::setTubelens(int position) {
+	if (position > 0 && position < 4) {
+		send("CR36," + std::to_string(position));
+	}
+}
+
+void ScanControl::Stand::setBaseport(int position) {
+	if (position > 0 && position < 4) {
+		send("CR38," + std::to_string(position));
+	}
+}
+
+void ScanControl::Stand::setSideport(int position) {
+	if (position > 0 && position < 4) {
+		send("CR39," + std::to_string(position));
+	}
+}
+
+void ScanControl::Stand::setMirror(int position) {
+	if (position > 0 && position < 3) {
+		send("CR51," + std::to_string(position));
+	}
 }

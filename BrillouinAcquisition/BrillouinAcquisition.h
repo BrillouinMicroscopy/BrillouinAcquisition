@@ -5,6 +5,7 @@
 #include "andor.h"
 #include "qcustomplot.h"
 #include "external/h5bm/h5bm.h"
+#include "scancontrol.h"
 
 #include <QtWidgets/QMainWindow>
 #include "ui_BrillouinAcquisition.h"
@@ -53,6 +54,7 @@ private slots:
 	void on_camera_singleShot_clicked();
 	void on_actionConnect_Camera_triggered();
 	void on_actionEnable_Cooling_triggered();
+	void on_actionConnect_Stage_triggered();
 	void on_camera_playPause_clicked();
 	void onNewImage(unsigned short *, AT_64, AT_64);
 	void createCameraImage();
@@ -64,6 +66,7 @@ private slots:
 	void on_ROIBottom_valueChanged(int);
 	void on_ROIHeight_valueChanged(int);
 	void setColormap(QCPColorGradient *, CustomGradientPreset);
+	void setElement(int element, int position);
 
 signals:
 	void settingsCameraChanged(SETTINGS_DEVICES);
@@ -76,6 +79,7 @@ private:
 	Ui::BrillouinAcquisitionClass *ui;
 	Thread CameraThread;
 	Andor *andor = new Andor();
+	ScanControl *scanControl = new ScanControl();
 	QCPColorMap *colorMap;
 	SETTINGS_DEVICES settings;
 	H5BM *h5bm;

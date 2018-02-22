@@ -3,7 +3,6 @@
 #include "version.h"
 #include "logger.h"
 #include "math.h"
-#include "scancontrol.h"
 
 BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	QMainWindow(parent), ui(new Ui::BrillouinAcquisitionClass) {
@@ -93,6 +92,10 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 			button->setMinimumWidth(40);
 			button->setMaximumWidth(40);
 			layout->addWidget(button);
+
+			QObject::connect(button, &QPushButton::clicked, [=] {
+				setElement(ii, jj+1);
+			});
 		}
 		verticalLayout->addLayout(layout);
 	}
@@ -106,6 +109,29 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 	delete andor;
 	qInfo(logInfo()) << "BrillouinAcquisition closed.";
 	delete ui;
+}
+
+void BrillouinAcquisition::setElement(int element, int position) {
+	switch (element) {
+		case 0:
+			scanControl->stand->setReflector(position);
+			break;
+		case 1:
+			scanControl->stand->setObjective(position);
+			break;
+		case 2:
+			scanControl->stand->setTubelens(position);
+			break;
+		case 3:
+			scanControl->stand->setBaseport(position);
+			break;
+		case 4:
+			scanControl->stand->setSideport(position);
+			break;
+		case 5:
+			scanControl->stand->setMirror(position);
+			break;
+	}
 }
 
 void BrillouinAcquisition::writeExampleH5bmFile() {
@@ -391,13 +417,32 @@ void BrillouinAcquisition::on_actionEnable_Cooling_triggered() {
 			ui->actionEnable_Cooling->setText("Enable Cooling");
 			QIcon icon(":/BrillouinAcquisition/assets/01standby.png");
 			ui->settingsWidget->setTabIcon(0, icon);
-		}
-		else {
+		} else {
 			andor->setSensorCooling(TRUE);
 			ui->actionEnable_Cooling->setText("Disable Cooling");
 			QIcon icon(":/BrillouinAcquisition/assets/02cooling.png");
 			ui->settingsWidget->setTabIcon(0, icon);
 		}
+	}
+}
+
+void BrillouinAcquisition::on_actionConnect_Stage_triggered() {
+	bool isConnected;
+	if (scanControl->getConnectionStatus()) {
+		isConnected = scanControl->disconnect();
+	} else {
+		isConnected = scanControl->connect();
+	}
+	if (isConnected) {
+		ui->actionConnect_Stage->setText("Disconnect Microscope");
+		QIcon icon(":/BrillouinAcquisition/assets/03ready.png");
+		ui->settingsWidget->setTabIcon(1, icon);
+		ui->settingsWidget->setTabIcon(2, icon);
+	} else {
+		ui->actionConnect_Stage->setText("Connect Microscope");
+		QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
+		ui->settingsWidget->setTabIcon(1, icon);
+		ui->settingsWidget->setTabIcon(2, icon);
 	}
 }
 
