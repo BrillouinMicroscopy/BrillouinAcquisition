@@ -2,7 +2,7 @@
 #include "BrillouinAcquisition.h"
 #include "version.h"
 #include "logger.h"
-#include "math.h"
+#include "simplemath.h"
 
 BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	QMainWindow(parent), ui(new Ui::BrillouinAcquisitionClass) {
@@ -173,9 +173,9 @@ void BrillouinAcquisition::writeExampleH5bmFile() {
 	std::vector<double> positionsX(nrPositions);
 	std::vector<double> positionsY(nrPositions);
 	std::vector<double> positionsZ(nrPositions);
-	std::vector<double> posX = math::linspace(minX, maxX, resolutionX);
-	std::vector<double> posY = math::linspace(minY, maxY, resolutionY);
-	std::vector<double> posZ = math::linspace(minZ, maxZ, resolutionZ);
+	std::vector<double> posX = simplemath::linspace(minX, maxX, resolutionX);
+	std::vector<double> posY = simplemath::linspace(minY, maxY, resolutionY);
+	std::vector<double> posZ = simplemath::linspace(minZ, maxZ, resolutionZ);
 	int ll = 0;
 	for (int ii = 0; ii < resolutionZ; ii++) {
 		for (int jj = 0; jj < resolutionX; jj++) {

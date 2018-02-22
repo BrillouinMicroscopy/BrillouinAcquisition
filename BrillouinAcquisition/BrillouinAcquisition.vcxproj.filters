@@ -101,11 +101,11 @@
     <ClInclude Include="logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="math.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="scancontrol.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simplemath.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
