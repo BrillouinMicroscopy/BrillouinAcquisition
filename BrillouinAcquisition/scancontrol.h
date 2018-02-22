@@ -11,15 +11,12 @@ private:
 		void send(std::string message);
 	};
 
-	com *m_comObject = NULL;
-
 	class Element {
 	private:
 		std::string m_prefix;		// prefix of the element for serial communication
 		com *m_comObject;
 	public:
 		Element(com *comObject, std::string prefix) : m_comObject(comObject), m_prefix(prefix) {};
-		Element(com *comObject) : m_comObject(comObject) {};
 		~Element();
 		std::string receive(std::string request);
 		void send(std::string message);
@@ -104,6 +101,8 @@ public:
 	Focus *focus;
 	MCU *mcu;
 	Stand *stand;
+
+	com *m_comObject = new com();
 };
 
 #endif // SCANCONTROL_H

@@ -13,16 +13,14 @@ ScanControl::~ScanControl() {
 	delete focus;
 	delete mcu;
 	delete stand;
+	delete m_comObject;
 	disconnect();
 }
 
 bool ScanControl::connect() {
-	if (!m_comObject) {
-		m_comObject = new com();
+	if (!isConnected) {
 		m_comObject->setBaudRate(QSerialPort::Baud9600);
 		m_comObject->setPortName("COM1");
-	}
-	if (!isConnected) {
 		isConnected = m_comObject->open(QIODevice::ReadWrite);
 	}
 	return isConnected;
@@ -32,8 +30,6 @@ bool ScanControl::disconnect() {
 	if (m_comObject && isConnected) {
 		m_comObject->close();
 		isConnected = FALSE;
-		delete m_comObject;
-		m_comObject = NULL;
 	}
 	return isConnected;
 }
@@ -66,6 +62,7 @@ std::string ScanControl::com::receive(std::string request) {
 }
 
 void ScanControl::com::send(std::string message) {
+	message = message + "\r";
 	write(message.c_str());
 }
 
@@ -83,7 +80,7 @@ std::string ScanControl::Element::receive(std::string request) {
 }
 
 void ScanControl::Element::send(std::string message) {
-	m_comObject->send(m_prefix + message);
+	m_comObject->send(m_prefix + "P" + message);
 }
 
 std::string ScanControl::Element::dec2hex(int dec) {
