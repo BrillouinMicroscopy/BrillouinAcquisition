@@ -92,7 +92,7 @@ ScanControl::Element::~Element() {
 }
 
 std::string ScanControl::Element::receive(std::string request) {
-	return m_comObject->receive(m_prefix + request);
+	return m_comObject->receive(m_prefix + "P" + request);
 }
 
 void ScanControl::Element::send(std::string message) {
