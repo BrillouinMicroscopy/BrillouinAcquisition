@@ -133,10 +133,20 @@ void ScanControl::MCU::setY(double position) {
  *
  */
 
+int ScanControl::Stand::getReflector() {
+	std::string answer = receive("Cr1,1");
+	return std::stoi(answer);
+}
+
 void ScanControl::Stand::setReflector(int position) {
 	if (position > 0 && position < 6) {
 		send("CR1," + std::to_string(position));
 	}
+}
+
+int ScanControl::Stand::getObjective() {
+	std::string answer = receive("Cr2,1");
+	return std::stoi(answer);
 }
 
 void ScanControl::Stand::setObjective(int position) {
@@ -145,10 +155,20 @@ void ScanControl::Stand::setObjective(int position) {
 	}
 }
 
+int ScanControl::Stand::getTubelens() {
+	std::string answer = receive("Cr36,1");
+	return std::stoi(answer);
+}
+
 void ScanControl::Stand::setTubelens(int position) {
 	if (position > 0 && position < 4) {
 		send("CR36," + std::to_string(position));
 	}
+}
+
+int ScanControl::Stand::getBaseport() {
+	std::string answer = receive("Cr38,1");
+	return std::stoi(answer);
 }
 
 void ScanControl::Stand::setBaseport(int position) {
@@ -157,10 +177,20 @@ void ScanControl::Stand::setBaseport(int position) {
 	}
 }
 
+int ScanControl::Stand::getSideport() {
+	std::string answer = receive("Cr39,1");
+	return std::stoi(answer);
+}
+
 void ScanControl::Stand::setSideport(int position) {
 	if (position > 0 && position < 4) {
 		send("CR39," + std::to_string(position));
 	}
+}
+
+int ScanControl::Stand::getMirror() {
+	std::string answer = receive("Cr51,1");
+	return std::stoi(answer);
 }
 
 void ScanControl::Stand::setMirror(int position) {
