@@ -21,6 +21,7 @@ bool ScanControl::connect() {
 	if (!isConnected) {
 		m_comObject->setBaudRate(QSerialPort::Baud9600);
 		m_comObject->setPortName("COM1");
+		m_comObject->setFlowControl(QSerialPort::HardwareControl);
 		isConnected = m_comObject->open(QIODevice::ReadWrite);
 	}
 	return isConnected;
