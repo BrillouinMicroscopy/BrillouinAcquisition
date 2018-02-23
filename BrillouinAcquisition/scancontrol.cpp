@@ -58,7 +58,22 @@ std::vector<double> ScanControl::getPosition() {
 */
 
 std::string ScanControl::com::receive(std::string request) {
-	return std::string();
+	request = request + "\r";
+	write(request.c_str());
+
+	int toWrite = bytesToWrite();
+	waitForBytesWritten();
+	bool wasWritten = flush();
+
+	waitForReadyRead();
+
+	int toRead = bytesAvailable();
+
+	QByteArray dataRead = readAll();
+
+	std::string answer(dataRead.constData(), dataRead.length());
+
+	return answer;
 }
 
 void ScanControl::com::send(std::string message) {
