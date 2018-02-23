@@ -2,6 +2,7 @@
 #include "scancontrol.h"
 #include <iomanip>
 #include <sstream>
+#include <regex>
 
 ScanControl::ScanControl() {
 	focus = new Focus(m_comObject);
@@ -92,7 +93,13 @@ ScanControl::Element::~Element() {
 }
 
 std::string ScanControl::Element::receive(std::string request) {
-	return m_comObject->receive(m_prefix + "P" + request);
+	std::string answer = m_comObject->receive(m_prefix + "P" + request);
+	std::string pattern = "([a-zA-Z\\d]*)\r";
+	pattern = "P" + m_prefix + pattern;
+	std::regex pieces_regex(pattern);
+	std::smatch pieces_match;
+	std::regex_match(answer, pieces_match, pieces_regex);
+	return pieces_match[1]; // needs error handling
 }
 
 void ScanControl::Element::send(std::string message) {
