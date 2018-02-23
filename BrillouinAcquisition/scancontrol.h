@@ -93,10 +93,8 @@ public:
 	bool getConnectionStatus();
 
 	void setPosition(std::vector<double> position);
+	void setPositionRelative(std::vector<double> distance);
 	std::vector<double> getPosition();
-
-	void moveRelative(std::vector<double> distance);
-	void moveAbsolute(std::vector<double> position);
 
 	Focus *focus;
 	MCU *mcu;
