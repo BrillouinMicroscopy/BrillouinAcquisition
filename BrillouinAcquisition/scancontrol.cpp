@@ -106,10 +106,16 @@ void ScanControl::Element::send(std::string message) {
 	m_comObject->send(m_prefix + "P" + message);
 }
 
-std::string ScanControl::Element::dec2hex(int dec) {
+std::string ScanControl::Element::dec2hex(int dec, int digits = 6) {
 	std::stringstream stream;
 	stream << std::hex << dec;
-	return stream.str();
+	std::string hex = stream.str();
+	// pad hex string with leading zeros if necessary
+	int len = hex.length();
+	if (len < digits) {
+		hex = std::string(digits - len, '0') + hex;
+	}
+	return hex;
 }
 
 int ScanControl::Element::hex2dec(std::string s) {
@@ -136,18 +142,55 @@ void ScanControl::Focus::setZ(double position) {
  *
  */
 
+double ScanControl::MCU::getPosition(std::string axis) {
+	std::string position = receive(axis + "p");
+	int pos = hex2dec(position);
+	return pos * m_umperinc;
+}
+
+void ScanControl::MCU::setPosition(std::string axis, double position) {
+	position = round(position / m_umperinc);
+	int inc = static_cast<int>(position);
+	inc %= m_rangeFocus;
+	std::string pos = dec2hex(inc, 6);
+	send(axis + "T" + pos);
+}
+
+void ScanControl::MCU::setVelocity(std::string axis, int velocity) {
+	std::string vel = dec2hex(velocity, 6);
+	send(axis + "V" + vel);
+}
+
 double ScanControl::MCU::getX() {
-	return 0.0;
+	return getPosition("X");
 }
 
 void ScanControl::MCU::setX(double position) {
+	setPosition("X", position);
 }
 
 double ScanControl::MCU::getY() {
-	return 0.0;
+	return getPosition("Y");
 }
 
 void ScanControl::MCU::setY(double position) {
+	setPosition("Y", position);
+}
+
+void ScanControl::MCU::setVelocityX(int velocity) {
+	setVelocity("X", velocity);
+}
+
+void ScanControl::MCU::setVelocityY(int velocity) {
+	setVelocity("Y", velocity);
+}
+
+void ScanControl::MCU::stopX() {
+	send("XS");
+}
+
+void ScanControl::MCU::stopY() {
+	send("YS");
 }
 
 

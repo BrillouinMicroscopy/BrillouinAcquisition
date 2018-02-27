@@ -20,14 +20,14 @@ private:
 		~Element();
 		std::string receive(std::string request);
 		void send(std::string message);
-		std::string dec2hex(int dec);
+		std::string dec2hex(int dec, int digits);
 		int hex2dec(std::string);
 	};
 
 	class Focus : public Element {
 	private:
 		double m_umperinc = 0.025;		// [µm per increment] constant for converting µm to increments of focus z-position
-		double m_rangeFocus = 16777215;	// number of focus increments
+		int m_rangeFocus = 16777215;	// number of focus increments
 
 	public:
 		Focus(com *comObject) : Element(comObject, "F") {};
@@ -46,6 +46,15 @@ private:
 	};
 
 	class MCU : public Element {
+	private:
+		double m_umperinc = 0.25;		// [µm per increment] constant for converting µm to increments of x- and y-position
+		int m_rangeFocus = 16777215;	// number of focus increments
+
+		double getPosition(std::string axis);
+		void setPosition(std::string axis, double position);
+
+		void setVelocity(std::string axis, int velocity);
+
 	public:
 		MCU(com *comObject) : Element(comObject, "N") {};
 		double getX();
@@ -54,8 +63,8 @@ private:
 		double getY();
 		void setY(double position);
 
-		void setVelocityX(double velocity);
-		void setVelocityY(double velocity);
+		void setVelocityX(int velocity);
+		void setVelocityY(int velocity);
 
 		void stopX();
 		void stopY();
