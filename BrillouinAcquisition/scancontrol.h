@@ -34,13 +34,13 @@ private:
 		double getZ();
 		void setZ(double position);
 
-		void setVelocity(double velocity);
+		void setVelocityZ(double velocity);
 
 		void scanUp();
 		void scanDown();
 		void scanStop();
-		void getScanStatus();
-		double getStatusKey();
+		int getScanStatus();
+		int getStatusKey();
 		void move2Load();
 		void move2Work();
 	};

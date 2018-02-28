@@ -46,6 +46,13 @@ void ScanControl::setPosition(std::vector<double> position) {
 	focus->setZ(position[2]);
 }
 
+void ScanControl::setPositionRelative(std::vector<double> distance) {
+	std::vector<double> position = getPosition();
+	mcu->setX(position[0] + distance[0]);
+	mcu->setY(position[1] + distance[1]);
+	focus->setZ(position[2] + distance[2]);
+}
+
 std::vector<double> ScanControl::getPosition() {
 	double x = mcu->getX();
 	double y = mcu->getY();
@@ -134,6 +141,46 @@ double ScanControl::Focus::getZ() {
 }
 
 void ScanControl::Focus::setZ(double position) {
+	position = round(position / m_umperinc);
+	int inc = static_cast<int>(position);
+	inc %= m_rangeFocus;
+	std::string pos = dec2hex(inc, 6);
+	receive("ZD" + pos);
+}
+
+void ScanControl::Focus::setVelocityZ(double velocity) {
+	std::string vel = dec2hex(velocity, 6);
+	send("ZG" + vel);
+}
+
+void ScanControl::Focus::scanUp() {
+	send("ZS+");
+}
+
+void ScanControl::Focus::scanDown() {
+	send("ZS-");
+}
+
+void ScanControl::Focus::scanStop() {
+	send("ZSS");
+}
+
+int ScanControl::Focus::getScanStatus() {
+	std::string status = receive("Zt");
+	return std::stoi(status);
+}
+
+int ScanControl::Focus::getStatusKey() {
+	std::string status = receive("Zw");
+	return std::stoi(status);
+}
+
+void ScanControl::Focus::move2Load() {
+	send("ZW0");
+}
+
+void ScanControl::Focus::move2Work() {
+	send("ZW1");
 }
 
 
