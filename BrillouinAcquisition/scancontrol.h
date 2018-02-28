@@ -3,7 +3,9 @@
 
 #include <QSerialPort>
 
-class ScanControl {
+class ScanControl: public QObject {
+	Q_OBJECT
+
 private:
 	class com : public QSerialPort {
 	public:
