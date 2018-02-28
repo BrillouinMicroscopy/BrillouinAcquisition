@@ -47,7 +47,8 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	ui->actionEnable_Cooling->setEnabled(FALSE);
 
 	// start camera worker thread
-	CameraThread.startWorker(andor);
+	cameraThread.startWorker(andor);
+	microscopeThread.startWorker(scanControl);
 
 	// set up the camera image plot
 	BrillouinAcquisition::createCameraImage();
@@ -105,8 +106,11 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 }
 
 BrillouinAcquisition::~BrillouinAcquisition() {
-	CameraThread.exit();
+	cameraThread.exit();
+	microscopeThread.exit();
+	storageThread.exit();
 	delete andor;
+	delete scanControl;
 	qInfo(logInfo()) << "BrillouinAcquisition closed.";
 	delete ui;
 }

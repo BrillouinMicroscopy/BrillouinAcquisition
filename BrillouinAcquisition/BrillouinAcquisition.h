@@ -77,7 +77,9 @@ public:
 
 private:
 	Ui::BrillouinAcquisitionClass *ui;
-	Thread CameraThread;
+	Thread cameraThread;
+	Thread microscopeThread;
+	Thread storageThread;
 	Andor *andor = new Andor();
 	ScanControl *scanControl = new ScanControl();
 	QCPColorMap *colorMap;
