@@ -176,6 +176,15 @@ void Andor::checkCamera() {
 /*
  *	Currently only a test function for asynchronous execution
  */
+void Andor::acquireSingleTest(int index, std::string test) {
+	qInfo(logInfo()) << "Acquisition started.";
+	Sleep(5000);
+	qInfo(logInfo()) << "Acquisition finished.";
+}
+
+/*
+*	Currently only a test function for asynchronous execution
+*/
 void Andor::acquireSingle() {
 	qInfo(logInfo()) << "Acquisition started.";
 	Sleep(5000);

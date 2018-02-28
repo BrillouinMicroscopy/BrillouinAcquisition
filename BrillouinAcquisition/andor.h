@@ -41,6 +41,7 @@ public:
 
 public slots:
 	void checkCamera();
+	void acquireSingleTest(int index, std::string test);
 	void acquireSingle();
 	void acquireStartStop();
 

@@ -38,6 +38,8 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 		SLOT(settingsCameraUpdate(SETTINGS_DEVICES))
 	);
 
+	qRegisterMetaType<std::string>("std::string");
+
 	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
 	ui->settingsWidget->setTabIcon(0, icon);
 	ui->settingsWidget->setTabIcon(1, icon);
@@ -493,6 +495,7 @@ void BrillouinAcquisition::on_camera_playPause_clicked() {
 
 void BrillouinAcquisition::on_camera_singleShot_clicked() {
 	// example for asynchronous/non-blocking execution
+	QMetaObject::invokeMethod(andor, "acquireSingleTest", Qt::QueuedConnection, Q_ARG(int, 1), Q_ARG(std::string, "Testen"));
 	QMetaObject::invokeMethod(andor, "acquireSingle", Qt::QueuedConnection);
 }
 

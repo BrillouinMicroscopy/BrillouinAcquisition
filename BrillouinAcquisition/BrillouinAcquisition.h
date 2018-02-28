@@ -49,6 +49,8 @@ enum CustomGradientPreset {
 	gpParula
 };
 
+Q_DECLARE_METATYPE(std::string);
+
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
 
