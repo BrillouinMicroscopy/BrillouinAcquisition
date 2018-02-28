@@ -1,9 +1,9 @@
-#ifndef MATH_H
-#define MATH_H
+#ifndef SIMPLEMATH_H
+#define SIMPLEMATH_H
 
 #include <vector>
 
-class math {
+class simplemath {
 public:
 	// return linearly spaced vector
 	template <typename T = double>
@@ -19,4 +19,4 @@ public:
 	}
 };
 
-#endif // MATH_H
+#endif // SIMPLEMATH_H

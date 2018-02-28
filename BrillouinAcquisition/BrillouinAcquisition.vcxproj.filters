@@ -87,6 +87,15 @@
     <ClCompile Include="external\h5bm\h5bm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="scancontrol.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_scancontrol.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_scancontrol.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -98,7 +107,7 @@
     <ClInclude Include="logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="math.h">
+    <ClInclude Include="simplemath.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -122,6 +131,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="external\h5bm\h5bm.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="scancontrol.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
