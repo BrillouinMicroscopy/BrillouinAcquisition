@@ -58,7 +58,6 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	// Set up GUI
 	std::vector<std::string> groupLabels = {"Reflector", "Objective", "Tubelens", "Baseport", "Sideport", "Mirror"};
 	std::vector<int> maxOptions = { 5, 6, 3, 3, 3, 2 };
-	std::vector<std::string> presetLabels = { "Brillouin", "Brightfield", "Eyepiece", "Calibration" };
 	QVBoxLayout *verticalLayout = new QVBoxLayout;
 	verticalLayout->setAlignment(Qt::AlignTop);
 	std::string buttonLabel;
@@ -75,6 +74,10 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 		button->setMinimumWidth(90);
 		button->setMaximumWidth(90);
 		layout->addWidget(button);
+
+		QObject::connect(button, &QPushButton::clicked, [=] {
+			setPreset(ii);
+		});
 	}
 	verticalLayout->addLayout(layout);
 	for (int ii = 0; ii < groupLabels.size(); ii++) {
@@ -136,6 +139,15 @@ void BrillouinAcquisition::setElement(int element, int position) {
 			scanControl->stand->setMirror(position);
 			break;
 	}
+}
+
+void BrillouinAcquisition::setPreset(int preset) {
+	scanControl->stand->setReflector(microscope_presets[preset][0]);
+	scanControl->stand->setObjective(microscope_presets[preset][1]);
+	scanControl->stand->setTubelens(microscope_presets[preset][2]);
+	scanControl->stand->setBaseport(microscope_presets[preset][3]);
+	scanControl->stand->setSideport(microscope_presets[preset][4]);
+	scanControl->stand->setMirror(microscope_presets[preset][5]);
 }
 
 void BrillouinAcquisition::writeExampleH5bmFile() {

@@ -10,6 +10,9 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_BrillouinAcquisition.h"
 
+#include <vector>
+#include <string>
+
 typedef struct {
 	AT_64 left   = 1;
 	AT_64 width  = 2048;
@@ -67,6 +70,7 @@ private slots:
 	void on_ROIHeight_valueChanged(int);
 	void setColormap(QCPColorGradient *, CustomGradientPreset);
 	void setElement(int element, int position);
+	void setPreset(int preset);
 
 signals:
 	void settingsCameraChanged(SETTINGS_DEVICES);
@@ -86,6 +90,16 @@ private:
 	SETTINGS_DEVICES settings;
 	H5BM *h5bm;
 	void writeExampleH5bmFile();
+
+	// pre-defined presets for element positions
+	// "Brillouin", "Brightfield", "Eyepiece", "Calibration"
+	std::vector<std::string> presetLabels = { "Brillouin", "Brightfield", "Eyepiece", "Calibration" };
+	std::vector<std::vector<int>> microscope_presets = {
+		{ 1, 1, 3, 1, 2, 1 },
+		{ 1, 1, 3, 1, 2, 2 },
+		{ 1, 1, 3, 2, 3, 2 },
+		{ 1, 1, 3, 1, 3, 2 }
+	};
 };
 
 #endif // BRILLOUINACQUISITON_H
