@@ -68,7 +68,7 @@ std::vector<double> ScanControl::getPosition() {
 *
 */
 
-std::string ScanControl::com::receive(std::string request) {
+std::string com::receive(std::string request) {
 	request = request + "\r";
 	write(request.c_str());
 
@@ -87,7 +87,7 @@ std::string ScanControl::com::receive(std::string request) {
 	return answer;
 }
 
-void ScanControl::com::send(std::string message) {
+void com::send(std::string message) {
 	message = message + "\r";
 	write(message.c_str());
 }
@@ -98,10 +98,10 @@ void ScanControl::com::send(std::string message) {
 *
 */
 
-ScanControl::Element::~Element() {
+Element::~Element() {
 }
 
-std::string ScanControl::Element::receive(std::string request) {
+std::string Element::receive(std::string request) {
 	std::string answer = m_comObject->receive(m_prefix + "P" + request);
 	std::string pattern = "([a-zA-Z\\d]*)\r";
 	pattern = "P" + m_prefix + pattern;
@@ -111,11 +111,11 @@ std::string ScanControl::Element::receive(std::string request) {
 	return pieces_match[1]; // needs error handling
 }
 
-void ScanControl::Element::send(std::string message) {
+void Element::send(std::string message) {
 	m_comObject->send(m_prefix + "P" + message);
 }
 
-std::string ScanControl::Element::dec2hex(int dec, int digits = 6) {
+std::string Element::dec2hex(int dec, int digits = 6) {
 	std::stringstream stream;
 	stream << std::hex << dec;
 	std::string hex = stream.str();
@@ -127,7 +127,7 @@ std::string ScanControl::Element::dec2hex(int dec, int digits = 6) {
 	return hex;
 }
 
-int ScanControl::Element::hex2dec(std::string s) {
+int Element::hex2dec(std::string s) {
 	return std::stoul(s, nullptr, 16);
 }
 
@@ -137,12 +137,12 @@ int ScanControl::Element::hex2dec(std::string s) {
 *
 */
 
-double ScanControl::Focus::getZ() {
+double Focus::getZ() {
 	std::string s = "0x" + receive("Zp");
 	return m_umperinc * hex2dec(s);
 }
 
-void ScanControl::Focus::setZ(double position) {
+void Focus::setZ(double position) {
 	position = round(position / m_umperinc);
 	int inc = static_cast<int>(position);
 	inc %= m_rangeFocus;
@@ -150,38 +150,38 @@ void ScanControl::Focus::setZ(double position) {
 	receive("ZD" + pos);
 }
 
-void ScanControl::Focus::setVelocityZ(double velocity) {
+void Focus::setVelocityZ(double velocity) {
 	std::string vel = dec2hex(velocity, 6);
 	send("ZG" + vel);
 }
 
-void ScanControl::Focus::scanUp() {
+void Focus::scanUp() {
 	send("ZS+");
 }
 
-void ScanControl::Focus::scanDown() {
+void Focus::scanDown() {
 	send("ZS-");
 }
 
-void ScanControl::Focus::scanStop() {
+void Focus::scanStop() {
 	send("ZSS");
 }
 
-int ScanControl::Focus::getScanStatus() {
+int Focus::getScanStatus() {
 	std::string status = receive("Zt");
 	return std::stoi(status);
 }
 
-int ScanControl::Focus::getStatusKey() {
+int Focus::getStatusKey() {
 	std::string status = receive("Zw");
 	return std::stoi(status);
 }
 
-void ScanControl::Focus::move2Load() {
+void Focus::move2Load() {
 	send("ZW0");
 }
 
-void ScanControl::Focus::move2Work() {
+void Focus::move2Work() {
 	send("ZW1");
 }
 
@@ -191,13 +191,13 @@ void ScanControl::Focus::move2Work() {
  *
  */
 
-double ScanControl::MCU::getPosition(std::string axis) {
+double MCU::getPosition(std::string axis) {
 	std::string position = receive(axis + "p");
 	int pos = hex2dec(position);
 	return pos * m_umperinc;
 }
 
-void ScanControl::MCU::setPosition(std::string axis, double position) {
+void MCU::setPosition(std::string axis, double position) {
 	position = round(position / m_umperinc);
 	int inc = static_cast<int>(position);
 	inc %= m_rangeFocus;
@@ -205,40 +205,40 @@ void ScanControl::MCU::setPosition(std::string axis, double position) {
 	send(axis + "T" + pos);
 }
 
-void ScanControl::MCU::setVelocity(std::string axis, int velocity) {
+void MCU::setVelocity(std::string axis, int velocity) {
 	std::string vel = dec2hex(velocity, 6);
 	send(axis + "V" + vel);
 }
 
-double ScanControl::MCU::getX() {
+double MCU::getX() {
 	return getPosition("X");
 }
 
-void ScanControl::MCU::setX(double position) {
+void MCU::setX(double position) {
 	setPosition("X", position);
 }
 
-double ScanControl::MCU::getY() {
+double MCU::getY() {
 	return getPosition("Y");
 }
 
-void ScanControl::MCU::setY(double position) {
+void MCU::setY(double position) {
 	setPosition("Y", position);
 }
 
-void ScanControl::MCU::setVelocityX(int velocity) {
+void MCU::setVelocityX(int velocity) {
 	setVelocity("X", velocity);
 }
 
-void ScanControl::MCU::setVelocityY(int velocity) {
+void MCU::setVelocityY(int velocity) {
 	setVelocity("Y", velocity);
 }
 
-void ScanControl::MCU::stopX() {
+void MCU::stopX() {
 	send("XS");
 }
 
-void ScanControl::MCU::stopY() {
+void MCU::stopY() {
 	send("YS");
 }
 
@@ -248,67 +248,67 @@ void ScanControl::MCU::stopY() {
  *
  */
 
-int ScanControl::Stand::getReflector() {
+int Stand::getReflector() {
 	std::string answer = receive("Cr1,1");
 	return std::stoi(answer);
 }
 
-void ScanControl::Stand::setReflector(int position) {
+void Stand::setReflector(int position) {
 	if (position > 0 && position < 6) {
 		send("CR1," + std::to_string(position));
 	}
 }
 
-int ScanControl::Stand::getObjective() {
+int Stand::getObjective() {
 	std::string answer = receive("Cr2,1");
 	return std::stoi(answer);
 }
 
-void ScanControl::Stand::setObjective(int position) {
+void Stand::setObjective(int position) {
 	if (position > 0 && position < 7) {
 		send("CR2," + std::to_string(position));
 	}
 }
 
-int ScanControl::Stand::getTubelens() {
+int Stand::getTubelens() {
 	std::string answer = receive("Cr36,1");
 	return std::stoi(answer);
 }
 
-void ScanControl::Stand::setTubelens(int position) {
+void Stand::setTubelens(int position) {
 	if (position > 0 && position < 4) {
 		send("CR36," + std::to_string(position));
 	}
 }
 
-int ScanControl::Stand::getBaseport() {
+int Stand::getBaseport() {
 	std::string answer = receive("Cr38,1");
 	return std::stoi(answer);
 }
 
-void ScanControl::Stand::setBaseport(int position) {
+void Stand::setBaseport(int position) {
 	if (position > 0 && position < 4) {
 		send("CR38," + std::to_string(position));
 	}
 }
 
-int ScanControl::Stand::getSideport() {
+int Stand::getSideport() {
 	std::string answer = receive("Cr39,1");
 	return std::stoi(answer);
 }
 
-void ScanControl::Stand::setSideport(int position) {
+void Stand::setSideport(int position) {
 	if (position > 0 && position < 4) {
 		send("CR39," + std::to_string(position));
 	}
 }
 
-int ScanControl::Stand::getMirror() {
+int Stand::getMirror() {
 	std::string answer = receive("Cr51,1");
 	return std::stoi(answer);
 }
 
-void ScanControl::Stand::setMirror(int position) {
+void Stand::setMirror(int position) {
 	if (position > 0 && position < 3) {
 		send("CR51," + std::to_string(position));
 	}
