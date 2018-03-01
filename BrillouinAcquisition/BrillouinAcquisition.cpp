@@ -48,7 +48,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 
 	// slot to update microscope element button background color
 	QWidget::connect(
-		scanControl,
+		scanControl->stand,
 		SIGNAL(elementPositionsChanged(std::vector<int>)),
 		this,
 		SLOT(microscopeElementPositionsChanged(std::vector<int>))
@@ -492,11 +492,14 @@ void BrillouinAcquisition::microscopeElementPositionsChanged(std::vector<int> po
 	microscopeElementPositions = positions;
 	for (int ii = 0; ii < elementButtons.size(); ii++) {
 		for (int jj = 0; jj < elementButtons[ii].size(); jj++) {
-			if (positions[ii] == jj) {
+			if (positions[ii] == jj+1) {
 				elementButtons[ii][jj]->setProperty("class", "active");
 			} else {
 				elementButtons[ii][jj]->setProperty("class", "");
 			}
+			elementButtons[ii][jj]->style()->unpolish(elementButtons[ii][jj]);
+			elementButtons[ii][jj]->style()->polish(elementButtons[ii][jj]);
+			elementButtons[ii][jj]->update();
 		}
 	}
 }
