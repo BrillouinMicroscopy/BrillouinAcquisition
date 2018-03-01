@@ -46,6 +46,7 @@ public slots:
 
 signals:
 	void elementPositionsChanged(std::vector<int>);
+	void elementPositionsChanged(int, int);
 };
 
 class Focus : public Element {

@@ -62,6 +62,7 @@ private slots:
 	void on_actionConnect_Stage_triggered();
 	void microscopeConnectionChanged(bool);
 	void microscopeElementPositionsChanged(std::vector<int>);
+	void microscopeElementPositionsChanged(int element, int position);
 	void on_camera_playPause_clicked();
 	void onNewImage(unsigned short *, AT_64, AT_64);
 	void createCameraImage();
@@ -94,6 +95,7 @@ private:
 	SETTINGS_DEVICES settings;
 	H5BM *h5bm;
 	void writeExampleH5bmFile();
+	void checkElementButtons();
 
 	// pre-defined presets for element positions
 	// "Brillouin", "Brightfield", "Eyepiece", "Calibration"
@@ -107,6 +109,7 @@ private:
 	std::vector<int> microscopeElementPositions = {0, 0, 0, 0, 0, 0};
 
 	std::vector<std::vector<QPushButton*>> elementButtons;
+	std::vector<QPushButton*> presetButtons;
 };
 
 #endif // BRILLOUINACQUISITON_H

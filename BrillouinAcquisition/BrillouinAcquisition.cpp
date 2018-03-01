@@ -53,6 +53,12 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 		this,
 		SLOT(microscopeElementPositionsChanged(std::vector<int>))
 	);
+	QWidget::connect(
+		scanControl->stand,
+		SIGNAL(elementPositionsChanged(int, int)),
+		this,
+		SLOT(microscopeElementPositionsChanged(int, int))
+	);
 
 	qRegisterMetaType<std::string>("std::string");
 
@@ -97,6 +103,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 		QObject::connect(button, &QPushButton::clicked, [=] {
 			setPreset(ii);
 		});
+		presetButtons.push_back(button);
 	}
 	verticalLayout->addLayout(layout);
 	for (int ii = 0; ii < groupLabels.size(); ii++) {
@@ -489,9 +496,18 @@ void BrillouinAcquisition::microscopeConnectionChanged(bool isConnected) {
 
 void BrillouinAcquisition::microscopeElementPositionsChanged(std::vector<int> positions) {
 	microscopeElementPositions = positions;
+	checkElementButtons();
+}
+
+void BrillouinAcquisition::microscopeElementPositionsChanged(int element, int position) {
+	microscopeElementPositions[element] = position;
+	checkElementButtons();
+}
+
+void BrillouinAcquisition::checkElementButtons() {
 	for (int ii = 0; ii < elementButtons.size(); ii++) {
 		for (int jj = 0; jj < elementButtons[ii].size(); jj++) {
-			if (positions[ii] == jj+1) {
+			if (microscopeElementPositions[ii] == jj + 1) {
 				elementButtons[ii][jj]->setProperty("class", "active");
 			} else {
 				elementButtons[ii][jj]->setProperty("class", "");
@@ -500,6 +516,16 @@ void BrillouinAcquisition::microscopeElementPositionsChanged(std::vector<int> po
 			elementButtons[ii][jj]->style()->polish(elementButtons[ii][jj]);
 			elementButtons[ii][jj]->update();
 		}
+	}
+	for (int ii = 0; ii < microscope_presets.size(); ii++) {
+		if (microscope_presets[ii] == microscopeElementPositions) {
+			presetButtons[ii]->setProperty("class", "active");
+		} else {
+			presetButtons[ii]->setProperty("class", "");
+		}
+		presetButtons[ii]->style()->unpolish(presetButtons[ii]);
+		presetButtons[ii]->style()->polish(presetButtons[ii]);
+		presetButtons[ii]->update();
 	}
 }
 

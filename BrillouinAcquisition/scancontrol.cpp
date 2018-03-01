@@ -268,6 +268,7 @@ void Stand::setReflector(int position) {
 	if (position > 0 && position < 6) {
 		send("CR1," + std::to_string(position));
 	}
+	emit(elementPositionsChanged(0, position));
 }
 
 int Stand::getObjective() {
@@ -279,6 +280,7 @@ void Stand::setObjective(int position) {
 	if (position > 0 && position < 7) {
 		send("CR2," + std::to_string(position));
 	}
+	emit(elementPositionsChanged(1, position));
 }
 
 int Stand::getTubelens() {
@@ -290,6 +292,7 @@ void Stand::setTubelens(int position) {
 	if (position > 0 && position < 4) {
 		send("CR36," + std::to_string(position));
 	}
+	emit(elementPositionsChanged(2, position));
 }
 
 int Stand::getBaseport() {
@@ -301,6 +304,7 @@ void Stand::setBaseport(int position) {
 	if (position > 0 && position < 4) {
 		send("CR38," + std::to_string(position));
 	}
+	emit(elementPositionsChanged(3, position));
 }
 
 int Stand::getSideport() {
@@ -312,6 +316,7 @@ void Stand::setSideport(int position) {
 	if (position > 0 && position < 4) {
 		send("CR39," + std::to_string(position));
 	}
+	emit(elementPositionsChanged(4, position));
 }
 
 int Stand::getMirror() {
@@ -323,4 +328,5 @@ void Stand::setMirror(int position) {
 	if (position > 0 && position < 3) {
 		send("CR51," + std::to_string(position));
 	}
+	emit(elementPositionsChanged(5, position));
 }
