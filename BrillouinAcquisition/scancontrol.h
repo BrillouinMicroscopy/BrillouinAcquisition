@@ -9,7 +9,8 @@ public:
 	void send(std::string message);
 };
 
-class Element {
+class Element : public QObject {
+	Q_OBJECT
 private:
 	std::string m_prefix;		// prefix of the element for serial communication
 	com *m_comObject;
@@ -23,24 +24,23 @@ public:
 };
 
 class Stand : public Element {
+	Q_OBJECT
 public:
 	Stand(com *comObject) : Element(comObject, "H") {};
+	
 	int getReflector();
-	void setReflector(int position);
-
 	int getObjective();
-	void setObjective(int position);
-
 	int getTubelens();
-	void setTubelens(int position);
-
 	int getBaseport();
-	void setBaseport(int position);
-
 	int getSideport();
-	void setSideport(int position);
-
 	int getMirror();
+
+public slots:
+	void setReflector(int position);
+	void setObjective(int position);
+	void setTubelens(int position);
+	void setBaseport(int position);
+	void setSideport(int position);
 	void setMirror(int position);
 };
 

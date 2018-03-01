@@ -132,33 +132,33 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 void BrillouinAcquisition::setElement(int element, int position) {
 	switch (element) {
 		case 0:
-			scanControl->stand->setReflector(position);
+			QMetaObject::invokeMethod(scanControl->stand, "setReflector", Qt::QueuedConnection, Q_ARG(int, position));
 			break;
 		case 1:
-			scanControl->stand->setObjective(position);
+			QMetaObject::invokeMethod(scanControl->stand, "setObjective", Qt::QueuedConnection, Q_ARG(int, position));
 			break;
 		case 2:
-			scanControl->stand->setTubelens(position);
+			QMetaObject::invokeMethod(scanControl->stand, "setTubelens", Qt::QueuedConnection, Q_ARG(int, position));
 			break;
 		case 3:
-			scanControl->stand->setBaseport(position);
+			QMetaObject::invokeMethod(scanControl->stand, "setBaseport", Qt::QueuedConnection, Q_ARG(int, position));
 			break;
 		case 4:
-			scanControl->stand->setSideport(position);
+			QMetaObject::invokeMethod(scanControl->stand, "setSideport", Qt::QueuedConnection, Q_ARG(int, position));
 			break;
 		case 5:
-			scanControl->stand->setMirror(position);
+			QMetaObject::invokeMethod(scanControl->stand, "setMirror", Qt::QueuedConnection, Q_ARG(int, position));
 			break;
 	}
 }
 
 void BrillouinAcquisition::setPreset(int preset) {
-	scanControl->stand->setReflector(microscope_presets[preset][0]);
-	scanControl->stand->setObjective(microscope_presets[preset][1]);
-	scanControl->stand->setTubelens(microscope_presets[preset][2]);
-	scanControl->stand->setBaseport(microscope_presets[preset][3]);
-	scanControl->stand->setSideport(microscope_presets[preset][4]);
-	scanControl->stand->setMirror(microscope_presets[preset][5]);
+	QMetaObject::invokeMethod(scanControl->stand, "setReflector", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][0]));
+	QMetaObject::invokeMethod(scanControl->stand, "setObjective", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][1]));
+	QMetaObject::invokeMethod(scanControl->stand, "setTubelens", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][2]));
+	QMetaObject::invokeMethod(scanControl->stand, "setBaseport", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][3]));
+	QMetaObject::invokeMethod(scanControl->stand, "setSideport", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][4]));
+	QMetaObject::invokeMethod(scanControl->stand, "setMirror", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][5]));
 }
 
 void BrillouinAcquisition::writeExampleH5bmFile() {
