@@ -135,7 +135,6 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 	microscopeThread.exit();
 	storageThread.exit();
 	delete andor;
-	delete scanControl;
 	qInfo(logInfo()) << "BrillouinAcquisition closed.";
 	delete ui;
 }
