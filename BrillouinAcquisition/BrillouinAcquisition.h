@@ -61,6 +61,7 @@ private slots:
 	void on_actionEnable_Cooling_triggered();
 	void on_actionConnect_Stage_triggered();
 	void microscopeConnectionChanged(bool);
+	void microscopeElementPositionsChanged(std::vector<int>);
 	void on_camera_playPause_clicked();
 	void onNewImage(unsigned short *, AT_64, AT_64);
 	void createCameraImage();
@@ -103,6 +104,9 @@ private:
 		{ 1, 1, 3, 2, 3, 2 },
 		{ 1, 1, 3, 1, 3, 2 }
 	};
+	std::vector<int> microscopeElementPositions = {0, 0, 0, 0, 0, 0};
+
+	std::vector<std::vector<QPushButton*>> elementButtons;
 };
 
 #endif // BRILLOUINACQUISITON_H

@@ -248,6 +248,17 @@ void MCU::stopY() {
  *
  */
 
+void Stand::getElementPositions() {
+	std::vector<int> elementPositions(6,0);
+	elementPositions[0] = getReflector();
+	elementPositions[1] = getObjective();
+	elementPositions[2] = getTubelens();
+	elementPositions[3] = getBaseport();
+	elementPositions[4] = getSideport();
+	elementPositions[5] = getMirror();
+	emit(elementPositionsChanged(elementPositions));
+};
+
 int Stand::getReflector() {
 	std::string answer = receive("Cr1,1");
 	return std::stoi(answer);

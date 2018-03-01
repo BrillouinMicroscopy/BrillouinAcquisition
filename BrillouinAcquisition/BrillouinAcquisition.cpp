@@ -46,6 +46,14 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 		SLOT(microscopeConnectionChanged(bool))
 	);
 
+	// slot to update microscope element button background color
+	QWidget::connect(
+		scanControl,
+		SIGNAL(elementPositionsChanged(std::vector<int>)),
+		this,
+		SLOT(microscopeElementPositionsChanged(std::vector<int>))
+	);
+
 	qRegisterMetaType<std::string>("std::string");
 
 	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
@@ -100,6 +108,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 		groupLabel->setMinimumWidth(80);
 		groupLabel->setMaximumWidth(80);
 		layout->addWidget(groupLabel);
+		std::vector<QPushButton*> buttons;
 		for (int jj = 0; jj < maxOptions[ii]; jj++) {
 			buttonLabel = std::to_string(jj + 1);
 			QPushButton *button = new QPushButton(buttonLabel.c_str());
@@ -111,7 +120,9 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 			QObject::connect(button, &QPushButton::clicked, [=] {
 				setElement(ii, jj+1);
 			});
+			buttons.push_back(button);
 		}
+		elementButtons.push_back(buttons);
 		verticalLayout->addLayout(layout);
 	}
 	ui->beamPathBox->setLayout(verticalLayout);
@@ -467,11 +478,26 @@ void BrillouinAcquisition::microscopeConnectionChanged(bool isConnected) {
 		QIcon icon(":/BrillouinAcquisition/assets/03ready.png");
 		ui->settingsWidget->setTabIcon(1, icon);
 		ui->settingsWidget->setTabIcon(2, icon);
+		QMetaObject::invokeMethod(scanControl->stand, "getElementPositions", Qt::QueuedConnection);
 	} else {
 		ui->actionConnect_Stage->setText("Connect Microscope");
 		QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
 		ui->settingsWidget->setTabIcon(1, icon);
 		ui->settingsWidget->setTabIcon(2, icon);
+		microscopeElementPositionsChanged({ 0,0,0,0,0,0 });
+	}
+}
+
+void BrillouinAcquisition::microscopeElementPositionsChanged(std::vector<int> positions) {
+	microscopeElementPositions = positions;
+	for (int ii = 0; ii < elementButtons.size(); ii++) {
+		for (int jj = 0; jj < elementButtons[ii].size(); jj++) {
+			if (positions[ii] == jj) {
+				elementButtons[ii][jj]->setProperty("class", "active");
+			} else {
+				elementButtons[ii][jj]->setProperty("class", "");
+			}
+		}
 	}
 }
 

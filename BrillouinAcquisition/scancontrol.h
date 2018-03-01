@@ -36,12 +36,16 @@ public:
 	int getMirror();
 
 public slots:
+	void getElementPositions();
 	void setReflector(int position);
 	void setObjective(int position);
 	void setTubelens(int position);
 	void setBaseport(int position);
 	void setSideport(int position);
 	void setMirror(int position);
+
+signals:
+	void elementPositionsChanged(std::vector<int>);
 };
 
 class Focus : public Element {

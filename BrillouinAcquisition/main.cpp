@@ -29,6 +29,8 @@ int main(int argc, char *argv[]) {
 	QApplication a(argc, argv);
 	BrillouinAcquisition w;
 
+	w.setStyleSheet("QPushButton.active  {background-color: rgb(0, 59, 206); color: white}");
+
 	// Set logging file path
 	m_logFile.reset(new QFile("log.log"));
 	// Open the log file
