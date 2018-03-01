@@ -11,11 +11,11 @@ ScanControl::ScanControl() {
 }
 
 ScanControl::~ScanControl() {
+	disconnect();
 	delete focus;
 	delete mcu;
 	delete stand;
 	delete m_comObject;
-	disconnect();
 }
 
 bool ScanControl::connect() {
