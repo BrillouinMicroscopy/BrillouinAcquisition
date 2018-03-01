@@ -99,8 +99,6 @@ public:
 	ScanControl();
 	~ScanControl();
 
-	bool connect();
-	bool disconnect();
 	bool getConnectionStatus();
 
 	void setPosition(std::vector<double> position);
@@ -112,6 +110,13 @@ public:
 	Stand *stand;
 
 	com *m_comObject = new com();
+
+public slots:
+	bool connect();
+	bool disconnect();
+
+signals:
+	void microscopeConnected(bool);
 };
 
 #endif // SCANCONTROL_H

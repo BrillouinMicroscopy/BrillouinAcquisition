@@ -38,6 +38,14 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 		SLOT(settingsCameraUpdate(SETTINGS_DEVICES))
 	);
 
+	// slot microscope connection
+	QWidget::connect(
+		scanControl,
+		SIGNAL(microscopeConnected(bool)),
+		this,
+		SLOT(microscopeConnectionChanged(bool))
+	);
+
 	qRegisterMetaType<std::string>("std::string");
 
 	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
@@ -51,6 +59,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	// start camera worker thread
 	cameraThread.startWorker(andor);
 	microscopeThread.startWorker(scanControl);
+	scanControl->m_comObject->moveToThread(&microscopeThread);
 
 	// set up the camera image plot
 	BrillouinAcquisition::createCameraImage();
@@ -445,12 +454,14 @@ void BrillouinAcquisition::on_actionEnable_Cooling_triggered() {
 }
 
 void BrillouinAcquisition::on_actionConnect_Stage_triggered() {
-	bool isConnected;
 	if (scanControl->getConnectionStatus()) {
-		isConnected = scanControl->disconnect();
+		QMetaObject::invokeMethod(scanControl, "disconnect", Qt::QueuedConnection);
 	} else {
-		isConnected = scanControl->connect();
+		QMetaObject::invokeMethod(scanControl, "connect", Qt::QueuedConnection);
 	}
+}
+
+void BrillouinAcquisition::microscopeConnectionChanged(bool isConnected) {
 	if (isConnected) {
 		ui->actionConnect_Stage->setText("Disconnect Microscope");
 		QIcon icon(":/BrillouinAcquisition/assets/03ready.png");

@@ -60,6 +60,7 @@ private slots:
 	void on_actionConnect_Camera_triggered();
 	void on_actionEnable_Cooling_triggered();
 	void on_actionConnect_Stage_triggered();
+	void microscopeConnectionChanged(bool);
 	void on_camera_playPause_clicked();
 	void onNewImage(unsigned short *, AT_64, AT_64);
 	void createCameraImage();

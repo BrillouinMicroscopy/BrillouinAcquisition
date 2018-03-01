@@ -25,6 +25,7 @@ bool ScanControl::connect() {
 		m_comObject->setFlowControl(QSerialPort::HardwareControl);
 		isConnected = m_comObject->open(QIODevice::ReadWrite);
 	}
+	emit(microscopeConnected(isConnected));
 	return isConnected;
 }
 
@@ -33,6 +34,7 @@ bool ScanControl::disconnect() {
 		m_comObject->close();
 		isConnected = FALSE;
 	}
+	emit(microscopeConnected(isConnected));
 	return isConnected;
 }
 
