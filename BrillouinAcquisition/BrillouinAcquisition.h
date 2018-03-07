@@ -50,6 +50,7 @@ enum CustomGradientPreset {
 };
 
 Q_DECLARE_METATYPE(std::string);
+Q_DECLARE_METATYPE(AT_64);
 
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT

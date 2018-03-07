@@ -38,12 +38,22 @@ public:
 
 	unsigned short* unpackedBuffer;
 
+	bool m_acquiring = FALSE;
+	int BufferSize;
+	unsigned char* UserBuffer;
+	unsigned char* Buffer;
+	AT_64 ImageHeight;
+	AT_64 ImageWidth;
+	AT_64 ImageStride;
+
 
 public slots:
 	void checkCamera();
 	void acquireSingleTest(int index, std::string test);
 	void acquireSingle();
 	void acquireStartStop();
+	void acquire();
+	void acquireContinuously();
 
 signals:
 	void imageAcquired(unsigned short*, AT_64, AT_64);

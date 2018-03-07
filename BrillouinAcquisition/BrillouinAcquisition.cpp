@@ -61,6 +61,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	);
 
 	qRegisterMetaType<std::string>("std::string");
+	qRegisterMetaType<AT_64>("AT_64");
 
 	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
 	ui->settingsWidget->setTabIcon(0, icon);
@@ -554,8 +555,7 @@ void BrillouinAcquisition::on_actionAbout_triggered() {
 }
 
 void BrillouinAcquisition::on_camera_playPause_clicked() {
-	// example for synchronous/blocking execution
-	andor->acquireStartStop();
+	QMetaObject::invokeMethod(andor, "acquireContinuously", Qt::QueuedConnection);
 }
 
 void BrillouinAcquisition::on_camera_singleShot_clicked() {
