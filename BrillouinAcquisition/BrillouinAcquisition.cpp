@@ -450,6 +450,7 @@ void BrillouinAcquisition::onNewImage(unsigned short* unpackedBuffer, AT_64 widt
 	colorMap->rescaleDataRange();
 	ui->customplot->rescaleAxes();
 	ui->customplot->replot();
+	delete[] unpackedBuffer;
 }
 
 void BrillouinAcquisition::on_actionConnect_Camera_triggered() {

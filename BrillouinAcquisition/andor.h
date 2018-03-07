@@ -26,8 +26,6 @@ private:
 	unsigned char* pucAlignedBuffer = NULL;
 
 	int BufferSize;
-	unsigned char* UserBuffer;
-	unsigned char* Buffer;
 
 public:
 	Andor(QObject *parent = 0);
@@ -43,8 +41,6 @@ public:
 	double getSensorTemperature();
 
 	// setters/getters for ROI
-
-	unsigned short* unpackedBuffer;
 
 public slots:
 	void acquire();

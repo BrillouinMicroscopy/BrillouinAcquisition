@@ -123,7 +123,7 @@ void Andor::acquireStartStop() {
 	AT_ConvertBuffer(Buffer, ImagePixels, m_imageWidth, m_imageHeight, m_imageStride, L"Mono16", L"Mono16");
 
 	// Mono16
-	unpackedBuffer = reinterpret_cast<unsigned short*>(ImagePixels);
+	unsigned short* unpackedBuffer = reinterpret_cast<unsigned short*>(ImagePixels);
 
 	AT_FinaliseUtilityLibrary();
 
@@ -152,13 +152,16 @@ void Andor::acquireContinuously() {
 		AT_SetEnumeratedString(m_cameraHndl, L"Pixel Readout Rate", L"100 MHz");
 
 		// Set the exposure time for this camera to 10 milliseconds
-		AT_SetFloat(m_cameraHndl, L"ExposureTime", 0.01);
+		AT_SetFloat(m_cameraHndl, L"ExposureTime", 0.5);
 
 		// Set the AOI
-		AT_SetInt(m_cameraHndl, L"AOIWidth", 100);
-		AT_SetInt(m_cameraHndl, L"AOILeft", 100);
-		AT_SetInt(m_cameraHndl, L"AOIHeight", 100);
-		AT_SetInt(m_cameraHndl, L"AOITop", 100);
+		AT_SetInt(m_cameraHndl, L"AOIWidth", 2048);
+		AT_SetInt(m_cameraHndl, L"AOILeft", 0);
+		AT_SetInt(m_cameraHndl, L"AOIHeight", 2048);
+		AT_SetInt(m_cameraHndl, L"AOITop", 0);
+
+		AT_SetEnumeratedString(m_cameraHndl, L"CycleMode", L"Continuous");
+		AT_SetEnumeratedString(m_cameraHndl, L"TriggerMode", L"Software");
 
 		// Allocate a buffer
 		// Get the number of bytes required to store one frame
@@ -166,19 +169,8 @@ void Andor::acquireContinuously() {
 		AT_GetInt(m_cameraHndl, L"ImageSizeBytes", &ImageSizeBytes);
 		BufferSize = static_cast<int>(ImageSizeBytes);
 
-		//Allocate a memory buffer to store one frame
-		UserBuffer = new unsigned char[BufferSize];
-
-		// Acquire images
-		// Pass this buffer to the SDK
-		AT_QueueBuffer(m_cameraHndl, UserBuffer, BufferSize);
-
 		// Start acquisition
 		AT_Command(m_cameraHndl, L"AcquisitionStart");
-
-		// Sleep in this thread until data is ready, in this case set
-		// the timeout to infinite for simplicity
-		AT_WaitBuffer(m_cameraHndl, &Buffer, &BufferSize, AT_INFINITE);
 		AT_InitialiseUtilityLibrary();
 
 		emit(acquisitionRunning(TRUE));
@@ -186,7 +178,6 @@ void Andor::acquireContinuously() {
 		//QMetaObject::invokeMethod(this, "acquire", Qt::QueuedConnection);
 	} else {
 		m_isAcquiring = FALSE;
-		delete UserBuffer;
 		// Stop acquisition
 		AT_FinaliseUtilityLibrary();
 		AT_Command(m_cameraHndl, L"AcquisitionStop");
@@ -197,7 +188,17 @@ void Andor::acquireContinuously() {
 
 void Andor::acquire() {
 	if (m_isAcquiring) {
+
+		// Pass this buffer to the SDK
+		unsigned char* UserBuffer = new unsigned char[BufferSize];
+		AT_QueueBuffer(m_cameraHndl, UserBuffer, BufferSize);
+
 		// Acquire camera images
+		AT_Command(m_cameraHndl, L"SoftwareTrigger");
+
+		// Sleep in this thread until data is ready
+		unsigned char* Buffer;
+		int ret = AT_WaitBuffer(m_cameraHndl, &Buffer, &BufferSize, 1000);
 
 		// Process the image
 		//Unpack the 12 bit packed data
@@ -216,14 +217,12 @@ void Andor::acquire() {
 		AT_ConvertBuffer(Buffer, ImagePixels, m_imageWidth, m_imageHeight, m_imageStride, L"Mono16", L"Mono16");
 
 		// Mono16
-		unpackedBuffer = reinterpret_cast<unsigned short*>(ImagePixels);
+		unsigned short* unpackedBuffer = reinterpret_cast<unsigned short*>(ImagePixels);
 
 		// announce image acquisition
 		emit(imageAcquired(unpackedBuffer, m_imageWidth, m_imageHeight));
 
-		Sleep(500);
-
-		delete ImagePixels;
+		delete[] Buffer;
 
 		QMetaObject::invokeMethod(this, "acquire", Qt::QueuedConnection);
 	}
