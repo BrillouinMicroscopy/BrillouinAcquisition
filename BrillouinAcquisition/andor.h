@@ -8,18 +8,26 @@ class Andor: public QObject {
 	Q_OBJECT
 
 private:
-	bool m_abort;
-	AT_H Hndl;
-	bool initialised = FALSE;
-	bool connected = FALSE;
+	AT_H m_cameraHndl;
+	bool m_isInitialised = FALSE;
+	bool m_isConnected = FALSE;
+	bool m_isAcquiring = FALSE;
+
+	int m_temperatureStatusIndex = 0;
+	wchar_t m_temperatureStatus[256];
+
+	AT_64 m_imageHeight;
+	AT_64 m_imageWidth;
+	AT_64 m_imageStride;
 
 	AT_64 imageSizeBytes;
 	int i_imageSize;
 	unsigned char* gblp_Buffer = NULL;
 	unsigned char* pucAlignedBuffer = NULL;
 
-	int temperatureStatusIndex = 0;
-	wchar_t temperatureStatus[256];
+	int BufferSize;
+	unsigned char* UserBuffer;
+	unsigned char* Buffer;
 
 public:
 	Andor(QObject *parent = 0);
@@ -38,22 +46,13 @@ public:
 
 	unsigned short* unpackedBuffer;
 
-	bool m_acquiring = FALSE;
-	int BufferSize;
-	unsigned char* UserBuffer;
-	unsigned char* Buffer;
-	AT_64 ImageHeight;
-	AT_64 ImageWidth;
-	AT_64 ImageStride;
-
-
 public slots:
-	void checkCamera();
+	void acquire();
+	void acquireContinuously();
+
 	void acquireSingleTest(int index, std::string test);
 	void acquireSingle();
 	void acquireStartStop();
-	void acquire();
-	void acquireContinuously();
 
 signals:
 	void imageAcquired(unsigned short*, AT_64, AT_64);
