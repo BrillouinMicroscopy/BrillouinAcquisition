@@ -108,22 +108,19 @@ void Andor::acquireStartStop() {
 // Process the image
 	//Unpack the 12 bit packed data
 	AT_InitialiseUtilityLibrary();
-	AT_64 ImageHeight;
-	AT_GetInt(m_cameraHndl, L"AOI Height", &ImageHeight);
-	AT_64 ImageWidth;
-	AT_GetInt(m_cameraHndl, L"AOI Width", &ImageWidth);
-	AT_64 ImageStride;
-	AT_GetInt(m_cameraHndl, L"AOI Stride", &ImageStride);
+	AT_GetInt(m_cameraHndl, L"AOI Height", &m_imageHeight);
+	AT_GetInt(m_cameraHndl, L"AOI Width", &m_imageWidth);
+	AT_GetInt(m_cameraHndl, L"AOI Stride", &m_imageStride);
 	
 	// needed for Mono12Packed
 	/*unsigned short* unpackedBuffer = new unsigned short[static_cast<size_t>(ImageHeight*ImageWidth)];
 	AT_ConvertBuffer(Buffer, reinterpret_cast<unsigned char*>(unpackedBuffer), ImageWidth, ImageHeight, ImageStride, L"Mono12Packed", L"Mono16");*/
 
 
-	int pixelNumber = ImageWidth*ImageHeight;
+	int pixelNumber = m_imageWidth * m_imageHeight;
 	AT_U8* ImagePixels = new AT_U8[pixelNumber*2];
 
-	AT_ConvertBuffer(Buffer, ImagePixels, ImageWidth, ImageHeight, ImageStride, L"Mono16", L"Mono16");
+	AT_ConvertBuffer(Buffer, ImagePixels, m_imageWidth, m_imageHeight, m_imageStride, L"Mono16", L"Mono16");
 
 	// Mono16
 	unpackedBuffer = reinterpret_cast<unsigned short*>(ImagePixels);
@@ -139,7 +136,7 @@ void Andor::acquireStartStop() {
 	//delete [] UserBuffer;
 
 	// announce image acquisition
-	emit(imageAcquired(unpackedBuffer, ImageWidth, ImageHeight));
+	emit(imageAcquired(unpackedBuffer, m_imageWidth, m_imageHeight));
 }
 
 void Andor::acquireContinuously() {
@@ -202,28 +199,25 @@ void Andor::acquire() {
 
 		// Process the image
 		//Unpack the 12 bit packed data
-		AT_64 ImageHeight;
-		AT_GetInt(m_cameraHndl, L"AOI Height", &ImageHeight);
-		AT_64 ImageWidth;
-		AT_GetInt(m_cameraHndl, L"AOI Width", &ImageWidth);
-		AT_64 ImageStride;
-		AT_GetInt(m_cameraHndl, L"AOI Stride", &ImageStride);
+		AT_GetInt(m_cameraHndl, L"AOI Height", &m_imageHeight);
+		AT_GetInt(m_cameraHndl, L"AOI Width", &m_imageWidth);
+		AT_GetInt(m_cameraHndl, L"AOI Stride", &m_imageStride);
 
 		// needed for Mono12Packed
 		/*unsigned short* unpackedBuffer = new unsigned short[static_cast<size_t>(ImageHeight*ImageWidth)];
 		AT_ConvertBuffer(Buffer, reinterpret_cast<unsigned char*>(unpackedBuffer), ImageWidth, ImageHeight, ImageStride, L"Mono12Packed", L"Mono16");*/
 
 
-		int pixelNumber = ImageWidth * ImageHeight;
+		int pixelNumber = m_imageWidth * m_imageHeight;
 		AT_U8* ImagePixels = new AT_U8[pixelNumber * 2];
 
-		AT_ConvertBuffer(Buffer, ImagePixels, ImageWidth, ImageHeight, ImageStride, L"Mono16", L"Mono16");
+		AT_ConvertBuffer(Buffer, ImagePixels, m_imageWidth, m_imageHeight, m_imageStride, L"Mono16", L"Mono16");
 
 		// Mono16
 		unpackedBuffer = reinterpret_cast<unsigned short*>(ImagePixels);
 
 		// announce image acquisition
-		emit(imageAcquired(unpackedBuffer, ImageWidth, ImageHeight));
+		emit(imageAcquired(unpackedBuffer, m_imageWidth, m_imageHeight));
 
 		Sleep(500);
 
