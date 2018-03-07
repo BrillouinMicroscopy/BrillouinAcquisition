@@ -181,6 +181,7 @@ void Andor::acquireContinuously() {
 		AT_WaitBuffer(m_cameraHndl, &Buffer, &BufferSize, AT_INFINITE);
 		AT_InitialiseUtilityLibrary();
 
+		emit(acquisitionRunning(TRUE));
 		acquire();
 		//QMetaObject::invokeMethod(this, "acquire", Qt::QueuedConnection);
 	} else {
@@ -190,6 +191,7 @@ void Andor::acquireContinuously() {
 		AT_FinaliseUtilityLibrary();
 		AT_Command(m_cameraHndl, L"AcquisitionStop");
 		AT_Flush(m_cameraHndl);
+		emit(acquisitionRunning(FALSE));
 	}
 }
 

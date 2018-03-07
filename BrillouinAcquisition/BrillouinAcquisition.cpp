@@ -16,6 +16,13 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 		SLOT(onNewImage(unsigned short*, AT_64, AT_64))
 	);
 
+	QWidget::connect(
+		andor,
+		SIGNAL(acquisitionRunning(bool)),
+		this,
+		SLOT(acquisitionRunning(bool))
+	);
+
 	// slot to limit the axis of the camera display after user interaction
 	QWidget::connect(
 		ui->customplot->xAxis,
@@ -177,6 +184,14 @@ void BrillouinAcquisition::setPreset(int preset) {
 	QMetaObject::invokeMethod(scanControl->stand, "setBaseport", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][3]));
 	QMetaObject::invokeMethod(scanControl->stand, "setSideport", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][4]));
 	QMetaObject::invokeMethod(scanControl->stand, "setMirror", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][5]));
+}
+
+void BrillouinAcquisition::acquisitionRunning(bool isRunning) {
+	if (isRunning) {
+		ui->camera_playPause->setText("Stop");
+	} else {
+		ui->camera_playPause->setText("Play");
+	}
 }
 
 void BrillouinAcquisition::writeExampleH5bmFile() {

@@ -77,6 +77,7 @@ private slots:
 	void setColormap(QCPColorGradient *, CustomGradientPreset);
 	void setElement(int element, int position);
 	void setPreset(int preset);
+	void acquisitionRunning(bool);
 
 signals:
 	void settingsCameraChanged(SETTINGS_DEVICES);
