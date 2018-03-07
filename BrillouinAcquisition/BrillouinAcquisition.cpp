@@ -147,8 +147,11 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 
 BrillouinAcquisition::~BrillouinAcquisition() {
 	cameraThread.exit();
+	cameraThread.wait();
 	microscopeThread.exit();
+	microscopeThread.wait();
 	storageThread.exit();
+	storageThread.wait();
 	delete andor;
 	qInfo(logInfo()) << "BrillouinAcquisition closed.";
 	delete ui;
