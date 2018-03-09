@@ -169,11 +169,18 @@ void Andor::acquireContinuously() {
 		AT_GetInt(m_cameraHndl, L"ImageSizeBytes", &ImageSizeBytes);
 		BufferSize = static_cast<int>(ImageSizeBytes);
 
+		AT_GetInt(m_cameraHndl, L"AOI Height", &m_imageHeight);
+		AT_GetInt(m_cameraHndl, L"AOI Width", &m_imageWidth);
+
+		int pixelNumber = m_imageWidth * m_imageHeight;
+
+		liveBuffer = new CircularBuffer<AT_U8>(5, pixelNumber * 2);
+
 		// Start acquisition
 		AT_Command(m_cameraHndl, L"AcquisitionStart");
 		AT_InitialiseUtilityLibrary();
 
-		emit(acquisitionRunning(TRUE));
+		emit(acquisitionRunning(TRUE, liveBuffer, m_imageWidth, m_imageHeight));
 		acquire();
 		//QMetaObject::invokeMethod(this, "acquire", Qt::QueuedConnection);
 	} else {
@@ -182,7 +189,8 @@ void Andor::acquireContinuously() {
 		AT_FinaliseUtilityLibrary();
 		AT_Command(m_cameraHndl, L"AcquisitionStop");
 		AT_Flush(m_cameraHndl);
-		emit(acquisitionRunning(FALSE));
+		emit(acquisitionRunning(FALSE, nullptr, 0, 0));
+		//delete liveBuffer;
 	}
 }
 
@@ -206,21 +214,14 @@ void Andor::acquire() {
 		AT_GetInt(m_cameraHndl, L"AOI Width", &m_imageWidth);
 		AT_GetInt(m_cameraHndl, L"AOI Stride", &m_imageStride);
 
-		// needed for Mono12Packed
-		/*unsigned short* unpackedBuffer = new unsigned short[static_cast<size_t>(ImageHeight*ImageWidth)];
-		AT_ConvertBuffer(Buffer, reinterpret_cast<unsigned char*>(unpackedBuffer), ImageWidth, ImageHeight, ImageStride, L"Mono12Packed", L"Mono16");*/
+		liveBuffer->m_freeBuffers->acquire();
 
+		AT_ConvertBuffer(Buffer, liveBuffer->getWriteBuffer(), m_imageWidth, m_imageHeight, m_imageStride, L"Mono16", L"Mono16");
 
-		int pixelNumber = m_imageWidth * m_imageHeight;
-		AT_U8* ImagePixels = new AT_U8[pixelNumber * 2];
-
-		AT_ConvertBuffer(Buffer, ImagePixels, m_imageWidth, m_imageHeight, m_imageStride, L"Mono16", L"Mono16");
-
-		// Mono16
-		unsigned short* unpackedBuffer = reinterpret_cast<unsigned short*>(ImagePixels);
+		liveBuffer->m_usedBuffers->release();
 
 		// announce image acquisition
-		emit(imageAcquired(unpackedBuffer, m_imageWidth, m_imageHeight));
+		//emit(imageAcquired(unpackedBuffer, m_imageWidth, m_imageHeight));
 
 		delete[] Buffer;
 

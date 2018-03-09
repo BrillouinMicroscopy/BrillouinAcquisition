@@ -3,6 +3,7 @@
 
 #include "atcore.h"
 #include "atutility.h"
+#include "circularBuffer.h"
 
 class Andor: public QObject {
 	Q_OBJECT
@@ -39,6 +40,7 @@ public:
 	bool getSensorCooling();
 	const wchar_t getTemperatureStatus();
 	double getSensorTemperature();
+	CircularBuffer<AT_U8>* liveBuffer;
 
 	// setters/getters for ROI
 
@@ -52,7 +54,7 @@ public slots:
 
 signals:
 	void imageAcquired(unsigned short*, AT_64, AT_64);
-	void acquisitionRunning(bool);
+	void acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64);
 };
 
 #endif // ANDOR_H

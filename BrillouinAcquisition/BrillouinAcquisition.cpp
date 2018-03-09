@@ -18,9 +18,9 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 
 	QWidget::connect(
 		andor,
-		SIGNAL(acquisitionRunning(bool)),
+		SIGNAL(acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64)),
 		this,
-		SLOT(acquisitionRunning(bool))
+		SLOT(acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64))
 	);
 
 	// slot to limit the axis of the camera display after user interaction
@@ -69,6 +69,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 
 	qRegisterMetaType<std::string>("std::string");
 	qRegisterMetaType<AT_64>("AT_64");
+	qRegisterMetaType<CircularBuffer<AT_U8>>("CircularBuffer<AT_U8>");
 
 	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
 	ui->settingsWidget->setTabIcon(0, icon);
@@ -189,12 +190,18 @@ void BrillouinAcquisition::setPreset(int preset) {
 	QMetaObject::invokeMethod(scanControl->stand, "setMirror", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][5]));
 }
 
-void BrillouinAcquisition::acquisitionRunning(bool isRunning) {
+void BrillouinAcquisition::acquisitionRunning(bool isRunning, CircularBuffer<AT_U8>* liveBuffer, AT_64 imageWidth, AT_64 imageHeight) {
 	if (isRunning) {
 		ui->camera_playPause->setText("Stop");
+		m_viewRunning = TRUE;
+		m_imageWidth = imageWidth;
+		m_imageHeight = imageHeight;
 	} else {
 		ui->camera_playPause->setText("Play");
+		m_viewRunning = FALSE;
 	}
+	m_liveBuffer = liveBuffer;
+	onNewImage();
 }
 
 void BrillouinAcquisition::writeExampleH5bmFile() {
@@ -433,24 +440,34 @@ void BrillouinAcquisition::on_ROIHeight_valueChanged(int height) {
 	ui->customplot->replot();
 }
 
-void BrillouinAcquisition::onNewImage(unsigned short* unpackedBuffer, AT_64 width, AT_64 height) {
+void BrillouinAcquisition::onNewImage() {
 
-	colorMap->data()->setSize(width, height); // we want the color map to have nx * ny data points
-	colorMap->data()->setRange(QCPRange(0, width), QCPRange(0, height)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
+	if (m_liveBuffer) {
+		m_liveBuffer->m_usedBuffers->acquire();
 
-	double x, y;
-	int tIndex;
-	for (int xIndex = 0; xIndex<width; ++xIndex) {
-		for (int yIndex = 0; yIndex<height; ++yIndex) {
-			colorMap->data()->cellToCoord(xIndex, yIndex, &x, &y);
-			tIndex = xIndex * height + yIndex;
-			colorMap->data()->setCell(xIndex, yIndex, unpackedBuffer[tIndex]);
+		unsigned short* unpackedBuffer = reinterpret_cast<unsigned short*>(m_liveBuffer->getReadBuffer());
+
+		colorMap->data()->setSize(m_imageWidth, m_imageHeight); // we want the color map to have nx * ny data points
+		colorMap->data()->setRange(QCPRange(0, m_imageWidth), QCPRange(0, m_imageHeight)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
+
+		double x, y;
+		int tIndex;
+		for (int xIndex = 0; xIndex < m_imageWidth; ++xIndex) {
+			for (int yIndex = 0; yIndex < m_imageHeight; ++yIndex) {
+				colorMap->data()->cellToCoord(xIndex, yIndex, &x, &y);
+				tIndex = xIndex * m_imageHeight + yIndex;
+				colorMap->data()->setCell(xIndex, yIndex, unpackedBuffer[tIndex]);
+			}
+		}
+		m_liveBuffer->m_freeBuffers->release();
+		colorMap->rescaleDataRange();
+		ui->customplot->rescaleAxes();
+		ui->customplot->replot();
+		
+		if (m_viewRunning) {
+			QMetaObject::invokeMethod(this, "onNewImage", Qt::QueuedConnection);
 		}
 	}
-	colorMap->rescaleDataRange();
-	ui->customplot->rescaleAxes();
-	ui->customplot->replot();
-	delete[] unpackedBuffer;
 }
 
 void BrillouinAcquisition::on_actionConnect_Camera_triggered() {

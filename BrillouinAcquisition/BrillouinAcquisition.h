@@ -51,6 +51,7 @@ enum CustomGradientPreset {
 
 Q_DECLARE_METATYPE(std::string);
 Q_DECLARE_METATYPE(AT_64);
+Q_DECLARE_METATYPE(CircularBuffer<AT_U8>);
 
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
@@ -65,7 +66,7 @@ private slots:
 	void microscopeElementPositionsChanged(std::vector<int>);
 	void microscopeElementPositionsChanged(int element, int position);
 	void on_camera_playPause_clicked();
-	void onNewImage(unsigned short *, AT_64, AT_64);
+	void onNewImage();
 	void createCameraImage();
 	void xAxisRangeChanged(const QCPRange & newRange);
 	void yAxisRangeChanged(const QCPRange & newRange);
@@ -77,7 +78,7 @@ private slots:
 	void setColormap(QCPColorGradient *, CustomGradientPreset);
 	void setElement(int element, int position);
 	void setPreset(int preset);
-	void acquisitionRunning(bool);
+	void acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64);
 
 signals:
 	void settingsCameraChanged(SETTINGS_DEVICES);
@@ -98,6 +99,10 @@ private:
 	H5BM *h5bm;
 	void writeExampleH5bmFile();
 	void checkElementButtons();
+	bool m_viewRunning = FALSE;
+	AT_64 m_imageHeight;
+	AT_64 m_imageWidth;
+	CircularBuffer<AT_U8> *m_liveBuffer;
 
 	// pre-defined presets for element positions
 	// "Brillouin", "Brightfield", "Eyepiece", "Calibration"

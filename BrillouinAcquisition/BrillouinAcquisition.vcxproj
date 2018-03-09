@@ -215,6 +215,7 @@ copy "$(ProgramW6432)\HDF_Group\HDF5\1.10.1\bin\zlib.dll" "$(TargetDir)"
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp" "-fstdafx.h" "-f../../%(Filename)%(Extension)"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DH5_BUILT_AS_DYNAMIC_LIB "-IC:\Program Files\HDF_Group\HDF5\1.10.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-Ic:\Program Files\Andor SDK3" "-I$(QTDIR)\include\QtPrintSupport"</Command>
     </CustomBuild>
+    <ClInclude Include="circularBuffer.h" />
     <ClInclude Include="simplemath.h" />
     <ClInclude Include="logger.h" />
     <CustomBuild Include="qcustomplot.h">
