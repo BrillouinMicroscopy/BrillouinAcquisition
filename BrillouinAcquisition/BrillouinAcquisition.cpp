@@ -445,7 +445,10 @@ void BrillouinAcquisition::on_ROIHeight_valueChanged(int height) {
 
 void BrillouinAcquisition::onNewImage() {
 	if (m_liveBuffer && m_viewRunning) {
-		m_liveBuffer->m_usedBuffers->acquire();
+		if (!m_liveBuffer->m_usedBuffers->tryAcquire()) {
+			QMetaObject::invokeMethod(this, "onNewImage", Qt::QueuedConnection);
+			return;
+		}
 
 		unsigned short* unpackedBuffer = reinterpret_cast<unsigned short*>(m_liveBuffer->getReadBuffer());
 
