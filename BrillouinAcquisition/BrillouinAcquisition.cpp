@@ -191,17 +191,20 @@ void BrillouinAcquisition::setPreset(int preset) {
 }
 
 void BrillouinAcquisition::acquisitionRunning(bool isRunning, CircularBuffer<AT_U8>* liveBuffer, AT_64 imageWidth, AT_64 imageHeight) {
+	if (m_liveBuffer) {
+		delete m_liveBuffer;
+	}
+	m_liveBuffer = liveBuffer;
 	if (isRunning) {
 		ui->camera_playPause->setText("Stop");
 		m_viewRunning = TRUE;
 		m_imageWidth = imageWidth;
 		m_imageHeight = imageHeight;
+		onNewImage();
 	} else {
 		ui->camera_playPause->setText("Play");
 		m_viewRunning = FALSE;
 	}
-	m_liveBuffer = liveBuffer;
-	onNewImage();
 }
 
 void BrillouinAcquisition::writeExampleH5bmFile() {
@@ -441,8 +444,7 @@ void BrillouinAcquisition::on_ROIHeight_valueChanged(int height) {
 }
 
 void BrillouinAcquisition::onNewImage() {
-
-	if (m_liveBuffer) {
+	if (m_liveBuffer && m_viewRunning) {
 		m_liveBuffer->m_usedBuffers->acquire();
 
 		unsigned short* unpackedBuffer = reinterpret_cast<unsigned short*>(m_liveBuffer->getReadBuffer());
@@ -463,10 +465,8 @@ void BrillouinAcquisition::onNewImage() {
 		colorMap->rescaleDataRange();
 		ui->customplot->rescaleAxes();
 		ui->customplot->replot();
-		
-		if (m_viewRunning) {
-			QMetaObject::invokeMethod(this, "onNewImage", Qt::QueuedConnection);
-		}
+			
+		QMetaObject::invokeMethod(this, "onNewImage", Qt::QueuedConnection);
 	}
 }
 

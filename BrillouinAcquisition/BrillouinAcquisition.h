@@ -102,7 +102,7 @@ private:
 	bool m_viewRunning = FALSE;
 	AT_64 m_imageHeight;
 	AT_64 m_imageWidth;
-	CircularBuffer<AT_U8> *m_liveBuffer;
+	CircularBuffer<AT_U8> *m_liveBuffer = nullptr;
 
 	// pre-defined presets for element positions
 	// "Brillouin", "Brightfield", "Eyepiece", "Calibration"
