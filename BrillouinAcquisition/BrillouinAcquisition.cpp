@@ -452,11 +452,9 @@ void BrillouinAcquisition::onNewImage() {
 		colorMap->data()->setSize(m_imageWidth, m_imageHeight); // we want the color map to have nx * ny data points
 		colorMap->data()->setRange(QCPRange(0, m_imageWidth), QCPRange(0, m_imageHeight)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
 
-		double x, y;
 		int tIndex;
 		for (int xIndex = 0; xIndex < m_imageWidth; ++xIndex) {
 			for (int yIndex = 0; yIndex < m_imageHeight; ++yIndex) {
-				colorMap->data()->cellToCoord(xIndex, yIndex, &x, &y);
 				tIndex = xIndex * m_imageHeight + yIndex;
 				colorMap->data()->setCell(xIndex, yIndex, unpackedBuffer[tIndex]);
 			}
