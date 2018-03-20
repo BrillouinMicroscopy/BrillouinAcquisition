@@ -19,6 +19,8 @@ private:
 
 	AT_64 m_imageHeight;
 	AT_64 m_imageWidth;
+	AT_64 m_imageLeft;
+	AT_64 m_imageTop;
 	AT_64 m_imageStride;
 
 	AT_64 imageSizeBytes;

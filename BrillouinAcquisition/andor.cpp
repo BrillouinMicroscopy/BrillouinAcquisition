@@ -169,8 +169,10 @@ void Andor::acquireContinuously() {
 		AT_GetInt(m_cameraHndl, L"ImageSizeBytes", &ImageSizeBytes);
 		BufferSize = static_cast<int>(ImageSizeBytes);
 
-		AT_GetInt(m_cameraHndl, L"AOI Height", &m_imageHeight);
-		AT_GetInt(m_cameraHndl, L"AOI Width", &m_imageWidth);
+		AT_GetInt(m_cameraHndl, L"AOIHeight", &m_imageHeight);
+		AT_GetInt(m_cameraHndl, L"AOIWidth", &m_imageWidth);
+		AT_GetInt(m_cameraHndl, L"AOILeft", &m_imageLeft);
+		AT_GetInt(m_cameraHndl, L"AOITop", &m_imageTop);
 
 		int pixelNumber = m_imageWidth * m_imageHeight;
 
