@@ -187,12 +187,7 @@ void Andor::acquireContinuously() {
 		//QMetaObject::invokeMethod(this, "acquire", Qt::QueuedConnection);
 	} else {
 		m_isAcquiring = FALSE;
-		// Stop acquisition
-		AT_FinaliseUtilityLibrary();
-		AT_Command(m_cameraHndl, L"AcquisitionStop");
-		AT_Flush(m_cameraHndl);
-		emit(acquisitionRunning(FALSE, nullptr, 0, 0));
-		//delete liveBuffer;
+		cleanupAcquisition();
 	}
 }
 
@@ -228,7 +223,17 @@ void Andor::acquire() {
 		delete[] Buffer;
 
 		QMetaObject::invokeMethod(this, "acquire", Qt::QueuedConnection);
+	} else {
+		cleanupAcquisition();
 	}
+}
+
+void Andor::cleanupAcquisition() {
+	AT_FinaliseUtilityLibrary();
+	AT_Command(m_cameraHndl, L"AcquisitionStop");
+	AT_Flush(m_cameraHndl);
+	emit(acquisitionRunning(FALSE, nullptr, 0, 0));
+
 }
 
 /*

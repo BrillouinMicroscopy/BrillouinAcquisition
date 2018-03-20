@@ -592,7 +592,11 @@ void BrillouinAcquisition::on_actionAbout_triggered() {
 }
 
 void BrillouinAcquisition::on_camera_playPause_clicked() {
-	QMetaObject::invokeMethod(andor, "acquireContinuously", Qt::QueuedConnection);
+	if (!andor->m_isAcquiring) {
+		QMetaObject::invokeMethod(andor, "acquireContinuously", Qt::QueuedConnection);
+	} else {
+		andor->m_isAcquiring = FALSE;
+	}
 }
 
 void BrillouinAcquisition::on_camera_singleShot_clicked() {

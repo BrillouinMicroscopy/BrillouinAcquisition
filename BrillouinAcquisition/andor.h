@@ -12,7 +12,6 @@ private:
 	AT_H m_cameraHndl;
 	bool m_isInitialised = FALSE;
 	bool m_isConnected = FALSE;
-	bool m_isAcquiring = FALSE;
 
 	int m_temperatureStatusIndex = 0;
 	wchar_t m_temperatureStatus[256];
@@ -29,6 +28,7 @@ private:
 	unsigned char* pucAlignedBuffer = NULL;
 
 	int BufferSize;
+	void cleanupAcquisition();
 
 public:
 	Andor(QObject *parent = 0);
@@ -36,6 +36,7 @@ public:
 	void connect();
 	void disconnect();
 	bool getConnectionStatus();
+	bool m_isAcquiring = FALSE;
 
 	// setters/getters for sensor cooling
 	void setSensorCooling(bool cooling);
