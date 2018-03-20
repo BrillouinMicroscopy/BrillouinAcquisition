@@ -88,7 +88,7 @@ void Andor::acquire() {
 
 		// Sleep in this thread until data is ready
 		unsigned char* Buffer;
-		int ret = AT_WaitBuffer(m_cameraHndl, &Buffer, &m_bufferSize, 1000);
+		int ret = AT_WaitBuffer(m_cameraHndl, &Buffer, &m_bufferSize, 1500*m_exposureTime);
 
 		// Process the image
 		//Unpack the 12 bit packed data
@@ -111,25 +111,23 @@ void Andor::acquire() {
 }
 
 void Andor::prepareAcquisition() {
-	// Set camera parameters
+	// Set the pixel Encoding
+	AT_SetEnumeratedString(m_cameraHndl, L"Pixel Encoding", m_pixelEncoding);
 
-	// Set the pixel Encoding to the desired settings Mono16 Data
-	AT_SetEnumeratedString(m_cameraHndl, L"Pixel Encoding", L"Mono16");
+	// Set the pixel Readout Rate
+	AT_SetEnumeratedString(m_cameraHndl, L"Pixel Readout Rate", m_pixelReadoutRate);
 
-	// Set the pixel Readout Rate to slowest
-	AT_SetEnumeratedString(m_cameraHndl, L"Pixel Readout Rate", L"100 MHz");
-
-	// Set the exposure time for this camera to 500 milliseconds
-	AT_SetFloat(m_cameraHndl, L"ExposureTime", 0.5);
+	// Set the exposure time
+	AT_SetFloat(m_cameraHndl, L"ExposureTime", m_exposureTime);
 
 	// Set the AOI
-	AT_SetInt(m_cameraHndl, L"AOIWidth", 2048);
-	AT_SetInt(m_cameraHndl, L"AOILeft", 0);
-	AT_SetInt(m_cameraHndl, L"AOIHeight", 2048);
-	AT_SetInt(m_cameraHndl, L"AOITop", 0);
+	AT_SetInt(m_cameraHndl, L"AOIWidth", m_imageWidth);
+	AT_SetInt(m_cameraHndl, L"AOILeft", m_imageLeft);
+	AT_SetInt(m_cameraHndl, L"AOIHeight", m_imageHeight);
+	AT_SetInt(m_cameraHndl, L"AOITop", m_imageTop);
 
-	AT_SetEnumeratedString(m_cameraHndl, L"CycleMode", L"Continuous");
-	AT_SetEnumeratedString(m_cameraHndl, L"TriggerMode", L"Software");
+	AT_SetEnumeratedString(m_cameraHndl, L"CycleMode", m_cycleMode);
+	AT_SetEnumeratedString(m_cameraHndl, L"TriggerMode", m_triggerMode);
 
 	// Allocate a buffer
 	// Get the number of bytes required to store one frame

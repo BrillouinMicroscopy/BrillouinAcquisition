@@ -16,11 +16,17 @@ private:
 	int m_temperatureStatusIndex = 0;
 	wchar_t m_temperatureStatus[256];
 
-	AT_64 m_imageHeight;
-	AT_64 m_imageWidth;
-	AT_64 m_imageLeft;
-	AT_64 m_imageTop;
+	AT_64 m_imageHeight = 2048;
+	AT_64 m_imageWidth = 2048;
+	AT_64 m_imageLeft = 0;
+	AT_64 m_imageTop = 0;
 	AT_64 m_imageStride;
+	double m_exposureTime = 0.5;
+
+	AT_WC *m_pixelReadoutRate = L"100 MHz";
+	AT_WC *m_pixelEncoding = L"Mono16";
+	AT_WC *m_cycleMode = L"Continuous";
+	AT_WC *m_triggerMode = L"Software";
 
 	int m_bufferSize;
 
