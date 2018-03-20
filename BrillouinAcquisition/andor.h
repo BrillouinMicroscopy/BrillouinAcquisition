@@ -22,12 +22,9 @@ private:
 	AT_64 m_imageTop;
 	AT_64 m_imageStride;
 
-	AT_64 imageSizeBytes;
-	int i_imageSize;
-	unsigned char* gblp_Buffer = NULL;
-	unsigned char* pucAlignedBuffer = NULL;
+	int m_bufferSize;
 
-	int BufferSize;
+	void prepareAcquisition();
 	void cleanupAcquisition();
 
 public:
@@ -43,17 +40,17 @@ public:
 	bool getSensorCooling();
 	const wchar_t getTemperatureStatus();
 	double getSensorTemperature();
-	CircularBuffer<AT_U8>* liveBuffer;
 
 	// setters/getters for ROI
 
-public slots:
-	void acquire();
-	void acquireContinuously();
+	// circular buffer for live acquisition
+	CircularBuffer<AT_U8>* liveBuffer;
 
-	void acquireSingleTest(int index, std::string test);
-	void acquireSingle();
-	void acquireStartStop();
+private slots:
+	void acquire();
+
+public slots:
+	void acquireContinuously();
 
 signals:
 	void imageAcquired(unsigned short*, AT_64, AT_64);
