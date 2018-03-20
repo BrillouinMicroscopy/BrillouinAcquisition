@@ -120,11 +120,16 @@ void Andor::prepareAcquisition() {
 	// Set the exposure time
 	AT_SetFloat(m_cameraHndl, L"ExposureTime", m_exposureTime);
 
+	// enable spurious noise filter
+	AT_SetBool(m_cameraHndl, L"SpuriousNoiseFilter", m_spuriousNoiseFilter);
+
 	// Set the AOI
 	AT_SetInt(m_cameraHndl, L"AOIWidth", m_imageWidth);
 	AT_SetInt(m_cameraHndl, L"AOILeft", m_imageLeft);
 	AT_SetInt(m_cameraHndl, L"AOIHeight", m_imageHeight);
 	AT_SetInt(m_cameraHndl, L"AOITop", m_imageTop);
+	AT_SetEnumeratedString(m_cameraHndl, L"AOIBinning", m_imageBinning);
+	AT_SetEnumeratedString(m_cameraHndl, L"SimplePreAmpGainControl", m_preAmpGain);
 
 	AT_SetEnumeratedString(m_cameraHndl, L"CycleMode", m_cycleMode);
 	AT_SetEnumeratedString(m_cameraHndl, L"TriggerMode", m_triggerMode);

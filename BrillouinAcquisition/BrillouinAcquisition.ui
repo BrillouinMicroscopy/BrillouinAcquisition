@@ -233,6 +233,11 @@ QTabBar::tab:!selected {
                 </item>
                 <item>
                  <property name="text">
+                  <string>3x3</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
                   <string>4x4</string>
                  </property>
                 </item>
@@ -451,7 +456,7 @@ QTabBar::tab:!selected {
                 </item>
                 <item>
                  <property name="text">
-                  <string>560 MHz</string>
+                  <string>560 MHz - fastest readout</string>
                  </property>
                 </item>
                </widget>
@@ -469,12 +474,12 @@ QTabBar::tab:!selected {
                 </property>
                 <item>
                  <property name="text">
-                  <string>12 bit (high well)</string>
+                  <string>12 bit (low noise)</string>
                  </property>
                 </item>
                 <item>
                  <property name="text">
-                  <string>12 bit (low noise)</string>
+                  <string>12 bit (high well capacity)</string>
                  </property>
                 </item>
                 <item>
@@ -492,9 +497,27 @@ QTabBar::tab:!selected {
                   <height>30</height>
                  </rect>
                 </property>
+                <property name="currentIndex">
+                 <number>2</number>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Mono12</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Mono12Packed</string>
+                 </property>
+                </item>
                 <item>
                  <property name="text">
                   <string>Mono16</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Mono32</string>
                  </property>
                 </item>
                </widget>
@@ -507,9 +530,17 @@ QTabBar::tab:!selected {
                   <height>30</height>
                  </rect>
                 </property>
+                <property name="currentIndex">
+                 <number>1</number>
+                </property>
                 <item>
                  <property name="text">
                   <string>Fixed</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Continuous</string>
                  </property>
                 </item>
                </widget>
@@ -530,22 +561,22 @@ QTabBar::tab:!selected {
                </item>
                <item>
                 <property name="text">
-                 <string>External Start</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>External Exposure</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
                  <string>Software</string>
                 </property>
                </item>
                <item>
                 <property name="text">
                  <string>External</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>External Start</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>External Exposure</string>
                 </property>
                </item>
               </widget>
@@ -667,8 +698,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>446</width>
-                <height>454</height>
+                <width>285</width>
+                <height>340</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -721,8 +752,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>446</width>
-                <height>454</height>
+                <width>285</width>
+                <height>440</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -825,7 +856,7 @@ QTabBar::tab:!selected {
                 <property name="geometry">
                  <rect>
                   <x>0</x>
-                  <y>-232</y>
+                  <y>0</y>
                   <width>433</width>
                   <height>740</height>
                  </rect>
