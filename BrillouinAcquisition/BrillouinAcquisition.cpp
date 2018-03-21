@@ -55,13 +55,13 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 
 	// slot to update microscope element button background color
 	QWidget::connect(
-		m_scanControl->stand,
+		m_scanControl->m_stand,
 		SIGNAL(elementPositionsChanged(std::vector<int>)),
 		this,
 		SLOT(microscopeElementPositionsChanged(std::vector<int>))
 	);
 	QWidget::connect(
-		m_scanControl->stand,
+		m_scanControl->m_stand,
 		SIGNAL(elementPositionsChanged(int, int)),
 		this,
 		SLOT(microscopeElementPositionsChanged(int, int))
@@ -161,33 +161,33 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 void BrillouinAcquisition::setElement(int element, int position) {
 	switch (element) {
 		case 0:
-			QMetaObject::invokeMethod(m_scanControl->stand, "setReflector", Qt::QueuedConnection, Q_ARG(int, position));
+			QMetaObject::invokeMethod(m_scanControl->m_stand, "setReflector", Qt::QueuedConnection, Q_ARG(int, position));
 			break;
 		case 1:
-			QMetaObject::invokeMethod(m_scanControl->stand, "setObjective", Qt::QueuedConnection, Q_ARG(int, position));
+			QMetaObject::invokeMethod(m_scanControl->m_stand, "setObjective", Qt::QueuedConnection, Q_ARG(int, position));
 			break;
 		case 2:
-			QMetaObject::invokeMethod(m_scanControl->stand, "setTubelens", Qt::QueuedConnection, Q_ARG(int, position));
+			QMetaObject::invokeMethod(m_scanControl->m_stand, "setTubelens", Qt::QueuedConnection, Q_ARG(int, position));
 			break;
 		case 3:
-			QMetaObject::invokeMethod(m_scanControl->stand, "setBaseport", Qt::QueuedConnection, Q_ARG(int, position));
+			QMetaObject::invokeMethod(m_scanControl->m_stand, "setBaseport", Qt::QueuedConnection, Q_ARG(int, position));
 			break;
 		case 4:
-			QMetaObject::invokeMethod(m_scanControl->stand, "setSideport", Qt::QueuedConnection, Q_ARG(int, position));
+			QMetaObject::invokeMethod(m_scanControl->m_stand, "setSideport", Qt::QueuedConnection, Q_ARG(int, position));
 			break;
 		case 5:
-			QMetaObject::invokeMethod(m_scanControl->stand, "setMirror", Qt::QueuedConnection, Q_ARG(int, position));
+			QMetaObject::invokeMethod(m_scanControl->m_stand, "setMirror", Qt::QueuedConnection, Q_ARG(int, position));
 			break;
 	}
 }
 
 void BrillouinAcquisition::setPreset(int preset) {
-	QMetaObject::invokeMethod(m_scanControl->stand, "setReflector", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][0]));
-	QMetaObject::invokeMethod(m_scanControl->stand, "setObjective", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][1]));
-	QMetaObject::invokeMethod(m_scanControl->stand, "setTubelens", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][2]));
-	QMetaObject::invokeMethod(m_scanControl->stand, "setBaseport", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][3]));
-	QMetaObject::invokeMethod(m_scanControl->stand, "setSideport", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][4]));
-	QMetaObject::invokeMethod(m_scanControl->stand, "setMirror", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][5]));
+	QMetaObject::invokeMethod(m_scanControl->m_stand, "setReflector", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][0]));
+	QMetaObject::invokeMethod(m_scanControl->m_stand, "setObjective", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][1]));
+	QMetaObject::invokeMethod(m_scanControl->m_stand, "setTubelens", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][2]));
+	QMetaObject::invokeMethod(m_scanControl->m_stand, "setBaseport", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][3]));
+	QMetaObject::invokeMethod(m_scanControl->m_stand, "setSideport", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][4]));
+	QMetaObject::invokeMethod(m_scanControl->m_stand, "setMirror", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][5]));
 }
 
 void BrillouinAcquisition::acquisitionRunning(bool isRunning, CircularBuffer<AT_U8>* liveBuffer, AT_64 imageWidth, AT_64 imageHeight) {
@@ -494,7 +494,7 @@ void BrillouinAcquisition::microscopeConnectionChanged(bool isConnected) {
 		QIcon icon(":/BrillouinAcquisition/assets/03ready.png");
 		ui->settingsWidget->setTabIcon(1, icon);
 		ui->settingsWidget->setTabIcon(2, icon);
-		QMetaObject::invokeMethod(m_scanControl->stand, "getElementPositions", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(m_scanControl->m_stand, "getElementPositions", Qt::QueuedConnection);
 	} else {
 		ui->actionConnect_Stage->setText("Connect Microscope");
 		QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");

@@ -111,9 +111,9 @@ public:
 	void setPositionRelative(std::vector<double> distance);
 	std::vector<double> getPosition();
 
-	Focus *focus;
-	MCU *mcu;
-	Stand *stand;
+	Focus *m_focus;
+	MCU *m_mcu;
+	Stand *m_stand;
 
 	com *m_comObject = new com();
 

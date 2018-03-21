@@ -5,16 +5,16 @@
 #include <regex>
 
 ScanControl::ScanControl() {
-	focus = new Focus(m_comObject);
-	mcu = new MCU(m_comObject);
-	stand = new Stand(m_comObject);
+	m_focus = new Focus(m_comObject);
+	m_mcu = new MCU(m_comObject);
+	m_stand = new Stand(m_comObject);
 }
 
 ScanControl::~ScanControl() {
 	disconnect();
-	delete focus;
-	delete mcu;
-	delete stand;
+	delete m_focus;
+	delete m_mcu;
+	delete m_stand;
 	delete m_comObject;
 }
 
@@ -43,22 +43,22 @@ bool ScanControl::getConnectionStatus() {
 }
 
 void ScanControl::setPosition(std::vector<double> position) {
-	mcu->setX(position[0]);
-	mcu->setY(position[1]);
-	focus->setZ(position[2]);
+	m_mcu->setX(position[0]);
+	m_mcu->setY(position[1]);
+	m_focus->setZ(position[2]);
 }
 
 void ScanControl::setPositionRelative(std::vector<double> distance) {
 	std::vector<double> position = getPosition();
-	mcu->setX(position[0] + distance[0]);
-	mcu->setY(position[1] + distance[1]);
-	focus->setZ(position[2] + distance[2]);
+	m_mcu->setX(position[0] + distance[0]);
+	m_mcu->setY(position[1] + distance[1]);
+	m_focus->setZ(position[2] + distance[2]);
 }
 
 std::vector<double> ScanControl::getPosition() {
-	double x = mcu->getX();
-	double y = mcu->getY();
-	double z = focus->getZ();
+	double x = m_mcu->getX();
+	double y = m_mcu->getY();
+	double z = m_focus->getZ();
 	return std::vector<double> {x, y, z};
 }
 
