@@ -67,7 +67,7 @@ private slots:
 	void microscopeElementPositionsChanged(int element, int position);
 	void on_camera_playPause_clicked();
 	void onNewImage();
-	void createCameraImage();
+	void initializePlot();
 	void xAxisRangeChanged(const QCPRange & newRange);
 	void yAxisRangeChanged(const QCPRange & newRange);
 	void settingsCameraUpdate(SETTINGS_DEVICES);
@@ -89,19 +89,19 @@ public:
 
 private:
 	Ui::BrillouinAcquisitionClass *ui;
-	Thread cameraThread;
-	Thread microscopeThread;
-	Thread storageThread;
-	Andor *andor = new Andor();
-	ScanControl *scanControl = new ScanControl();
-	QCPColorMap *colorMap;
-	SETTINGS_DEVICES settings;
-	H5BM *h5bm;
 	void writeExampleH5bmFile();
 	void checkElementButtons();
+	Thread m_cameraThread;
+	Thread m_microscopeThread;
+	Thread m_storageThread;
+	Andor *m_andor = new Andor();
+	ScanControl *m_scanControl = new ScanControl();
+	QCPColorMap *m_colorMap;
+	SETTINGS_DEVICES m_deviceSettings;
+	H5BM *m_h5bm;
 	bool m_viewRunning = FALSE;
-	AT_64 m_imageHeight;
-	AT_64 m_imageWidth;
+	AT_64 m_imageHeight = 2048;
+	AT_64 m_imageWidth = 2048;
 	CircularBuffer<AT_U8> *m_liveBuffer = nullptr;
 
 	// pre-defined presets for element positions
