@@ -168,7 +168,7 @@ void Andor::acquire() {
 
 		liveBuffer->m_freeBuffers->acquire();
 
-		AT_ConvertBuffer(Buffer, liveBuffer->getWriteBuffer(), m_settings.roi.width, m_settings.roi.height, m_imageStride, L"Mono16", L"Mono16");
+		AT_ConvertBuffer(Buffer, liveBuffer->getWriteBuffer(), m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding, L"Mono16");
 
 		liveBuffer->m_usedBuffers->release();
 
