@@ -199,7 +199,7 @@ QTabBar::tab:!selected {
                <property name="title">
                 <string>Binning &amp;&amp; ROI</string>
                </property>
-               <widget class="QLabel" name="binningValueLabel">
+               <widget class="QLabel" name="binningLabel">
                 <property name="geometry">
                  <rect>
                   <x>10</x>
@@ -212,7 +212,7 @@ QTabBar::tab:!selected {
                  <string>Pixel binning</string>
                 </property>
                </widget>
-               <widget class="QComboBox" name="binningValue">
+               <widget class="QComboBox" name="binning">
                 <property name="geometry">
                  <rect>
                   <x>160</x>
@@ -260,7 +260,7 @@ QTabBar::tab:!selected {
                  <string>Left</string>
                 </property>
                </widget>
-               <widget class="QLabel" name="ROIBottomLabel">
+               <widget class="QLabel" name="ROITopLabel">
                 <property name="geometry">
                  <rect>
                   <x>10</x>
@@ -270,7 +270,7 @@ QTabBar::tab:!selected {
                  </rect>
                 </property>
                 <property name="text">
-                 <string>Bottom</string>
+                 <string>Top</string>
                 </property>
                </widget>
                <widget class="QLabel" name="ROIWidthLabel">
@@ -318,7 +318,7 @@ QTabBar::tab:!selected {
                  <number>1</number>
                 </property>
                </widget>
-               <widget class="QSpinBox" name="ROIBottom">
+               <widget class="QSpinBox" name="ROITop">
                 <property name="geometry">
                  <rect>
                   <x>85</x>
@@ -353,7 +353,7 @@ QTabBar::tab:!selected {
                  <number>2048</number>
                 </property>
                 <property name="value">
-                 <number>2048</number>
+                 <number>1</number>
                 </property>
                </widget>
                <widget class="QSpinBox" name="ROIHeight">
@@ -372,7 +372,7 @@ QTabBar::tab:!selected {
                  <number>2048</number>
                 </property>
                 <property name="value">
-                 <number>2048</number>
+                 <number>1</number>
                 </property>
                </widget>
               </widget>
@@ -388,7 +388,7 @@ QTabBar::tab:!selected {
                <property name="title">
                 <string>Readout</string>
                </property>
-               <widget class="QLabel" name="sensitivityLabel">
+               <widget class="QLabel" name="preAmpGainLabel">
                 <property name="geometry">
                  <rect>
                   <x>10</x>
@@ -398,10 +398,10 @@ QTabBar::tab:!selected {
                  </rect>
                 </property>
                 <property name="text">
-                 <string>Sensitivity</string>
+                 <string>PreAmpGain</string>
                 </property>
                </widget>
-               <widget class="QLabel" name="encodingLabel">
+               <widget class="QLabel" name="pixelEncodingLabel">
                 <property name="geometry">
                  <rect>
                   <x>10</x>
@@ -414,7 +414,7 @@ QTabBar::tab:!selected {
                  <string>Pixel encoding</string>
                 </property>
                </widget>
-               <widget class="QLabel" name="readoutRateLabel">
+               <widget class="QLabel" name="pixelReadoutRateLabel">
                 <property name="geometry">
                  <rect>
                   <x>10</x>
@@ -440,7 +440,7 @@ QTabBar::tab:!selected {
                  <string>Cycle mode</string>
                 </property>
                </widget>
-               <widget class="QComboBox" name="readoutRate">
+               <widget class="QComboBox" name="pixelReadoutRate">
                 <property name="geometry">
                  <rect>
                   <x>160</x>
@@ -451,16 +451,16 @@ QTabBar::tab:!selected {
                 </property>
                 <item>
                  <property name="text">
-                  <string>200 MHz - low noise</string>
+                  <string>100 MHz</string>
                  </property>
                 </item>
                 <item>
                  <property name="text">
-                  <string>560 MHz - fastest readout</string>
+                  <string>280 MHz</string>
                  </property>
                 </item>
                </widget>
-               <widget class="QComboBox" name="sensitivity">
+               <widget class="QComboBox" name="preAmpGain">
                 <property name="geometry">
                  <rect>
                   <x>160</x>
@@ -470,25 +470,25 @@ QTabBar::tab:!selected {
                  </rect>
                 </property>
                 <property name="currentIndex">
-                 <number>2</number>
+                 <number>0</number>
                 </property>
                 <item>
                  <property name="text">
-                  <string>12 bit (low noise)</string>
+                  <string>12-bit (low noise)</string>
                  </property>
                 </item>
                 <item>
                  <property name="text">
-                  <string>12 bit (high well capacity)</string>
+                  <string>12-bit (high well capacity)</string>
                  </property>
                 </item>
                 <item>
                  <property name="text">
-                  <string>16 bit (low noise, high well)</string>
+                  <string>16-bit (low noise &amp; high well capacity)</string>
                  </property>
                 </item>
                </widget>
-               <widget class="QComboBox" name="encoding">
+               <widget class="QComboBox" name="pixelEncoding">
                 <property name="geometry">
                  <rect>
                   <x>160</x>
@@ -498,7 +498,7 @@ QTabBar::tab:!selected {
                  </rect>
                 </property>
                 <property name="currentIndex">
-                 <number>2</number>
+                 <number>0</number>
                 </property>
                 <item>
                  <property name="text">
@@ -531,7 +531,7 @@ QTabBar::tab:!selected {
                  </rect>
                 </property>
                 <property name="currentIndex">
-                 <number>1</number>
+                 <number>0</number>
                 </property>
                 <item>
                  <property name="text">
@@ -545,7 +545,7 @@ QTabBar::tab:!selected {
                 </item>
                </widget>
               </widget>
-              <widget class="QComboBox" name="tiggerMode">
+              <widget class="QComboBox" name="triggerMode">
                <property name="geometry">
                 <rect>
                  <x>170</x>
@@ -619,7 +619,7 @@ QTabBar::tab:!selected {
                 <string>Number of images</string>
                </property>
               </widget>
-              <widget class="QSpinBox" name="nrImages">
+              <widget class="QSpinBox" name="frameCount">
                <property name="geometry">
                 <rect>
                  <x>170</x>
@@ -632,7 +632,7 @@ QTabBar::tab:!selected {
                 <number>1</number>
                </property>
                <property name="value">
-                <number>2</number>
+                <number>1</number>
                </property>
               </widget>
               <widget class="QDoubleSpinBox" name="exposureTime">
@@ -651,7 +651,7 @@ QTabBar::tab:!selected {
                 <double>0.100000000000000</double>
                </property>
                <property name="value">
-                <double>0.500000000000000</double>
+                <double>0.000000000000000</double>
                </property>
               </widget>
              </widget>
@@ -698,8 +698,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>285</width>
-                <height>340</height>
+                <width>446</width>
+                <height>454</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -752,8 +752,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>285</width>
-                <height>440</height>
+                <width>446</width>
+                <height>454</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -1870,16 +1870,16 @@ border: none;</string>
  <tabstops>
   <tabstop>cTScrollArea</tabstop>
   <tabstop>exposureTime</tabstop>
-  <tabstop>nrImages</tabstop>
-  <tabstop>tiggerMode</tabstop>
-  <tabstop>binningValue</tabstop>
+  <tabstop>frameCount</tabstop>
+  <tabstop>triggerMode</tabstop>
+  <tabstop>binning</tabstop>
   <tabstop>ROILeft</tabstop>
   <tabstop>ROIWidth</tabstop>
-  <tabstop>ROIBottom</tabstop>
+  <tabstop>ROITop</tabstop>
   <tabstop>ROIHeight</tabstop>
-  <tabstop>readoutRate</tabstop>
-  <tabstop>sensitivity</tabstop>
-  <tabstop>encoding</tabstop>
+  <tabstop>pixelReadoutRate</tabstop>
+  <tabstop>preAmpGain</tabstop>
+  <tabstop>pixelEncoding</tabstop>
   <tabstop>cycleMode</tabstop>
   <tabstop>sTScrollArea</tabstop>
  </tabstops>

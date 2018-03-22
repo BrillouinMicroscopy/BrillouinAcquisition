@@ -14,35 +14,12 @@
 #include <string>
 
 typedef struct {
-	AT_64 left   = 1;
-	AT_64 width  = 2048;
-	AT_64 bottom = 1;
-	AT_64 height = 2048;
-	AT_WC *binning = L"1x1";
-} CAMERA_ROI;
+
+} STAGE_SETTINGS;
 
 typedef struct {
-	AT_WC *rate			= L"100 MHz";
-	AT_WC *sensitivity	= L"16-bit (low noise & high well capacity)";
-	AT_WC *encoding		= L"Mono16";
-	AT_WC *mode			= L"Fixed";
-} CAMERA_READOUT;
-
-typedef struct {
-	double exp = 0.5;					// [s]	exposure time
-	int nrImages = 2;					// [1]	number of images to acquire at one point
-	AT_WC *triggerMode = L"Software";	//		trigger mode
-	CAMERA_ROI roi;						//		region of interest
-	CAMERA_READOUT readout;				//		readout settings
-} SETTINGS_CAMERA;
-
-typedef struct {
-
-} SETTINGS_STAGE;
-
-typedef struct {
-	SETTINGS_CAMERA camera;
-	SETTINGS_STAGE stage;
+	CAMERA_SETTINGS camera;
+	STAGE_SETTINGS stage;
 } SETTINGS_DEVICES;
 
 enum CustomGradientPreset {
@@ -79,6 +56,8 @@ private slots:
 	void setElement(int element, int position);
 	void setPreset(int preset);
 	void acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64);
+	void cameraSettingsChanged(CAMERA_SETTINGS);
+	void cameraOptionsChanged(CAMERA_OPTIONS);
 
 signals:
 	void settingsCameraChanged(SETTINGS_DEVICES);
@@ -91,6 +70,7 @@ private:
 	Ui::BrillouinAcquisitionClass *ui;
 	void writeExampleH5bmFile();
 	void checkElementButtons();
+	void addListToComboBox(QComboBox*, std::vector<AT_WC*>, bool clear = TRUE);
 	Thread m_cameraThread;
 	Thread m_microscopeThread;
 	Thread m_storageThread;

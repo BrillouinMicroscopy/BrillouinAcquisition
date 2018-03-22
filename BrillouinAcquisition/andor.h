@@ -4,6 +4,47 @@
 #include "atcore.h"
 #include "atutility.h"
 #include "circularBuffer.h"
+	
+// possible parameters
+struct CAMERA_OPTIONS {
+	const std::vector<AT_WC*> pixelReadoutRates = { L"100 MHz", L"280 MHz" };
+	const std::vector<AT_WC*> pixelEncodings = { L"Mono12", L"Mono12Packed", L"Mono16", L"Mono32" };
+	const std::vector<AT_WC*> cycleModes = { L"Fixed", L"Continuous" };
+	const std::vector<AT_WC*> triggerModes = { L"Internal", L"Software", L"External", L"External Start", L"External Exposure" };
+	const std::vector<AT_WC*> preAmpGains = { L"12-bit (low noise)", L"12-bit (high well capacity)", L"16-bit (low noise & high well capacity)" };
+	const std::vector<AT_WC*> imageBinnings = { L"1x1", L"2x2", L"3x3", L"4x4", L"8x8" };
+	std::vector<double> exposureTimeLimits = { 0.01, 1 };
+	std::vector<AT_64> frameCountLimits = { 1, 100 };
+	std::vector<AT_64> ROILeftLimits = { 1, 2 };
+	std::vector<AT_64> ROIWidthLimits = { 1, 2 };
+	std::vector<AT_64> ROITopLimits = { 1, 2 };
+	std::vector<AT_64> ROIHeightLimits = { 1, 2 };
+};
+
+struct CAMERA_ROI {
+	AT_64 left = 1;
+	AT_64 width = 2048;
+	AT_64 top = 1;
+	AT_64 height = 2048;
+	AT_WC *binning = L"1x1";
+};
+
+struct CAMERA_READOUT {
+	AT_WC *pixelReadoutRate = L"100 MHz";
+	AT_WC *pixelEncoding = L"Mono16";
+	AT_WC *cycleMode = L"Continuous";
+	AT_WC *triggerMode = L"Software";
+	AT_WC *preAmpGain = L"16-bit (low noise & high well capacity)";
+};
+
+struct CAMERA_SETTINGS {
+	double exposureTime = 0.5;			// [s]	exposure time
+	AT_64 frameCount = 2;				// [1]	number of images to acquire in one sequence
+	AT_WC *triggerMode = L"Software";	//		trigger mode
+	AT_BOOL spuriousNoiseFilter = TRUE;	//		turn on spurious noise filter
+	CAMERA_ROI roi;						//		region of interest
+	CAMERA_READOUT readout;				//		readout settings
+};
 
 class Andor : public QObject {
 	Q_OBJECT
@@ -16,32 +57,15 @@ private:
 	int m_temperatureStatusIndex = 0;
 	wchar_t m_temperatureStatus[256];
 
-	// possible parameters
-	AT_WC *m_pixelReadoutRates[2] = { L"100 MHz", L"280 MHz" };
-	AT_WC *m_pixelEncodings[4] = { L"Mono12", L"Mono12Packed", L"Mono16", L"Mono32" };
-	AT_WC *m_cycleModes[2] = { L"Fixed", L"Continuous" };
-	AT_WC *m_triggerModes[5] = { L"Internal", L"Software", L"External", L"External Start", L"External Exposure" };
-	AT_WC *m_imageBinnings[5] = { L"1x1", L"2x2", L"3x3", L"4x4", L"8x8" };
-	AT_WC *m_preAmpGains[3] = { L"12-bit (low noise)", L"12-bit (high well capacity)", L"16-bit (low noise & high well capacity)" };
-
-	AT_64 m_imageHeight = 2048;
-	AT_64 m_imageWidth = 2048;
-	AT_64 m_imageLeft = 0;
-	AT_64 m_imageTop = 0;
 	AT_64 m_imageStride;
-	AT_WC *m_imageBinning = m_imageBinnings[0];
-	double m_exposureTime = 0.5;
 
-	AT_BOOL m_spuriousNoiseFilter = TRUE;
-
-	AT_WC *m_pixelReadoutRate = m_pixelReadoutRates[0];
-	AT_WC *m_pixelEncoding = m_pixelEncodings[2];
-	AT_WC *m_cycleMode = m_cycleModes[1];
-	AT_WC *m_triggerMode = m_triggerModes[1];
-	AT_WC *m_preAmpGain = m_preAmpGains[2];
+	CAMERA_OPTIONS m_options;
+	CAMERA_SETTINGS m_settings;
 
 	int m_bufferSize;
 
+	void readCameraSettings();
+	void readCameraOptions();
 	void prepareAcquisition();
 	void cleanupAcquisition();
 
@@ -73,6 +97,8 @@ public slots:
 signals:
 	void imageAcquired(unsigned short*, AT_64, AT_64);
 	void acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64);
+	void settingsChanged(CAMERA_SETTINGS);
+	void optionsChanged(CAMERA_OPTIONS);
 };
 
 #endif // ANDOR_H
