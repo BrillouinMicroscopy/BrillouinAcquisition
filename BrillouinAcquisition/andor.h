@@ -24,7 +24,7 @@ struct CAMERA_ROI {
 	AT_64 width = 2048;
 	AT_64 top = 1;
 	AT_64 height = 2048;
-	AT_WC binning[256] = L"2x2";
+	AT_WC binning[256] = L"1x1";
 };
 
 struct CAMERA_READOUT {
