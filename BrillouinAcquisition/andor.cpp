@@ -42,14 +42,8 @@ void Andor::readCameraOptions() {
 	AT_GetIntMin(m_cameraHndl, L"AOI Height", &m_options.ROIHeightLimits[0]);
 	AT_GetIntMax(m_cameraHndl, L"AOI Height", &m_options.ROIHeightLimits[1]);
 
-	AT_GetIntMin(m_cameraHndl, L"AOI Top", &m_options.ROITopLimits[0]);
-	AT_GetIntMax(m_cameraHndl, L"AOI Top", &m_options.ROITopLimits[1]);
-
 	AT_GetIntMin(m_cameraHndl, L"AOI Width", &m_options.ROIWidthLimits[0]);
 	AT_GetIntMax(m_cameraHndl, L"AOI Width", &m_options.ROIWidthLimits[1]);
-
-	AT_GetIntMin(m_cameraHndl, L"AOI Left", &m_options.ROILeftLimits[0]);
-	AT_GetIntMax(m_cameraHndl, L"AOI Left", &m_options.ROILeftLimits[1]);
 
 	emit(optionsChanged(m_options));
 }

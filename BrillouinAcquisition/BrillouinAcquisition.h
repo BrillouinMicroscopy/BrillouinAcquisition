@@ -50,7 +50,7 @@ private slots:
 	void settingsCameraUpdate(SETTINGS_DEVICES);
 	void on_ROILeft_valueChanged(int);
 	void on_ROIWidth_valueChanged(int);
-	void on_ROIBottom_valueChanged(int);
+	void on_ROITop_valueChanged(int);
 	void on_ROIHeight_valueChanged(int);
 	void setColormap(QCPColorGradient *, CustomGradientPreset);
 	void setElement(int element, int position);

@@ -226,14 +226,14 @@ void BrillouinAcquisition::cameraOptionsChanged(CAMERA_OPTIONS options) {
 	ui->frameCount->setMinimum(options.frameCountLimits[0]);
 	ui->frameCount->setMaximum(options.frameCountLimits[1]);
 
-	ui->ROIHeight->setMaximum(options.ROIHeightLimits[0]);
+	ui->ROIHeight->setMinimum(options.ROIHeightLimits[0]);
 	ui->ROIHeight->setMaximum(options.ROIHeightLimits[1]);
-	ui->ROITop->setMaximum(options.ROITopLimits[0]);
-	ui->ROITop->setMaximum(options.ROITopLimits[1]);
-	ui->ROIWidth->setMaximum(options.ROIWidthLimits[0]);
+	ui->ROITop->setMinimum(options.ROIHeightLimits[0]);
+	ui->ROITop->setMaximum(options.ROIHeightLimits[1]);
+	ui->ROIWidth->setMinimum(options.ROIWidthLimits[0]);
 	ui->ROIWidth->setMaximum(options.ROIWidthLimits[1]);
-	ui->ROILeft->setMaximum(options.ROILeftLimits[0]);
-	ui->ROILeft->setMaximum(options.ROILeftLimits[1]);
+	ui->ROILeft->setMinimum(options.ROIWidthLimits[0]);
+	ui->ROILeft->setMaximum(options.ROIWidthLimits[1]);
 }
 
 void BrillouinAcquisition::addListToComboBox(QComboBox* box, std::vector<AT_WC*> list, bool clear) {
@@ -457,9 +457,9 @@ void BrillouinAcquisition::on_ROIWidth_valueChanged(int width) {
 	ui->customplot->replot();
 }
 
-void BrillouinAcquisition::on_ROIBottom_valueChanged(int bottom) {
-	m_deviceSettings.camera.roi.top = bottom;
-	ui->customplot->yAxis->setRange(QCPRange(bottom, bottom + m_deviceSettings.camera.roi.height));
+void BrillouinAcquisition::on_ROITop_valueChanged(int top) {
+	m_deviceSettings.camera.roi.top = top;
+	ui->customplot->yAxis->setRange(QCPRange(top, top + m_deviceSettings.camera.roi.height));
 	ui->customplot->replot();
 }
 
