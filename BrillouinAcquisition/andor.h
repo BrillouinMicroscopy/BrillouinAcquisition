@@ -24,24 +24,23 @@ struct CAMERA_ROI {
 	AT_64 width = 2048;
 	AT_64 top = 1;
 	AT_64 height = 2048;
-	AT_WC *binning = L"1x1";
+	AT_WC binning[256] = L"2x2";
 };
 
 struct CAMERA_READOUT {
-	AT_WC *pixelReadoutRate = L"100 MHz";
-	AT_WC *pixelEncoding = L"Mono16";
-	AT_WC *cycleMode = L"Continuous";
-	AT_WC *triggerMode = L"Software";
-	AT_WC *preAmpGain = L"16-bit (low noise & high well capacity)";
+	AT_WC pixelReadoutRate[256] = L"100 MHz";
+	AT_WC pixelEncoding[256] = L"Mono16";
+	AT_WC cycleMode[256] = L"Continuous";
+	AT_WC triggerMode[256] = L"Software";
+	AT_WC preAmpGain[256] = L"16-bit (low noise & high well capacity)";
 };
 
 struct CAMERA_SETTINGS {
-	double exposureTime = 0.5;			// [s]	exposure time
-	AT_64 frameCount = 2;				// [1]	number of images to acquire in one sequence
-	AT_WC *triggerMode = L"Software";	//		trigger mode
-	AT_BOOL spuriousNoiseFilter = TRUE;	//		turn on spurious noise filter
-	CAMERA_ROI roi;						//		region of interest
-	CAMERA_READOUT readout;				//		readout settings
+	double exposureTime = 0.5;				// [s]	exposure time
+	AT_64 frameCount = 2;					// [1]	number of images to acquire in one sequence
+	AT_BOOL spuriousNoiseFilter = TRUE;		//		turn on spurious noise filter
+	CAMERA_ROI roi;							//		region of interest
+	CAMERA_READOUT readout;					//		readout settings
 };
 
 class Andor : public QObject {
@@ -53,7 +52,7 @@ private:
 	bool m_isConnected = FALSE;
 
 	int m_temperatureStatusIndex = 0;
-	wchar_t m_temperatureStatus[256];
+	AT_WC m_temperatureStatus[256];
 
 	AT_64 m_imageStride;
 
@@ -62,10 +61,12 @@ private:
 
 	int m_bufferSize;
 
-	void readCameraSettings();
-	void readCameraOptions();
+	void readOptions();
+	void setDefaultSettings();
+	void readSettings();
 	void prepareAcquisition();
 	void cleanupAcquisition();
+	void getEnumString(AT_WC* feature, AT_WC* string);
 
 public:
 	Andor(QObject *parent = 0);

@@ -253,7 +253,7 @@ void BrillouinAcquisition::cameraSettingsChanged(CAMERA_SETTINGS settings) {
 	ui->ROITop->setValue(settings.roi.top);
 	ui->ROIHeight->setValue(settings.roi.height);
 
-	ui->triggerMode->setCurrentText(QString::fromWCharArray(settings.triggerMode));
+	ui->triggerMode->setCurrentText(QString::fromWCharArray(settings.readout.triggerMode));
 	ui->binning->setCurrentText(QString::fromWCharArray(settings.roi.binning));
 
 	ui->pixelReadoutRate->setCurrentText(QString::fromWCharArray(settings.readout.pixelReadoutRate));
