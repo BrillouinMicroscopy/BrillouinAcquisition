@@ -4,8 +4,8 @@
 #include "logger.h"
 
 
-Acquisition::Acquisition(QObject *parent)
-	: QObject(parent) {
+Acquisition::Acquisition(QObject *parent, Andor *andor, ScanControl *scanControl)
+	: QObject(parent), m_andor(andor), m_scanControl(scanControl) {
 }
 
 Acquisition::~Acquisition() {

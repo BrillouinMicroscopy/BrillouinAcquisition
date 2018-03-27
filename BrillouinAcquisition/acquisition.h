@@ -4,6 +4,7 @@
 #include "storageWrapper.h"
 #include "thread.h"
 #include "andor.h"
+#include "scancontrol.h"
 
 
 struct ACQUISITION_SETTINGS {
@@ -39,7 +40,7 @@ class Acquisition : public QObject {
 	Q_OBJECT
 
 public:
-	Acquisition(QObject *parent = 0);
+	Acquisition(QObject *parent, Andor *andor, ScanControl *scanControl);
 	~Acquisition();
 
 public slots:
@@ -49,6 +50,8 @@ private:
 	ACQUISITION_SETTINGS m_acqSettings;
 	Thread m_storageThread;
 	StorageWrapper *m_fileHndl;			// file handle
+	Andor *m_andor;
+	ScanControl *m_scanControl;
 	bool m_running = FALSE;				// is acquisition currently running
 
 signals:
