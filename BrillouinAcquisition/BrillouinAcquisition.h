@@ -3,6 +3,7 @@
 
 #include "thread.h"
 #include "andor.h"
+#include "acquisition.h"
 #include "qcustomplot.h"
 #include "external/h5bm/h5bm.h"
 #include "scancontrol.h"
@@ -39,6 +40,7 @@ private slots:
 	void on_actionConnect_Camera_triggered();
 	void on_actionEnable_Cooling_triggered();
 	void on_actionConnect_Stage_triggered();
+	void on_acquisitionStart_clicked();
 	void microscopeConnectionChanged(bool);
 	void microscopeElementPositionsChanged(std::vector<int>);
 	void microscopeElementPositionsChanged(int element, int position);
@@ -68,17 +70,16 @@ public:
 
 private:
 	Ui::BrillouinAcquisitionClass *ui;
-	void writeExampleH5bmFile();
 	void checkElementButtons();
 	void addListToComboBox(QComboBox*, std::vector<AT_WC*>, bool clear = TRUE);
 	Thread m_cameraThread;
 	Thread m_microscopeThread;
-	Thread m_storageThread;
+	Thread m_acquisitionThread;
 	Andor *m_andor = new Andor();
 	ScanControl *m_scanControl = new ScanControl();
+	Acquisition *m_acquisition = new Acquisition();
 	QCPColorMap *m_colorMap;
 	SETTINGS_DEVICES m_deviceSettings;
-	H5BM *m_h5bm;
 	bool m_viewRunning = FALSE;
 	AT_64 m_imageHeight = 2048;
 	AT_64 m_imageWidth = 2048;

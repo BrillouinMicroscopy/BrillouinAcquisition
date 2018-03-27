@@ -85,15 +85,16 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 
 	ui->actionEnable_Cooling->setEnabled(FALSE);
 
-	// start camera worker thread
+	// start camera thread
 	m_cameraThread.startWorker(m_andor);
+	// start microscope thread
 	m_microscopeThread.startWorker(m_scanControl);
 	m_scanControl->m_comObject->moveToThread(&m_microscopeThread);
+	// start acquisition thread
+	m_acquisitionThread.startWorker(m_acquisition);
 
 	// set up the camera image plot
 	BrillouinAcquisition::initializePlot();
-
-	writeExampleH5bmFile();
 
 	// Set up GUI
 	std::vector<std::string> groupLabels = {"Reflector", "Objective", "Tubelens", "Baseport", "Sideport", "Mirror"};
@@ -157,8 +158,8 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 	m_cameraThread.wait();
 	m_microscopeThread.exit();
 	m_microscopeThread.wait();
-	m_storageThread.exit();
-	m_storageThread.wait();
+	m_acquisitionThread.exit();
+	m_acquisitionThread.wait();
 	delete m_andor;
 	qInfo(logInfo()) << "BrillouinAcquisition closed.";
 	delete ui;
@@ -260,104 +261,6 @@ void BrillouinAcquisition::cameraSettingsChanged(CAMERA_SETTINGS settings) {
 	ui->cycleMode->setCurrentText(QString::fromWCharArray(settings.readout.cycleMode));
 	ui->preAmpGain->setCurrentText(QString::fromWCharArray(settings.readout.preAmpGain));
 	ui->pixelEncoding->setCurrentText(QString::fromWCharArray(settings.readout.pixelEncoding));
-}
-
-void BrillouinAcquisition::writeExampleH5bmFile() {
-	m_h5bm = new H5BM(0, "Brillouin-0.h5", H5F_ACC_RDWR);
-
-	std::string now = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
-		.toString(Qt::ISODate).toStdString();
-
-	m_h5bm->setDate(now);
-	std::string date = m_h5bm->getDate();
-
-	std::string version = m_h5bm->getVersion();
-
-	std::string commentIn = "Brillouin data";
-	m_h5bm->setComment(commentIn);
-	std::string commentOut = m_h5bm->getComment();
-
-	int resolutionX, resolutionY, resolutionZ;
-
-	resolutionX = 11;
-	resolutionY = 13;
-	resolutionZ = 2;
-
-	m_h5bm->setResolution("x", resolutionX);
-	m_h5bm->setResolution("y", resolutionY);
-	m_h5bm->setResolution("z", resolutionZ);
-
-	int resolutionXout = m_h5bm->getResolution("x");
-
-	// Create position vector
-	double minX, maxX, minY, maxY, minZ, maxZ;
-	minX = -10;
-	maxX = 10;
-	minY = -20;
-	maxY = 20;
-	minZ = 0;
-	maxZ = 10;
-	int nrPositions = resolutionX * resolutionY * resolutionZ;
-	std::vector<double> positionsX(nrPositions);
-	std::vector<double> positionsY(nrPositions);
-	std::vector<double> positionsZ(nrPositions);
-	std::vector<double> posX = simplemath::linspace(minX, maxX, resolutionX);
-	std::vector<double> posY = simplemath::linspace(minY, maxY, resolutionY);
-	std::vector<double> posZ = simplemath::linspace(minZ, maxZ, resolutionZ);
-	int ll = 0;
-	for (int ii = 0; ii < resolutionZ; ii++) {
-		for (int jj = 0; jj < resolutionX; jj++) {
-			for (int kk = 0; kk < resolutionY; kk++) {
-				positionsX[ll] = posX[jj];
-				positionsY[ll] = posY[kk];
-				positionsZ[ll] = posZ[ii];
-				ll++;
-			}
-		}
-	}
-
-	int rank = 3;
-	// For compatibility with MATLAB respect Fortran-style ordering: z, x, y
-	hsize_t *dims = new hsize_t[rank];
-	dims[0] = resolutionZ;
-	dims[1] = resolutionX;
-	dims[2] = resolutionY;
-
-	m_h5bm->setPositions("x", positionsX, rank, dims);
-	m_h5bm->setPositions("y", positionsY, rank, dims);
-	m_h5bm->setPositions("z", positionsZ, rank, dims);
-	delete[] dims;
-
-	positionsX = m_h5bm->getPositions("x");
-	positionsY = m_h5bm->getPositions("y");
-	positionsZ = m_h5bm->getPositions("z");
-
-	// set payload data
-	std::vector<double> data(1600);
-	int rank_data = 3;
-	hsize_t nrImages = 2;
-	hsize_t imageWidth = 100;
-	hsize_t imageHeight = 80;
-	hsize_t dims_data[3] = {nrImages, imageHeight, imageWidth};
-	for (int ii = 0; ii < resolutionZ; ii++) {
-		for (int jj = 0; jj < resolutionX; jj++) {
-			for (int kk = 0; kk < resolutionY; kk++) {
-				m_h5bm->setPayloadData(jj, kk, ii, data, rank, dims_data);
-			}
-		}
-	}
-
-	data = m_h5bm->getPayloadData(1, 1, 1);
-	date = m_h5bm->getPayloadDate(1, 1, 1);
-
-	m_h5bm->setBackgroundData(data, rank, dims_data, "2016-05-06T11:11:00+02:00");
-	data = m_h5bm->getBackgroundData();
-	date = m_h5bm->getBackgroundDate();
-
-	m_h5bm->setCalibrationData(1, data, rank, dims_data, "methanol", 3.799);
-	m_h5bm->setCalibrationData(2, data, rank, dims_data, "water", 5.088);
-
-	delete m_h5bm;
 }
 
 void BrillouinAcquisition::initializePlot() {
@@ -628,6 +531,10 @@ void BrillouinAcquisition::on_camera_playPause_clicked() {
 
 void BrillouinAcquisition::on_camera_singleShot_clicked() {
 	QMetaObject::invokeMethod(m_andor, "acquireSingle", Qt::QueuedConnection);
+}
+
+void BrillouinAcquisition::on_acquisitionStart_clicked() {
+	QMetaObject::invokeMethod(m_acquisition, "startAcquisition", Qt::QueuedConnection);
 }
 
 void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradientPreset preset) {
