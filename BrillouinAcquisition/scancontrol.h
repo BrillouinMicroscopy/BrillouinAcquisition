@@ -35,6 +35,13 @@ public:
 	int getSideport();
 	int getMirror();
 
+	std::vector<std::vector<int>> m_presets = {
+		{ 1, 1, 3, 1, 2, 1 },	// Brillouin
+		{ 1, 1, 3, 1, 2, 2 },	// Brightfield
+		{ 1, 1, 3, 2, 3, 2 },	// Eyepiece
+		{ 1, 1, 3, 1, 3, 2 }	// Calibration
+	};
+
 public slots:
 	void getElementPositions();
 	void setReflector(int position);
@@ -43,6 +50,7 @@ public slots:
 	void setBaseport(int position);
 	void setSideport(int position);
 	void setMirror(int position);
+	void setPreset(int preset);
 
 signals:
 	void elementPositionsChanged(std::vector<int>);

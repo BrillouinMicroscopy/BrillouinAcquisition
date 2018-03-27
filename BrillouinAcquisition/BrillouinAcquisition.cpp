@@ -189,12 +189,7 @@ void BrillouinAcquisition::setElement(int element, int position) {
 }
 
 void BrillouinAcquisition::setPreset(int preset) {
-	QMetaObject::invokeMethod(m_scanControl->m_stand, "setReflector", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][0]));
-	QMetaObject::invokeMethod(m_scanControl->m_stand, "setObjective", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][1]));
-	QMetaObject::invokeMethod(m_scanControl->m_stand, "setTubelens", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][2]));
-	QMetaObject::invokeMethod(m_scanControl->m_stand, "setBaseport", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][3]));
-	QMetaObject::invokeMethod(m_scanControl->m_stand, "setSideport", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][4]));
-	QMetaObject::invokeMethod(m_scanControl->m_stand, "setMirror", Qt::QueuedConnection, Q_ARG(int, microscope_presets[preset][5]));
+	QMetaObject::invokeMethod(m_scanControl->m_stand, "setPreset", Qt::QueuedConnection, Q_ARG(int, preset));
 }
 
 void BrillouinAcquisition::acquisitionRunning(bool isRunning, CircularBuffer<AT_U8>* liveBuffer, AT_64 imageWidth, AT_64 imageHeight) {
@@ -485,8 +480,8 @@ void BrillouinAcquisition::checkElementButtons() {
 			elementButtons[ii][jj]->update();
 		}
 	}
-	for (int ii = 0; ii < microscope_presets.size(); ii++) {
-		if (microscope_presets[ii] == microscopeElementPositions) {
+	for (int ii = 0; ii < m_scanControl->m_stand->m_presets.size(); ii++) {
+		if (m_scanControl->m_stand->m_presets[ii] == microscopeElementPositions) {
 			presetButtons[ii]->setProperty("class", "active");
 		} else {
 			presetButtons[ii]->setProperty("class", "");

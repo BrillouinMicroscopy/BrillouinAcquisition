@@ -330,3 +330,12 @@ void Stand::setMirror(int position) {
 	}
 	emit(elementPositionsChanged(5, position));
 }
+
+void Stand::setPreset(int preset) {
+	setReflector(m_presets[preset][0]);
+	setObjective(m_presets[preset][1]);
+	setTubelens(m_presets[preset][2]);
+	setBaseport(m_presets[preset][3]);
+	setSideport(m_presets[preset][4]);
+	setMirror(m_presets[preset][5]);
+}

@@ -88,12 +88,6 @@ private:
 	// pre-defined presets for element positions
 	// "Brillouin", "Brightfield", "Eyepiece", "Calibration"
 	std::vector<std::string> presetLabels = { "Brillouin", "Brightfield", "Eyepiece", "Calibration" };
-	std::vector<std::vector<int>> microscope_presets = {
-		{ 1, 1, 3, 1, 2, 1 },
-		{ 1, 1, 3, 1, 2, 2 },
-		{ 1, 1, 3, 2, 3, 2 },
-		{ 1, 1, 3, 1, 3, 2 }
-	};
 	std::vector<int> microscopeElementPositions = {0, 0, 0, 0, 0, 0};
 
 	std::vector<std::vector<QPushButton*>> elementButtons;
