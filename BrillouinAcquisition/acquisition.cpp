@@ -13,6 +13,12 @@ Acquisition::~Acquisition() {
 
 void Acquisition::startAcquisition(std::string filename) {
 
+	// set optical elements for brightfield/Brillouin imaging
+	m_scanControl->m_stand->setPreset(1);
+
+	// get current stage position
+	std::vector<double> startPosition = m_scanControl->getPosition();
+
 	m_fileHndl = new StorageWrapper(0, filename, H5F_ACC_RDWR);
 	// move h5bm file to separate thread
 	m_storageThread.startWorker(m_fileHndl);
@@ -43,9 +49,10 @@ void Acquisition::startAcquisition(std::string filename) {
 	for (int ii = 0; ii < m_acqSettings.zSteps; ii++) {
 		for (int jj = 0; jj < m_acqSettings.xSteps; jj++) {
 			for (int kk = 0; kk < m_acqSettings.ySteps; kk++) {
-				positionsX[ll] = posX[jj];
-				positionsY[ll] = posY[kk];
-				positionsZ[ll] = posZ[ii];
+				// calculate stage positions
+				positionsX[ll] = posX[jj] + startPosition[0];
+				positionsY[ll] = posY[kk] + startPosition[1];
+				positionsZ[ll] = posZ[ii] + startPosition[2];
 				ll++;
 			}
 		}
@@ -68,10 +75,13 @@ void Acquisition::startAcquisition(std::string filename) {
 	std::vector<double> data(m_acqSettings.camera.roi.height * m_acqSettings.camera.roi.width);
 	int rank_data = 3;
 	hsize_t dims_data[3] = { m_acqSettings.camera.frameCount , m_acqSettings.camera.roi.height, m_acqSettings.camera.roi.width };
+	ll = 0;
 	for (int ii = 0; ii < m_acqSettings.zSteps; ii++) {
 		for (int jj = 0; jj < m_acqSettings.xSteps; jj++) {
 			for (int kk = 0; kk < m_acqSettings.ySteps; kk++) {
-				// move stage to correct position, wait for it to finish
+				// move stage to correct position, wait 50 ms for it to finish
+				m_scanControl->setPosition({ positionsX[ll], positionsY[ll], positionsZ[ll] });
+				Sleep(50);
 
 				// acquire image
 
@@ -83,6 +93,7 @@ void Acquisition::startAcquisition(std::string filename) {
 				m_fileHndl->m_payloadQueue.enqueue(img);
 				std::string info = "Image acquired " + std::to_string(ii*(m_acqSettings.xSteps*m_acqSettings.ySteps) + jj * m_acqSettings.ySteps + kk);
 				qInfo(logInfo()) << info.c_str();
+				ll++;
 			}
 		}
 	}
