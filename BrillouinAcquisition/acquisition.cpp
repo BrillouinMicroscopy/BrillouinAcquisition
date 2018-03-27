@@ -89,10 +89,11 @@ void Acquisition::startAcquisition(std::string filename) {
 				// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
 				std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 					.toString(Qt::ISODate).toStdString();
-				IMAGE *img = new IMAGE(jj, kk, ii, rank, dims, date, data);
+				IMAGE *img = new IMAGE(jj, kk, ii, rank, dims_data, date, data);
 				m_fileHndl->m_payloadQueue.enqueue(img);
-				std::string info = "Image acquired " + std::to_string(ii*(m_acqSettings.xSteps*m_acqSettings.ySteps) + jj * m_acqSettings.ySteps + kk);
-				qInfo(logInfo()) << info.c_str();
+
+				//std::string info = "Images acquired " + std::to_string(ii*(m_acqSettings.xSteps*m_acqSettings.ySteps) + jj * m_acqSettings.ySteps + kk);
+				//qInfo(logInfo()) << info.c_str();
 				ll++;
 			}
 		}

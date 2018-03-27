@@ -32,10 +32,9 @@ void StorageWrapper::s_writeQueues() {
 			return;
 		}
 		IMAGE *img = m_payloadQueue.dequeue();
-		Sleep(1000);
-		//setPayloadData(img->indX, img->indY, img->indZ, img->data, img->rank, img->dims, img->date);
-		std::string info = "Image written " + std::to_string(m_writtenImagesNr);
-		qInfo(logInfo()) << info.c_str();
+		setPayloadData(img->indX, img->indY, img->indZ, img->data, img->rank, img->dims, img->date);
+		//std::string info = "Image written " + std::to_string(m_writtenImagesNr);
+		//qInfo(logInfo()) << info.c_str();
 		m_writtenImagesNr++;
 		delete img;
 	}
@@ -46,10 +45,9 @@ void StorageWrapper::s_writeQueues() {
 			return;
 		}
 		CALIBRATION *cal = m_calibrationQueue.dequeue();
-		Sleep(1000);
-		//setCalibrationData(cal->index, cal->data, cal->rank, cal->dims, cal->sample, cal->shift, cal->date);
-		std::string info = "Calibration written " + std::to_string(m_writtenCalibrationsNr);
-		qInfo(logInfo()) << info.c_str();
+		setCalibrationData(cal->index, cal->data, cal->rank, cal->dims, cal->sample, cal->shift, cal->date);
+		//std::string info = "Calibration written " + std::to_string(m_writtenCalibrationsNr);
+		//qInfo(logInfo()) << info.c_str();
 		m_writtenCalibrationsNr++;
 		delete cal;
 	}
