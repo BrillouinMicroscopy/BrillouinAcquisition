@@ -85,10 +85,7 @@ void Acquisition::startAcquisition(std::string filename) {
 				m_scanControl->setPosition({ positionsX[ll], positionsY[ll], positionsZ[ll] });
 				Sleep(50);
 
-				//std::vector<AT_U8*> images(m_acqSettings.camera.frameCount);
-
 				int bytesPerFrame = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height * 2;
-				//AT_U8* test = new AT_U8[bytes * m_acqSettings.camera.frameCount];
 
 				std::vector<AT_U8> images(bytesPerFrame * m_acqSettings.camera.frameCount);
 
