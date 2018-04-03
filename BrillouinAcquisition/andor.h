@@ -63,6 +63,7 @@ private:
 
 	void readOptions();
 	void setDefaultSettings();
+	void setSettings();
 	void readSettings();
 	void prepareAcquisition();
 	void cleanupAcquisition();
@@ -92,6 +93,9 @@ private slots:
 
 public slots:
 	void acquireContinuously();
+	void prepareMeasurement(CAMERA_SETTINGS settings);
+	void finishMeasurement();
+	void acquireImage(AT_U8* buffer);
 
 signals:
 	void imageAcquired(unsigned short*, AT_64, AT_64);

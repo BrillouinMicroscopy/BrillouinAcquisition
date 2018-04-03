@@ -6,7 +6,7 @@
 
 struct IMAGE {
 public:
-	IMAGE(int indX, int indY, int indZ, int rank, hsize_t *dims, std::string date, std::vector<double> data) :
+	IMAGE(int indX, int indY, int indZ, int rank, hsize_t *dims, std::string date, std::vector<unsigned short> data) :
 		indX(indX), indY(indY), indZ(indZ), rank(rank), dims(dims), date(date), data(data) {};
 
 	const int indX;
@@ -15,7 +15,7 @@ public:
 	const int rank;
 	const hsize_t *dims;
 	const std::string date;
-	const std::vector<double> data;
+	const std::vector<unsigned short> data;
 };
 
 struct CALIBRATION {

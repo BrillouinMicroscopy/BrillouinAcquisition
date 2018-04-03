@@ -180,7 +180,7 @@ void Andor::acquire() {
 	}
 }
 
-void Andor::prepareAcquisition() {
+void Andor::setSettings() {
 	// Set the pixel Encoding
 	AT_SetEnumeratedString(m_cameraHndl, L"Pixel Encoding", m_settings.readout.pixelEncoding);
 
@@ -214,9 +214,12 @@ void Andor::prepareAcquisition() {
 	AT_GetInt(m_cameraHndl, L"AOIWidth", &m_settings.roi.width);
 	AT_GetInt(m_cameraHndl, L"AOILeft", &m_settings.roi.left);
 	AT_GetInt(m_cameraHndl, L"AOITop", &m_settings.roi.top);
+}
+
+void Andor::prepareAcquisition() {
+	setSettings();
 
 	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
-
 	liveBuffer = new CircularBuffer<AT_U8>(5, pixelNumber * 2);
 
 	// Start acquisition
@@ -232,3 +235,38 @@ void Andor::cleanupAcquisition() {
 	AT_Flush(m_cameraHndl);
 	emit(acquisitionRunning(FALSE, nullptr, 0, 0));
 }
+
+
+void Andor::prepareMeasurement(CAMERA_SETTINGS settings) {
+	setSettings();
+
+	// Start acquisition
+	AT_Command(m_cameraHndl, L"AcquisitionStart");
+	AT_InitialiseUtilityLibrary();
+};
+
+void Andor::finishMeasurement() {
+};
+
+void Andor::acquireImage(AT_U8* buffer) {
+	// Pass this buffer to the SDK
+	unsigned char* UserBuffer = new unsigned char[m_bufferSize];
+	AT_QueueBuffer(m_cameraHndl, UserBuffer, m_bufferSize);
+
+	// Acquire camera images
+	AT_Command(m_cameraHndl, L"SoftwareTrigger");
+
+	// Sleep in this thread until data is ready
+	unsigned char* Buffer;
+	int ret = AT_WaitBuffer(m_cameraHndl, &Buffer, &m_bufferSize, 1500 * m_settings.exposureTime);
+
+	// Process the image
+	//Unpack the 12 bit packed data
+	AT_GetInt(m_cameraHndl, L"AOIHeight", &m_settings.roi.height);
+	AT_GetInt(m_cameraHndl, L"AOIWidth", &m_settings.roi.width);
+	AT_GetInt(m_cameraHndl, L"AOIStride", &m_imageStride);
+
+	AT_ConvertBuffer(Buffer, buffer, m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding, L"Mono16");
+
+	delete[] Buffer;
+};
