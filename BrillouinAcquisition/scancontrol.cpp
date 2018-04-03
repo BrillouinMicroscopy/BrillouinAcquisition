@@ -101,14 +101,18 @@ void com::send(std::string message) {
 Element::~Element() {
 }
 
-std::string Element::receive(std::string request) {
-	std::string answer = m_comObject->receive(m_prefix + "P" + request);
+std::string Element::parse(std::string answer) {
 	std::string pattern = "([a-zA-Z\\d]*)\r";
 	pattern = "P" + m_prefix + pattern;
 	std::regex pieces_regex(pattern);
 	std::smatch pieces_match;
 	std::regex_match(answer, pieces_match, pieces_regex);
 	return pieces_match[1]; // needs error handling
+}
+
+std::string Element::receive(std::string request) {
+	std::string answer = m_comObject->receive(m_prefix + "P" + request);
+	return parse(answer);
 }
 
 void Element::send(std::string message) {

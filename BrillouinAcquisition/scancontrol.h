@@ -17,6 +17,7 @@ private:
 public:
 	Element(com *comObject, std::string prefix) : m_comObject(comObject), m_prefix(prefix) {};
 	~Element();
+	std::string parse(std::string answer);
 	std::string receive(std::string request);
 	void send(std::string message);
 	std::string dec2hex(int dec, int digits);
@@ -107,7 +108,7 @@ class ScanControl: public QObject {
 	Q_OBJECT
 
 private:
-	bool isConnected = FALSE;
+	bool isConnected = 0;
 
 public:
 	ScanControl();
