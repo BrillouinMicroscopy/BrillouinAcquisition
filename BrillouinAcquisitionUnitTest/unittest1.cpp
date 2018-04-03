@@ -12,15 +12,15 @@ namespace BrillouinAcquisitionUnitTest
 		TEST_METHOD(TestMethod1) {
 			com *comObject = new com();
 			MCU *mcu = new MCU(comObject);
-			std::string answer = mcu->parse("PND");
-			std::string expected = "D";
+			std::string answer = mcu->parse("PN000000\r");
+			std::string expected = "000000";
 			Assert::AreEqual(expected, answer);
 		}
 
 		TEST_METHOD(TestMethod2) {
 			com *comObject = new com();
 			Stand *stand = new Stand(comObject);
-			std::string answer = stand->parse("PI001");
+			std::string answer = stand->parse("PH001\r");
 			std::string expected = "001";
 			Assert::AreEqual(expected, answer);
 		}
