@@ -15,14 +15,15 @@ class Element : public QObject {
 private:
 	std::string m_prefix;		// prefix of the element for serial communication
 	com *m_comObject;
+protected:
+	std::string dec2hex(int dec, int digits);
+	int hex2dec(std::string);
 public:
 	Element(com *comObject, std::string prefix) : m_comObject(comObject), m_prefix(prefix) {};
 	~Element();
 	std::string parse(std::string answer);
 	std::string receive(std::string request);
 	void send(std::string message);
-	std::string dec2hex(int dec, int digits);
-	int hex2dec(std::string);
 };
 
 class Stand : public Element {
