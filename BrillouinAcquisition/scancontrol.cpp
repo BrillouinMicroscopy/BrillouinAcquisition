@@ -78,13 +78,33 @@ std::string com::receive(std::string request) {
 
 	waitForReadyRead();
 
-	int toRead = bytesAvailable();
+	char buf[1024];
+	std::string answer;
 
-	QByteArray dataRead = readAll();
-
-	std::string answer(dataRead.constData(), dataRead.length());
+	int bytesRead = readLineDataCR(buf, 1024);
+	if (bytesRead > -1)
+		 answer = buf;
+	else
+		answer = "";
 
 	return answer;
+}
+
+qint64 com::readLineDataCR(char *data, qint64 maxSize) {
+	qint64 readSoFar = 0;
+	char c;
+	int lastReadReturn = 0;
+
+	while (readSoFar < maxSize && (lastReadReturn = read(&c, 1)) == 1) {
+		*data++ = c;
+		++readSoFar;
+		if (c == '\r')
+			break;
+	}
+
+	if (lastReadReturn != 1 && readSoFar == 0)
+		return isSequential() ? lastReadReturn : -1;
+	return readSoFar;
 }
 
 void com::send(std::string message) {
@@ -107,7 +127,11 @@ std::string Element::parse(std::string answer) {
 	std::regex pieces_regex(pattern);
 	std::smatch pieces_match;
 	std::regex_match(answer, pieces_match, pieces_regex);
-	return pieces_match[1]; // needs error handling
+	if (pieces_match.size() == 0) {
+		return "";
+	} else {
+		return pieces_match[1];
+	}
 }
 
 std::string Element::receive(std::string request) {

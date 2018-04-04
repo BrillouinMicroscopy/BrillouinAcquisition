@@ -7,6 +7,7 @@ class com : public QSerialPort {
 public:
 	std::string receive(std::string request);
 	void send(std::string message);
+	qint64 readLineDataCR(char *data, qint64 maxSize);
 };
 
 class Element : public QObject {
