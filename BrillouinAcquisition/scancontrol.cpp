@@ -107,6 +107,9 @@ std::string com::receive(std::string request) {
 
 	char buf[1024];
 	std::string answer;
+	// Sleep until the microscope has answered
+	// Is there a better solution?
+	Sleep(50);
 
 	int bytesRead = readLineDataCR(buf, 1024);
 	if (bytesRead > -1)
