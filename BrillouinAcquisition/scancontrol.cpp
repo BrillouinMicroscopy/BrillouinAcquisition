@@ -99,9 +99,7 @@ std::string com::receive(std::string request) {
 	request = request + m_terminator;
 	write(request.c_str());
 
-	int toWrite = bytesToWrite();
 	waitForBytesWritten();
-	bool wasWritten = flush();
 
 	waitForReadyRead();
 
@@ -140,6 +138,8 @@ qint64 com::readLineDataCR(char *data, qint64 maxSize) {
 void com::send(std::string message) {
 	message = message + m_terminator;
 	write(message.c_str());
+
+	waitForBytesWritten();
 }
 
 
