@@ -4,6 +4,33 @@
 #include <sstream>
 #include <regex>
 
+std::string helper::dec2hex(int dec, int digits = 6) {
+	std::stringstream stream;
+	// make letters in hex string uppercase -> std:uppercase
+	// set the fill character --> std::setfill
+	// set the number of characters --> std::setw
+	stream << std::uppercase << std::setfill('0') << std::setw(digits) << std::hex << dec;
+	return stream.str();
+}
+
+int helper::hex2dec(std::string s) {
+	return std::stoul(s, nullptr, 16);
+}
+
+std::string helper::parse(std::string answer, std::string prefix) {
+	std::string pattern = "([a-zA-Z\\d]*)\r";
+	pattern = "P" + prefix + pattern;
+	std::regex pieces_regex(pattern);
+	std::smatch pieces_match;
+	std::regex_match(answer, pieces_match, pieces_regex);
+	if (pieces_match.size() == 0) {
+		return "";
+	}
+	else {
+		return pieces_match[1];
+	}
+}
+
 ScanControl::ScanControl() {
 	m_focus = new Focus(m_comObject);
 	m_mcu = new MCU(m_comObject);
@@ -121,44 +148,14 @@ void com::send(std::string message) {
 Element::~Element() {
 }
 
-std::string Element::parse(std::string answer) {
-	std::string pattern = "([a-zA-Z\\d]*)\r";
-	pattern = "P" + m_prefix + pattern;
-	std::regex pieces_regex(pattern);
-	std::smatch pieces_match;
-	std::regex_match(answer, pieces_match, pieces_regex);
-	if (pieces_match.size() == 0) {
-		return "";
-	} else {
-		return pieces_match[1];
-	}
-}
-
 std::string Element::receive(std::string request) {
 	std::string answer = m_comObject->receive(m_prefix + "P" + request);
-	return parse(answer);
+	return helper::parse(answer, m_prefix);
 }
 
 void Element::send(std::string message) {
 	m_comObject->send(m_prefix + "P" + message);
 }
-
-std::string Element::dec2hex(int dec, int digits = 6) {
-	std::stringstream stream;
-	stream << std::hex << dec;
-	std::string hex = stream.str();
-	// pad hex string with leading zeros if necessary
-	int len = hex.length();
-	if (len < digits) {
-		hex = std::string(digits - len, '0') + hex;
-	}
-	return hex;
-}
-
-int Element::hex2dec(std::string s) {
-	return std::stoul(s, nullptr, 16);
-}
-
 
 /*
 * Functions regarding the objective focus
@@ -167,19 +164,19 @@ int Element::hex2dec(std::string s) {
 
 double Focus::getZ() {
 	std::string s = "0x" + receive("Zp");
-	return m_umperinc * hex2dec(s);
+	return m_umperinc * helper::hex2dec(s);
 }
 
 void Focus::setZ(double position) {
 	position = round(position / m_umperinc);
 	int inc = static_cast<int>(position);
 	inc %= m_rangeFocus;
-	std::string pos = dec2hex(inc, 6);
+	std::string pos = helper::dec2hex(inc, 6);
 	receive("ZD" + pos);
 }
 
 void Focus::setVelocityZ(double velocity) {
-	std::string vel = dec2hex(velocity, 6);
+	std::string vel = helper::dec2hex(velocity, 6);
 	send("ZG" + vel);
 }
 
@@ -221,7 +218,7 @@ void Focus::move2Work() {
 
 double MCU::getPosition(std::string axis) {
 	std::string position = receive(axis + "p");
-	int pos = hex2dec(position);
+	int pos = helper::hex2dec(position);
 	return pos * m_umperinc;
 }
 
@@ -229,12 +226,12 @@ void MCU::setPosition(std::string axis, double position) {
 	position = round(position / m_umperinc);
 	int inc = static_cast<int>(position);
 	inc %= m_rangeFocus;
-	std::string pos = dec2hex(inc, 6);
+	std::string pos = helper::dec2hex(inc, 6);
 	send(axis + "T" + pos);
 }
 
 void MCU::setVelocity(std::string axis, int velocity) {
-	std::string vel = dec2hex(velocity, 6);
+	std::string vel = helper::dec2hex(velocity, 6);
 	send(axis + "V" + vel);
 }
 

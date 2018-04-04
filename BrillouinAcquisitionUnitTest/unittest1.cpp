@@ -10,33 +10,33 @@ namespace BrillouinAcquisitionUnitTest
 	public:
 		
 		TEST_METHOD(TestMethod1) {
-			com *comObject = new com();
-			MCU *mcu = new MCU(comObject);
-			std::string answer = mcu->parse("PN000000\r");
+			std::string answer = helper::parse("PN000000\r", "N");
 			std::string expected = "000000";
-			delete mcu;
-			delete comObject;
 			Assert::AreEqual(expected, answer);
 		}
 
 		TEST_METHOD(TestMethod2) {
-			com *comObject = new com();
-			Stand *stand = new Stand(comObject);
-			std::string answer = stand->parse("PH001\r");
+			std::string answer = helper::parse("PH001\r", "H");
 			std::string expected = "001";
-			delete stand;
-			delete comObject;
 			Assert::AreEqual(expected, answer);
 		}
 
 		TEST_METHOD(TestMethod3) {
-			com *comObject = new com();
-			MCU *mcu = new MCU(comObject);
-			std::string answer = mcu->parse("PN000000");
+			std::string answer = helper::parse("PN000000", "N");
 			std::string expected = "";
-			delete mcu;
-			delete comObject;
 			Assert::AreEqual(expected, answer);
+		}
+
+		TEST_METHOD(TestHex2Dec) {
+			int result = helper::hex2dec("0003E8");
+			int expected = 1000;
+			Assert::AreEqual(expected, result);
+		}
+
+		TEST_METHOD(TestDec2Hex) {
+			std::string result = helper::dec2hex(1000,6);
+			std::string expected = "0003E8";
+			Assert::AreEqual(expected, result);
 		}
 
 	};
