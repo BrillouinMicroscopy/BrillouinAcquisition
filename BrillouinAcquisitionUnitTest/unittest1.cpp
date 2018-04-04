@@ -29,5 +29,15 @@ namespace BrillouinAcquisitionUnitTest
 			Assert::AreEqual(expected, answer);
 		}
 
+		TEST_METHOD(TestMethod3) {
+			com *comObject = new com();
+			MCU *mcu = new MCU(comObject);
+			std::string answer = mcu->parse("PN000000");
+			std::string expected = "";
+			delete mcu;
+			delete comObject;
+			Assert::AreEqual(expected, answer);
+		}
+
 	};
 }
