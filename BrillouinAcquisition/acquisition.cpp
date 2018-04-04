@@ -119,6 +119,9 @@ void Acquisition::startAcquisition(std::string filename) {
 	//m_acqSettings.fileHndl->setCalibrationData(1, data, rank, dims_data, "methanol", 3.799);
 	//m_acqSettings.fileHndl->setCalibrationData(2, data, rank, dims_data, "water", 5.088);
 
+
+	m_scanControl->setPosition(startPosition);
+
 	m_storageThread.exit();
 	m_storageThread.wait();
 	delete m_fileHndl;
