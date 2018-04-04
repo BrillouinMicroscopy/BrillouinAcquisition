@@ -14,6 +14,8 @@ namespace BrillouinAcquisitionUnitTest
 			MCU *mcu = new MCU(comObject);
 			std::string answer = mcu->parse("PN000000\r");
 			std::string expected = "000000";
+			delete mcu;
+			delete comObject;
 			Assert::AreEqual(expected, answer);
 		}
 
@@ -22,6 +24,8 @@ namespace BrillouinAcquisitionUnitTest
 			Stand *stand = new Stand(comObject);
 			std::string answer = stand->parse("PH001\r");
 			std::string expected = "001";
+			delete stand;
+			delete comObject;
 			Assert::AreEqual(expected, answer);
 		}
 
