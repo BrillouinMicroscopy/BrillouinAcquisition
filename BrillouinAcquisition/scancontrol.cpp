@@ -110,7 +110,7 @@ std::string com::receive(std::string request) {
 
 	int bytesRead = readLineDataCR(buf, 1024);
 	if (bytesRead > -1)
-		 answer = buf;
+		 answer = std::string(buf, buf+bytesRead);
 	else
 		answer = "";
 
