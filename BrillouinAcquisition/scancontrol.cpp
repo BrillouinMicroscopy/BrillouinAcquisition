@@ -69,7 +69,7 @@ std::vector<double> ScanControl::getPosition() {
 */
 
 std::string com::receive(std::string request) {
-	request = request + "\r";
+	request = request + m_terminator;
 	write(request.c_str());
 
 	int toWrite = bytesToWrite();
@@ -98,7 +98,7 @@ qint64 com::readLineDataCR(char *data, qint64 maxSize) {
 	while (readSoFar < maxSize && (lastReadReturn = read(&c, 1)) == 1) {
 		*data++ = c;
 		++readSoFar;
-		if (c == '\r')
+		if (c == *m_terminator.c_str())
 			break;
 	}
 
@@ -108,7 +108,7 @@ qint64 com::readLineDataCR(char *data, qint64 maxSize) {
 }
 
 void com::send(std::string message) {
-	message = message + "\r";
+	message = message + m_terminator;
 	write(message.c_str());
 }
 

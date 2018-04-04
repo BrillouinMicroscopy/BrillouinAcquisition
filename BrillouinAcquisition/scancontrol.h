@@ -4,6 +4,8 @@
 #include <QSerialPort>
 
 class com : public QSerialPort {
+private:
+	std::string m_terminator = "\r";
 public:
 	std::string receive(std::string request);
 	void send(std::string message);
