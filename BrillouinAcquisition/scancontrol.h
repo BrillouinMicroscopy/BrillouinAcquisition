@@ -11,7 +11,7 @@ public:
 };
 
 class com : public QSerialPort {
-private:
+protected:
 	std::string m_terminator = "\r";
 public:
 	std::string receive(std::string request);
@@ -29,6 +29,7 @@ public:
 	~Element();
 	std::string receive(std::string request);
 	void send(std::string message);
+	void setDevice(com *device);
 };
 
 class Stand : public Element {
@@ -126,6 +127,7 @@ public:
 	void setPosition(std::vector<double> position);
 	void setPositionRelative(std::vector<double> distance);
 	std::vector<double> getPosition();
+	void setDevice(com *device);
 
 	Focus *m_focus;
 	MCU *m_mcu;

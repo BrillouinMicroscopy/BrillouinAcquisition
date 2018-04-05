@@ -59,7 +59,7 @@ bool ScanControl::connect() {
 bool ScanControl::disconnect() {
 	if (m_comObject && isConnected) {
 		m_comObject->close();
-		isConnected = FALSE;
+		isConnected = 0;
 	}
 	emit(microscopeConnected(isConnected));
 	return isConnected;
@@ -89,6 +89,14 @@ std::vector<double> ScanControl::getPosition() {
 	return std::vector<double> {x, y, z};
 }
 
+void ScanControl::setDevice(com *device) {
+	delete m_comObject;
+	m_comObject = device;
+	m_focus->setDevice(device);
+	m_mcu->setDevice(device);
+	m_stand->setDevice(device);
+}
+
 
 /*
 * Functions regarding the serial communication
@@ -97,7 +105,7 @@ std::vector<double> ScanControl::getPosition() {
 
 std::string com::receive(std::string request) {
 	request = request + m_terminator;
-	write(request.c_str());
+	writeData(request.c_str(), 128);
 
 	waitForBytesWritten();
 
@@ -123,7 +131,7 @@ qint64 com::readLineDataCR(char *data, qint64 maxSize) {
 	char c;
 	int lastReadReturn = 0;
 
-	while (readSoFar < maxSize && (lastReadReturn = read(&c, 1)) == 1) {
+	while (readSoFar < maxSize && (lastReadReturn = readData(&c, 1)) == 1) {
 		*data++ = c;
 		++readSoFar;
 		if (c == *m_terminator.c_str())
@@ -158,6 +166,10 @@ std::string Element::receive(std::string request) {
 
 void Element::send(std::string message) {
 	m_comObject->send(m_prefix + "P" + message);
+}
+
+void Element::setDevice(com *device) {
+	m_comObject = device;
 }
 
 /*
