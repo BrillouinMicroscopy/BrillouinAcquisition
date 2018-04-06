@@ -105,7 +105,7 @@ void ScanControl::setDevice(com *device) {
 
 std::string com::receive(std::string request) {
 	request = request + m_terminator;
-	writeData(request.c_str(), 128);
+	writeData(request.c_str(), request.size());
 
 	waitForBytesWritten();
 
