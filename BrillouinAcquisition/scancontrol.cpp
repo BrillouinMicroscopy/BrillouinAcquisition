@@ -131,7 +131,7 @@ qint64 com::readLineDataCR(char *data, qint64 maxSize) {
 	char c;
 	int lastReadReturn = 0;
 
-	while (readSoFar < maxSize && (lastReadReturn = readData(&c, 1)) == 1) {
+	while (readSoFar < maxSize && (lastReadReturn = readCharacter(&c, 1)) == 1) {
 		*data++ = c;
 		++readSoFar;
 		if (c == *m_terminator.c_str())
@@ -142,6 +142,10 @@ qint64 com::readLineDataCR(char *data, qint64 maxSize) {
 		return isSequential() ? lastReadReturn : -1;
 	return readSoFar;
 }
+
+qint64 com::readCharacter(char *data, qint64 maxlen) {
+	return read(data, maxlen);
+};
 
 void com::send(std::string message) {
 	message = message + m_terminator;

@@ -18,7 +18,7 @@ void MockMicroscope::close() {
 	m_isOpen = 0;
 }
 
-qint64 MockMicroscope::readData(char *data, qint64 maxlen) {
+qint64 MockMicroscope::readCharacter(char *data, qint64 maxlen) {
 	if (m_outputBuffer.size() > 0) {
 		char tmp = m_outputBuffer[0];
 		strcpy(data, &tmp);
