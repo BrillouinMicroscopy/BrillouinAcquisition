@@ -245,9 +245,6 @@ void Andor::prepareMeasurement(CAMERA_SETTINGS settings) {
 	AT_InitialiseUtilityLibrary();
 };
 
-void Andor::finishMeasurement() {
-};
-
 void Andor::acquireImage(AT_U8* buffer) {
 	// Pass this buffer to the SDK
 	unsigned char* UserBuffer = new unsigned char[m_bufferSize];

@@ -119,7 +119,7 @@ void Acquisition::startAcquisition(std::string filename) {
 		}
 	}
 	// close camera libraries, clear buffers
-	m_andor->finishMeasurement();
+	m_andor->cleanupAcquisition();
 
 	//m_acqSettings.fileHndl->setBackgroundData(data, rank, dims_data, "2016-05-06T11:11:00+02:00");
 

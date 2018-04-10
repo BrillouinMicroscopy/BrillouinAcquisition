@@ -66,7 +66,6 @@ private:
 	void setSettings();
 	void readSettings();
 	void prepareAcquisition();
-	void cleanupAcquisition();
 	void getEnumString(AT_WC* feature, AT_WC* string);
 
 public:
@@ -82,6 +81,7 @@ public:
 	bool getSensorCooling();
 	const wchar_t getTemperatureStatus();
 	double getSensorTemperature();
+	void cleanupAcquisition();
 
 	// setters/getters for ROI
 
@@ -94,7 +94,6 @@ private slots:
 public slots:
 	void acquireContinuously();
 	void prepareMeasurement(CAMERA_SETTINGS settings);
-	void finishMeasurement();
 	void acquireImage(AT_U8* buffer);
 
 signals:
