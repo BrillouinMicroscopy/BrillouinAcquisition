@@ -1400,7 +1400,7 @@ QTabBar::tab:!selected {
                    <string extracomment="Test">Acquisition stopped</string>
                   </property>
                  </widget>
-                 <widget class="QLineEdit" name="lineEdit_4">
+                 <widget class="QLineEdit" name="positionX">
                   <property name="geometry">
                    <rect>
                     <x>10</x>
@@ -1423,7 +1423,7 @@ border: none;</string>
                    <bool>true</bool>
                   </property>
                  </widget>
-                 <widget class="QLineEdit" name="lineEdit_2">
+                 <widget class="QLineEdit" name="positionY">
                   <property name="geometry">
                    <rect>
                     <x>140</x>
@@ -1446,7 +1446,7 @@ border: none;</string>
                    <bool>true</bool>
                   </property>
                  </widget>
-                 <widget class="QLineEdit" name="lineEdit_3">
+                 <widget class="QLineEdit" name="positionZ">
                   <property name="geometry">
                    <rect>
                     <x>270</x>
@@ -1469,7 +1469,7 @@ border: none;</string>
                    <bool>true</bool>
                   </property>
                  </widget>
-                 <widget class="QLineEdit" name="lineEdit">
+                 <widget class="QLineEdit" name="imageNr">
                   <property name="geometry">
                    <rect>
                     <x>140</x>
@@ -1492,7 +1492,7 @@ border: none;</string>
                    <bool>true</bool>
                   </property>
                  </widget>
-                 <widget class="QLabel" name="label">
+                 <widget class="QLabel" name="imageNr_label">
                   <property name="geometry">
                    <rect>
                     <x>10</x>
@@ -1505,7 +1505,7 @@ border: none;</string>
                    <string>Image number</string>
                   </property>
                  </widget>
-                 <widget class="QLabel" name="label_2">
+                 <widget class="QLabel" name="positionX_label">
                   <property name="geometry">
                    <rect>
                     <x>10</x>
@@ -1521,7 +1521,7 @@ border: none;</string>
                    <set>Qt::AlignCenter</set>
                   </property>
                  </widget>
-                 <widget class="QLabel" name="label_3">
+                 <widget class="QLabel" name="positionY_label">
                   <property name="geometry">
                    <rect>
                     <x>140</x>
@@ -1537,7 +1537,7 @@ border: none;</string>
                    <set>Qt::AlignCenter</set>
                   </property>
                  </widget>
-                 <widget class="QLabel" name="label_4">
+                 <widget class="QLabel" name="positionZ_label">
                   <property name="geometry">
                    <rect>
                     <x>270</x>

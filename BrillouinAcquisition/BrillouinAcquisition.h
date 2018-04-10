@@ -60,6 +60,8 @@ private slots:
 	void acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64);
 	void cameraSettingsChanged(CAMERA_SETTINGS);
 	void cameraOptionsChanged(CAMERA_OPTIONS);
+	void showAcqPosition(double, double, double, int);
+	void showAcqProgress(double, int);
 
 signals:
 	void settingsCameraChanged(SETTINGS_DEVICES);

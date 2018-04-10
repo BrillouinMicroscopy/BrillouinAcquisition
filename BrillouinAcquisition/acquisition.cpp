@@ -13,6 +13,7 @@ Acquisition::~Acquisition() {
 
 void Acquisition::startAcquisition(std::string filename) {
 
+	emit(s_acqProgress(0.0, -1));
 	// set optical elements for brightfield/Brillouin imaging
 	m_scanControl->m_stand->setPreset(1);
 
@@ -78,6 +79,10 @@ void Acquisition::startAcquisition(std::string filename) {
 	int rank_data = 3;
 	hsize_t dims_data[3] = { m_acqSettings.camera.frameCount, m_acqSettings.camera.roi.height, m_acqSettings.camera.roi.width };
 	ll = 0;
+
+	QElapsedTimer measurementTimer;
+	measurementTimer.start();
+
 	for (int ii = 0; ii < m_acqSettings.zSteps; ii++) {
 		for (int jj = 0; jj < m_acqSettings.xSteps; jj++) {
 			for (int kk = 0; kk < m_acqSettings.ySteps; kk++) {
@@ -90,6 +95,7 @@ void Acquisition::startAcquisition(std::string filename) {
 				std::vector<AT_U8> images(bytesPerFrame * m_acqSettings.camera.frameCount);
 
 				for (int mm = 0; mm < m_acqSettings.camera.frameCount; mm++) {
+					emit(s_acqPosition(positionsX[ll], positionsY[ll], positionsZ[ll], mm+1));
 					// acquire images
 					m_andor->acquireImage(&images[bytesPerFrame * mm]);
 				}
@@ -108,6 +114,7 @@ void Acquisition::startAcquisition(std::string filename) {
 				qInfo(logInfo()) << info.c_str();
 				// increase position index
 				ll++;
+				emit(s_acqProgress(100 * (double)ll / nrPositions, 1e-3 * measurementTimer.elapsed() / ll * (nrPositions - ll)));
 			}
 		}
 	}
@@ -121,6 +128,7 @@ void Acquisition::startAcquisition(std::string filename) {
 
 
 	m_scanControl->setPosition(startPosition);
+	emit(s_acqPosition(startPosition[0], startPosition[1], startPosition[2], 0));
 
 	m_storageThread.exit();
 	m_storageThread.wait();
@@ -130,4 +138,5 @@ void Acquisition::startAcquisition(std::string filename) {
 	std::string info = "Acquisition finished.";
 	qInfo(logInfo()) << info.c_str();
 	emit(s_acqCalibrationRunning(FALSE));
+	emit(s_acqProgress(100.0, 0));
 }

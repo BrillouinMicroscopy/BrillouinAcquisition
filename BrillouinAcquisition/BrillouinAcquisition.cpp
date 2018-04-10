@@ -73,6 +73,22 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 		SLOT(microscopeElementPositionsChanged(int, int))
 	);
 
+	// slot to show current acquisition position
+	QWidget::connect(
+		m_acquisition,
+		SIGNAL(s_acqPosition(double, double, double, int)),
+		this,
+		SLOT(showAcqPosition(double, double, double, int))
+	);
+
+	// slot to show current acquisition progress
+	QWidget::connect(
+		m_acquisition,
+		SIGNAL(s_acqProgress(double, int)),
+		this,
+		SLOT(showAcqProgress(double, int))
+	);
+
 	qRegisterMetaType<std::string>("std::string");
 	qRegisterMetaType<AT_64>("AT_64");
 	qRegisterMetaType<CircularBuffer<AT_U8>>("CircularBuffer<AT_U8>");
@@ -230,6 +246,37 @@ void BrillouinAcquisition::cameraOptionsChanged(CAMERA_OPTIONS options) {
 	ui->ROIWidth->setMaximum(options.ROIWidthLimits[1]);
 	ui->ROILeft->setMinimum(options.ROIWidthLimits[0]);
 	ui->ROILeft->setMaximum(options.ROIWidthLimits[1]);
+}
+
+void BrillouinAcquisition::showAcqPosition(double positionX, double positionY, double positionZ, int imageNr) {
+	ui->positionX->setText(QString::number(positionX));
+	ui->positionY->setText(QString::number(positionY));
+	ui->positionZ->setText(QString::number(positionZ));
+	ui->imageNr->setText(QString::number(imageNr));
+}
+
+void BrillouinAcquisition::showAcqProgress(double progress, int seconds) {
+	ui->progressBar->setValue(progress);
+
+	QString string;
+	if (seconds < 0) {
+		string = "Acquisition started.";
+	} else if (seconds == 0) {
+		string = "Acquisition finished.";
+	} else {
+		if (seconds > 3600) {
+			int hours = floor((double)seconds / 3600);
+			int minutes = floor((seconds - hours * 3600) / 60);
+			string.sprintf("%02.1f %% finished, %02.0f:%02.0f hours remaining.", progress, (double)hours, (double)minutes);
+		} else if (seconds > 60) {
+			int minutes = floor(seconds / 60);
+			seconds = floor(seconds - minutes * 60);
+			string.sprintf("%02.1f %% finished, %02.0f:%02.0f minutes remaining.", progress, (double)minutes, (double)seconds);
+		} else {
+			string.sprintf("%02.1f %% finished, %2.0f seconds remaining.", progress, (double)seconds);
+		}
+	}
+	ui->progressBar->setFormat(string);
 }
 
 void BrillouinAcquisition::addListToComboBox(QComboBox* box, std::vector<AT_WC*> list, bool clear) {
