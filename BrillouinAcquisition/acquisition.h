@@ -42,6 +42,8 @@ class Acquisition : public QObject {
 public:
 	Acquisition(QObject *parent, Andor *andor, ScanControl *scanControl);
 	~Acquisition();
+	bool m_abort = 0;
+	bool isAcqRunning();
 
 public slots:
 	void startAcquisition(std::string filename = "Brillouin.h5");
@@ -52,9 +54,11 @@ private:
 	StorageWrapper *m_fileHndl;			// file handle
 	Andor *m_andor;
 	ScanControl *m_scanControl;
-	bool m_running = FALSE;				// is acquisition currently running
+	bool m_running = 0;				// is acquisition currently running
+	void abort(std::vector<double> startPosition);
 
 signals:
+	void s_acqRunning(bool);			// is acquisition running
 	void s_acqProgress(double, int);	// progress in percent and the remaining time in seconds
 	// current position in x, y and z, as well as the current image number
 	void s_acqPosition(double, double, double, int);

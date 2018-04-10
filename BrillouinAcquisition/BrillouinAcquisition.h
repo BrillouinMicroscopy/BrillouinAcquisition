@@ -62,6 +62,7 @@ private slots:
 	void cameraOptionsChanged(CAMERA_OPTIONS);
 	void showAcqPosition(double, double, double, int);
 	void showAcqProgress(double, int);
+	void showAcqRunning(bool);
 
 signals:
 	void settingsCameraChanged(SETTINGS_DEVICES);

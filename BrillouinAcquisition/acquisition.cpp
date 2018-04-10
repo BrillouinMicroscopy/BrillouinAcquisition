@@ -11,7 +11,14 @@ Acquisition::Acquisition(QObject *parent, Andor *andor, ScanControl *scanControl
 Acquisition::~Acquisition() {
 }
 
+bool Acquisition::isAcqRunning() {
+	return m_running;
+}
+
 void Acquisition::startAcquisition(std::string filename) {
+	m_running = 1;
+	emit(s_acqRunning(m_running));
+	m_abort = 0;
 
 	emit(s_acqProgress(0.0, -1));
 	// set optical elements for brightfield/Brillouin imaging
@@ -95,6 +102,10 @@ void Acquisition::startAcquisition(std::string filename) {
 				std::vector<AT_U8> images(bytesPerFrame * m_acqSettings.camera.frameCount);
 
 				for (int mm = 0; mm < m_acqSettings.camera.frameCount; mm++) {
+					if (m_abort) {
+						abort(startPosition);
+						return;
+					}
 					emit(s_acqPosition(positionsX[ll], positionsY[ll], positionsZ[ll], mm+1));
 					// acquire images
 					m_andor->acquireImage(&images[bytesPerFrame * mm]);
@@ -137,6 +148,23 @@ void Acquisition::startAcquisition(std::string filename) {
 
 	std::string info = "Acquisition finished.";
 	qInfo(logInfo()) << info.c_str();
+	m_running = 0;
+	emit(s_acqRunning(m_running));
 	emit(s_acqCalibrationRunning(FALSE));
 	emit(s_acqProgress(100.0, 0));
+}
+
+void Acquisition::abort(std::vector<double> startPosition) {
+	m_fileHndl->m_payloadQueue.clear();
+	m_andor->cleanupAcquisition();
+	m_scanControl->setPosition(startPosition);
+	m_storageThread.exit();
+	m_storageThread.wait();
+	delete m_fileHndl;
+	m_fileHndl = NULL;
+	m_running = 0;
+	emit(s_acqRunning(m_running));
+	emit(s_acqProgress(0, -2));
+	emit(s_acqPosition(startPosition[0], startPosition[1], startPosition[2], 0));
+	emit(s_acqCalibrationRunning(FALSE));
 }

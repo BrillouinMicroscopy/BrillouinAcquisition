@@ -73,6 +73,14 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 		SLOT(microscopeElementPositionsChanged(int, int))
 	);
 
+	// slot to show current acquisition progress
+	QWidget::connect(
+		m_acquisition,
+		SIGNAL(s_acqRunning(bool)),
+		this,
+		SLOT(showAcqRunning(bool))
+	);
+
 	// slot to show current acquisition position
 	QWidget::connect(
 		m_acquisition,
@@ -259,7 +267,9 @@ void BrillouinAcquisition::showAcqProgress(double progress, int seconds) {
 	ui->progressBar->setValue(progress);
 
 	QString string;
-	if (seconds < 0) {
+	if (seconds < -1) {
+		string = "Acquisition aborted.";
+	} else if (seconds < 0) {
 		string = "Acquisition started.";
 	} else if (seconds == 0) {
 		string = "Acquisition finished.";
@@ -576,7 +586,19 @@ void BrillouinAcquisition::on_camera_singleShot_clicked() {
 }
 
 void BrillouinAcquisition::on_acquisitionStart_clicked() {
-	QMetaObject::invokeMethod(m_acquisition, "startAcquisition", Qt::QueuedConnection);
+	if (!m_acquisition->isAcqRunning()) {
+		QMetaObject::invokeMethod(m_acquisition, "startAcquisition", Qt::QueuedConnection);
+	} else {
+		m_acquisition->m_abort = 1;
+	}
+}
+
+void BrillouinAcquisition::showAcqRunning(bool isRunning) {
+	if (isRunning) {
+		ui->acquisitionStart->setText("Stop");
+	} else {
+		ui->acquisitionStart->setText("Start");
+	}
 }
 
 void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradientPreset preset) {
