@@ -36,7 +36,7 @@ private:
 
 public:
 	StorageWrapper(
-		QObject *parent = 0,
+		QObject *parent = nullptr,
 		const std::string filename = "Brillouin.h5",
 		int flags = H5F_ACC_RDONLY
 	) : H5BM(parent, filename, flags) {};

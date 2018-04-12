@@ -69,7 +69,7 @@ private:
 	void getEnumString(AT_WC* feature, AT_WC* string);
 
 public:
-	Andor(QObject *parent = 0);
+	Andor(QObject *parent = nullptr);
 	~Andor();
 	void connect();
 	void disconnect();

@@ -80,7 +80,7 @@ private:
 	Thread m_acquisitionThread;
 	Andor *m_andor = new Andor();
 	ScanControl *m_scanControl = new ScanControl();
-	Acquisition *m_acquisition = new Acquisition(0, m_andor, m_scanControl);
+	Acquisition *m_acquisition = new Acquisition(nullptr, m_andor, m_scanControl);
 	QCPColorMap *m_colorMap;
 	SETTINGS_DEVICES m_deviceSettings;
 	bool m_viewRunning = false;
