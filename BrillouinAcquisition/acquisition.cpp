@@ -144,7 +144,7 @@ void Acquisition::startAcquisition(std::string filename) {
 	m_storageThread.exit();
 	m_storageThread.wait();
 	delete m_fileHndl;
-	m_fileHndl = NULL;
+	m_fileHndl = nullptr;
 
 	std::string info = "Acquisition finished.";
 	qInfo(logInfo()) << info.c_str();
@@ -161,7 +161,7 @@ void Acquisition::abort(std::vector<double> startPosition) {
 	m_storageThread.exit();
 	m_storageThread.wait();
 	delete m_fileHndl;
-	m_fileHndl = NULL;
+	m_fileHndl = nullptr;
 	m_running = 0;
 	emit(s_acqRunning(m_running));
 	emit(s_acqProgress(0, -2));
