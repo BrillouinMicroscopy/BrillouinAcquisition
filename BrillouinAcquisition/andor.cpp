@@ -10,7 +10,7 @@ Andor::Andor(QObject *parent)
 	if (i_retCode != AT_SUCCESS) {
 		//error condition, check atdebug.log file
 	} else {
-		m_isInitialised = TRUE;
+		m_isInitialised = true;
 	}
 }
 
@@ -25,7 +25,7 @@ void Andor::connect() {
 	if (!m_isConnected) {
 		int i_retCode = AT_Open(0, &m_cameraHndl);
 		if (i_retCode == AT_SUCCESS) {
-			m_isConnected = TRUE;
+			m_isConnected = true;
 			readOptions();
 			setDefaultSettings();
 			readSettings();
@@ -98,7 +98,7 @@ void Andor::disconnect() {
 	if (m_isConnected) {
 		int i_retCode = AT_Close(m_cameraHndl);
 		if (i_retCode == AT_SUCCESS) {
-			m_isConnected = FALSE;
+			m_isConnected = false;
 		}
 	}
 }
@@ -226,14 +226,14 @@ void Andor::prepareAcquisition() {
 	AT_Command(m_cameraHndl, L"AcquisitionStart");
 	AT_InitialiseUtilityLibrary();
 
-	emit(acquisitionRunning(TRUE, liveBuffer, m_settings.roi.width, m_settings.roi.height));
+	emit(acquisitionRunning(true, liveBuffer, m_settings.roi.width, m_settings.roi.height));
 }
 
 void Andor::cleanupAcquisition() {
 	AT_FinaliseUtilityLibrary();
 	AT_Command(m_cameraHndl, L"AcquisitionStop");
 	AT_Flush(m_cameraHndl);
-	emit(acquisitionRunning(FALSE, nullptr, 0, 0));
+	emit(acquisitionRunning(false, nullptr, 0, 0));
 }
 
 

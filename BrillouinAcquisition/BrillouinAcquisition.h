@@ -68,13 +68,13 @@ signals:
 	void settingsCameraChanged(SETTINGS_DEVICES);
 
 public:
-	BrillouinAcquisition(QWidget *parent = Q_NULLPTR);
+	BrillouinAcquisition(QWidget *parent = nullptr);
 	~BrillouinAcquisition();
 
 private:
 	Ui::BrillouinAcquisitionClass *ui;
 	void checkElementButtons();
-	void addListToComboBox(QComboBox*, std::vector<AT_WC*>, bool clear = TRUE);
+	void addListToComboBox(QComboBox*, std::vector<AT_WC*>, bool clear = true);
 	Thread m_cameraThread;
 	Thread m_microscopeThread;
 	Thread m_acquisitionThread;
@@ -83,7 +83,7 @@ private:
 	Acquisition *m_acquisition = new Acquisition(0, m_andor, m_scanControl);
 	QCPColorMap *m_colorMap;
 	SETTINGS_DEVICES m_deviceSettings;
-	bool m_viewRunning = FALSE;
+	bool m_viewRunning = false;
 	AT_64 m_imageHeight = 2048;
 	AT_64 m_imageWidth = 2048;
 	CircularBuffer<AT_U8> *m_liveBuffer = nullptr;

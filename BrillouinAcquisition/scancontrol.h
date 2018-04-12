@@ -117,7 +117,7 @@ class ScanControl: public QObject {
 	Q_OBJECT
 
 private:
-	bool isConnected = 0;
+	bool isConnected = false;
 
 public:
 	ScanControl();

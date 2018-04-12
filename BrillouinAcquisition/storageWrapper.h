@@ -31,8 +31,8 @@ struct CALIBRATION {
 class StorageWrapper : public H5BM {
 	Q_OBJECT
 private:
-	bool m_finishedWriting = FALSE;
-	bool m_observeQueues = FALSE;
+	bool m_finishedWriting = false;
+	bool m_observeQueues = false;
 
 public:
 	StorageWrapper(
@@ -44,7 +44,7 @@ public:
 
 	QQueue<IMAGE*> m_payloadQueue;
 	QQueue<CALIBRATION*> m_calibrationQueue;
-	bool m_abort = FALSE;
+	bool m_abort = false;
 
 	void startWritingQueues();
 	void stopWritingQueues();

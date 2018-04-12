@@ -12,9 +12,9 @@ struct ACQUISITION_SETTINGS {
 	
 	// calibration parameters
 	std::string sample = "Methanol & Water";
-	bool preCalibration = TRUE;				// do pre calibration
-	bool postCalibration = TRUE;			// do post calibration
-	bool conCalibration = TRUE;				// do continuous calibration
+	bool preCalibration = true;				// do pre calibration
+	bool postCalibration = true;			// do post calibration
+	bool conCalibration = true;				// do continuous calibration
 	double conCalibrationInterval = 10;		// interval of continuous calibrations
 	int calibrationImages = 10;				// number of calibration images
 	double calibrationExposureTime = 1;		// exposure time for calibration images
@@ -42,7 +42,7 @@ class Acquisition : public QObject {
 public:
 	Acquisition(QObject *parent, Andor *andor, ScanControl *scanControl);
 	~Acquisition();
-	bool m_abort = 0;
+	bool m_abort = false;
 	bool isAcqRunning();
 
 public slots:
@@ -54,7 +54,7 @@ private:
 	StorageWrapper *m_fileHndl;			// file handle
 	Andor *m_andor;
 	ScanControl *m_scanControl;
-	bool m_running = 0;				// is acquisition currently running
+	bool m_running = false;				// is acquisition currently running
 	void abort(std::vector<double> startPosition);
 
 signals:

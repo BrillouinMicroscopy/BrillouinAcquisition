@@ -107,7 +107,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	ui->settingsWidget->setTabIcon(2, icon);
 	ui->settingsWidget->setIconSize(QSize(16, 16));
 
-	ui->actionEnable_Cooling->setEnabled(FALSE);
+	ui->actionEnable_Cooling->setEnabled(false);
 
 	// start camera thread
 	m_cameraThread.startWorker(m_andor);
@@ -223,13 +223,13 @@ void BrillouinAcquisition::acquisitionRunning(bool isRunning, CircularBuffer<AT_
 	m_liveBuffer = liveBuffer;
 	if (isRunning) {
 		ui->camera_playPause->setText("Stop");
-		m_viewRunning = TRUE;
+		m_viewRunning = true;
 		m_imageWidth = imageWidth;
 		m_imageHeight = imageHeight;
 		onNewImage();
 	} else {
 		ui->camera_playPause->setText("Play");
-		m_viewRunning = FALSE;
+		m_viewRunning = false;
 	}
 }
 
@@ -460,29 +460,29 @@ void BrillouinAcquisition::on_actionConnect_Camera_triggered() {
 		ui->actionEnable_Cooling->setText("Enable Cooling");
 		QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
 		ui->settingsWidget->setTabIcon(0, icon);
-		ui->actionEnable_Cooling->setEnabled(FALSE);
-		ui->camera_playPause->setEnabled(FALSE);
-		ui->camera_singleShot->setEnabled(FALSE);
+		ui->actionEnable_Cooling->setEnabled(false);
+		ui->camera_playPause->setEnabled(false);
+		ui->camera_singleShot->setEnabled(false);
 	} else {
 		m_andor->connect();
 		ui->actionConnect_Camera->setText("Disconnect Camera");
 		QIcon icon(":/BrillouinAcquisition/assets/01standby.png");
 		ui->settingsWidget->setTabIcon(0, icon);
-		ui->actionEnable_Cooling->setEnabled(TRUE);
-		ui->camera_playPause->setEnabled(TRUE);
-		ui->camera_singleShot->setEnabled(TRUE);
+		ui->actionEnable_Cooling->setEnabled(true);
+		ui->camera_playPause->setEnabled(true);
+		ui->camera_singleShot->setEnabled(true);
 	}
 }
 
 void BrillouinAcquisition::on_actionEnable_Cooling_triggered() {
 	if (m_andor->getConnectionStatus()) {
 		if (m_andor->getSensorCooling()) {
-			m_andor->setSensorCooling(FALSE);
+			m_andor->setSensorCooling(false);
 			ui->actionEnable_Cooling->setText("Enable Cooling");
 			QIcon icon(":/BrillouinAcquisition/assets/01standby.png");
 			ui->settingsWidget->setTabIcon(0, icon);
 		} else {
-			m_andor->setSensorCooling(TRUE);
+			m_andor->setSensorCooling(true);
 			ui->actionEnable_Cooling->setText("Disable Cooling");
 			QIcon icon(":/BrillouinAcquisition/assets/02cooling.png");
 			ui->settingsWidget->setTabIcon(0, icon);
@@ -577,7 +577,7 @@ void BrillouinAcquisition::on_camera_playPause_clicked() {
 	if (!m_andor->m_isAcquiring) {
 		QMetaObject::invokeMethod(m_andor, "acquireContinuously", Qt::QueuedConnection);
 	} else {
-		m_andor->m_isAcquiring = FALSE;
+		m_andor->m_isAcquiring = false;
 	}
 }
 

@@ -38,7 +38,7 @@ struct CAMERA_READOUT {
 struct CAMERA_SETTINGS {
 	double exposureTime = 0.5;				// [s]	exposure time
 	AT_64 frameCount = 2;					// [1]	number of images to acquire in one sequence
-	AT_BOOL spuriousNoiseFilter = TRUE;		//		turn on spurious noise filter
+	AT_BOOL spuriousNoiseFilter = true;		//		turn on spurious noise filter
 	CAMERA_ROI roi;							//		region of interest
 	CAMERA_READOUT readout;					//		readout settings
 };
@@ -48,8 +48,8 @@ class Andor : public QObject {
 
 private:
 	AT_H m_cameraHndl;
-	bool m_isInitialised = FALSE;
-	bool m_isConnected = FALSE;
+	bool m_isInitialised = false;
+	bool m_isConnected = false;
 
 	int m_temperatureStatusIndex = 0;
 	AT_WC m_temperatureStatus[256];
@@ -74,7 +74,7 @@ public:
 	void connect();
 	void disconnect();
 	bool getConnectionStatus();
-	bool m_isAcquiring = FALSE;
+	bool m_isAcquiring = false;
 
 	// setters/getters for sensor cooling
 	void setSensorCooling(bool cooling);

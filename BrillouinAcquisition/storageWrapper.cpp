@@ -17,18 +17,18 @@ StorageWrapper::~StorageWrapper() {
 }
 
 void StorageWrapper::startWritingQueues() {
-	m_observeQueues = TRUE;
+	m_observeQueues = true;
 	s_writeQueues();
 }
 
 void StorageWrapper::stopWritingQueues() {
-	m_observeQueues = FALSE;
+	m_observeQueues = false;
 }
 
 void StorageWrapper::s_writeQueues() {
 	while (!m_payloadQueue.isEmpty()) {
 		if (m_abort) {
-			m_finishedWriting = TRUE;
+			m_finishedWriting = true;
 			return;
 		}
 		IMAGE *img = m_payloadQueue.dequeue();
@@ -37,11 +37,12 @@ void StorageWrapper::s_writeQueues() {
 		//qInfo(logInfo()) << info.c_str();
 		m_writtenImagesNr++;
 		delete img;
+		img = nullptr;
 	}
 
 	while (!m_calibrationQueue.isEmpty()) {
 		if (m_abort) {
-			m_finishedWriting = TRUE;
+			m_finishedWriting = true;
 			return;
 		}
 		CALIBRATION *cal = m_calibrationQueue.dequeue();
@@ -50,11 +51,12 @@ void StorageWrapper::s_writeQueues() {
 		//qInfo(logInfo()) << info.c_str();
 		m_writtenCalibrationsNr++;
 		delete cal;
+		cal = nullptr;
 	}
 
 	if (m_observeQueues && !m_abort) {
 		QMetaObject::invokeMethod(this, "s_writeQueues", Qt::QueuedConnection);
 	} else {
-		m_finishedWriting = TRUE;
+		m_finishedWriting = true;
 	}
 }

@@ -5,17 +5,17 @@ MockMicroscope::MockMicroscope() {
 }
 
 MockMicroscope::~MockMicroscope() {
-	m_isOpen = 0;
+	m_isOpen = false;
 }
 
 bool MockMicroscope::open(OpenMode mode) {
 	m_mode = mode;
-	m_isOpen = 1;
+	m_isOpen = true;
 	return m_isOpen;
 }
 
 void MockMicroscope::close() {
-	m_isOpen = 0;
+	m_isOpen = false;
 }
 
 qint64 MockMicroscope::readCharacter(char *data, qint64 maxlen) {

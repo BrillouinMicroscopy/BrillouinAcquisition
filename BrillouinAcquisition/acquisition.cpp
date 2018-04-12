@@ -16,9 +16,9 @@ bool Acquisition::isAcqRunning() {
 }
 
 void Acquisition::startAcquisition(std::string filename) {
-	m_running = 1;
+	m_running = true;
 	emit(s_acqRunning(m_running));
-	m_abort = 0;
+	m_abort = false;
 
 	emit(s_acqProgress(0.0, -1));
 	// set optical elements for brightfield/Brillouin imaging
@@ -27,7 +27,7 @@ void Acquisition::startAcquisition(std::string filename) {
 	// get current stage position
 	std::vector<double> startPosition = m_scanControl->getPosition();
 
-	m_fileHndl = new StorageWrapper(0, filename, H5F_ACC_RDWR);
+	m_fileHndl = new StorageWrapper(nullptr, filename, H5F_ACC_RDWR);
 	// move h5bm file to separate thread
 	m_storageThread.startWorker(m_fileHndl);
 
@@ -148,9 +148,9 @@ void Acquisition::startAcquisition(std::string filename) {
 
 	std::string info = "Acquisition finished.";
 	qInfo(logInfo()) << info.c_str();
-	m_running = 0;
+	m_running = false;
 	emit(s_acqRunning(m_running));
-	emit(s_acqCalibrationRunning(FALSE));
+	emit(s_acqCalibrationRunning(false));
 	emit(s_acqProgress(100.0, 0));
 }
 
@@ -162,9 +162,9 @@ void Acquisition::abort(std::vector<double> startPosition) {
 	m_storageThread.wait();
 	delete m_fileHndl;
 	m_fileHndl = nullptr;
-	m_running = 0;
+	m_running = false;
 	emit(s_acqRunning(m_running));
 	emit(s_acqProgress(0, -2));
 	emit(s_acqPosition(startPosition[0], startPosition[1], startPosition[2], 0));
-	emit(s_acqCalibrationRunning(FALSE));
+	emit(s_acqCalibrationRunning(false));
 }

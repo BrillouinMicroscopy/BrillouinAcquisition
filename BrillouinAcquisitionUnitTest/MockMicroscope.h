@@ -4,7 +4,7 @@
 class MockMicroscope : public com {
 	Q_OBJECT
 private:
-	bool m_isOpen = 0;
+	bool m_isOpen = false;
 	OpenMode m_mode;
 	QByteArray m_outputBuffer;
 public:
