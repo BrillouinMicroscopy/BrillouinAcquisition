@@ -63,6 +63,8 @@ private slots:
 	void cameraOptionsChanged(CAMERA_OPTIONS);
 	void showAcqPosition(double, double, double, int);
 	void showAcqProgress(double, int);
+	void showCalibrationInterval(int);
+	void showCalibrationRunning(bool);
 	void showAcqRunning(bool);
 	void updateFilename(std::string);
 
@@ -78,6 +80,11 @@ private slots:
 	void on_stepsX_valueChanged(int);
 	void on_stepsY_valueChanged(int);
 	void on_stepsZ_valueChanged(int);
+
+	// live calibration
+	void on_conCalibrationInterval_valueChanged(double);
+	void on_nrCalibrationImages_valueChanged(int);
+	void on_calibrationExposureTime_valueChanged(double);
 
 signals:
 	void settingsCameraChanged(SETTINGS_DEVICES);

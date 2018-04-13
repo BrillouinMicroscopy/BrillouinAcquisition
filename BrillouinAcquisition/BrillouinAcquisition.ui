@@ -856,7 +856,7 @@ QTabBar::tab:!selected {
                 <property name="geometry">
                  <rect>
                   <x>0</x>
-                  <y>-232</y>
+                  <y>0</y>
                   <width>433</width>
                   <height>740</height>
                  </rect>
@@ -1168,7 +1168,7 @@ QTabBar::tab:!selected {
                  <property name="title">
                   <string>Live calibration</string>
                  </property>
-                 <widget class="QCheckBox" name="preCalibrtion">
+                 <widget class="QCheckBox" name="preCalibration">
                   <property name="geometry">
                    <rect>
                     <x>10</x>
@@ -1214,25 +1214,6 @@ QTabBar::tab:!selected {
                   </property>
                   <property name="checked">
                    <bool>true</bool>
-                  </property>
-                 </widget>
-                 <widget class="QLineEdit" name="conCalibrationInterval">
-                  <property name="geometry">
-                   <rect>
-                    <x>150</x>
-                    <y>60</y>
-                    <width>41</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>10</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                  <property name="readOnly">
-                   <bool>false</bool>
                   </property>
                  </widget>
                  <widget class="QLabel" name="label_11">
@@ -1318,44 +1299,6 @@ QTabBar::tab:!selected {
                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                   </property>
                  </widget>
-                 <widget class="QLineEdit" name="nrCalibrationImages">
-                  <property name="geometry">
-                   <rect>
-                    <x>150</x>
-                    <y>140</y>
-                    <width>41</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>10</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                  <property name="readOnly">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                 <widget class="QLineEdit" name="calibrationExposureTime">
-                  <property name="geometry">
-                   <rect>
-                    <x>350</x>
-                    <y>140</y>
-                    <width>41</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>1</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                  <property name="readOnly">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
                  <widget class="QComboBox" name="sampleSelection">
                   <property name="geometry">
                    <rect>
@@ -1385,6 +1328,66 @@ QTabBar::tab:!selected {
                     <string>PMMA</string>
                    </property>
                   </item>
+                 </widget>
+                 <widget class="QDoubleSpinBox" name="conCalibrationInterval">
+                  <property name="geometry">
+                   <rect>
+                    <x>150</x>
+                    <y>60</y>
+                    <width>41</width>
+                    <height>30</height>
+                   </rect>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
+                  </property>
+                  <property name="decimals">
+                   <number>0</number>
+                  </property>
+                  <property name="value">
+                   <double>10.000000000000000</double>
+                  </property>
+                 </widget>
+                 <widget class="QDoubleSpinBox" name="calibrationExposureTime">
+                  <property name="geometry">
+                   <rect>
+                    <x>350</x>
+                    <y>140</y>
+                    <width>41</width>
+                    <height>30</height>
+                   </rect>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
+                  </property>
+                  <property name="decimals">
+                   <number>0</number>
+                  </property>
+                  <property name="value">
+                   <double>1.000000000000000</double>
+                  </property>
+                 </widget>
+                 <widget class="QSpinBox" name="nrCalibrationImages">
+                  <property name="geometry">
+                   <rect>
+                    <x>150</x>
+                    <y>140</y>
+                    <width>41</width>
+                    <height>30</height>
+                   </rect>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
+                  </property>
                  </widget>
                 </widget>
                 <widget class="QGroupBox" name="acquisitionProgress">
@@ -1573,6 +1576,9 @@ border: none;</string>
                  </widget>
                 </widget>
                 <widget class="QGroupBox" name="repetitions">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
                  <property name="geometry">
                   <rect>
                    <x>10</x>
@@ -1914,13 +1920,10 @@ border: none;</string>
   <tabstop>startZ</tabstop>
   <tabstop>endZ</tabstop>
   <tabstop>stepsZ</tabstop>
-  <tabstop>preCalibrtion</tabstop>
+  <tabstop>preCalibration</tabstop>
   <tabstop>postCalibration</tabstop>
   <tabstop>conCalibration</tabstop>
-  <tabstop>conCalibrationInterval</tabstop>
   <tabstop>sampleSelection</tabstop>
-  <tabstop>nrCalibrationImages</tabstop>
-  <tabstop>calibrationExposureTime</tabstop>
   <tabstop>repetitionCount</tabstop>
   <tabstop>repetitionInterval</tabstop>
   <tabstop>positionX</tabstop>

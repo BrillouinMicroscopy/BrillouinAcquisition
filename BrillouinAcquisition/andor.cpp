@@ -267,3 +267,12 @@ void Andor::acquireImage(AT_U8* buffer) {
 
 	delete[] Buffer;
 };
+
+void Andor::setCalibrationExposureTime(double exposureTime) {
+	m_settings.exposureTime = exposureTime;
+	AT_Command(m_cameraHndl, L"AcquisitionStop");
+	// Set the exposure time
+	AT_SetFloat(m_cameraHndl, L"ExposureTime", m_settings.exposureTime);
+
+	AT_Command(m_cameraHndl, L"AcquisitionStart");
+}

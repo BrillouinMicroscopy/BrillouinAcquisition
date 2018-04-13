@@ -19,8 +19,12 @@ public:
 };
 
 struct CALIBRATION {
+public:
+	CALIBRATION(int index, std::vector<unsigned short> data, int rank, hsize_t *dims, std::string sample, double shift, std::string date) :
+		index(index), data(data), rank(rank), dims(dims), sample(sample), shift(shift), date(date) {};
+
 	const int index;
-	const std::vector<double> data;
+	const std::vector<unsigned short> data;
 	const int rank;
 	const hsize_t *dims;
 	const std::string sample;

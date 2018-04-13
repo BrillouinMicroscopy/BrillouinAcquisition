@@ -16,7 +16,7 @@ struct ACQUISITION_SETTINGS {
 	bool postCalibration = true;			// do post calibration
 	bool conCalibration = true;				// do continuous calibration
 	double conCalibrationInterval = 10;		// interval of continuous calibrations
-	int calibrationImages = 10;				// number of calibration images
+	int nrCalibrationImages = 10;				// number of calibration images
 	double calibrationExposureTime = 1;		// exposure time for calibration images
 	
 	// repetition parameters
@@ -56,9 +56,13 @@ private:
 	Andor *m_andor;
 	ScanControl *m_scanControl;
 	bool m_running = false;				// is acquisition currently running
-	void abort(std::vector<double> startPosition);
+	std::vector<double> m_startPosition = { 0,0,0 };
+	void abort();
 	void setSettings(ACQUISITION_SETTINGS acqSettings);
 	std::string checkFilename(std::string oldFilename);
+
+	int nrCalibrations = 1;
+	void doCalibration();
 
 signals:
 	void s_acqRunning(bool);			// is acquisition running

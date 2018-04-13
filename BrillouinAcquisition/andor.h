@@ -82,6 +82,7 @@ public:
 	const wchar_t getTemperatureStatus();
 	double getSensorTemperature();
 	void cleanupAcquisition();
+	void setCalibrationExposureTime(double);
 
 	// setters/getters for ROI
 

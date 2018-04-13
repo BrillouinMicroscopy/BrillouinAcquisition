@@ -105,6 +105,22 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 		SLOT(updateFilename(std::string))
 	);
 
+	// slot to show calibration running
+	QWidget::connect(
+		m_acquisition,
+		SIGNAL(s_acqCalibrationRunning(bool)),
+		this,
+		SLOT(showCalibrationRunning(bool))
+	);
+
+	// slot to show time until next calibration
+	QWidget::connect(
+		m_acquisition,
+		SIGNAL(s_acqTimeToCalibration(int)),
+		this,
+		SLOT(showCalibrationInterval(int))
+	);
+
 	qRegisterMetaType<std::string>("std::string");
 	qRegisterMetaType<AT_64>("AT_64");
 	qRegisterMetaType<CircularBuffer<AT_U8>>("CircularBuffer<AT_U8>");
@@ -298,6 +314,18 @@ void BrillouinAcquisition::showAcqProgress(double progress, int seconds) {
 		}
 	}
 	ui->progressBar->setFormat(string);
+}
+
+void BrillouinAcquisition::showCalibrationInterval(int value) {
+	ui->calibrationProgress->setValue(value);
+	ui->calibrationProgress->setFormat("Time to next calibration.");
+}
+
+void BrillouinAcquisition::showCalibrationRunning(bool isCalibrating) {
+	if (isCalibrating) {
+		ui->calibrationProgress->setValue(100);
+		ui->calibrationProgress->setFormat("Acquiring calibration.");
+	}
 }
 
 void BrillouinAcquisition::addListToComboBox(QComboBox* box, std::vector<AT_WC*> list, bool clear) {
@@ -629,6 +657,7 @@ void BrillouinAcquisition::updateFilename(std::string filename) {
 void BrillouinAcquisition::updateAcquisitionSettings() {
 	ui->acquisitionFilename->setText(QString::fromStdString(m_acquisitionSettings.filename));
 
+	// AOI settings
 	ui->startX->setValue(m_acquisitionSettings.xMin);
 	ui->startY->setValue(m_acquisitionSettings.yMin);
 	ui->startZ->setValue(m_acquisitionSettings.zMin);
@@ -638,6 +667,16 @@ void BrillouinAcquisition::updateAcquisitionSettings() {
 	ui->stepsX->setValue(m_acquisitionSettings.xSteps);
 	ui->stepsY->setValue(m_acquisitionSettings.ySteps);
 	ui->stepsZ->setValue(m_acquisitionSettings.zSteps);
+
+	// calibration settings
+	ui->preCalibration->setEnabled(m_acquisitionSettings.preCalibration);
+	ui->postCalibration->setEnabled(m_acquisitionSettings.postCalibration);
+	ui->conCalibration->setEnabled(m_acquisitionSettings.conCalibration);
+	ui->conCalibrationInterval->setValue(m_acquisitionSettings.conCalibrationInterval);
+	ui->nrCalibrationImages->setValue(m_acquisitionSettings.nrCalibrationImages);
+	ui->calibrationExposureTime->setValue(m_acquisitionSettings.calibrationExposureTime);
+	ui->sampleSelection->setCurrentText(QString::fromStdString(m_acquisitionSettings.sample));
+
 }
 
 void BrillouinAcquisition::on_startX_valueChanged(double value) {
@@ -675,6 +714,18 @@ void BrillouinAcquisition::on_stepsY_valueChanged(int value) {
 void BrillouinAcquisition::on_stepsZ_valueChanged(int value) {
 	m_acquisitionSettings.zSteps = value;
 }
+
+void BrillouinAcquisition::on_conCalibrationInterval_valueChanged(double value) {
+	m_acquisitionSettings.conCalibrationInterval = value;
+}
+
+void BrillouinAcquisition::on_nrCalibrationImages_valueChanged(int value) {
+	m_acquisitionSettings.nrCalibrationImages = value;
+};
+
+void BrillouinAcquisition::on_calibrationExposureTime_valueChanged(double value) {
+	m_acquisitionSettings.calibrationExposureTime = value;
+};
 
 void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradientPreset preset) {
 	gradient->clearColorStops();
