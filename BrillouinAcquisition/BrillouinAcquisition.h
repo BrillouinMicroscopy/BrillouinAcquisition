@@ -30,6 +30,7 @@ enum CustomGradientPreset {
 Q_DECLARE_METATYPE(std::string);
 Q_DECLARE_METATYPE(AT_64);
 Q_DECLARE_METATYPE(CircularBuffer<AT_U8>);
+Q_DECLARE_METATYPE(ACQUISITION_SETTINGS);
 
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
@@ -63,6 +64,20 @@ private slots:
 	void showAcqPosition(double, double, double, int);
 	void showAcqProgress(double, int);
 	void showAcqRunning(bool);
+	void updateFilename(std::string);
+
+	void updateAcquisitionSettings();
+
+	// acquisition AOI
+	void on_startX_valueChanged(double);
+	void on_startY_valueChanged(double);
+	void on_startZ_valueChanged(double);
+	void on_endX_valueChanged(double);
+	void on_endY_valueChanged(double);
+	void on_endZ_valueChanged(double);
+	void on_stepsX_valueChanged(int);
+	void on_stepsY_valueChanged(int);
+	void on_stepsZ_valueChanged(int);
 
 signals:
 	void settingsCameraChanged(SETTINGS_DEVICES);
@@ -83,6 +98,7 @@ private:
 	Acquisition *m_acquisition = new Acquisition(nullptr, m_andor, m_scanControl);
 	QCPColorMap *m_colorMap;
 	SETTINGS_DEVICES m_deviceSettings;
+	ACQUISITION_SETTINGS m_acquisitionSettings;
 	bool m_viewRunning = false;
 	AT_64 m_imageHeight = 2048;
 	AT_64 m_imageWidth = 2048;

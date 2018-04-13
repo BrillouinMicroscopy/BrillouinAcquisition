@@ -18,7 +18,8 @@ struct ACQUISITION_SETTINGS {
 	double conCalibrationInterval = 10;		// interval of continuous calibrations
 	int calibrationImages = 10;				// number of calibration images
 	double calibrationExposureTime = 1;		// exposure time for calibration images
-											// repetition parameters
+	
+	// repetition parameters
 	int repetitionCount = 1;				// number of repetitions
 	double repetitionInterval = 10;			// repetition interval
 
@@ -46,7 +47,7 @@ public:
 	bool isAcqRunning();
 
 public slots:
-	void startAcquisition(std::string filename = "Brillouin.h5");
+	void startAcquisition(ACQUISITION_SETTINGS acqSettings);
 
 private:
 	ACQUISITION_SETTINGS m_acqSettings;
@@ -56,6 +57,8 @@ private:
 	ScanControl *m_scanControl;
 	bool m_running = false;				// is acquisition currently running
 	void abort(std::vector<double> startPosition);
+	void setSettings(ACQUISITION_SETTINGS acqSettings);
+	std::string checkFilename(std::string oldFilename);
 
 signals:
 	void s_acqRunning(bool);			// is acquisition running
@@ -64,6 +67,7 @@ signals:
 	void s_acqPosition(double, double, double, int);
 	void s_acqTimeToCalibration(int);	// time to next calibration
 	void s_acqCalibrationRunning(bool);	// is calibration running
+	void s_filenameChanged(std::string);
 };
 
 #endif //ACQUISITION_H

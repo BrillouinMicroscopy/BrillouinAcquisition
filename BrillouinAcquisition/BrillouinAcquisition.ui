@@ -856,7 +856,7 @@ QTabBar::tab:!selected {
                 <property name="geometry">
                  <rect>
                   <x>0</x>
-                  <y>0</y>
+                  <y>-232</y>
                   <width>433</width>
                   <height>740</height>
                  </rect>
@@ -867,7 +867,7 @@ QTabBar::tab:!selected {
                   <height>740</height>
                  </size>
                 </property>
-                <widget class="QGroupBox" name="groupBox">
+                <widget class="QGroupBox" name="acquisitionAOI">
                  <property name="geometry">
                   <rect>
                    <x>10</x>
@@ -879,7 +879,7 @@ QTabBar::tab:!selected {
                  <property name="title">
                   <string>Area of interest</string>
                  </property>
-                 <widget class="QLabel" name="label_5">
+                 <widget class="QLabel" name="stepsLabel">
                   <property name="geometry">
                    <rect>
                     <x>290</x>
@@ -895,7 +895,7 @@ QTabBar::tab:!selected {
                    <set>Qt::AlignCenter</set>
                   </property>
                  </widget>
-                 <widget class="QLabel" name="label_6">
+                 <widget class="QLabel" name="startLabel">
                   <property name="geometry">
                    <rect>
                     <x>70</x>
@@ -911,7 +911,7 @@ QTabBar::tab:!selected {
                    <set>Qt::AlignCenter</set>
                   </property>
                  </widget>
-                 <widget class="QLabel" name="label_7">
+                 <widget class="QLabel" name="endLabel">
                   <property name="geometry">
                    <rect>
                     <x>180</x>
@@ -927,7 +927,7 @@ QTabBar::tab:!selected {
                    <set>Qt::AlignCenter</set>
                   </property>
                  </widget>
-                 <widget class="QLabel" name="label_8">
+                 <widget class="QLabel" name="xLabel">
                   <property name="geometry">
                    <rect>
                     <x>10</x>
@@ -943,7 +943,7 @@ QTabBar::tab:!selected {
                    <set>Qt::AlignCenter</set>
                   </property>
                  </widget>
-                 <widget class="QLabel" name="label_9">
+                 <widget class="QLabel" name="yLabel">
                   <property name="geometry">
                    <rect>
                     <x>10</x>
@@ -959,7 +959,7 @@ QTabBar::tab:!selected {
                    <set>Qt::AlignCenter</set>
                   </property>
                  </widget>
-                 <widget class="QLabel" name="label_10">
+                 <widget class="QLabel" name="zLabel">
                   <property name="geometry">
                    <rect>
                     <x>10</x>
@@ -975,7 +975,7 @@ QTabBar::tab:!selected {
                    <set>Qt::AlignCenter</set>
                   </property>
                  </widget>
-                 <widget class="QDoubleSpinBox" name="doubleSpinBox">
+                 <widget class="QDoubleSpinBox" name="startX">
                   <property name="geometry">
                    <rect>
                     <x>70</x>
@@ -987,6 +987,9 @@ QTabBar::tab:!selected {
                   <property name="decimals">
                    <number>1</number>
                   </property>
+                  <property name="minimum">
+                   <double>-1000.000000000000000</double>
+                  </property>
                   <property name="maximum">
                    <double>1000.000000000000000</double>
                   </property>
@@ -994,7 +997,7 @@ QTabBar::tab:!selected {
                    <double>1.000000000000000</double>
                   </property>
                  </widget>
-                 <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+                 <widget class="QDoubleSpinBox" name="endX">
                   <property name="geometry">
                    <rect>
                     <x>180</x>
@@ -1006,6 +1009,9 @@ QTabBar::tab:!selected {
                   <property name="decimals">
                    <number>1</number>
                   </property>
+                  <property name="minimum">
+                   <double>-1000.000000000000000</double>
+                  </property>
                   <property name="maximum">
                    <double>1000.000000000000000</double>
                   </property>
@@ -1013,7 +1019,7 @@ QTabBar::tab:!selected {
                    <double>1.000000000000000</double>
                   </property>
                  </widget>
-                 <widget class="QDoubleSpinBox" name="doubleSpinBox_3">
+                 <widget class="QDoubleSpinBox" name="endZ">
                   <property name="geometry">
                    <rect>
                     <x>180</x>
@@ -1025,6 +1031,9 @@ QTabBar::tab:!selected {
                   <property name="decimals">
                    <number>1</number>
                   </property>
+                  <property name="minimum">
+                   <double>-1000.000000000000000</double>
+                  </property>
                   <property name="maximum">
                    <double>1000.000000000000000</double>
                   </property>
@@ -1032,7 +1041,7 @@ QTabBar::tab:!selected {
                    <double>1.000000000000000</double>
                   </property>
                  </widget>
-                 <widget class="QDoubleSpinBox" name="doubleSpinBox_4">
+                 <widget class="QDoubleSpinBox" name="startZ">
                   <property name="geometry">
                    <rect>
                     <x>70</x>
@@ -1044,6 +1053,9 @@ QTabBar::tab:!selected {
                   <property name="decimals">
                    <number>1</number>
                   </property>
+                  <property name="minimum">
+                   <double>-1000.000000000000000</double>
+                  </property>
                   <property name="maximum">
                    <double>1000.000000000000000</double>
                   </property>
@@ -1051,7 +1063,7 @@ QTabBar::tab:!selected {
                    <double>1.000000000000000</double>
                   </property>
                  </widget>
-                 <widget class="QDoubleSpinBox" name="doubleSpinBox_5">
+                 <widget class="QDoubleSpinBox" name="startY">
                   <property name="geometry">
                    <rect>
                     <x>70</x>
@@ -1063,6 +1075,9 @@ QTabBar::tab:!selected {
                   <property name="decimals">
                    <number>1</number>
                   </property>
+                  <property name="minimum">
+                   <double>-1000.000000000000000</double>
+                  </property>
                   <property name="maximum">
                    <double>1000.000000000000000</double>
                   </property>
@@ -1070,7 +1085,7 @@ QTabBar::tab:!selected {
                    <double>1.000000000000000</double>
                   </property>
                  </widget>
-                 <widget class="QDoubleSpinBox" name="doubleSpinBox_6">
+                 <widget class="QDoubleSpinBox" name="endY">
                   <property name="geometry">
                    <rect>
                     <x>180</x>
@@ -1082,6 +1097,9 @@ QTabBar::tab:!selected {
                   <property name="decimals">
                    <number>1</number>
                   </property>
+                  <property name="minimum">
+                   <double>-1000.000000000000000</double>
+                  </property>
                   <property name="maximum">
                    <double>1000.000000000000000</double>
                   </property>
@@ -1089,7 +1107,7 @@ QTabBar::tab:!selected {
                    <double>1.000000000000000</double>
                   </property>
                  </widget>
-                 <widget class="QSpinBox" name="spinBox">
+                 <widget class="QSpinBox" name="stepsX">
                   <property name="geometry">
                    <rect>
                     <x>291</x>
@@ -1105,7 +1123,7 @@ QTabBar::tab:!selected {
                    <number>1000</number>
                   </property>
                  </widget>
-                 <widget class="QSpinBox" name="spinBox_2">
+                 <widget class="QSpinBox" name="stepsZ">
                   <property name="geometry">
                    <rect>
                     <x>290</x>
@@ -1121,7 +1139,7 @@ QTabBar::tab:!selected {
                    <number>1000</number>
                   </property>
                  </widget>
-                 <widget class="QSpinBox" name="spinBox_3">
+                 <widget class="QSpinBox" name="stepsY">
                   <property name="geometry">
                    <rect>
                     <x>290</x>
@@ -1138,7 +1156,7 @@ QTabBar::tab:!selected {
                   </property>
                  </widget>
                 </widget>
-                <widget class="QGroupBox" name="groupBox_2">
+                <widget class="QGroupBox" name="liveCalibration">
                  <property name="geometry">
                   <rect>
                    <x>10</x>
@@ -1150,7 +1168,7 @@ QTabBar::tab:!selected {
                  <property name="title">
                   <string>Live calibration</string>
                  </property>
-                 <widget class="QCheckBox" name="checkBox">
+                 <widget class="QCheckBox" name="preCalibrtion">
                   <property name="geometry">
                    <rect>
                     <x>10</x>
@@ -1166,7 +1184,7 @@ QTabBar::tab:!selected {
                    <bool>true</bool>
                   </property>
                  </widget>
-                 <widget class="QCheckBox" name="checkBox_2">
+                 <widget class="QCheckBox" name="conCalibration">
                   <property name="geometry">
                    <rect>
                     <x>10</x>
@@ -1182,7 +1200,7 @@ QTabBar::tab:!selected {
                    <bool>true</bool>
                   </property>
                  </widget>
-                 <widget class="QCheckBox" name="checkBox_3">
+                 <widget class="QCheckBox" name="postCalibration">
                   <property name="geometry">
                    <rect>
                     <x>220</x>
@@ -1198,7 +1216,7 @@ QTabBar::tab:!selected {
                    <bool>true</bool>
                   </property>
                  </widget>
-                 <widget class="QLineEdit" name="lineEdit_14">
+                 <widget class="QLineEdit" name="conCalibrationInterval">
                   <property name="geometry">
                    <rect>
                     <x>150</x>
@@ -1233,7 +1251,7 @@ QTabBar::tab:!selected {
                    <set>Qt::AlignCenter</set>
                   </property>
                  </widget>
-                 <widget class="QProgressBar" name="progressBar_2">
+                 <widget class="QProgressBar" name="calibrationProgress">
                   <property name="geometry">
                    <rect>
                     <x>10</x>
@@ -1300,7 +1318,7 @@ QTabBar::tab:!selected {
                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                   </property>
                  </widget>
-                 <widget class="QLineEdit" name="lineEdit_15">
+                 <widget class="QLineEdit" name="nrCalibrationImages">
                   <property name="geometry">
                    <rect>
                     <x>150</x>
@@ -1319,7 +1337,7 @@ QTabBar::tab:!selected {
                    <bool>false</bool>
                   </property>
                  </widget>
-                 <widget class="QLineEdit" name="lineEdit_16">
+                 <widget class="QLineEdit" name="calibrationExposureTime">
                   <property name="geometry">
                    <rect>
                     <x>350</x>
@@ -1338,7 +1356,7 @@ QTabBar::tab:!selected {
                    <bool>false</bool>
                   </property>
                  </widget>
-                 <widget class="QComboBox" name="comboBox">
+                 <widget class="QComboBox" name="sampleSelection">
                   <property name="geometry">
                    <rect>
                     <x>190</x>
@@ -1369,7 +1387,7 @@ QTabBar::tab:!selected {
                   </item>
                  </widget>
                 </widget>
-                <widget class="QGroupBox" name="groupBox_3">
+                <widget class="QGroupBox" name="acquisitionProgress">
                  <property name="geometry">
                   <rect>
                    <x>10</x>
@@ -1554,7 +1572,7 @@ border: none;</string>
                   </property>
                  </widget>
                 </widget>
-                <widget class="QGroupBox" name="groupBox_4">
+                <widget class="QGroupBox" name="repetitions">
                  <property name="geometry">
                   <rect>
                    <x>10</x>
@@ -1566,7 +1584,7 @@ border: none;</string>
                  <property name="title">
                   <string>Repetitions</string>
                  </property>
-                 <widget class="QLineEdit" name="lineEdit_17">
+                 <widget class="QLineEdit" name="repetitionCount">
                   <property name="geometry">
                    <rect>
                     <x>150</x>
@@ -1585,7 +1603,7 @@ border: none;</string>
                    <bool>false</bool>
                   </property>
                  </widget>
-                 <widget class="QLabel" name="label_15">
+                 <widget class="QLabel" name="repetitionCount_label">
                   <property name="geometry">
                    <rect>
                     <x>10</x>
@@ -1601,7 +1619,7 @@ border: none;</string>
                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                   </property>
                  </widget>
-                 <widget class="QLabel" name="label_16">
+                 <widget class="QLabel" name="repetitionInterval_label">
                   <property name="geometry">
                    <rect>
                     <x>210</x>
@@ -1617,7 +1635,7 @@ border: none;</string>
                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                   </property>
                  </widget>
-                 <widget class="QLineEdit" name="lineEdit_18">
+                 <widget class="QLineEdit" name="repetitionInterval">
                   <property name="geometry">
                    <rect>
                     <x>350</x>
@@ -1637,7 +1655,7 @@ border: none;</string>
                   </property>
                  </widget>
                 </widget>
-                <widget class="QLabel" name="label_17">
+                <widget class="QLabel" name="acquisitionFilename_label">
                  <property name="geometry">
                   <rect>
                    <x>10</x>
@@ -1656,7 +1674,7 @@ border: none;</string>
                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                  </property>
                 </widget>
-                <widget class="QLineEdit" name="lineEdit_5">
+                <widget class="QLineEdit" name="acquisitionFilename">
                  <property name="geometry">
                   <rect>
                    <x>90</x>
@@ -1882,6 +1900,35 @@ border: none;</string>
   <tabstop>pixelEncoding</tabstop>
   <tabstop>cycleMode</tabstop>
   <tabstop>sTScrollArea</tabstop>
+  <tabstop>settingsWidget</tabstop>
+  <tabstop>sTScrollArea_2</tabstop>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>acquisitionFilename</tabstop>
+  <tabstop>acquisitionStart</tabstop>
+  <tabstop>startX</tabstop>
+  <tabstop>endX</tabstop>
+  <tabstop>stepsX</tabstop>
+  <tabstop>startY</tabstop>
+  <tabstop>endY</tabstop>
+  <tabstop>stepsY</tabstop>
+  <tabstop>startZ</tabstop>
+  <tabstop>endZ</tabstop>
+  <tabstop>stepsZ</tabstop>
+  <tabstop>preCalibrtion</tabstop>
+  <tabstop>postCalibration</tabstop>
+  <tabstop>conCalibration</tabstop>
+  <tabstop>conCalibrationInterval</tabstop>
+  <tabstop>sampleSelection</tabstop>
+  <tabstop>nrCalibrationImages</tabstop>
+  <tabstop>calibrationExposureTime</tabstop>
+  <tabstop>repetitionCount</tabstop>
+  <tabstop>repetitionInterval</tabstop>
+  <tabstop>positionX</tabstop>
+  <tabstop>positionY</tabstop>
+  <tabstop>positionZ</tabstop>
+  <tabstop>imageNr</tabstop>
+  <tabstop>camera_singleShot</tabstop>
+  <tabstop>camera_playPause</tabstop>
  </tabstops>
  <resources>
   <include location="BrillouinAcquisition.qrc"/>

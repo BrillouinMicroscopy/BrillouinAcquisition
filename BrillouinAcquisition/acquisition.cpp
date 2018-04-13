@@ -15,7 +15,9 @@ bool Acquisition::isAcqRunning() {
 	return m_running;
 }
 
-void Acquisition::startAcquisition(std::string filename) {
+void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
+	setSettings(acqSettings);
+
 	m_running = true;
 	emit(s_acqRunning(m_running));
 	m_abort = false;
@@ -27,7 +29,7 @@ void Acquisition::startAcquisition(std::string filename) {
 	// get current stage position
 	std::vector<double> startPosition = m_scanControl->getPosition();
 
-	m_fileHndl = new StorageWrapper(nullptr, filename, H5F_ACC_RDWR);
+	m_fileHndl = new StorageWrapper(nullptr, m_acqSettings.filename, H5F_ACC_RDWR);
 	// move h5bm file to separate thread
 	m_storageThread.startWorker(m_fileHndl);
 
@@ -167,4 +169,20 @@ void Acquisition::abort(std::vector<double> startPosition) {
 	emit(s_acqProgress(0, -2));
 	emit(s_acqPosition(startPosition[0], startPosition[1], startPosition[2], 0));
 	emit(s_acqCalibrationRunning(false));
+}
+
+void Acquisition::setSettings(ACQUISITION_SETTINGS acqSettings) {
+	m_acqSettings = acqSettings;
+
+	std::string newFilename = checkFilename(acqSettings.filename);
+	if (newFilename != acqSettings.filename) {
+		m_acqSettings.filename = newFilename;
+		emit(s_filenameChanged(newFilename));
+	}
+}
+
+std::string Acquisition::checkFilename(std::string oldFilename) {
+	// todo
+	// if (file with old filename already exists) { add increasing counter to filename };
+	return oldFilename;
 }

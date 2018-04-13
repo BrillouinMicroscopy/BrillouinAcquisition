@@ -97,9 +97,18 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 		SLOT(showAcqProgress(double, int))
 	);
 
+	// slot to update filename
+	QWidget::connect(
+		m_acquisition,
+		SIGNAL(s_filenameChanged(std::string)),
+		this,
+		SLOT(updateFilename(std::string))
+	);
+
 	qRegisterMetaType<std::string>("std::string");
 	qRegisterMetaType<AT_64>("AT_64");
 	qRegisterMetaType<CircularBuffer<AT_U8>>("CircularBuffer<AT_U8>");
+	qRegisterMetaType<ACQUISITION_SETTINGS>("ACQUISITION_SETTINGS");
 
 	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
 	ui->settingsWidget->setTabIcon(0, icon);
@@ -119,6 +128,8 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 
 	// set up the camera image plot
 	BrillouinAcquisition::initializePlot();
+
+	updateAcquisitionSettings();
 
 	// Set up GUI
 	std::vector<std::string> groupLabels = {"Reflector", "Objective", "Tubelens", "Baseport", "Sideport", "Mirror"};
@@ -587,7 +598,7 @@ void BrillouinAcquisition::on_camera_singleShot_clicked() {
 
 void BrillouinAcquisition::on_acquisitionStart_clicked() {
 	if (!m_acquisition->isAcqRunning()) {
-		QMetaObject::invokeMethod(m_acquisition, "startAcquisition", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(m_acquisition, "startAcquisition", Qt::QueuedConnection, Q_ARG(ACQUISITION_SETTINGS, m_acquisitionSettings));
 	} else {
 		m_acquisition->m_abort = 1;
 	}
@@ -599,6 +610,70 @@ void BrillouinAcquisition::showAcqRunning(bool isRunning) {
 	} else {
 		ui->acquisitionStart->setText("Start");
 	}
+	ui->startX->setEnabled(!isRunning);
+	ui->startY->setEnabled(!isRunning);
+	ui->startZ->setEnabled(!isRunning);
+	ui->endX->setEnabled(!isRunning);
+	ui->endY->setEnabled(!isRunning);
+	ui->endZ->setEnabled(!isRunning);
+	ui->stepsX->setEnabled(!isRunning);
+	ui->stepsY->setEnabled(!isRunning);
+	ui->stepsZ->setEnabled(!isRunning);
+}
+
+void BrillouinAcquisition::updateFilename(std::string filename) {
+	m_acquisitionSettings.filename = filename;
+	updateAcquisitionSettings();
+}
+
+void BrillouinAcquisition::updateAcquisitionSettings() {
+	ui->acquisitionFilename->setText(QString::fromStdString(m_acquisitionSettings.filename));
+
+	ui->startX->setValue(m_acquisitionSettings.xMin);
+	ui->startY->setValue(m_acquisitionSettings.yMin);
+	ui->startZ->setValue(m_acquisitionSettings.zMin);
+	ui->endX->setValue(m_acquisitionSettings.xMax);
+	ui->endY->setValue(m_acquisitionSettings.yMax);
+	ui->endZ->setValue(m_acquisitionSettings.zMax);
+	ui->stepsX->setValue(m_acquisitionSettings.xSteps);
+	ui->stepsY->setValue(m_acquisitionSettings.ySteps);
+	ui->stepsZ->setValue(m_acquisitionSettings.zSteps);
+}
+
+void BrillouinAcquisition::on_startX_valueChanged(double value) {
+	m_acquisitionSettings.xMin = value;
+}
+
+void BrillouinAcquisition::on_startY_valueChanged(double value) {
+	m_acquisitionSettings.yMin = value;
+}
+
+void BrillouinAcquisition::on_startZ_valueChanged(double value) {
+	m_acquisitionSettings.zMin = value;
+}
+
+void BrillouinAcquisition::on_endX_valueChanged(double value) {
+	m_acquisitionSettings.xMax = value;
+}
+
+void BrillouinAcquisition::on_endY_valueChanged(double value) {
+	m_acquisitionSettings.yMax = value;
+}
+
+void BrillouinAcquisition::on_endZ_valueChanged(double value) {
+	m_acquisitionSettings.zMax = value;
+}
+
+void BrillouinAcquisition::on_stepsX_valueChanged(int value) {
+	m_acquisitionSettings.xSteps = value;
+}
+
+void BrillouinAcquisition::on_stepsY_valueChanged(int value) {
+	m_acquisitionSettings.ySteps = value;
+}
+
+void BrillouinAcquisition::on_stepsZ_valueChanged(int value) {
+	m_acquisitionSettings.zSteps = value;
 }
 
 void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradientPreset preset) {
