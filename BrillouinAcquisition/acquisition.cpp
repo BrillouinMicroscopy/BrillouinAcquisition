@@ -2,6 +2,9 @@
 #include "acquisition.h"
 #include "simplemath.h"
 #include "logger.h"
+#include "filesystem"
+
+using namespace std::experimental::filesystem::v1;
 
 
 Acquisition::Acquisition(QObject *parent, Andor *andor, ScanControl *scanControl)
@@ -200,10 +203,15 @@ void Acquisition::setSettings(ACQUISITION_SETTINGS acqSettings) {
 	}
 }
 
-std::string Acquisition::checkFilename(std::string oldFilename) {
-	// todo
-	// if (file with old filename already exists) { add increasing counter to filename };
-	return oldFilename;
+std::string Acquisition::checkFilename(std::string filename) {
+	// get filename without extension
+	std::string rawFilename = filename.substr(0, filename.find_last_of("."));
+	int count = 0;
+	while (exists(filename)) {
+		filename = rawFilename + '-' + std::to_string(count) + filename.substr(filename.find_last_of("."), std::string::npos);
+		count++;
+	}
+	return filename;
 }
 
 void Acquisition::doCalibration() {
