@@ -138,9 +138,9 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 					// acquire images
 					m_andor->acquireImage(&images[bytesPerFrame * mm]);
 
-					memcpy(previewBuffer->getWriteBuffer(), &images, bytesPerFrame);
+					//memcpy(previewBuffer->getWriteBuffer(), &images, bytesPerFrame);
 
-					previewBuffer->m_usedBuffers->release();
+					//previewBuffer->m_usedBuffers->release();
 
 				}
 
