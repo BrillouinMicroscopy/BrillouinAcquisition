@@ -107,9 +107,9 @@ std::string com::receive(std::string request) {
 	request = request + m_terminator;
 	writeData(request.c_str(), request.size());
 
-	waitForBytesWritten();
+	waitForBytesWritten(1000);
 
-	waitForReadyRead();
+	waitForReadyRead(1000);
 
 	char buf[1024];
 	std::string answer;
@@ -191,7 +191,7 @@ void Focus::setZ(double position) {
 	int inc = static_cast<int>(position);
 	inc %= m_rangeFocus;
 	std::string pos = helper::dec2hex(inc, 6);
-	receive("ZD" + pos);
+	send("ZD" + pos);
 }
 
 void Focus::setVelocityZ(double velocity) {
