@@ -35,6 +35,14 @@ ScanControl::ScanControl() {
 	m_focus = new Focus(m_comObject);
 	m_mcu = new MCU(m_comObject);
 	m_stand = new Stand(m_comObject);
+
+	QWidget::connect(
+		m_comObject,
+		SIGNAL(errorOccurred(QSerialPort::SerialPortError)),
+		this,
+		SLOT(errorHandler(QSerialPort::SerialPortError))
+	);
+
 }
 
 ScanControl::~ScanControl() {
@@ -63,6 +71,9 @@ bool ScanControl::disconnect() {
 	}
 	emit(microscopeConnected(isConnected));
 	return isConnected;
+}
+
+void ScanControl::errorHandler(QSerialPort::SerialPortError error) {
 }
 
 bool ScanControl::getConnectionStatus() {
@@ -151,7 +162,9 @@ void com::send(std::string message) {
 	message = message + m_terminator;
 	write(message.c_str());
 
-	waitForBytesWritten();
+	flush();
+
+	waitForBytesWritten(1000);
 }
 
 

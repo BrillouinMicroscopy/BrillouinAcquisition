@@ -139,6 +139,7 @@ public:
 public slots:
 	bool connect();
 	bool disconnect();
+	void errorHandler(QSerialPort::SerialPortError error);
 
 signals:
 	void microscopeConnected(bool);
