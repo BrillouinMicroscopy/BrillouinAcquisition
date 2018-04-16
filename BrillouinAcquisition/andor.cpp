@@ -238,6 +238,7 @@ void Andor::cleanupAcquisition() {
 
 
 void Andor::prepareMeasurement(CAMERA_SETTINGS settings) {
+	m_settings = settings;
 	setSettings();
 
 	// Start acquisition

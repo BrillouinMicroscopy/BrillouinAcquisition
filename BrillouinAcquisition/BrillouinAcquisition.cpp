@@ -441,24 +441,28 @@ void BrillouinAcquisition::settingsCameraUpdate(SETTINGS_DEVICES settings) {
 
 void BrillouinAcquisition::on_ROILeft_valueChanged(int left) {
 	m_deviceSettings.camera.roi.left = left;
+	m_acquisitionSettings.camera.roi.left = left;
 	ui->customplot->xAxis->setRange(QCPRange(left, left + m_deviceSettings.camera.roi.width));
 	ui->customplot->replot();
 }
 
 void BrillouinAcquisition::on_ROIWidth_valueChanged(int width) {
 	m_deviceSettings.camera.roi.width = width;
+	m_acquisitionSettings.camera.roi.width = width;
 	ui->customplot->xAxis->setRange(QCPRange(m_deviceSettings.camera.roi.left, m_deviceSettings.camera.roi.left + width));
 	ui->customplot->replot();
 }
 
 void BrillouinAcquisition::on_ROITop_valueChanged(int top) {
 	m_deviceSettings.camera.roi.top = top;
+	m_acquisitionSettings.camera.roi.top = top;
 	ui->customplot->yAxis->setRange(QCPRange(top, top + m_deviceSettings.camera.roi.height));
 	ui->customplot->replot();
 }
 
 void BrillouinAcquisition::on_ROIHeight_valueChanged(int height) {
 	m_deviceSettings.camera.roi.height = height;
+	m_acquisitionSettings.camera.roi.height = height;
 	ui->customplot->yAxis->setRange(QCPRange(m_deviceSettings.camera.roi.top, m_deviceSettings.camera.roi.top + height));
 	ui->customplot->replot();
 }
