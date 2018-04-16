@@ -253,6 +253,8 @@ void BrillouinAcquisition::acquisitionRunning(bool isRunning, CircularBuffer<AT_
 		m_viewRunning = true;
 		m_imageWidth = imageWidth;
 		m_imageHeight = imageHeight;
+		m_colorMap->data()->setSize(imageWidth, imageHeight);
+		m_colorMap->data()->setRange(QCPRange(0, m_imageWidth), QCPRange(0, m_imageHeight));
 		onNewImage();
 	} else {
 		ui->camera_playPause->setText("Play");
@@ -261,6 +263,9 @@ void BrillouinAcquisition::acquisitionRunning(bool isRunning, CircularBuffer<AT_
 }
 
 void BrillouinAcquisition::cameraOptionsChanged(CAMERA_OPTIONS options) {
+	m_cameraOptions.ROIHeightLimits = options.ROIHeightLimits;
+	m_cameraOptions.ROIWidthLimits = options.ROIWidthLimits;
+
 	addListToComboBox(ui->triggerMode, options.triggerModes);
 	addListToComboBox(ui->binning, options.imageBinnings);
 	addListToComboBox(ui->pixelReadoutRate, options.pixelReadoutRates);
@@ -373,8 +378,6 @@ void BrillouinAcquisition::initializePlot() {
 
 	// set up the QCPColorMap:
 	m_colorMap = new QCPColorMap(customPlot->xAxis, customPlot->yAxis);
-	m_colorMap->data()->setSize(m_imageWidth, m_imageHeight); // number of data points
-	m_colorMap->data()->setRange(QCPRange(0, m_imageWidth), QCPRange(0, m_imageHeight));
 
 	// fill map with zero
 	m_colorMap->data()->fill(0);
@@ -408,12 +411,12 @@ void BrillouinAcquisition::initializePlot() {
 
 void BrillouinAcquisition::xAxisRangeChanged(const QCPRange &newRange) {
 	// checks for certain range
-	ui->customplot->xAxis->setRange(newRange.bounded(0, 2048));
-	if (newRange.lower >= 0) {
+	ui->customplot->xAxis->setRange(newRange.bounded(m_cameraOptions.ROIWidthLimits[0], m_cameraOptions.ROIWidthLimits[1]));
+	if (newRange.lower >= m_cameraOptions.ROIWidthLimits[0]) {
 		m_deviceSettings.camera.roi.left = newRange.lower;
 	}
 	int width = newRange.upper - newRange.lower;
-	if (width < 2048) {
+	if (width < m_cameraOptions.ROIWidthLimits[1]) {
 		m_deviceSettings.camera.roi.width = width;
 	}
 	emit(settingsCameraChanged(m_deviceSettings));
@@ -421,12 +424,12 @@ void BrillouinAcquisition::xAxisRangeChanged(const QCPRange &newRange) {
 
 void BrillouinAcquisition::yAxisRangeChanged(const QCPRange &newRange) {
 	// checks for certain range
-	ui->customplot->yAxis->setRange(newRange.bounded(0, 2048));
-	if (newRange.lower >= 0) {
+	ui->customplot->yAxis->setRange(newRange.bounded(m_cameraOptions.ROIHeightLimits[0], m_cameraOptions.ROIHeightLimits[1]));
+	if (newRange.lower >= m_cameraOptions.ROIHeightLimits[0]) {
 		m_deviceSettings.camera.roi.top = newRange.lower;
 	}
 	int height = newRange.upper - newRange.lower;
-	if (height < 2048) {
+	if (height < m_cameraOptions.ROIHeightLimits[1]) {
 		m_deviceSettings.camera.roi.height = height;
 	}
 	emit(settingsCameraChanged(m_deviceSettings));
@@ -477,9 +480,6 @@ void BrillouinAcquisition::onNewImage() {
 
 		unsigned short* unpackedBuffer = reinterpret_cast<unsigned short*>(m_liveBuffer->getReadBuffer());
 
-		m_colorMap->data()->setSize(m_imageWidth, m_imageHeight); // we want the color map to have nx * ny data points
-		m_colorMap->data()->setRange(QCPRange(0, m_imageWidth), QCPRange(0, m_imageHeight)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
-
 		int tIndex;
 		for (int xIndex = 0; xIndex < m_imageWidth; ++xIndex) {
 			for (int yIndex = 0; yIndex < m_imageHeight; ++yIndex) {
@@ -489,7 +489,6 @@ void BrillouinAcquisition::onNewImage() {
 		}
 		m_liveBuffer->m_freeBuffers->release();
 		m_colorMap->rescaleDataRange();
-		ui->customplot->rescaleAxes();
 		ui->customplot->replot();
 			
 		QMetaObject::invokeMethod(this, "onNewImage", Qt::QueuedConnection);

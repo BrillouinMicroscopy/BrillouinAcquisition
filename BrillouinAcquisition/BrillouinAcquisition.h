@@ -105,10 +105,11 @@ private:
 	Acquisition *m_acquisition = new Acquisition(nullptr, m_andor, m_scanControl);
 	QCPColorMap *m_colorMap;
 	SETTINGS_DEVICES m_deviceSettings;
+	CAMERA_OPTIONS m_cameraOptions;
 	ACQUISITION_SETTINGS m_acquisitionSettings;
 	bool m_viewRunning = false;
-	AT_64 m_imageHeight = 2048;
-	AT_64 m_imageWidth = 2048;
+	AT_64 m_imageHeight = 0;
+	AT_64 m_imageWidth = 0;
 	CircularBuffer<AT_U8> *m_liveBuffer = nullptr;
 
 	// pre-defined presets for element positions
