@@ -114,7 +114,7 @@ bool Andor::getConnectionStatus() {
 }
 
 void Andor::setSensorCooling(bool cooling) {
-	int i_retCode = AT_SetBool(m_cameraHndl, L"SensorCooling", cooling);
+	int i_retCode = AT_SetBool(m_cameraHndl, L"SensorCooling", (int)cooling);
 }
 
 bool Andor::getSensorCooling() {
