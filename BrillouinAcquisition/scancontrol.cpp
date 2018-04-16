@@ -115,7 +115,7 @@ std::string com::receive(std::string request) {
 	std::string answer;
 	// Sleep until the microscope has answered
 	// Is there a better solution?
-	Sleep(50);
+	Sleep(200);
 
 	int bytesRead = readLineDataCR(buf, 1024);
 	if (bytesRead > -1)
