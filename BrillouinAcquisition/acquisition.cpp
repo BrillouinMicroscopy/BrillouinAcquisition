@@ -134,7 +134,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 						abort();
 						return;
 					}
-					emit(s_acqPosition(positionsX[ll], positionsY[ll], positionsZ[ll], mm+1));
+					emit(s_acqPosition(positionsX[ll] - m_startPosition[0], positionsY[ll] - m_startPosition[1], positionsZ[ll] - m_startPosition[2], mm+1));
 					// acquire images
 					m_andor->acquireImage(&images[bytesPerFrame * mm]);
 
