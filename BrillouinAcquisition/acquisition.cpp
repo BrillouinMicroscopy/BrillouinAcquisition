@@ -171,7 +171,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	m_andor->cleanupAcquisition();
 
 	m_scanControl->setPosition(m_startPosition);
-	emit(s_acqPosition(m_startPosition[0], m_startPosition[1], m_startPosition[2], 0));
+	emit(s_acqPosition(0, 0, 0, 0));
 
 	m_storageThread.exit();
 	m_storageThread.wait();
