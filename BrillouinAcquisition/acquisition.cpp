@@ -25,6 +25,10 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	emit(s_acqRunning(m_running));
 	m_abort = false;
 
+	int pixelNumber = acqSettings.camera.roi.width * acqSettings.camera.roi.height;
+	previewBuffer = new CircularBuffer<AT_U8>(4, pixelNumber * 2);
+	emit(s_previewRunning(true, previewBuffer, acqSettings.camera.roi.width, acqSettings.camera.roi.height));
+
 	emit(s_acqProgress(0.0, -1));
 	// set optical elements for brightfield/Brillouin imaging
 	m_scanControl->m_stand->setPreset(1);
@@ -133,6 +137,11 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 					emit(s_acqPosition(positionsX[ll], positionsY[ll], positionsZ[ll], mm+1));
 					// acquire images
 					m_andor->acquireImage(&images[bytesPerFrame * mm]);
+
+					memcpy(previewBuffer->getWriteBuffer(), &images, bytesPerFrame);
+
+					previewBuffer->m_usedBuffers->release();
+
 				}
 
 				// cast the vector to unsigned short
@@ -161,7 +170,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	// close camera libraries, clear buffers
 	m_andor->cleanupAcquisition();
 
-	//m_scanControl->setPosition(m_startPosition);
+	m_scanControl->setPosition(m_startPosition);
 	emit(s_acqPosition(m_startPosition[0], m_startPosition[1], m_startPosition[2], 0));
 
 	m_storageThread.exit();

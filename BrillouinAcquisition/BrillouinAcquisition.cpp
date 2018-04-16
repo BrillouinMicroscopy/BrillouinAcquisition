@@ -12,7 +12,14 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 		m_andor,
 		SIGNAL(acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64)),
 		this,
-		SLOT(acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64))
+		SLOT(updatePreview(bool, CircularBuffer<AT_U8>*, AT_64, AT_64))
+	);
+
+	QWidget::connect(
+		m_andor,
+		SIGNAL(s_previewRunning(bool)),
+		this,
+		SLOT(showPreviewRunning(bool))
 	);
 
 	QWidget::connect(
@@ -119,6 +126,13 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 		SIGNAL(s_acqTimeToCalibration(int)),
 		this,
 		SLOT(showCalibrationInterval(int))
+	);
+
+	QWidget::connect(
+		m_acquisition,
+		SIGNAL(acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64)),
+		this,
+		SLOT(updatePreview(bool, CircularBuffer<AT_U8>*, AT_64, AT_64))
 	);
 
 	qRegisterMetaType<std::string>("std::string");
@@ -241,25 +255,6 @@ void BrillouinAcquisition::setElement(int element, int position) {
 
 void BrillouinAcquisition::setPreset(int preset) {
 	QMetaObject::invokeMethod(m_scanControl->m_stand, "setPreset", Qt::QueuedConnection, Q_ARG(int, preset));
-}
-
-void BrillouinAcquisition::acquisitionRunning(bool isRunning, CircularBuffer<AT_U8>* liveBuffer, AT_64 imageWidth, AT_64 imageHeight) {
-	if (m_liveBuffer) {
-		delete m_liveBuffer;
-	}
-	m_liveBuffer = liveBuffer;
-	if (isRunning) {
-		ui->camera_playPause->setText("Stop");
-		m_viewRunning = true;
-		m_imageWidth = imageWidth;
-		m_imageHeight = imageHeight;
-		m_colorMap->data()->setSize(imageWidth, imageHeight);
-		m_colorMap->data()->setRange(QCPRange(0, m_imageWidth), QCPRange(0, m_imageHeight));
-		onNewImage();
-	} else {
-		ui->camera_playPause->setText("Play");
-		m_viewRunning = false;
-	}
 }
 
 void BrillouinAcquisition::cameraOptionsChanged(CAMERA_OPTIONS options) {
@@ -416,7 +411,7 @@ void BrillouinAcquisition::xAxisRangeChanged(const QCPRange &newRange) {
 		m_deviceSettings.camera.roi.left = newRange.lower;
 	}
 	int width = newRange.upper - newRange.lower;
-	if (width < m_cameraOptions.ROIWidthLimits[1]) {
+	if (width <= m_cameraOptions.ROIWidthLimits[1]) {
 		m_deviceSettings.camera.roi.width = width;
 	}
 	emit(settingsCameraChanged(m_deviceSettings));
@@ -429,7 +424,7 @@ void BrillouinAcquisition::yAxisRangeChanged(const QCPRange &newRange) {
 		m_deviceSettings.camera.roi.top = newRange.lower;
 	}
 	int height = newRange.upper - newRange.lower;
-	if (height < m_cameraOptions.ROIHeightLimits[1]) {
+	if (height <= m_cameraOptions.ROIHeightLimits[1]) {
 		m_deviceSettings.camera.roi.height = height;
 	}
 	emit(settingsCameraChanged(m_deviceSettings));
@@ -620,6 +615,31 @@ void BrillouinAcquisition::on_camera_playPause_clicked() {
 		QMetaObject::invokeMethod(m_andor, "acquireContinuously", Qt::QueuedConnection);
 	} else {
 		m_andor->m_isAcquiring = false;
+	}
+}
+
+void BrillouinAcquisition::showPreviewRunning(bool isRunning) {
+	m_viewRunning = isRunning;
+	if (m_viewRunning) {
+		ui->camera_playPause->setText("Stop");
+	}
+	else {
+		ui->camera_playPause->setText("Play");
+	}
+}
+
+void BrillouinAcquisition::updatePreview(bool isRunning, CircularBuffer<AT_U8>* liveBuffer, AT_64 imageWidth, AT_64 imageHeight) {
+	if (m_liveBuffer) {
+		delete m_liveBuffer;
+	}
+	m_liveBuffer = liveBuffer;
+	m_viewRunning = isRunning;
+	if (m_viewRunning) {
+		m_imageWidth = imageWidth;
+		m_imageHeight = imageHeight;
+		m_colorMap->data()->setSize(imageWidth, imageHeight);
+		m_colorMap->data()->setRange(QCPRange(0, m_imageWidth), QCPRange(0, m_imageHeight));
+		onNewImage();
 	}
 }
 

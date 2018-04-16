@@ -100,6 +100,7 @@ public slots:
 signals:
 	void imageAcquired(unsigned short*, AT_64, AT_64);
 	void acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64);
+	void s_previewRunning(bool);
 	void settingsChanged(CAMERA_SETTINGS);
 	void optionsChanged(CAMERA_OPTIONS);
 };

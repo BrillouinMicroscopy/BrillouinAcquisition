@@ -26,8 +26,6 @@ private:
 	unsigned int m_readCount = 0;
 };
 
-#endif //CIRCULARBUFFER_H
-
 template<class T>
 inline CircularBuffer<T>::CircularBuffer() : m_bufferNumber(0), m_bufferSize(0) {
 	m_buffers = nullptr;
@@ -71,3 +69,5 @@ inline T * CircularBuffer<T>::getReadBuffer() {
 	// return pointer to buffer and increment m_readCount
 	return m_buffers[m_readCount++ % m_bufferNumber];
 }
+
+#endif //CIRCULARBUFFER_H
