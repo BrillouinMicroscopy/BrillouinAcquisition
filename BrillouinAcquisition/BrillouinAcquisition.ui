@@ -166,7 +166,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>446</width>
-                <height>454</height>
+                <height>451</height>
                </rect>
               </property>
               <property name="sizePolicy">
@@ -699,7 +699,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>446</width>
-                <height>454</height>
+                <height>451</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -753,7 +753,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>446</width>
-                <height>454</height>
+                <height>451</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -857,7 +857,7 @@ QTabBar::tab:!selected {
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>433</width>
+                  <width>429</width>
                   <height>740</height>
                  </rect>
                 </property>
@@ -1757,6 +1757,13 @@ border: none;</string>
            </spacer>
           </item>
           <item>
+           <widget class="QCheckBox" name="autoscalePlot">
+            <property name="text">
+             <string>Autoscale</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="camera_singleShot">
             <property name="enabled">
              <bool>false</bool>
@@ -1800,7 +1807,7 @@ border: none;</string>
      <x>0</x>
      <y>0</y>
      <width>1318</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">

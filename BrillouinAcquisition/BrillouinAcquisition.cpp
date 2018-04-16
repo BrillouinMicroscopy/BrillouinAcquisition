@@ -147,6 +147,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	ui->settingsWidget->setIconSize(QSize(16, 16));
 
 	ui->actionEnable_Cooling->setEnabled(false);
+	ui->autoscalePlot->setChecked(m_autoscalePlot);
 
 	// start camera thread
 	m_cameraThread.startWorker(m_andor);
@@ -251,6 +252,10 @@ void BrillouinAcquisition::setElement(int element, int position) {
 			QMetaObject::invokeMethod(m_scanControl->m_stand, "setMirror", Qt::QueuedConnection, Q_ARG(int, position));
 			break;
 	}
+}
+
+void BrillouinAcquisition::on_autoscalePlot_stateChanged(int state) {
+	m_autoscalePlot = (bool)state;
 }
 
 void BrillouinAcquisition::setPreset(int preset) {
@@ -393,7 +398,9 @@ void BrillouinAcquisition::initializePlot() {
 	m_colorMap->setGradient(gradient);
 
 	// rescale the data dimension (color) such that all data points lie in the span visualized by the color gradient:
-	m_colorMap->rescaleDataRange();
+	if (m_autoscalePlot) {
+		m_colorMap->rescaleDataRange();
+	}
 
 	// make sure the axis rect and color scale synchronize their bottom and top margins (so they line up):
 	QCPMarginGroup *marginGroup = new QCPMarginGroup(customPlot);
@@ -483,7 +490,9 @@ void BrillouinAcquisition::onNewImage() {
 			}
 		}
 		m_liveBuffer->m_freeBuffers->release();
-		m_colorMap->rescaleDataRange();
+		if (m_autoscalePlot) {
+			m_colorMap->rescaleDataRange();
+		}
 		ui->customplot->replot();
 			
 		QMetaObject::invokeMethod(this, "onNewImage", Qt::QueuedConnection);

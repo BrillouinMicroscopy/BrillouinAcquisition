@@ -69,6 +69,8 @@ private slots:
 	void showAcqRunning(bool);
 	void updateFilename(std::string);
 
+	void on_autoscalePlot_stateChanged(int);
+
 	void updateAcquisitionSettings();
 
 	// acquisition AOI
@@ -112,6 +114,8 @@ private:
 	AT_64 m_imageHeight = 0;
 	AT_64 m_imageWidth = 0;
 	CircularBuffer<AT_U8> *m_liveBuffer = nullptr;
+
+	bool m_autoscalePlot = false;
 
 	// pre-defined presets for element positions
 	// "Brillouin", "Brightfield", "Eyepiece", "Calibration"
