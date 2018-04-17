@@ -145,7 +145,13 @@ void ScanControl::setDevice(com *device) {
 
 std::string com::receive(std::string request) {
 	request = request + m_terminator;
-	writeData(request.c_str(), request.size());
+	QByteArray ba = request.c_str();
+	int bytesWritten = writeData(ba, request.size());
+
+	if (bytesWritten < request.size()) {
+		// error not all bytes were written
+		int tmp = 0;
+	}
 
 	waitForBytesWritten(1000);
 
@@ -162,6 +168,8 @@ std::string com::receive(std::string request) {
 		 answer = std::string(buf, buf+bytesRead);
 	else
 		answer = "";
+
+	clear();
 
 	return answer;
 }
@@ -201,6 +209,8 @@ void com::send(std::string message) {
 	flush();
 
 	waitForBytesWritten(1000);
+
+	clear();
 }
 
 
