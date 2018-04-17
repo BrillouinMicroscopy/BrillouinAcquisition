@@ -189,10 +189,13 @@ qint64 com::readCharacter(char *data, qint64 maxlen) {
 
 void com::send(std::string message) {
 	message = message + m_terminator;
-	int bytesWritten = writeData(message.c_str(), message.size());
+
+	QByteArray ba = message.c_str();
+	int bytesWritten = writeData(ba, message.size());
 
 	if (bytesWritten < message.size()) {
 		// error not all bytes were written
+		int tmp = 0;
 	}
 
 	flush();
@@ -237,7 +240,7 @@ void Focus::setZ(double position) {
 	int inc = static_cast<int>(position);
 	inc %= m_rangeFocus;
 	std::string pos = helper::dec2hex(inc, 6);
-	send("ZD" + pos);
+	receive("ZD" + pos);
 }
 
 void Focus::setVelocityZ(double velocity) {
