@@ -29,9 +29,9 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	CAMERA_SETTINGS cameraSettings = m_andor->prepareMeasurement(m_acqSettings.camera);
 	m_acqSettings.camera = cameraSettings;
 
-	int pixelNumber = acqSettings.camera.roi.width * acqSettings.camera.roi.height;
+	int pixelNumber = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height;
 	previewBuffer = new CircularBuffer<AT_U8>(4, pixelNumber * 2);
-	emit(s_previewRunning(true, previewBuffer, acqSettings.camera.roi.width, acqSettings.camera.roi.height));
+	emit(s_previewRunning(true, previewBuffer, m_acqSettings.camera.roi.width, m_acqSettings.camera.roi.height));
 
 	emit(s_acqProgress(0.0, -1));
 	// set optical elements for brightfield/Brillouin imaging
@@ -140,9 +140,9 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 					// acquire images
 					m_andor->acquireImage(&images[bytesPerFrame * mm]);
 
-					//memcpy(previewBuffer->getWriteBuffer(), &images, bytesPerFrame);
+					memcpy(previewBuffer->getWriteBuffer(), &images[bytesPerFrame * mm], bytesPerFrame);
 
-					//previewBuffer->m_usedBuffers->release();
+					previewBuffer->m_usedBuffers->release();
 
 				}
 
@@ -250,6 +250,10 @@ void Acquisition::doCalibration() {
 		}
 		// acquire images
 		m_andor->acquireImage(&images[bytesPerFrame * mm]);
+
+		memcpy(previewBuffer->getWriteBuffer(), &images[bytesPerFrame * mm], bytesPerFrame);
+
+		previewBuffer->m_usedBuffers->release();
 	}
 	// cast the vector to unsigned short
 	std::vector<unsigned short> *images_ = (std::vector<unsigned short> *) &images;
