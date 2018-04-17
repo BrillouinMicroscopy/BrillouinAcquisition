@@ -483,10 +483,10 @@ void BrillouinAcquisition::onNewImage() {
 		unsigned short* unpackedBuffer = reinterpret_cast<unsigned short*>(m_liveBuffer->getReadBuffer());
 
 		int tIndex;
-		for (int xIndex = 0; xIndex < m_imageWidth; ++xIndex) {
-			for (int yIndex = 0; yIndex < m_imageHeight; ++yIndex) {
-				tIndex = xIndex * m_imageHeight + yIndex;
-				m_colorMap->data()->setCell(xIndex, yIndex, unpackedBuffer[tIndex]);
+		for (int xIndex = 0; xIndex < m_imageHeight; ++xIndex) {
+			for (int yIndex = 0; yIndex < m_imageWidth; ++yIndex) {
+				tIndex = xIndex * m_imageWidth + yIndex;
+				m_colorMap->data()->setCell(yIndex, xIndex, unpackedBuffer[tIndex]);
 			}
 		}
 		m_liveBuffer->m_freeBuffers->release();
