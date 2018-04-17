@@ -55,25 +55,29 @@ ScanControl::~ScanControl() {
 
 bool ScanControl::connect() {
 	if (!isConnected) {
-		m_comObject->setPortName("COM1");
-		if (m_comObject->setBaudRate(QSerialPort::Baud9600)) {
-			throw QString("Could not set BaudRate.");
-		}
-		isConnected = m_comObject->open(QIODevice::ReadWrite);
-		if (isConnected) {
-			throw QString("Could not open the serial port.");
-		}
-		if (m_comObject->setFlowControl(QSerialPort::HardwareControl)) {
-			throw QString("Could not set FlowControl.");
-		}
-		if (m_comObject->setDataBits(QSerialPort::Data8)) {
-			throw QString("Could not set DataBits.");
-		}
-		if (m_comObject->setParity(QSerialPort::NoParity)) {
-			throw QString("Could not set Parity.");
-		}
-		if (m_comObject->setStopBits(QSerialPort::OneStop)) {
-			throw QString("Could not set StopBits.");
+		try {
+			m_comObject->setPortName("COM1");
+			isConnected = m_comObject->open(QIODevice::ReadWrite);
+			if (!isConnected) {
+				throw QString("Could not open the serial port.");
+			}
+			if (!m_comObject->setBaudRate(QSerialPort::Baud9600)) {
+				throw QString("Could not set BaudRate.");
+			}
+			if (!m_comObject->setFlowControl(QSerialPort::HardwareControl)) {
+				throw QString("Could not set FlowControl.");
+			}
+			if (!m_comObject->setDataBits(QSerialPort::Data8)) {
+				throw QString("Could not set DataBits.");
+			}
+			if (!m_comObject->setParity(QSerialPort::NoParity)) {
+				throw QString("Could not set Parity.");
+			}
+			if (!m_comObject->setStopBits(QSerialPort::OneStop)) {
+				throw QString("Could not set StopBits.");
+			}
+		} catch (QString e) {
+			// todo
 		}
 	}
 	emit(microscopeConnected(isConnected));
