@@ -57,10 +57,6 @@ bool ScanControl::connect() {
 	if (!isConnected) {
 		try {
 			m_comObject->setPortName("COM1");
-			isConnected = m_comObject->open(QIODevice::ReadWrite);
-			if (!isConnected) {
-				throw QString("Could not open the serial port.");
-			}
 			if (!m_comObject->setBaudRate(QSerialPort::Baud9600)) {
 				throw QString("Could not set BaudRate.");
 			}
@@ -76,6 +72,11 @@ bool ScanControl::connect() {
 			if (!m_comObject->setStopBits(QSerialPort::OneStop)) {
 				throw QString("Could not set StopBits.");
 			}
+			isConnected = m_comObject->open(QIODevice::ReadWrite);
+			if (!isConnected) {
+				throw QString("Could not open the serial port.");
+			}
+			m_comObject->clear();
 		} catch (QString e) {
 			// todo
 		}
