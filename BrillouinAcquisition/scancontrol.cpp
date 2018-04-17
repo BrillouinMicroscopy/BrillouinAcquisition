@@ -55,13 +55,26 @@ ScanControl::~ScanControl() {
 
 bool ScanControl::connect() {
 	if (!isConnected) {
-		m_comObject->setBaudRate(QSerialPort::Baud9600);
 		m_comObject->setPortName("COM1");
-		m_comObject->setFlowControl(QSerialPort::HardwareControl);
-		m_comObject->setDataBits(QSerialPort::Data8);
-		m_comObject->setParity(QSerialPort::NoParity);
-		m_comObject->setStopBits(QSerialPort::OneStop);
+		if (m_comObject->setBaudRate(QSerialPort::Baud9600)) {
+			throw QString("Could not set BaudRate.");
+		}
 		isConnected = m_comObject->open(QIODevice::ReadWrite);
+		if (isConnected) {
+			throw QString("Could not open the serial port.");
+		}
+		if (m_comObject->setFlowControl(QSerialPort::HardwareControl)) {
+			throw QString("Could not set FlowControl.");
+		}
+		if (m_comObject->setDataBits(QSerialPort::Data8)) {
+			throw QString("Could not set DataBits.");
+		}
+		if (m_comObject->setParity(QSerialPort::NoParity)) {
+			throw QString("Could not set Parity.");
+		}
+		if (m_comObject->setStopBits(QSerialPort::OneStop)) {
+			throw QString("Could not set StopBits.");
+		}
 	}
 	emit(microscopeConnected(isConnected));
 	return isConnected;
@@ -163,7 +176,11 @@ qint64 com::readCharacter(char *data, qint64 maxlen) {
 
 void com::send(std::string message) {
 	message = message + m_terminator;
-	writeData(message.c_str(), message.size());
+	int bytesWritten = writeData(message.c_str(), message.size());
+
+	if (bytesWritten < message.size()) {
+		// error not all bytes were written
+	}
 
 	flush();
 
