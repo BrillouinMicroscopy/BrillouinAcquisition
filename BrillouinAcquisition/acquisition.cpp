@@ -155,7 +155,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 				m_fileHndl->m_payloadQueue.enqueue(img);
 
 				std::string info = "Images acquired " + std::to_string(ii*(m_acqSettings.xSteps*m_acqSettings.ySteps) + jj * m_acqSettings.ySteps + kk);
-				qInfo(logInfo()) << info.c_str();
+				//qInfo(logInfo()) << info.c_str();
 				// increase position index
 				ll++;
 				emit(s_acqProgress(100 * (double)ll / nrPositions, 1e-3 * measurementTimer.elapsed() / ll * (nrPositions - ll)));
@@ -179,7 +179,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	m_fileHndl = nullptr;
 
 	std::string info = "Acquisition finished.";
-	qInfo(logInfo()) << info.c_str();
+	//qInfo(logInfo()) << info.c_str();
 	m_running = false;
 	emit(s_acqRunning(m_running));
 	emit(s_acqCalibrationRunning(false));
