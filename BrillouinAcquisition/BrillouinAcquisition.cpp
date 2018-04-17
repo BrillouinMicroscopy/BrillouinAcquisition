@@ -130,7 +130,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 
 	QWidget::connect(
 		m_acquisition,
-		SIGNAL(acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64)),
+		SIGNAL(s_previewRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64)),
 		this,
 		SLOT(updatePreview(bool, CircularBuffer<AT_U8>*, AT_64, AT_64))
 	);
