@@ -153,6 +153,8 @@ std::string com::receive(std::string request) {
 		int tmp = 0;
 	}
 
+	flush();
+
 	waitForBytesWritten(1000);
 
 	waitForReadyRead(1000);
