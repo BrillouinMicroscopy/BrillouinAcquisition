@@ -78,6 +78,13 @@ bool ScanControl::connect() {
 			}
 			Sleep(100);
 			m_comObject->clear();
+
+			int baudRate = m_comObject->baudRate();
+			QSerialPort::DataBits dataBits = m_comObject->dataBits();
+			QSerialPort::FlowControl flowControl = m_comObject->flowControl();
+			QSerialPort::Parity parity = m_comObject->parity();
+			QSerialPort::StopBits stopBits = m_comObject->stopBits();
+
 		} catch (QString e) {
 			// todo
 		}
