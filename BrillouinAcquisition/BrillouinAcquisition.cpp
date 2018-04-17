@@ -139,6 +139,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	qRegisterMetaType<AT_64>("AT_64");
 	qRegisterMetaType<CircularBuffer<AT_U8>>("CircularBuffer<AT_U8>");
 	qRegisterMetaType<ACQUISITION_SETTINGS>("ACQUISITION_SETTINGS");
+	qRegisterMetaType<CAMERA_SETTINGS>("ACQUISITION_SETTINGS");
 
 	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
 	ui->settingsWidget->setTabIcon(0, icon);

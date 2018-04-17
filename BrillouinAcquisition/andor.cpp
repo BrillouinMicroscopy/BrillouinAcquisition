@@ -216,6 +216,9 @@ void Andor::setSettings() {
 	AT_GetInt(m_cameraHndl, L"AOIWidth", &m_settings.roi.width);
 	AT_GetInt(m_cameraHndl, L"AOILeft", &m_settings.roi.left);
 	AT_GetInt(m_cameraHndl, L"AOITop", &m_settings.roi.top);
+
+	// emit signal that settings changed
+	emit(settingsChanged(m_settings));
 }
 
 void Andor::prepareAcquisition() {
