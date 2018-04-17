@@ -76,6 +76,7 @@ bool ScanControl::connect() {
 			if (!isConnected) {
 				throw QString("Could not open the serial port.");
 			}
+			Sleep(100);
 			m_comObject->clear();
 		} catch (QString e) {
 			// todo
