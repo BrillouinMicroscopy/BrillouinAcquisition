@@ -64,7 +64,7 @@ private:
 	void readOptions();
 	void setDefaultSettings();
 	void setSettings();
-	void readSettings();
+	CAMERA_SETTINGS readSettings();
 	void prepareAcquisition();
 	void getEnumString(AT_WC* feature, AT_WC* string);
 
@@ -94,7 +94,7 @@ private slots:
 
 public slots:
 	void acquireContinuously();
-	void prepareMeasurement(CAMERA_SETTINGS settings);
+	CAMERA_SETTINGS prepareMeasurement(CAMERA_SETTINGS settings);
 	void acquireImage(AT_U8* buffer);
 
 signals:

@@ -70,7 +70,7 @@ void Andor::setDefaultSettings() {
 	AT_SetEnumeratedString(m_cameraHndl, L"TriggerMode", m_settings.readout.triggerMode);
 };
 
-void Andor::readSettings() {
+CAMERA_SETTINGS Andor::readSettings() {
 	// general settings
 	AT_GetFloat(m_cameraHndl, L"ExposureTime", &m_settings.exposureTime);
 	AT_GetInt(m_cameraHndl, L"FrameCount", &m_settings.frameCount);
@@ -92,6 +92,8 @@ void Andor::readSettings() {
 
 	// emit signal that settings changed
 	emit(settingsChanged(m_settings));
+
+	return m_settings;
 };
 
 void Andor::disconnect() {
@@ -249,13 +251,17 @@ void Andor::cleanupAcquisition() {
 }
 
 
-void Andor::prepareMeasurement(CAMERA_SETTINGS settings) {
+CAMERA_SETTINGS Andor::prepareMeasurement(CAMERA_SETTINGS settings) {
 	m_settings = settings;
 	setSettings();
+
+	CAMERA_SETTINGS cameraSettings = readSettings();
 
 	// Start acquisition
 	AT_Command(m_cameraHndl, L"AcquisitionStart");
 	AT_InitialiseUtilityLibrary();
+
+	return cameraSettings;
 };
 
 void Andor::acquireImage(AT_U8* buffer) {

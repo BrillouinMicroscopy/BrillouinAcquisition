@@ -25,6 +25,10 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	emit(s_acqRunning(m_running));
 	m_abort = false;
 
+	// prepare camera for image acquisition
+	CAMERA_SETTINGS cameraSettings = m_andor->prepareMeasurement(m_acqSettings.camera);
+	m_acqSettings.camera = cameraSettings;
+
 	int pixelNumber = acqSettings.camera.roi.width * acqSettings.camera.roi.height;
 	previewBuffer = new CircularBuffer<AT_U8>(4, pixelNumber * 2);
 	emit(s_previewRunning(true, previewBuffer, acqSettings.camera.roi.width, acqSettings.camera.roi.height));
@@ -87,10 +91,8 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	m_fileHndl->setPositions("z", positionsZ, rank, dims);
 	delete[] dims;
 
-	// do actual measurement 
+	// do actual measurement
 	m_fileHndl->startWritingQueues();
-	// prepare camera for image acquisition
-	m_andor->prepareMeasurement(m_acqSettings.camera);
 	
 	int rank_data = 3;
 	hsize_t dims_data[3] = { m_acqSettings.camera.frameCount, m_acqSettings.camera.roi.height, m_acqSettings.camera.roi.width };
