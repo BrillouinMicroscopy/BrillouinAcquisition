@@ -219,20 +219,16 @@ void Andor::setSettings() {
 }
 
 void Andor::prepareAcquisition() {
+	// always use full camera image for live preview
+	m_settings.roi.width = m_options.ROIWidthLimits[1];
+	m_settings.roi.left = m_options.ROIWidthLimits[0];
+	m_settings.roi.height = m_options.ROIHeightLimits[1];
+	m_settings.roi.top = m_options.ROIHeightLimits[0];
+
 	setSettings();
 
 	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
 	liveBuffer = new CircularBuffer<AT_U8>(5, pixelNumber * 2);
-
-	AT_SetInt(m_cameraHndl, L"AOIWidth", m_options.ROIWidthLimits[1]);
-	AT_SetInt(m_cameraHndl, L"AOILeft", m_options.ROIWidthLimits[0]);
-	AT_SetInt(m_cameraHndl, L"AOIHeight", m_options.ROIHeightLimits[1]);
-	AT_SetInt(m_cameraHndl, L"AOITop", m_options.ROIHeightLimits[0]);
-
-	AT_GetInt(m_cameraHndl, L"AOIHeight", &m_settings.roi.height);
-	AT_GetInt(m_cameraHndl, L"AOIWidth", &m_settings.roi.width);
-	AT_GetInt(m_cameraHndl, L"AOILeft", &m_settings.roi.left);
-	AT_GetInt(m_cameraHndl, L"AOITop", &m_settings.roi.top);
 
 	// Start acquisition
 	AT_Command(m_cameraHndl, L"AcquisitionStart");
