@@ -58,6 +58,9 @@ bool ScanControl::connect() {
 		m_comObject->setBaudRate(QSerialPort::Baud9600);
 		m_comObject->setPortName("COM1");
 		m_comObject->setFlowControl(QSerialPort::HardwareControl);
+		m_comObject->setDataBits(QSerialPort::Data8);
+		m_comObject->setParity(QSerialPort::NoParity);
+		m_comObject->setStopBits(QSerialPort::OneStop);
 		isConnected = m_comObject->open(QIODevice::ReadWrite);
 	}
 	emit(microscopeConnected(isConnected));
@@ -160,7 +163,7 @@ qint64 com::readCharacter(char *data, qint64 maxlen) {
 
 void com::send(std::string message) {
 	message = message + m_terminator;
-	write(message.c_str());
+	writeData(message.c_str(), message.size());
 
 	flush();
 
