@@ -145,15 +145,17 @@ void ScanControl::setDevice(com *device) {
 
 std::string com::receive(std::string request) {
 	request = request + m_terminator;
-	QByteArray ba = request.c_str();
-	int bytesWritten = writeData(ba, request.size());
+	write(request.c_str());
 
-	if (bytesWritten < request.size()) {
-		// error not all bytes were written
-		int tmp = 0;
-	}
+	//QByteArray ba = request.c_str();
+	//int bytesWritten = writeData(ba, request.size());
 
-	flush();
+	//if (bytesWritten < request.size()) {
+	//	// error not all bytes were written
+	//	int tmp = 0;
+	//}
+
+	//flush();
 
 	waitForBytesWritten(1000);
 
@@ -200,19 +202,22 @@ qint64 com::readCharacter(char *data, qint64 maxlen) {
 void com::send(std::string message) {
 	message = message + m_terminator;
 
-	QByteArray ba = message.c_str();
-	int bytesWritten = writeData(ba, message.size());
-
-	if (bytesWritten < message.size()) {
-		// error not all bytes were written
-		int tmp = 0;
-	}
-
-	flush();
-
+	write(message.c_str());
 	waitForBytesWritten(1000);
 
-	clear();
+	//QByteArray ba = message.c_str();
+	//int bytesWritten = writeData(ba, message.size());
+
+	//if (bytesWritten < message.size()) {
+	//	// error not all bytes were written
+	//	int tmp = 0;
+	//}
+
+	//flush();
+
+	//waitForBytesWritten(1000);
+
+	//clear();
 }
 
 
