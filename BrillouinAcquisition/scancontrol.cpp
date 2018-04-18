@@ -198,7 +198,11 @@ void com::send(std::string message) {
 	message = message + m_terminator;
 
 	write(message.c_str());
-	waitForBytesWritten(1000);
+	bool wasWritten = waitForBytesWritten(1000);
+
+	if (!wasWritten) {
+		int tmp = 0;
+	}
 
 	//QByteArray ba = message.c_str();
 	//int bytesWritten = writeData(ba, message.size());
