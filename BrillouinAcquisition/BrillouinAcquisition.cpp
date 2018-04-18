@@ -622,7 +622,7 @@ void BrillouinAcquisition::on_actionAbout_triggered() {
 
 void BrillouinAcquisition::on_camera_playPause_clicked() {
 	if (!m_andor->m_isAcquiring) {
-		QMetaObject::invokeMethod(m_andor, "acquireContinuously", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(m_andor, "acquireContinuously", Qt::QueuedConnection, Q_ARG(CAMERA_SETTINGS, m_acquisitionSettings.camera));
 	} else {
 		m_andor->m_isAcquiring = false;
 	}
@@ -758,6 +758,14 @@ void BrillouinAcquisition::on_nrCalibrationImages_valueChanged(int value) {
 
 void BrillouinAcquisition::on_calibrationExposureTime_valueChanged(double value) {
 	m_acquisitionSettings.calibrationExposureTime = value;
+};
+
+void BrillouinAcquisition::on_exposureTime_valueChanged(double value) {
+	m_acquisitionSettings.camera.exposureTime = value;
+};
+
+void BrillouinAcquisition::on_frameCount_valueChanged(int value) {
+	m_acquisitionSettings.camera.frameCount = value;
 };
 
 void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradientPreset preset) {

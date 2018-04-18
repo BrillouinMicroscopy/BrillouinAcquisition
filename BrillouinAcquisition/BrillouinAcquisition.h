@@ -74,6 +74,9 @@ private slots:
 
 	void updateAcquisitionSettings();
 
+	void on_exposureTime_valueChanged(double);
+	void on_frameCount_valueChanged(int);
+
 	// acquisition AOI
 	void on_startX_valueChanged(double);
 	void on_startY_valueChanged(double);

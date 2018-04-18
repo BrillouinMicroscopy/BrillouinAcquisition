@@ -137,9 +137,10 @@ double Andor::getSensorTemperature() {
 	return szValue;
 }
 
-void Andor::acquireContinuously() {
+void Andor::acquireContinuously(CAMERA_SETTINGS settings) {
 	// Check if camera is currently acquiring images
 	m_isAcquiring = !m_isAcquiring;
+	m_settings = settings;
 	if (m_isAcquiring) {
 		prepareAcquisition();
 		acquire();

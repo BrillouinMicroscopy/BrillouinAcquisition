@@ -93,7 +93,7 @@ private slots:
 	void acquire();
 
 public slots:
-	void acquireContinuously();
+	void acquireContinuously(CAMERA_SETTINGS settings);
 	CAMERA_SETTINGS prepareMeasurement(CAMERA_SETTINGS settings);
 	void acquireImage(AT_U8* buffer);
 
