@@ -154,13 +154,13 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	ui->autoscalePlot->setChecked(m_autoscalePlot);
 
 	// start camera thread
-	m_cameraThread.startWorker(m_andor);
+	m_acquisitionThread.startWorker(m_andor);
 	// start microscope thread
-	m_microscopeThread.startWorker(m_scanControl);
-	m_scanControl->m_comObject->moveToThread(&m_microscopeThread);
-	m_scanControl->m_focus->moveToThread(&m_microscopeThread);
-	m_scanControl->m_mcu->moveToThread(&m_microscopeThread);
-	m_scanControl->m_stand->moveToThread(&m_microscopeThread);
+	m_acquisitionThread.startWorker(m_scanControl);
+	m_scanControl->m_comObject->moveToThread(&m_acquisitionThread);
+	m_scanControl->m_focus->moveToThread(&m_acquisitionThread);
+	m_scanControl->m_mcu->moveToThread(&m_acquisitionThread);
+	m_scanControl->m_stand->moveToThread(&m_acquisitionThread);
 	// start acquisition thread
 	m_acquisitionThread.startWorker(m_acquisition);
 
@@ -227,10 +227,10 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 }
 
 BrillouinAcquisition::~BrillouinAcquisition() {
-	m_cameraThread.exit();
-	m_cameraThread.wait();
-	m_microscopeThread.exit();
-	m_microscopeThread.wait();
+	//m_cameraThread.exit();
+	//m_cameraThread.wait();
+	//m_microscopeThread.exit();
+	//m_microscopeThread.wait();
 	m_acquisitionThread.exit();
 	m_acquisitionThread.wait();
 	delete m_andor;

@@ -106,8 +106,8 @@ private:
 	Ui::BrillouinAcquisitionClass *ui;
 	void checkElementButtons();
 	void addListToComboBox(QComboBox*, std::vector<AT_WC*>, bool clear = true);
-	Thread m_cameraThread;
-	Thread m_microscopeThread;
+	//Thread m_cameraThread;
+	//Thread m_microscopeThread;
 	Thread m_acquisitionThread;
 	Andor *m_andor = new Andor();
 	ScanControl *m_scanControl = new ScanControl();
