@@ -32,17 +32,12 @@ std::string helper::parse(std::string answer, std::string prefix) {
 }
 
 ScanControl::ScanControl() {
-	m_focus = new Focus(m_comObject);
-	m_mcu = new MCU(m_comObject);
-	m_stand = new Stand(m_comObject);
-
 	QWidget::connect(
 		m_comObject,
 		SIGNAL(errorOccurred(QSerialPort::SerialPortError)),
 		this,
 		SLOT(errorHandler(QSerialPort::SerialPortError))
 	);
-
 }
 
 ScanControl::~ScanControl() {

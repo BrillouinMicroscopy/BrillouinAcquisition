@@ -130,11 +130,11 @@ public:
 	std::vector<double> getPosition();
 	void setDevice(com *device);
 
-	Focus *m_focus;
-	MCU *m_mcu;
-	Stand *m_stand;
-
 	com *m_comObject = new com();
+
+	Focus *m_focus = new Focus(m_comObject);
+	MCU *m_mcu = new MCU(m_comObject);
+	Stand *m_stand = new Stand(m_comObject);
 
 public slots:
 	bool connect();

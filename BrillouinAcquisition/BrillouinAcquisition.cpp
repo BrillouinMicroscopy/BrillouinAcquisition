@@ -155,6 +155,9 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	// start microscope thread
 	m_microscopeThread.startWorker(m_scanControl);
 	m_scanControl->m_comObject->moveToThread(&m_microscopeThread);
+	m_scanControl->m_focus->moveToThread(&m_microscopeThread);
+	m_scanControl->m_mcu->moveToThread(&m_microscopeThread);
+	m_scanControl->m_stand->moveToThread(&m_microscopeThread);
 	// start acquisition thread
 	m_acquisitionThread.startWorker(m_acquisition);
 
