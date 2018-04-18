@@ -141,6 +141,8 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	qRegisterMetaType<ACQUISITION_SETTINGS>("ACQUISITION_SETTINGS");
 	qRegisterMetaType<CAMERA_SETTINGS>("ACQUISITION_SETTINGS");
 	qRegisterMetaType<std::vector<int>>("std::vector<int>");
+	qRegisterMetaType<QSerialPort::SerialPortError>("QSerialPort::SerialPortError");
+	
 
 	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
 	ui->settingsWidget->setTabIcon(0, icon);

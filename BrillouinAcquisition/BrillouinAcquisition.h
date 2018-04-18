@@ -33,6 +33,7 @@ Q_DECLARE_METATYPE(CircularBuffer<AT_U8>);
 Q_DECLARE_METATYPE(ACQUISITION_SETTINGS);
 Q_DECLARE_METATYPE(CAMERA_SETTINGS);
 Q_DECLARE_METATYPE(std::vector<int>);
+Q_DECLARE_METATYPE(QSerialPort::SerialPortError);
 
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
