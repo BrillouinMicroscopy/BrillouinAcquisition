@@ -19,11 +19,14 @@ bool Acquisition::isAcqRunning() {
 }
 
 void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
-	setSettings(acqSettings);
-
 	m_running = true;
 	emit(s_acqRunning(m_running));
 	m_abort = false;
+
+	std::string info = "Acquisition started.";
+	qInfo(logInfo()) << info.c_str();
+	
+	setSettings(acqSettings);
 
 	// prepare camera for image acquisition
 	CAMERA_SETTINGS cameraSettings = m_andor->prepareMeasurement(m_acqSettings.camera);
@@ -156,8 +159,6 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 				IMAGE *img = new IMAGE(jj, kk, ii, rank_data, dims_data, date, *images_);
 				m_fileHndl->m_payloadQueue.enqueue(img);
 
-				std::string info = "Images acquired " + std::to_string(ii*(m_acqSettings.xSteps*m_acqSettings.ySteps) + jj * m_acqSettings.ySteps + kk);
-				//qInfo(logInfo()) << info.c_str();
 				// increase position index
 				ll++;
 				emit(s_acqProgress(100 * (double)ll / nrPositions, 1e-3 * measurementTimer.elapsed() / ll * (nrPositions - ll)));
@@ -180,8 +181,8 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	delete m_fileHndl;
 	m_fileHndl = nullptr;
 
-	std::string info = "Acquisition finished.";
-	//qInfo(logInfo()) << info.c_str();
+	info = "Acquisition finished.";
+	qInfo(logInfo()) << info.c_str();
 	m_running = false;
 	emit(s_acqRunning(m_running));
 	emit(s_acqCalibrationRunning(false));
