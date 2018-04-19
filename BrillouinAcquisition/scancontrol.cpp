@@ -164,7 +164,7 @@ std::string com::receive(std::string request) {
 			while (waitForReadyRead(100))
 				responseData += readAll();
 
-			std::string response = responseData;
+			response = responseData;
 			//const QString response = QString::fromUtf8(responseData);
 		}
 	}
