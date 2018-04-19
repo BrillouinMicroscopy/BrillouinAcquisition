@@ -142,20 +142,6 @@ std::string com::receive(std::string request) {
 	request = request + m_terminator;
 	write(request.c_str());
 
-	//QByteArray ba = request.c_str();
-	//int bytesWritten = writeData(ba, request.size());
-
-	//if (bytesWritten < request.size()) {
-	//	// error not all bytes were written
-	//	int tmp = 0;
-	//}
-
-	//flush();
-
-	//waitForBytesWritten(1000);
-
-	//waitForReadyRead(1000);
-	
 	std::string response = "";
 	if (waitForBytesWritten(1000)) {
 		// read response
@@ -165,47 +151,11 @@ std::string com::receive(std::string request) {
 				responseData += readAll();
 
 			response = responseData;
-			//const QString response = QString::fromUtf8(responseData);
 		}
 	}
 
-	//char buf[1024];
-	//std::string answer;
-	//// Sleep until the microscope has answered
-	//// Is there a better solution?
-	//Sleep(100);
-
-	//int bytesRead = readLineDataCR(buf, 1024);
-	//if (bytesRead > -1)
-	//	 answer = std::string(buf, buf+bytesRead);
-	//else
-	//	answer = "";
-
-	//clear();
-
 	return response;
 }
-
-qint64 com::readLineDataCR(char *data, qint64 maxSize) {
-	qint64 readSoFar = 0;
-	char c;
-	int lastReadReturn = 0;
-
-	while (readSoFar < maxSize && (lastReadReturn = readCharacter(&c, 1)) == 1) {
-		*data++ = c;
-		++readSoFar;
-		if (c == *m_terminator.c_str())
-			break;
-	}
-
-	if (lastReadReturn != 1 && readSoFar == 0)
-		return isSequential() ? lastReadReturn : -1;
-	return readSoFar;
-}
-
-qint64 com::readCharacter(char *data, qint64 maxlen) {
-	return read(data, maxlen);
-};
 
 void com::send(std::string message) {
 	message = message + m_terminator;
@@ -216,20 +166,6 @@ void com::send(std::string message) {
 	if (!wasWritten) {
 		int tmp = 0;
 	}
-
-	//QByteArray ba = message.c_str();
-	//int bytesWritten = writeData(ba, message.size());
-
-	//if (bytesWritten < message.size()) {
-	//	// error not all bytes were written
-	//	int tmp = 0;
-	//}
-
-	//flush();
-
-	//waitForBytesWritten(1000);
-
-	//clear();
 }
 
 

@@ -16,8 +16,6 @@ protected:
 public:
 	std::string receive(std::string request);
 	void send(std::string message);
-	virtual qint64 readCharacter(char *data, qint64 maxlen);
-	qint64 readLineDataCR(char *data, qint64 maxSize);
 };
 
 class Element : public QObject {
