@@ -152,25 +152,38 @@ std::string com::receive(std::string request) {
 
 	//flush();
 
-	waitForBytesWritten(1000);
+	//waitForBytesWritten(1000);
 
-	waitForReadyRead(1000);
+	//waitForReadyRead(1000);
+	
+	std::string response = "";
+	if (waitForBytesWritten(1000)) {
+		// read response
+		if (waitForReadyRead(1000)) {
+			QByteArray responseData = readAll();
+			while (waitForReadyRead(100))
+				responseData += readAll();
 
-	char buf[1024];
-	std::string answer;
-	// Sleep until the microscope has answered
-	// Is there a better solution?
-	Sleep(100);
+			std::string response = responseData;
+			//const QString response = QString::fromUtf8(responseData);
+		}
+	}
 
-	int bytesRead = readLineDataCR(buf, 1024);
-	if (bytesRead > -1)
-		 answer = std::string(buf, buf+bytesRead);
-	else
-		answer = "";
+	//char buf[1024];
+	//std::string answer;
+	//// Sleep until the microscope has answered
+	//// Is there a better solution?
+	//Sleep(100);
+
+	//int bytesRead = readLineDataCR(buf, 1024);
+	//if (bytesRead > -1)
+	//	 answer = std::string(buf, buf+bytesRead);
+	//else
+	//	answer = "";
 
 	//clear();
 
-	return answer;
+	return response;
 }
 
 qint64 com::readLineDataCR(char *data, qint64 maxSize) {
