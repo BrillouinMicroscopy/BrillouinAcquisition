@@ -12,6 +12,8 @@ Acquisition::Acquisition(QObject *parent, Andor *andor, ScanControl *scanControl
 }
 
 Acquisition::~Acquisition() {
+	m_fileHndl->m_abort = true;
+	m_running = false;
 }
 
 bool Acquisition::isAcqRunning() {
@@ -44,6 +46,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	m_startPosition = m_scanControl->getPosition();
 
 	m_fileHndl = new StorageWrapper(nullptr, m_acqSettings.filename, H5F_ACC_RDWR);
+	connect(m_fileHndl, SIGNAL(finished()), m_fileHndl, SLOT(deleteLater()));
 	// move h5bm file to separate thread
 	m_storageThread.startWorker(m_fileHndl);
 
@@ -157,7 +160,8 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 				std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 					.toString(Qt::ISODate).toStdString();
 				IMAGE *img = new IMAGE(jj, kk, ii, rank_data, dims_data, date, *images_);
-				m_fileHndl->m_payloadQueue.enqueue(img);
+
+				QMetaObject::invokeMethod(m_fileHndl, "s_enqueuePayload", Qt::QueuedConnection, Q_ARG(IMAGE*, img));
 
 				// increase position index
 				ll++;
@@ -173,13 +177,10 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	// close camera libraries, clear buffers
 	m_andor->cleanupAcquisition();
 
+	QMetaObject::invokeMethod(m_fileHndl, "s_finishedQueueing", Qt::QueuedConnection);
+
 	m_scanControl->setPosition(m_startPosition);
 	emit(s_acqPosition(0, 0, 0, 0));
-
-	m_storageThread.exit();
-	m_storageThread.wait();
-	delete m_fileHndl;
-	m_fileHndl = nullptr;
 
 	info = "Acquisition finished.";
 	qInfo(logInfo()) << info.c_str();
@@ -191,13 +192,9 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 }
 
 void Acquisition::abort() {
-	m_fileHndl->m_payloadQueue.clear();
+	m_fileHndl->m_abort = true;
 	m_andor->cleanupAcquisition();
 	m_scanControl->setPosition(m_startPosition);
-	m_storageThread.exit();
-	m_storageThread.wait();
-	delete m_fileHndl;
-	m_fileHndl = nullptr;
 	m_running = false;
 	emit(s_acqRunning(m_running));
 	emit(s_acqProgress(0, -2));
@@ -271,7 +268,7 @@ void Acquisition::doCalibration() {
 		shift,					// the Brillouin shift of the sample
 		date					// the datetime
 	);
-	m_fileHndl->m_calibrationQueue.enqueue(cal);
+	QMetaObject::invokeMethod(m_fileHndl, "s_enqueueCalibration", Qt::QueuedConnection, Q_ARG(CALIBRATION*, cal));
 	nrCalibrations++;
 
 	// revert optical elements to position for brightfield/Brillouin imaging

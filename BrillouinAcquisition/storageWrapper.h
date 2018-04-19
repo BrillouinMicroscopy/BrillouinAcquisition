@@ -35,8 +35,9 @@ public:
 class StorageWrapper : public H5BM {
 	Q_OBJECT
 private:
-	bool m_finishedWriting = false;
+	bool m_finished = false;
 	bool m_observeQueues = false;
+	bool m_finishedQueueing = false;
 
 public:
 	StorageWrapper(
@@ -58,6 +59,14 @@ public:
 
 public slots:
 	void s_writeQueues();
+
+	void s_enqueuePayload(IMAGE*);
+	void s_enqueueCalibration(CALIBRATION *cal);
+
+	void s_finishedQueueing();
+
+signals:
+	void finished();
 };
 
 #endif //STORAGEWRAPPER_H

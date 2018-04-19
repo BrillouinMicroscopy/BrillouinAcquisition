@@ -6,18 +6,33 @@
 StorageWrapper::~StorageWrapper() {
 	// clear image queue in case acquisition was aborted
 	// and the queue is still filled
-	while (!m_payloadQueue.isEmpty()) {
-		IMAGE *img = m_payloadQueue.dequeue();
-		delete img;
+	if (m_abort) {
+		while (!m_payloadQueue.isEmpty()) {
+			IMAGE *img = m_payloadQueue.dequeue();
+			delete img;
+		}
+		while (!m_calibrationQueue.isEmpty()) {
+			CALIBRATION *cal = m_calibrationQueue.dequeue();
+			delete cal;
+		}
 	}
-	while (!m_calibrationQueue.isEmpty()) {
-		CALIBRATION *cal = m_calibrationQueue.dequeue();
-		delete cal;
-	}
+}
+
+void StorageWrapper::s_enqueuePayload(IMAGE *img) {
+	m_payloadQueue.enqueue(img);
+}
+
+void StorageWrapper::s_enqueueCalibration(CALIBRATION *cal) {
+	m_calibrationQueue.enqueue(cal);
+}
+
+void StorageWrapper::s_finishedQueueing() {
+	m_finishedQueueing = true;
 }
 
 void StorageWrapper::startWritingQueues() {
 	m_observeQueues = true;
+	m_finishedQueueing = false;
 	s_writeQueues();
 }
 
@@ -28,7 +43,7 @@ void StorageWrapper::stopWritingQueues() {
 void StorageWrapper::s_writeQueues() {
 	while (!m_payloadQueue.isEmpty()) {
 		if (m_abort) {
-			m_finishedWriting = true;
+			m_finished = true;
 			return;
 		}
 		IMAGE *img = m_payloadQueue.dequeue();
@@ -42,7 +57,7 @@ void StorageWrapper::s_writeQueues() {
 
 	while (!m_calibrationQueue.isEmpty()) {
 		if (m_abort) {
-			m_finishedWriting = true;
+			m_finished = true;
 			return;
 		}
 		CALIBRATION *cal = m_calibrationQueue.dequeue();
@@ -54,9 +69,14 @@ void StorageWrapper::s_writeQueues() {
 		cal = nullptr;
 	}
 
-	if (m_observeQueues && !m_abort) {
+	// continue to write queues if
+	// m_observeQueues is true
+	// m_abort was not set from the outside
+	// m_finishedQeueuing shows that more queue entries will come
+	if (m_observeQueues && !m_abort && !m_finishedQueueing) {
 		QMetaObject::invokeMethod(this, "s_writeQueues", Qt::QueuedConnection);
 	} else {
-		m_finishedWriting = true;
+		m_finished = true;
+		emit finished();
 	}
 }
