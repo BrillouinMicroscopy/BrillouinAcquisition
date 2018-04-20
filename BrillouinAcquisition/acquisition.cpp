@@ -104,6 +104,8 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	hsize_t dims_data[3] = { m_acqSettings.camera.frameCount, m_acqSettings.camera.roi.height, m_acqSettings.camera.roi.width };
 	ll = 0;
 
+	// reset number of calibrations
+	nrCalibrations = 1;
 	// do pre calibration
 	if (m_acqSettings.preCalibration) {
 		doCalibration();
