@@ -131,7 +131,6 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 				emit(s_acqTimeToCalibration(nextCalibration));
 				// move stage to correct position, wait 50 ms for it to finish
 				m_scanControl->setPosition({ positionsX[ll], positionsY[ll], positionsZ[ll] });
-				Sleep(50);
 
 				int bytesPerFrame = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height * 2;
 

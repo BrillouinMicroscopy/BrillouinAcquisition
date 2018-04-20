@@ -71,7 +71,6 @@ bool ScanControl::connect() {
 			if (!isConnected) {
 				throw QString("Could not open the serial port.");
 			}
-			Sleep(100);
 			m_comObject->clear();
 
 			int baudRate = m_comObject->baudRate();
@@ -147,7 +146,7 @@ std::string com::receive(std::string request) {
 		// read response
 		if (waitForReadyRead(1000)) {
 			QByteArray responseData = readAll();
-			while (waitForReadyRead(100))
+			while (waitForReadyRead(50))
 				responseData += readAll();
 
 			response = responseData;
