@@ -51,7 +51,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	m_storageThread.startWorker(m_fileHndl);
 
 	std::string now = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
-		.toString(Qt::ISODate).toStdString();
+		.toString(Qt::ISODateWithMs).toStdString();
 
 	m_fileHndl->setDate(now);
 
@@ -159,7 +159,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 				// asynchronously write image to disk
 				// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
 				std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
-					.toString(Qt::ISODate).toStdString();
+					.toString(Qt::ISODateWithMs).toStdString();
 				IMAGE *img = new IMAGE(jj, kk, ii, rank_data, dims_data, date, *images_);
 
 				QMetaObject::invokeMethod(m_fileHndl, "s_enqueuePayload", Qt::QueuedConnection, Q_ARG(IMAGE*, img));
@@ -259,7 +259,7 @@ void Acquisition::doCalibration() {
 
 	// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
 	std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
-		.toString(Qt::ISODate).toStdString();
+		.toString(Qt::ISODateWithMs).toStdString();
 	CALIBRATION *cal = new CALIBRATION(
 		nrCalibrations,			// index
 		*images_,				// data
