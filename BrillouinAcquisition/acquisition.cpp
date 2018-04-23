@@ -41,6 +41,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	emit(s_acqProgress(ACQUISITION_STATES::STARTED, 0.0, -1));
 	// set optical elements for brightfield/Brillouin imaging
 	m_scanControl->m_stand->setPreset(1);
+	Sleep(500);
 
 	// get current stage position
 	m_startPosition = m_scanControl->getPosition();
@@ -235,6 +236,7 @@ void Acquisition::doCalibration() {
 
 	// move optical elements to position for calibration
 	m_scanControl->m_stand->setPreset(3);
+	Sleep(500);
 
 	double shift = 5.088; // this is the shift for water
 
@@ -279,4 +281,5 @@ void Acquisition::doCalibration() {
 
 	// reset exposure time
 	m_andor->setCalibrationExposureTime(m_acqSettings.camera.exposureTime);
+	Sleep(500);
 }
