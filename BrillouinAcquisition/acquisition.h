@@ -7,6 +7,12 @@
 #include "scancontrol.h"
 #include "circularBuffer.h"
 
+enum ACQUISITION_STATES {
+	STARTED,
+	RUNNING,
+	FINISHED,
+	ABORTED
+};
 
 struct ACQUISITION_SETTINGS {
 	std::string filename = "Brillouin.h5";	// filename
@@ -70,7 +76,7 @@ private:
 
 signals:
 	void s_acqRunning(bool);			// is acquisition running
-	void s_acqProgress(double, int);	// progress in percent and the remaining time in seconds
+	void s_acqProgress(int, double, int);	// progress in percent and the remaining time in seconds
 	// current position in x, y and z, as well as the current image number
 	void s_acqPosition(double, double, double, int);
 	void s_acqTimeToCalibration(int);	// time to next calibration

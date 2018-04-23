@@ -38,7 +38,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	previewBuffer = new CircularBuffer<AT_U8>(4, pixelNumber * 2);
 	emit(s_previewRunning(true, previewBuffer, m_acqSettings.camera.roi.width, m_acqSettings.camera.roi.height));
 
-	emit(s_acqProgress(0.0, -1));
+	emit(s_acqProgress(ACQUISITION_STATES::STARTED, 0.0, -1));
 	// set optical elements for brightfield/Brillouin imaging
 	m_scanControl->m_stand->setPreset(1);
 
@@ -166,7 +166,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 
 				// increase position index
 				ll++;
-				emit(s_acqProgress(100 * (double)ll / nrPositions, 1e-3 * measurementTimer.elapsed() / ll * (nrPositions - ll)));
+				emit(s_acqProgress(ACQUISITION_STATES::RUNNING, 100 * (double)ll / nrPositions, 1e-3 * measurementTimer.elapsed() / ll * (nrPositions - ll)));
 			}
 		}
 	}
@@ -188,7 +188,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	m_running = false;
 	emit(s_acqRunning(m_running));
 	emit(s_acqCalibrationRunning(false));
-	emit(s_acqProgress(100.0, 0));
+	emit(s_acqProgress(ACQUISITION_STATES::FINISHED, 100.0, 0));
 	emit(s_acqTimeToCalibration(0));
 }
 
@@ -198,7 +198,7 @@ void Acquisition::abort() {
 	m_scanControl->setPosition(m_startPosition);
 	m_running = false;
 	emit(s_acqRunning(m_running));
-	emit(s_acqProgress(0, -2));
+	emit(s_acqProgress(ACQUISITION_STATES::ABORTED, 0, 0));
 	emit(s_acqPosition(m_startPosition[0], m_startPosition[1], m_startPosition[2], 0));
 	emit(s_acqTimeToCalibration(0));
 }

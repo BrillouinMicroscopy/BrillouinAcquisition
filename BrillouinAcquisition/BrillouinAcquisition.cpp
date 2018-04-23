@@ -99,9 +99,9 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	// slot to show current acquisition progress
 	QWidget::connect(
 		m_acquisition,
-		SIGNAL(s_acqProgress(double, int)),
+		SIGNAL(s_acqProgress(int, double, int)),
 		this,
-		SLOT(showAcqProgress(double, int))
+		SLOT(showAcqProgress(int, double, int))
 	);
 
 	// slot to update filename
@@ -304,15 +304,15 @@ void BrillouinAcquisition::showAcqPosition(double positionX, double positionY, d
 	ui->imageNr->setText(QString::number(imageNr));
 }
 
-void BrillouinAcquisition::showAcqProgress(double progress, int seconds) {
+void BrillouinAcquisition::showAcqProgress(int state, double progress, int seconds) {
 	ui->progressBar->setValue(progress);
 
 	QString string;
-	if (seconds < -1) {
+	if (state == ACQUISITION_STATES::ABORTED) {
 		string = "Acquisition aborted.";
-	} else if (seconds < 0) {
+	} else if (state == ACQUISITION_STATES::STARTED) {
 		string = "Acquisition started.";
-	} else if (seconds == 0) {
+	} else if (state == ACQUISITION_STATES::FINISHED) {
 		string = "Acquisition finished.";
 	} else {
 		if (seconds > 3600) {

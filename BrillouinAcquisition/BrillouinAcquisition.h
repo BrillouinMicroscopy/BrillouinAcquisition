@@ -68,7 +68,7 @@ private slots:
 	void cameraSettingsChanged(CAMERA_SETTINGS);
 	void cameraOptionsChanged(CAMERA_OPTIONS);
 	void showAcqPosition(double, double, double, int);
-	void showAcqProgress(double, int);
+	void showAcqProgress(int state, double progress, int seconds);
 	void showCalibrationInterval(int);
 	void showCalibrationRunning(bool);
 	void showAcqRunning(bool);
