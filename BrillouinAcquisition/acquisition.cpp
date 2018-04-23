@@ -216,6 +216,8 @@ void Acquisition::setSettings(ACQUISITION_SETTINGS acqSettings) {
 std::string Acquisition::checkFilename(std::string filename) {
 	// get filename without extension
 	std::string rawFilename = filename.substr(0, filename.find_last_of("."));
+	// remove possibly attached number separated by a hyphen
+	rawFilename = rawFilename.substr(0, rawFilename.find_last_of("-"));
 	int count = 0;
 	while (exists(filename)) {
 		filename = rawFilename + '-' + std::to_string(count) + filename.substr(filename.find_last_of("."), std::string::npos);
