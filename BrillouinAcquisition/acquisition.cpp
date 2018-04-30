@@ -172,7 +172,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 		}
 	}
 	// do post calibration
-	if (m_acqSettings.preCalibration) {
+	if (m_acqSettings.postCalibration) {
 		doCalibration();
 	}
 

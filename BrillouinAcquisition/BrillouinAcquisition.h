@@ -93,6 +93,10 @@ private slots:
 	void on_stepsZ_valueChanged(int);
 
 	// live calibration
+	void on_preCalibration_stateChanged(int);
+	void on_postCalibration_stateChanged(int);
+	void on_conCalibration_stateChanged(int);
+	void on_sampleSelection_currentIndexChanged(const QString &text);
 	void on_conCalibrationInterval_valueChanged(double);
 	void on_nrCalibrationImages_valueChanged(int);
 	void on_calibrationExposureTime_valueChanged(double);

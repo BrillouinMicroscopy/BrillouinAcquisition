@@ -710,9 +710,9 @@ void BrillouinAcquisition::updateAcquisitionSettings() {
 	ui->stepsZ->setValue(m_acquisitionSettings.zSteps);
 
 	// calibration settings
-	ui->preCalibration->setEnabled(m_acquisitionSettings.preCalibration);
-	ui->postCalibration->setEnabled(m_acquisitionSettings.postCalibration);
-	ui->conCalibration->setEnabled(m_acquisitionSettings.conCalibration);
+	ui->preCalibration->setChecked(m_acquisitionSettings.preCalibration);
+	ui->postCalibration->setChecked(m_acquisitionSettings.postCalibration);
+	ui->conCalibration->setChecked(m_acquisitionSettings.conCalibration);
 	ui->conCalibrationInterval->setValue(m_acquisitionSettings.conCalibrationInterval);
 	ui->nrCalibrationImages->setValue(m_acquisitionSettings.nrCalibrationImages);
 	ui->calibrationExposureTime->setValue(m_acquisitionSettings.calibrationExposureTime);
@@ -755,6 +755,23 @@ void BrillouinAcquisition::on_stepsY_valueChanged(int value) {
 void BrillouinAcquisition::on_stepsZ_valueChanged(int value) {
 	m_acquisitionSettings.zSteps = value;
 }
+
+void BrillouinAcquisition::on_preCalibration_stateChanged(int state) {
+	m_acquisitionSettings.preCalibration = (bool)state;
+}
+
+void BrillouinAcquisition::on_postCalibration_stateChanged(int state) {
+	m_acquisitionSettings.postCalibration = (bool)state;
+}
+
+void BrillouinAcquisition::on_conCalibration_stateChanged(int state) {
+	m_acquisitionSettings.conCalibration = (bool)state;
+}
+
+
+void BrillouinAcquisition::on_sampleSelection_currentIndexChanged(const QString &text) {
+	m_acquisitionSettings.sample = text.toStdString();
+};
 
 void BrillouinAcquisition::on_conCalibrationInterval_valueChanged(double value) {
 	m_acquisitionSettings.conCalibrationInterval = value;
