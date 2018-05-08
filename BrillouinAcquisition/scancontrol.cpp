@@ -204,8 +204,8 @@ double Focus::getZ() {
 
 void Focus::setZ(double position) {
 	position = round(position / m_umperinc);
-	int inc = static_cast<int>(position);
-	inc %= m_rangeFocus;
+	int inc = positive_modulo(position, m_rangeFocus);
+
 	std::string pos = helper::dec2hex(inc, 6);
 	receive("ZD" + pos);
 }
@@ -259,8 +259,8 @@ double MCU::getPosition(std::string axis) {
 
 void MCU::setPosition(std::string axis, double position) {
 	position = round(position / m_umperinc);
-	int inc = static_cast<int>(position);
-	inc %= m_rangeFocus;
+	int inc = positive_modulo(position, m_rangeFocus);
+
 	std::string pos = helper::dec2hex(inc, 6);
 	send(axis + "T" + pos);
 }

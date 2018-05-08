@@ -25,12 +25,16 @@ class Element : public QObject {
 private:
 	std::string m_prefix;		// prefix of the element for serial communication
 	com *m_comObject;
+
 public:
 	Element(com *comObject, std::string prefix) : m_comObject(comObject), m_prefix(prefix) {};
 	~Element();
 	std::string receive(std::string request);
 	void send(std::string message);
 	void setDevice(com *device);
+	inline int positive_modulo(int i, int n) {
+		return (i % n + n) % n;
+	}
 };
 
 class Stand : public Element {
