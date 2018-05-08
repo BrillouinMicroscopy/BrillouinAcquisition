@@ -18,7 +18,17 @@ void MockMicroscope::close() {
 	m_isOpen = false;
 }
 
-qint64 MockMicroscope::readCharacter(char *data, qint64 maxlen) {
+qint64 MockMicroscope::writeToDevice(const char *data) {
+	std::string message = data;
+	m_outputBuffer += message;
+	return message.length();
+}
+
+std::string MockMicroscope::readOutputBuffer() {
+	return m_outputBuffer;
+}
+
+/*qint64 MockMicroscope::readCharacter(char *data, qint64 maxlen) {
 	if (m_outputBuffer.size() > 0) {
 		char tmp = m_outputBuffer[0];
 		strcpy(data, &tmp);
@@ -48,4 +58,4 @@ bool MockMicroscope::waitForBytesWritten(int msecs) {
 
 bool MockMicroscope::waitForReadyRead(int msecs) {
 	return true;
-}
+}*/

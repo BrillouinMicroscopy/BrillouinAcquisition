@@ -16,6 +16,8 @@ protected:
 public:
 	std::string receive(std::string request);
 	void send(std::string message);
+
+	virtual qint64 writeToDevice(const char *data);
 };
 
 class Element : public QObject {

@@ -139,7 +139,7 @@ void ScanControl::setDevice(com *device) {
 
 std::string com::receive(std::string request) {
 	request = request + m_terminator;
-	write(request.c_str());
+	writeToDevice(request.c_str());
 
 	std::string response = "";
 	if (waitForBytesWritten(1000)) {
@@ -159,7 +159,7 @@ std::string com::receive(std::string request) {
 void com::send(std::string message) {
 	message = message + m_terminator;
 
-	write(message.c_str());
+	writeToDevice(message.c_str());
 	bool wasWritten = waitForBytesWritten(1000);
 
 	if (!wasWritten) {
@@ -167,6 +167,9 @@ void com::send(std::string message) {
 	}
 }
 
+qint64 com::writeToDevice(const char *data) {
+	return write(data);
+}
 
 /*
 * Functions of the parent class for all elements
