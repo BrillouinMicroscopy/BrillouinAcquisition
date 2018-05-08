@@ -39,5 +39,12 @@ namespace BrillouinAcquisitionUnitTest
 			Assert::AreEqual(expected, result);
 		}
 
+		TEST_METHOD(TestDec2Hex_Negative) {
+			// provoke an overflow --> wraps around
+			std::string result = helper::dec2hex(-1000, 6);
+			std::string expected = "FFFFFC18";
+			Assert::AreEqual(expected, result);
+		}
+
 	};
 }
