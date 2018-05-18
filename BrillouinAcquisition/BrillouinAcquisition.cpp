@@ -624,9 +624,7 @@ void BrillouinAcquisition::cameraConnectionChanged(bool isConnected) {
 }
 
 void BrillouinAcquisition::showNoCameraFound() {
-	QMessageBox msgBox;
-	msgBox.setText("No camera was found. Switch on the camera and restart the program.");
-	msgBox.exec();
+	QMessageBox::critical(this, "Camera not found.", "No camera was found. Switch on the camera and restart the program.");
 }
 
 void BrillouinAcquisition::on_actionEnable_Cooling_triggered() {
