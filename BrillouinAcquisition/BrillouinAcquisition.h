@@ -37,6 +37,7 @@ Q_DECLARE_METATYPE(AT_64);
 Q_DECLARE_METATYPE(CircularBuffer<AT_U8>);
 Q_DECLARE_METATYPE(ACQUISITION_SETTINGS);
 Q_DECLARE_METATYPE(CAMERA_SETTINGS);
+Q_DECLARE_METATYPE(CAMERA_OPTIONS);
 Q_DECLARE_METATYPE(std::vector<int>);
 Q_DECLARE_METATYPE(QSerialPort::SerialPortError);
 Q_DECLARE_METATYPE(IMAGE*);
@@ -48,11 +49,18 @@ class BrillouinAcquisition : public QMainWindow {
 private slots:
 	void on_actionAbout_triggered();
 	void on_camera_singleShot_clicked();
+	// connect camera and react
 	void on_actionConnect_Camera_triggered();
+	void cameraConnectionChanged(bool);
+	void showNoCameraFound();
+	// enable camera cooling and react
 	void on_actionEnable_Cooling_triggered();
+	void cameraCoolingChanged(bool);
+	// connect microscope and react
 	void on_actionConnect_Stage_triggered();
-	void on_acquisitionStart_clicked();
 	void microscopeConnectionChanged(bool);
+
+	void on_acquisitionStart_clicked();
 	void microscopeElementPositionsChanged(std::vector<int>);
 	void microscopeElementPositionsChanged(int element, int position);
 	void on_camera_playPause_clicked();

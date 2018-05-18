@@ -8,6 +8,28 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	QMainWindow(parent), ui(new Ui::BrillouinAcquisitionClass) {
 	ui->setupUi(this);
 
+	// slot camera connection
+	QWidget::connect(
+		m_andor,
+		SIGNAL(cameraConnected(bool)),
+		this,
+		SLOT(cameraConnectionChanged(bool))
+	);
+
+	QWidget::connect(
+		m_andor,
+		SIGNAL(noCameraFound()),
+		this,
+		SLOT(showNoCameraFound())
+	);
+
+	QWidget::connect(
+		m_andor,
+		SIGNAL(cameraCoolingChanged(bool)),
+		this,
+		SLOT(cameraCoolingChanged(bool))
+	);
+
 	QWidget::connect(
 		m_andor,
 		SIGNAL(acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64)),
@@ -132,6 +154,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	qRegisterMetaType<CircularBuffer<AT_U8>>("CircularBuffer<AT_U8>");
 	qRegisterMetaType<ACQUISITION_SETTINGS>("ACQUISITION_SETTINGS");
 	qRegisterMetaType<CAMERA_SETTINGS>("ACQUISITION_SETTINGS");
+	qRegisterMetaType<CAMERA_OPTIONS>("CAMERA_OPTIONS");
 	qRegisterMetaType<std::vector<int>>("std::vector<int>");
 	qRegisterMetaType<QSerialPort::SerialPortError>("QSerialPort::SerialPortError");
 	qRegisterMetaType<IMAGE*>("IMAGE*");
@@ -575,7 +598,21 @@ void BrillouinAcquisition::onNewImage() {
 
 void BrillouinAcquisition::on_actionConnect_Camera_triggered() {
 	if (m_andor->getConnectionStatus()) {
-		m_andor->disconnect();
+		QMetaObject::invokeMethod(m_andor, "disconnect", Qt::QueuedConnection);
+	} else {
+		QMetaObject::invokeMethod(m_andor, "connect", Qt::QueuedConnection);
+	}
+}
+
+void BrillouinAcquisition::cameraConnectionChanged(bool isConnected) {
+	if (isConnected) {
+		ui->actionConnect_Camera->setText("Disconnect Camera");
+		QIcon icon(":/BrillouinAcquisition/assets/01standby.png");
+		ui->settingsWidget->setTabIcon(0, icon);
+		ui->actionEnable_Cooling->setEnabled(true);
+		ui->camera_playPause->setEnabled(true);
+		ui->camera_singleShot->setEnabled(true);
+	} else {
 		ui->actionConnect_Camera->setText("Connect Camera");
 		ui->actionEnable_Cooling->setText("Enable Cooling");
 		QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
@@ -583,30 +620,34 @@ void BrillouinAcquisition::on_actionConnect_Camera_triggered() {
 		ui->actionEnable_Cooling->setEnabled(false);
 		ui->camera_playPause->setEnabled(false);
 		ui->camera_singleShot->setEnabled(false);
-	} else {
-		m_andor->connect();
-		ui->actionConnect_Camera->setText("Disconnect Camera");
-		QIcon icon(":/BrillouinAcquisition/assets/01standby.png");
-		ui->settingsWidget->setTabIcon(0, icon);
-		ui->actionEnable_Cooling->setEnabled(true);
-		ui->camera_playPause->setEnabled(true);
-		ui->camera_singleShot->setEnabled(true);
 	}
+}
+
+void BrillouinAcquisition::showNoCameraFound() {
+	QMessageBox msgBox;
+	msgBox.setText("No camera was found. Switch on the camera and restart the program.");
+	msgBox.exec();
 }
 
 void BrillouinAcquisition::on_actionEnable_Cooling_triggered() {
 	if (m_andor->getConnectionStatus()) {
 		if (m_andor->getSensorCooling()) {
-			m_andor->setSensorCooling(false);
-			ui->actionEnable_Cooling->setText("Enable Cooling");
-			QIcon icon(":/BrillouinAcquisition/assets/01standby.png");
-			ui->settingsWidget->setTabIcon(0, icon);
+			QMetaObject::invokeMethod(m_andor, "setSensorCooling", Qt::QueuedConnection, Q_ARG(bool, false));
 		} else {
-			m_andor->setSensorCooling(true);
-			ui->actionEnable_Cooling->setText("Disable Cooling");
-			QIcon icon(":/BrillouinAcquisition/assets/02cooling.png");
-			ui->settingsWidget->setTabIcon(0, icon);
+			QMetaObject::invokeMethod(m_andor, "setSensorCooling", Qt::QueuedConnection, Q_ARG(bool, true));
 		}
+	}
+}
+
+void BrillouinAcquisition::cameraCoolingChanged(bool isCooling) {
+	if (isCooling) {
+		ui->actionEnable_Cooling->setText("Disable Cooling");
+		QIcon icon(":/BrillouinAcquisition/assets/02cooling.png");
+		ui->settingsWidget->setTabIcon(0, icon);
+	} else {
+		ui->actionEnable_Cooling->setText("Enable Cooling");
+		QIcon icon(":/BrillouinAcquisition/assets/01standby.png");
+		ui->settingsWidget->setTabIcon(0, icon);
 	}
 }
 
