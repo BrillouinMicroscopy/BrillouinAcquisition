@@ -15,8 +15,8 @@ struct CAMERA_OPTIONS {
 	const std::vector<AT_WC*> imageBinnings = { L"1x1", L"2x2", L"3x3", L"4x4", L"8x8" };
 	std::vector<double> exposureTimeLimits = { 0.01, 1 };
 	std::vector<AT_64> frameCountLimits = { 1, 100 };
-	std::vector<AT_64> ROIWidthLimits = { 1, 2 };
-	std::vector<AT_64> ROIHeightLimits = { 1, 2 };
+	std::vector<AT_64> ROIWidthLimits = { 1, 2 };		// minimum and maximum ROI width
+	std::vector<AT_64> ROIHeightLimits = { 1, 2 };		// minimum and maximum ROI height
 };
 
 struct CAMERA_ROI {
@@ -99,7 +99,7 @@ public slots:
 
 signals:
 	void imageAcquired(unsigned short*, AT_64, AT_64);
-	void acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64);
+	void acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64);
 	void s_previewRunning(bool);
 	void settingsChanged(CAMERA_SETTINGS);
 	void optionsChanged(CAMERA_OPTIONS);

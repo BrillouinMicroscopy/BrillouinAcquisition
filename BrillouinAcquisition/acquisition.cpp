@@ -36,7 +36,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 
 	int pixelNumber = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height;
 	previewBuffer = new CircularBuffer<AT_U8>(4, pixelNumber * 2);
-	emit(s_previewRunning(true, previewBuffer, m_acqSettings.camera.roi.width, m_acqSettings.camera.roi.height));
+	emit(s_previewRunning(true, previewBuffer, m_acqSettings.camera.roi.width, m_acqSettings.camera.roi.height, m_acqSettings.camera.roi.left, m_acqSettings.camera.roi.top));
 
 	emit(s_acqProgress(ACQUISITION_STATES::STARTED, 0.0, -1));
 	// set optical elements for brightfield/Brillouin imaging

@@ -225,9 +225,9 @@ void Andor::setSettings() {
 void Andor::prepareAcquisition() {
 	// always use full camera image for live preview
 	m_settings.roi.width = m_options.ROIWidthLimits[1];
-	m_settings.roi.left = m_options.ROIWidthLimits[0];
+	m_settings.roi.left = 1;
 	m_settings.roi.height = m_options.ROIHeightLimits[1];
-	m_settings.roi.top = m_options.ROIHeightLimits[0];
+	m_settings.roi.top = 1;
 
 	setSettings();
 
@@ -239,7 +239,7 @@ void Andor::prepareAcquisition() {
 	AT_InitialiseUtilityLibrary();
 
 	emit(s_previewRunning(true));
-	emit(acquisitionRunning(true, liveBuffer, m_settings.roi.width, m_settings.roi.height));
+	emit(acquisitionRunning(true, liveBuffer, m_settings.roi.width, m_settings.roi.height, m_settings.roi.left, m_settings.roi.top));
 }
 
 void Andor::cleanupAcquisition() {
@@ -247,7 +247,7 @@ void Andor::cleanupAcquisition() {
 	AT_Command(m_cameraHndl, L"AcquisitionStop");
 	AT_Flush(m_cameraHndl);
 	emit(s_previewRunning(false));
-	emit(acquisitionRunning(false, nullptr, 0, 0));
+	emit(acquisitionRunning(false, nullptr, 0, 0, 0, 0));
 }
 
 

@@ -27,6 +27,11 @@ enum CustomGradientPreset {
 	gpParula
 };
 
+enum ROI_SOURCE {
+	BOX,
+	PLOT
+};
+
 Q_DECLARE_METATYPE(std::string);
 Q_DECLARE_METATYPE(AT_64);
 Q_DECLARE_METATYPE(CircularBuffer<AT_U8>);
@@ -53,17 +58,21 @@ private slots:
 	void on_camera_playPause_clicked();
 	void onNewImage();
 	void initializePlot();
+
+	// set and check camera ROI
 	void xAxisRangeChanged(const QCPRange & newRange);
 	void yAxisRangeChanged(const QCPRange & newRange);
-	void settingsCameraUpdate(SETTINGS_DEVICES);
 	void on_ROILeft_valueChanged(int);
 	void on_ROIWidth_valueChanged(int);
 	void on_ROITop_valueChanged(int);
 	void on_ROIHeight_valueChanged(int);
+	void settingsCameraUpdate(int);
+	std::vector<AT_64> checkROI(std::vector<AT_64>, std::vector<AT_64>);
+
 	void setColormap(QCPColorGradient *, CustomGradientPreset);
 	void setElement(int element, int position);
 	void setPreset(int preset);
-	void updatePreview(bool, CircularBuffer<AT_U8>*, AT_64, AT_64);
+	void updatePreview(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64);
 	void showPreviewRunning(bool);
 	void cameraSettingsChanged(CAMERA_SETTINGS);
 	void cameraOptionsChanged(CAMERA_OPTIONS);
@@ -100,9 +109,6 @@ private slots:
 	void on_conCalibrationInterval_valueChanged(double);
 	void on_nrCalibrationImages_valueChanged(int);
 	void on_calibrationExposureTime_valueChanged(double);
-
-signals:
-	void settingsCameraChanged(SETTINGS_DEVICES);
 
 public:
 	BrillouinAcquisition(QWidget *parent = nullptr);

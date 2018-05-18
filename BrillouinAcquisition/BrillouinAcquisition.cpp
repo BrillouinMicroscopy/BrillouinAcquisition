@@ -10,9 +10,9 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 
 	QWidget::connect(
 		m_andor,
-		SIGNAL(acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64)),
+		SIGNAL(acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64)),
 		this,
-		SLOT(updatePreview(bool, CircularBuffer<AT_U8>*, AT_64, AT_64))
+		SLOT(updatePreview(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64))
 	);
 
 	QWidget::connect(
@@ -48,14 +48,6 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 		SIGNAL(rangeChanged(QCPRange)),
 		this,
 		SLOT(yAxisRangeChanged(QCPRange))
-	);
-
-	// slots to update the settings inputs
-	QWidget::connect(
-		this,
-		SIGNAL(settingsCameraChanged(SETTINGS_DEVICES)),
-		this,
-		SLOT(settingsCameraUpdate(SETTINGS_DEVICES))
 	);
 
 	// slot microscope connection
@@ -130,9 +122,9 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 
 	QWidget::connect(
 		m_acquisition,
-		SIGNAL(s_previewRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64)),
+		SIGNAL(s_previewRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64)),
 		this,
-		SLOT(updatePreview(bool, CircularBuffer<AT_U8>*, AT_64, AT_64))
+		SLOT(updatePreview(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64))
 	);
 
 	qRegisterMetaType<std::string>("std::string");
@@ -275,6 +267,9 @@ void BrillouinAcquisition::cameraOptionsChanged(CAMERA_OPTIONS options) {
 	m_cameraOptions.ROIHeightLimits = options.ROIHeightLimits;
 	m_cameraOptions.ROIWidthLimits = options.ROIWidthLimits;
 
+	// set size of colormap to maximum image size
+	m_colorMap->data()->setSize(options.ROIWidthLimits[1], options.ROIHeightLimits[1]);
+
 	addListToComboBox(ui->triggerMode, options.triggerModes);
 	addListToComboBox(ui->binning, options.imageBinnings);
 	addListToComboBox(ui->pixelReadoutRate, options.pixelReadoutRates);
@@ -289,12 +284,16 @@ void BrillouinAcquisition::cameraOptionsChanged(CAMERA_OPTIONS options) {
 
 	ui->ROIHeight->setMinimum(options.ROIHeightLimits[0]);
 	ui->ROIHeight->setMaximum(options.ROIHeightLimits[1]);
-	ui->ROITop->setMinimum(options.ROIHeightLimits[0]);
+	ui->ROIHeight->setValue(options.ROIHeightLimits[1]);
+	ui->ROITop->setMinimum(1);
 	ui->ROITop->setMaximum(options.ROIHeightLimits[1]);
+	ui->ROITop->setValue(1);
 	ui->ROIWidth->setMinimum(options.ROIWidthLimits[0]);
 	ui->ROIWidth->setMaximum(options.ROIWidthLimits[1]);
-	ui->ROILeft->setMinimum(options.ROIWidthLimits[0]);
+	ui->ROIWidth->setValue(options.ROIWidthLimits[1]);
+	ui->ROILeft->setMinimum(1);
 	ui->ROILeft->setMaximum(options.ROIWidthLimits[1]);
+	ui->ROILeft->setValue(1);
 }
 
 void BrillouinAcquisition::showAcqPosition(double positionX, double positionY, double positionZ, int imageNr) {
@@ -354,10 +353,10 @@ void BrillouinAcquisition::addListToComboBox(QComboBox* box, std::vector<AT_WC*>
 void BrillouinAcquisition::cameraSettingsChanged(CAMERA_SETTINGS settings) {
 	ui->exposureTime->setValue(settings.exposureTime);
 	ui->frameCount->setValue(settings.frameCount);
-	ui->ROILeft->setValue(settings.roi.left);
-	ui->ROIWidth->setValue(settings.roi.width);
-	ui->ROITop->setValue(settings.roi.top);
-	ui->ROIHeight->setValue(settings.roi.height);
+	//ui->ROILeft->setValue(settings.roi.left);
+	//ui->ROIWidth->setValue(settings.roi.width);
+	//ui->ROITop->setValue(settings.roi.top);
+	//ui->ROIHeight->setValue(settings.roi.height);
 
 	ui->triggerMode->setCurrentText(QString::fromWCharArray(settings.readout.triggerMode));
 	ui->binning->setCurrentText(QString::fromWCharArray(settings.roi.binning));
@@ -421,64 +420,130 @@ void BrillouinAcquisition::initializePlot() {
 }
 
 void BrillouinAcquisition::xAxisRangeChanged(const QCPRange &newRange) {
-	// checks for certain range
-	ui->customplot->xAxis->setRange(newRange.bounded(m_cameraOptions.ROIWidthLimits[0], m_cameraOptions.ROIWidthLimits[1]));
-	if (newRange.lower >= m_cameraOptions.ROIWidthLimits[0]) {
-		m_deviceSettings.camera.roi.left = newRange.lower;
-	}
-	int width = newRange.upper - newRange.lower;
-	if (width <= m_cameraOptions.ROIWidthLimits[1]) {
-		m_deviceSettings.camera.roi.width = width;
-	}
-	emit(settingsCameraChanged(m_deviceSettings));
+	ui->customplot->xAxis->setRange(newRange.bounded(1, m_cameraOptions.ROIWidthLimits[1]));
+	m_deviceSettings.camera.roi.left = newRange.lower;
+	m_deviceSettings.camera.roi.width = newRange.upper - newRange.lower + 1;
+	settingsCameraUpdate(ROI_SOURCE::PLOT);
 }
 
 void BrillouinAcquisition::yAxisRangeChanged(const QCPRange &newRange) {
-	// checks for certain range
-	ui->customplot->yAxis->setRange(newRange.bounded(m_cameraOptions.ROIHeightLimits[0], m_cameraOptions.ROIHeightLimits[1]));
-	if (newRange.lower >= m_cameraOptions.ROIHeightLimits[0]) {
-		m_deviceSettings.camera.roi.top = newRange.lower;
-	}
-	int height = newRange.upper - newRange.lower;
-	if (height <= m_cameraOptions.ROIHeightLimits[1]) {
-		m_deviceSettings.camera.roi.height = height;
-	}
-	emit(settingsCameraChanged(m_deviceSettings));
-}
-
-void BrillouinAcquisition::settingsCameraUpdate(SETTINGS_DEVICES settings) {
-	ui->ROILeft->setValue(settings.camera.roi.left);
-	ui->ROIWidth->setValue(settings.camera.roi.width);
-	ui->ROITop->setValue(settings.camera.roi.top);
-	ui->ROIHeight->setValue(settings.camera.roi.height);
+	ui->customplot->yAxis->setRange(newRange.bounded(1, m_cameraOptions.ROIHeightLimits[1]));
+	m_deviceSettings.camera.roi.top = newRange.lower;
+	m_deviceSettings.camera.roi.height = newRange.upper - newRange.lower + 1;
+	settingsCameraUpdate(ROI_SOURCE::PLOT);
 }
 
 void BrillouinAcquisition::on_ROILeft_valueChanged(int left) {
 	m_deviceSettings.camera.roi.left = left;
-	m_acquisitionSettings.camera.roi.left = left;
-	ui->customplot->xAxis->setRange(QCPRange(left, left + m_deviceSettings.camera.roi.width));
-	ui->customplot->replot();
+	settingsCameraUpdate(ROI_SOURCE::BOX);
 }
 
 void BrillouinAcquisition::on_ROIWidth_valueChanged(int width) {
 	m_deviceSettings.camera.roi.width = width;
-	m_acquisitionSettings.camera.roi.width = width;
-	ui->customplot->xAxis->setRange(QCPRange(m_deviceSettings.camera.roi.left, m_deviceSettings.camera.roi.left + width));
-	ui->customplot->replot();
+	settingsCameraUpdate(ROI_SOURCE::BOX);
 }
 
 void BrillouinAcquisition::on_ROITop_valueChanged(int top) {
 	m_deviceSettings.camera.roi.top = top;
-	m_acquisitionSettings.camera.roi.top = top;
-	ui->customplot->yAxis->setRange(QCPRange(top, top + m_deviceSettings.camera.roi.height));
-	ui->customplot->replot();
+	settingsCameraUpdate(ROI_SOURCE::BOX);
 }
 
 void BrillouinAcquisition::on_ROIHeight_valueChanged(int height) {
 	m_deviceSettings.camera.roi.height = height;
-	m_acquisitionSettings.camera.roi.height = height;
-	ui->customplot->yAxis->setRange(QCPRange(m_deviceSettings.camera.roi.top, m_deviceSettings.camera.roi.top + height));
-	ui->customplot->replot();
+	settingsCameraUpdate(ROI_SOURCE::BOX);
+}
+
+void BrillouinAcquisition::settingsCameraUpdate(int source) {
+	// check that values are valid
+	// start must be >= than 1 and <= than (imageSize - minROIsize + 1)
+	// ROIsize must be within [minROIsize, maxROIsize]
+	// end must be >= than <= than the size of the image
+
+	// check these requirements
+	// for x
+	std::vector<AT_64> xIn = { m_deviceSettings.camera.roi.left, m_deviceSettings.camera.roi.width };
+	std::vector<AT_64> xOut = checkROI(xIn, m_cameraOptions.ROIWidthLimits);
+	bool xChanged = (xIn != xOut);
+	if (xChanged) {
+		m_deviceSettings.camera.roi.left = xOut[0];
+		m_deviceSettings.camera.roi.width = xOut[1];
+	}
+
+	//for y
+	std::vector<AT_64> yIn = { m_deviceSettings.camera.roi.top, m_deviceSettings.camera.roi.height };
+	std::vector<AT_64> yOut = checkROI(yIn, m_cameraOptions.ROIHeightLimits);
+	bool yChanged = (yIn != yOut);
+	if (yChanged) {
+		m_deviceSettings.camera.roi.top = yOut[0];
+		m_deviceSettings.camera.roi.height = yOut[1];
+	}
+
+	// set values of manual input fields
+	if (source == ROI_SOURCE::PLOT || xChanged) {
+		// dont retrigger a round of checking
+		ui->ROILeft->blockSignals(true);
+		ui->ROIWidth->blockSignals(true);
+		ui->ROILeft->setValue(m_deviceSettings.camera.roi.left);
+		ui->ROIWidth->setValue(m_deviceSettings.camera.roi.width);
+		ui->ROILeft->blockSignals(false);
+		ui->ROIWidth->blockSignals(false);
+	}
+	if (source == ROI_SOURCE::PLOT || yChanged) {
+		// dont retrigger a round of checking
+		ui->ROITop->blockSignals(true);
+		ui->ROIHeight->blockSignals(true);
+		ui->ROITop->setValue(m_deviceSettings.camera.roi.top);
+		ui->ROIHeight->setValue(m_deviceSettings.camera.roi.height);
+		ui->ROITop->blockSignals(false);
+		ui->ROIHeight->blockSignals(false);
+	}
+	// set plot range
+	//ui->customplot->yAxis->setRange(newRange.bounded(1, m_cameraOptions.ROIHeightLimits[1]));
+	if (source == ROI_SOURCE::BOX || xChanged) {
+		ui->customplot->xAxis->setRange(QCPRange(m_deviceSettings.camera.roi.left, m_deviceSettings.camera.roi.left + m_deviceSettings.camera.roi.width - 1));
+	}
+	if (source == ROI_SOURCE::BOX || yChanged) {
+		ui->customplot->yAxis->setRange(QCPRange(m_deviceSettings.camera.roi.top, m_deviceSettings.camera.roi.top + m_deviceSettings.camera.roi.height - 1));
+	}
+	if (source == ROI_SOURCE::BOX || xChanged || yChanged) {
+		ui->customplot->replot();
+	}
+}
+
+std::vector<AT_64> BrillouinAcquisition::checkROI(std::vector<AT_64> values, std::vector<AT_64> requirements) {
+	// check that lower value is in valid range
+	if (values[0] < 1) {
+	// must be larger than 0, counting camera pixels starts at 1
+		values[0] = 1;
+	} else if (values[0] > (requirements[1] - requirements[0] + 1)) {
+	// must be equal to or smaller than the image size minus the minimal ROI size + 1
+		values[0] = requirements[1] - requirements[0] + 1;
+	}
+	// check that ROI size is valid
+	if (values[1] < requirements[0]) {
+	// size must at least be equal to the minmal allowed ROI size
+		values[1] = requirements[0];
+	} else if (values[1] > (requirements[1] - values[0] + 1)) {
+		values[1] = requirements[1] - values[0] + 1;
+	}
+	return values;
+}
+
+void BrillouinAcquisition::updatePreview(bool isRunning, CircularBuffer<AT_U8>* liveBuffer, AT_64 imageWidth, AT_64 imageHeight, AT_64 left, AT_64 top) {
+	if (m_liveBuffer) {
+		delete m_liveBuffer;
+	}
+	m_liveBuffer = liveBuffer;
+	m_viewRunning = isRunning;
+	if (m_viewRunning) {
+		m_imageWidth = imageWidth;
+		m_imageHeight = imageHeight;
+
+		// set size of colormap to maximum image size
+		m_colorMap->data()->setSize(m_imageWidth, m_imageHeight);
+		m_colorMap->data()->setRange(QCPRange(left, m_imageWidth + left - 1), QCPRange(top, m_imageHeight + top - 1));
+		onNewImage();
+	}
 }
 
 void BrillouinAcquisition::onNewImage() {
@@ -646,26 +711,13 @@ void BrillouinAcquisition::showPreviewRunning(bool isRunning) {
 	}
 }
 
-void BrillouinAcquisition::updatePreview(bool isRunning, CircularBuffer<AT_U8>* liveBuffer, AT_64 imageWidth, AT_64 imageHeight) {
-	if (m_liveBuffer) {
-		delete m_liveBuffer;
-	}
-	m_liveBuffer = liveBuffer;
-	m_viewRunning = isRunning;
-	if (m_viewRunning) {
-		m_imageWidth = imageWidth;
-		m_imageHeight = imageHeight;
-		m_colorMap->data()->setSize(imageWidth, imageHeight);
-		m_colorMap->data()->setRange(QCPRange(0, m_imageWidth), QCPRange(0, m_imageHeight));
-		onNewImage();
-	}
-}
-
 void BrillouinAcquisition::on_camera_singleShot_clicked() {
 	QMetaObject::invokeMethod(m_andor, "acquireSingle", Qt::QueuedConnection);
 }
 
 void BrillouinAcquisition::on_acquisitionStart_clicked() {
+	// set camera ROI
+	m_acquisitionSettings.camera.roi = m_deviceSettings.camera.roi;
 	if (!m_acquisition->isAcqRunning()) {
 		QMetaObject::invokeMethod(m_acquisition, "startAcquisition", Qt::QueuedConnection, Q_ARG(ACQUISITION_SETTINGS, m_acquisitionSettings));
 	} else {
