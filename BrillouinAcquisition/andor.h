@@ -50,6 +50,7 @@ private:
 	AT_H m_cameraHndl;
 	bool m_isInitialised = false;
 	bool m_isConnected = false;
+	bool m_isCooling = false;
 
 	int m_temperatureStatusIndex = 0;
 	AT_WC m_temperatureStatus[256];
@@ -71,13 +72,11 @@ private:
 public:
 	Andor(QObject *parent = nullptr);
 	~Andor();
-	void connect();
-	void disconnect();
+	bool initialize();
 	bool getConnectionStatus();
 	bool m_isAcquiring = false;
 
 	// setters/getters for sensor cooling
-	void setSensorCooling(bool cooling);
 	bool getSensorCooling();
 	const wchar_t getTemperatureStatus();
 	double getSensorTemperature();
@@ -93,11 +92,18 @@ private slots:
 	void acquire();
 
 public slots:
+	void connect();
+	void disconnect();
 	void acquireContinuously(CAMERA_SETTINGS settings);
 	CAMERA_SETTINGS prepareMeasurement(CAMERA_SETTINGS settings);
 	void acquireImage(AT_U8* buffer);
+	// setters/getters for sensor cooling
+	void setSensorCooling(bool cooling);
 
 signals:
+	void cameraConnected(bool);
+	void cameraCoolingChanged(bool);
+	void noCameraFound();
 	void imageAcquired(unsigned short*, AT_64, AT_64);
 	void acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64);
 	void s_previewRunning(bool);

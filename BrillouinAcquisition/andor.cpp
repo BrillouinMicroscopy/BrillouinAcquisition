@@ -6,12 +6,6 @@
 
 Andor::Andor(QObject *parent)
 	: QObject(parent) {
-	int i_retCode = AT_InitialiseLibrary();
-	if (i_retCode != AT_SUCCESS) {
-		//error condition, check atdebug.log file
-	} else {
-		m_isInitialised = true;
-	}
 }
 
 Andor::~Andor() {
@@ -21,8 +15,36 @@ Andor::~Andor() {
 	AT_FinaliseLibrary();
 }
 
+bool Andor::initialize() {
+	if (!m_isInitialised) {
+		int i_retCode = AT_InitialiseLibrary();
+		if (i_retCode != AT_SUCCESS) {
+			//error condition, check atdebug.log file
+			m_isInitialised = false;
+		} else {
+			// when AT_InitialiseLibrary is called when the camera is still disabled, it will succeed,
+			// but the camera is never found even if switched on later
+			AT_64 i_numberOfDevices = 0;
+			// Use system handle as inidivdual handle to the camera hasn't been opened. 
+			int i_errorCode = AT_GetInt(AT_HANDLE_SYSTEM, L"DeviceCount", &i_numberOfDevices);
+			if (i_numberOfDevices > 0) {
+				m_isInitialised = true;
+			} else {
+				// if no camera is found and it was attempted to initialise the library, reinitializing will not help (wtf?)
+				// the program has to be restarted
+				emit(noCameraFound());
+				AT_FinaliseLibrary();
+				m_isInitialised = false;
+			}
+		}
+	}
+	return m_isInitialised;
+}
+
 void Andor::connect() {
-	if (!m_isConnected) {
+	// initialize library
+	initialize();
+	if (!m_isConnected && m_isInitialised) {
 		int i_retCode = AT_Open(0, &m_cameraHndl);
 		if (i_retCode == AT_SUCCESS) {
 			m_isConnected = true;
@@ -31,6 +53,17 @@ void Andor::connect() {
 			readSettings();
 		}
 	}
+	emit(cameraConnected(m_isConnected));
+}
+
+void Andor::disconnect() {
+	if (m_isConnected) {
+		int i_retCode = AT_Close(m_cameraHndl);
+		if (i_retCode == AT_SUCCESS) {
+			m_isConnected = false;
+		}
+	}
+	emit(cameraConnected(m_isConnected));
 }
 
 void Andor::readOptions() {
@@ -96,15 +129,6 @@ CAMERA_SETTINGS Andor::readSettings() {
 	return m_settings;
 };
 
-void Andor::disconnect() {
-	if (m_isConnected) {
-		int i_retCode = AT_Close(m_cameraHndl);
-		if (i_retCode == AT_SUCCESS) {
-			m_isConnected = false;
-		}
-	}
-}
-
 void Andor::getEnumString(AT_WC* feature, AT_WC* string) {
 	int enumIndex;
 	AT_GetEnumIndex(m_cameraHndl, feature, &enumIndex);
@@ -117,6 +141,8 @@ bool Andor::getConnectionStatus() {
 
 void Andor::setSensorCooling(bool cooling) {
 	int i_retCode = AT_SetBool(m_cameraHndl, L"SensorCooling", (int)cooling);
+	m_isCooling = cooling;
+	emit(cameraCoolingChanged(m_isCooling));
 }
 
 bool Andor::getSensorCooling() {
