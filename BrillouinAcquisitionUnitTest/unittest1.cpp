@@ -27,6 +27,18 @@ namespace BrillouinAcquisitionUnitTest
 			Assert::AreEqual(expected, answer);
 		}
 
+		TEST_METHOD(TestParsingVersionString1) {
+			std::string answer = helper::parse("PNMC V2.08\r", "N");
+			std::string expected = "MC V2.08";
+			Assert::AreEqual(expected, answer);
+		}
+
+		TEST_METHOD(TestParsingVersionString2) {
+			std::string answer = helper::parse("PFZM_V2_04\r", "F");
+			std::string expected = "ZM_V2_04";
+			Assert::AreEqual(expected, answer);
+		}
+
 		TEST_METHOD(TestHex2Dec) {
 			int result = helper::hex2dec("0003E8");
 			int expected = 1000;

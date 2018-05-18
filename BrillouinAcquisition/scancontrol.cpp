@@ -18,7 +18,7 @@ int helper::hex2dec(std::string s) {
 }
 
 std::string helper::parse(std::string answer, std::string prefix) {
-	std::string pattern = "([a-zA-Z\\d]*)\r";
+	std::string pattern = "([a-zA-Z\\d\\s_.]*)\r";
 	pattern = "P" + prefix + pattern;
 	std::regex pieces_regex(pattern);
 	std::smatch pieces_match;
@@ -49,7 +49,7 @@ ScanControl::~ScanControl() {
 }
 
 bool ScanControl::connect() {
-	if (!isConnected) {
+	if (!m_isConnected) {
 		try {
 			m_comObject->setPortName("COM1");
 			if (!m_comObject->setBaudRate(QSerialPort::Baud9600)) {
@@ -67,8 +67,8 @@ bool ScanControl::connect() {
 			if (!m_comObject->setStopBits(QSerialPort::OneStop)) {
 				throw QString("Could not set StopBits.");
 			}
-			isConnected = m_comObject->open(QIODevice::ReadWrite);
-			if (!isConnected) {
+			m_isConnected = m_comObject->open(QIODevice::ReadWrite);
+			if (!m_isConnected) {
 				throw QString("Could not open the serial port.");
 			}
 			m_comObject->clear();
@@ -79,28 +79,36 @@ bool ScanControl::connect() {
 			QSerialPort::Parity parity = m_comObject->parity();
 			QSerialPort::StopBits stopBits = m_comObject->stopBits();
 
+			// check if connected to compatible device
+			bool focus = m_focus->checkCompatibility();
+			bool stand = m_stand->checkCompatibility();
+			bool mcu = m_mcu->checkCompatibility();
+
+			m_isCompatible = focus && stand && mcu;
+
 		} catch (QString e) {
 			// todo
 		}
 	}
-	emit(microscopeConnected(isConnected));
-	return isConnected;
+	emit(microscopeConnected(m_isConnected && m_isCompatible));
+	return m_isConnected && m_isCompatible;
 }
 
 bool ScanControl::disconnect() {
-	if (m_comObject && isConnected) {
+	if (m_comObject && m_isConnected) {
 		m_comObject->close();
-		isConnected = 0;
+		m_isConnected = false;
+		m_isCompatible = false;
 	}
-	emit(microscopeConnected(isConnected));
-	return isConnected;
+	emit(microscopeConnected(m_isConnected && m_isCompatible));
+	return m_isConnected && m_isCompatible;
 }
 
 void ScanControl::errorHandler(QSerialPort::SerialPortError error) {
 }
 
 bool ScanControl::getConnectionStatus() {
-	return isConnected;
+	return m_isConnected + m_isCompatible;
 }
 
 void ScanControl::setPosition(std::vector<double> position) {
@@ -190,6 +198,16 @@ void Element::send(std::string message) {
 
 void Element::setDevice(com *device) {
 	m_comObject = device;
+}
+
+std::string Element::requestVersion() {
+	std::string answer = m_comObject->receive(m_prefix + "P" + "Tv");
+	return helper::parse(answer, m_prefix);
+}
+
+bool Element::checkCompatibility() {
+	std::string version = requestVersion();
+	return std::find(m_versions.begin(), m_versions.end(), version) != m_versions.end();
 }
 
 /*

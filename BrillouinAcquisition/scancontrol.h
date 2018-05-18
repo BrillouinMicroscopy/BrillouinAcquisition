@@ -25,9 +25,10 @@ class Element : public QObject {
 private:
 	std::string m_prefix;		// prefix of the element for serial communication
 	com *m_comObject;
+	std::vector<std::string> m_versions;
 
 public:
-	Element(com *comObject, std::string prefix) : m_comObject(comObject), m_prefix(prefix) {};
+	Element(com *comObject, std::string prefix, std::vector<std::string> versions) : m_comObject(comObject), m_prefix(prefix), m_versions(versions) {};
 	~Element();
 	std::string receive(std::string request);
 	void send(std::string message);
@@ -35,12 +36,14 @@ public:
 	inline int positive_modulo(int i, int n) {
 		return (i % n + n) % n;
 	}
+	std::string requestVersion();
+	bool checkCompatibility();
 };
 
 class Stand : public Element {
 	Q_OBJECT
 public:
-	Stand(com *comObject) : Element(comObject, "H") {};
+	Stand(com *comObject) : Element(comObject, "H", { "AV_V3_17" }) {};
 	
 	int getReflector();
 	int getObjective();
@@ -77,7 +80,7 @@ private:
 	int m_rangeFocus = 16777215;	// number of focus increments
 
 public:
-	Focus(com *comObject) : Element(comObject, "F") {};
+	Focus(com *comObject) : Element(comObject, "F", { "ZM_V2_04" }) {};
 	double getZ();
 	void setZ(double position);
 
@@ -103,7 +106,7 @@ private:
 	void setVelocity(std::string axis, int velocity);
 
 public:
-	MCU(com *comObject) : Element(comObject, "N") {};
+	MCU(com *comObject) : Element(comObject, "N", { "MC V2.08" }) {};
 	double getX();
 	void setX(double position);
 
@@ -121,7 +124,8 @@ class ScanControl: public QObject {
 	Q_OBJECT
 
 private:
-	bool isConnected = false;
+	bool m_isConnected = false;
+	bool m_isCompatible = false;
 
 public:
 	ScanControl();
