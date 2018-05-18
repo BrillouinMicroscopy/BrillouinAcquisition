@@ -47,6 +47,7 @@ class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
 
 private slots:
+	void showEvent(QShowEvent* event);
 	void on_actionAbout_triggered();
 	void on_camera_singleShot_clicked();
 	// connect camera and react

@@ -255,6 +255,14 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 	delete ui;
 }
 
+void BrillouinAcquisition::showEvent(QShowEvent* event) {
+	QWidget::showEvent(event);
+
+	// connect camera and microscope automatically
+	QMetaObject::invokeMethod(m_andor, "connect", Qt::QueuedConnection);
+	QMetaObject::invokeMethod(m_scanControl, "connect", Qt::QueuedConnection);
+}
+
 void BrillouinAcquisition::setElement(int element, int position) {
 	switch (element) {
 		case 0:
@@ -612,6 +620,8 @@ void BrillouinAcquisition::cameraConnectionChanged(bool isConnected) {
 		ui->actionEnable_Cooling->setEnabled(true);
 		ui->camera_playPause->setEnabled(true);
 		ui->camera_singleShot->setEnabled(true);
+		// switch on cooling automatically
+		QMetaObject::invokeMethod(m_andor, "setSensorCooling", Qt::QueuedConnection, Q_ARG(bool, true));
 	} else {
 		ui->actionConnect_Camera->setText("Connect Camera");
 		ui->actionEnable_Cooling->setText("Enable Cooling");
