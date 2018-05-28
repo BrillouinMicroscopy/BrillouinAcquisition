@@ -9,49 +9,50 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	ui->setupUi(this);
 
 	// slot camera connection
-	QWidget::connect(
+	static QMetaObject::Connection connection;
+	connection = QWidget::connect(
 		m_andor,
 		SIGNAL(cameraConnected(bool)),
 		this,
 		SLOT(cameraConnectionChanged(bool))
 	);
 
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_andor,
 		SIGNAL(noCameraFound()),
 		this,
 		SLOT(showNoCameraFound())
 	);
 
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_andor,
 		SIGNAL(cameraCoolingChanged(bool)),
 		this,
 		SLOT(cameraCoolingChanged(bool))
 	);
 
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_andor,
 		SIGNAL(acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64)),
 		this,
 		SLOT(updatePreview(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64))
 	);
 
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_andor,
 		SIGNAL(s_previewRunning(bool)),
 		this,
 		SLOT(showPreviewRunning(bool))
 	);
 
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_andor,
 		SIGNAL(optionsChanged(CAMERA_OPTIONS)),
 		this,
 		SLOT(cameraOptionsChanged(CAMERA_OPTIONS))
 	);
 
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_andor,
 		SIGNAL(settingsChanged(CAMERA_SETTINGS)),
 		this,
@@ -59,13 +60,13 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	);
 
 	// slot to limit the axis of the camera display after user interaction
-	QWidget::connect(
+	connection = QWidget::connect(
 		ui->customplot->xAxis,
 		SIGNAL(rangeChanged(QCPRange)),
 		this,
 		SLOT(xAxisRangeChanged(QCPRange))
 	);
-	QWidget::connect(
+	connection = QWidget::connect(
 		ui->customplot->yAxis,
 		SIGNAL(rangeChanged(QCPRange)),
 		this,
@@ -73,7 +74,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	);
 
 	// slot microscope connection
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_scanControl,
 		SIGNAL(microscopeConnected(bool)),
 		this,
@@ -81,13 +82,13 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	);
 
 	// slot to update microscope element button background color
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_scanControl->m_stand,
 		SIGNAL(elementPositionsChanged(std::vector<int>)),
 		this,
 		SLOT(microscopeElementPositionsChanged(std::vector<int>))
 	);
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_scanControl->m_stand,
 		SIGNAL(elementPositionsChanged(int, int)),
 		this,
@@ -95,7 +96,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	);
 
 	// slot to show current acquisition progress
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_acquisition,
 		SIGNAL(s_acqRunning(bool)),
 		this,
@@ -103,7 +104,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	);
 
 	// slot to show current acquisition position
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_acquisition,
 		SIGNAL(s_acqPosition(double, double, double, int)),
 		this,
@@ -111,7 +112,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	);
 
 	// slot to show current acquisition progress
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_acquisition,
 		SIGNAL(s_acqProgress(int, double, int)),
 		this,
@@ -119,7 +120,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	);
 
 	// slot to update filename
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_acquisition,
 		SIGNAL(s_filenameChanged(std::string)),
 		this,
@@ -127,7 +128,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	);
 
 	// slot to show calibration running
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_acquisition,
 		SIGNAL(s_acqCalibrationRunning(bool)),
 		this,
@@ -135,14 +136,14 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	);
 
 	// slot to show time until next calibration
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_acquisition,
 		SIGNAL(s_acqTimeToCalibration(int)),
 		this,
 		SLOT(showCalibrationInterval(int))
 	);
 
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_acquisition,
 		SIGNAL(s_previewRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64)),
 		this,
@@ -206,7 +207,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		button->setMaximumWidth(90);
 		layout->addWidget(button);
 
-		QObject::connect(button, &QPushButton::clicked, [=] {
+		connection = QObject::connect(button, &QPushButton::clicked, [=] {
 			setPreset(ii);
 		});
 		presetButtons.push_back(button);
@@ -230,7 +231,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 			button->setMaximumWidth(40);
 			layout->addWidget(button);
 
-			QObject::connect(button, &QPushButton::clicked, [=] {
+			connection = QObject::connect(button, &QPushButton::clicked, [=] {
 				setElement(ii, jj+1);
 			});
 			buttons.push_back(button);

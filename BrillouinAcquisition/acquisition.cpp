@@ -47,7 +47,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	m_startPosition = m_scanControl->getPosition();
 
 	m_fileHndl = new StorageWrapper(nullptr, m_acqSettings.filename, H5F_ACC_RDWR);
-	connect(m_fileHndl, SIGNAL(finished()), m_fileHndl, SLOT(deleteLater()));
+	static QMetaObject::Connection connection = connect(m_fileHndl, SIGNAL(finished()), m_fileHndl, SLOT(deleteLater()));
 	// move h5bm file to separate thread
 	m_storageThread.startWorker(m_fileHndl);
 

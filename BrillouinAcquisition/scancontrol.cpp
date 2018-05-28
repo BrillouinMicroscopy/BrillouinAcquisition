@@ -32,7 +32,7 @@ std::string helper::parse(std::string answer, std::string prefix) {
 }
 
 ScanControl::ScanControl() noexcept {
-	QWidget::connect(
+	static QMetaObject::Connection connection = QWidget::connect(
 		m_comObject,
 		SIGNAL(errorOccurred(QSerialPort::SerialPortError)),
 		this,
@@ -225,7 +225,7 @@ void Focus::setZ(double position) {
 	int inc = positive_modulo(position, m_rangeFocus);
 
 	std::string pos = helper::dec2hex(inc, 6);
-	receive("ZD" + pos);
+	std::string answer = receive("ZD" + pos);
 }
 
 void Focus::setVelocityZ(double velocity) {
