@@ -41,7 +41,7 @@ bool Andor::initialize() {
 	return m_isInitialised;
 }
 
-void Andor::connect() {
+void Andor::connectDevice() {
 	// initialize library
 	initialize();
 	if (!m_isConnected && m_isInitialised) {
@@ -56,7 +56,7 @@ void Andor::connect() {
 	emit(cameraConnected(m_isConnected));
 }
 
-void Andor::disconnect() {
+void Andor::disconnectDevice() {
 	if (m_isConnected) {
 		int i_retCode = AT_Close(m_cameraHndl);
 		if (i_retCode == AT_SUCCESS) {

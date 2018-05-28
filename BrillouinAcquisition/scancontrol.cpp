@@ -48,7 +48,7 @@ ScanControl::~ScanControl() {
 	delete m_comObject;
 }
 
-bool ScanControl::connect() {
+bool ScanControl::connectDevice() {
 	if (!m_isConnected) {
 		try {
 			m_comObject->setPortName("COM1");
@@ -94,7 +94,7 @@ bool ScanControl::connect() {
 	return m_isConnected && m_isCompatible;
 }
 
-bool ScanControl::disconnect() {
+bool ScanControl::disconnectDevice() {
 	if (m_comObject && m_isConnected) {
 		m_comObject->close();
 		m_isConnected = false;

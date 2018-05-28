@@ -259,8 +259,8 @@ void BrillouinAcquisition::showEvent(QShowEvent* event) {
 	QWidget::showEvent(event);
 
 	// connect camera and microscope automatically
-	QMetaObject::invokeMethod(m_andor, "connect", Qt::QueuedConnection);
-	QMetaObject::invokeMethod(m_scanControl, "connect", Qt::QueuedConnection);
+	QMetaObject::invokeMethod(m_andor, "connectDevice", Qt::QueuedConnection);
+	QMetaObject::invokeMethod(m_scanControl, "connectDevice", Qt::QueuedConnection);
 }
 
 void BrillouinAcquisition::setElement(int element, int position) {
@@ -606,9 +606,9 @@ void BrillouinAcquisition::onNewImage() {
 
 void BrillouinAcquisition::on_actionConnect_Camera_triggered() {
 	if (m_andor->getConnectionStatus()) {
-		QMetaObject::invokeMethod(m_andor, "disconnect", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(m_andor, "disconnectDevice", Qt::QueuedConnection);
 	} else {
-		QMetaObject::invokeMethod(m_andor, "connect", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(m_andor, "connectDevice", Qt::QueuedConnection);
 	}
 }
 
@@ -661,9 +661,9 @@ void BrillouinAcquisition::cameraCoolingChanged(bool isCooling) {
 
 void BrillouinAcquisition::on_actionConnect_Stage_triggered() {
 	if (m_scanControl->getConnectionStatus()) {
-		QMetaObject::invokeMethod(m_scanControl, "disconnect", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(m_scanControl, "disconnectDevice", Qt::QueuedConnection);
 	} else {
-		QMetaObject::invokeMethod(m_scanControl, "connect", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(m_scanControl, "connectDevice", Qt::QueuedConnection);
 	}
 }
 
