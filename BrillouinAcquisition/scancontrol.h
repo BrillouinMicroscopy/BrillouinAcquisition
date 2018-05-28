@@ -128,7 +128,7 @@ private:
 	bool m_isCompatible = false;
 
 public:
-	ScanControl();
+	ScanControl() noexcept;
 	~ScanControl();
 
 	bool getConnectionStatus();

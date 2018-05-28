@@ -4,7 +4,7 @@
 #include "logger.h"
 #include <windows.h>
 
-Andor::Andor(QObject *parent)
+Andor::Andor(QObject *parent) noexcept
 	: QObject(parent) {
 }
 

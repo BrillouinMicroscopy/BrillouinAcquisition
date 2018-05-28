@@ -4,7 +4,7 @@
 #include "logger.h"
 #include "simplemath.h"
 
-BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
+BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	QMainWindow(parent), ui(new Ui::BrillouinAcquisitionClass) {
 	ui->setupUi(this);
 

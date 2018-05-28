@@ -70,7 +70,7 @@ private:
 	void getEnumString(AT_WC* feature, AT_WC* string);
 
 public:
-	Andor(QObject *parent = nullptr);
+	Andor(QObject *parent = nullptr) noexcept;
 	~Andor();
 	bool initialize();
 	bool getConnectionStatus();

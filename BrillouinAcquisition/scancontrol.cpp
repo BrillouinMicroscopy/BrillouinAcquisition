@@ -31,7 +31,7 @@ std::string helper::parse(std::string answer, std::string prefix) {
 	}
 }
 
-ScanControl::ScanControl() {
+ScanControl::ScanControl() noexcept {
 	QWidget::connect(
 		m_comObject,
 		SIGNAL(errorOccurred(QSerialPort::SerialPortError)),

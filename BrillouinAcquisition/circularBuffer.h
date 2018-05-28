@@ -6,7 +6,7 @@
 template<class T> class CircularBuffer {
 
 public:
-	CircularBuffer();
+	CircularBuffer() noexcept;
 	CircularBuffer(const int bufferNumber, const int bufferSize);
 	~CircularBuffer();
 
@@ -27,7 +27,7 @@ private:
 };
 
 template<class T>
-inline CircularBuffer<T>::CircularBuffer() : m_bufferNumber(0), m_bufferSize(0) {
+inline CircularBuffer<T>::CircularBuffer() noexcept : m_bufferNumber(0), m_bufferSize(0) {
 	m_buffers = nullptr;
 }
 
