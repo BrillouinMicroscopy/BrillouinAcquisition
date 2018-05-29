@@ -146,9 +146,10 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 					}
 					emit(s_acqPosition(positionsX[ll] - m_startPosition[0], positionsY[ll] - m_startPosition[1], positionsZ[ll] - m_startPosition[2], mm+1));
 					// acquire images
-					m_andor->acquireImage(&images[bytesPerFrame * mm]);
+					int64_t pointerPos = (int64_t)bytesPerFrame * mm;
+					m_andor->acquireImage(&images[pointerPos]);
 
-					memcpy(previewBuffer->getWriteBuffer(), &images[bytesPerFrame * mm], bytesPerFrame);
+					memcpy(previewBuffer->getWriteBuffer(), &images[pointerPos], bytesPerFrame);
 
 					previewBuffer->m_usedBuffers->release();
 
@@ -167,7 +168,9 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 
 				// increase position index
 				ll++;
-				emit(s_acqProgress(ACQUISITION_STATES::RUNNING, 100 * (double)ll / nrPositions, 1e-3 * measurementTimer.elapsed() / ll * (nrPositions - ll)));
+				double percentage = 100 * (double)ll / nrPositions;
+				int remaining = 1e-3 * measurementTimer.elapsed() / ll * ((int64_t)nrPositions - ll);
+				emit(s_acqProgress(ACQUISITION_STATES::RUNNING, percentage, remaining));
 			}
 		}
 	}
@@ -245,16 +248,17 @@ void Acquisition::doCalibration() {
 	hsize_t dims_cal[3] = { m_acqSettings.nrCalibrationImages, m_acqSettings.camera.roi.height, m_acqSettings.camera.roi.width };
 
 	int bytesPerFrame = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height * 2;
-	std::vector<AT_U8> images(bytesPerFrame * m_acqSettings.nrCalibrationImages);
+	std::vector<AT_U8> images((int64_t)bytesPerFrame * m_acqSettings.nrCalibrationImages);
 	for (int mm = 0; mm < m_acqSettings.nrCalibrationImages; mm++) {
 		if (m_abort) {
 			abort();
 			return;
 		}
 		// acquire images
-		m_andor->acquireImage(&images[bytesPerFrame * mm]);
+		int64_t pointerPos = (int64_t)bytesPerFrame * mm;
+		m_andor->acquireImage(&images[pointerPos]);
 
-		memcpy(previewBuffer->getWriteBuffer(), &images[bytesPerFrame * mm], bytesPerFrame);
+		memcpy(previewBuffer->getWriteBuffer(), &images[pointerPos], bytesPerFrame);
 
 		previewBuffer->m_usedBuffers->release();
 	}
