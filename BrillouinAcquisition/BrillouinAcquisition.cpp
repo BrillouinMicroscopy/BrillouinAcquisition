@@ -3,6 +3,7 @@
 #include "version.h"
 #include "logger.h"
 #include "simplemath.h"
+#include <gsl/gsl>
 
 BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	QMainWindow(parent), ui(new Ui::BrillouinAcquisitionClass) {
@@ -203,7 +204,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	presetLayoutLabel->addWidget(presetLabel);
 	verticalLayout->addLayout(presetLayoutLabel);
 	QHBoxLayout *layout = new QHBoxLayout();
-	for (int ii = 0; ii < presetLabels.size(); ii++) {
+	for (gsl::index ii = 0; ii < presetLabels.size(); ii++) {
 		buttonLabel = std::to_string(ii + 1);
 		QPushButton *button = new QPushButton(presetLabels[ii].c_str());
 		button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
@@ -217,7 +218,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		presetButtons.push_back(button);
 	}
 	verticalLayout->addLayout(layout);
-	for (int ii = 0; ii < groupLabels.size(); ii++) {
+	for (gsl::index ii = 0; ii < groupLabels.size(); ii++) {
 		QHBoxLayout *layout = new QHBoxLayout();
 
 		layout->setAlignment(Qt::AlignLeft);
@@ -227,7 +228,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		groupLabel->setMaximumWidth(80);
 		layout->addWidget(groupLabel);
 		std::vector<QPushButton*> buttons;
-		for (int jj = 0; jj < maxOptions[ii]; jj++) {
+		for (gsl::index jj = 0; jj < maxOptions[ii]; jj++) {
 			buttonLabel = std::to_string(jj + 1);
 			QPushButton *button = new QPushButton(buttonLabel.c_str());
 			button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
@@ -590,8 +591,8 @@ void BrillouinAcquisition::onNewImage() {
 		unsigned short* unpackedBuffer = reinterpret_cast<unsigned short*>(m_liveBuffer->getReadBuffer());
 
 		int tIndex;
-		for (int xIndex = 0; xIndex < m_imageHeight; ++xIndex) {
-			for (int yIndex = 0; yIndex < m_imageWidth; ++yIndex) {
+		for (gsl::index xIndex = 0; xIndex < m_imageHeight; ++xIndex) {
+			for (gsl::index yIndex = 0; yIndex < m_imageWidth; ++yIndex) {
 				tIndex = xIndex * m_imageWidth + yIndex;
 				m_colorMap->data()->setCell(yIndex, xIndex, unpackedBuffer[tIndex]);
 			}
@@ -696,8 +697,8 @@ void BrillouinAcquisition::microscopeElementPositionsChanged(int element, int po
 }
 
 void BrillouinAcquisition::checkElementButtons() {
-	for (int ii = 0; ii < elementButtons.size(); ii++) {
-		for (int jj = 0; jj < elementButtons[ii].size(); jj++) {
+	for (gsl::index ii = 0; ii < elementButtons.size(); ii++) {
+		for (gsl::index jj = 0; jj < elementButtons[ii].size(); jj++) {
 			if (microscopeElementPositions[ii] == jj + 1) {
 				elementButtons[ii][jj]->setProperty("class", "active");
 			} else {
@@ -708,7 +709,7 @@ void BrillouinAcquisition::checkElementButtons() {
 			elementButtons[ii][jj]->update();
 		}
 	}
-	for (int ii = 0; ii < m_scanControl->m_stand->m_presets.size(); ii++) {
+	for (gsl::index ii = 0; ii < m_scanControl->m_stand->m_presets.size(); ii++) {
 		if (m_scanControl->m_stand->m_presets[ii] == microscopeElementPositions) {
 			presetButtons[ii]->setProperty("class", "active");
 		} else {

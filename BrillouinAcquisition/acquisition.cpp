@@ -74,9 +74,9 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	std::vector<double> posY = simplemath::linspace(m_acqSettings.yMin, m_acqSettings.yMax, m_acqSettings.ySteps);
 	std::vector<double> posZ = simplemath::linspace(m_acqSettings.zMin, m_acqSettings.zMax, m_acqSettings.zSteps);
 	int ll = 0;
-	for (int ii = 0; ii < m_acqSettings.zSteps; ii++) {
-		for (int jj = 0; jj < m_acqSettings.xSteps; jj++) {
-			for (int kk = 0; kk < m_acqSettings.ySteps; kk++) {
+	for (gsl::index ii = 0; ii < m_acqSettings.zSteps; ii++) {
+		for (gsl::index jj = 0; jj < m_acqSettings.xSteps; jj++) {
+			for (gsl::index kk = 0; kk < m_acqSettings.ySteps; kk++) {
 				// calculate stage positions
 				positionsX[ll] = posX[jj] + m_startPosition[0];
 				positionsY[ll] = posY[kk] + m_startPosition[1];
@@ -118,8 +118,8 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	QElapsedTimer calibrationTimer;
 	calibrationTimer.start();
 
-	for (int ii = 0; ii < m_acqSettings.zSteps; ii++) {
-		for (int jj = 0; jj < m_acqSettings.xSteps; jj++) {
+	for (gsl::index ii = 0; ii < m_acqSettings.zSteps; ii++) {
+		for (gsl::index jj = 0; jj < m_acqSettings.xSteps; jj++) {
 
 			// do live calibration 
 			if (m_acqSettings.conCalibration) {
@@ -129,7 +129,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 				}
 			}
 
-			for (int kk = 0; kk < m_acqSettings.ySteps; kk++) {
+			for (gsl::index kk = 0; kk < m_acqSettings.ySteps; kk++) {
 				int nextCalibration = 100 * (1e-3 * calibrationTimer.elapsed()) / (60 * m_acqSettings.conCalibrationInterval);
 				emit(s_acqTimeToCalibration(nextCalibration));
 				// move stage to correct position, wait 50 ms for it to finish
@@ -139,7 +139,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 
 				std::vector<AT_U8> images(bytesPerFrame * m_acqSettings.camera.frameCount);
 
-				for (int mm = 0; mm < m_acqSettings.camera.frameCount; mm++) {
+				for (gsl::index mm = 0; mm < m_acqSettings.camera.frameCount; mm++) {
 					if (m_abort) {
 						abort();
 						return;
@@ -253,7 +253,7 @@ void Acquisition::doCalibration() {
 
 	int bytesPerFrame = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height * 2;
 	std::vector<AT_U8> images((int64_t)bytesPerFrame * m_acqSettings.nrCalibrationImages);
-	for (int mm = 0; mm < m_acqSettings.nrCalibrationImages; mm++) {
+	for (gsl::index mm = 0; mm < m_acqSettings.nrCalibrationImages; mm++) {
 		if (m_abort) {
 			abort();
 			return;

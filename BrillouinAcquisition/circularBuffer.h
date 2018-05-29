@@ -2,6 +2,7 @@
 #define CIRCULARBUFFER_H
 
 #include <QtCore>
+#include <gsl/gsl>
 
 template<class T> class CircularBuffer {
 
@@ -36,7 +37,7 @@ inline CircularBuffer<T>::CircularBuffer(const int bufferNumber, const int buffe
 	m_freeBuffers(new QSemaphore(bufferSize)) {
 
 	m_buffers = new T*[m_bufferNumber];
-	for (int i = 0; i < m_bufferNumber; i++) {
+	for (gsl::index i = 0; i < m_bufferNumber; i++) {
 		m_buffers[i] = new T[m_bufferSize];
 	}
 }
@@ -49,7 +50,7 @@ inline int CircularBuffer<T>::checkBufferNumber(int bufferNumber) {
 
 template<class T>
 inline CircularBuffer<T>::~CircularBuffer() {
-	for (int i = 0; i < m_bufferNumber; i++) {
+	for (gsl::index i = 0; i < m_bufferNumber; i++) {
 		delete[] m_buffers[i];
 	}
 	delete[] m_buffers;
