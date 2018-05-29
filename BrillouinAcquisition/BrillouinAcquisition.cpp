@@ -182,6 +182,10 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	// start acquisition thread
 	m_acquisitionThread.startWorker(m_acquisition);
 
+
+	// set up the QCPColorMap:
+	m_colorMap = new QCPColorMap(ui->customplot->xAxis, ui->customplot->yAxis);
+
 	// set up the camera image plot
 	BrillouinAcquisition::initializePlot();
 
@@ -415,9 +419,6 @@ void BrillouinAcquisition::initializePlot() {
 	// set background color to default light gray
 	customPlot->setBackground(QColor(240, 240, 240, 255));
 	customPlot->axisRect()->setBackground(Qt::white);
-
-	// set up the QCPColorMap:
-	m_colorMap = new QCPColorMap(customPlot->xAxis, customPlot->yAxis);
 
 	// fill map with zero
 	m_colorMap->data()->fill(0);

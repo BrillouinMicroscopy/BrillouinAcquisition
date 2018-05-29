@@ -54,7 +54,7 @@ public:
 	bool isAcqRunning();
 
 	// circular buffer for live acquisition
-	CircularBuffer<AT_U8>* previewBuffer;
+	CircularBuffer<AT_U8>* previewBuffer = nullptr;
 
 public slots:
 	void startAcquisition(ACQUISITION_SETTINGS acqSettings);
@@ -62,7 +62,7 @@ public slots:
 private:
 	ACQUISITION_SETTINGS m_acqSettings;
 	Thread m_storageThread;
-	StorageWrapper *m_fileHndl;			// file handle
+	StorageWrapper *m_fileHndl = nullptr;	// file handle
 	Andor *m_andor;
 	ScanControl *m_scanControl;
 	bool m_running = false;				// is acquisition currently running

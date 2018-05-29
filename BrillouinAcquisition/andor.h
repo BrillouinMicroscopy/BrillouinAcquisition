@@ -47,20 +47,20 @@ class Andor : public QObject {
 	Q_OBJECT
 
 private:
-	AT_H m_cameraHndl;
+	AT_H m_cameraHndl = -1;
 	bool m_isInitialised = false;
 	bool m_isConnected = false;
 	bool m_isCooling = false;
 
 	int m_temperatureStatusIndex = 0;
-	AT_WC m_temperatureStatus[256];
+	AT_WC m_temperatureStatus[256] = {};
 
-	AT_64 m_imageStride;
+	AT_64 m_imageStride = 0;
 
 	CAMERA_OPTIONS m_options;
 	CAMERA_SETTINGS m_settings;
 
-	int m_bufferSize;
+	int m_bufferSize = -1;
 
 	void readOptions();
 	void setDefaultSettings();
@@ -86,7 +86,7 @@ public:
 	// setters/getters for ROI
 
 	// circular buffer for live acquisition
-	CircularBuffer<AT_U8>* liveBuffer;
+	CircularBuffer<AT_U8>* liveBuffer = nullptr;
 
 private slots:
 	void acquire();
