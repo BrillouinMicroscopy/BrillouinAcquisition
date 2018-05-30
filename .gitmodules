@@ -1,3 +1,6 @@
 [submodule "BrillouinAcquisition/external/h5bm"]
 	path = BrillouinAcquisition/external/h5bm
 	url = https://github.com/BrillouinMicroscopy/h5bm.git
+[submodule "BrillouinAcquisition/external/gsl"]
+	path = BrillouinAcquisition/external/gsl
+	url = https://github.com/Microsoft/GSL.git

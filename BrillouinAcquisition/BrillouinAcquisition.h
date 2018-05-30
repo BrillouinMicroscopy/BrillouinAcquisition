@@ -120,7 +120,7 @@ private slots:
 	void on_calibrationExposureTime_valueChanged(double);
 
 public:
-	BrillouinAcquisition(QWidget *parent = nullptr);
+	BrillouinAcquisition(QWidget *parent = nullptr) noexcept;
 	~BrillouinAcquisition();
 
 private:

@@ -47,7 +47,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	m_startPosition = m_scanControl->getPosition();
 
 	m_fileHndl = new StorageWrapper(nullptr, m_acqSettings.filename, H5F_ACC_RDWR);
-	connect(m_fileHndl, SIGNAL(finished()), m_fileHndl, SLOT(deleteLater()));
+	static QMetaObject::Connection connection = connect(m_fileHndl, SIGNAL(finished()), m_fileHndl, SLOT(deleteLater()));
 	// move h5bm file to separate thread
 	m_storageThread.startWorker(m_fileHndl);
 
@@ -74,9 +74,9 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	std::vector<double> posY = simplemath::linspace(m_acqSettings.yMin, m_acqSettings.yMax, m_acqSettings.ySteps);
 	std::vector<double> posZ = simplemath::linspace(m_acqSettings.zMin, m_acqSettings.zMax, m_acqSettings.zSteps);
 	int ll = 0;
-	for (int ii = 0; ii < m_acqSettings.zSteps; ii++) {
-		for (int jj = 0; jj < m_acqSettings.xSteps; jj++) {
-			for (int kk = 0; kk < m_acqSettings.ySteps; kk++) {
+	for (gsl::index ii = 0; ii < m_acqSettings.zSteps; ii++) {
+		for (gsl::index jj = 0; jj < m_acqSettings.xSteps; jj++) {
+			for (gsl::index kk = 0; kk < m_acqSettings.ySteps; kk++) {
 				// calculate stage positions
 				positionsX[ll] = posX[jj] + m_startPosition[0];
 				positionsY[ll] = posY[kk] + m_startPosition[1];
@@ -118,8 +118,8 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	QElapsedTimer calibrationTimer;
 	calibrationTimer.start();
 
-	for (int ii = 0; ii < m_acqSettings.zSteps; ii++) {
-		for (int jj = 0; jj < m_acqSettings.xSteps; jj++) {
+	for (gsl::index ii = 0; ii < m_acqSettings.zSteps; ii++) {
+		for (gsl::index jj = 0; jj < m_acqSettings.xSteps; jj++) {
 
 			// do live calibration 
 			if (m_acqSettings.conCalibration) {
@@ -129,7 +129,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 				}
 			}
 
-			for (int kk = 0; kk < m_acqSettings.ySteps; kk++) {
+			for (gsl::index kk = 0; kk < m_acqSettings.ySteps; kk++) {
 				int nextCalibration = 100 * (1e-3 * calibrationTimer.elapsed()) / (60 * m_acqSettings.conCalibrationInterval);
 				emit(s_acqTimeToCalibration(nextCalibration));
 				// move stage to correct position, wait 50 ms for it to finish
@@ -139,16 +139,17 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 
 				std::vector<AT_U8> images(bytesPerFrame * m_acqSettings.camera.frameCount);
 
-				for (int mm = 0; mm < m_acqSettings.camera.frameCount; mm++) {
+				for (gsl::index mm = 0; mm < m_acqSettings.camera.frameCount; mm++) {
 					if (m_abort) {
 						abort();
 						return;
 					}
 					emit(s_acqPosition(positionsX[ll] - m_startPosition[0], positionsY[ll] - m_startPosition[1], positionsZ[ll] - m_startPosition[2], mm+1));
 					// acquire images
-					m_andor->acquireImage(&images[bytesPerFrame * mm]);
+					int64_t pointerPos = (int64_t)bytesPerFrame * mm;
+					m_andor->acquireImage(&images[pointerPos]);
 
-					memcpy(previewBuffer->getWriteBuffer(), &images[bytesPerFrame * mm], bytesPerFrame);
+					memcpy(previewBuffer->getWriteBuffer(), &images[pointerPos], bytesPerFrame);
 
 					previewBuffer->m_usedBuffers->release();
 
@@ -167,7 +168,9 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 
 				// increase position index
 				ll++;
-				emit(s_acqProgress(ACQUISITION_STATES::RUNNING, 100 * (double)ll / nrPositions, 1e-3 * measurementTimer.elapsed() / ll * (nrPositions - ll)));
+				double percentage = 100 * (double)ll / nrPositions;
+				int remaining = 1e-3 * measurementTimer.elapsed() / ll * ((int64_t)nrPositions - ll);
+				emit(s_acqProgress(ACQUISITION_STATES::RUNNING, percentage, remaining));
 			}
 		}
 	}
@@ -187,6 +190,8 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	info = "Acquisition finished.";
 	qInfo(logInfo()) << info.c_str();
 	m_running = false;
+	delete m_fileHndl;
+	m_fileHndl = nullptr;
 	emit(s_acqRunning(m_running));
 	emit(s_acqCalibrationRunning(false));
 	emit(s_acqProgress(ACQUISITION_STATES::FINISHED, 100.0, 0));
@@ -198,6 +203,8 @@ void Acquisition::abort() {
 	m_andor->cleanupAcquisition();
 	m_scanControl->setPosition(m_startPosition);
 	m_running = false;
+	delete m_fileHndl;
+	m_fileHndl = nullptr;
 	emit(s_acqRunning(m_running));
 	emit(s_acqProgress(ACQUISITION_STATES::ABORTED, 0, 0));
 	emit(s_acqPosition(m_startPosition[0], m_startPosition[1], m_startPosition[2], 0));
@@ -245,16 +252,17 @@ void Acquisition::doCalibration() {
 	hsize_t dims_cal[3] = { m_acqSettings.nrCalibrationImages, m_acqSettings.camera.roi.height, m_acqSettings.camera.roi.width };
 
 	int bytesPerFrame = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height * 2;
-	std::vector<AT_U8> images(bytesPerFrame * m_acqSettings.nrCalibrationImages);
-	for (int mm = 0; mm < m_acqSettings.nrCalibrationImages; mm++) {
+	std::vector<AT_U8> images((int64_t)bytesPerFrame * m_acqSettings.nrCalibrationImages);
+	for (gsl::index mm = 0; mm < m_acqSettings.nrCalibrationImages; mm++) {
 		if (m_abort) {
 			abort();
 			return;
 		}
 		// acquire images
-		m_andor->acquireImage(&images[bytesPerFrame * mm]);
+		int64_t pointerPos = (int64_t)bytesPerFrame * mm;
+		m_andor->acquireImage(&images[pointerPos]);
 
-		memcpy(previewBuffer->getWriteBuffer(), &images[bytesPerFrame * mm], bytesPerFrame);
+		memcpy(previewBuffer->getWriteBuffer(), &images[pointerPos], bytesPerFrame);
 
 		previewBuffer->m_usedBuffers->release();
 	}

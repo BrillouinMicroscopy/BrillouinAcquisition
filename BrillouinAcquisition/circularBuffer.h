@@ -2,11 +2,12 @@
 #define CIRCULARBUFFER_H
 
 #include <QtCore>
+#include <gsl/gsl>
 
 template<class T> class CircularBuffer {
 
 public:
-	CircularBuffer();
+	CircularBuffer() noexcept;
 	CircularBuffer(const int bufferNumber, const int bufferSize);
 	~CircularBuffer();
 
@@ -14,7 +15,7 @@ public:
 	T* getReadBuffer();
 
 	QSemaphore* m_freeBuffers;
-	QSemaphore* m_usedBuffers;
+	QSemaphore* m_usedBuffers = new QSemaphore;
 
 	T** m_buffers;
 
@@ -27,17 +28,16 @@ private:
 };
 
 template<class T>
-inline CircularBuffer<T>::CircularBuffer() : m_bufferNumber(0), m_bufferSize(0) {
+inline CircularBuffer<T>::CircularBuffer() noexcept : m_bufferNumber(0), m_bufferSize(0), m_freeBuffers(new QSemaphore(0)) {
 	m_buffers = nullptr;
 }
 
 template<class T>
-inline CircularBuffer<T>::CircularBuffer(const int bufferNumber, const int bufferSize) : m_bufferNumber(checkBufferNumber(bufferNumber)), m_bufferSize(bufferSize) {
-	m_freeBuffers = new QSemaphore(m_bufferSize);
-	m_usedBuffers = new QSemaphore;
+inline CircularBuffer<T>::CircularBuffer(const int bufferNumber, const int bufferSize) : m_bufferNumber(checkBufferNumber(bufferNumber)), m_bufferSize(bufferSize),
+	m_freeBuffers(new QSemaphore(bufferSize)) {
 
 	m_buffers = new T*[m_bufferNumber];
-	for (int i = 0; i < m_bufferNumber; i++) {
+	for (gsl::index i = 0; i < m_bufferNumber; i++) {
 		m_buffers[i] = new T[m_bufferSize];
 	}
 }
@@ -50,7 +50,7 @@ inline int CircularBuffer<T>::checkBufferNumber(int bufferNumber) {
 
 template<class T>
 inline CircularBuffer<T>::~CircularBuffer() {
-	for (int i = 0; i < m_bufferNumber; i++) {
+	for (gsl::index i = 0; i < m_bufferNumber; i++) {
 		delete[] m_buffers[i];
 	}
 	delete[] m_buffers;

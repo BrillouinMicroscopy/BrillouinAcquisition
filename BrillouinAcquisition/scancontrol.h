@@ -128,7 +128,7 @@ private:
 	bool m_isCompatible = false;
 
 public:
-	ScanControl();
+	ScanControl() noexcept;
 	~ScanControl();
 
 	bool getConnectionStatus();
@@ -145,8 +145,8 @@ public:
 	Stand *m_stand = new Stand(m_comObject);
 
 public slots:
-	bool connect();
-	bool disconnect();
+	bool connectDevice();
+	bool disconnectDevice();
 	void errorHandler(QSerialPort::SerialPortError error);
 
 signals:

@@ -8,9 +8,6 @@ class Thread :public QThread {
 
 public:
 	void startWorker(QObject *worker);
-
-private:
-	QObject *worker;
 };
 
 #endif // THREAD_H

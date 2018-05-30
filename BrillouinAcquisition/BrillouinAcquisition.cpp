@@ -3,55 +3,57 @@
 #include "version.h"
 #include "logger.h"
 #include "simplemath.h"
+#include <gsl/gsl>
 
-BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
+BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	QMainWindow(parent), ui(new Ui::BrillouinAcquisitionClass) {
 	ui->setupUi(this);
 
 	// slot camera connection
-	QWidget::connect(
+	static QMetaObject::Connection connection;
+	connection = QWidget::connect(
 		m_andor,
 		SIGNAL(cameraConnected(bool)),
 		this,
 		SLOT(cameraConnectionChanged(bool))
 	);
 
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_andor,
 		SIGNAL(noCameraFound()),
 		this,
 		SLOT(showNoCameraFound())
 	);
 
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_andor,
 		SIGNAL(cameraCoolingChanged(bool)),
 		this,
 		SLOT(cameraCoolingChanged(bool))
 	);
 
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_andor,
 		SIGNAL(acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64)),
 		this,
 		SLOT(updatePreview(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64))
 	);
 
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_andor,
 		SIGNAL(s_previewRunning(bool)),
 		this,
 		SLOT(showPreviewRunning(bool))
 	);
 
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_andor,
 		SIGNAL(optionsChanged(CAMERA_OPTIONS)),
 		this,
 		SLOT(cameraOptionsChanged(CAMERA_OPTIONS))
 	);
 
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_andor,
 		SIGNAL(settingsChanged(CAMERA_SETTINGS)),
 		this,
@@ -59,13 +61,13 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	);
 
 	// slot to limit the axis of the camera display after user interaction
-	QWidget::connect(
+	connection = QWidget::connect(
 		ui->customplot->xAxis,
 		SIGNAL(rangeChanged(QCPRange)),
 		this,
 		SLOT(xAxisRangeChanged(QCPRange))
 	);
-	QWidget::connect(
+	connection = QWidget::connect(
 		ui->customplot->yAxis,
 		SIGNAL(rangeChanged(QCPRange)),
 		this,
@@ -73,7 +75,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	);
 
 	// slot microscope connection
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_scanControl,
 		SIGNAL(microscopeConnected(bool)),
 		this,
@@ -81,13 +83,13 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	);
 
 	// slot to update microscope element button background color
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_scanControl->m_stand,
 		SIGNAL(elementPositionsChanged(std::vector<int>)),
 		this,
 		SLOT(microscopeElementPositionsChanged(std::vector<int>))
 	);
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_scanControl->m_stand,
 		SIGNAL(elementPositionsChanged(int, int)),
 		this,
@@ -95,7 +97,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	);
 
 	// slot to show current acquisition progress
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_acquisition,
 		SIGNAL(s_acqRunning(bool)),
 		this,
@@ -103,7 +105,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	);
 
 	// slot to show current acquisition position
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_acquisition,
 		SIGNAL(s_acqPosition(double, double, double, int)),
 		this,
@@ -111,7 +113,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	);
 
 	// slot to show current acquisition progress
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_acquisition,
 		SIGNAL(s_acqProgress(int, double, int)),
 		this,
@@ -119,7 +121,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	);
 
 	// slot to update filename
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_acquisition,
 		SIGNAL(s_filenameChanged(std::string)),
 		this,
@@ -127,7 +129,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	);
 
 	// slot to show calibration running
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_acquisition,
 		SIGNAL(s_acqCalibrationRunning(bool)),
 		this,
@@ -135,14 +137,14 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	);
 
 	// slot to show time until next calibration
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_acquisition,
 		SIGNAL(s_acqTimeToCalibration(int)),
 		this,
 		SLOT(showCalibrationInterval(int))
 	);
 
-	QWidget::connect(
+	connection = QWidget::connect(
 		m_acquisition,
 		SIGNAL(s_previewRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64)),
 		this,
@@ -181,6 +183,10 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	// start acquisition thread
 	m_acquisitionThread.startWorker(m_acquisition);
 
+
+	// set up the QCPColorMap:
+	m_colorMap = new QCPColorMap(ui->customplot->xAxis, ui->customplot->yAxis);
+
 	// set up the camera image plot
 	BrillouinAcquisition::initializePlot();
 
@@ -198,7 +204,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 	presetLayoutLabel->addWidget(presetLabel);
 	verticalLayout->addLayout(presetLayoutLabel);
 	QHBoxLayout *layout = new QHBoxLayout();
-	for (int ii = 0; ii < presetLabels.size(); ii++) {
+	for (gsl::index ii = 0; ii < presetLabels.size(); ii++) {
 		buttonLabel = std::to_string(ii + 1);
 		QPushButton *button = new QPushButton(presetLabels[ii].c_str());
 		button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
@@ -206,13 +212,13 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 		button->setMaximumWidth(90);
 		layout->addWidget(button);
 
-		QObject::connect(button, &QPushButton::clicked, [=] {
+		connection = QObject::connect(button, &QPushButton::clicked, [=] {
 			setPreset(ii);
 		});
 		presetButtons.push_back(button);
 	}
 	verticalLayout->addLayout(layout);
-	for (int ii = 0; ii < groupLabels.size(); ii++) {
+	for (gsl::index ii = 0; ii < groupLabels.size(); ii++) {
 		QHBoxLayout *layout = new QHBoxLayout();
 
 		layout->setAlignment(Qt::AlignLeft);
@@ -222,7 +228,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 		groupLabel->setMaximumWidth(80);
 		layout->addWidget(groupLabel);
 		std::vector<QPushButton*> buttons;
-		for (int jj = 0; jj < maxOptions[ii]; jj++) {
+		for (gsl::index jj = 0; jj < maxOptions[ii]; jj++) {
 			buttonLabel = std::to_string(jj + 1);
 			QPushButton *button = new QPushButton(buttonLabel.c_str());
 			button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
@@ -230,7 +236,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent):
 			button->setMaximumWidth(40);
 			layout->addWidget(button);
 
-			QObject::connect(button, &QPushButton::clicked, [=] {
+			connection = QObject::connect(button, &QPushButton::clicked, [=] {
 				setElement(ii, jj+1);
 			});
 			buttons.push_back(button);
@@ -259,8 +265,8 @@ void BrillouinAcquisition::showEvent(QShowEvent* event) {
 	QWidget::showEvent(event);
 
 	// connect camera and microscope automatically
-	QMetaObject::invokeMethod(m_andor, "connect", Qt::QueuedConnection);
-	QMetaObject::invokeMethod(m_scanControl, "connect", Qt::QueuedConnection);
+	QMetaObject::invokeMethod(m_andor, "connectDevice", Qt::QueuedConnection);
+	QMetaObject::invokeMethod(m_scanControl, "connectDevice", Qt::QueuedConnection);
 }
 
 void BrillouinAcquisition::setElement(int element, int position) {
@@ -414,9 +420,6 @@ void BrillouinAcquisition::initializePlot() {
 	// set background color to default light gray
 	customPlot->setBackground(QColor(240, 240, 240, 255));
 	customPlot->axisRect()->setBackground(Qt::white);
-
-	// set up the QCPColorMap:
-	m_colorMap = new QCPColorMap(customPlot->xAxis, customPlot->yAxis);
 
 	// fill map with zero
 	m_colorMap->data()->fill(0);
@@ -588,8 +591,8 @@ void BrillouinAcquisition::onNewImage() {
 		unsigned short* unpackedBuffer = reinterpret_cast<unsigned short*>(m_liveBuffer->getReadBuffer());
 
 		int tIndex;
-		for (int xIndex = 0; xIndex < m_imageHeight; ++xIndex) {
-			for (int yIndex = 0; yIndex < m_imageWidth; ++yIndex) {
+		for (gsl::index xIndex = 0; xIndex < m_imageHeight; ++xIndex) {
+			for (gsl::index yIndex = 0; yIndex < m_imageWidth; ++yIndex) {
 				tIndex = xIndex * m_imageWidth + yIndex;
 				m_colorMap->data()->setCell(yIndex, xIndex, unpackedBuffer[tIndex]);
 			}
@@ -606,9 +609,9 @@ void BrillouinAcquisition::onNewImage() {
 
 void BrillouinAcquisition::on_actionConnect_Camera_triggered() {
 	if (m_andor->getConnectionStatus()) {
-		QMetaObject::invokeMethod(m_andor, "disconnect", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(m_andor, "disconnectDevice", Qt::QueuedConnection);
 	} else {
-		QMetaObject::invokeMethod(m_andor, "connect", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(m_andor, "connectDevice", Qt::QueuedConnection);
 	}
 }
 
@@ -661,9 +664,9 @@ void BrillouinAcquisition::cameraCoolingChanged(bool isCooling) {
 
 void BrillouinAcquisition::on_actionConnect_Stage_triggered() {
 	if (m_scanControl->getConnectionStatus()) {
-		QMetaObject::invokeMethod(m_scanControl, "disconnect", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(m_scanControl, "disconnectDevice", Qt::QueuedConnection);
 	} else {
-		QMetaObject::invokeMethod(m_scanControl, "connect", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(m_scanControl, "connectDevice", Qt::QueuedConnection);
 	}
 }
 
@@ -694,8 +697,8 @@ void BrillouinAcquisition::microscopeElementPositionsChanged(int element, int po
 }
 
 void BrillouinAcquisition::checkElementButtons() {
-	for (int ii = 0; ii < elementButtons.size(); ii++) {
-		for (int jj = 0; jj < elementButtons[ii].size(); jj++) {
+	for (gsl::index ii = 0; ii < elementButtons.size(); ii++) {
+		for (gsl::index jj = 0; jj < elementButtons[ii].size(); jj++) {
 			if (microscopeElementPositions[ii] == jj + 1) {
 				elementButtons[ii][jj]->setProperty("class", "active");
 			} else {
@@ -706,7 +709,7 @@ void BrillouinAcquisition::checkElementButtons() {
 			elementButtons[ii][jj]->update();
 		}
 	}
-	for (int ii = 0; ii < m_scanControl->m_stand->m_presets.size(); ii++) {
+	for (gsl::index ii = 0; ii < m_scanControl->m_stand->m_presets.size(); ii++) {
 		if (m_scanControl->m_stand->m_presets[ii] == microscopeElementPositions) {
 			presetButtons[ii]->setProperty("class", "active");
 		} else {

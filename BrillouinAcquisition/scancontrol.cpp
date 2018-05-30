@@ -31,8 +31,8 @@ std::string helper::parse(std::string answer, std::string prefix) {
 	}
 }
 
-ScanControl::ScanControl() {
-	QWidget::connect(
+ScanControl::ScanControl() noexcept {
+	static QMetaObject::Connection connection = QWidget::connect(
 		m_comObject,
 		SIGNAL(errorOccurred(QSerialPort::SerialPortError)),
 		this,
@@ -48,7 +48,7 @@ ScanControl::~ScanControl() {
 	delete m_comObject;
 }
 
-bool ScanControl::connect() {
+bool ScanControl::connectDevice() {
 	if (!m_isConnected) {
 		try {
 			m_comObject->setPortName("COM1");
@@ -94,7 +94,7 @@ bool ScanControl::connect() {
 	return m_isConnected && m_isCompatible;
 }
 
-bool ScanControl::disconnect() {
+bool ScanControl::disconnectDevice() {
 	if (m_comObject && m_isConnected) {
 		m_comObject->close();
 		m_isConnected = false;
@@ -225,7 +225,7 @@ void Focus::setZ(double position) {
 	int inc = positive_modulo(position, m_rangeFocus);
 
 	std::string pos = helper::dec2hex(inc, 6);
-	receive("ZD" + pos);
+	std::string answer = receive("ZD" + pos);
 }
 
 void Focus::setVelocityZ(double velocity) {
