@@ -153,7 +153,6 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 
 	qRegisterMetaType<std::string>("std::string");
 	qRegisterMetaType<AT_64>("AT_64");
-	qRegisterMetaType<PreviewBuffer<AT_U8>>("PreviewBuffer<AT_U8>");
 	qRegisterMetaType<ACQUISITION_SETTINGS>("ACQUISITION_SETTINGS");
 	qRegisterMetaType<CAMERA_SETTINGS>("ACQUISITION_SETTINGS");
 	qRegisterMetaType<CAMERA_OPTIONS>("CAMERA_OPTIONS");
