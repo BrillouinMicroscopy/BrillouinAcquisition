@@ -190,8 +190,6 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	info = "Acquisition finished.";
 	qInfo(logInfo()) << info.c_str();
 	m_running = false;
-	delete m_fileHndl;
-	m_fileHndl = nullptr;
 	emit(s_acqRunning(m_running));
 	emit(s_acqCalibrationRunning(false));
 	emit(s_acqProgress(ACQUISITION_STATES::FINISHED, 100.0, 0));
@@ -203,8 +201,6 @@ void Acquisition::abort() {
 	m_andor->cleanupAcquisition();
 	m_scanControl->setPosition(m_startPosition);
 	m_running = false;
-	delete m_fileHndl;
-	m_fileHndl = nullptr;
 	emit(s_acqRunning(m_running));
 	emit(s_acqProgress(ACQUISITION_STATES::ABORTED, 0, 0));
 	emit(s_acqPosition(m_startPosition[0], m_startPosition[1], m_startPosition[2], 0));
