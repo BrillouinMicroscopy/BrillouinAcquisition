@@ -34,7 +34,6 @@ enum ROI_SOURCE {
 
 Q_DECLARE_METATYPE(std::string);
 Q_DECLARE_METATYPE(AT_64);
-Q_DECLARE_METATYPE(CircularBuffer<AT_U8>);
 Q_DECLARE_METATYPE(ACQUISITION_SETTINGS);
 Q_DECLARE_METATYPE(CAMERA_SETTINGS);
 Q_DECLARE_METATYPE(CAMERA_OPTIONS);
@@ -81,7 +80,7 @@ private slots:
 	void setColormap(QCPColorGradient *, CustomGradientPreset);
 	void setElement(int element, int position);
 	void setPreset(int preset);
-	void updatePreview(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64);
+	void updatePreview(bool);
 	void showPreviewRunning(bool);
 	void cameraSettingsChanged(CAMERA_SETTINGS);
 	void cameraOptionsChanged(CAMERA_OPTIONS);
@@ -138,9 +137,6 @@ private:
 	CAMERA_OPTIONS m_cameraOptions;
 	ACQUISITION_SETTINGS m_acquisitionSettings;
 	bool m_viewRunning = false;
-	AT_64 m_imageHeight = 0;
-	AT_64 m_imageWidth = 0;
-	CircularBuffer<AT_U8> *m_liveBuffer = nullptr;
 
 	bool m_autoscalePlot = false;
 

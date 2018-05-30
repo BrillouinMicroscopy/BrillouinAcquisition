@@ -131,6 +131,12 @@
     <ClInclude Include="circularBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="previewBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cameraParameters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="BrillouinAcquisition.h">

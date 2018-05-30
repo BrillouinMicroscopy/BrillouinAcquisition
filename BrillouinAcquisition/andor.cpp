@@ -195,11 +195,11 @@ void Andor::acquire() {
 		AT_GetInt(m_cameraHndl, L"AOIWidth", &m_settings.roi.width);
 		AT_GetInt(m_cameraHndl, L"AOIStride", &m_imageStride);
 
-		liveBuffer->m_freeBuffers->acquire();
+		previewBuffer->m_buffer->m_freeBuffers->acquire();
 
-		AT_ConvertBuffer(Buffer, liveBuffer->getWriteBuffer(), m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding, L"Mono16");
+		AT_ConvertBuffer(Buffer, previewBuffer->m_buffer->getWriteBuffer(), m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding, L"Mono16");
 
-		liveBuffer->m_usedBuffers->release();
+		previewBuffer->m_buffer->m_usedBuffers->release();
 
 		delete[] Buffer;
 
@@ -258,14 +258,15 @@ void Andor::prepareAcquisition() {
 	setSettings();
 
 	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
-	liveBuffer = new CircularBuffer<AT_U8>(5, pixelNumber * 2);
+	BUFFER_SETTINGS bufferSettings = { 5, pixelNumber * 2, m_settings.roi };
+	previewBuffer->initializeBuffer(bufferSettings);
 
 	// Start acquisition
 	AT_Command(m_cameraHndl, L"AcquisitionStart");
 	AT_InitialiseUtilityLibrary();
 
 	emit(s_previewRunning(true));
-	emit(acquisitionRunning(true, liveBuffer, m_settings.roi.width, m_settings.roi.height, m_settings.roi.left, m_settings.roi.top));
+	emit(acquisitionRunning(true));
 }
 
 void Andor::cleanupAcquisition() {
@@ -273,7 +274,7 @@ void Andor::cleanupAcquisition() {
 	AT_Command(m_cameraHndl, L"AcquisitionStop");
 	AT_Flush(m_cameraHndl);
 	emit(s_previewRunning(false));
-	emit(acquisitionRunning(false, nullptr, 0, 0, 0, 0));
+	emit(acquisitionRunning(false));
 }
 
 

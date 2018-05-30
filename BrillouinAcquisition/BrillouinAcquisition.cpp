@@ -34,9 +34,9 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 
 	connection = QWidget::connect(
 		m_andor,
-		SIGNAL(acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64)),
+		SIGNAL(acquisitionRunning(bool)),
 		this,
-		SLOT(updatePreview(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64))
+		SLOT(updatePreview(bool))
 	);
 
 	connection = QWidget::connect(
@@ -146,14 +146,14 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 
 	connection = QWidget::connect(
 		m_acquisition,
-		SIGNAL(s_previewRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64)),
+		SIGNAL(s_previewRunning(bool)),
 		this,
-		SLOT(updatePreview(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64))
+		SLOT(updatePreview(bool))
 	);
 
 	qRegisterMetaType<std::string>("std::string");
 	qRegisterMetaType<AT_64>("AT_64");
-	qRegisterMetaType<CircularBuffer<AT_U8>>("CircularBuffer<AT_U8>");
+	qRegisterMetaType<PreviewBuffer<AT_U8>>("PreviewBuffer<AT_U8>");
 	qRegisterMetaType<ACQUISITION_SETTINGS>("ACQUISITION_SETTINGS");
 	qRegisterMetaType<CAMERA_SETTINGS>("ACQUISITION_SETTINGS");
 	qRegisterMetaType<CAMERA_OPTIONS>("CAMERA_OPTIONS");
@@ -563,46 +563,43 @@ std::vector<AT_64> BrillouinAcquisition::checkROI(std::vector<AT_64> values, std
 	return values;
 }
 
-void BrillouinAcquisition::updatePreview(bool isRunning, CircularBuffer<AT_U8>* liveBuffer, AT_64 imageWidth, AT_64 imageHeight, AT_64 left, AT_64 top) {
-	if (m_liveBuffer) {
-		delete m_liveBuffer;
-	}
-	m_liveBuffer = liveBuffer;
+void BrillouinAcquisition::updatePreview(bool isRunning) {
 	m_viewRunning = isRunning;
 	if (m_viewRunning) {
-		m_imageWidth = imageWidth;
-		m_imageHeight = imageHeight;
-
 		// set size of colormap to maximum image size
-		m_colorMap->data()->setSize(m_imageWidth, m_imageHeight);
-		m_colorMap->data()->setRange(QCPRange(left, m_imageWidth + left - 1), QCPRange(top, m_imageHeight + top - 1));
+		m_colorMap->data()->setSize(m_andor->previewBuffer->m_bufferSettings.roi.width, m_andor->previewBuffer->m_bufferSettings.roi.height);
+		m_colorMap->data()->setRange(
+			QCPRange(m_andor->previewBuffer->m_bufferSettings.roi.left,
+				m_andor->previewBuffer->m_bufferSettings.roi.width + m_andor->previewBuffer->m_bufferSettings.roi.left - 1),
+			QCPRange(m_andor->previewBuffer->m_bufferSettings.roi.top,
+				m_andor->previewBuffer->m_bufferSettings.roi.height + m_andor->previewBuffer->m_bufferSettings.roi.top - 1));
 		onNewImage();
 	}
 }
 
 void BrillouinAcquisition::onNewImage() {
-	if (m_liveBuffer && m_viewRunning) {
+	if (m_viewRunning) {
 		// if no image is ready return immediately
-		if (!m_liveBuffer->m_usedBuffers->tryAcquire()) {
+		if (!m_andor->previewBuffer->m_buffer->m_usedBuffers->tryAcquire()) {
 			QMetaObject::invokeMethod(this, "onNewImage", Qt::QueuedConnection);
 			return;
 		}
 
-		unsigned short* unpackedBuffer = reinterpret_cast<unsigned short*>(m_liveBuffer->getReadBuffer());
+		unsigned short* unpackedBuffer = reinterpret_cast<unsigned short*>(m_andor->previewBuffer->m_buffer->getReadBuffer());
 
 		int tIndex;
-		for (gsl::index xIndex = 0; xIndex < m_imageHeight; ++xIndex) {
-			for (gsl::index yIndex = 0; yIndex < m_imageWidth; ++yIndex) {
-				tIndex = xIndex * m_imageWidth + yIndex;
+		for (gsl::index xIndex = 0; xIndex < m_andor->previewBuffer->m_bufferSettings.roi.height; ++xIndex) {
+			for (gsl::index yIndex = 0; yIndex < m_andor->previewBuffer->m_bufferSettings.roi.width; ++yIndex) {
+				tIndex = xIndex * m_andor->previewBuffer->m_bufferSettings.roi.width + yIndex;
 				m_colorMap->data()->setCell(yIndex, xIndex, unpackedBuffer[tIndex]);
 			}
 		}
-		m_liveBuffer->m_freeBuffers->release();
+		m_andor->previewBuffer->m_buffer->m_freeBuffers->release();
 		if (m_autoscalePlot) {
 			m_colorMap->rescaleDataRange();
 		}
 		ui->customplot->replot();
-			
+		
 		QMetaObject::invokeMethod(this, "onNewImage", Qt::QueuedConnection);
 	}
 }
