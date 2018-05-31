@@ -311,6 +311,10 @@ void Andor::acquireImage(AT_U8* buffer) {
 
 	AT_ConvertBuffer(Buffer, buffer, m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding, L"Mono16");
 
+	// write image to preview buffer
+	memcpy(previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.width * m_settings.roi.height * 2);
+	previewBuffer->m_buffer->m_usedBuffers->release();
+
 	delete[] Buffer;
 };
 

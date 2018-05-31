@@ -149,11 +149,6 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 					// acquire images
 					int64_t pointerPos = (int64_t)bytesPerFrame * mm;
 					m_andor->acquireImage(&images[pointerPos]);
-
-					memcpy(m_andor->previewBuffer->m_buffer->getWriteBuffer(), &images[pointerPos], bytesPerFrame);
-
-					m_andor->previewBuffer->m_buffer->m_usedBuffers->release();
-
 				}
 
 				// cast the vector to unsigned short
@@ -258,10 +253,6 @@ void Acquisition::doCalibration() {
 		// acquire images
 		int64_t pointerPos = (int64_t)bytesPerFrame * mm;
 		m_andor->acquireImage(&images[pointerPos]);
-
-		memcpy(m_andor->previewBuffer->m_buffer->getWriteBuffer(), &images[pointerPos], bytesPerFrame);
-
-		m_andor->previewBuffer->m_buffer->m_usedBuffers->release();
 	}
 	// cast the vector to unsigned short
 	std::vector<unsigned short> *images_ = (std::vector<unsigned short> *) &images;
