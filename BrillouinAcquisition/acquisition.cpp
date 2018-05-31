@@ -22,7 +22,6 @@ bool Acquisition::isAcqRunning() {
 
 void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	m_running = true;
-	emit(s_acqRunning(m_running));
 	m_abort = false;
 
 	std::string info = "Acquisition started.";
@@ -31,13 +30,9 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	setSettings(acqSettings);
 
 	// prepare camera for image acquisition
-	CAMERA_SETTINGS cameraSettings = m_andor->prepareMeasurement(m_acqSettings.camera);
-	m_acqSettings.camera = cameraSettings;
-
-	int pixelNumber = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height;
-	previewBuffer = new CircularBuffer<AT_U8>(4, pixelNumber * 2);
-	emit(s_previewRunning(true, previewBuffer, m_acqSettings.camera.roi.width, m_acqSettings.camera.roi.height, m_acqSettings.camera.roi.left, m_acqSettings.camera.roi.top));
-
+	m_acqSettings.camera = m_andor->prepareMeasurement(m_acqSettings.camera);
+	
+	emit(s_acqRunning(m_running));
 	emit(s_acqProgress(ACQUISITION_STATES::STARTED, 0.0, -1));
 	// set optical elements for brightfield/Brillouin imaging
 	m_scanControl->m_stand->setPreset(1);
@@ -147,12 +142,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 					emit(s_acqPosition(positionsX[ll] - m_startPosition[0], positionsY[ll] - m_startPosition[1], positionsZ[ll] - m_startPosition[2], mm+1));
 					// acquire images
 					int64_t pointerPos = (int64_t)bytesPerFrame * mm;
-					m_andor->acquireImage(&images[pointerPos]);
-
-					memcpy(previewBuffer->getWriteBuffer(), &images[pointerPos], bytesPerFrame);
-
-					previewBuffer->m_usedBuffers->release();
-
+					m_andor->getImageForMeasurement(&images[pointerPos]);
 				}
 
 				// cast the vector to unsigned short
@@ -256,11 +246,7 @@ void Acquisition::doCalibration() {
 		}
 		// acquire images
 		int64_t pointerPos = (int64_t)bytesPerFrame * mm;
-		m_andor->acquireImage(&images[pointerPos]);
-
-		memcpy(previewBuffer->getWriteBuffer(), &images[pointerPos], bytesPerFrame);
-
-		previewBuffer->m_usedBuffers->release();
+		m_andor->getImageForMeasurement(&images[pointerPos]);
 	}
 	// cast the vector to unsigned short
 	std::vector<unsigned short> *images_ = (std::vector<unsigned short> *) &images;

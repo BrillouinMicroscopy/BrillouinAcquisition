@@ -163,50 +163,110 @@ double Andor::getSensorTemperature() {
 	return szValue;
 }
 
-void Andor::acquireContinuously(CAMERA_SETTINGS settings) {
-	// Check if camera is currently acquiring images
-	m_isAcquiring = !m_isAcquiring;
+void Andor::startPreview(CAMERA_SETTINGS settings) {
+	m_isPreviewRunning = true;
 	m_settings = settings;
-	if (m_isAcquiring) {
-		prepareAcquisition();
-		acquire();
+	preparePreview();
+	getImageForPreview();
+}
+
+void Andor::stopPreview() {
+	m_isPreviewRunning = false;
+	cleanupAcquisition();
+}
+
+void Andor::preparePreview() {
+	// always use full camera image for live preview
+	m_settings.roi.width = m_options.ROIWidthLimits[1];
+	m_settings.roi.left = 1;
+	m_settings.roi.height = m_options.ROIHeightLimits[1];
+	m_settings.roi.top = 1;
+
+	setSettings();
+
+	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
+	BUFFER_SETTINGS bufferSettings = { 5, pixelNumber * 2, m_settings.roi };
+	previewBuffer->initializeBuffer(bufferSettings);
+	emit(s_previewBufferSettingsChanged());
+
+	// Start acquisition
+	AT_Command(m_cameraHndl, L"AcquisitionStart");
+	AT_InitialiseUtilityLibrary();
+
+	emit(s_previewRunning(true));
+}
+
+void Andor::cleanupAcquisition() {
+	AT_FinaliseUtilityLibrary();
+	AT_Command(m_cameraHndl, L"AcquisitionStop");
+	AT_Flush(m_cameraHndl);
+	emit(s_previewRunning(false));
+}
+
+CAMERA_SETTINGS Andor::prepareMeasurement(CAMERA_SETTINGS settings) {
+	m_settings = settings;
+
+	// check if currently a preview is running and stop it in case
+	if (m_isPreviewRunning) {
+		stopPreview();
+	}
+
+	setSettings();
+
+	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
+	BUFFER_SETTINGS bufferSettings = { 4, pixelNumber * 2, m_settings.roi };
+	previewBuffer->initializeBuffer(bufferSettings);
+	emit(s_previewBufferSettingsChanged());
+
+	// Start acquisition
+	AT_Command(m_cameraHndl, L"AcquisitionStart");
+	AT_InitialiseUtilityLibrary();
+
+	return readSettings();
+};
+
+void Andor::acquireImage(AT_U8* buffer) {
+	// Pass this buffer to the SDK
+	unsigned char* UserBuffer = new unsigned char[m_bufferSize];
+	AT_QueueBuffer(m_cameraHndl, UserBuffer, m_bufferSize);
+
+	// Acquire camera images
+	AT_Command(m_cameraHndl, L"SoftwareTrigger");
+
+	// Sleep in this thread until data is ready
+	unsigned char* Buffer;
+	int ret = AT_WaitBuffer(m_cameraHndl, &Buffer, &m_bufferSize, 1500 * m_settings.exposureTime);
+
+	// Process the image
+	//Unpack the 12 bit packed data
+	AT_GetInt(m_cameraHndl, L"AOIHeight", &m_settings.roi.height);
+	AT_GetInt(m_cameraHndl, L"AOIWidth", &m_settings.roi.width);
+	AT_GetInt(m_cameraHndl, L"AOIStride", &m_imageStride);
+
+	AT_ConvertBuffer(Buffer, buffer, m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding, L"Mono16");
+
+	delete[] Buffer;
+};
+
+void Andor::getImageForPreview() {
+	if (m_isPreviewRunning) {
+
+		previewBuffer->m_buffer->m_freeBuffers->acquire();
+		acquireImage(previewBuffer->m_buffer->getWriteBuffer());
+		previewBuffer->m_buffer->m_usedBuffers->release();
+
+		QMetaObject::invokeMethod(this, "getImageForPreview", Qt::QueuedConnection);
 	} else {
 		cleanupAcquisition();
 	}
 }
 
-void Andor::acquire() {
-	if (m_isAcquiring) {
+void Andor::getImageForMeasurement(AT_U8* buffer) {
+	acquireImage(buffer);
 
-		// Pass this buffer to the SDK
-		unsigned char* UserBuffer = new unsigned char[m_bufferSize];
-		AT_QueueBuffer(m_cameraHndl, UserBuffer, m_bufferSize);
-
-		// Acquire camera images
-		AT_Command(m_cameraHndl, L"SoftwareTrigger");
-
-		// Sleep in this thread until data is ready
-		unsigned char* Buffer;
-		int ret = AT_WaitBuffer(m_cameraHndl, &Buffer, &m_bufferSize, 1500*m_settings.exposureTime);
-
-		// Process the image
-		//Unpack the 12 bit packed data
-		AT_GetInt(m_cameraHndl, L"AOIHeight", &m_settings.roi.height);
-		AT_GetInt(m_cameraHndl, L"AOIWidth", &m_settings.roi.width);
-		AT_GetInt(m_cameraHndl, L"AOIStride", &m_imageStride);
-
-		liveBuffer->m_freeBuffers->acquire();
-
-		AT_ConvertBuffer(Buffer, liveBuffer->getWriteBuffer(), m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding, L"Mono16");
-
-		liveBuffer->m_usedBuffers->release();
-
-		delete[] Buffer;
-
-		QMetaObject::invokeMethod(this, "acquire", Qt::QueuedConnection);
-	} else {
-		cleanupAcquisition();
-	}
+	// write image to preview buffer
+	memcpy(previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.width * m_settings.roi.height * 2);
+	previewBuffer->m_buffer->m_usedBuffers->release();
 }
 
 void Andor::setSettings() {
@@ -247,71 +307,6 @@ void Andor::setSettings() {
 	// emit signal that settings changed
 	emit(settingsChanged(m_settings));
 }
-
-void Andor::prepareAcquisition() {
-	// always use full camera image for live preview
-	m_settings.roi.width = m_options.ROIWidthLimits[1];
-	m_settings.roi.left = 1;
-	m_settings.roi.height = m_options.ROIHeightLimits[1];
-	m_settings.roi.top = 1;
-
-	setSettings();
-
-	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
-	liveBuffer = new CircularBuffer<AT_U8>(5, pixelNumber * 2);
-
-	// Start acquisition
-	AT_Command(m_cameraHndl, L"AcquisitionStart");
-	AT_InitialiseUtilityLibrary();
-
-	emit(s_previewRunning(true));
-	emit(acquisitionRunning(true, liveBuffer, m_settings.roi.width, m_settings.roi.height, m_settings.roi.left, m_settings.roi.top));
-}
-
-void Andor::cleanupAcquisition() {
-	AT_FinaliseUtilityLibrary();
-	AT_Command(m_cameraHndl, L"AcquisitionStop");
-	AT_Flush(m_cameraHndl);
-	emit(s_previewRunning(false));
-	emit(acquisitionRunning(false, nullptr, 0, 0, 0, 0));
-}
-
-
-CAMERA_SETTINGS Andor::prepareMeasurement(CAMERA_SETTINGS settings) {
-	m_settings = settings;
-	setSettings();
-
-	CAMERA_SETTINGS cameraSettings = readSettings();
-
-	// Start acquisition
-	AT_Command(m_cameraHndl, L"AcquisitionStart");
-	AT_InitialiseUtilityLibrary();
-
-	return cameraSettings;
-};
-
-void Andor::acquireImage(AT_U8* buffer) {
-	// Pass this buffer to the SDK
-	unsigned char* UserBuffer = new unsigned char[m_bufferSize];
-	AT_QueueBuffer(m_cameraHndl, UserBuffer, m_bufferSize);
-
-	// Acquire camera images
-	AT_Command(m_cameraHndl, L"SoftwareTrigger");
-
-	// Sleep in this thread until data is ready
-	unsigned char* Buffer;
-	int ret = AT_WaitBuffer(m_cameraHndl, &Buffer, &m_bufferSize, 1500 * m_settings.exposureTime);
-
-	// Process the image
-	//Unpack the 12 bit packed data
-	AT_GetInt(m_cameraHndl, L"AOIHeight", &m_settings.roi.height);
-	AT_GetInt(m_cameraHndl, L"AOIWidth", &m_settings.roi.width);
-	AT_GetInt(m_cameraHndl, L"AOIStride", &m_imageStride);
-
-	AT_ConvertBuffer(Buffer, buffer, m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding, L"Mono16");
-
-	delete[] Buffer;
-};
 
 void Andor::setCalibrationExposureTime(double exposureTime) {
 	m_settings.exposureTime = exposureTime;

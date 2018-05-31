@@ -53,9 +53,6 @@ public:
 	bool m_abort = false;
 	bool isAcqRunning();
 
-	// circular buffer for live acquisition
-	CircularBuffer<AT_U8>* previewBuffer = nullptr;
-
 public slots:
 	void startAcquisition(ACQUISITION_SETTINGS acqSettings);
 
@@ -82,7 +79,6 @@ signals:
 	void s_acqTimeToCalibration(int);	// time to next calibration
 	void s_acqCalibrationRunning(bool);	// is calibration running
 	void s_filenameChanged(std::string);
-	void s_previewRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64);
 };
 
 #endif //ACQUISITION_H

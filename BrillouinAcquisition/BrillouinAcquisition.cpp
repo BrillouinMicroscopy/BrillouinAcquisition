@@ -13,6 +13,13 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	static QMetaObject::Connection connection;
 	connection = QWidget::connect(
 		m_andor,
+		SIGNAL(s_previewBufferSettingsChanged()),
+		this,
+		SLOT(updatePreview())
+	);
+
+	connection = QWidget::connect(
+		m_andor,
 		SIGNAL(cameraConnected(bool)),
 		this,
 		SLOT(cameraConnectionChanged(bool))
@@ -30,13 +37,6 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		SIGNAL(cameraCoolingChanged(bool)),
 		this,
 		SLOT(cameraCoolingChanged(bool))
-	);
-
-	connection = QWidget::connect(
-		m_andor,
-		SIGNAL(acquisitionRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64)),
-		this,
-		SLOT(updatePreview(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64))
 	);
 
 	connection = QWidget::connect(
@@ -144,16 +144,8 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		SLOT(showCalibrationInterval(int))
 	);
 
-	connection = QWidget::connect(
-		m_acquisition,
-		SIGNAL(s_previewRunning(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64)),
-		this,
-		SLOT(updatePreview(bool, CircularBuffer<AT_U8>*, AT_64, AT_64, AT_64, AT_64))
-	);
-
 	qRegisterMetaType<std::string>("std::string");
 	qRegisterMetaType<AT_64>("AT_64");
-	qRegisterMetaType<CircularBuffer<AT_U8>>("CircularBuffer<AT_U8>");
 	qRegisterMetaType<ACQUISITION_SETTINGS>("ACQUISITION_SETTINGS");
 	qRegisterMetaType<CAMERA_SETTINGS>("ACQUISITION_SETTINGS");
 	qRegisterMetaType<CAMERA_OPTIONS>("CAMERA_OPTIONS");
@@ -563,46 +555,78 @@ std::vector<AT_64> BrillouinAcquisition::checkROI(std::vector<AT_64> values, std
 	return values;
 }
 
-void BrillouinAcquisition::updatePreview(bool isRunning, CircularBuffer<AT_U8>* liveBuffer, AT_64 imageWidth, AT_64 imageHeight, AT_64 left, AT_64 top) {
-	if (m_liveBuffer) {
-		delete m_liveBuffer;
-	}
-	m_liveBuffer = liveBuffer;
-	m_viewRunning = isRunning;
-	if (m_viewRunning) {
-		m_imageWidth = imageWidth;
-		m_imageHeight = imageHeight;
+void BrillouinAcquisition::updatePreview() {
+	// set the properties of the colormap to the correct values of the preview buffer
+	m_colorMap->data()->setSize(m_andor->previewBuffer->m_bufferSettings.roi.width, m_andor->previewBuffer->m_bufferSettings.roi.height);
+	m_colorMap->data()->setRange(
+		QCPRange(m_andor->previewBuffer->m_bufferSettings.roi.left,
+			m_andor->previewBuffer->m_bufferSettings.roi.width + m_andor->previewBuffer->m_bufferSettings.roi.left - 1),
+		QCPRange(m_andor->previewBuffer->m_bufferSettings.roi.top,
+			m_andor->previewBuffer->m_bufferSettings.roi.height + m_andor->previewBuffer->m_bufferSettings.roi.top - 1));
+}
 
-		// set size of colormap to maximum image size
-		m_colorMap->data()->setSize(m_imageWidth, m_imageHeight);
-		m_colorMap->data()->setRange(QCPRange(left, m_imageWidth + left - 1), QCPRange(top, m_imageHeight + top - 1));
+void BrillouinAcquisition::showPreviewRunning(bool isRunning) {
+	if (isRunning) {
+		ui->camera_playPause->setText("Stop");
+	} else {
+		ui->camera_playPause->setText("Play");
+	}
+	// if preview was not running, start it, else leave it running (don't start it twice)
+	if (!m_viewRunning && isRunning) {
+		m_viewRunning = true;
 		onNewImage();
 	}
+	m_viewRunning = isRunning;
+}
+
+void BrillouinAcquisition::showAcqRunning(bool isRunning) {
+	if (isRunning) {
+		ui->acquisitionStart->setText("Stop");
+	} else {
+		ui->acquisitionStart->setText("Start");
+	}
+	// if preview was not running, start it, else leave it running (don't start it twice)
+	if (!m_viewRunning && isRunning) {
+		m_viewRunning = true;
+		onNewImage();
+	}
+	m_viewRunning = isRunning;
+	ui->startX->setEnabled(!m_viewRunning);
+	ui->startY->setEnabled(!m_viewRunning);
+	ui->startZ->setEnabled(!m_viewRunning);
+	ui->endX->setEnabled(!m_viewRunning);
+	ui->endY->setEnabled(!m_viewRunning);
+	ui->endZ->setEnabled(!m_viewRunning);
+	ui->stepsX->setEnabled(!m_viewRunning);
+	ui->stepsY->setEnabled(!m_viewRunning);
+	ui->stepsZ->setEnabled(!m_viewRunning);
+	ui->camera_playPause->setEnabled(!m_viewRunning);
+	ui->camera_singleShot->setEnabled(!m_viewRunning);
 }
 
 void BrillouinAcquisition::onNewImage() {
-	if (m_liveBuffer && m_viewRunning) {
+	if (m_viewRunning) {
 		// if no image is ready return immediately
-		if (!m_liveBuffer->m_usedBuffers->tryAcquire()) {
+		if (!m_andor->previewBuffer->m_buffer->m_usedBuffers->tryAcquire()) {
 			QMetaObject::invokeMethod(this, "onNewImage", Qt::QueuedConnection);
 			return;
 		}
 
-		unsigned short* unpackedBuffer = reinterpret_cast<unsigned short*>(m_liveBuffer->getReadBuffer());
+		unsigned short* unpackedBuffer = reinterpret_cast<unsigned short*>(m_andor->previewBuffer->m_buffer->getReadBuffer());
 
 		int tIndex;
-		for (gsl::index xIndex = 0; xIndex < m_imageHeight; ++xIndex) {
-			for (gsl::index yIndex = 0; yIndex < m_imageWidth; ++yIndex) {
-				tIndex = xIndex * m_imageWidth + yIndex;
+		for (gsl::index xIndex = 0; xIndex < m_andor->previewBuffer->m_bufferSettings.roi.height; ++xIndex) {
+			for (gsl::index yIndex = 0; yIndex < m_andor->previewBuffer->m_bufferSettings.roi.width; ++yIndex) {
+				tIndex = xIndex * m_andor->previewBuffer->m_bufferSettings.roi.width + yIndex;
 				m_colorMap->data()->setCell(yIndex, xIndex, unpackedBuffer[tIndex]);
 			}
 		}
-		m_liveBuffer->m_freeBuffers->release();
+		m_andor->previewBuffer->m_buffer->m_freeBuffers->release();
 		if (m_autoscalePlot) {
 			m_colorMap->rescaleDataRange();
 		}
 		ui->customplot->replot();
-			
+		
 		QMetaObject::invokeMethod(this, "onNewImage", Qt::QueuedConnection);
 	}
 }
@@ -746,20 +770,10 @@ void BrillouinAcquisition::on_actionAbout_triggered() {
 }
 
 void BrillouinAcquisition::on_camera_playPause_clicked() {
-	if (!m_andor->m_isAcquiring) {
-		QMetaObject::invokeMethod(m_andor, "acquireContinuously", Qt::QueuedConnection, Q_ARG(CAMERA_SETTINGS, m_acquisitionSettings.camera));
+	if (!m_andor->m_isPreviewRunning) {
+		QMetaObject::invokeMethod(m_andor, "startPreview", Qt::QueuedConnection, Q_ARG(CAMERA_SETTINGS, m_acquisitionSettings.camera));
 	} else {
-		m_andor->m_isAcquiring = false;
-	}
-}
-
-void BrillouinAcquisition::showPreviewRunning(bool isRunning) {
-	m_viewRunning = isRunning;
-	if (m_viewRunning) {
-		ui->camera_playPause->setText("Stop");
-	}
-	else {
-		ui->camera_playPause->setText("Play");
+		m_andor->m_isPreviewRunning = false;
 	}
 }
 
@@ -775,23 +789,6 @@ void BrillouinAcquisition::on_acquisitionStart_clicked() {
 	} else {
 		m_acquisition->m_abort = 1;
 	}
-}
-
-void BrillouinAcquisition::showAcqRunning(bool isRunning) {
-	if (isRunning) {
-		ui->acquisitionStart->setText("Stop");
-	} else {
-		ui->acquisitionStart->setText("Start");
-	}
-	ui->startX->setEnabled(!isRunning);
-	ui->startY->setEnabled(!isRunning);
-	ui->startZ->setEnabled(!isRunning);
-	ui->endX->setEnabled(!isRunning);
-	ui->endY->setEnabled(!isRunning);
-	ui->endZ->setEnabled(!isRunning);
-	ui->stepsX->setEnabled(!isRunning);
-	ui->stepsY->setEnabled(!isRunning);
-	ui->stepsZ->setEnabled(!isRunning);
 }
 
 void BrillouinAcquisition::updateFilename(std::string filename) {
