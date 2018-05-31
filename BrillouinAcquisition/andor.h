@@ -71,6 +71,7 @@ signals:
 	void s_previewRunning(bool);
 	void settingsChanged(CAMERA_SETTINGS);
 	void optionsChanged(CAMERA_OPTIONS);
+	void s_previewBufferSettingsChanged();
 };
 
 #endif // ANDOR_H

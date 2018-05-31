@@ -31,10 +31,6 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 
 	// prepare camera for image acquisition
 	m_acqSettings.camera = m_andor->prepareMeasurement(m_acqSettings.camera);
-
-	int pixelNumber = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height;
-	BUFFER_SETTINGS bufferSettings = { 4, pixelNumber * 2, m_acqSettings.camera.roi };
-	m_andor->previewBuffer->initializeBuffer(bufferSettings);
 	
 	emit(s_acqRunning(m_running));
 	emit(s_acqProgress(ACQUISITION_STATES::STARTED, 0.0, -1));

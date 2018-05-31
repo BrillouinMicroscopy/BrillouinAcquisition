@@ -270,6 +270,7 @@ void Andor::prepareAcquisition() {
 	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
 	BUFFER_SETTINGS bufferSettings = { 5, pixelNumber * 2, m_settings.roi };
 	previewBuffer->initializeBuffer(bufferSettings);
+	emit(s_previewBufferSettingsChanged());
 
 	// Start acquisition
 	AT_Command(m_cameraHndl, L"AcquisitionStart");
@@ -285,18 +286,21 @@ void Andor::cleanupAcquisition() {
 	emit(s_previewRunning(false));
 }
 
-
 CAMERA_SETTINGS Andor::prepareMeasurement(CAMERA_SETTINGS settings) {
 	m_settings = settings;
+
 	setSettings();
 
-	CAMERA_SETTINGS cameraSettings = readSettings();
+	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
+	BUFFER_SETTINGS bufferSettings = { 4, pixelNumber * 2, m_settings.roi };
+	previewBuffer->initializeBuffer(bufferSettings);
+	emit(s_previewBufferSettingsChanged());
 
 	// Start acquisition
 	AT_Command(m_cameraHndl, L"AcquisitionStart");
 	AT_InitialiseUtilityLibrary();
 
-	return cameraSettings;
+	return readSettings();
 };
 
 void Andor::setCalibrationExposureTime(double exposureTime) {

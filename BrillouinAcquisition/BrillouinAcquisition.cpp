@@ -13,6 +13,13 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	static QMetaObject::Connection connection;
 	connection = QWidget::connect(
 		m_andor,
+		SIGNAL(s_previewBufferSettingsChanged()),
+		this,
+		SLOT(updatePreview())
+	);
+
+	connection = QWidget::connect(
+		m_andor,
 		SIGNAL(cameraConnected(bool)),
 		this,
 		SLOT(cameraConnectionChanged(bool))
@@ -548,38 +555,42 @@ std::vector<AT_64> BrillouinAcquisition::checkROI(std::vector<AT_64> values, std
 	return values;
 }
 
-void BrillouinAcquisition::updatePreview(bool isRunning) {
-	m_viewRunning = isRunning;
-	if (m_viewRunning) {
-		// set size of colormap to maximum image size
-		m_colorMap->data()->setSize(m_andor->previewBuffer->m_bufferSettings.roi.width, m_andor->previewBuffer->m_bufferSettings.roi.height);
-		m_colorMap->data()->setRange(
-			QCPRange(m_andor->previewBuffer->m_bufferSettings.roi.left,
-				m_andor->previewBuffer->m_bufferSettings.roi.width + m_andor->previewBuffer->m_bufferSettings.roi.left - 1),
-			QCPRange(m_andor->previewBuffer->m_bufferSettings.roi.top,
-				m_andor->previewBuffer->m_bufferSettings.roi.height + m_andor->previewBuffer->m_bufferSettings.roi.top - 1));
-		onNewImage();
-	}
+void BrillouinAcquisition::updatePreview() {
+	// set the properties of the colormap to the correct values of the preview buffer
+	m_colorMap->data()->setSize(m_andor->previewBuffer->m_bufferSettings.roi.width, m_andor->previewBuffer->m_bufferSettings.roi.height);
+	m_colorMap->data()->setRange(
+		QCPRange(m_andor->previewBuffer->m_bufferSettings.roi.left,
+			m_andor->previewBuffer->m_bufferSettings.roi.width + m_andor->previewBuffer->m_bufferSettings.roi.left - 1),
+		QCPRange(m_andor->previewBuffer->m_bufferSettings.roi.top,
+			m_andor->previewBuffer->m_bufferSettings.roi.height + m_andor->previewBuffer->m_bufferSettings.roi.top - 1));
 }
 
 void BrillouinAcquisition::showPreviewRunning(bool isRunning) {
-	m_viewRunning = isRunning;
-	if (m_viewRunning) {
+	if (isRunning) {
 		ui->camera_playPause->setText("Stop");
-		updatePreview(true);
 	} else {
 		ui->camera_playPause->setText("Play");
 	}
+	// if preview was not running, start it, else leave it running (don't start it twice)
+	if (!m_viewRunning && isRunning) {
+		m_viewRunning = true;
+		onNewImage();
+	}
+	m_viewRunning = isRunning;
 }
 
 void BrillouinAcquisition::showAcqRunning(bool isRunning) {
-	m_viewRunning = isRunning;
-	if (m_viewRunning) {
+	if (isRunning) {
 		ui->acquisitionStart->setText("Stop");
-		updatePreview(true);
 	} else {
 		ui->acquisitionStart->setText("Start");
 	}
+	// if preview was not running, start it, else leave it running (don't start it twice)
+	if (!m_viewRunning && isRunning) {
+		m_viewRunning = true;
+		onNewImage();
+	}
+	m_viewRunning = isRunning;
 	ui->startX->setEnabled(!m_viewRunning);
 	ui->startY->setEnabled(!m_viewRunning);
 	ui->startZ->setEnabled(!m_viewRunning);

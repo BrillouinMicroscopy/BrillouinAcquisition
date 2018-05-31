@@ -131,9 +131,6 @@
     <ClInclude Include="circularBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="previewBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="cameraParameters.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -167,6 +164,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="storageWrapper.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="previewBuffer.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
