@@ -24,7 +24,7 @@ public:
 
 	void initializeBuffer(BUFFER_SETTINGS bufferSettings);
 
-	CircularBuffer<T>* m_buffer = nullptr;
+	CircularBuffer<T>* m_buffer = new CircularBuffer<T>;
 	BUFFER_SETTINGS m_bufferSettings;
 };
 
