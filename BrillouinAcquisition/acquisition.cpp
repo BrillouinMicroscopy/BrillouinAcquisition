@@ -37,7 +37,6 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	int pixelNumber = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height;
 	BUFFER_SETTINGS bufferSettings = { 4, pixelNumber * 2, m_acqSettings.camera.roi };
 	m_andor->previewBuffer->initializeBuffer(bufferSettings);
-	emit(s_previewRunning(true));
 
 	emit(s_acqProgress(ACQUISITION_STATES::STARTED, 0.0, -1));
 	// set optical elements for brightfield/Brillouin imaging

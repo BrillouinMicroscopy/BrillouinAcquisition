@@ -79,7 +79,6 @@ signals:
 	void s_acqTimeToCalibration(int);	// time to next calibration
 	void s_acqCalibrationRunning(bool);	// is calibration running
 	void s_filenameChanged(std::string);
-	void s_previewRunning(bool);
 };
 
 #endif //ACQUISITION_H

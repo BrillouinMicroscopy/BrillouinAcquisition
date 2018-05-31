@@ -266,7 +266,6 @@ void Andor::prepareAcquisition() {
 	AT_InitialiseUtilityLibrary();
 
 	emit(s_previewRunning(true));
-	emit(acquisitionRunning(true));
 }
 
 void Andor::cleanupAcquisition() {
@@ -274,7 +273,6 @@ void Andor::cleanupAcquisition() {
 	AT_Command(m_cameraHndl, L"AcquisitionStop");
 	AT_Flush(m_cameraHndl);
 	emit(s_previewRunning(false));
-	emit(acquisitionRunning(false));
 }
 
 

@@ -67,8 +67,6 @@ signals:
 	void cameraConnected(bool);
 	void cameraCoolingChanged(bool);
 	void noCameraFound();
-	void imageAcquired(unsigned short*, AT_64, AT_64);
-	void acquisitionRunning(bool);
 	void s_previewRunning(bool);
 	void settingsChanged(CAMERA_SETTINGS);
 	void optionsChanged(CAMERA_OPTIONS);

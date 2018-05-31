@@ -34,13 +34,6 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 
 	connection = QWidget::connect(
 		m_andor,
-		SIGNAL(acquisitionRunning(bool)),
-		this,
-		SLOT(updatePreview(bool))
-	);
-
-	connection = QWidget::connect(
-		m_andor,
 		SIGNAL(s_previewRunning(bool)),
 		this,
 		SLOT(showPreviewRunning(bool))
@@ -146,7 +139,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 
 	connection = QWidget::connect(
 		m_acquisition,
-		SIGNAL(s_previewRunning(bool)),
+		SIGNAL(s_acqRunning(bool)),
 		this,
 		SLOT(updatePreview(bool))
 	);
@@ -576,6 +569,16 @@ void BrillouinAcquisition::updatePreview(bool isRunning) {
 	}
 }
 
+void BrillouinAcquisition::showPreviewRunning(bool isRunning) {
+	m_viewRunning = isRunning;
+	if (m_viewRunning) {
+		ui->camera_playPause->setText("Stop");
+		updatePreview(true);
+	} else {
+		ui->camera_playPause->setText("Play");
+	}
+}
+
 void BrillouinAcquisition::onNewImage() {
 	if (m_viewRunning) {
 		// if no image is ready return immediately
@@ -746,16 +749,6 @@ void BrillouinAcquisition::on_camera_playPause_clicked() {
 		QMetaObject::invokeMethod(m_andor, "acquireContinuously", Qt::QueuedConnection, Q_ARG(CAMERA_SETTINGS, m_acquisitionSettings.camera));
 	} else {
 		m_andor->m_isAcquiring = false;
-	}
-}
-
-void BrillouinAcquisition::showPreviewRunning(bool isRunning) {
-	m_viewRunning = isRunning;
-	if (m_viewRunning) {
-		ui->camera_playPause->setText("Stop");
-	}
-	else {
-		ui->camera_playPause->setText("Play");
 	}
 }
 
