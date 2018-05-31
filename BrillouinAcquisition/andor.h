@@ -52,14 +52,15 @@ public:
 	PreviewBuffer<AT_U8>* previewBuffer = new PreviewBuffer<AT_U8>;
 
 private slots:
-	void acquire();
+	void acquireImage(AT_U8* buffer);
+	void getImageForPreview();
 
 public slots:
 	void connectDevice();
 	void disconnectDevice();
 	void acquireContinuously(CAMERA_SETTINGS settings);
 	CAMERA_SETTINGS prepareMeasurement(CAMERA_SETTINGS settings);
-	void acquireImage(AT_U8* buffer);
+	void getImageForMeasurement(AT_U8* buffer);
 	// setters/getters for sensor cooling
 	void setSensorCooling(bool cooling);
 

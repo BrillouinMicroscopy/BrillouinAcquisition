@@ -147,7 +147,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 					emit(s_acqPosition(positionsX[ll] - m_startPosition[0], positionsY[ll] - m_startPosition[1], positionsZ[ll] - m_startPosition[2], mm+1));
 					// acquire images
 					int64_t pointerPos = (int64_t)bytesPerFrame * mm;
-					m_andor->acquireImage(&images[pointerPos]);
+					m_andor->getImageForMeasurement(&images[pointerPos]);
 				}
 
 				// cast the vector to unsigned short
@@ -251,7 +251,7 @@ void Acquisition::doCalibration() {
 		}
 		// acquire images
 		int64_t pointerPos = (int64_t)bytesPerFrame * mm;
-		m_andor->acquireImage(&images[pointerPos]);
+		m_andor->getImageForMeasurement(&images[pointerPos]);
 	}
 	// cast the vector to unsigned short
 	std::vector<unsigned short> *images_ = (std::vector<unsigned short> *) &images;
