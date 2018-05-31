@@ -770,10 +770,10 @@ void BrillouinAcquisition::on_actionAbout_triggered() {
 }
 
 void BrillouinAcquisition::on_camera_playPause_clicked() {
-	if (!m_andor->m_isAcquiring) {
-		QMetaObject::invokeMethod(m_andor, "acquireContinuously", Qt::QueuedConnection, Q_ARG(CAMERA_SETTINGS, m_acquisitionSettings.camera));
+	if (!m_andor->m_isPreviewRunning) {
+		QMetaObject::invokeMethod(m_andor, "startPreview", Qt::QueuedConnection, Q_ARG(CAMERA_SETTINGS, m_acquisitionSettings.camera));
 	} else {
-		m_andor->m_isAcquiring = false;
+		m_andor->m_isPreviewRunning = false;
 	}
 }
 

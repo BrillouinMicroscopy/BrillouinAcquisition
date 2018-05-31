@@ -163,17 +163,67 @@ double Andor::getSensorTemperature() {
 	return szValue;
 }
 
-void Andor::acquireContinuously(CAMERA_SETTINGS settings) {
-	// Check if camera is currently acquiring images
-	m_isAcquiring = !m_isAcquiring;
+void Andor::startPreview(CAMERA_SETTINGS settings) {
+	m_isPreviewRunning = true;
 	m_settings = settings;
-	if (m_isAcquiring) {
-		prepareAcquisition();
-		getImageForPreview();
-	} else {
-		cleanupAcquisition();
-	}
+	preparePreview();
+	getImageForPreview();
 }
+
+void Andor::stopPreview() {
+	m_isPreviewRunning = false;
+	cleanupAcquisition();
+}
+
+void Andor::preparePreview() {
+	// always use full camera image for live preview
+	m_settings.roi.width = m_options.ROIWidthLimits[1];
+	m_settings.roi.left = 1;
+	m_settings.roi.height = m_options.ROIHeightLimits[1];
+	m_settings.roi.top = 1;
+
+	setSettings();
+
+	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
+	BUFFER_SETTINGS bufferSettings = { 5, pixelNumber * 2, m_settings.roi };
+	previewBuffer->initializeBuffer(bufferSettings);
+	emit(s_previewBufferSettingsChanged());
+
+	// Start acquisition
+	AT_Command(m_cameraHndl, L"AcquisitionStart");
+	AT_InitialiseUtilityLibrary();
+
+	emit(s_previewRunning(true));
+}
+
+void Andor::cleanupAcquisition() {
+	AT_FinaliseUtilityLibrary();
+	AT_Command(m_cameraHndl, L"AcquisitionStop");
+	AT_Flush(m_cameraHndl);
+	emit(s_previewRunning(false));
+}
+
+CAMERA_SETTINGS Andor::prepareMeasurement(CAMERA_SETTINGS settings) {
+	m_settings = settings;
+
+	// check if currently a preview is running and stop it in case
+	if (m_isPreviewRunning) {
+		stopPreview();
+	}
+
+	setSettings();
+
+	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
+	BUFFER_SETTINGS bufferSettings = { 4, pixelNumber * 2, m_settings.roi };
+	previewBuffer->initializeBuffer(bufferSettings);
+	emit(s_previewBufferSettingsChanged());
+
+	// Start acquisition
+	AT_Command(m_cameraHndl, L"AcquisitionStart");
+	AT_InitialiseUtilityLibrary();
+
+	return readSettings();
+};
 
 void Andor::acquireImage(AT_U8* buffer) {
 	// Pass this buffer to the SDK
@@ -199,7 +249,7 @@ void Andor::acquireImage(AT_U8* buffer) {
 };
 
 void Andor::getImageForPreview() {
-	if (m_isAcquiring) {
+	if (m_isPreviewRunning) {
 
 		previewBuffer->m_buffer->m_freeBuffers->acquire();
 		acquireImage(previewBuffer->m_buffer->getWriteBuffer());
@@ -257,51 +307,6 @@ void Andor::setSettings() {
 	// emit signal that settings changed
 	emit(settingsChanged(m_settings));
 }
-
-void Andor::prepareAcquisition() {
-	// always use full camera image for live preview
-	m_settings.roi.width = m_options.ROIWidthLimits[1];
-	m_settings.roi.left = 1;
-	m_settings.roi.height = m_options.ROIHeightLimits[1];
-	m_settings.roi.top = 1;
-
-	setSettings();
-
-	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
-	BUFFER_SETTINGS bufferSettings = { 5, pixelNumber * 2, m_settings.roi };
-	previewBuffer->initializeBuffer(bufferSettings);
-	emit(s_previewBufferSettingsChanged());
-
-	// Start acquisition
-	AT_Command(m_cameraHndl, L"AcquisitionStart");
-	AT_InitialiseUtilityLibrary();
-
-	emit(s_previewRunning(true));
-}
-
-void Andor::cleanupAcquisition() {
-	AT_FinaliseUtilityLibrary();
-	AT_Command(m_cameraHndl, L"AcquisitionStop");
-	AT_Flush(m_cameraHndl);
-	emit(s_previewRunning(false));
-}
-
-CAMERA_SETTINGS Andor::prepareMeasurement(CAMERA_SETTINGS settings) {
-	m_settings = settings;
-
-	setSettings();
-
-	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
-	BUFFER_SETTINGS bufferSettings = { 4, pixelNumber * 2, m_settings.roi };
-	previewBuffer->initializeBuffer(bufferSettings);
-	emit(s_previewBufferSettingsChanged());
-
-	// Start acquisition
-	AT_Command(m_cameraHndl, L"AcquisitionStart");
-	AT_InitialiseUtilityLibrary();
-
-	return readSettings();
-};
 
 void Andor::setCalibrationExposureTime(double exposureTime) {
 	m_settings.exposureTime = exposureTime;

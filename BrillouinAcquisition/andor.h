@@ -29,7 +29,7 @@ private:
 	void setDefaultSettings();
 	void setSettings();
 	CAMERA_SETTINGS readSettings();
-	void prepareAcquisition();
+	void preparePreview();
 	void getEnumString(AT_WC* feature, AT_WC* string);
 
 public:
@@ -37,7 +37,7 @@ public:
 	~Andor();
 	bool initialize();
 	bool getConnectionStatus();
-	bool m_isAcquiring = false;
+	bool m_isPreviewRunning = false;
 
 	// setters/getters for sensor cooling
 	bool getSensorCooling();
@@ -58,7 +58,8 @@ private slots:
 public slots:
 	void connectDevice();
 	void disconnectDevice();
-	void acquireContinuously(CAMERA_SETTINGS settings);
+	void startPreview(CAMERA_SETTINGS settings);
+	void stopPreview();
 	CAMERA_SETTINGS prepareMeasurement(CAMERA_SETTINGS settings);
 	void getImageForMeasurement(AT_U8* buffer);
 	// setters/getters for sensor cooling
