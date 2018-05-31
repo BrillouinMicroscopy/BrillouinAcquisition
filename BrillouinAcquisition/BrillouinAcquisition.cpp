@@ -589,6 +589,8 @@ void BrillouinAcquisition::showAcqRunning(bool isRunning) {
 	ui->stepsX->setEnabled(!m_viewRunning);
 	ui->stepsY->setEnabled(!m_viewRunning);
 	ui->stepsZ->setEnabled(!m_viewRunning);
+	ui->camera_playPause->setEnabled(!m_viewRunning);
+	ui->camera_singleShot->setEnabled(!m_viewRunning);
 }
 
 void BrillouinAcquisition::onNewImage() {
