@@ -137,13 +137,6 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		SLOT(showCalibrationInterval(int))
 	);
 
-	connection = QWidget::connect(
-		m_acquisition,
-		SIGNAL(s_acqRunning(bool)),
-		this,
-		SLOT(updatePreview(bool))
-	);
-
 	qRegisterMetaType<std::string>("std::string");
 	qRegisterMetaType<AT_64>("AT_64");
 	qRegisterMetaType<ACQUISITION_SETTINGS>("ACQUISITION_SETTINGS");
@@ -579,6 +572,25 @@ void BrillouinAcquisition::showPreviewRunning(bool isRunning) {
 	}
 }
 
+void BrillouinAcquisition::showAcqRunning(bool isRunning) {
+	m_viewRunning = isRunning;
+	if (m_viewRunning) {
+		ui->acquisitionStart->setText("Stop");
+		updatePreview(true);
+	} else {
+		ui->acquisitionStart->setText("Start");
+	}
+	ui->startX->setEnabled(!m_viewRunning);
+	ui->startY->setEnabled(!m_viewRunning);
+	ui->startZ->setEnabled(!m_viewRunning);
+	ui->endX->setEnabled(!m_viewRunning);
+	ui->endY->setEnabled(!m_viewRunning);
+	ui->endZ->setEnabled(!m_viewRunning);
+	ui->stepsX->setEnabled(!m_viewRunning);
+	ui->stepsY->setEnabled(!m_viewRunning);
+	ui->stepsZ->setEnabled(!m_viewRunning);
+}
+
 void BrillouinAcquisition::onNewImage() {
 	if (m_viewRunning) {
 		// if no image is ready return immediately
@@ -764,23 +776,6 @@ void BrillouinAcquisition::on_acquisitionStart_clicked() {
 	} else {
 		m_acquisition->m_abort = 1;
 	}
-}
-
-void BrillouinAcquisition::showAcqRunning(bool isRunning) {
-	if (isRunning) {
-		ui->acquisitionStart->setText("Stop");
-	} else {
-		ui->acquisitionStart->setText("Start");
-	}
-	ui->startX->setEnabled(!isRunning);
-	ui->startY->setEnabled(!isRunning);
-	ui->startZ->setEnabled(!isRunning);
-	ui->endX->setEnabled(!isRunning);
-	ui->endY->setEnabled(!isRunning);
-	ui->endZ->setEnabled(!isRunning);
-	ui->stepsX->setEnabled(!isRunning);
-	ui->stepsY->setEnabled(!isRunning);
-	ui->stepsZ->setEnabled(!isRunning);
 }
 
 void BrillouinAcquisition::updateFilename(std::string filename) {

@@ -22,7 +22,6 @@ bool Acquisition::isAcqRunning() {
 
 void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	m_running = true;
-	emit(s_acqRunning(m_running));
 	m_abort = false;
 
 	std::string info = "Acquisition started.";
@@ -31,13 +30,13 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	setSettings(acqSettings);
 
 	// prepare camera for image acquisition
-	CAMERA_SETTINGS cameraSettings = m_andor->prepareMeasurement(m_acqSettings.camera);
-	m_acqSettings.camera = cameraSettings;
+	m_acqSettings.camera = m_andor->prepareMeasurement(m_acqSettings.camera);
 
 	int pixelNumber = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height;
 	BUFFER_SETTINGS bufferSettings = { 4, pixelNumber * 2, m_acqSettings.camera.roi };
 	m_andor->previewBuffer->initializeBuffer(bufferSettings);
-
+	
+	emit(s_acqRunning(m_running));
 	emit(s_acqProgress(ACQUISITION_STATES::STARTED, 0.0, -1));
 	// set optical elements for brightfield/Brillouin imaging
 	m_scanControl->m_stand->setPreset(1);
