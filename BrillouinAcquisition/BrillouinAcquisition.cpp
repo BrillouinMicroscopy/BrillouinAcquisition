@@ -431,6 +431,7 @@ void BrillouinAcquisition::initializePlot() {
 	setColormap(&gradient, gpParula);
 	m_colorMap->setGradient(gradient);
 
+	m_colorMap->setDataRange(m_cLim_Default);
 	// rescale the data dimension (color) such that all data points lie in the span visualized by the color gradient:
 	if (m_autoscalePlot) {
 		m_colorMap->rescaleDataRange();

@@ -133,6 +133,7 @@ private:
 	ScanControl *m_scanControl = new ScanControl();
 	Acquisition *m_acquisition = new Acquisition(nullptr, m_andor, m_scanControl);
 	QCPColorMap *m_colorMap;
+	QCPRange m_cLim_Default = { 100, 300 };	// default colormap range
 	SETTINGS_DEVICES m_deviceSettings;
 	CAMERA_OPTIONS m_cameraOptions;
 	ACQUISITION_SETTINGS m_acquisitionSettings;
