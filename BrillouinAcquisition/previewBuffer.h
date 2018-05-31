@@ -11,7 +11,7 @@ struct BUFFER_SETTINGS {
 	int bufferNumber = 0;
 	int bufferSize = 0;
 	CAMERA_ROI roi;
-	BUFFER_SETTINGS() {};
+	BUFFER_SETTINGS() noexcept {};
 	BUFFER_SETTINGS(int bufferNumber, int bufferSize, CAMERA_ROI roi) : roi(roi), bufferNumber(bufferNumber), bufferSize(bufferSize) {};
 };
 
