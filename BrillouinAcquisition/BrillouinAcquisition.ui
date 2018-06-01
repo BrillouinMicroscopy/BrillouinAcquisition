@@ -166,7 +166,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>446</width>
-                <height>451</height>
+                <height>454</height>
                </rect>
               </property>
               <property name="sizePolicy">
@@ -699,7 +699,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>446</width>
-                <height>451</height>
+                <height>454</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -753,7 +753,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>446</width>
-                <height>451</height>
+                <height>454</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -786,7 +786,7 @@ QTabBar::tab:!selected {
          <property name="maximumSize">
           <size>
            <width>450</width>
-           <height>765</height>
+           <height>800</height>
           </size>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -856,15 +856,15 @@ QTabBar::tab:!selected {
                 <property name="geometry">
                  <rect>
                   <x>0</x>
-                  <y>0</y>
-                  <width>429</width>
-                  <height>740</height>
+                  <y>-262</y>
+                  <width>433</width>
+                  <height>775</height>
                  </rect>
                 </property>
                 <property name="minimumSize">
                  <size>
                   <width>0</width>
-                  <height>740</height>
+                  <height>775</height>
                  </size>
                 </property>
                 <widget class="QGroupBox" name="acquisitionAOI">
@@ -1394,7 +1394,7 @@ QTabBar::tab:!selected {
                  <property name="geometry">
                   <rect>
                    <x>10</x>
-                   <y>560</y>
+                   <y>595</y>
                    <width>401</width>
                    <height>171</height>
                   </rect>
@@ -1577,38 +1577,19 @@ border: none;</string>
                 </widget>
                 <widget class="QGroupBox" name="repetitions">
                  <property name="enabled">
-                  <bool>false</bool>
+                  <bool>true</bool>
                  </property>
                  <property name="geometry">
                   <rect>
                    <x>10</x>
                    <y>480</y>
                    <width>401</width>
-                   <height>71</height>
+                   <height>106</height>
                   </rect>
                  </property>
                  <property name="title">
                   <string>Repetitions</string>
                  </property>
-                 <widget class="QLineEdit" name="repetitionCount">
-                  <property name="geometry">
-                   <rect>
-                    <x>150</x>
-                    <y>25</y>
-                    <width>41</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>1</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                  <property name="readOnly">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
                  <widget class="QLabel" name="repetitionCount_label">
                   <property name="geometry">
                    <rect>
@@ -1635,13 +1616,54 @@ border: none;</string>
                    </rect>
                   </property>
                   <property name="text">
-                   <string>Time [min]</string>
+                   <string>Interval [min]</string>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                   </property>
                  </widget>
-                 <widget class="QLineEdit" name="repetitionInterval">
+                 <widget class="QProgressBar" name="repetitionProgress">
+                  <property name="geometry">
+                   <rect>
+                    <x>10</x>
+                    <y>65</y>
+                    <width>381</width>
+                    <height>30</height>
+                   </rect>
+                  </property>
+                  <property name="value">
+                   <number>100</number>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="format">
+                   <string extracomment="Test">Repetition 1 of 1.</string>
+                  </property>
+                 </widget>
+                 <widget class="QSpinBox" name="repetitionCount">
+                  <property name="geometry">
+                   <rect>
+                    <x>150</x>
+                    <y>25</y>
+                    <width>41</width>
+                    <height>30</height>
+                   </rect>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
+                  </property>
+                  <property name="minimum">
+                   <number>1</number>
+                  </property>
+                  <property name="maximum">
+                   <number>100</number>
+                  </property>
+                 </widget>
+                 <widget class="QDoubleSpinBox" name="repetitionInterval">
                   <property name="geometry">
                    <rect>
                     <x>350</x>
@@ -1650,14 +1672,17 @@ border: none;</string>
                     <height>30</height>
                    </rect>
                   </property>
-                  <property name="text">
-                   <string>10</string>
-                  </property>
                   <property name="alignment">
                    <set>Qt::AlignCenter</set>
                   </property>
-                  <property name="readOnly">
-                   <bool>false</bool>
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
+                  </property>
+                  <property name="decimals">
+                   <number>1</number>
+                  </property>
+                  <property name="value">
+                   <double>10.000000000000000</double>
                   </property>
                  </widget>
                 </widget>
@@ -1807,7 +1832,7 @@ border: none;</string>
      <x>0</x>
      <y>0</y>
      <width>1318</width>
-     <height>21</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">
@@ -1931,8 +1956,6 @@ border: none;</string>
   <tabstop>postCalibration</tabstop>
   <tabstop>conCalibration</tabstop>
   <tabstop>sampleSelection</tabstop>
-  <tabstop>repetitionCount</tabstop>
-  <tabstop>repetitionInterval</tabstop>
   <tabstop>positionX</tabstop>
   <tabstop>positionY</tabstop>
   <tabstop>positionZ</tabstop>

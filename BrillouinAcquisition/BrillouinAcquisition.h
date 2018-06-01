@@ -91,6 +91,8 @@ private slots:
 	void showAcqRunning(bool);
 	void updateFilename(std::string);
 
+	QString formatSeconds(int seconds);
+
 	void on_autoscalePlot_stateChanged(int);
 
 	void updateAcquisitionSettings();
@@ -117,6 +119,11 @@ private slots:
 	void on_conCalibrationInterval_valueChanged(double);
 	void on_nrCalibrationImages_valueChanged(int);
 	void on_calibrationExposureTime_valueChanged(double);
+
+	// repetitions
+	void on_repetitionCount_valueChanged(int);
+	void on_repetitionInterval_valueChanged(double);
+	void showRepProgress(int repNumber, int timeToNext);
 
 public:
 	BrillouinAcquisition(QWidget *parent = nullptr) noexcept;

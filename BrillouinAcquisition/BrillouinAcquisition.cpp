@@ -144,6 +144,14 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		SLOT(showCalibrationInterval(int))
 	);
 
+	// slot to show repetitions
+	connection = QWidget::connect(
+		m_acquisition,
+		SIGNAL(s_acqRepetitionProgress(int, int)),
+		this,
+		SLOT(showRepProgress(int, int))
+	);
+
 	qRegisterMetaType<std::string>("std::string");
 	qRegisterMetaType<AT_64>("AT_64");
 	qRegisterMetaType<ACQUISITION_SETTINGS>("ACQUISITION_SETTINGS");
@@ -343,19 +351,26 @@ void BrillouinAcquisition::showAcqProgress(int state, double progress, int secon
 	} else if (state == ACQUISITION_STATES::FINISHED) {
 		string = "Acquisition finished.";
 	} else {
-		if (seconds > 3600) {
-			int hours = floor((double)seconds / 3600);
-			int minutes = floor((seconds - hours * 3600) / 60);
-			string.sprintf("%02.1f %% finished, %02.0f:%02.0f hours remaining.", progress, (double)hours, (double)minutes);
-		} else if (seconds > 60) {
-			int minutes = floor(seconds / 60);
-			seconds = floor(seconds - minutes * 60);
-			string.sprintf("%02.1f %% finished, %02.0f:%02.0f minutes remaining.", progress, (double)minutes, (double)seconds);
-		} else {
-			string.sprintf("%02.1f %% finished, %2.0f seconds remaining.", progress, (double)seconds);
-		}
+		QString timeString = formatSeconds(seconds);
+		string.sprintf("%02.1f %% finished, ", progress) + timeString + " remaining.";
 	}
 	ui->progressBar->setFormat(string);
+}
+
+QString BrillouinAcquisition::formatSeconds(int seconds) {
+	QString string;
+	if (seconds > 3600) {
+		int hours = floor((double)seconds / 3600);
+		int minutes = floor((seconds - hours * 3600) / 60);
+		string.sprintf("%02.0f:%02.0f hours", (double)hours, (double)minutes);
+	} else if (seconds > 60) {
+		int minutes = floor(seconds / 60);
+		seconds = floor(seconds - minutes * 60);
+		string.sprintf("%02.0f:%02.0f minutes", (double)minutes, (double)seconds);
+	} else {
+		string.sprintf("%2.0f seconds", (double)seconds);
+	}
+	return string;
 }
 
 void BrillouinAcquisition::showCalibrationInterval(int value) {
@@ -885,6 +900,30 @@ void BrillouinAcquisition::on_nrCalibrationImages_valueChanged(int value) {
 
 void BrillouinAcquisition::on_calibrationExposureTime_valueChanged(double value) {
 	m_acquisitionSettings.calibrationExposureTime = value;
+};
+
+/*
+ * Functions regarding the repetition feature.
+ */
+
+void BrillouinAcquisition::on_repetitionCount_valueChanged(int count) {
+	m_acquisitionSettings.repetitions.count = count;
+};
+
+void BrillouinAcquisition::on_repetitionInterval_valueChanged(double interval) {
+	m_acquisitionSettings.repetitions.interval = interval;
+};
+
+void BrillouinAcquisition::showRepProgress(int repNumber, int timeToNext) {
+	ui->repetitionProgress->setValue((double)repNumber / m_acquisitionSettings.repetitions.count);
+
+	QString string;
+	if (timeToNext > 0) {
+		string = formatSeconds(timeToNext) + " to next repetition.";
+	} else {
+		string.sprintf("Measuring repetition %2.0d of %2.0d.", repNumber, m_acquisitionSettings.repetitions.count);
+	}
+	ui->progressBar->setFormat(string);
 };
 
 void BrillouinAcquisition::on_exposureTime_valueChanged(double value) {

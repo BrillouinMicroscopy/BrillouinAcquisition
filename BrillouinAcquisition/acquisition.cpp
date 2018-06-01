@@ -26,14 +26,41 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 
 	std::string info = "Acquisition started.";
 	qInfo(logInfo()) << info.c_str();
-	
-	setSettings(acqSettings);
 
+	emit(s_acqRunning(m_running));
+
+	setSettings(acqSettings);
+	
+	QElapsedTimer startOfLastRepetition;
+	startOfLastRepetition.start();
+
+	for (gsl::index repNumber = 0; repNumber < m_acqSettings.repetitions.count - 1; repNumber++) {
+		if (m_abort) {
+			abort();
+			return;
+		}
+		if (repNumber == 0) {
+			runRepetition();
+			emit(s_acqRepetitionProgress(repNumber, -1));
+		} else {
+			int timeToNext = startOfLastRepetition.elapsed()*1e3;
+			while (timeToNext < m_acqSettings.repetitions.interval) {
+				emit(s_acqRepetitionProgress(repNumber, timeToNext));
+				Sleep(1000);
+			}
+			startOfLastRepetition.restart();
+			runRepetition();
+			emit(s_acqRepetitionProgress(repNumber, -1));
+		}
+	}
+}
+
+void Acquisition::runRepetition() {
+
+	emit(s_acqProgress(ACQUISITION_STATES::STARTED, 0.0, -1));
+	
 	// prepare camera for image acquisition
 	m_acqSettings.camera = m_andor->prepareMeasurement(m_acqSettings.camera);
-	
-	emit(s_acqRunning(m_running));
-	emit(s_acqProgress(ACQUISITION_STATES::STARTED, 0.0, -1));
 	// set optical elements for brightfield/Brillouin imaging
 	m_scanControl->m_stand->setPreset(1);
 	Sleep(500);
@@ -176,7 +203,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	m_scanControl->setPosition(m_startPosition);
 	emit(s_acqPosition(0, 0, 0, 0));
 
-	info = "Acquisition finished.";
+	std::string info = "Acquisition finished.";
 	qInfo(logInfo()) << info.c_str();
 	m_running = false;
 	emit(s_acqRunning(m_running));

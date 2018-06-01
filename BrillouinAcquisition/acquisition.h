@@ -14,6 +14,11 @@ enum ACQUISITION_STATES {
 	ABORTED
 };
 
+struct REPETITIONS {
+	int count = 1;			// [1]		number of repetitions
+	double interval = 10;	// [min]	interval between repetitions
+};
+
 struct ACQUISITION_SETTINGS {
 	std::string filename = "Brillouin.h5";	// filename
 	
@@ -27,8 +32,7 @@ struct ACQUISITION_SETTINGS {
 	double calibrationExposureTime = 1;		// exposure time for calibration images
 	
 	// repetition parameters
-	int repetitionCount = 1;				// number of repetitions
-	double repetitionInterval = 10;			// repetition interval
+	REPETITIONS repetitions;
 
 	// ROI parameters
 	double xMin = 0;	// [µm]	x minimum value
@@ -71,6 +75,8 @@ private:
 	int nrCalibrations = 1;
 	void doCalibration();
 
+	void runRepetition();
+
 signals:
 	void s_acqRunning(bool);			// is acquisition running
 	void s_acqProgress(int, double, int);	// progress in percent and the remaining time in seconds
@@ -79,6 +85,7 @@ signals:
 	void s_acqTimeToCalibration(int);	// time to next calibration
 	void s_acqCalibrationRunning(bool);	// is calibration running
 	void s_filenameChanged(std::string);
+	void s_acqRepetitionProgress(int, int);	// repetitions
 };
 
 #endif //ACQUISITION_H
