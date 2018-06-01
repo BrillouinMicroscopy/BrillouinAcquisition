@@ -82,6 +82,7 @@ private slots:
 	void setPreset(int preset);
 	void updatePreview();
 	void showPreviewRunning(bool);
+	void startPreview(bool);
 	void cameraSettingsChanged(CAMERA_SETTINGS);
 	void cameraOptionsChanged(CAMERA_OPTIONS);
 	void showAcqPosition(double, double, double, int);
@@ -144,7 +145,8 @@ private:
 	SETTINGS_DEVICES m_deviceSettings;
 	CAMERA_OPTIONS m_cameraOptions;
 	ACQUISITION_SETTINGS m_acquisitionSettings;
-	bool m_viewRunning = false;
+	bool m_previewRunning = false;
+	bool m_measurementRunning = false;
 
 	bool m_autoscalePlot = false;
 

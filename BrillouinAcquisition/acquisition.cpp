@@ -29,35 +29,41 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 
 	emit(s_acqRunning(m_running));
 
-	setSettings(acqSettings);
+	m_acqSettings = acqSettings;
 	
 	QElapsedTimer startOfLastRepetition;
 	startOfLastRepetition.start();
 
-	for (gsl::index repNumber = 0; repNumber < m_acqSettings.repetitions.count - 1; repNumber++) {
+	for (gsl::index repNumber = 0; repNumber < m_acqSettings.repetitions.count; repNumber++) {
 		if (m_abort) {
 			abort();
 			return;
 		}
 		if (repNumber == 0) {
-			runRepetition();
 			emit(s_acqRepetitionProgress(repNumber, -1));
+			runRepetition();
 		} else {
-			int timeToNext = startOfLastRepetition.elapsed()*1e3;
-			while (timeToNext < m_acqSettings.repetitions.interval) {
-				emit(s_acqRepetitionProgress(repNumber, timeToNext));
-				Sleep(1000);
+			int timeSinceLast = startOfLastRepetition.elapsed()*1e-3;
+			while (timeSinceLast < m_acqSettings.repetitions.interval * 60) {
+				timeSinceLast = startOfLastRepetition.elapsed()*1e-3;
+				emit(s_acqRepetitionProgress(repNumber, m_acqSettings.repetitions.interval * 60 - timeSinceLast));
+				Sleep(100);
 			}
 			startOfLastRepetition.restart();
-			runRepetition();
 			emit(s_acqRepetitionProgress(repNumber, -1));
+			runRepetition();
 		}
 	}
+	emit(s_acqRepetitionProgress(m_acqSettings.repetitions.count, -1));
+	m_running = false;
+	emit(s_acqRunning(m_running));
 }
 
 void Acquisition::runRepetition() {
 
 	emit(s_acqProgress(ACQUISITION_STATES::STARTED, 0.0, -1));
+
+	checkFilename(m_acqSettings.filename);
 	
 	// prepare camera for image acquisition
 	m_acqSettings.camera = m_andor->prepareMeasurement(m_acqSettings.camera);
@@ -196,7 +202,7 @@ void Acquisition::runRepetition() {
 	}
 
 	// close camera libraries, clear buffers
-	m_andor->cleanupAcquisition();
+	m_andor->stopMeasurement();
 
 	QMetaObject::invokeMethod(m_fileHndl, "s_finishedQueueing", Qt::AutoConnection);
 
@@ -205,8 +211,6 @@ void Acquisition::runRepetition() {
 
 	std::string info = "Acquisition finished.";
 	qInfo(logInfo()) << info.c_str();
-	m_running = false;
-	emit(s_acqRunning(m_running));
 	emit(s_acqCalibrationRunning(false));
 	emit(s_acqProgress(ACQUISITION_STATES::FINISHED, 100.0, 0));
 	emit(s_acqTimeToCalibration(0));
@@ -215,7 +219,7 @@ void Acquisition::runRepetition() {
 
 void Acquisition::abort() {
 	m_fileHndl->m_abort = true;
-	m_andor->cleanupAcquisition();
+	m_andor->stopMeasurement();
 	m_scanControl->setPosition(m_startPosition);
 	m_running = false;
 	emit(s_acqRunning(m_running));
@@ -225,27 +229,21 @@ void Acquisition::abort() {
 	delete m_fileHndl;
 }
 
-void Acquisition::setSettings(ACQUISITION_SETTINGS acqSettings) {
-	m_acqSettings = acqSettings;
-
-	std::string newFilename = checkFilename(acqSettings.filename);
-	if (newFilename != acqSettings.filename) {
+void Acquisition::checkFilename(std::string oldFilename) {
+	// get filename without extension
+	std::string rawFilename = oldFilename.substr(0, oldFilename.find_last_of("."));
+	// remove possibly attached number separated by a hyphen
+	rawFilename = rawFilename.substr(0, rawFilename.find_last_of("-"));
+	std::string newFilename = oldFilename;
+	int count = 0;
+	while (exists(newFilename)) {
+		newFilename = rawFilename + '-' + std::to_string(count) + oldFilename.substr(oldFilename.find_last_of("."), std::string::npos);
+		count++;
+	}
+	if (newFilename != oldFilename) {
 		m_acqSettings.filename = newFilename;
 		emit(s_filenameChanged(newFilename));
 	}
-}
-
-std::string Acquisition::checkFilename(std::string filename) {
-	// get filename without extension
-	std::string rawFilename = filename.substr(0, filename.find_last_of("."));
-	// remove possibly attached number separated by a hyphen
-	rawFilename = rawFilename.substr(0, rawFilename.find_last_of("-"));
-	int count = 0;
-	while (exists(filename)) {
-		filename = rawFilename + '-' + std::to_string(count) + filename.substr(filename.find_last_of("."), std::string::npos);
-		count++;
-	}
-	return filename;
 }
 
 void Acquisition::doCalibration() {

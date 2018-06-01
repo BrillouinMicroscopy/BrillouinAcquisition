@@ -69,8 +69,7 @@ private:
 	bool m_running = false;				// is acquisition currently running
 	std::vector<double> m_startPosition = { 0,0,0 };
 	void abort();
-	void setSettings(ACQUISITION_SETTINGS acqSettings);
-	std::string checkFilename(std::string oldFilename);
+	void checkFilename(std::string oldFilename);
 
 	int nrCalibrations = 1;
 	void doCalibration();

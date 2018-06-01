@@ -48,6 +48,13 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 
 	connection = QWidget::connect(
 		m_andor,
+		SIGNAL(s_measurementRunning(bool)),
+		this,
+		SLOT(startPreview(bool))
+	);
+
+	connection = QWidget::connect(
+		m_andor,
 		SIGNAL(optionsChanged(CAMERA_OPTIONS)),
 		this,
 		SLOT(cameraOptionsChanged(CAMERA_OPTIONS))
@@ -587,12 +594,7 @@ void BrillouinAcquisition::showPreviewRunning(bool isRunning) {
 	} else {
 		ui->camera_playPause->setText("Play");
 	}
-	// if preview was not running, start it, else leave it running (don't start it twice)
-	if (!m_viewRunning && isRunning) {
-		m_viewRunning = true;
-		onNewImage();
-	}
-	m_viewRunning = isRunning;
+	startPreview(isRunning);
 }
 
 void BrillouinAcquisition::showAcqRunning(bool isRunning) {
@@ -601,27 +603,31 @@ void BrillouinAcquisition::showAcqRunning(bool isRunning) {
 	} else {
 		ui->acquisitionStart->setText("Start");
 	}
+	m_measurementRunning = isRunning;
+	ui->startX->setEnabled(!m_measurementRunning);
+	ui->startY->setEnabled(!m_measurementRunning);
+	ui->startZ->setEnabled(!m_measurementRunning);
+	ui->endX->setEnabled(!m_measurementRunning);
+	ui->endY->setEnabled(!m_measurementRunning);
+	ui->endZ->setEnabled(!m_measurementRunning);
+	ui->stepsX->setEnabled(!m_measurementRunning);
+	ui->stepsY->setEnabled(!m_measurementRunning);
+	ui->stepsZ->setEnabled(!m_measurementRunning);
+	ui->camera_playPause->setEnabled(!m_measurementRunning);
+	ui->camera_singleShot->setEnabled(!m_measurementRunning);
+}
+
+void BrillouinAcquisition::startPreview(bool isRunning) {
 	// if preview was not running, start it, else leave it running (don't start it twice)
-	if (!m_viewRunning && isRunning) {
-		m_viewRunning = true;
+	if (!m_previewRunning && isRunning) {
+		m_previewRunning = true;
 		onNewImage();
 	}
-	m_viewRunning = isRunning;
-	ui->startX->setEnabled(!m_viewRunning);
-	ui->startY->setEnabled(!m_viewRunning);
-	ui->startZ->setEnabled(!m_viewRunning);
-	ui->endX->setEnabled(!m_viewRunning);
-	ui->endY->setEnabled(!m_viewRunning);
-	ui->endZ->setEnabled(!m_viewRunning);
-	ui->stepsX->setEnabled(!m_viewRunning);
-	ui->stepsY->setEnabled(!m_viewRunning);
-	ui->stepsZ->setEnabled(!m_viewRunning);
-	ui->camera_playPause->setEnabled(!m_viewRunning);
-	ui->camera_singleShot->setEnabled(!m_viewRunning);
+	m_previewRunning = isRunning;
 }
 
 void BrillouinAcquisition::onNewImage() {
-	if (m_viewRunning) {
+	if (m_previewRunning) {
 		// if no image is ready return immediately
 		if (!m_andor->previewBuffer->m_buffer->m_usedBuffers->tryAcquire()) {
 			QMetaObject::invokeMethod(this, "onNewImage", Qt::QueuedConnection);
@@ -915,15 +921,19 @@ void BrillouinAcquisition::on_repetitionInterval_valueChanged(double interval) {
 };
 
 void BrillouinAcquisition::showRepProgress(int repNumber, int timeToNext) {
-	ui->repetitionProgress->setValue((double)repNumber / m_acquisitionSettings.repetitions.count);
+	ui->repetitionProgress->setValue(100 * ((double)repNumber + 1) / m_acquisitionSettings.repetitions.count);
 
 	QString string;
 	if (timeToNext > 0) {
 		string = formatSeconds(timeToNext) + " to next repetition.";
 	} else {
-		string.sprintf("Measuring repetition %2.0d of %2.0d.", repNumber, m_acquisitionSettings.repetitions.count);
+		if (repNumber < m_acquisitionSettings.repetitions.count) {
+			string.sprintf("Measuring repetition %1.0d of %1.0d.", repNumber + 1, m_acquisitionSettings.repetitions.count);
+		} else {
+			string.sprintf("Finished %1.0d repetitions.", m_acquisitionSettings.repetitions.count);
+		}
 	}
-	ui->progressBar->setFormat(string);
+	ui->repetitionProgress->setFormat(string);
 };
 
 void BrillouinAcquisition::on_exposureTime_valueChanged(double value) {
