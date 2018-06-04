@@ -48,6 +48,14 @@ struct ACQUISITION_SETTINGS {
 	CAMERA_SETTINGS camera;
 };
 
+struct ACQUISITION {
+	ACQUISITION_SETTINGS settings;	// settings of the acquisition
+	StorageWrapper *fileHndl;		// handle to the file
+	bool running = true;			// is the acquisition still running
+	ACQUISITION(ACQUISITION_SETTINGS settings) : settings(settings),
+		fileHndl(new StorageWrapper(nullptr, settings.filename, H5F_ACC_RDWR)) {};
+};
+
 class Acquisition : public QObject {
 	Q_OBJECT
 
@@ -63,18 +71,18 @@ public slots:
 private:
 	ACQUISITION_SETTINGS m_acqSettings;
 	//Thread m_storageThread;
-	StorageWrapper *m_fileHndl = nullptr;	// file handle
+	std::vector<ACQUISITION> m_acquisitions;	// list of acquisitions
 	Andor *m_andor;
 	ScanControl *m_scanControl;
 	bool m_running = false;				// is acquisition currently running
 	std::vector<double> m_startPosition = { 0,0,0 };
-	void abort();
+	void abort(ACQUISITION);
 	void checkFilename(std::string oldFilename);
 
 	int nrCalibrations = 1;
-	void doCalibration();
+	void doCalibration(ACQUISITION acquisition);
 
-	void runRepetition();
+	void runAcquisition(ACQUISITION acquisition);
 
 signals:
 	void s_acqRunning(bool);			// is acquisition running
