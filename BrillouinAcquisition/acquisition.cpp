@@ -42,7 +42,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 		checkFilename(m_acqSettings.filename);
 
 		ACQUISITION acquisition = ACQUISITION(m_acqSettings);
-		//static QMetaObject::Connection connection = connect(acquisition.fileHndl, SIGNAL(finished()), acquisition.fileHndl, SLOT(deleteLater()));
+		QMetaObject::Connection connection = connect(acquisition.fileHndl, SIGNAL(finished()), acquisition.fileHndl, SLOT(deleteLater()));
 		// move h5bm handle to separate thread
 		//m_storageThread.startWorker(acquisition.fileHndl);
 		
