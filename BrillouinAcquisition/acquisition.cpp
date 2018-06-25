@@ -98,6 +98,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	
 	int rank_data = 3;
 	hsize_t dims_data[3] = { m_acqSettings.camera.frameCount, m_acqSettings.camera.roi.height, m_acqSettings.camera.roi.width };
+	int bytesPerFrame = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height * 2;
 	ll = 0;
 
 	// reset number of calibrations
@@ -129,8 +130,6 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 				emit(s_acqTimeToCalibration(nextCalibration));
 				// move stage to correct position, wait 50 ms for it to finish
 				m_scanControl->setPosition({ positionsX[ll], positionsY[ll], positionsZ[ll] });
-
-				int bytesPerFrame = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height * 2;
 
 				std::vector<AT_U8> images(bytesPerFrame * m_acqSettings.camera.frameCount);
 
