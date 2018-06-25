@@ -628,20 +628,24 @@ void BrillouinAcquisition::startPreview(bool isRunning) {
 
 void BrillouinAcquisition::onNewImage() {
 	if (m_previewRunning) {
-		// if no image is ready return immediately
-		if (!m_andor->previewBuffer->m_buffer->m_usedBuffers->tryAcquire()) {
-			QMetaObject::invokeMethod(this, "onNewImage", Qt::QueuedConnection);
-			return;
-		}
-
-		unsigned short* unpackedBuffer = reinterpret_cast<unsigned short*>(m_andor->previewBuffer->m_buffer->getReadBuffer());
-
-		int tIndex;
-		for (gsl::index xIndex = 0; xIndex < m_andor->previewBuffer->m_bufferSettings.roi.height; ++xIndex) {
-			for (gsl::index yIndex = 0; yIndex < m_andor->previewBuffer->m_bufferSettings.roi.width; ++yIndex) {
-				tIndex = xIndex * m_andor->previewBuffer->m_bufferSettings.roi.width + yIndex;
-				m_colorMap->data()->setCell(yIndex, xIndex, unpackedBuffer[tIndex]);
+		{
+			std::lock_guard<std::mutex> lockGuard(m_andor->previewBuffer->m_mutex);
+			// if no image is ready return immediately
+			if (!m_andor->previewBuffer->m_buffer->m_usedBuffers->tryAcquire()) {
+				QMetaObject::invokeMethod(this, "onNewImage", Qt::QueuedConnection);
+				return;
 			}
+
+			unsigned short* unpackedBuffer = reinterpret_cast<unsigned short*>(m_andor->previewBuffer->m_buffer->getReadBuffer());
+
+			int tIndex;
+			for (gsl::index xIndex = 0; xIndex < m_andor->previewBuffer->m_bufferSettings.roi.height; ++xIndex) {
+				for (gsl::index yIndex = 0; yIndex < m_andor->previewBuffer->m_bufferSettings.roi.width; ++yIndex) {
+					tIndex = xIndex * m_andor->previewBuffer->m_bufferSettings.roi.width + yIndex;
+					m_colorMap->data()->setCell(yIndex, xIndex, unpackedBuffer[tIndex]);
+				}
+			}
+
 		}
 		m_andor->previewBuffer->m_buffer->m_freeBuffers->release();
 		if (m_autoscalePlot) {
