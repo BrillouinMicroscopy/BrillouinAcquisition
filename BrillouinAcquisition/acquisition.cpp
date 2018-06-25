@@ -183,6 +183,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	emit(s_acqCalibrationRunning(false));
 	emit(s_acqProgress(ACQUISITION_STATES::FINISHED, 100.0, 0));
 	emit(s_acqTimeToCalibration(0));
+	delete m_fileHndl;
 }
 
 void Acquisition::abort() {
@@ -194,6 +195,7 @@ void Acquisition::abort() {
 	emit(s_acqProgress(ACQUISITION_STATES::ABORTED, 0, 0));
 	emit(s_acqPosition(m_startPosition[0], m_startPosition[1], m_startPosition[2], 0));
 	emit(s_acqTimeToCalibration(0));
+	delete m_fileHndl;
 }
 
 void Acquisition::setSettings(ACQUISITION_SETTINGS acqSettings) {
