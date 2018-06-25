@@ -12,10 +12,6 @@ Acquisition::Acquisition(QObject *parent, Andor *andor, ScanControl *scanControl
 }
 
 Acquisition::~Acquisition() {
-	// abort all acquisitions
-	for (auto const& acquisition : m_acquisitions) {
-		acquisition.fileHndl->m_abort = true;
-	}
 	m_running = false;
 }
 
@@ -38,23 +34,19 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	startOfLastRepetition.start();
 
 	for (gsl::index repNumber = 0; repNumber < m_acqSettings.repetitions.count; repNumber++) {
-		
-		checkFilename(m_acqSettings.filename);
-
-		ACQUISITION acquisition = ACQUISITION(m_acqSettings);
-		QMetaObject::Connection connection = connect(acquisition.fileHndl, SIGNAL(finished()), acquisition.fileHndl, SLOT(deleteLater()));
-		// move h5bm handle to separate thread
-		//m_storageThread.startWorker(acquisition.fileHndl);
-		
-		m_acquisitions.push_back(acquisition);
 
 		if (m_abort) {
 			abort();
 			return;
 		}
+		
+		checkFilename(m_acqSettings.filename);
+
+		ACQUISITION acquisition = ACQUISITION(m_acqSettings);
+
 		if (repNumber == 0) {
 			emit(s_acqRepetitionProgress(repNumber, -1));
-			runAcquisition(acquisition);
+			runAcquisition(&acquisition);
 		} else {
 			int timeSinceLast = startOfLastRepetition.elapsed()*1e-3;
 			while (timeSinceLast < m_acqSettings.repetitions.interval * 60) {
@@ -64,7 +56,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 			}
 			startOfLastRepetition.restart();
 			emit(s_acqRepetitionProgress(repNumber, -1));
-			runAcquisition(acquisition);
+			runAcquisition(&acquisition);
 		}
 	}
 	emit(s_acqRepetitionProgress(m_acqSettings.repetitions.count, -1));
@@ -72,12 +64,12 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	emit(s_acqRunning(m_running));
 }
 
-void Acquisition::runAcquisition(ACQUISITION acquisition) {
+void Acquisition::runAcquisition(ACQUISITION *acquisition) {
 
 	emit(s_acqProgress(ACQUISITION_STATES::STARTED, 0.0, -1));
 	
 	// prepare camera for image acquisition
-	acquisition.settings.camera = m_andor->prepareMeasurement(acquisition.settings.camera);
+	acquisition->settings.camera = m_andor->prepareMeasurement(acquisition->settings.camera);
 	// set optical elements for brightfield/Brillouin imaging
 	m_scanControl->m_stand->setPreset(1);
 	Sleep(500);
@@ -88,29 +80,29 @@ void Acquisition::runAcquisition(ACQUISITION acquisition) {
 	std::string now = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 		.toString(Qt::ISODateWithMs).toStdString();
 
-	acquisition.fileHndl->setDate(now);
+	acquisition->fileHndl->setDate(now);
 
 	std::string commentIn = "Brillouin data";
-	acquisition.fileHndl->setComment(commentIn);
+	acquisition->fileHndl->setComment(commentIn);
 
-	acquisition.fileHndl->setResolution("x", acquisition.settings.xSteps);
-	acquisition.fileHndl->setResolution("y", acquisition.settings.ySteps);
-	acquisition.fileHndl->setResolution("z", acquisition.settings.zSteps);
+	acquisition->fileHndl->setResolution("x", acquisition->settings.xSteps);
+	acquisition->fileHndl->setResolution("y", acquisition->settings.ySteps);
+	acquisition->fileHndl->setResolution("z", acquisition->settings.zSteps);
 
-	int resolutionXout = acquisition.fileHndl->getResolution("x");
+	int resolutionXout = acquisition->fileHndl->getResolution("x");
 
 	// Create position vector
-	int nrPositions = acquisition.settings.xSteps * acquisition.settings.ySteps * acquisition.settings.zSteps;
+	int nrPositions = acquisition->settings.xSteps * acquisition->settings.ySteps * acquisition->settings.zSteps;
 	std::vector<double> positionsX(nrPositions);
 	std::vector<double> positionsY(nrPositions);
 	std::vector<double> positionsZ(nrPositions);
-	std::vector<double> posX = simplemath::linspace(acquisition.settings.xMin, acquisition.settings.xMax, acquisition.settings.xSteps);
-	std::vector<double> posY = simplemath::linspace(acquisition.settings.yMin, acquisition.settings.yMax, acquisition.settings.ySteps);
-	std::vector<double> posZ = simplemath::linspace(acquisition.settings.zMin, acquisition.settings.zMax, acquisition.settings.zSteps);
+	std::vector<double> posX = simplemath::linspace(acquisition->settings.xMin, acquisition->settings.xMax, acquisition->settings.xSteps);
+	std::vector<double> posY = simplemath::linspace(acquisition->settings.yMin, acquisition->settings.yMax, acquisition->settings.ySteps);
+	std::vector<double> posZ = simplemath::linspace(acquisition->settings.zMin, acquisition->settings.zMax, acquisition->settings.zSteps);
 	int ll = 0;
-	for (gsl::index ii = 0; ii < acquisition.settings.zSteps; ii++) {
-		for (gsl::index jj = 0; jj < acquisition.settings.xSteps; jj++) {
-			for (gsl::index kk = 0; kk < acquisition.settings.ySteps; kk++) {
+	for (gsl::index ii = 0; ii < acquisition->settings.zSteps; ii++) {
+		for (gsl::index jj = 0; jj < acquisition->settings.xSteps; jj++) {
+			for (gsl::index kk = 0; kk < acquisition->settings.ySteps; kk++) {
 				// calculate stage positions
 				positionsX[ll] = posX[jj] + m_startPosition[0];
 				positionsY[ll] = posY[kk] + m_startPosition[1];
@@ -123,27 +115,27 @@ void Acquisition::runAcquisition(ACQUISITION acquisition) {
 	int rank = 3;
 	// For compatibility with MATLAB respect Fortran-style ordering: z, x, y
 	hsize_t *dims = new hsize_t[rank];
-	dims[0] = acquisition.settings.zSteps;
-	dims[1] = acquisition.settings.xSteps;
-	dims[2] = acquisition.settings.ySteps;
+	dims[0] = acquisition->settings.zSteps;
+	dims[1] = acquisition->settings.xSteps;
+	dims[2] = acquisition->settings.ySteps;
 
-	acquisition.fileHndl->setPositions("x", positionsX, rank, dims);
-	acquisition.fileHndl->setPositions("y", positionsY, rank, dims);
-	acquisition.fileHndl->setPositions("z", positionsZ, rank, dims);
+	acquisition->fileHndl->setPositions("x", positionsX, rank, dims);
+	acquisition->fileHndl->setPositions("y", positionsY, rank, dims);
+	acquisition->fileHndl->setPositions("z", positionsZ, rank, dims);
 	delete[] dims;
 
 	// do actual measurement
-	acquisition.fileHndl->startWritingQueues();
+	acquisition->fileHndl->startWritingQueues();
 	
 	int rank_data = 3;
-	hsize_t dims_data[3] = { acquisition.settings.camera.frameCount, acquisition.settings.camera.roi.height, acquisition.settings.camera.roi.width };
+	hsize_t dims_data[3] = { acquisition->settings.camera.frameCount, acquisition->settings.camera.roi.height, acquisition->settings.camera.roi.width };
 	int bytesPerFrame = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height * 2;
 	ll = 0;
 
 	// reset number of calibrations
 	nrCalibrations = 1;
 	// do pre calibration
-	if (acquisition.settings.preCalibration) {
+	if (acquisition->settings.preCalibration) {
 		doCalibration(acquisition);
 	}
 
@@ -153,28 +145,28 @@ void Acquisition::runAcquisition(ACQUISITION acquisition) {
 	QElapsedTimer calibrationTimer;
 	calibrationTimer.start();
 
-	for (gsl::index ii = 0; ii < acquisition.settings.zSteps; ii++) {
-		for (gsl::index jj = 0; jj < acquisition.settings.xSteps; jj++) {
+	for (gsl::index ii = 0; ii < acquisition->settings.zSteps; ii++) {
+		for (gsl::index jj = 0; jj < acquisition->settings.xSteps; jj++) {
 
 			// do live calibration 
-			if (acquisition.settings.conCalibration) {
-				if (calibrationTimer.elapsed() > (60e3 * acquisition.settings.conCalibrationInterval)) {
+			if (acquisition->settings.conCalibration) {
+				if (calibrationTimer.elapsed() > (60e3 * acquisition->settings.conCalibrationInterval)) {
 					doCalibration(acquisition);
 					calibrationTimer.start();
 				}
 			}
 
-			for (gsl::index kk = 0; kk < acquisition.settings.ySteps; kk++) {
-				int nextCalibration = 100 * (1e-3 * calibrationTimer.elapsed()) / (60 * acquisition.settings.conCalibrationInterval);
+			for (gsl::index kk = 0; kk < acquisition->settings.ySteps; kk++) {
+				int nextCalibration = 100 * (1e-3 * calibrationTimer.elapsed()) / (60 * acquisition->settings.conCalibrationInterval);
 				emit(s_acqTimeToCalibration(nextCalibration));
 				// move stage to correct position, wait 50 ms for it to finish
 				m_scanControl->setPosition({ positionsX[ll], positionsY[ll], positionsZ[ll] });
 
-				std::vector<AT_U8> images(bytesPerFrame * acquisition.settings.camera.frameCount);
+				std::vector<AT_U8> images(bytesPerFrame * acquisition->settings.camera.frameCount);
 
-				for (gsl::index mm = 0; mm < acquisition.settings.camera.frameCount; mm++) {
+				for (gsl::index mm = 0; mm < acquisition->settings.camera.frameCount; mm++) {
 					if (m_abort) {
-						abort(acquisition);
+						abort();
 						return;
 					}
 					emit(s_acqPosition(positionsX[ll] - m_startPosition[0], positionsY[ll] - m_startPosition[1], positionsZ[ll] - m_startPosition[2], mm+1));
@@ -192,7 +184,7 @@ void Acquisition::runAcquisition(ACQUISITION acquisition) {
 					.toString(Qt::ISODateWithMs).toStdString();
 				IMAGE *img = new IMAGE(jj, kk, ii, rank_data, dims_data, date, *images_);
 
-				QMetaObject::invokeMethod(acquisition.fileHndl, "s_enqueuePayload", Qt::AutoConnection, Q_ARG(IMAGE*, img));
+				QMetaObject::invokeMethod(acquisition->fileHndl, "s_enqueuePayload", Qt::AutoConnection, Q_ARG(IMAGE*, img));
 
 				// increase position index
 				ll++;
@@ -203,14 +195,14 @@ void Acquisition::runAcquisition(ACQUISITION acquisition) {
 		}
 	}
 	// do post calibration
-	if (acquisition.settings.postCalibration) {
+	if (acquisition->settings.postCalibration) {
 		doCalibration(acquisition);
 	}
 
 	// close camera libraries, clear buffers
 	m_andor->stopMeasurement();
 
-	QMetaObject::invokeMethod(acquisition.fileHndl, "s_finishedQueueing", Qt::AutoConnection);
+	QMetaObject::invokeMethod(acquisition->fileHndl, "s_finishedQueueing", Qt::AutoConnection);
 
 	m_scanControl->setPosition(m_startPosition);
 	emit(s_acqPosition(0, 0, 0, 0));
@@ -220,14 +212,9 @@ void Acquisition::runAcquisition(ACQUISITION acquisition) {
 	emit(s_acqCalibrationRunning(false));
 	emit(s_acqProgress(ACQUISITION_STATES::FINISHED, 100.0, 0));
 	emit(s_acqTimeToCalibration(0));
-	delete acquisition.fileHndl;
 }
 
-void Acquisition::abort(ACQUISITION acquisition) {
-	// abort all acquisitions
-	for (auto const& acquisition : m_acquisitions) {
-		acquisition.fileHndl->m_abort = true;
-	}
+void Acquisition::abort() {
 	m_andor->stopMeasurement();
 	m_scanControl->setPosition(m_startPosition);
 	m_running = false;
@@ -254,12 +241,12 @@ void Acquisition::checkFilename(std::string oldFilename) {
 	}
 }
 
-void Acquisition::doCalibration(ACQUISITION acquisition) {
+void Acquisition::doCalibration(ACQUISITION *acquisition) {
 	// announce calibration start
 	emit(s_acqCalibrationRunning(true));
 
 	// set exposure time for calibration
-	m_andor->setCalibrationExposureTime(acquisition.settings.calibrationExposureTime);
+	m_andor->setCalibrationExposureTime(acquisition->settings.calibrationExposureTime);
 
 	// move optical elements to position for calibration
 	m_scanControl->m_stand->setPreset(3);
@@ -269,13 +256,13 @@ void Acquisition::doCalibration(ACQUISITION acquisition) {
 
 	// acquire images
 	int rank_cal = 3;
-	hsize_t dims_cal[3] = { acquisition.settings.nrCalibrationImages, acquisition.settings.camera.roi.height, acquisition.settings.camera.roi.width };
+	hsize_t dims_cal[3] = { acquisition->settings.nrCalibrationImages, acquisition->settings.camera.roi.height, acquisition->settings.camera.roi.width };
 
-	int bytesPerFrame = acquisition.settings.camera.roi.width * acquisition.settings.camera.roi.height * 2;
-	std::vector<AT_U8> images((int64_t)bytesPerFrame * acquisition.settings.nrCalibrationImages);
-	for (gsl::index mm = 0; mm < acquisition.settings.nrCalibrationImages; mm++) {
+	int bytesPerFrame = acquisition->settings.camera.roi.width * acquisition->settings.camera.roi.height * 2;
+	std::vector<AT_U8> images((int64_t)bytesPerFrame * acquisition->settings.nrCalibrationImages);
+	for (gsl::index mm = 0; mm < acquisition->settings.nrCalibrationImages; mm++) {
 		if (m_abort) {
-			abort(acquisition);
+			abort();
 			return;
 		}
 		// acquire images
@@ -293,17 +280,17 @@ void Acquisition::doCalibration(ACQUISITION acquisition) {
 		*images_,				// data
 		rank_cal,				// the rank of the calibration data
 		dims_cal,				// the dimension of the calibration data
-		acquisition.settings.sample,	// the samplename
+		acquisition->settings.sample,	// the samplename
 		shift,					// the Brillouin shift of the sample
 		date					// the datetime
 	);
-	QMetaObject::invokeMethod(acquisition.fileHndl, "s_enqueueCalibration", Qt::AutoConnection, Q_ARG(CALIBRATION*, cal));
+	QMetaObject::invokeMethod(acquisition->fileHndl, "s_enqueueCalibration", Qt::AutoConnection, Q_ARG(CALIBRATION*, cal));
 	nrCalibrations++;
 
 	// revert optical elements to position for brightfield/Brillouin imaging
 	m_scanControl->m_stand->setPreset(1);
 
 	// reset exposure time
-	m_andor->setCalibrationExposureTime(acquisition.settings.camera.exposureTime);
+	m_andor->setCalibrationExposureTime(acquisition->settings.camera.exposureTime);
 	Sleep(500);
 }

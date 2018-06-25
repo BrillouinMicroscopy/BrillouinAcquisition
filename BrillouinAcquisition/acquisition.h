@@ -54,6 +54,12 @@ struct ACQUISITION {
 	bool running = true;			// is the acquisition still running
 	ACQUISITION(ACQUISITION_SETTINGS settings) : settings(settings),
 		fileHndl(new StorageWrapper(nullptr, settings.filename, H5F_ACC_RDWR)) {};
+	~ACQUISITION() {
+		if (fileHndl) {
+			delete fileHndl;
+			fileHndl = nullptr;
+		}
+	};
 };
 
 class Acquisition : public QObject {
@@ -71,18 +77,17 @@ public slots:
 private:
 	ACQUISITION_SETTINGS m_acqSettings;
 	//Thread m_storageThread;
-	std::vector<ACQUISITION> m_acquisitions;	// list of acquisitions
 	Andor *m_andor;
 	ScanControl *m_scanControl;
 	bool m_running = false;				// is acquisition currently running
 	std::vector<double> m_startPosition = { 0,0,0 };
-	void abort(ACQUISITION);
+	void abort();
 	void checkFilename(std::string oldFilename);
 
 	int nrCalibrations = 1;
-	void doCalibration(ACQUISITION acquisition);
+	void doCalibration(ACQUISITION *acquisition);
 
-	void runAcquisition(ACQUISITION acquisition);
+	void runAcquisition(ACQUISITION *acquisition);
 
 signals:
 	void s_acqRunning(bool);			// is acquisition running

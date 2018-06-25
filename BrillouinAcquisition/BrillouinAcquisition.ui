@@ -698,8 +698,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>446</width>
-                <height>454</height>
+                <width>285</width>
+                <height>340</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -752,8 +752,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>446</width>
-                <height>454</height>
+                <width>285</width>
+                <height>440</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -856,7 +856,7 @@ QTabBar::tab:!selected {
                 <property name="geometry">
                  <rect>
                   <x>0</x>
-                  <y>-262</y>
+                  <y>-267</y>
                   <width>433</width>
                   <height>775</height>
                  </rect>
@@ -1679,7 +1679,7 @@ border: none;</string>
                    <enum>QAbstractSpinBox::NoButtons</enum>
                   </property>
                   <property name="decimals">
-                   <number>1</number>
+                   <number>2</number>
                   </property>
                   <property name="value">
                    <double>10.000000000000000</double>
