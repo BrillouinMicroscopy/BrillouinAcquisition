@@ -94,7 +94,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	delete[] dims;
 
 	// do actual measurement
-	QMetaObject::invokeMethod(m_fileHndl, "startWritingQueues", Qt::AutoConnection);
+	m_fileHndl->startWritingQueues();
 	
 	int rank_data = 3;
 	hsize_t dims_data[3] = { m_acqSettings.camera.frameCount, m_acqSettings.camera.roi.height, m_acqSettings.camera.roi.width };
