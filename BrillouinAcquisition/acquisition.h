@@ -58,7 +58,7 @@ public slots:
 
 private:
 	ACQUISITION_SETTINGS m_acqSettings;
-	Thread m_storageThread;
+	//Thread m_storageThread;
 	StorageWrapper *m_fileHndl = nullptr;	// file handle
 	Andor *m_andor;
 	ScanControl *m_scanControl;

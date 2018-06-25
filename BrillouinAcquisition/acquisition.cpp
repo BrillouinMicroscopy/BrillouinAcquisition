@@ -42,9 +42,9 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	m_startPosition = m_scanControl->getPosition();
 
 	m_fileHndl = new StorageWrapper(nullptr, m_acqSettings.filename, H5F_ACC_RDWR);
-	QMetaObject::Connection connection = connect(m_fileHndl, SIGNAL(finished()), m_fileHndl, SLOT(deleteLater()));
+	//QMetaObject::Connection connection = connect(m_fileHndl, SIGNAL(finished()), m_fileHndl, SLOT(deleteLater()));
 	// move h5bm file to separate thread
-	m_storageThread.startWorker(m_fileHndl);
+	//m_storageThread.startWorker(m_fileHndl);
 
 	std::string now = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 		.toString(Qt::ISODateWithMs).toStdString();
@@ -183,6 +183,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	emit(s_acqCalibrationRunning(false));
 	emit(s_acqProgress(ACQUISITION_STATES::FINISHED, 100.0, 0));
 	emit(s_acqTimeToCalibration(0));
+	delete m_fileHndl;
 }
 
 void Acquisition::abort() {
@@ -194,6 +195,7 @@ void Acquisition::abort() {
 	emit(s_acqProgress(ACQUISITION_STATES::ABORTED, 0, 0));
 	emit(s_acqPosition(m_startPosition[0], m_startPosition[1], m_startPosition[2], 0));
 	emit(s_acqTimeToCalibration(0));
+	delete m_fileHndl;
 }
 
 void Acquisition::setSettings(ACQUISITION_SETTINGS acqSettings) {
