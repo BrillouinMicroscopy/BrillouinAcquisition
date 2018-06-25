@@ -20,10 +20,12 @@ StorageWrapper::~StorageWrapper() {
 
 void StorageWrapper::s_enqueuePayload(IMAGE *img) {
 	m_payloadQueue.enqueue(img);
+	s_writeQueues();
 }
 
 void StorageWrapper::s_enqueueCalibration(CALIBRATION *cal) {
 	m_calibrationQueue.enqueue(cal);
+	s_writeQueues();
 }
 
 void StorageWrapper::s_finishedQueueing() {
@@ -67,16 +69,5 @@ void StorageWrapper::s_writeQueues() {
 		m_writtenCalibrationsNr++;
 		delete cal;
 		cal = nullptr;
-	}
-
-	// continue to write queues if
-	// m_observeQueues is true
-	// m_abort was not set from the outside
-	// m_finishedQeueuing shows that more queue entries will come
-	if (m_observeQueues && !m_abort && !m_finishedQueueing) {
-		QMetaObject::invokeMethod(this, "s_writeQueues", Qt::QueuedConnection);
-	} else {
-		m_finished = true;
-		emit finished();
 	}
 }
