@@ -94,7 +94,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	delete[] dims;
 
 	// do actual measurement
-	m_fileHndl->startWritingQueues();
+	QMetaObject::invokeMethod(m_fileHndl, "startWritingQueues", Qt::AutoConnection);
 	
 	int rank_data = 3;
 	hsize_t dims_data[3] = { m_acqSettings.camera.frameCount, m_acqSettings.camera.roi.height, m_acqSettings.camera.roi.width };
@@ -154,7 +154,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 					.toString(Qt::ISODateWithMs).toStdString();
 				IMAGE *img = new IMAGE(jj, kk, ii, rank_data, dims_data, date, *images_);
 
-				QMetaObject::invokeMethod(m_fileHndl, "s_enqueuePayload", Qt::QueuedConnection, Q_ARG(IMAGE*, img));
+				QMetaObject::invokeMethod(m_fileHndl, "s_enqueuePayload", Qt::AutoConnection, Q_ARG(IMAGE*, img));
 
 				// increase position index
 				ll++;
@@ -172,7 +172,7 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 	// close camera libraries, clear buffers
 	m_andor->cleanupAcquisition();
 
-	QMetaObject::invokeMethod(m_fileHndl, "s_finishedQueueing", Qt::QueuedConnection);
+	QMetaObject::invokeMethod(m_fileHndl, "s_finishedQueueing", Qt::AutoConnection);
 
 	m_scanControl->setPosition(m_startPosition);
 	emit(s_acqPosition(0, 0, 0, 0));
@@ -263,7 +263,7 @@ void Acquisition::doCalibration() {
 		shift,					// the Brillouin shift of the sample
 		date					// the datetime
 	);
-	QMetaObject::invokeMethod(m_fileHndl, "s_enqueueCalibration", Qt::QueuedConnection, Q_ARG(CALIBRATION*, cal));
+	QMetaObject::invokeMethod(m_fileHndl, "s_enqueueCalibration", Qt::AutoConnection, Q_ARG(CALIBRATION*, cal));
 	nrCalibrations++;
 
 	// revert optical elements to position for brightfield/Brillouin imaging
