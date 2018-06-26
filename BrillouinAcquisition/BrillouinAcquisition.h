@@ -82,6 +82,7 @@ private slots:
 	void setPreset(int preset);
 	void updatePreview();
 	void showPreviewRunning(bool);
+	void startPreview(bool);
 	void cameraSettingsChanged(CAMERA_SETTINGS);
 	void cameraOptionsChanged(CAMERA_OPTIONS);
 	void showAcqPosition(double, double, double, int);
@@ -90,6 +91,8 @@ private slots:
 	void showCalibrationRunning(bool);
 	void showAcqRunning(bool);
 	void updateFilename(std::string);
+
+	QString formatSeconds(int seconds);
 
 	void on_autoscalePlot_stateChanged(int);
 
@@ -118,6 +121,11 @@ private slots:
 	void on_nrCalibrationImages_valueChanged(int);
 	void on_calibrationExposureTime_valueChanged(double);
 
+	// repetitions
+	void on_repetitionCount_valueChanged(int);
+	void on_repetitionInterval_valueChanged(double);
+	void showRepProgress(int repNumber, int timeToNext);
+
 public:
 	BrillouinAcquisition(QWidget *parent = nullptr) noexcept;
 	~BrillouinAcquisition();
@@ -137,7 +145,8 @@ private:
 	SETTINGS_DEVICES m_deviceSettings;
 	CAMERA_OPTIONS m_cameraOptions;
 	ACQUISITION_SETTINGS m_acquisitionSettings;
-	bool m_viewRunning = false;
+	bool m_previewRunning = false;
+	bool m_measurementRunning = false;
 
 	bool m_autoscalePlot = false;
 

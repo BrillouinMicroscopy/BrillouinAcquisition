@@ -48,6 +48,13 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 
 	connection = QWidget::connect(
 		m_andor,
+		SIGNAL(s_measurementRunning(bool)),
+		this,
+		SLOT(startPreview(bool))
+	);
+
+	connection = QWidget::connect(
+		m_andor,
 		SIGNAL(optionsChanged(CAMERA_OPTIONS)),
 		this,
 		SLOT(cameraOptionsChanged(CAMERA_OPTIONS))
@@ -142,6 +149,14 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		SIGNAL(s_acqTimeToCalibration(int)),
 		this,
 		SLOT(showCalibrationInterval(int))
+	);
+
+	// slot to show repetitions
+	connection = QWidget::connect(
+		m_acquisition,
+		SIGNAL(s_acqRepetitionProgress(int, int)),
+		this,
+		SLOT(showRepProgress(int, int))
 	);
 
 	qRegisterMetaType<std::string>("std::string");
@@ -343,19 +358,26 @@ void BrillouinAcquisition::showAcqProgress(int state, double progress, int secon
 	} else if (state == ACQUISITION_STATES::FINISHED) {
 		string = "Acquisition finished.";
 	} else {
-		if (seconds > 3600) {
-			int hours = floor((double)seconds / 3600);
-			int minutes = floor((seconds - hours * 3600) / 60);
-			string.sprintf("%02.1f %% finished, %02.0f:%02.0f hours remaining.", progress, (double)hours, (double)minutes);
-		} else if (seconds > 60) {
-			int minutes = floor(seconds / 60);
-			seconds = floor(seconds - minutes * 60);
-			string.sprintf("%02.1f %% finished, %02.0f:%02.0f minutes remaining.", progress, (double)minutes, (double)seconds);
-		} else {
-			string.sprintf("%02.1f %% finished, %2.0f seconds remaining.", progress, (double)seconds);
-		}
+		QString timeString = formatSeconds(seconds);
+		string.sprintf("%02.1f %% finished, ", progress) + timeString + " remaining.";
 	}
 	ui->progressBar->setFormat(string);
+}
+
+QString BrillouinAcquisition::formatSeconds(int seconds) {
+	QString string;
+	if (seconds > 3600) {
+		int hours = floor((double)seconds / 3600);
+		int minutes = floor((seconds - hours * 3600) / 60);
+		string.sprintf("%02.0f:%02.0f hours", (double)hours, (double)minutes);
+	} else if (seconds > 60) {
+		int minutes = floor(seconds / 60);
+		seconds = floor(seconds - minutes * 60);
+		string.sprintf("%02.0f:%02.0f minutes", (double)minutes, (double)seconds);
+	} else {
+		string.sprintf("%2.0f seconds", (double)seconds);
+	}
+	return string;
 }
 
 void BrillouinAcquisition::showCalibrationInterval(int value) {
@@ -572,12 +594,7 @@ void BrillouinAcquisition::showPreviewRunning(bool isRunning) {
 	} else {
 		ui->camera_playPause->setText("Play");
 	}
-	// if preview was not running, start it, else leave it running (don't start it twice)
-	if (!m_viewRunning && isRunning) {
-		m_viewRunning = true;
-		onNewImage();
-	}
-	m_viewRunning = isRunning;
+	startPreview(isRunning);
 }
 
 void BrillouinAcquisition::showAcqRunning(bool isRunning) {
@@ -586,41 +603,49 @@ void BrillouinAcquisition::showAcqRunning(bool isRunning) {
 	} else {
 		ui->acquisitionStart->setText("Start");
 	}
+	m_measurementRunning = isRunning;
+	ui->startX->setEnabled(!m_measurementRunning);
+	ui->startY->setEnabled(!m_measurementRunning);
+	ui->startZ->setEnabled(!m_measurementRunning);
+	ui->endX->setEnabled(!m_measurementRunning);
+	ui->endY->setEnabled(!m_measurementRunning);
+	ui->endZ->setEnabled(!m_measurementRunning);
+	ui->stepsX->setEnabled(!m_measurementRunning);
+	ui->stepsY->setEnabled(!m_measurementRunning);
+	ui->stepsZ->setEnabled(!m_measurementRunning);
+	ui->camera_playPause->setEnabled(!m_measurementRunning);
+	ui->camera_singleShot->setEnabled(!m_measurementRunning);
+}
+
+void BrillouinAcquisition::startPreview(bool isRunning) {
 	// if preview was not running, start it, else leave it running (don't start it twice)
-	if (!m_viewRunning && isRunning) {
-		m_viewRunning = true;
+	if (!m_previewRunning && isRunning) {
+		m_previewRunning = true;
 		onNewImage();
 	}
-	m_viewRunning = isRunning;
-	ui->startX->setEnabled(!m_viewRunning);
-	ui->startY->setEnabled(!m_viewRunning);
-	ui->startZ->setEnabled(!m_viewRunning);
-	ui->endX->setEnabled(!m_viewRunning);
-	ui->endY->setEnabled(!m_viewRunning);
-	ui->endZ->setEnabled(!m_viewRunning);
-	ui->stepsX->setEnabled(!m_viewRunning);
-	ui->stepsY->setEnabled(!m_viewRunning);
-	ui->stepsZ->setEnabled(!m_viewRunning);
-	ui->camera_playPause->setEnabled(!m_viewRunning);
-	ui->camera_singleShot->setEnabled(!m_viewRunning);
+	m_previewRunning = isRunning;
 }
 
 void BrillouinAcquisition::onNewImage() {
-	if (m_viewRunning) {
-		// if no image is ready return immediately
-		if (!m_andor->previewBuffer->m_buffer->m_usedBuffers->tryAcquire()) {
-			QMetaObject::invokeMethod(this, "onNewImage", Qt::QueuedConnection);
-			return;
-		}
-
-		unsigned short* unpackedBuffer = reinterpret_cast<unsigned short*>(m_andor->previewBuffer->m_buffer->getReadBuffer());
-
-		int tIndex;
-		for (gsl::index xIndex = 0; xIndex < m_andor->previewBuffer->m_bufferSettings.roi.height; ++xIndex) {
-			for (gsl::index yIndex = 0; yIndex < m_andor->previewBuffer->m_bufferSettings.roi.width; ++yIndex) {
-				tIndex = xIndex * m_andor->previewBuffer->m_bufferSettings.roi.width + yIndex;
-				m_colorMap->data()->setCell(yIndex, xIndex, unpackedBuffer[tIndex]);
+	if (m_previewRunning) {
+		{
+			std::lock_guard<std::mutex> lockGuard(m_andor->previewBuffer->m_mutex);
+			// if no image is ready return immediately
+			if (!m_andor->previewBuffer->m_buffer->m_usedBuffers->tryAcquire()) {
+				QMetaObject::invokeMethod(this, "onNewImage", Qt::QueuedConnection);
+				return;
 			}
+
+			unsigned short* unpackedBuffer = reinterpret_cast<unsigned short*>(m_andor->previewBuffer->m_buffer->getReadBuffer());
+
+			int tIndex;
+			for (gsl::index xIndex = 0; xIndex < m_andor->previewBuffer->m_bufferSettings.roi.height; ++xIndex) {
+				for (gsl::index yIndex = 0; yIndex < m_andor->previewBuffer->m_bufferSettings.roi.width; ++yIndex) {
+					tIndex = xIndex * m_andor->previewBuffer->m_bufferSettings.roi.width + yIndex;
+					m_colorMap->data()->setCell(yIndex, xIndex, unpackedBuffer[tIndex]);
+				}
+			}
+
 		}
 		m_andor->previewBuffer->m_buffer->m_freeBuffers->release();
 		if (m_autoscalePlot) {
@@ -885,6 +910,34 @@ void BrillouinAcquisition::on_nrCalibrationImages_valueChanged(int value) {
 
 void BrillouinAcquisition::on_calibrationExposureTime_valueChanged(double value) {
 	m_acquisitionSettings.calibrationExposureTime = value;
+};
+
+/*
+ * Functions regarding the repetition feature.
+ */
+
+void BrillouinAcquisition::on_repetitionCount_valueChanged(int count) {
+	m_acquisitionSettings.repetitions.count = count;
+};
+
+void BrillouinAcquisition::on_repetitionInterval_valueChanged(double interval) {
+	m_acquisitionSettings.repetitions.interval = interval;
+};
+
+void BrillouinAcquisition::showRepProgress(int repNumber, int timeToNext) {
+	ui->repetitionProgress->setValue(100 * ((double)repNumber + 1) / m_acquisitionSettings.repetitions.count);
+
+	QString string;
+	if (timeToNext > 0) {
+		string = formatSeconds(timeToNext) + " to next repetition.";
+	} else {
+		if (repNumber < m_acquisitionSettings.repetitions.count) {
+			string.sprintf("Measuring repetition %1.0d of %1.0d.", repNumber + 1, m_acquisitionSettings.repetitions.count);
+		} else {
+			string.sprintf("Finished %1.0d repetitions.", m_acquisitionSettings.repetitions.count);
+		}
+	}
+	ui->repetitionProgress->setFormat(string);
 };
 
 void BrillouinAcquisition::on_exposureTime_valueChanged(double value) {

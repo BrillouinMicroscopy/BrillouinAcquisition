@@ -14,6 +14,11 @@ enum ACQUISITION_STATES {
 	ABORTED
 };
 
+struct REPETITIONS {
+	int count = 1;			// [1]		number of repetitions
+	double interval = 10;	// [min]	interval between repetitions
+};
+
 struct ACQUISITION_SETTINGS {
 	std::string filename = "Brillouin.h5";	// filename
 	
@@ -27,8 +32,7 @@ struct ACQUISITION_SETTINGS {
 	double calibrationExposureTime = 1;		// exposure time for calibration images
 	
 	// repetition parameters
-	int repetitionCount = 1;				// number of repetitions
-	double repetitionInterval = 10;			// repetition interval
+	REPETITIONS repetitions;
 
 	// ROI parameters
 	double xMin = 0;	// [µm]	x minimum value
@@ -42,6 +46,20 @@ struct ACQUISITION_SETTINGS {
 	int zSteps = 1;		// [1]	z steps
 
 	CAMERA_SETTINGS camera;
+};
+
+struct ACQUISITION {
+	ACQUISITION_SETTINGS settings;	// settings of the acquisition
+	StorageWrapper *fileHndl;		// handle to the file
+	bool running = true;			// is the acquisition still running
+	ACQUISITION(ACQUISITION_SETTINGS settings) : settings(settings),
+		fileHndl(new StorageWrapper(nullptr, settings.filename, H5F_ACC_RDWR)) {};
+	~ACQUISITION() {
+		if (fileHndl) {
+			delete fileHndl;
+			fileHndl = nullptr;
+		}
+	};
 };
 
 class Acquisition : public QObject {
@@ -59,17 +77,17 @@ public slots:
 private:
 	ACQUISITION_SETTINGS m_acqSettings;
 	//Thread m_storageThread;
-	StorageWrapper *m_fileHndl = nullptr;	// file handle
 	Andor *m_andor;
 	ScanControl *m_scanControl;
 	bool m_running = false;				// is acquisition currently running
 	std::vector<double> m_startPosition = { 0,0,0 };
 	void abort();
-	void setSettings(ACQUISITION_SETTINGS acqSettings);
-	std::string checkFilename(std::string oldFilename);
+	void checkFilename(std::string oldFilename);
 
 	int nrCalibrations = 1;
-	void doCalibration();
+	void doCalibration(ACQUISITION *acquisition);
+
+	void runAcquisition(ACQUISITION *acquisition);
 
 signals:
 	void s_acqRunning(bool);			// is acquisition running
@@ -79,6 +97,7 @@ signals:
 	void s_acqTimeToCalibration(int);	// time to next calibration
 	void s_acqCalibrationRunning(bool);	// is calibration running
 	void s_filenameChanged(std::string);
+	void s_acqRepetitionProgress(int, int);	// repetitions
 };
 
 #endif //ACQUISITION_H

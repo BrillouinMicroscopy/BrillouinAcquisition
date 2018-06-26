@@ -34,7 +34,7 @@ inline CircularBuffer<T>::CircularBuffer() noexcept : m_bufferNumber(0), m_buffe
 
 template<class T>
 inline CircularBuffer<T>::CircularBuffer(const int bufferNumber, const int bufferSize) : m_bufferNumber(checkBufferNumber(bufferNumber)), m_bufferSize(bufferSize),
-	m_freeBuffers(new QSemaphore(bufferSize)) {
+	m_freeBuffers(new QSemaphore(checkBufferNumber(bufferNumber))) {
 
 	m_buffers = new T*[m_bufferNumber];
 	for (gsl::index i = 0; i < m_bufferNumber; i++) {
@@ -69,5 +69,4 @@ inline T * CircularBuffer<T>::getReadBuffer() {
 	// return pointer to buffer and increment m_readCount
 	return m_buffers[m_readCount++ % m_bufferNumber];
 }
-
 #endif //CIRCULARBUFFER_H

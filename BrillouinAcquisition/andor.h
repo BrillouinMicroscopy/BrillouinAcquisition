@@ -60,6 +60,7 @@ public slots:
 	void disconnectDevice();
 	void startPreview(CAMERA_SETTINGS settings);
 	void stopPreview();
+	void stopMeasurement();
 	CAMERA_SETTINGS prepareMeasurement(CAMERA_SETTINGS settings);
 	void getImageForMeasurement(AT_U8* buffer);
 	// setters/getters for sensor cooling
@@ -70,6 +71,7 @@ signals:
 	void cameraCoolingChanged(bool);
 	void noCameraFound();
 	void s_previewRunning(bool);
+	void s_measurementRunning(bool);
 	void settingsChanged(CAMERA_SETTINGS);
 	void optionsChanged(CAMERA_OPTIONS);
 	void s_previewBufferSettingsChanged();

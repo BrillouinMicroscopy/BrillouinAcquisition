@@ -24,6 +24,8 @@ public:
 
 	void initializeBuffer(BUFFER_SETTINGS bufferSettings);
 
+	std::mutex m_mutex;
+
 	CircularBuffer<T>* m_buffer = new CircularBuffer<T>;
 	BUFFER_SETTINGS m_bufferSettings;
 };
@@ -45,6 +47,8 @@ inline PreviewBuffer<T>::~PreviewBuffer() {
 
 template<class T>
 void inline PreviewBuffer<T>::initializeBuffer(BUFFER_SETTINGS bufferSettings) {
+	std::lock_guard<std::mutex> lockGuard(m_mutex);
+
 	m_bufferSettings = bufferSettings;
 	if (m_buffer != nullptr) {
 		delete m_buffer;

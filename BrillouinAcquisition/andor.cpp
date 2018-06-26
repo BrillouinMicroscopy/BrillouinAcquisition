@@ -170,11 +170,6 @@ void Andor::startPreview(CAMERA_SETTINGS settings) {
 	getImageForPreview();
 }
 
-void Andor::stopPreview() {
-	m_isPreviewRunning = false;
-	cleanupAcquisition();
-}
-
 void Andor::preparePreview() {
 	// always use full camera image for live preview
 	m_settings.roi.width = m_options.ROIWidthLimits[1];
@@ -196,10 +191,9 @@ void Andor::preparePreview() {
 	emit(s_previewRunning(true));
 }
 
-void Andor::cleanupAcquisition() {
-	AT_FinaliseUtilityLibrary();
-	AT_Command(m_cameraHndl, L"AcquisitionStop");
-	AT_Flush(m_cameraHndl);
+void Andor::stopPreview() {
+	m_isPreviewRunning = false;
+	cleanupAcquisition();
 	emit(s_previewRunning(false));
 }
 
@@ -222,8 +216,21 @@ CAMERA_SETTINGS Andor::prepareMeasurement(CAMERA_SETTINGS settings) {
 	AT_Command(m_cameraHndl, L"AcquisitionStart");
 	AT_InitialiseUtilityLibrary();
 
+	emit(s_measurementRunning(true));
+
 	return readSettings();
 };
+
+void Andor::stopMeasurement() {
+	cleanupAcquisition();
+	emit(s_measurementRunning(false));
+}
+
+void Andor::cleanupAcquisition() {
+	AT_FinaliseUtilityLibrary();
+	AT_Command(m_cameraHndl, L"AcquisitionStop");
+	AT_Flush(m_cameraHndl);
+}
 
 void Andor::acquireImage(AT_U8* buffer) {
 	// Pass this buffer to the SDK
@@ -257,7 +264,7 @@ void Andor::getImageForPreview() {
 
 		QMetaObject::invokeMethod(this, "getImageForPreview", Qt::QueuedConnection);
 	} else {
-		cleanupAcquisition();
+		stopPreview();
 	}
 }
 
