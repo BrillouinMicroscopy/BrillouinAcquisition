@@ -359,7 +359,9 @@ void BrillouinAcquisition::showAcqProgress(int state, double progress, int secon
 		string = "Acquisition finished.";
 	} else {
 		QString timeString = formatSeconds(seconds);
-		string.sprintf("%02.1f %% finished, ", progress) + timeString + " remaining.";
+		string.sprintf("%02.1f %% finished, ", progress);
+		string += timeString;
+		string += " remaining.";
 	}
 	ui->progressBar->setFormat(string);
 }
