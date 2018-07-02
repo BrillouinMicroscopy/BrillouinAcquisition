@@ -68,9 +68,9 @@ copy "$(QTDIR)\bin\Qt5Widgetsd.dll" "$(TargetDir)"
 copy "$(QTDIR)\bin\Qt5Guid.dll" "$(TargetDir)"
 copy "$(QTDIR)\bin\Qt5SerialPortd.dll" "$(TargetDir)"
 copy "$(QTDIR)\bin\Qt5PrintSupportd.dll" "$(TargetDir)"
-copy "$(ProgramW6432)\HDF_Group\HDF5\1.10.1\bin\hdf5.dll" "$(TargetDir)"
-copy "$(ProgramW6432)\HDF_Group\HDF5\1.10.1\bin\szip.dll" "$(TargetDir)"
-copy "$(ProgramW6432)\HDF_Group\HDF5\1.10.1\bin\zlib.dll" "$(TargetDir)"</Command>
+copy "$(ProgramW6432)\HDF_Group\HDF5\1.10.2\bin\hdf5.dll" "$(TargetDir)"
+copy "$(ProgramW6432)\HDF_Group\HDF5\1.10.2\bin\szip.dll" "$(TargetDir)"
+copy "$(ProgramW6432)\HDF_Group\HDF5\1.10.2\bin\zlib.dll" "$(TargetDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -105,9 +105,9 @@ copy "$(QTDIR)\bin\Qt5Widgets.dll" "$(TargetDir)"
 copy "$(QTDIR)\bin\Qt5Gui.dll" "$(TargetDir)"
 copy "$(QTDIR)\bin\Qt5SerialPort.dll" "$(TargetDir)"
 copy "$(QTDIR)\bin\Qt5PrintSupport.dll" "$(TargetDir)"
-copy "$(ProgramW6432)\HDF_Group\HDF5\1.10.1\bin\hdf5.dll" "$(TargetDir)"
-copy "$(ProgramW6432)\HDF_Group\HDF5\1.10.1\bin\szip.dll" "$(TargetDir)"
-copy "$(ProgramW6432)\HDF_Group\HDF5\1.10.1\bin\zlib.dll" "$(TargetDir)"
+copy "$(ProgramW6432)\HDF_Group\HDF5\1.10.2\bin\hdf5.dll" "$(TargetDir)"
+copy "$(ProgramW6432)\HDF_Group\HDF5\1.10.2\bin\szip.dll" "$(TargetDir)"
+copy "$(ProgramW6432)\HDF_Group\HDF5\1.10.2\bin\zlib.dll" "$(TargetDir)"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
