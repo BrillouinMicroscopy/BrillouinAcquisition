@@ -382,6 +382,10 @@ QString BrillouinAcquisition::formatSeconds(int seconds) {
 	return string;
 }
 
+void BrillouinAcquisition::on_actionQuit_triggered() {
+	QApplication::quit();
+}
+
 void BrillouinAcquisition::showCalibrationInterval(int value) {
 	ui->calibrationProgress->setValue(value);
 	ui->calibrationProgress->setFormat("Time to next calibration.");

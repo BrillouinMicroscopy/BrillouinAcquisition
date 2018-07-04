@@ -94,6 +94,8 @@ private slots:
 
 	QString formatSeconds(int seconds);
 
+	void on_actionQuit_triggered();
+
 	void on_autoscalePlot_stateChanged(int);
 
 	void updateAcquisitionSettings();
