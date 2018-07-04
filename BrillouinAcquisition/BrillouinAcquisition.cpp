@@ -948,6 +948,10 @@ void BrillouinAcquisition::on_exposureTime_valueChanged(double value) {
 
 void BrillouinAcquisition::on_frameCount_valueChanged(int value) {
 	m_acquisitionSettings.camera.frameCount = value;
+}
+void BrillouinAcquisition::on_selectFolder_clicked() {
+	m_acquisitionSettings.folder = QFileDialog::getExistingDirectory(this, tr("Select directory to store measurements"),
+		QString::fromStdString(m_acquisitionSettings.folder), QFileDialog::ShowDirsOnly	| QFileDialog::DontResolveSymlinks).toStdString();
 };
 
 void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradientPreset preset) {

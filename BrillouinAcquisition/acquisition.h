@@ -21,6 +21,8 @@ struct REPETITIONS {
 
 struct ACQUISITION_SETTINGS {
 	std::string filename = "Brillouin.h5";	// filename
+	std::string folder = "./";
+	std::string fullPath = folder + filename;
 	
 	// calibration parameters
 	std::string sample = "Methanol & Water";
@@ -53,7 +55,7 @@ struct ACQUISITION {
 	StorageWrapper *fileHndl;		// handle to the file
 	bool running = true;			// is the acquisition still running
 	ACQUISITION(ACQUISITION_SETTINGS settings) : settings(settings),
-		fileHndl(new StorageWrapper(nullptr, settings.filename, H5F_ACC_RDWR)) {};
+		fileHndl(new StorageWrapper(nullptr, settings.fullPath, H5F_ACC_RDWR)) {};
 	~ACQUISITION() {
 		if (fileHndl) {
 			delete fileHndl;
@@ -82,7 +84,7 @@ private:
 	bool m_running = false;				// is acquisition currently running
 	std::vector<double> m_startPosition = { 0,0,0 };
 	void abort();
-	void checkFilename(std::string oldFilename);
+	void checkFilename();
 
 	int nrCalibrations = 1;
 	void doCalibration(ACQUISITION *acquisition);

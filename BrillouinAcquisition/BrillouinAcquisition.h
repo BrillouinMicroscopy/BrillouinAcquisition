@@ -101,6 +101,8 @@ private slots:
 	void on_exposureTime_valueChanged(double);
 	void on_frameCount_valueChanged(int);
 
+	void on_selectFolder_clicked();
+
 	// acquisition AOI
 	void on_startX_valueChanged(double);
 	void on_startY_valueChanged(double);

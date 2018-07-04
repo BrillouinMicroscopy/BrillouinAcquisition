@@ -39,8 +39,8 @@ void Acquisition::startAcquisition(ACQUISITION_SETTINGS acqSettings) {
 			abort();
 			return;
 		}
-		
-		checkFilename(m_acqSettings.filename);
+
+		checkFilename();
 
 		ACQUISITION acquisition = ACQUISITION(m_acqSettings);
 
@@ -224,20 +224,21 @@ void Acquisition::abort() {
 	emit(s_acqTimeToCalibration(0));
 }
 
-void Acquisition::checkFilename(std::string oldFilename) {
+void Acquisition::checkFilename() {
+	std::string oldFilename = m_acqSettings.filename;
 	// get filename without extension
 	std::string rawFilename = oldFilename.substr(0, oldFilename.find_last_of("."));
 	// remove possibly attached number separated by a hyphen
 	rawFilename = rawFilename.substr(0, rawFilename.find_last_of("-"));
-	std::string newFilename = oldFilename;
+	m_acqSettings.fullPath = m_acqSettings.folder + m_acqSettings.filename;
 	int count = 0;
-	while (exists(newFilename)) {
-		newFilename = rawFilename + '-' + std::to_string(count) + oldFilename.substr(oldFilename.find_last_of("."), std::string::npos);
+	while (exists(m_acqSettings.fullPath)) {
+		m_acqSettings.filename = rawFilename + '-' + std::to_string(count) + oldFilename.substr(oldFilename.find_last_of("."), std::string::npos);
+		m_acqSettings.fullPath = m_acqSettings.folder + m_acqSettings.filename;
 		count++;
 	}
-	if (newFilename != oldFilename) {
-		m_acqSettings.filename = newFilename;
-		emit(s_filenameChanged(newFilename));
+	if (m_acqSettings.filename != oldFilename) {
+		emit(s_filenameChanged(m_acqSettings.filename));
 	}
 }
 
