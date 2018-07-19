@@ -856,7 +856,7 @@ QTabBar::tab:!selected {
                 <property name="geometry">
                  <rect>
                   <x>0</x>
-                  <y>0</y>
+                  <y>-122</y>
                   <width>433</width>
                   <height>775</height>
                  </rect>
@@ -1173,7 +1173,7 @@ QTabBar::tab:!selected {
                    <rect>
                     <x>10</x>
                     <y>20</y>
-                    <width>131</width>
+                    <width>181</width>
                     <height>30</height>
                    </rect>
                   </property>
@@ -1189,7 +1189,7 @@ QTabBar::tab:!selected {
                    <rect>
                     <x>10</x>
                     <y>60</y>
-                    <width>131</width>
+                    <width>141</width>
                     <height>30</height>
                    </rect>
                   </property>
@@ -1205,7 +1205,7 @@ QTabBar::tab:!selected {
                    <rect>
                     <x>220</x>
                     <y>20</y>
-                    <width>131</width>
+                    <width>171</width>
                     <height>30</height>
                    </rect>
                   </property>
@@ -1256,7 +1256,7 @@ QTabBar::tab:!selected {
                    <rect>
                     <x>10</x>
                     <y>140</y>
-                    <width>131</width>
+                    <width>141</width>
                     <height>30</height>
                    </rect>
                   </property>
@@ -1288,7 +1288,7 @@ QTabBar::tab:!selected {
                    <rect>
                     <x>10</x>
                     <y>100</y>
-                    <width>151</width>
+                    <width>171</width>
                     <height>30</height>
                    </rect>
                   </property>
@@ -1334,7 +1334,7 @@ QTabBar::tab:!selected {
                    <rect>
                     <x>150</x>
                     <y>60</y>
-                    <width>41</width>
+                    <width>51</width>
                     <height>30</height>
                    </rect>
                   </property>
@@ -1354,9 +1354,9 @@ QTabBar::tab:!selected {
                  <widget class="QDoubleSpinBox" name="calibrationExposureTime">
                   <property name="geometry">
                    <rect>
-                    <x>350</x>
+                    <x>340</x>
                     <y>140</y>
-                    <width>41</width>
+                    <width>51</width>
                     <height>30</height>
                    </rect>
                   </property>
@@ -1378,7 +1378,7 @@ QTabBar::tab:!selected {
                    <rect>
                     <x>150</x>
                     <y>140</y>
-                    <width>41</width>
+                    <width>51</width>
                     <height>30</height>
                    </rect>
                   </property>
@@ -1595,7 +1595,7 @@ border: none;</string>
                    <rect>
                     <x>10</x>
                     <y>25</y>
-                    <width>131</width>
+                    <width>141</width>
                     <height>30</height>
                    </rect>
                   </property>
@@ -1646,7 +1646,7 @@ border: none;</string>
                    <rect>
                     <x>150</x>
                     <y>25</y>
-                    <width>41</width>
+                    <width>51</width>
                     <height>30</height>
                    </rect>
                   </property>
@@ -1666,9 +1666,9 @@ border: none;</string>
                  <widget class="QDoubleSpinBox" name="repetitionInterval">
                   <property name="geometry">
                    <rect>
-                    <x>350</x>
+                    <x>340</x>
                     <y>25</y>
-                    <width>41</width>
+                    <width>51</width>
                     <height>30</height>
                    </rect>
                   </property>
