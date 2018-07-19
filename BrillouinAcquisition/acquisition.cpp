@@ -230,11 +230,11 @@ void Acquisition::checkFilename() {
 	std::string rawFilename = oldFilename.substr(0, oldFilename.find_last_of("."));
 	// remove possibly attached number separated by a hyphen
 	rawFilename = rawFilename.substr(0, rawFilename.find_last_of("-"));
-	m_acqSettings.fullPath = m_acqSettings.folder + m_acqSettings.filename;
+	m_acqSettings.fullPath = m_acqSettings.folder + "/" + m_acqSettings.filename;
 	int count = 0;
 	while (exists(m_acqSettings.fullPath)) {
 		m_acqSettings.filename = rawFilename + '-' + std::to_string(count) + oldFilename.substr(oldFilename.find_last_of("."), std::string::npos);
-		m_acqSettings.fullPath = m_acqSettings.folder + m_acqSettings.filename;
+		m_acqSettings.fullPath = m_acqSettings.folder + "/" + m_acqSettings.filename;
 		count++;
 	}
 	if (m_acqSettings.filename != oldFilename) {

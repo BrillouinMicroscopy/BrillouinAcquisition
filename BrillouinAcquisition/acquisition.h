@@ -21,7 +21,7 @@ struct REPETITIONS {
 
 struct ACQUISITION_SETTINGS {
 	std::string filename = "Brillouin.h5";	// filename
-	std::string folder = "./";
+	std::string folder = ".";
 	std::string fullPath = folder + filename;
 	
 	// calibration parameters
