@@ -1,12 +1,16 @@
 #ifndef BRILLOUINACQUISITON_H
 #define BRILLOUINACQUISITON_H
 
+#include <gsl/gsl>
+
 #include "thread.h"
 #include "andor.h"
 #include "acquisition.h"
 #include "qcustomplot.h"
 #include "external/h5bm/h5bm.h"
 #include "scancontrol.h"
+#include "ZeissECU.h"
+#include "NIDAQ.h"
 
 #include <QtWidgets/QMainWindow>
 #include "ui_BrillouinAcquisition.h"
@@ -41,6 +45,8 @@ Q_DECLARE_METATYPE(std::vector<int>);
 Q_DECLARE_METATYPE(QSerialPort::SerialPortError);
 Q_DECLARE_METATYPE(IMAGE*);
 Q_DECLARE_METATYPE(CALIBRATION*);
+Q_DECLARE_METATYPE(ScanControl::SCAN_PRESET);
+Q_DECLARE_METATYPE(ScanControl::DEVICE_ELEMENT);
 
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
@@ -62,7 +68,7 @@ private slots:
 
 	void on_acquisitionStart_clicked();
 	void microscopeElementPositionsChanged(std::vector<int>);
-	void microscopeElementPositionsChanged(int element, int position);
+	void microscopeElementPositionChanged(ScanControl::DEVICE_ELEMENT element, int position);
 	void on_camera_playPause_clicked();
 	void onNewImage();
 	void initializePlot();
@@ -78,8 +84,8 @@ private slots:
 	std::vector<AT_64> checkROI(std::vector<AT_64>, std::vector<AT_64>);
 
 	void setColormap(QCPColorGradient *, CustomGradientPreset);
-	void setElement(int element, int position);
-	void setPreset(int preset);
+	void setElement(ScanControl::DEVICE_ELEMENT element, int position);
+	void setPreset(ScanControl::SCAN_PRESET preset);
 	void updatePreview();
 	void showPreviewRunning(bool);
 	void startPreview(bool);
@@ -142,8 +148,8 @@ private:
 	//Thread m_microscopeThread;
 	Thread m_acquisitionThread;
 	Andor *m_andor = new Andor();
-	ScanControl *m_scanControl = new ScanControl();
-	Acquisition *m_acquisition = new Acquisition(nullptr, m_andor, m_scanControl);
+	ScanControl *m_scanControl = nullptr;
+	Acquisition *m_acquisition = new Acquisition(nullptr, m_andor, &m_scanControl);
 	QCPColorMap *m_colorMap;
 	QCPRange m_cLim_Default = { 100, 300 };	// default colormap range
 	SETTINGS_DEVICES m_deviceSettings;
@@ -154,10 +160,7 @@ private:
 
 	bool m_autoscalePlot = false;
 
-	// pre-defined presets for element positions
-	// "Brillouin", "Brightfield", "Eyepiece", "Calibration"
-	std::vector<std::string> presetLabels = { "Brillouin", "Brightfield", "Eyepiece", "Calibration" };
-	std::vector<int> microscopeElementPositions = {0, 0, 0, 0, 0, 0};
+	std::vector<int> m_deviceElementPositions = {0, 0, 0, 0, 0, 0};
 
 	std::vector<std::vector<QPushButton*>> elementButtons;
 	std::vector<QPushButton*> presetButtons;

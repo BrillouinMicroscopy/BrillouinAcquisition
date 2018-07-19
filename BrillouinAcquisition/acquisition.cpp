@@ -7,7 +7,7 @@
 using namespace std::experimental::filesystem::v1;
 
 
-Acquisition::Acquisition(QObject *parent, Andor *andor, ScanControl *scanControl)
+Acquisition::Acquisition(QObject *parent, Andor *andor, ScanControl **scanControl)
 	: QObject(parent), m_andor(andor), m_scanControl(scanControl) {
 }
 
@@ -71,11 +71,11 @@ void Acquisition::runAcquisition(ACQUISITION *acquisition) {
 	// prepare camera for image acquisition
 	acquisition->settings.camera = m_andor->prepareMeasurement(acquisition->settings.camera);
 	// set optical elements for brightfield/Brillouin imaging
-	m_scanControl->m_stand->setPreset(1);
+	(*m_scanControl)->setElements(ScanControl::SCAN_BRIGHTFIELD);
 	Sleep(500);
 
 	// get current stage position
-	m_startPosition = m_scanControl->getPosition();
+	m_startPosition = (*m_scanControl)->getPosition();
 
 	std::string now = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 		.toString(Qt::ISODateWithMs).toStdString();
@@ -160,7 +160,7 @@ void Acquisition::runAcquisition(ACQUISITION *acquisition) {
 				int nextCalibration = 100 * (1e-3 * calibrationTimer.elapsed()) / (60 * acquisition->settings.conCalibrationInterval);
 				emit(s_acqTimeToCalibration(nextCalibration));
 				// move stage to correct position, wait 50 ms for it to finish
-				m_scanControl->setPosition({ positionsX[ll], positionsY[ll], positionsZ[ll] });
+				(*m_scanControl)->setPosition({ positionsX[ll], positionsY[ll], positionsZ[ll] });
 
 				std::vector<AT_U8> images(bytesPerFrame * acquisition->settings.camera.frameCount);
 
@@ -204,7 +204,7 @@ void Acquisition::runAcquisition(ACQUISITION *acquisition) {
 
 	QMetaObject::invokeMethod(acquisition->fileHndl, "s_finishedQueueing", Qt::AutoConnection);
 
-	m_scanControl->setPosition(m_startPosition);
+	(*m_scanControl)->setPosition(m_startPosition);
 	emit(s_acqPosition(0, 0, 0, 0));
 
 	std::string info = "Acquisition finished.";
@@ -216,7 +216,7 @@ void Acquisition::runAcquisition(ACQUISITION *acquisition) {
 
 void Acquisition::abort() {
 	m_andor->stopMeasurement();
-	m_scanControl->setPosition(m_startPosition);
+	(*m_scanControl)->setPosition(m_startPosition);
 	m_running = false;
 	emit(s_acqRunning(m_running));
 	emit(s_acqProgress(ACQUISITION_STATES::ABORTED, 0, 0));
@@ -250,7 +250,7 @@ void Acquisition::doCalibration(ACQUISITION *acquisition) {
 	m_andor->setCalibrationExposureTime(acquisition->settings.calibrationExposureTime);
 
 	// move optical elements to position for calibration
-	m_scanControl->m_stand->setPreset(3);
+	(*m_scanControl)->setElements(ScanControl::SCAN_CALIBRATION);
 	Sleep(500);
 
 	double shift = 5.088; // this is the shift for water
@@ -289,7 +289,7 @@ void Acquisition::doCalibration(ACQUISITION *acquisition) {
 	nrCalibrations++;
 
 	// revert optical elements to position for brightfield/Brillouin imaging
-	m_scanControl->m_stand->setPreset(1);
+	(*m_scanControl)->setElements(ScanControl::SCAN_BRIGHTFIELD);
 
 	// reset exposure time
 	m_andor->setCalibrationExposureTime(acquisition->settings.camera.exposureTime);

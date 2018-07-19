@@ -3,11 +3,13 @@
 #include "version.h"
 #include "logger.h"
 #include "simplemath.h"
-#include <gsl/gsl>
 
 BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	QMainWindow(parent), ui(new Ui::BrillouinAcquisitionClass) {
 	ui->setupUi(this);
+
+	m_scanControl = new ZeissECU();
+	//m_scanControl = new NIDAQ();
 
 	// slot camera connection
 	static QMetaObject::Connection connection;
@@ -84,23 +86,23 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	// slot microscope connection
 	connection = QWidget::connect(
 		m_scanControl,
-		SIGNAL(microscopeConnected(bool)),
+		SIGNAL(connectedDevice(bool)),
 		this,
 		SLOT(microscopeConnectionChanged(bool))
 	);
 
 	// slot to update microscope element button background color
 	connection = QWidget::connect(
-		m_scanControl->m_stand,
+		m_scanControl,
 		SIGNAL(elementPositionsChanged(std::vector<int>)),
 		this,
 		SLOT(microscopeElementPositionsChanged(std::vector<int>))
 	);
 	connection = QWidget::connect(
-		m_scanControl->m_stand,
-		SIGNAL(elementPositionsChanged(int, int)),
+		m_scanControl,
+		SIGNAL(elementPositionChanged(ScanControl::DEVICE_ELEMENT, int)),
 		this,
-		SLOT(microscopeElementPositionsChanged(int, int))
+		SLOT(microscopeElementPositionChanged(ScanControl::DEVICE_ELEMENT, int))
 	);
 
 	// slot to show current acquisition progress
@@ -168,6 +170,8 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<QSerialPort::SerialPortError>("QSerialPort::SerialPortError");
 	qRegisterMetaType<IMAGE*>("IMAGE*");
 	qRegisterMetaType<CALIBRATION*>("CALIBRATION*");
+	qRegisterMetaType<ScanControl::SCAN_PRESET>("ScanControl::SCAN_PRESET");
+	qRegisterMetaType<ScanControl::DEVICE_ELEMENT>("ScanControl::DEVICE_ELEMENT");
 	
 
 	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
@@ -183,10 +187,6 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	m_acquisitionThread.startWorker(m_andor);
 	// start microscope thread
 	m_acquisitionThread.startWorker(m_scanControl);
-	m_scanControl->m_comObject->moveToThread(&m_acquisitionThread);
-	m_scanControl->m_focus->moveToThread(&m_acquisitionThread);
-	m_scanControl->m_mcu->moveToThread(&m_acquisitionThread);
-	m_scanControl->m_stand->moveToThread(&m_acquisitionThread);
 	// start acquisition thread
 	m_acquisitionThread.startWorker(m_acquisition);
 
@@ -200,42 +200,42 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	updateAcquisitionSettings();
 
 	// Set up GUI
-	std::vector<std::string> groupLabels = {"Reflector", "Objective", "Tubelens", "Baseport", "Sideport", "Mirror"};
-	std::vector<int> maxOptions = { 5, 6, 3, 3, 3, 2 };
 	QVBoxLayout *verticalLayout = new QVBoxLayout;
 	verticalLayout->setAlignment(Qt::AlignTop);
 	std::string buttonLabel;
-	QHBoxLayout *presetLayoutLabel = new QHBoxLayout();
-	std::string presetLabelString = "Presets:";
-	QLabel *presetLabel = new QLabel(presetLabelString.c_str());
-	presetLayoutLabel->addWidget(presetLabel);
-	verticalLayout->addLayout(presetLayoutLabel);
-	QHBoxLayout *layout = new QHBoxLayout();
-	for (gsl::index ii = 0; ii < presetLabels.size(); ii++) {
-		buttonLabel = std::to_string(ii + 1);
-		QPushButton *button = new QPushButton(presetLabels[ii].c_str());
-		button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-		button->setMinimumWidth(90);
-		button->setMaximumWidth(90);
-		layout->addWidget(button);
+	if (m_scanControl->m_availablePresets.size() > 0) {
+		QHBoxLayout *presetLayoutLabel = new QHBoxLayout();
+		std::string presetLabelString = "Presets:";
+		QLabel *presetLabel = new QLabel(presetLabelString.c_str());
+		presetLayoutLabel->addWidget(presetLabel);
+		verticalLayout->addLayout(presetLayoutLabel);
+		QHBoxLayout *layout = new QHBoxLayout();
+		for (gsl::index ii = 0; ii < m_scanControl->m_availablePresets.size(); ii++) {
+			buttonLabel = std::to_string(ii + 1);
+			QPushButton *button = new QPushButton(m_scanControl->m_presetLabels[m_scanControl->m_availablePresets[ii]].c_str());
+			button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+			button->setMinimumWidth(90);
+			button->setMaximumWidth(90);
+			layout->addWidget(button);
 
-		connection = QObject::connect(button, &QPushButton::clicked, [=] {
-			setPreset(ii);
-		});
-		presetButtons.push_back(button);
+			connection = QObject::connect(button, &QPushButton::clicked, [=] {
+				setPreset((ScanControl::SCAN_PRESET)ii);
+			});
+			presetButtons.push_back(button);
+		}
+		verticalLayout->addLayout(layout);
 	}
-	verticalLayout->addLayout(layout);
-	for (gsl::index ii = 0; ii < groupLabels.size(); ii++) {
+	for (gsl::index ii = 0; ii < m_scanControl->m_availableElements.size(); ii++) {
 		QHBoxLayout *layout = new QHBoxLayout();
 
 		layout->setAlignment(Qt::AlignLeft);
-		QLabel *groupLabel = new QLabel(groupLabels[ii].c_str());
+		QLabel *groupLabel = new QLabel(m_scanControl->m_groupLabels[m_scanControl->m_availableElements[ii]].c_str());
 		groupLabel->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 		groupLabel->setMinimumWidth(80);
 		groupLabel->setMaximumWidth(80);
 		layout->addWidget(groupLabel);
 		std::vector<QPushButton*> buttons;
-		for (gsl::index jj = 0; jj < maxOptions[ii]; jj++) {
+		for (gsl::index jj = 0; jj < m_scanControl->m_maxOptions[m_scanControl->m_availableElements[ii]]; jj++) {
 			buttonLabel = std::to_string(jj + 1);
 			QPushButton *button = new QPushButton(buttonLabel.c_str());
 			button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
@@ -244,7 +244,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 			layout->addWidget(button);
 
 			connection = QObject::connect(button, &QPushButton::clicked, [=] {
-				setElement(ii, jj+1);
+				setElement((ScanControl::DEVICE_ELEMENT)ii, jj+1);
 			});
 			buttons.push_back(button);
 		}
@@ -276,35 +276,16 @@ void BrillouinAcquisition::showEvent(QShowEvent* event) {
 	QMetaObject::invokeMethod(m_scanControl, "connectDevice", Qt::QueuedConnection);
 }
 
-void BrillouinAcquisition::setElement(int element, int position) {
-	switch (element) {
-		case 0:
-			QMetaObject::invokeMethod(m_scanControl->m_stand, "setReflector", Qt::QueuedConnection, Q_ARG(int, position));
-			break;
-		case 1:
-			QMetaObject::invokeMethod(m_scanControl->m_stand, "setObjective", Qt::QueuedConnection, Q_ARG(int, position));
-			break;
-		case 2:
-			QMetaObject::invokeMethod(m_scanControl->m_stand, "setTubelens", Qt::QueuedConnection, Q_ARG(int, position));
-			break;
-		case 3:
-			QMetaObject::invokeMethod(m_scanControl->m_stand, "setBaseport", Qt::QueuedConnection, Q_ARG(int, position));
-			break;
-		case 4:
-			QMetaObject::invokeMethod(m_scanControl->m_stand, "setSideport", Qt::QueuedConnection, Q_ARG(int, position));
-			break;
-		case 5:
-			QMetaObject::invokeMethod(m_scanControl->m_stand, "setMirror", Qt::QueuedConnection, Q_ARG(int, position));
-			break;
-	}
+void BrillouinAcquisition::setElement(ScanControl::DEVICE_ELEMENT element, int position) {
+	QMetaObject::invokeMethod(m_scanControl, "setElement", Qt::QueuedConnection, Q_ARG(ScanControl::DEVICE_ELEMENT, element), Q_ARG(int, position));
 }
 
 void BrillouinAcquisition::on_autoscalePlot_stateChanged(int state) {
 	m_autoscalePlot = (bool)state;
 }
 
-void BrillouinAcquisition::setPreset(int preset) {
-	QMetaObject::invokeMethod(m_scanControl->m_stand, "setPreset", Qt::QueuedConnection, Q_ARG(int, preset));
+void BrillouinAcquisition::setPreset(ScanControl::SCAN_PRESET preset) {
+	QMetaObject::invokeMethod(m_scanControl, "setElements", Qt::QueuedConnection, Q_ARG(ScanControl::SCAN_PRESET, preset));
 }
 
 void BrillouinAcquisition::cameraOptionsChanged(CAMERA_OPTIONS options) {
@@ -732,7 +713,7 @@ void BrillouinAcquisition::microscopeConnectionChanged(bool isConnected) {
 		QIcon icon(":/BrillouinAcquisition/assets/03ready.png");
 		ui->settingsWidget->setTabIcon(1, icon);
 		ui->settingsWidget->setTabIcon(2, icon);
-		QMetaObject::invokeMethod(m_scanControl->m_stand, "getElementPositions", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(m_scanControl, "getElements", Qt::QueuedConnection);
 	} else {
 		ui->actionConnect_Stage->setText("Connect Microscope");
 		QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
@@ -743,19 +724,19 @@ void BrillouinAcquisition::microscopeConnectionChanged(bool isConnected) {
 }
 
 void BrillouinAcquisition::microscopeElementPositionsChanged(std::vector<int> positions) {
-	microscopeElementPositions = positions;
+	m_deviceElementPositions = positions;
 	checkElementButtons();
 }
 
-void BrillouinAcquisition::microscopeElementPositionsChanged(int element, int position) {
-	microscopeElementPositions[element] = position;
+void BrillouinAcquisition::microscopeElementPositionChanged(ScanControl::DEVICE_ELEMENT element, int position) {
+	m_deviceElementPositions[element] = position;
 	checkElementButtons();
 }
 
 void BrillouinAcquisition::checkElementButtons() {
 	for (gsl::index ii = 0; ii < elementButtons.size(); ii++) {
 		for (gsl::index jj = 0; jj < elementButtons[ii].size(); jj++) {
-			if (microscopeElementPositions[ii] == jj + 1) {
+			if (m_deviceElementPositions[ii] == jj + 1) {
 				elementButtons[ii][jj]->setProperty("class", "active");
 			} else {
 				elementButtons[ii][jj]->setProperty("class", "");
@@ -765,8 +746,8 @@ void BrillouinAcquisition::checkElementButtons() {
 			elementButtons[ii][jj]->update();
 		}
 	}
-	for (gsl::index ii = 0; ii < m_scanControl->m_stand->m_presets.size(); ii++) {
-		if (m_scanControl->m_stand->m_presets[ii] == microscopeElementPositions) {
+	for (gsl::index ii = 0; ii < m_scanControl->m_presets.size(); ii++) {
+		if (m_scanControl->m_presets[ii] == m_deviceElementPositions) {
 			presetButtons[ii]->setProperty("class", "active");
 		} else {
 			presetButtons[ii]->setProperty("class", "");

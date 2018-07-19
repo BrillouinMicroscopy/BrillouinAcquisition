@@ -68,19 +68,20 @@ class Acquisition : public QObject {
 	Q_OBJECT
 
 public:
-	Acquisition(QObject *parent, Andor *andor, ScanControl *scanControl);
+	Acquisition(QObject *parent, Andor *andor, ScanControl **scanControl);
 	~Acquisition();
 	bool m_abort = false;
 	bool isAcqRunning();
 
 public slots:
+	void init() {};
 	void startAcquisition(ACQUISITION_SETTINGS acqSettings);
 
 private:
 	ACQUISITION_SETTINGS m_acqSettings;
 	//Thread m_storageThread;
 	Andor *m_andor;
-	ScanControl *m_scanControl;
+	ScanControl **m_scanControl;
 	bool m_running = false;				// is acquisition currently running
 	std::vector<double> m_startPosition = { 0,0,0 };
 	void abort();

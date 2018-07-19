@@ -54,9 +54,6 @@
     <ClCompile Include="andor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="thread.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_thread.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -87,15 +84,6 @@
     <ClCompile Include="external\h5bm\h5bm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="scancontrol.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_scancontrol.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_scancontrol.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="acquisition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -113,6 +101,33 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_storageWrapper.cpp">
       <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ZeissECU.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ZeissECU.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ZeissECU.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_scancontrol.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_scancontrol.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scancontrol.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_NIDAQ.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_NIDAQ.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NIDAQ.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -157,9 +172,6 @@
     <CustomBuild Include="external\h5bm\h5bm.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="scancontrol.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="acquisition.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -167,6 +179,15 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="previewBuffer.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="ZeissECU.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="scancontrol.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="NIDAQ.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

@@ -52,6 +52,7 @@ public:
 	PreviewBuffer<AT_U8>* previewBuffer = new PreviewBuffer<AT_U8>;
 
 private slots:
+	void init() {};
 	void acquireImage(AT_U8* buffer);
 	void getImageForPreview();
 
