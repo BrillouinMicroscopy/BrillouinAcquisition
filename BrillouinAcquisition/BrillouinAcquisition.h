@@ -72,6 +72,8 @@ private slots:
 	void initSettingsDialog();
 	void selectScanningDevice(int index);
 
+	void initBeampathButtons();
+
 	void on_acquisitionStart_clicked();
 	void microscopeElementPositionsChanged(std::vector<int>);
 	void microscopeElementPositionChanged(ScanControl::DEVICE_ELEMENT element, int position);

@@ -174,58 +174,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	initSettingsDialog();
 
 	// Set up GUI
-	QVBoxLayout *verticalLayout = new QVBoxLayout;
-	verticalLayout->setAlignment(Qt::AlignTop);
-	std::string buttonLabel;
-	if (m_scanControl->m_availablePresets.size() > 0) {
-		QHBoxLayout *presetLayoutLabel = new QHBoxLayout();
-		std::string presetLabelString = "Presets:";
-		QLabel *presetLabel = new QLabel(presetLabelString.c_str());
-		presetLayoutLabel->addWidget(presetLabel);
-		verticalLayout->addLayout(presetLayoutLabel);
-		QHBoxLayout *layout = new QHBoxLayout();
-		for (gsl::index ii = 0; ii < m_scanControl->m_availablePresets.size(); ii++) {
-			buttonLabel = std::to_string(ii + 1);
-			QPushButton *button = new QPushButton(m_scanControl->m_presetLabels[m_scanControl->m_availablePresets[ii]].c_str());
-			button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-			button->setMinimumWidth(90);
-			button->setMaximumWidth(90);
-			layout->addWidget(button);
-
-			connection = QObject::connect(button, &QPushButton::clicked, [=] {
-				setPreset((ScanControl::SCAN_PRESET)ii);
-			});
-			presetButtons.push_back(button);
-		}
-		verticalLayout->addLayout(layout);
-	}
-	for (gsl::index ii = 0; ii < m_scanControl->m_availableElements.size(); ii++) {
-		QHBoxLayout *layout = new QHBoxLayout();
-
-		layout->setAlignment(Qt::AlignLeft);
-		QLabel *groupLabel = new QLabel(m_scanControl->m_groupLabels[m_scanControl->m_availableElements[ii]].c_str());
-		groupLabel->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-		groupLabel->setMinimumWidth(80);
-		groupLabel->setMaximumWidth(80);
-		layout->addWidget(groupLabel);
-		std::vector<QPushButton*> buttons;
-		for (gsl::index jj = 0; jj < m_scanControl->m_maxOptions[m_scanControl->m_availableElements[ii]]; jj++) {
-			buttonLabel = std::to_string(jj + 1);
-			QPushButton *button = new QPushButton(buttonLabel.c_str());
-			button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-			button->setMinimumWidth(40);
-			button->setMaximumWidth(40);
-			layout->addWidget(button);
-
-			connection = QObject::connect(button, &QPushButton::clicked, [=] {
-				setElement((ScanControl::DEVICE_ELEMENT)ii, jj+1);
-			});
-			buttons.push_back(button);
-		}
-		elementButtons.push_back(buttons);
-		verticalLayout->addLayout(layout);
-	}
-	ui->beamPathBox->setLayout(verticalLayout);
+	initBeampathButtons();
 
 	ui->parametersWidget->layout()->setAlignment(Qt::AlignTop);
 }
@@ -706,6 +655,7 @@ void BrillouinAcquisition::saveSettings() {
 	m_scanControllerType = m_scanControllerTypeTemporary;
 	m_settingsDialog->hide();
 	initScanControl();
+	initBeampathButtons();
 }
 
 void BrillouinAcquisition::cancelSettings() {
@@ -788,6 +738,80 @@ void BrillouinAcquisition::initSettingsDialog() {
 
 void BrillouinAcquisition::selectScanningDevice(int index) {
 	m_scanControllerTypeTemporary = (ScanControl::SCAN_DEVICE)index;
+}
+
+void BrillouinAcquisition::initBeampathButtons() {
+	for (auto widget : ui->beamPathBox->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly)) {
+		delete widget;
+	}
+
+	QLayout* layout = ui->beamPathBox->layout();
+	if (layout != 0) {
+		QLayoutItem *item;
+		while ((item = layout->takeAt(0)) != 0) {
+			layout->removeItem(item);
+		}
+		delete item;
+		delete layout;
+	}
+
+	QMetaObject::Connection connection;
+	QVBoxLayout *verticalLayout = new QVBoxLayout;
+	verticalLayout->setAlignment(Qt::AlignTop);
+	std::string buttonLabel;
+	if (m_scanControl->m_availablePresets.size() > 0) {
+		QHBoxLayout *presetLayoutLabel = new QHBoxLayout();
+		std::string presetLabelString = "Presets:";
+		QLabel *presetLabel = new QLabel(presetLabelString.c_str());
+		presetLayoutLabel->addWidget(presetLabel);
+		verticalLayout->addLayout(presetLayoutLabel);
+		QHBoxLayout *layout = new QHBoxLayout();
+		layout->setAlignment(Qt::AlignLeft);
+		presetButtons.clear();
+		for (gsl::index ii = 0; ii < m_scanControl->m_availablePresets.size(); ii++) {
+			buttonLabel = std::to_string(ii + 1);
+			QPushButton *button = new QPushButton(m_scanControl->m_presetLabels[m_scanControl->m_availablePresets[ii]].c_str());
+			button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+			button->setMinimumWidth(90);
+			button->setMaximumWidth(90);
+			layout->addWidget(button);
+
+			connection = QObject::connect(button, &QPushButton::clicked, [=] {
+				setPreset((ScanControl::SCAN_PRESET)ii);
+			});
+			presetButtons.push_back(button);
+		}
+		verticalLayout->addLayout(layout);
+	}
+	elementButtons.clear();
+	for (gsl::index ii = 0; ii < m_scanControl->m_availableElements.size(); ii++) {
+		QHBoxLayout *layout = new QHBoxLayout();
+
+		layout->setAlignment(Qt::AlignLeft);
+		QLabel *groupLabel = new QLabel(m_scanControl->m_groupLabels[m_scanControl->m_availableElements[ii]].c_str());
+		groupLabel->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+		groupLabel->setMinimumWidth(80);
+		groupLabel->setMaximumWidth(80);
+		layout->addWidget(groupLabel);
+		std::vector<QPushButton*> buttons;
+		for (gsl::index jj = 0; jj < m_scanControl->m_maxOptions[m_scanControl->m_availableElements[ii]]; jj++) {
+			buttonLabel = std::to_string(jj + 1);
+			QPushButton *button = new QPushButton(buttonLabel.c_str());
+			button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+			button->setMinimumWidth(40);
+			button->setMaximumWidth(40);
+			layout->addWidget(button);
+
+			connection = QObject::connect(button, &QPushButton::clicked, [=] {
+				setElement((ScanControl::DEVICE_ELEMENT)ii, jj + 1);
+			});
+			buttons.push_back(button);
+		}
+		elementButtons.push_back(buttons);
+		verticalLayout->addLayout(layout);
+	}
+	ui->beamPathBox->setLayout(verticalLayout);
+	ui->beamPathBox->show();
 }
 
 void BrillouinAcquisition::initScanControl() {
