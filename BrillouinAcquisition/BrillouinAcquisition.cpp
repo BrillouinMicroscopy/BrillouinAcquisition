@@ -8,9 +8,6 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	QMainWindow(parent), ui(new Ui::BrillouinAcquisitionClass) {
 	ui->setupUi(this);
 
-	m_scanControl = new ZeissECU();
-	//m_scanControl = new NIDAQ();
-
 	// slot camera connection
 	static QMetaObject::Connection connection;
 	connection = QWidget::connect(
@@ -81,28 +78,6 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		SIGNAL(rangeChanged(QCPRange)),
 		this,
 		SLOT(yAxisRangeChanged(QCPRange))
-	);
-
-	// slot microscope connection
-	connection = QWidget::connect(
-		m_scanControl,
-		SIGNAL(connectedDevice(bool)),
-		this,
-		SLOT(microscopeConnectionChanged(bool))
-	);
-
-	// slot to update microscope element button background color
-	connection = QWidget::connect(
-		m_scanControl,
-		SIGNAL(elementPositionsChanged(std::vector<int>)),
-		this,
-		SLOT(microscopeElementPositionsChanged(std::vector<int>))
-	);
-	connection = QWidget::connect(
-		m_scanControl,
-		SIGNAL(elementPositionChanged(ScanControl::DEVICE_ELEMENT, int)),
-		this,
-		SLOT(microscopeElementPositionChanged(ScanControl::DEVICE_ELEMENT, int))
 	);
 
 	// slot to show current acquisition progress
@@ -183,13 +158,11 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	ui->actionEnable_Cooling->setEnabled(false);
 	ui->autoscalePlot->setChecked(m_autoscalePlot);
 
+	initScanControl();
 	// start camera thread
 	m_acquisitionThread.startWorker(m_andor);
-	// start microscope thread
-	m_acquisitionThread.startWorker(m_scanControl);
 	// start acquisition thread
 	m_acquisitionThread.startWorker(m_acquisition);
-
 
 	// set up the QCPColorMap:
 	m_colorMap = new QCPColorMap(ui->customplot->xAxis, ui->customplot->yAxis);
@@ -198,6 +171,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	BrillouinAcquisition::initializePlot();
 
 	updateAcquisitionSettings();
+	initSettingsDialog();
 
 	// Set up GUI
 	QVBoxLayout *verticalLayout = new QVBoxLayout;
@@ -721,6 +695,147 @@ void BrillouinAcquisition::microscopeConnectionChanged(bool isConnected) {
 		ui->settingsWidget->setTabIcon(2, icon);
 		microscopeElementPositionsChanged({ 0,0,0,0,0,0 });
 	}
+}
+
+void BrillouinAcquisition::on_actionSettings_Stage_triggered() {
+	m_scanControlDropdown->setCurrentIndex((int)m_scanControllerType);
+	m_settingsDialog->show();
+}
+
+void BrillouinAcquisition::saveSettings() {
+	m_scanControllerType = m_scanControllerTypeTemporary;
+	m_settingsDialog->hide();
+	initScanControl();
+}
+
+void BrillouinAcquisition::cancelSettings() {
+	m_scanControllerTypeTemporary = m_scanControllerType;
+	m_settingsDialog->hide();
+}
+
+void BrillouinAcquisition::initSettingsDialog() {
+	m_scanControllerTypeTemporary = m_scanControllerType;
+	m_settingsDialog = new QDialog(0, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint);
+	m_settingsDialog->setWindowTitle("Settings");
+	m_settingsDialog->setWindowModality(Qt::ApplicationModal);
+
+	QVBoxLayout *vLayout = new QVBoxLayout(m_settingsDialog);
+
+	QWidget *daqWidget = new QWidget();
+	daqWidget->setMinimumHeight(100);
+	daqWidget->setMinimumWidth(400);
+	QGroupBox *box = new QGroupBox(daqWidget);
+	box->setTitle("Scanning device");
+	box->setMinimumHeight(100);
+	box->setMinimumWidth(400);
+
+	vLayout->addWidget(daqWidget);
+
+	QHBoxLayout *layout = new QHBoxLayout(box);
+
+	QLabel *label = new QLabel("Currently selected device");
+	layout->addWidget(label);
+
+	m_scanControlDropdown = new QComboBox();
+	layout->addWidget(m_scanControlDropdown);
+	gsl::index i{ 0 };
+	for (auto type : m_scanControl->SCAN_DEVICE_NAMES) {
+		m_scanControlDropdown->insertItem(i, QString::fromStdString(type));
+		i++;
+	}
+	m_scanControlDropdown->setCurrentIndex((int)m_scanControllerType);
+
+	static QMetaObject::Connection connection = QWidget::connect(
+		m_scanControlDropdown,
+		SIGNAL(currentIndexChanged(int)),
+		this,
+		SLOT(selectScanningDevice(int))
+	);
+
+	QWidget *buttonWidget = new QWidget();
+	vLayout->addWidget(buttonWidget);
+
+	QHBoxLayout *buttonLayout = new QHBoxLayout(buttonWidget);
+	buttonLayout->setMargin(0);
+
+	QPushButton *okButton = new QPushButton();
+	okButton->setText(tr("OK"));
+	okButton->setMaximumWidth(100);
+	buttonLayout->addWidget(okButton);
+	buttonLayout->setAlignment(okButton, Qt::AlignRight);
+
+	connection = QWidget::connect(
+		okButton,
+		SIGNAL(clicked()),
+		this,
+		SLOT(saveSettings())
+	);
+
+	QPushButton *cancelButton = new QPushButton();
+	cancelButton->setText(tr("Cancel"));
+	cancelButton->setMaximumWidth(100);
+	buttonLayout->addWidget(cancelButton);
+
+	connection = QWidget::connect(
+		cancelButton,
+		SIGNAL(clicked()),
+		this,
+		SLOT(cancelSettings())
+	);
+
+	m_settingsDialog->layout()->setSizeConstraint(QLayout::SetFixedSize);
+}
+
+void BrillouinAcquisition::selectScanningDevice(int index) {
+	m_scanControllerTypeTemporary = (ScanControl::SCAN_DEVICE)index;
+}
+
+void BrillouinAcquisition::initScanControl() {
+	// deinitialize DAQ if necessary
+	if (m_scanControl) {
+		m_scanControl->deleteLater();
+		m_scanControl = nullptr;
+	}
+
+	// initialize correct DAQ type
+	switch (m_scanControllerType) {
+		case ScanControl::SCAN_DEVICE::ZEISSECU:
+			m_scanControl = new ZeissECU();
+			break;
+		case ScanControl::SCAN_DEVICE::NIDAQ:
+			m_scanControl = new NIDAQ();
+			break;
+		default:
+			m_scanControl = new ZeissECU();
+			break;
+	}
+
+	m_acquisitionThread.startWorker(m_scanControl);
+
+	// reestablish m_scanControl connections
+	QMetaObject::Connection connection = QWidget::connect(
+		m_scanControl,
+		SIGNAL(connectedDevice(bool)),
+		this,
+		SLOT(microscopeConnectionChanged(bool))
+	);
+
+	// slot to update microscope element button background color
+	connection = QWidget::connect(
+		m_scanControl,
+		SIGNAL(elementPositionsChanged(std::vector<int>)),
+		this,
+		SLOT(microscopeElementPositionsChanged(std::vector<int>))
+	);
+	connection = QWidget::connect(
+		m_scanControl,
+		SIGNAL(elementPositionChanged(ScanControl::DEVICE_ELEMENT, int)),
+		this,
+		SLOT(microscopeElementPositionChanged(ScanControl::DEVICE_ELEMENT, int))
+	);
+
+	QMetaObject::invokeMethod(m_scanControl, "connectDevice", Qt::AutoConnection);
+
 }
 
 void BrillouinAcquisition::microscopeElementPositionsChanged(std::vector<int> positions) {

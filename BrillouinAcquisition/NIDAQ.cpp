@@ -7,6 +7,7 @@ NIDAQ::NIDAQ() noexcept {
 }
 
 NIDAQ::~NIDAQ() {
+	disconnectDevice();
 }
 
 bool NIDAQ::connectDevice() {

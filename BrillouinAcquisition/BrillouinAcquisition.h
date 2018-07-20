@@ -66,6 +66,12 @@ private slots:
 	void on_actionConnect_Stage_triggered();
 	void microscopeConnectionChanged(bool);
 
+	void on_actionSettings_Stage_triggered();
+	void saveSettings();
+	void cancelSettings();
+	void initSettingsDialog();
+	void selectScanningDevice(int index);
+
 	void on_acquisitionStart_clicked();
 	void microscopeElementPositionsChanged(std::vector<int>);
 	void microscopeElementPositionChanged(ScanControl::DEVICE_ELEMENT element, int position);
@@ -142,6 +148,12 @@ public:
 
 private:
 	Ui::BrillouinAcquisitionClass *ui;
+	ScanControl::SCAN_DEVICE m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSECU;
+	ScanControl::SCAN_DEVICE m_scanControllerTypeTemporary = m_scanControllerType;
+	void initScanControl();
+	QComboBox *m_scanControlDropdown;
+
+	QDialog *m_settingsDialog = nullptr;
 	void checkElementButtons();
 	void addListToComboBox(QComboBox*, std::vector<AT_WC*>, bool clear = true);
 	//Thread m_cameraThread;

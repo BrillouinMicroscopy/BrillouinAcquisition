@@ -12,6 +12,12 @@ public:
 	ScanControl() noexcept {};
 	virtual ~ScanControl() {};
 
+	typedef enum class enScanDevice {
+		ZEISSECU = 0,
+		NIDAQ = 1
+	} SCAN_DEVICE;
+	std::vector<std::string> SCAN_DEVICE_NAMES = { "Zeiss ECU", "NI-DAQmx" };
+
 	// pre-defined presets for element positions
 	std::vector<std::string> m_presetLabels = { "Brightfield", "Calibration", "Brillouin", "Eyepiece" };
 	typedef enum enScanPreset {

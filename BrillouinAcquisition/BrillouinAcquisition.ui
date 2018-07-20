@@ -856,7 +856,7 @@ QTabBar::tab:!selected {
                 <property name="geometry">
                  <rect>
                   <x>0</x>
-                  <y>-122</y>
+                  <y>0</y>
                   <width>433</width>
                   <height>775</height>
                  </rect>
@@ -1862,6 +1862,7 @@ border: none;</string>
     <addaction name="actionEnable_Cooling"/>
     <addaction name="separator"/>
     <addaction name="actionConnect_Stage"/>
+    <addaction name="actionSettings_Stage"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuFile">
@@ -1923,7 +1924,12 @@ border: none;</string>
   </action>
   <action name="actionConnect_Stage">
    <property name="text">
-    <string>Connect Microscope</string>
+    <string>Connect ScanController</string>
+   </property>
+  </action>
+  <action name="actionSettings_Stage">
+   <property name="text">
+    <string>Settings</string>
    </property>
   </action>
  </widget>
