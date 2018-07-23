@@ -125,13 +125,6 @@ public:
 	std::vector<double> getPosition();
 	void setDevice(com *device);
 
-	std::vector<std::vector<int>> m_presets = {
-		{ 1, 1, 3, 1, 2, 2 },	// Brightfield
-		{ 1, 1, 3, 1, 3, 2 },	// Calibration
-		{ 1, 1, 3, 1, 2, 1 },	// Brillouin
-		{ 1, 1, 3, 2, 3, 2 }	// Eyepiece
-	};
-
 public slots:
 	void init();
 	bool connectDevice();

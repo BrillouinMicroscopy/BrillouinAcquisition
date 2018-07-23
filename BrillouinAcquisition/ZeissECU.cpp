@@ -157,6 +157,7 @@ void ZeissECU::setElements(ScanControl::SCAN_PRESET preset) {
 	m_stand->setBaseport(m_presets[preset][3]);
 	m_stand->setSideport(m_presets[preset][4]);
 	m_stand->setMirror(m_presets[preset][5]);
+	emit(elementPositionsChanged(m_presets[preset]));
 }
 
 void ZeissECU::setElement(ScanControl::DEVICE_ELEMENT element, int position) {

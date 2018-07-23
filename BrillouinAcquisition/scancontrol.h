@@ -27,7 +27,13 @@ public:
 		SCAN_EYEPIECE,
 		SCAN_PRESET_COUNT
 	} SCAN_PRESET;
-	std::vector<std::vector<int>> m_presets;
+
+	std::vector<std::vector<int>> m_presets = {
+		{ 1, 1, 3, 1, 2, 2 },	// Brightfield
+		{ 1, 1, 3, 1, 3, 2 },	// Calibration
+		{ 1, 1, 3, 1, 2, 1 },	// Brillouin
+		{ 1, 1, 3, 2, 3, 2 }	// Eyepiece
+	};
 	std::vector<int> m_availablePresets;
 
 	std::vector<std::string> m_groupLabels = { "Reflector", "Objective", "Tubelens", "Baseport", "Sideport", "Mirror" };

@@ -659,7 +659,6 @@ void BrillouinAcquisition::microscopeConnectionChanged(bool isConnected) {
 		QIcon icon(":/BrillouinAcquisition/assets/03ready.png");
 		ui->settingsWidget->setTabIcon(1, icon);
 		ui->settingsWidget->setTabIcon(2, icon);
-		QMetaObject::invokeMethod(m_scanControl, "getElements", Qt::QueuedConnection);
 	} else {
 		ui->actionConnect_Stage->setText("Connect Microscope");
 		QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
