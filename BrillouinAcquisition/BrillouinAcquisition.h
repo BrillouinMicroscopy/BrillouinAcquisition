@@ -47,6 +47,7 @@ Q_DECLARE_METATYPE(IMAGE*);
 Q_DECLARE_METATYPE(CALIBRATION*);
 Q_DECLARE_METATYPE(ScanControl::SCAN_PRESET);
 Q_DECLARE_METATYPE(ScanControl::DEVICE_ELEMENT);
+Q_DECLARE_METATYPE(SensorTemperature);
 
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
@@ -98,6 +99,7 @@ private slots:
 	void showPreviewRunning(bool);
 	void startPreview(bool);
 	void cameraSettingsChanged(CAMERA_SETTINGS);
+	void sensorTemperatureChanged(SensorTemperature);
 	void cameraOptionsChanged(CAMERA_OPTIONS);
 	void showAcqPosition(double, double, double, int);
 	void showAcqProgress(int state, double progress, int seconds);

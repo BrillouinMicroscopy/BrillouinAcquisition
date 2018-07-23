@@ -66,6 +66,13 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		SLOT(cameraSettingsChanged(CAMERA_SETTINGS))
 	);
 
+	connection = QWidget::connect(
+		m_andor,
+		SIGNAL(s_sensorTemperatureChanged(SensorTemperature)),
+		this,
+		SLOT(sensorTemperatureChanged(SensorTemperature))
+	);
+
 	// slot to limit the axis of the camera display after user interaction
 	connection = QWidget::connect(
 		ui->customplot->xAxis,
@@ -147,6 +154,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<CALIBRATION*>("CALIBRATION*");
 	qRegisterMetaType<ScanControl::SCAN_PRESET>("ScanControl::SCAN_PRESET");
 	qRegisterMetaType<ScanControl::DEVICE_ELEMENT>("ScanControl::DEVICE_ELEMENT");
+	qRegisterMetaType<SensorTemperature>("SensorTemperature");
 	
 
 	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
@@ -326,6 +334,21 @@ void BrillouinAcquisition::cameraSettingsChanged(CAMERA_SETTINGS settings) {
 	ui->cycleMode->setCurrentText(QString::fromWCharArray(settings.readout.cycleMode));
 	ui->preAmpGain->setCurrentText(QString::fromWCharArray(settings.readout.preAmpGain));
 	ui->pixelEncoding->setCurrentText(QString::fromWCharArray(settings.readout.pixelEncoding));
+}
+
+void BrillouinAcquisition::sensorTemperatureChanged(SensorTemperature sensorTemperature) {
+	ui->sensorTemp->setValue(sensorTemperature.temperature);
+	QIcon icon;
+	if (sensorTemperature.status == COOLER_OFF || sensorTemperature.status == FAULT || sensorTemperature.status == DRIFT) {
+		icon = QIcon(":/BrillouinAcquisition/assets/01standby.png");
+	} else if (sensorTemperature.status == COOLING || sensorTemperature.status == NOT_STABILISED) {
+		icon = QIcon(":/BrillouinAcquisition/assets/02cooling.png");
+	} else if (sensorTemperature.status == STABILISED) {
+		icon = QIcon(":/BrillouinAcquisition/assets/03ready.png");
+	} else {
+		icon = QIcon(":/BrillouinAcquisition/assets/00disconnected.png");
+	}
+	ui->settingsWidget->setTabIcon(0, icon);
 }
 
 void BrillouinAcquisition::initializePlot() {

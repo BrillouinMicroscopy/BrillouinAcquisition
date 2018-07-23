@@ -68,7 +68,7 @@
          <property name="maximumSize">
           <size>
            <width>450</width>
-           <height>480</height>
+           <height>520</height>
           </size>
          </property>
          <property name="styleSheet">
@@ -165,8 +165,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>446</width>
-                <height>454</height>
+                <width>429</width>
+                <height>475</height>
                </rect>
               </property>
               <property name="sizePolicy">
@@ -178,14 +178,14 @@ QTabBar::tab:!selected {
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>440</height>
+                <height>475</height>
                </size>
               </property>
               <widget class="QGroupBox" name="binningROIBox">
                <property name="geometry">
                 <rect>
                  <x>10</x>
-                 <y>120</y>
+                 <y>160</y>
                  <width>401</width>
                  <height>131</height>
                 </rect>
@@ -380,7 +380,7 @@ QTabBar::tab:!selected {
                <property name="geometry">
                 <rect>
                  <x>10</x>
-                 <y>260</y>
+                 <y>300</y>
                  <width>401</width>
                  <height>171</height>
                 </rect>
@@ -654,6 +654,50 @@ QTabBar::tab:!selected {
                 <double>0.000000000000000</double>
                </property>
               </widget>
+              <widget class="QLabel" name="sensorTempLabel">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>120</y>
+                 <width>271</width>
+                 <height>30</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Sensor temperature [°C]</string>
+               </property>
+              </widget>
+              <widget class="QDoubleSpinBox" name="sensorTemp">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="geometry">
+                <rect>
+                 <x>290</x>
+                 <y>120</y>
+                 <width>121</width>
+                 <height>30</height>
+                </rect>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::NoButtons</enum>
+               </property>
+               <property name="decimals">
+                <number>1</number>
+               </property>
+               <property name="minimum">
+                <double>-100.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.100000000000000</double>
+               </property>
+              </widget>
              </widget>
             </widget>
            </item>
@@ -698,8 +742,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>446</width>
-                <height>454</height>
+                <width>281</width>
+                <height>340</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -752,8 +796,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>446</width>
-                <height>454</height>
+                <width>281</width>
+                <height>440</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -857,7 +901,7 @@ QTabBar::tab:!selected {
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>433</width>
+                  <width>429</width>
                   <height>775</height>
                  </rect>
                 </property>
@@ -1845,7 +1889,7 @@ border: none;</string>
      <x>0</x>
      <y>0</y>
      <width>1318</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">
