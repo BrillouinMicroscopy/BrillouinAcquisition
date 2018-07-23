@@ -6,6 +6,20 @@
 #include "cameraParameters.h"
 #include "previewBuffer.h"
 
+typedef enum enAndorTemperatureStatus{
+	COOLER_OFF,
+	FAULT,
+	COOLING,
+	DRIFT,
+	NOT_STABILISED,
+	STABILISED
+} ANDOR_TEMPERATURE_STATUS;
+
+typedef struct {
+	double temperature = 0;
+	ANDOR_TEMPERATURE_STATUS status = COOLER_OFF;
+} SensorTemperature;
+
 class Andor : public QObject {
 	Q_OBJECT
 
@@ -16,7 +30,11 @@ private:
 	bool m_isCooling = false;
 
 	int m_temperatureStatusIndex = 0;
-	AT_WC m_temperatureStatus[256] = {};
+	AT_WC temperatureStatus[256] = {};
+	std::string m_temperatureStatus;
+	QTimer *m_tempTimer = nullptr;
+	SensorTemperature m_sensorTemperature;
+	int m_test = 0;
 
 	AT_64 m_imageStride = 0;
 
@@ -41,7 +59,7 @@ public:
 
 	// setters/getters for sensor cooling
 	bool getSensorCooling();
-	const wchar_t getTemperatureStatus();
+	const std::string getTemperatureStatus();
 	double getSensorTemperature();
 	void cleanupAcquisition();
 	void setCalibrationExposureTime(double);
@@ -52,9 +70,10 @@ public:
 	PreviewBuffer<AT_U8>* previewBuffer = new PreviewBuffer<AT_U8>;
 
 private slots:
-	void init() {};
+	void init();
 	void acquireImage(AT_U8* buffer);
 	void getImageForPreview();
+	void checkSensorTemperature();
 
 public slots:
 	void connectDevice();
@@ -76,6 +95,7 @@ signals:
 	void settingsChanged(CAMERA_SETTINGS);
 	void optionsChanged(CAMERA_OPTIONS);
 	void s_previewBufferSettingsChanged();
+	void s_sensorTemperatureChanged(SensorTemperature);
 };
 
 #endif // ANDOR_H

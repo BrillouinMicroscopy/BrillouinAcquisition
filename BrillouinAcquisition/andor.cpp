@@ -41,6 +41,13 @@ bool Andor::initialize() {
 	return m_isInitialised;
 }
 
+void Andor::init() {
+	// create timers and connect their signals
+	// after moving daq_PS2000 to another thread
+	m_tempTimer = new QTimer();
+	QMetaObject::Connection connection = QWidget::connect(m_tempTimer, SIGNAL(timeout()), this, SLOT(checkSensorTemperature()));
+}
+
 void Andor::connectDevice() {
 	// initialize library
 	initialize();
@@ -51,6 +58,9 @@ void Andor::connectDevice() {
 			readOptions();
 			setDefaultSettings();
 			readSettings();
+			if (!m_tempTimer->isActive()) {
+				m_tempTimer->start(1000);
+			}
 		}
 	}
 	emit(cameraConnected(m_isConnected));
@@ -58,6 +68,9 @@ void Andor::connectDevice() {
 
 void Andor::disconnectDevice() {
 	if (m_isConnected) {
+		if (m_tempTimer->isActive()) {
+			m_tempTimer->stop();
+		}
 		int i_retCode = AT_Close(m_cameraHndl);
 		if (i_retCode == AT_SUCCESS) {
 			m_isConnected = false;
@@ -151,16 +164,39 @@ bool Andor::getSensorCooling() {
 	return szValue;
 }
 
-const wchar_t Andor::getTemperatureStatus() {
+const std::string Andor::getTemperatureStatus() {
 	int i_retCode = AT_GetEnumIndex(m_cameraHndl, L"TemperatureStatus", &m_temperatureStatusIndex);
-	AT_GetEnumStringByIndex(m_cameraHndl, L"TemperatureStatus", m_temperatureStatusIndex, m_temperatureStatus, 256);
-	return *m_temperatureStatus;
+	AT_GetEnumStringByIndex(m_cameraHndl, L"TemperatureStatus", m_temperatureStatusIndex, temperatureStatus, 256);
+	std::wstring ws(temperatureStatus);
+	std::string m_temperatureStatus(ws.begin(), ws.end());
+	return m_temperatureStatus;
 }
 
 double Andor::getSensorTemperature() {
 	double szValue;
 	int i_retCode = AT_GetFloat(m_cameraHndl, L"SensorTemperature", &szValue);
 	return szValue;
+}
+
+void Andor::checkSensorTemperature() {
+	m_sensorTemperature.temperature = getSensorTemperature();
+	std::string status = getTemperatureStatus();
+	if (status == "Cooler Off") {
+		m_sensorTemperature.status = COOLER_OFF;
+	} else if (status == "Fault") {
+		m_sensorTemperature.status = FAULT;
+	} else if(status == "Cooling") {
+		m_sensorTemperature.status = COOLING;
+	} else if (status == "Drift") {
+		m_sensorTemperature.status = DRIFT;
+	} else if (status == "Not Stabilised") {
+		m_sensorTemperature.status = NOT_STABILISED;
+	} else if (status == "Stabilised") {
+		m_sensorTemperature.status = STABILISED;
+	} else {
+		m_sensorTemperature.status = FAULT;
+	}
+	emit(s_sensorTemperatureChanged(m_sensorTemperature));
 }
 
 void Andor::startPreview(CAMERA_SETTINGS settings) {
