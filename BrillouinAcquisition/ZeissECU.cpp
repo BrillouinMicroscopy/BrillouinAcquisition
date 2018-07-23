@@ -97,6 +97,10 @@ bool ZeissECU::connectDevice() {
 
 			m_isCompatible = focus && stand && mcu;
 
+			if (m_isCompatible && m_isCompatible) {
+				setElements(SCAN_PRESET::SCAN_BRIGHTFIELD);
+			}
+
 		} catch (QString e) {
 			// todo
 		}
