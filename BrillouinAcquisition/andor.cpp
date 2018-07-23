@@ -243,6 +243,10 @@ void Andor::acquireImage(AT_U8* buffer) {
 	// Sleep in this thread until data is ready
 	unsigned char* Buffer;
 	int ret = AT_WaitBuffer(m_cameraHndl, &Buffer, &m_bufferSize, 1500 * m_settings.exposureTime);
+	// return if AT_WaitBuffer timed out
+	if (ret == AT_ERR_TIMEDOUT) {
+		return;
+	}
 
 	// Process the image
 	//Unpack the 12 bit packed data
