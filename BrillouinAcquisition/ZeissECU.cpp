@@ -273,8 +273,15 @@ bool Element::checkCompatibility() {
 */
 
 double Focus::getZ() {
-	std::string s = "0x" + receive("Zp");
-	return m_umperinc * helper::hex2dec(s);
+	std::string position = "0x" + receive("Zp");
+	int pos = helper::hex2dec(position);
+	// The actual travel range of the focus is significantly smaller than the theoretically possible maximum increment value (FFFFFF or 16777215).
+	// When the microscope starts, it sets it home position to (0, 0, 0). Values in the negative range are then adressed as (16777215 - positionInInc).
+	// Hence, we consider all values > 16777215/2 to actually be negative and wrap them accordingly (similar to what positive_modulo(...,...) for the setPosition() functions does).
+	if (pos > m_rangeFocus / 2) {
+		pos -= m_rangeFocus;
+	}
+	return pos * m_umperinc;
 }
 
 void Focus::setZ(double position) {
@@ -329,6 +336,12 @@ void Focus::move2Work() {
 double MCU::getPosition(std::string axis) {
 	std::string position = receive(axis + "p");
 	int pos = helper::hex2dec(position);
+	// The actual travel range of the stage is significantly smaller than the theoretically possible maximum increment value (FFFFFF or 16777215).
+	// When the microscope starts, it sets it home position to (0, 0, 0). Values in the negative range are then adressed as (16777215 - positionInInc).
+	// Hence, we consider all values > 16777215/2 to actually be negative and wrap them accordingly (similar to what positive_modulo(...,...) for the setPosition() functions does).
+	if (pos > m_rangeFocus /2) {
+		pos -= m_rangeFocus;
+	}
 	return pos * m_umperinc;
 }
 
