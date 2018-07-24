@@ -7,10 +7,7 @@ bool ScanControl::getConnectionStatus() {
 
 void ScanControl::announcePosition() {
 	POINT3 point = getPosition();
-	point.x -= m_homePosition.x;
-	point.y -= m_homePosition.y;
-	point.z -= m_homePosition.z;
-	emit(currentPosition(point));
+	emit(currentPosition(point - m_homePosition));
 }
 
 void ScanControl::startAnnouncingPosition() {

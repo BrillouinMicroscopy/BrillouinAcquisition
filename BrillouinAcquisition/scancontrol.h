@@ -1,11 +1,17 @@
 #ifndef SCANCONTROL_H
 #define SCANCONTROL_H
 
-typedef struct {
+struct POINT3 {
 	double x{ 0 };
 	double y{ 0 };
 	double z{ 0 };
-} POINT3;
+	POINT3 operator+(const POINT3 &pos) {
+		return POINT3{ x + pos.x, y + pos.y, z + pos.z };
+	}
+	POINT3 operator-(const POINT3 &pos) {
+		return POINT3{ x - pos.x, y - pos.y, z - pos.z };
+	}
+};
 
 class ScanControl: public QObject {
 	Q_OBJECT

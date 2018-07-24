@@ -161,7 +161,8 @@ void Acquisition::runAcquisition(ACQUISITION *acquisition) {
 				int nextCalibration = 100 * (1e-3 * calibrationTimer.elapsed()) / (60 * acquisition->settings.conCalibrationInterval);
 				emit(s_acqTimeToCalibration(nextCalibration));
 				// move stage to correct position, wait 50 ms for it to finish
-				(*m_scanControl)->setPosition({ positionsX[ll], positionsY[ll], positionsZ[ll] });
+				POINT3 newPosition{ positionsX[ll], positionsY[ll], positionsZ[ll] };
+				(*m_scanControl)->setPosition(newPosition);
 
 				std::vector<AT_U8> images(bytesPerFrame * acquisition->settings.camera.frameCount);
 
@@ -170,7 +171,7 @@ void Acquisition::runAcquisition(ACQUISITION *acquisition) {
 						abort();
 						return;
 					}
-					emit(s_acqPosition({ positionsX[ll] - m_startPosition.x, positionsY[ll] - m_startPosition.y, positionsZ[ll] - m_startPosition.z }, mm + 1));
+					emit(s_acqPosition( newPosition - m_startPosition, mm + 1));
 					// acquire images
 					int64_t pointerPos = (int64_t)bytesPerFrame * mm;
 					m_andor->getImageForMeasurement(&images[pointerPos]);

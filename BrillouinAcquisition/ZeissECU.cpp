@@ -135,10 +135,10 @@ void ZeissECU::setPosition(POINT3 position) {
 }
 
 void ZeissECU::setPositionRelative(POINT3 distance) {
-	POINT3 position = getPosition();
-	m_mcu->setX(position.x + distance.x);
-	m_mcu->setY(position.y + distance.y);
-	m_focus->setZ(position.z + distance.z);
+	POINT3 position = getPosition() + distance;
+	m_mcu->setX(position.x);
+	m_mcu->setY(position.y);
+	m_focus->setZ(position.z);
 }
 
 POINT3 ZeissECU::getPosition() {
