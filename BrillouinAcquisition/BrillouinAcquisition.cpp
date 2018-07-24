@@ -98,9 +98,9 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	// slot to show current acquisition position
 	connection = QWidget::connect(
 		m_acquisition,
-		SIGNAL(s_acqPosition(double, double, double, int)),
+		SIGNAL(s_acqPosition(POINT3, int)),
 		this,
-		SLOT(showAcqPosition(double, double, double, int))
+		SLOT(showAcqPosition(POINT3, int))
 	);
 
 	// slot to show current acquisition progress
@@ -253,9 +253,8 @@ void BrillouinAcquisition::cameraOptionsChanged(CAMERA_OPTIONS options) {
 	ui->ROILeft->setValue(1);
 }
 
-void BrillouinAcquisition::showAcqPosition(double positionX, double positionY, double positionZ, int imageNr) {
-	POINT3 point = POINT3{ positionX, positionY, positionZ };
-	showPosition(point);
+void BrillouinAcquisition::showAcqPosition(POINT3 position, int imageNr) {
+	showPosition(position);
 	ui->imageNr->setText(QString::number(imageNr));
 }
 

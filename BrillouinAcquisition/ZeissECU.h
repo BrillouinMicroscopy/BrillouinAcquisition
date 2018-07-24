@@ -120,9 +120,9 @@ public:
 	ZeissECU() noexcept;
 	~ZeissECU();
 
-	void setPosition(std::vector<double> position);
-	void setPositionRelative(std::vector<double> distance);
-	std::vector<double> getPosition();
+	void setPosition(POINT3 position);
+	void setPositionRelative(POINT3 distance);
+	POINT3 getPosition();
 	void setDevice(com *device);
 
 public slots:

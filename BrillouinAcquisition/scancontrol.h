@@ -58,9 +58,9 @@ public:
 
 	bool getConnectionStatus();
 
-	virtual void setPosition(std::vector<double> position) = 0;
-	virtual void setPositionRelative(std::vector<double> distance) = 0;
-	virtual std::vector<double> getPosition() = 0;
+	virtual void setPosition(POINT3 position) = 0;
+	virtual void setPositionRelative(POINT3 distance) = 0;
+	virtual POINT3 getPosition() = 0;
 
 	QTimer *positionTimer = nullptr;
 

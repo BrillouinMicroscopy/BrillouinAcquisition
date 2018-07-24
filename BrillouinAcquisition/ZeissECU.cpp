@@ -102,8 +102,7 @@ bool ZeissECU::connectDevice() {
 
 			if (m_isConnected && m_isCompatible) {
 				setElements(SCAN_PRESET::SCAN_BRIGHTFIELD);
-				std::vector<double> position = getPosition();
-				m_homePosition = { position[0], position[1], position[2] };
+				m_homePosition = getPosition();
 				startAnnouncingPosition();
 			}
 
@@ -129,24 +128,24 @@ bool ZeissECU::disconnectDevice() {
 void ZeissECU::errorHandler(QSerialPort::SerialPortError error) {
 }
 
-void ZeissECU::setPosition(std::vector<double> position) {
-	m_mcu->setX(position[0]);
-	m_mcu->setY(position[1]);
-	m_focus->setZ(position[2]);
+void ZeissECU::setPosition(POINT3 position) {
+	m_mcu->setX(position.x);
+	m_mcu->setY(position.y);
+	m_focus->setZ(position.z);
 }
 
-void ZeissECU::setPositionRelative(std::vector<double> distance) {
-	std::vector<double> position = getPosition();
-	m_mcu->setX(position[0] + distance[0]);
-	m_mcu->setY(position[1] + distance[1]);
-	m_focus->setZ(position[2] + distance[2]);
+void ZeissECU::setPositionRelative(POINT3 distance) {
+	POINT3 position = getPosition();
+	m_mcu->setX(position.x + distance.x);
+	m_mcu->setY(position.y + distance.y);
+	m_focus->setZ(position.z + distance.z);
 }
 
-std::vector<double> ZeissECU::getPosition() {
+POINT3 ZeissECU::getPosition() {
 	double x = m_mcu->getX();
 	double y = m_mcu->getY();
 	double z = m_focus->getZ();
-	return std::vector<double> {x, y, z};
+	return POINT3{ x, y, z };
 }
 
 void ZeissECU::setDevice(com *device) {

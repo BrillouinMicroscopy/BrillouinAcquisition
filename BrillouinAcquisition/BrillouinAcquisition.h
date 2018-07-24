@@ -102,7 +102,7 @@ private slots:
 	void cameraSettingsChanged(CAMERA_SETTINGS);
 	void sensorTemperatureChanged(SensorTemperature);
 	void cameraOptionsChanged(CAMERA_OPTIONS);
-	void showAcqPosition(double, double, double, int);
+	void showAcqPosition(POINT3, int);
 	void showPosition(POINT3);
 	void showAcqProgress(int state, double progress, int seconds);
 	void showCalibrationInterval(int);

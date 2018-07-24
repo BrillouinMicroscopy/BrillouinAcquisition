@@ -6,8 +6,7 @@ bool ScanControl::getConnectionStatus() {
 }
 
 void ScanControl::announcePosition() {
-	std::vector<double> position = getPosition();
-	POINT3 point = { position[0], position[1], position[2] };
+	POINT3 point = getPosition();
 	point.x -= m_homePosition.x;
 	point.y -= m_homePosition.y;
 	point.z -= m_homePosition.z;

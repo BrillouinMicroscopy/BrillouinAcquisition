@@ -83,7 +83,7 @@ private:
 	Andor *m_andor;
 	ScanControl **m_scanControl;
 	bool m_running = false;				// is acquisition currently running
-	std::vector<double> m_startPosition = { 0,0,0 };
+	POINT3 m_startPosition{ 0, 0, 0 };
 	void abort();
 	void checkFilename();
 
@@ -96,7 +96,7 @@ signals:
 	void s_acqRunning(bool);			// is acquisition running
 	void s_acqProgress(int, double, int);	// progress in percent and the remaining time in seconds
 	// current position in x, y and z, as well as the current image number
-	void s_acqPosition(double, double, double, int);
+	void s_acqPosition(POINT3, int);
 	void s_acqTimeToCalibration(int);	// time to next calibration
 	void s_acqCalibrationRunning(bool);	// is calibration running
 	void s_filenameChanged(std::string);

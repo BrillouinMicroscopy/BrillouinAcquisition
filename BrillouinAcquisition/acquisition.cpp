@@ -105,9 +105,9 @@ void Acquisition::runAcquisition(ACQUISITION *acquisition) {
 		for (gsl::index jj = 0; jj < acquisition->settings.xSteps; jj++) {
 			for (gsl::index kk = 0; kk < acquisition->settings.ySteps; kk++) {
 				// calculate stage positions
-				positionsX[ll] = posX[jj] + m_startPosition[0];
-				positionsY[ll] = posY[kk] + m_startPosition[1];
-				positionsZ[ll] = posZ[ii] + m_startPosition[2];
+				positionsX[ll] = posX[jj] + m_startPosition.x;
+				positionsY[ll] = posY[kk] + m_startPosition.y;
+				positionsZ[ll] = posZ[ii] + m_startPosition.z;
 				ll++;
 			}
 		}
@@ -170,7 +170,7 @@ void Acquisition::runAcquisition(ACQUISITION *acquisition) {
 						abort();
 						return;
 					}
-					emit(s_acqPosition(positionsX[ll] - m_startPosition[0], positionsY[ll] - m_startPosition[1], positionsZ[ll] - m_startPosition[2], mm+1));
+					emit(s_acqPosition({ positionsX[ll] - m_startPosition.x, positionsY[ll] - m_startPosition.y, positionsZ[ll] - m_startPosition.z }, mm + 1));
 					// acquire images
 					int64_t pointerPos = (int64_t)bytesPerFrame * mm;
 					m_andor->getImageForMeasurement(&images[pointerPos]);
@@ -206,7 +206,7 @@ void Acquisition::runAcquisition(ACQUISITION *acquisition) {
 	QMetaObject::invokeMethod(acquisition->fileHndl, "s_finishedQueueing", Qt::AutoConnection);
 
 	(*m_scanControl)->setPosition(m_startPosition);
-	emit(s_acqPosition(0, 0, 0, 0));
+	emit(s_acqPosition({ 0, 0, 0 }, 0));
 	(*m_scanControl)->startAnnouncingPosition();
 
 	std::string info = "Acquisition finished.";
@@ -222,7 +222,7 @@ void Acquisition::abort() {
 	m_running = false;
 	emit(s_acqRunning(m_running));
 	emit(s_acqProgress(ACQUISITION_STATES::ABORTED, 0, 0));
-	emit(s_acqPosition(m_startPosition[0], m_startPosition[1], m_startPosition[2], 0));
+	emit(s_acqPosition(m_startPosition, 0));
 	emit(s_acqTimeToCalibration(0));
 }
 
