@@ -64,7 +64,22 @@ void NIDAQ::setPosition(POINT3 position) {
 	DAQmxWriteAnalogF64(taskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
 }
 
-void NIDAQ::setPositionRelative(POINT3 distance) {
+void NIDAQ::movePosition(POINT3 distance) {
+}
+
+void NIDAQ::setPositionRelativeX(double positionX) {
+	voltages.chA = positionToVoltage(positionX);
+	float64 data[2] = { voltages.chA, voltages.chB };
+	DAQmxWriteAnalogF64(taskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
+}
+
+void NIDAQ::setPositionRelativeY(double positionY) {
+	voltages.chB = positionToVoltage(positionY);
+	float64 data[2] = { voltages.chA, voltages.chB };
+	DAQmxWriteAnalogF64(taskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
+}
+
+void NIDAQ::setPositionRelativeZ(double positionZ) {
 }
 
 POINT3 NIDAQ::getPosition() {

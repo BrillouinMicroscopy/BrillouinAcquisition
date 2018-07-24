@@ -185,6 +185,12 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	// Set up GUI
 	initBeampathButtons();
 
+	// disable keyboard tracking on stage position input
+	// so only complete numbers emit signals
+	ui->setPositionX->setKeyboardTracking(false);
+	ui->setPositionY->setKeyboardTracking(false);
+	ui->setPositionZ->setKeyboardTracking(false);
+
 	ui->parametersWidget->layout()->setAlignment(Qt::AlignTop);
 }
 
@@ -262,9 +268,21 @@ void BrillouinAcquisition::showPosition(POINT3 position) {
 	ui->positionX->setText(QString::number(position.x));
 	ui->positionY->setText(QString::number(position.y));
 	ui->positionZ->setText(QString::number(position.z));
-	ui->setPositionX->setValue(position.x);
-	ui->setPositionY->setValue(position.y);
-	ui->setPositionZ->setValue(position.z);
+	if (!ui->setPositionX->hasFocus()) {
+		ui->setPositionX->blockSignals(true);
+		ui->setPositionX->setValue(position.x);
+		ui->setPositionX->blockSignals(false);
+	}
+	if (!ui->setPositionY->hasFocus()) {
+		ui->setPositionY->blockSignals(true);
+		ui->setPositionY->setValue(position.y);
+		ui->setPositionY->blockSignals(false);
+	}
+	if (!ui->setPositionZ->hasFocus()) {
+		ui->setPositionZ->blockSignals(true);
+		ui->setPositionZ->setValue(position.z);
+		ui->setPositionZ->blockSignals(false);
+	}
 }
 
 void BrillouinAcquisition::showAcqProgress(int state, double progress, int seconds) {
@@ -556,6 +574,10 @@ void BrillouinAcquisition::showAcqRunning(bool isRunning) {
 	ui->stepsZ->setEnabled(!m_measurementRunning);
 	ui->camera_playPause->setEnabled(!m_measurementRunning);
 	ui->camera_singleShot->setEnabled(!m_measurementRunning);
+	ui->setHome->setEnabled(!m_measurementRunning);
+	ui->setPositionX->setEnabled(!m_measurementRunning);
+	ui->setPositionY->setEnabled(!m_measurementRunning);
+	ui->setPositionZ->setEnabled(!m_measurementRunning);
 }
 
 void BrillouinAcquisition::startPreview(bool isRunning) {
@@ -1101,6 +1123,34 @@ void BrillouinAcquisition::showRepProgress(int repNumber, int timeToNext) {
 	}
 	ui->repetitionProgress->setFormat(string);
 };
+
+void BrillouinAcquisition::on_setHome_clicked() {
+	QMetaObject::invokeMethod(m_scanControl, "setHome", Qt::AutoConnection);
+}
+
+void BrillouinAcquisition::on_moveHome_clicked() {
+	if (!m_measurementRunning) {
+		QMetaObject::invokeMethod(m_scanControl, "moveHome", Qt::AutoConnection);
+	}
+}
+
+void BrillouinAcquisition::on_setPositionX_valueChanged(double positionX) {
+	if (!m_measurementRunning) {
+		QMetaObject::invokeMethod(m_scanControl, "setPositionRelativeX", Qt::AutoConnection, Q_ARG(double, positionX));
+	}
+}
+
+void BrillouinAcquisition::on_setPositionY_valueChanged(double positionY) {
+	if (!m_measurementRunning) {
+		QMetaObject::invokeMethod(m_scanControl, "setPositionRelativeY", Qt::AutoConnection, Q_ARG(double, positionY));
+	}
+}
+
+void BrillouinAcquisition::on_setPositionZ_valueChanged(double positionZ) {
+	if (!m_measurementRunning) {
+		QMetaObject::invokeMethod(m_scanControl, "setPositionRelativeZ", Qt::AutoConnection, Q_ARG(double, positionZ));
+	}
+}
 
 void BrillouinAcquisition::on_exposureTime_valueChanged(double value) {
 	m_acquisitionSettings.camera.exposureTime = value;

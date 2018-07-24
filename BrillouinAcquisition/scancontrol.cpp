@@ -21,3 +21,11 @@ void ScanControl::stopAnnouncingPosition() {
 		positionTimer->stop();
 	}
 };
+
+void ScanControl::setHome() {
+	m_homePosition = getPosition();
+}
+
+void ScanControl::moveHome() {
+	setPosition(m_homePosition);
+}

@@ -65,7 +65,8 @@ public:
 	bool getConnectionStatus();
 
 	virtual void setPosition(POINT3 position) = 0;
-	virtual void setPositionRelative(POINT3 distance) = 0;
+	// moves the position relative to current position
+	virtual void movePosition(POINT3 distance) = 0;
 	virtual POINT3 getPosition() = 0;
 
 	QTimer *positionTimer = nullptr;
@@ -80,6 +81,12 @@ public slots:
 	void announcePosition();
 	void startAnnouncingPosition();
 	void stopAnnouncingPosition();
+	// sets the position relative to the home position m_homePosition
+	virtual void setPositionRelativeX(double position) = 0;
+	virtual void setPositionRelativeY(double position) = 0;
+	virtual void setPositionRelativeZ(double position) = 0;
+	void setHome();
+	void moveHome();
 
 signals:
 	void connectedDevice(bool);

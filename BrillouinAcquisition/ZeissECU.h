@@ -121,7 +121,8 @@ public:
 	~ZeissECU();
 
 	void setPosition(POINT3 position);
-	void setPositionRelative(POINT3 distance);
+	// moves the position relative to current position
+	void movePosition(POINT3 distance);
 	POINT3 getPosition();
 	void setDevice(com *device);
 
@@ -133,6 +134,10 @@ public slots:
 	void setElement(ScanControl::DEVICE_ELEMENT element, int position);
 	void setElements(ScanControl::SCAN_PRESET preset);
 	void getElements();
+	// sets the position relative to the home position m_homePosition
+	void setPositionRelativeX(double position);
+	void setPositionRelativeY(double position);
+	void setPositionRelativeZ(double position);
 };
 
 #endif // ZEISSECU_H

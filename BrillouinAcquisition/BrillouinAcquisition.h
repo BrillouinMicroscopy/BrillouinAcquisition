@@ -148,6 +148,14 @@ private slots:
 	void on_repetitionInterval_valueChanged(double);
 	void showRepProgress(int repNumber, int timeToNext);
 
+	// manual stage control
+	void on_setHome_clicked();
+	void on_moveHome_clicked();
+
+	void on_setPositionX_valueChanged(double);
+	void on_setPositionY_valueChanged(double);
+	void on_setPositionZ_valueChanged(double);
+
 public:
 	BrillouinAcquisition(QWidget *parent = nullptr) noexcept;
 	~BrillouinAcquisition();
