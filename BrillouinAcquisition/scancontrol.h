@@ -1,12 +1,19 @@
 #ifndef SCANCONTROL_H
 #define SCANCONTROL_H
 
+typedef struct {
+	double x{ 0 };
+	double y{ 0 };
+	double z{ 0 };
+} POINT3;
+
 class ScanControl: public QObject {
 	Q_OBJECT
 
 protected:
 	bool m_isConnected = false;
 	bool m_isCompatible = false;
+	POINT3 m_homePosition = { 0,0,0 };
 
 public:
 	ScanControl() noexcept {};
@@ -55,6 +62,8 @@ public:
 	virtual void setPositionRelative(std::vector<double> distance) = 0;
 	virtual std::vector<double> getPosition() = 0;
 
+	QTimer *positionTimer = nullptr;
+
 public slots:
 	virtual void init() = 0;
 	virtual bool connectDevice() = 0;
@@ -62,11 +71,15 @@ public slots:
 	virtual void setElement(ScanControl::DEVICE_ELEMENT, int) = 0;
 	virtual void setElements(ScanControl::SCAN_PRESET) = 0;
 	virtual void getElements() = 0;
+	void announcePosition();
+	void startAnnouncingPosition();
+	void stopAnnouncingPosition();
 
 signals:
 	void connectedDevice(bool);
 	void elementPositionsChanged(std::vector<int>);
 	void elementPositionChanged(ScanControl::DEVICE_ELEMENT, int);
+	void currentPosition(POINT3);
 };
 
 #endif // SCANCONTROL_H

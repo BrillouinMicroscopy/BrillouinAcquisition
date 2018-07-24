@@ -70,6 +70,7 @@ void Acquisition::runAcquisition(ACQUISITION *acquisition) {
 	
 	// prepare camera for image acquisition
 	acquisition->settings.camera = m_andor->prepareMeasurement(acquisition->settings.camera);
+	(*m_scanControl)->stopAnnouncingPosition();
 	// set optical elements for brightfield/Brillouin imaging
 	(*m_scanControl)->setElements(ScanControl::SCAN_BRIGHTFIELD);
 	Sleep(500);
@@ -206,6 +207,7 @@ void Acquisition::runAcquisition(ACQUISITION *acquisition) {
 
 	(*m_scanControl)->setPosition(m_startPosition);
 	emit(s_acqPosition(0, 0, 0, 0));
+	(*m_scanControl)->startAnnouncingPosition();
 
 	std::string info = "Acquisition finished.";
 	qInfo(logInfo()) << info.c_str();

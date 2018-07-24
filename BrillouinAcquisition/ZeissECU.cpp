@@ -51,12 +51,15 @@ void ZeissECU::init() {
 	m_mcu = new MCU(m_comObject);
 	m_stand = new Stand(m_comObject);
 
-	static QMetaObject::Connection connection = QWidget::connect(
+	QMetaObject::Connection connection = QWidget::connect(
 		m_comObject,
 		SIGNAL(errorOccurred(QSerialPort::SerialPortError)),
 		this,
 		SLOT(errorHandler(QSerialPort::SerialPortError))
 	);
+
+	positionTimer = new QTimer();
+	connection = QWidget::connect(positionTimer, SIGNAL(timeout()), this, SLOT(announcePosition()));
 }
 
 bool ZeissECU::connectDevice() {
@@ -97,8 +100,11 @@ bool ZeissECU::connectDevice() {
 
 			m_isCompatible = focus && stand && mcu;
 
-			if (m_isCompatible && m_isCompatible) {
+			if (m_isConnected && m_isCompatible) {
 				setElements(SCAN_PRESET::SCAN_BRIGHTFIELD);
+				std::vector<double> position = getPosition();
+				m_homePosition = { position[0], position[1], position[2] };
+				startAnnouncingPosition();
 			}
 
 		} catch (QString e) {
@@ -111,6 +117,7 @@ bool ZeissECU::connectDevice() {
 
 bool ZeissECU::disconnectDevice() {
 	if (m_comObject && m_isConnected) {
+		stopAnnouncingPosition();
 		m_comObject->close();
 		m_isConnected = false;
 		m_isCompatible = false;

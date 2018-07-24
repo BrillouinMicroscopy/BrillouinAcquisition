@@ -155,6 +155,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<ScanControl::SCAN_PRESET>("ScanControl::SCAN_PRESET");
 	qRegisterMetaType<ScanControl::DEVICE_ELEMENT>("ScanControl::DEVICE_ELEMENT");
 	qRegisterMetaType<SensorTemperature>("SensorTemperature");
+	qRegisterMetaType<POINT3>("POINT3");
 	
 
 	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
@@ -253,10 +254,18 @@ void BrillouinAcquisition::cameraOptionsChanged(CAMERA_OPTIONS options) {
 }
 
 void BrillouinAcquisition::showAcqPosition(double positionX, double positionY, double positionZ, int imageNr) {
-	ui->positionX->setText(QString::number(positionX));
-	ui->positionY->setText(QString::number(positionY));
-	ui->positionZ->setText(QString::number(positionZ));
+	POINT3 point = POINT3{ positionX, positionY, positionZ };
+	showPosition(point);
 	ui->imageNr->setText(QString::number(imageNr));
+}
+
+void BrillouinAcquisition::showPosition(POINT3 position) {
+	ui->positionX->setText(QString::number(position.x));
+	ui->positionY->setText(QString::number(position.y));
+	ui->positionZ->setText(QString::number(position.z));
+	ui->setPositionX->setValue(position.x);
+	ui->setPositionY->setValue(position.y);
+	ui->setPositionZ->setValue(position.z);
 }
 
 void BrillouinAcquisition::showAcqProgress(int state, double progress, int seconds) {
@@ -878,6 +887,12 @@ void BrillouinAcquisition::initScanControl() {
 		SIGNAL(elementPositionChanged(ScanControl::DEVICE_ELEMENT, int)),
 		this,
 		SLOT(microscopeElementPositionChanged(ScanControl::DEVICE_ELEMENT, int))
+	);
+	connection = QWidget::connect(
+		m_scanControl,
+		SIGNAL(currentPosition(POINT3)),
+		this,
+		SLOT(showPosition(POINT3))
 	);
 
 	QMetaObject::invokeMethod(m_scanControl, "connectDevice", Qt::AutoConnection);
