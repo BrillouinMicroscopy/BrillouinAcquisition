@@ -781,6 +781,7 @@ void BrillouinAcquisition::initBeampathButtons() {
 	QVBoxLayout *verticalLayout = new QVBoxLayout;
 	verticalLayout->setAlignment(Qt::AlignTop);
 	std::string buttonLabel;
+	presetButtons.clear();
 	if (m_scanControl->m_availablePresets.size() > 0) {
 		QHBoxLayout *presetLayoutLabel = new QHBoxLayout();
 		std::string presetLabelString = "Presets:";
@@ -789,7 +790,6 @@ void BrillouinAcquisition::initBeampathButtons() {
 		verticalLayout->addLayout(presetLayoutLabel);
 		QHBoxLayout *layout = new QHBoxLayout();
 		layout->setAlignment(Qt::AlignLeft);
-		presetButtons.clear();
 		for (gsl::index ii = 0; ii < m_scanControl->m_availablePresets.size(); ii++) {
 			buttonLabel = std::to_string(ii + 1);
 			QPushButton *button = new QPushButton(m_scanControl->m_presetLabels[m_scanControl->m_availablePresets[ii]].c_str());
@@ -907,8 +907,8 @@ void BrillouinAcquisition::checkElementButtons() {
 			elementButtons[ii][jj]->update();
 		}
 	}
-	for (gsl::index ii = 0; ii < m_scanControl->m_presets.size(); ii++) {
-		if (m_scanControl->m_presets[ii] == m_deviceElementPositions) {
+	for (gsl::index ii = 0; ii < m_scanControl->m_availablePresets.size(); ii++) {
+		if (m_scanControl->m_presets[m_scanControl->m_availablePresets[ii]] == m_deviceElementPositions) {
 			presetButtons[ii]->setProperty("class", "active");
 		} else {
 			presetButtons[ii]->setProperty("class", "");
