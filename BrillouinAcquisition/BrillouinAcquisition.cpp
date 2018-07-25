@@ -935,7 +935,7 @@ void BrillouinAcquisition::initScanControl() {
 		tableModel,
 		SLOT(setStorage(std::vector<POINT3>))
 	);
-	tableModel->setStorage(m_scanControl->m_savedPositions);
+	tableModel->setStorage(m_scanControl->getSavedPositionsNormalized());
 
 	QMetaObject::invokeMethod(m_scanControl, "connectDevice", Qt::AutoConnection);
 

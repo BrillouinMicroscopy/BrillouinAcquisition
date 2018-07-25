@@ -21,6 +21,8 @@ protected:
 	bool m_isCompatible = false;
 	POINT3 m_homePosition = { 0,0,0 };
 
+	std::vector<POINT3> m_savedPositions;
+
 public:
 	ScanControl() noexcept {};
 	virtual ~ScanControl() {};
@@ -62,8 +64,6 @@ public:
 	} DEVICE_ELEMENT;
 	std::vector<int> m_availableElements;
 
-	std::vector<POINT3> m_savedPositions;
-
 	bool getConnectionStatus();
 
 	virtual void setPosition(POINT3 position) = 0;
@@ -92,6 +92,9 @@ public slots:
 	void savePosition();
 	void moveToSavedPosition(int index);
 	void deleteSavedPosition(int index);
+
+	std::vector<POINT3> getSavedPositionsNormalized();
+	void announceSavedPositionsNormalized();
 
 signals:
 	void connectedDevice(bool);
