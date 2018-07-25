@@ -62,6 +62,8 @@ public:
 	} DEVICE_ELEMENT;
 	std::vector<int> m_availableElements;
 
+	std::vector<POINT3> m_savedPositions;
+
 	bool getConnectionStatus();
 
 	virtual void setPosition(POINT3 position) = 0;
@@ -87,12 +89,16 @@ public slots:
 	virtual void setPositionRelativeZ(double position) = 0;
 	void setHome();
 	void moveHome();
+	void savePosition();
+	void moveToSavedPosition(int index);
+	void deleteSavedPosition(int index);
 
 signals:
 	void connectedDevice(bool);
 	void elementPositionsChanged(std::vector<int>);
 	void elementPositionChanged(ScanControl::DEVICE_ELEMENT, int);
 	void currentPosition(POINT3);
+	void savedPositionsChanged(std::vector<POINT3>);
 };
 
 #endif // SCANCONTROL_H

@@ -156,6 +156,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<ScanControl::DEVICE_ELEMENT>("ScanControl::DEVICE_ELEMENT");
 	qRegisterMetaType<SensorTemperature>("SensorTemperature");
 	qRegisterMetaType<POINT3>("POINT3");
+	qRegisterMetaType<std::vector<POINT3>>("std::vector<POINT3>");
 	
 
 	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
@@ -184,6 +185,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 
 	// Set up GUI
 	initBeampathButtons();
+	updateSavedPositions();
 
 	// disable keyboard tracking on stage position input
 	// so only complete numbers emit signals
@@ -915,6 +917,25 @@ void BrillouinAcquisition::initScanControl() {
 		this,
 		SLOT(showPosition(POINT3))
 	);
+	connection = QWidget::connect(
+		&buttonDelegate,
+		SIGNAL(deletePosition(int)),
+		m_scanControl,
+		SLOT(deleteSavedPosition(int))
+	);
+	connection = QWidget::connect(
+		&buttonDelegate,
+		SIGNAL(moveToPosition(int)),
+		m_scanControl,
+		SLOT(moveToSavedPosition(int))
+	);
+	connection = QWidget::connect(
+		m_scanControl,
+		SIGNAL(savedPositionsChanged(std::vector<POINT3>)),
+		tableModel,
+		SLOT(setStorage(std::vector<POINT3>))
+	);
+	tableModel->setStorage(m_scanControl->m_savedPositions);
 
 	QMetaObject::invokeMethod(m_scanControl, "connectDevice", Qt::AutoConnection);
 
@@ -1124,6 +1145,10 @@ void BrillouinAcquisition::showRepProgress(int repNumber, int timeToNext) {
 	ui->repetitionProgress->setFormat(string);
 };
 
+void BrillouinAcquisition::on_savePosition_clicked() {
+	QMetaObject::invokeMethod(m_scanControl, "savePosition", Qt::AutoConnection);
+}
+
 void BrillouinAcquisition::on_setHome_clicked() {
 	QMetaObject::invokeMethod(m_scanControl, "setHome", Qt::AutoConnection);
 }
@@ -1150,6 +1175,16 @@ void BrillouinAcquisition::on_setPositionZ_valueChanged(double positionZ) {
 	if (!m_measurementRunning) {
 		QMetaObject::invokeMethod(m_scanControl, "setPositionRelativeZ", Qt::AutoConnection, Q_ARG(double, positionZ));
 	}
+}
+
+void BrillouinAcquisition::updateSavedPositions() {
+	ui->tableView->setModel(tableModel);
+	ui->tableView->setItemDelegateForColumn(3, &buttonDelegate);
+	ui->tableView->verticalHeader()->setDefaultSectionSize(35);
+	ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	ui->tableView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+	ui->tableView->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+	ui->tableView->show();
 }
 
 void BrillouinAcquisition::on_exposureTime_valueChanged(double value) {
