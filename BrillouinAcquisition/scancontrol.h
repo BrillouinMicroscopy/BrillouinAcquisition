@@ -1,12 +1,27 @@
 #ifndef SCANCONTROL_H
 #define SCANCONTROL_H
 
+struct POINT3 {
+	double x{ 0 };
+	double y{ 0 };
+	double z{ 0 };
+	POINT3 operator+(const POINT3 &pos) {
+		return POINT3{ x + pos.x, y + pos.y, z + pos.z };
+	}
+	POINT3 operator-(const POINT3 &pos) {
+		return POINT3{ x - pos.x, y - pos.y, z - pos.z };
+	}
+};
+
 class ScanControl: public QObject {
 	Q_OBJECT
 
 protected:
 	bool m_isConnected = false;
 	bool m_isCompatible = false;
+	POINT3 m_homePosition = { 0,0,0 };
+
+	std::vector<POINT3> m_savedPositions;
 
 public:
 	ScanControl() noexcept {};
@@ -51,9 +66,12 @@ public:
 
 	bool getConnectionStatus();
 
-	virtual void setPosition(std::vector<double> position) = 0;
-	virtual void setPositionRelative(std::vector<double> distance) = 0;
-	virtual std::vector<double> getPosition() = 0;
+	virtual void setPosition(POINT3 position) = 0;
+	// moves the position relative to current position
+	virtual void movePosition(POINT3 distance) = 0;
+	virtual POINT3 getPosition() = 0;
+
+	QTimer *positionTimer = nullptr;
 
 public slots:
 	virtual void init() = 0;
@@ -62,11 +80,28 @@ public slots:
 	virtual void setElement(ScanControl::DEVICE_ELEMENT, int) = 0;
 	virtual void setElements(ScanControl::SCAN_PRESET) = 0;
 	virtual void getElements() = 0;
+	void announcePosition();
+	void startAnnouncingPosition();
+	void stopAnnouncingPosition();
+	// sets the position relative to the home position m_homePosition
+	virtual void setPositionRelativeX(double position) = 0;
+	virtual void setPositionRelativeY(double position) = 0;
+	virtual void setPositionRelativeZ(double position) = 0;
+	void setHome();
+	void moveHome();
+	void savePosition();
+	void moveToSavedPosition(int index);
+	void deleteSavedPosition(int index);
+
+	std::vector<POINT3> getSavedPositionsNormalized();
+	void announceSavedPositionsNormalized();
 
 signals:
 	void connectedDevice(bool);
 	void elementPositionsChanged(std::vector<int>);
 	void elementPositionChanged(ScanControl::DEVICE_ELEMENT, int);
+	void currentPosition(POINT3);
+	void savedPositionsChanged(std::vector<POINT3>);
 };
 
 #endif // SCANCONTROL_H

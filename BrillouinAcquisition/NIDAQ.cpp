@@ -57,19 +57,33 @@ void NIDAQ::setElements(ScanControl::SCAN_PRESET preset) {
 void NIDAQ::getElements() {
 }
 
-void NIDAQ::setPosition(std::vector<double> position) {
-	voltages.chA = positionToVoltage(position[0]);
-	voltages.chB = positionToVoltage(position[1]);
+void NIDAQ::setPosition(POINT3 position) {
+	voltages.chA = positionToVoltage(position.x);
+	voltages.chB = positionToVoltage(position.y);
 	float64 data[2] = { voltages.chA, voltages.chB };
 	DAQmxWriteAnalogF64(taskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
 }
 
-void NIDAQ::setPositionRelative(std::vector<double> distance) {
+void NIDAQ::movePosition(POINT3 distance) {
 }
 
-std::vector<double> NIDAQ::getPosition() {
+void NIDAQ::setPositionRelativeX(double positionX) {
+	voltages.chA = positionToVoltage(positionX);
+	float64 data[2] = { voltages.chA, voltages.chB };
+	DAQmxWriteAnalogF64(taskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
+}
+
+void NIDAQ::setPositionRelativeY(double positionY) {
+	voltages.chB = positionToVoltage(positionY);
+	float64 data[2] = { voltages.chA, voltages.chB };
+	DAQmxWriteAnalogF64(taskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
+}
+
+void NIDAQ::setPositionRelativeZ(double positionZ) {
+}
+
+POINT3 NIDAQ::getPosition() {
 	double x = voltageToPosition(voltages.chA);
 	double y = voltageToPosition(voltages.chB);
-	double z = 0;
-	return std::vector<double> {x, y, z};
+	return POINT3{ x, y, 0 };
 }

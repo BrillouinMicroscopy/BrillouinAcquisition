@@ -51,12 +51,15 @@ void ZeissECU::init() {
 	m_mcu = new MCU(m_comObject);
 	m_stand = new Stand(m_comObject);
 
-	static QMetaObject::Connection connection = QWidget::connect(
+	QMetaObject::Connection connection = QWidget::connect(
 		m_comObject,
 		SIGNAL(errorOccurred(QSerialPort::SerialPortError)),
 		this,
 		SLOT(errorHandler(QSerialPort::SerialPortError))
 	);
+
+	positionTimer = new QTimer();
+	connection = QWidget::connect(positionTimer, SIGNAL(timeout()), this, SLOT(announcePosition()));
 }
 
 bool ZeissECU::connectDevice() {
@@ -97,8 +100,10 @@ bool ZeissECU::connectDevice() {
 
 			m_isCompatible = focus && stand && mcu;
 
-			if (m_isCompatible && m_isCompatible) {
+			if (m_isConnected && m_isCompatible) {
 				setElements(SCAN_PRESET::SCAN_BRIGHTFIELD);
+				m_homePosition = getPosition();
+				startAnnouncingPosition();
 			}
 
 		} catch (QString e) {
@@ -111,6 +116,7 @@ bool ZeissECU::connectDevice() {
 
 bool ZeissECU::disconnectDevice() {
 	if (m_comObject && m_isConnected) {
+		stopAnnouncingPosition();
 		m_comObject->close();
 		m_isConnected = false;
 		m_isCompatible = false;
@@ -122,24 +128,36 @@ bool ZeissECU::disconnectDevice() {
 void ZeissECU::errorHandler(QSerialPort::SerialPortError error) {
 }
 
-void ZeissECU::setPosition(std::vector<double> position) {
-	m_mcu->setX(position[0]);
-	m_mcu->setY(position[1]);
-	m_focus->setZ(position[2]);
+void ZeissECU::setPosition(POINT3 position) {
+	m_mcu->setX(position.x);
+	m_mcu->setY(position.y);
+	m_focus->setZ(position.z);
 }
 
-void ZeissECU::setPositionRelative(std::vector<double> distance) {
-	std::vector<double> position = getPosition();
-	m_mcu->setX(position[0] + distance[0]);
-	m_mcu->setY(position[1] + distance[1]);
-	m_focus->setZ(position[2] + distance[2]);
+void ZeissECU::movePosition(POINT3 distance) {
+	POINT3 position = getPosition() + distance;
+	m_mcu->setX(position.x);
+	m_mcu->setY(position.y);
+	m_focus->setZ(position.z);
 }
 
-std::vector<double> ZeissECU::getPosition() {
+void ZeissECU::setPositionRelativeX(double positionX) {
+	m_mcu->setX(positionX + m_homePosition.x);
+}
+
+void ZeissECU::setPositionRelativeY(double positionY) {
+	m_mcu->setY(positionY + m_homePosition.y);
+}
+
+void ZeissECU::setPositionRelativeZ(double positionZ) {
+	m_focus->setZ(positionZ + m_homePosition.z);
+}
+
+POINT3 ZeissECU::getPosition() {
 	double x = m_mcu->getX();
 	double y = m_mcu->getY();
 	double z = m_focus->getZ();
-	return std::vector<double> {x, y, z};
+	return POINT3{ x, y, z };
 }
 
 void ZeissECU::setDevice(com *device) {

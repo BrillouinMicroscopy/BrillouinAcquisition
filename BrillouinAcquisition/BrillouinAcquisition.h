@@ -11,6 +11,7 @@
 #include "scancontrol.h"
 #include "ZeissECU.h"
 #include "NIDAQ.h"
+#include "tableModel.h"
 
 #include <QtWidgets/QMainWindow>
 #include "ui_BrillouinAcquisition.h"
@@ -48,6 +49,8 @@ Q_DECLARE_METATYPE(CALIBRATION*);
 Q_DECLARE_METATYPE(ScanControl::SCAN_PRESET);
 Q_DECLARE_METATYPE(ScanControl::DEVICE_ELEMENT);
 Q_DECLARE_METATYPE(SensorTemperature);
+Q_DECLARE_METATYPE(POINT3);
+Q_DECLARE_METATYPE(std::vector<POINT3>);
 
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
@@ -101,7 +104,8 @@ private slots:
 	void cameraSettingsChanged(CAMERA_SETTINGS);
 	void sensorTemperatureChanged(SensorTemperature);
 	void cameraOptionsChanged(CAMERA_OPTIONS);
-	void showAcqPosition(double, double, double, int);
+	void showAcqPosition(POINT3, int);
+	void showPosition(POINT3);
 	void showAcqProgress(int state, double progress, int seconds);
 	void showCalibrationInterval(int);
 	void showCalibrationRunning(bool);
@@ -146,6 +150,16 @@ private slots:
 	void on_repetitionInterval_valueChanged(double);
 	void showRepProgress(int repNumber, int timeToNext);
 
+	// manual stage control
+	void on_savePosition_clicked();
+	void on_setHome_clicked();
+	void on_moveHome_clicked();
+
+	void on_setPositionX_valueChanged(double);
+	void on_setPositionY_valueChanged(double);
+	void on_setPositionZ_valueChanged(double);
+	void updateSavedPositions();
+
 public:
 	BrillouinAcquisition(QWidget *parent = nullptr) noexcept;
 	~BrillouinAcquisition();
@@ -175,6 +189,11 @@ private:
 	bool m_measurementRunning = false;
 
 	bool m_autoscalePlot = false;
+
+	//std::vector<POINT3> m_savedPositions = { {0,0,0}, {100,100,100}, {-200,200,300}, { -10.4,100,100 } };
+
+	TableModel *tableModel = new TableModel(0);
+	ButtonDelegate buttonDelegate;
 
 	std::vector<int> m_deviceElementPositions = {0, 0, 0, 0, 0, 0};
 

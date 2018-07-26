@@ -4,5 +4,7 @@
         <file>assets/01standby.png</file>
         <file>assets/02cooling.png</file>
         <file>assets/03ready.png</file>
+        <file>assets/moveToPosition.png</file>
+        <file>assets/deletePosition.png</file>
     </qresource>
 </RCC>

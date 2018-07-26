@@ -129,6 +129,15 @@
     <ClCompile Include="NIDAQ.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_tableModel.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_tableModel.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tableModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -188,6 +197,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="NIDAQ.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="tableModel.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

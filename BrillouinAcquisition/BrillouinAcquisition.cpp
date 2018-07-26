@@ -98,9 +98,9 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	// slot to show current acquisition position
 	connection = QWidget::connect(
 		m_acquisition,
-		SIGNAL(s_acqPosition(double, double, double, int)),
+		SIGNAL(s_acqPosition(POINT3, int)),
 		this,
-		SLOT(showAcqPosition(double, double, double, int))
+		SLOT(showAcqPosition(POINT3, int))
 	);
 
 	// slot to show current acquisition progress
@@ -155,6 +155,8 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<ScanControl::SCAN_PRESET>("ScanControl::SCAN_PRESET");
 	qRegisterMetaType<ScanControl::DEVICE_ELEMENT>("ScanControl::DEVICE_ELEMENT");
 	qRegisterMetaType<SensorTemperature>("SensorTemperature");
+	qRegisterMetaType<POINT3>("POINT3");
+	qRegisterMetaType<std::vector<POINT3>>("std::vector<POINT3>");
 	
 
 	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
@@ -183,6 +185,13 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 
 	// Set up GUI
 	initBeampathButtons();
+	updateSavedPositions();
+
+	// disable keyboard tracking on stage position input
+	// so only complete numbers emit signals
+	ui->setPositionX->setKeyboardTracking(false);
+	ui->setPositionY->setKeyboardTracking(false);
+	ui->setPositionZ->setKeyboardTracking(false);
 
 	ui->parametersWidget->layout()->setAlignment(Qt::AlignTop);
 }
@@ -252,11 +261,30 @@ void BrillouinAcquisition::cameraOptionsChanged(CAMERA_OPTIONS options) {
 	ui->ROILeft->setValue(1);
 }
 
-void BrillouinAcquisition::showAcqPosition(double positionX, double positionY, double positionZ, int imageNr) {
-	ui->positionX->setText(QString::number(positionX));
-	ui->positionY->setText(QString::number(positionY));
-	ui->positionZ->setText(QString::number(positionZ));
+void BrillouinAcquisition::showAcqPosition(POINT3 position, int imageNr) {
+	showPosition(position);
 	ui->imageNr->setText(QString::number(imageNr));
+}
+
+void BrillouinAcquisition::showPosition(POINT3 position) {
+	ui->positionX->setText(QString::number(position.x));
+	ui->positionY->setText(QString::number(position.y));
+	ui->positionZ->setText(QString::number(position.z));
+	if (!ui->setPositionX->hasFocus()) {
+		ui->setPositionX->blockSignals(true);
+		ui->setPositionX->setValue(position.x);
+		ui->setPositionX->blockSignals(false);
+	}
+	if (!ui->setPositionY->hasFocus()) {
+		ui->setPositionY->blockSignals(true);
+		ui->setPositionY->setValue(position.y);
+		ui->setPositionY->blockSignals(false);
+	}
+	if (!ui->setPositionZ->hasFocus()) {
+		ui->setPositionZ->blockSignals(true);
+		ui->setPositionZ->setValue(position.z);
+		ui->setPositionZ->blockSignals(false);
+	}
 }
 
 void BrillouinAcquisition::showAcqProgress(int state, double progress, int seconds) {
@@ -548,6 +576,10 @@ void BrillouinAcquisition::showAcqRunning(bool isRunning) {
 	ui->stepsZ->setEnabled(!m_measurementRunning);
 	ui->camera_playPause->setEnabled(!m_measurementRunning);
 	ui->camera_singleShot->setEnabled(!m_measurementRunning);
+	ui->setHome->setEnabled(!m_measurementRunning);
+	ui->setPositionX->setEnabled(!m_measurementRunning);
+	ui->setPositionY->setEnabled(!m_measurementRunning);
+	ui->setPositionZ->setEnabled(!m_measurementRunning);
 }
 
 void BrillouinAcquisition::startPreview(bool isRunning) {
@@ -879,6 +911,31 @@ void BrillouinAcquisition::initScanControl() {
 		this,
 		SLOT(microscopeElementPositionChanged(ScanControl::DEVICE_ELEMENT, int))
 	);
+	connection = QWidget::connect(
+		m_scanControl,
+		SIGNAL(currentPosition(POINT3)),
+		this,
+		SLOT(showPosition(POINT3))
+	);
+	connection = QWidget::connect(
+		&buttonDelegate,
+		SIGNAL(deletePosition(int)),
+		m_scanControl,
+		SLOT(deleteSavedPosition(int))
+	);
+	connection = QWidget::connect(
+		&buttonDelegate,
+		SIGNAL(moveToPosition(int)),
+		m_scanControl,
+		SLOT(moveToSavedPosition(int))
+	);
+	connection = QWidget::connect(
+		m_scanControl,
+		SIGNAL(savedPositionsChanged(std::vector<POINT3>)),
+		tableModel,
+		SLOT(setStorage(std::vector<POINT3>))
+	);
+	tableModel->setStorage(m_scanControl->getSavedPositionsNormalized());
 
 	QMetaObject::invokeMethod(m_scanControl, "connectDevice", Qt::AutoConnection);
 
@@ -1087,6 +1144,48 @@ void BrillouinAcquisition::showRepProgress(int repNumber, int timeToNext) {
 	}
 	ui->repetitionProgress->setFormat(string);
 };
+
+void BrillouinAcquisition::on_savePosition_clicked() {
+	QMetaObject::invokeMethod(m_scanControl, "savePosition", Qt::AutoConnection);
+}
+
+void BrillouinAcquisition::on_setHome_clicked() {
+	QMetaObject::invokeMethod(m_scanControl, "setHome", Qt::AutoConnection);
+}
+
+void BrillouinAcquisition::on_moveHome_clicked() {
+	if (!m_measurementRunning) {
+		QMetaObject::invokeMethod(m_scanControl, "moveHome", Qt::AutoConnection);
+	}
+}
+
+void BrillouinAcquisition::on_setPositionX_valueChanged(double positionX) {
+	if (!m_measurementRunning) {
+		QMetaObject::invokeMethod(m_scanControl, "setPositionRelativeX", Qt::AutoConnection, Q_ARG(double, positionX));
+	}
+}
+
+void BrillouinAcquisition::on_setPositionY_valueChanged(double positionY) {
+	if (!m_measurementRunning) {
+		QMetaObject::invokeMethod(m_scanControl, "setPositionRelativeY", Qt::AutoConnection, Q_ARG(double, positionY));
+	}
+}
+
+void BrillouinAcquisition::on_setPositionZ_valueChanged(double positionZ) {
+	if (!m_measurementRunning) {
+		QMetaObject::invokeMethod(m_scanControl, "setPositionRelativeZ", Qt::AutoConnection, Q_ARG(double, positionZ));
+	}
+}
+
+void BrillouinAcquisition::updateSavedPositions() {
+	ui->tableView->setModel(tableModel);
+	ui->tableView->setItemDelegateForColumn(3, &buttonDelegate);
+	ui->tableView->verticalHeader()->setDefaultSectionSize(35);
+	ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	ui->tableView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+	ui->tableView->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+	ui->tableView->show();
+}
 
 void BrillouinAcquisition::on_exposureTime_valueChanged(double value) {
 	m_acquisitionSettings.camera.exposureTime = value;

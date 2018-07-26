@@ -26,9 +26,10 @@ public:
 	NIDAQ() noexcept;
 	~NIDAQ();
 
-	void setPosition(std::vector<double> position);
-	void setPositionRelative(std::vector<double> distance);
-	std::vector<double> getPosition();
+	void setPosition(POINT3 position);
+	// moves the position relative to current position
+	void movePosition(POINT3 distance);
+	POINT3 getPosition();
 
 public slots:
 	void init();
@@ -37,6 +38,10 @@ public slots:
 	void setElement(ScanControl::DEVICE_ELEMENT element, int position);
 	void setElements(ScanControl::SCAN_PRESET preset);
 	void getElements();
+	// sets the position relative to the home position m_homePosition
+	void setPositionRelativeX(double position);
+	void setPositionRelativeY(double position);
+	void setPositionRelativeZ(double position);
 };
 
 #endif // NIDAQMX_H

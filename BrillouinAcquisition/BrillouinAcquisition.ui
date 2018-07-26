@@ -796,8 +796,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>281</width>
-                <height>440</height>
+                <width>446</width>
+                <height>464</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -806,6 +806,218 @@ QTabBar::tab:!selected {
                 <height>440</height>
                </size>
               </property>
+              <widget class="QPushButton" name="moveHome">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="geometry">
+                <rect>
+                 <x>270</x>
+                 <y>10</y>
+                 <width>121</width>
+                 <height>30</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Move to home</string>
+               </property>
+              </widget>
+              <widget class="QLabel" name="positionZ_label_2">
+               <property name="geometry">
+                <rect>
+                 <x>270</x>
+                 <y>45</y>
+                 <width>121</width>
+                 <height>30</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>z [µm]</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+              <widget class="QTableView" name="tableView">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>150</y>
+                 <width>381</width>
+                 <height>200</height>
+                </rect>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>100</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>290</height>
+                </size>
+               </property>
+               <property name="lineWidth">
+                <number>1</number>
+               </property>
+              </widget>
+              <widget class="QLabel" name="positionY_label_2">
+               <property name="geometry">
+                <rect>
+                 <x>140</x>
+                 <y>45</y>
+                 <width>121</width>
+                 <height>30</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>y [µm]</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+              <widget class="QLabel" name="positionX_label_2">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>45</y>
+                 <width>121</width>
+                 <height>30</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>x [µm]</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+              <widget class="QLabel" name="positionX_label_3">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>115</y>
+                 <width>121</width>
+                 <height>30</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Saved positions:</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+              <widget class="QDoubleSpinBox" name="setPositionX">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>80</y>
+                 <width>121</width>
+                 <height>30</height>
+                </rect>
+               </property>
+               <property name="decimals">
+                <number>2</number>
+               </property>
+               <property name="minimum">
+                <double>-150000.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>150000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>10.000000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.000000000000000</double>
+               </property>
+              </widget>
+              <widget class="QDoubleSpinBox" name="setPositionZ">
+               <property name="geometry">
+                <rect>
+                 <x>270</x>
+                 <y>80</y>
+                 <width>121</width>
+                 <height>30</height>
+                </rect>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="minimum">
+                <double>-150000.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>150000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>10.000000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.000000000000000</double>
+               </property>
+              </widget>
+              <widget class="QPushButton" name="setHome">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="geometry">
+                <rect>
+                 <x>140</x>
+                 <y>10</y>
+                 <width>121</width>
+                 <height>30</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Set home</string>
+               </property>
+              </widget>
+              <widget class="QDoubleSpinBox" name="setPositionY">
+               <property name="geometry">
+                <rect>
+                 <x>140</x>
+                 <y>80</y>
+                 <width>121</width>
+                 <height>30</height>
+                </rect>
+               </property>
+               <property name="decimals">
+                <number>2</number>
+               </property>
+               <property name="minimum">
+                <double>-150000.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>150000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>10.000000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.000000000000000</double>
+               </property>
+              </widget>
+              <widget class="QPushButton" name="savePosition">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>121</width>
+                 <height>30</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Save position</string>
+               </property>
+              </widget>
              </widget>
             </widget>
            </item>
@@ -2025,6 +2237,21 @@ border: none;</string>
   <tabstop>imageNr</tabstop>
   <tabstop>camera_singleShot</tabstop>
   <tabstop>camera_playPause</tabstop>
+  <tabstop>sensorTemp</tabstop>
+  <tabstop>savePosition</tabstop>
+  <tabstop>setHome</tabstop>
+  <tabstop>moveHome</tabstop>
+  <tabstop>setPositionX</tabstop>
+  <tabstop>setPositionY</tabstop>
+  <tabstop>setPositionZ</tabstop>
+  <tabstop>tableView</tabstop>
+  <tabstop>conCalibrationInterval</tabstop>
+  <tabstop>calibrationExposureTime</tabstop>
+  <tabstop>nrCalibrationImages</tabstop>
+  <tabstop>repetitionCount</tabstop>
+  <tabstop>repetitionInterval</tabstop>
+  <tabstop>selectFolder</tabstop>
+  <tabstop>autoscalePlot</tabstop>
  </tabstops>
  <resources>
   <include location="BrillouinAcquisition.qrc"/>
