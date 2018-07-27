@@ -719,7 +719,7 @@ void BrillouinAcquisition::cancelSettings() {
 
 void BrillouinAcquisition::initSettingsDialog() {
 	m_scanControllerTypeTemporary = m_scanControllerType;
-	m_settingsDialog = new QDialog(0, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint);
+	m_settingsDialog = new QDialog(this, Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
 	m_settingsDialog->setWindowTitle("Settings");
 	m_settingsDialog->setWindowModality(Qt::ApplicationModal);
 
