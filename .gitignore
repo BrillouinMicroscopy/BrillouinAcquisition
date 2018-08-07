@@ -6,6 +6,7 @@ BrillouinAcquisition/version.h
 
 # HDF5 storage files
 *.h5
+*.mat
 
 build/
 build*/
