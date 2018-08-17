@@ -794,6 +794,12 @@ void BrillouinAcquisition::selectScanningDevice(int index) {
 	m_scanControllerTypeTemporary = (ScanControl::SCAN_DEVICE)index;
 }
 
+void BrillouinAcquisition::on_actionLoad_Voltage_Position_map_triggered() {
+	calibrationMapFile = QFileDialog::getOpenFileName(this, tr("Select Voltage-Position map"),
+		QString::fromStdString(calibrationMapFile), tr("Calibration map (*.h5)")).toStdString();
+	m_scanControl->loadVoltagePositionMap(calibrationMapFile);
+}
+
 void BrillouinAcquisition::initBeampathButtons() {
 	for (auto widget : ui->beamPathBox->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly)) {
 		delete widget;
@@ -879,12 +885,15 @@ void BrillouinAcquisition::initScanControl() {
 	switch (m_scanControllerType) {
 		case ScanControl::SCAN_DEVICE::ZEISSECU:
 			m_scanControl = new ZeissECU();
+			ui->actionLoad_Voltage_Position_map->setVisible(false);
 			break;
 		case ScanControl::SCAN_DEVICE::NIDAQ:
 			m_scanControl = new NIDAQ();
+			ui->actionLoad_Voltage_Position_map->setVisible(true);
 			break;
 		default:
 			m_scanControl = new ZeissECU();
+			ui->actionLoad_Voltage_Position_map->setVisible(false);
 			break;
 	}
 

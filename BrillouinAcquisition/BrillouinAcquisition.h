@@ -75,6 +75,7 @@ private slots:
 	void cancelSettings();
 	void initSettingsDialog();
 	void selectScanningDevice(int index);
+	void on_actionLoad_Voltage_Position_map_triggered();
 
 	void initBeampathButtons();
 
@@ -170,6 +171,7 @@ private:
 	ScanControl::SCAN_DEVICE m_scanControllerTypeTemporary = m_scanControllerType;
 	void initScanControl();
 	QComboBox *m_scanControlDropdown;
+	std::string calibrationMapFile;
 
 	QDialog *m_settingsDialog = nullptr;
 	void checkElementButtons();
