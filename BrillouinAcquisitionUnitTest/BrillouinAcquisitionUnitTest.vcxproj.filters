@@ -44,6 +44,9 @@
     <ClCompile Include="NIDAQ_PositionVoltage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="simplemath.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BrillouinAcquisitionUnitTest.h">

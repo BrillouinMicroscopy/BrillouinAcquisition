@@ -5,8 +5,8 @@ VOLTAGE2 NIDAQ::positionToVoltage(POINT2 position) {
 
 	position = position - m_calibration.translation;
 
-	double x_rot = position.x * cos(m_calibration.rho) - position.y * sin(m_calibration.rho);
-	double y_rot = position.x * sin(m_calibration.rho) + position.y * cos(m_calibration.rho);
+	double x_rot = position.x * cos(m_calibration.rho) + position.y * sin(m_calibration.rho);
+	double y_rot = position.y * cos(m_calibration.rho) - position.x * sin(m_calibration.rho);
 
 	double R_old = sqrt(pow(position.x, 2) + pow(position.y, 2));
 
