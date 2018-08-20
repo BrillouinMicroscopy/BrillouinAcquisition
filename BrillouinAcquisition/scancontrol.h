@@ -13,6 +13,15 @@ struct POINT3 {
 	}
 };
 
+struct BOUNDS {
+	double xMin{ -1e3 };	// [µm] minimal x-value
+	double xMax{  1e3 };	// [µm] maximal x-value
+	double yMin{ -1e3 };	// [µm] minimal y-value
+	double yMax{  1e3 };	// [µm] maximal y-value
+	double zMin{ -1e3 };	// [µm] minimal z-value
+	double zMax{  1e3 };	// [µm] maximal z-value
+};
+
 class ScanControl: public QObject {
 	Q_OBJECT
 
@@ -22,6 +31,8 @@ protected:
 	POINT3 m_homePosition = { 0,0,0 };
 
 	std::vector<POINT3> m_savedPositions;
+
+	BOUNDS m_normalizedBounds;
 
 public:
 	ScanControl() noexcept {};
@@ -88,6 +99,7 @@ public slots:
 	virtual void setPositionRelativeY(double position) = 0;
 	virtual void setPositionRelativeZ(double position) = 0;
 	void setHome();
+	void announceBounds();
 	void moveHome();
 	void savePosition();
 	void moveToSavedPosition(int index);
@@ -103,6 +115,7 @@ signals:
 	void elementPositionChanged(ScanControl::DEVICE_ELEMENT, int);
 	void currentPosition(POINT3);
 	void savedPositionsChanged(std::vector<POINT3>);
+	void boundsChanged(BOUNDS);
 };
 
 #endif // SCANCONTROL_H

@@ -30,6 +30,11 @@ void ScanControl::stopAnnouncingPosition() {
 void ScanControl::setHome() {
 	m_homePosition = getPosition();
 	announceSavedPositionsNormalized();
+	announceBounds();
+}
+
+void ScanControl::announceBounds() {
+	emit(boundsChanged(m_normalizedBounds));
 }
 
 void ScanControl::moveHome() {

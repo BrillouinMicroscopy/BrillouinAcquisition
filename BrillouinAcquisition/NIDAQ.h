@@ -13,13 +13,6 @@ struct VOLTAGE2 {
 	double Uy{ 0 };
 };
 
-struct Bounds {
-	double xMin{ -53e-6 };	// [m] minimal x-value
-	double xMax{  53e-6 };	// [m] maximal x-value
-	double yMin{ -43e-6 };	// [m] minimal y-value
-	double yMax{  43e-6 };	// [m] maximal y-value
-};
-
 struct POINT2 {
 	double x{ 0 };
 	double y{ 0 };
@@ -38,7 +31,7 @@ private:
 	TaskHandle taskHandle = 0;
 	
 	struct Calibration {
-		POINT2 translation{ -3.8008e-6, 1.1829e-6 };	// [µm]	translation
+		POINT2 translation{ -3.8008e-6, 1.1829e-6 };	// [m]	translation
 		double rho{ -0.2528 };		// [rad]	rotation
 		COEFFICIANTS5 coef{
 			-6.9185e-4, // [1/m³]	coefficient of fourth order
@@ -47,7 +40,14 @@ private:
 			4.1544e-4,	// [1]		coefficient of first order
 			0			// [m]		offset term
 		};
-		Bounds bounds;
+		BOUNDS bounds = {
+			-53,	// [µm] minimal x-value
+			 53,	// [µm] maximal x-value
+			-43,	// [µm] minimal y-value
+			 43,	// [µm] maximal y-value
+			  0,	// [µm] minimal z-value
+			  0		// [µm] maximal z-value
+		};
 		bool valid = false;
 	} m_calibration;
 
@@ -78,6 +78,8 @@ public slots:
 	void setPositionRelativeX(double position);
 	void setPositionRelativeY(double position);
 	void setPositionRelativeZ(double position);
+	void setHome();
+	void calculateBounds();
 	void loadCalibration(std::string filepath);
 };
 

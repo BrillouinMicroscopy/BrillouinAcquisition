@@ -157,6 +157,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<SensorTemperature>("SensorTemperature");
 	qRegisterMetaType<POINT3>("POINT3");
 	qRegisterMetaType<std::vector<POINT3>>("std::vector<POINT3>");
+	qRegisterMetaType<BOUNDS>("BOUNDS");
 	
 
 	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
@@ -285,6 +286,35 @@ void BrillouinAcquisition::showPosition(POINT3 position) {
 		ui->setPositionZ->setValue(position.z);
 		ui->setPositionZ->blockSignals(false);
 	}
+}
+
+void BrillouinAcquisition::setBounds(BOUNDS bounds) {
+	// set limits on manual stage control
+	ui->setPositionX->setMinimum(bounds.xMin);
+	ui->setPositionX->setMaximum(bounds.xMax);
+	ui->setPositionY->setMinimum(bounds.yMin);
+	ui->setPositionY->setMaximum(bounds.yMax);
+	ui->setPositionZ->setMinimum(bounds.zMin);
+	ui->setPositionZ->setMaximum(bounds.zMax);
+
+	// set limits on AOI control
+	//x
+	ui->startX->setMinimum(bounds.xMin);
+	ui->startX->setMaximum(bounds.xMax);
+	ui->endX->setMinimum(bounds.xMin);
+	ui->endX->setMaximum(bounds.xMax);
+
+	//y
+	ui->startY->setMinimum(bounds.yMin);
+	ui->startY->setMaximum(bounds.yMax);
+	ui->endY->setMinimum(bounds.yMin);
+	ui->endY->setMaximum(bounds.yMax);
+
+	//z
+	ui->startZ->setMinimum(bounds.zMin);
+	ui->startZ->setMaximum(bounds.zMax);
+	ui->endZ->setMinimum(bounds.zMin);
+	ui->endZ->setMaximum(bounds.zMax);
 }
 
 void BrillouinAcquisition::showAcqProgress(int state, double progress, int seconds) {
@@ -897,8 +927,6 @@ void BrillouinAcquisition::initScanControl() {
 			break;
 	}
 
-	m_acquisitionThread.startWorker(m_scanControl);
-
 	// reestablish m_scanControl connections
 	QMetaObject::Connection connection = QWidget::connect(
 		m_scanControl,
@@ -944,7 +972,15 @@ void BrillouinAcquisition::initScanControl() {
 		tableModel,
 		SLOT(setStorage(std::vector<POINT3>))
 	);
+	connection = QWidget::connect(
+		m_scanControl,
+		SIGNAL(boundsChanged(BOUNDS)),
+		this,
+		SLOT(setBounds(BOUNDS))
+	);
 	tableModel->setStorage(m_scanControl->getSavedPositionsNormalized());
+
+	m_acquisitionThread.startWorker(m_scanControl);
 
 	QMetaObject::invokeMethod(m_scanControl, "connectDevice", Qt::AutoConnection);
 

@@ -67,6 +67,16 @@ POINT2 NIDAQ::voltageToPosition(VOLTAGE2 voltage) {
 NIDAQ::NIDAQ() noexcept {
 	m_availablePresets = {};
 	m_availableElements = {};
+
+	// bounds of the stage
+	m_normalizedBounds = {
+		-53,	// [µm] minimal x-value
+		 53,	// [µm] maximal x-value
+		-43,	// [µm] minimal y-value
+		 43,	// [µm] maximal y-value
+		  0,	// [µm] minimal z-value
+		  0		// [µm] maximal z-value
+	};
 }
 
 NIDAQ::~NIDAQ() {
@@ -102,6 +112,7 @@ bool NIDAQ::disconnectDevice() {
 }
 
 void NIDAQ::init() {
+	announceBounds();
 }
 
 void NIDAQ::setElement(ScanControl::DEVICE_ELEMENT element, int position) {
@@ -117,18 +128,18 @@ void NIDAQ::setPosition(POINT3 position) {
 	// check if position is in valid range
 	// this could also throw an exception in the future
 	// x-value
-	if (position.x < 1e6*m_calibration.bounds.xMin) {
-		position.x = 1e6*m_calibration.bounds.xMin;
+	if (position.x < m_calibration.bounds.xMin) {
+		position.x = m_calibration.bounds.xMin;
 	}
-	if (position.x > 1e6*m_calibration.bounds.xMax) {
-		position.x = 1e6*m_calibration.bounds.xMax;
+	if (position.x > m_calibration.bounds.xMax) {
+		position.x = m_calibration.bounds.xMax;
 	}
 	// y-value
-	if (position.y < 1e6*m_calibration.bounds.yMin) {
-		position.y = 1e6*m_calibration.bounds.yMin;
+	if (position.y < m_calibration.bounds.yMin) {
+		position.y = m_calibration.bounds.yMin;
 	}
-	if (position.y > 1e6*m_calibration.bounds.yMax) {
-		position.y = 1e6*m_calibration.bounds.yMax;
+	if (position.y > m_calibration.bounds.yMax) {
+		position.y = m_calibration.bounds.yMax;
 	}
 
 	m_position = position;
@@ -153,6 +164,24 @@ void NIDAQ::setPositionRelativeZ(double positionZ) {
 	setPosition(m_position);
 }
 
+void NIDAQ::setHome() {
+	m_homePosition = getPosition();
+	announceSavedPositionsNormalized();
+	calculateBounds();
+	announceBounds();
+}
+
+void NIDAQ::calculateBounds() {
+	BOUNDS normalizedBounds = m_calibration.bounds;
+	normalizedBounds.xMin -= m_homePosition.x;
+	normalizedBounds.xMax -= m_homePosition.x;
+	normalizedBounds.yMin -= m_homePosition.y;
+	normalizedBounds.yMax -= m_homePosition.y;
+	normalizedBounds.zMin -= m_homePosition.z;
+	normalizedBounds.zMax -= m_homePosition.z;
+	m_normalizedBounds = normalizedBounds;
+}
+
 void NIDAQ::loadCalibration(std::string filepath) {
 	// TODO: read real values from the calibration file
 	m_calibration.translation.x = 0;
@@ -167,6 +196,8 @@ void NIDAQ::loadCalibration(std::string filepath) {
 	m_calibration.bounds.yMin = 0;
 	m_calibration.bounds.yMax = 0;
 	m_calibration.valid = true;
+	calculateBounds();
+	announceBounds();
 }
 
 POINT3 NIDAQ::getPosition() {

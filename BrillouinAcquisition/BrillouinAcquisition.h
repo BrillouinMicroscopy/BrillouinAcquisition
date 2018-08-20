@@ -51,6 +51,7 @@ Q_DECLARE_METATYPE(ScanControl::DEVICE_ELEMENT);
 Q_DECLARE_METATYPE(SensorTemperature);
 Q_DECLARE_METATYPE(POINT3);
 Q_DECLARE_METATYPE(std::vector<POINT3>);
+Q_DECLARE_METATYPE(BOUNDS);
 
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
@@ -107,6 +108,7 @@ private slots:
 	void cameraOptionsChanged(CAMERA_OPTIONS);
 	void showAcqPosition(POINT3, int);
 	void showPosition(POINT3);
+	void setBounds(BOUNDS);
 	void showAcqProgress(int state, double progress, int seconds);
 	void showCalibrationInterval(int);
 	void showCalibrationRunning(bool);

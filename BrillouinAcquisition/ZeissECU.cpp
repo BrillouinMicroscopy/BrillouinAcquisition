@@ -34,6 +34,15 @@ std::string helper::parse(std::string answer, std::string prefix) {
 ZeissECU::ZeissECU() noexcept {
 	m_availablePresets = { 0,1,2,3 };
 	m_availableElements = { 0,1,2,3,4,5 };
+	// bounds of the stage
+	m_normalizedBounds = {
+		-150000,	// [µm] minimal x-value
+		 150000,	// [µm] maximal x-value
+		-150000,	// [µm] minimal y-value
+		 150000,	// [µm] maximal y-value
+		-150000,	// [µm] minimal z-value
+		 150000		// [µm] maximal z-value
+	};
 }
 
 ZeissECU::~ZeissECU() {
@@ -60,6 +69,7 @@ void ZeissECU::init() {
 
 	positionTimer = new QTimer();
 	connection = QWidget::connect(positionTimer, SIGNAL(timeout()), this, SLOT(announcePosition()));
+	announceBounds();
 }
 
 bool ZeissECU::connectDevice() {
