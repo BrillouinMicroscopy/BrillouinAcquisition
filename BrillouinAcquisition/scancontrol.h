@@ -68,7 +68,7 @@ public:
 
 	virtual void setPosition(POINT3 position) = 0;
 	// moves the position relative to current position
-	virtual void movePosition(POINT3 distance) = 0;
+	void movePosition(POINT3 distance);
 	virtual POINT3 getPosition() = 0;
 
 	QTimer *positionTimer = nullptr;

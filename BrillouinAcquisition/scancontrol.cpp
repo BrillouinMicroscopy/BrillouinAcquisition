@@ -5,6 +5,11 @@ bool ScanControl::getConnectionStatus() {
 	return m_isConnected + m_isCompatible;
 }
 
+void ScanControl::movePosition(POINT3 distance) {
+	POINT3 position = getPosition() + distance;
+	setPosition(position);
+}
+
 void ScanControl::announcePosition() {
 	POINT3 point = getPosition();
 	emit(currentPosition(point - m_homePosition));

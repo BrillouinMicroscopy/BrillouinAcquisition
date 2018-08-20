@@ -138,11 +138,6 @@ void NIDAQ::setPosition(POINT3 position) {
 	// set z-position once implemented
 }
 
-void NIDAQ::movePosition(POINT3 distance) {
-	POINT3 position = getPosition() + distance;
-	setPosition(position);
-}
-
 void NIDAQ::setPositionRelativeX(double positionX) {
 	m_position.x = positionX + m_homePosition.x;
 	setPosition(m_position);

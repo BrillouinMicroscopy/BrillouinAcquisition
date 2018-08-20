@@ -121,8 +121,6 @@ public:
 	~ZeissECU();
 
 	void setPosition(POINT3 position);
-	// moves the position relative to current position
-	void movePosition(POINT3 distance);
 	POINT3 getPosition();
 	void setDevice(com *device);
 

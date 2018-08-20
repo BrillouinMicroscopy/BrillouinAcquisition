@@ -62,8 +62,6 @@ public:
 	POINT2 voltageToPosition(VOLTAGE2 position);
 
 	void setPosition(POINT3 position);
-	// moves the position relative to current position
-	void movePosition(POINT3 distance);
 	POINT3 getPosition();
 
 	// NIDAQ specific function to move position to center of field of view
