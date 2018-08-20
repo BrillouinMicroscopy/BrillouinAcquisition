@@ -13,11 +13,11 @@ struct VOLTAGE2 {
 	double Uy{ 0 };
 };
 
-struct validRange {
-	double xMin{ 0 };
-	double xMax{ 0 };
-	double yMin{ 0 };
-	double yMax{ 0 };
+struct Bounds {
+	double xMin{ -53e-6 };	// [m] minimal x-value
+	double xMax{  53e-6 };	// [m] maximal x-value
+	double yMin{ -43e-6 };	// [m] minimal y-value
+	double yMax{  43e-6 };	// [m] maximal y-value
 };
 
 struct POINT2 {
@@ -47,7 +47,7 @@ private:
 			4.1544e-4,	// [1]		coefficient of first order
 			0			// [m]		offset term
 		};
-		validRange range;
+		Bounds bounds;
 		bool valid = false;
 	} m_calibration;
 
@@ -65,6 +65,9 @@ public:
 	// moves the position relative to current position
 	void movePosition(POINT3 distance);
 	POINT3 getPosition();
+
+	// NIDAQ specific function to move position to center of field of view
+	void centerPosition();
 
 public slots:
 	void init();

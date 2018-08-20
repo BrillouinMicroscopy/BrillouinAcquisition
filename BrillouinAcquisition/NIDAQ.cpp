@@ -83,6 +83,7 @@ bool NIDAQ::connectDevice() {
 		DAQmxStartTask(taskHandle);
 		m_isConnected = true;
 		m_isCompatible = true;
+		centerPosition();
 	}
 	emit(connectedDevice(m_isConnected && m_isCompatible));
 	return m_isConnected && m_isCompatible;
@@ -113,28 +114,47 @@ void NIDAQ::getElements() {
 }
 
 void NIDAQ::setPosition(POINT3 position) {
+	// check if position is in valid range
+	// this could also throw an exception in the future
+	// x-value
+	if (position.x < 1e6*m_calibration.bounds.xMin) {
+		position.x = 1e6*m_calibration.bounds.xMin;
+	}
+	if (position.x > 1e6*m_calibration.bounds.xMax) {
+		position.x = 1e6*m_calibration.bounds.xMax;
+	}
+	// y-value
+	if (position.y < 1e6*m_calibration.bounds.yMin) {
+		position.y = 1e6*m_calibration.bounds.yMin;
+	}
+	if (position.y > 1e6*m_calibration.bounds.yMax) {
+		position.y = 1e6*m_calibration.bounds.yMax;
+	}
+
 	m_position = position;
-	m_voltages = positionToVoltage(POINT2{ m_position.x, m_position.y });
+	m_voltages = positionToVoltage(POINT2{ 1e-6*m_position.x, 1e-6*m_position.y });
 	float64 data[2] = { m_voltages.Ux, m_voltages.Uy };
 	DAQmxWriteAnalogF64(taskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
 	// set z-position once implemented
 }
 
 void NIDAQ::movePosition(POINT3 distance) {
+	POINT3 position = getPosition() + distance;
+	setPosition(position);
 }
 
 void NIDAQ::setPositionRelativeX(double positionX) {
-	m_position.x = positionX;
+	m_position.x = positionX + m_homePosition.x;
 	setPosition(m_position);
 }
 
 void NIDAQ::setPositionRelativeY(double positionY) {
-	m_position.y = positionY;
+	m_position.y = positionY + m_homePosition.y;
 	setPosition(m_position);
 }
 
 void NIDAQ::setPositionRelativeZ(double positionZ) {
-	m_position.z = positionZ;
+	m_position.z = positionZ + m_homePosition.z;
 	setPosition(m_position);
 }
 
@@ -147,13 +167,20 @@ void NIDAQ::loadCalibration(std::string filepath) {
 	m_calibration.coef.b = 0;
 	m_calibration.coef.c = 0;
 	m_calibration.coef.d = 0;
-	m_calibration.range.xMin = 0;
-	m_calibration.range.xMax = 0;
-	m_calibration.range.yMin = 0;
-	m_calibration.range.yMax = 0;
+	m_calibration.bounds.xMin = 0;
+	m_calibration.bounds.xMax = 0;
+	m_calibration.bounds.yMin = 0;
+	m_calibration.bounds.yMax = 0;
 	m_calibration.valid = true;
 }
 
 POINT3 NIDAQ::getPosition() {
 	return m_position;
+}
+
+void NIDAQ::centerPosition() {
+	m_position = { 0, 0, 0 };
+	m_voltages = positionToVoltage(POINT2{ 1e-6*m_position.x, 1e-6*m_position.y });
+	float64 data[2] = { m_voltages.Ux, m_voltages.Uy };
+	DAQmxWriteAnalogF64(taskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
 }
