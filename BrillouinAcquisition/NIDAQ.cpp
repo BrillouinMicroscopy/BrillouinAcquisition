@@ -182,22 +182,56 @@ void NIDAQ::calculateBounds() {
 	m_normalizedBounds = normalizedBounds;
 }
 
-void NIDAQ::loadCalibration(std::string filepath) {
-	// TODO: read real values from the calibration file
-	m_calibration.translation.x = 0;
-	m_calibration.translation.y = 0;
-	m_calibration.rho = 0;
-	m_calibration.coef.a = 0;
-	m_calibration.coef.b = 0;
-	m_calibration.coef.c = 0;
-	m_calibration.coef.d = 0;
-	m_calibration.bounds.xMin = 0;
-	m_calibration.bounds.xMax = 0;
-	m_calibration.bounds.yMin = 0;
-	m_calibration.bounds.yMax = 0;
-	m_calibration.valid = true;
+void NIDAQ::loadVoltagePositionCalibration(std::string filepath) {
+
+	using namespace std::experimental::filesystem::v1;
+
+	if (exists(filepath)) {
+		H5::H5File file(&filepath[0], H5F_ACC_RDONLY);
+
+		// read date
+		H5::Group root = file.openGroup("/");
+		H5::Attribute attr = root.openAttribute("date");
+		H5::DataType type = attr.getDataType();
+		hsize_t dateLength = attr.getStorageSize();
+		char *buf = new char[dateLength + 1];
+		attr.read(type, buf);
+		m_calibration.date.assign(buf, dateLength);
+		delete[] buf;
+		buf = nullptr;
+
+		// read calibration values
+		m_calibration.translation.x = getCalibrationValue(file, "/translation/x");
+		m_calibration.translation.y = getCalibrationValue(file, "/translation/y");
+		m_calibration.rho = getCalibrationValue(file, "/rotation");
+		m_calibration.coef.a = getCalibrationValue(file, "/coefficients/a");
+		m_calibration.coef.b = getCalibrationValue(file, "/coefficients/b");
+		m_calibration.coef.c = getCalibrationValue(file, "/coefficients/c");
+		m_calibration.coef.d = getCalibrationValue(file, "/coefficients/d");
+
+		m_calibration.bounds.xMin = getCalibrationValue(file, "/bounds/xMin");
+		m_calibration.bounds.xMax = getCalibrationValue(file, "/bounds/xMax");
+		m_calibration.bounds.yMin = getCalibrationValue(file, "/bounds/yMin");
+		m_calibration.bounds.yMax = getCalibrationValue(file, "/bounds/yMax");
+		m_calibration.valid = true;
+	}
 	calculateBounds();
 	announceBounds();
+}
+
+double NIDAQ::getCalibrationValue(H5::H5File file, std::string datasetName) {
+	using namespace H5;
+	double value{ 0 };
+
+	DataSet dataset = file.openDataSet(datasetName.c_str());
+	DataSpace filespace = dataset.getSpace();
+	int rank = filespace.getSimpleExtentNdims();
+	hsize_t dims[2];
+	rank = filespace.getSimpleExtentDims(dims);
+	DataSpace memspace(1, dims);
+	dataset.read(&value, PredType::NATIVE_DOUBLE, memspace, filespace);
+
+	return value;
 }
 
 POINT3 NIDAQ::getPosition() {

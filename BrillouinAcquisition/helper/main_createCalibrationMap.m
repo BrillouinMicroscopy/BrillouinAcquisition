@@ -15,6 +15,8 @@ if ~exist(path, 'dir') && (mode == 1)
     mkdir(path);
 end
 
+filename = '_positionCalibration';
+
 %% camera parameters
 camera.imgWidth = 1280;
 camera.imgHeight = 1024;
@@ -114,6 +116,15 @@ positions.Y_pix_centered = (positions.Y_pix - camera.imgHeight/2 - 0.5);   % [µm
 positions.X_meter = camera.pixelSize/camera.magnification*(positions.X_pix - camera.imgWidth/2 - 0.5);    % [µm] focus position
 positions.Y_meter = camera.pixelSize/camera.magnification*(positions.Y_pix - camera.imgHeight/2 - 0.5);   % [µm] focus position
 
+%% extract bounds
+bounds = 1e6*camera.pixelSize/camera.magnification*[-camera.imgWidth/2 camera.imgWidth/2 -camera.imgHeight/2 camera.imgHeight/2];
+bounds = struct( ...
+    'xMin', bounds(1), ...  % [µm] minimal x-value
+    'xMax', bounds(2), ...  % [µm] maximal x-value
+    'yMin', bounds(3), ...  % [µm] minimal y-value
+    'yMax', bounds(4) ...   % [µm] maximal y-value
+);
+
 %% plot all focus positions
 subplot(2,4,2);
 imagesc(combinedImage);
@@ -136,7 +147,7 @@ for jj = 1:size(positions.X_meter, 2)
 end
 axis equal;
 box on;
-axis(1e6*camera.pixelSize/camera.magnification*[-camera.imgWidth/2 camera.imgWidth/2 -camera.imgHeight/2 camera.imgHeight/2]);
+axis([bounds.xMin bounds.xMax bounds.yMin bounds.yMax]);
 xlabel('$x$ [$\mu$m]', 'interpreter', 'latex');
 ylabel('$y$ [$\mu$m]', 'interpreter', 'latex');
 title('Evaluated positions');
@@ -260,7 +271,7 @@ for jj = 1:size(positions_resulting.X_meter, 2)
 end
 axis equal;
 box on;
-axis(1e6*camera.pixelSize/camera.magnification*[-camera.imgWidth/2 camera.imgWidth/2 -camera.imgHeight/2 camera.imgHeight/2]);
+axis([bounds.xMin bounds.xMax bounds.yMin bounds.yMax]);
 xlabel('$x$ [$\mu$m]', 'interpreter', 'latex');
 ylabel('$y$ [$\mu$m]', 'interpreter', 'latex');
 title('Evaluated positions');
@@ -272,9 +283,99 @@ subplot(2,4,8);
 imagesc(1e6*positions_resulting.X_meter(1,:), 1e6*positions_resulting.Y_meter(:,1), 1e9*distances);
 axis equal;
 set(gca, 'yDir', 'normal');
-axis(1e6*camera.pixelSize/camera.magnification*[-camera.imgWidth/2 camera.imgWidth/2 -camera.imgHeight/2 camera.imgHeight/2]);
+axis([bounds.xMin bounds.xMax bounds.yMin bounds.yMax]);
 xlabel('$x$ [$\mu$m]', 'interpreter', 'latex');
 ylabel('$y$ [$\mu$m]', 'interpreter', 'latex');
 title('Error');
 cb = colorbar;
 title(cb, '[nm]', 'interpreter', 'latex');
+
+%% write calibration to file
+% data to write:
+%
+% date
+% translation ->
+%   x
+%   y
+% rho
+% coefficients ->
+%   d
+%   c
+%   b
+%   a
+% bounds ->
+%   xMin
+%   xMax
+%   yMin
+%   yMax
+
+% create filename
+date = datetime('now', 'InputFormat', 'uuuu-MM-dd''T''HH:mm:ss.SSSXXX', 'TimeZone', 'UTC');
+date.TimeZone = 'local';
+date.Format = 'uuuu-MM-dd''T''HHmmssX';
+shortdate = char(date);
+
+fullFilename = ['../' filename '_' shortdate '.h5'];
+
+% create file
+fid = fopen(fullFilename,'w');
+fclose(fid);
+
+% write date
+date.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSXXX';
+fulldate = char(date);
+h5writeatt(fullFilename, '/', 'date', fulldate);
+
+% write translation
+d = '/translation/';
+
+ds = [d 'x'];
+h5create(fullFilename, ds, 1, 'ChunkSize', 1);
+h5write(fullFilename, ds, distortion(1));
+
+ds = [d 'y'];
+h5create(fullFilename, ds, 1, 'ChunkSize', 1);
+h5write(fullFilename, ds, distortion(2));
+
+%% write rotation
+ds = '/rotation';
+h5create(fullFilename, ds, 1, 'ChunkSize', 1);
+h5write(fullFilename, ds, distortion(3));
+
+% write coefficients
+d = '/coefficients/';
+
+ds = [d 'a'];
+h5create(fullFilename, ds, 1, 'ChunkSize', 1);
+h5write(fullFilename, ds, distortion(7));
+
+ds = [d 'b'];
+h5create(fullFilename, ds, 1, 'ChunkSize', 1);
+h5write(fullFilename, ds, distortion(6));
+
+ds = [d 'c'];
+h5create(fullFilename, ds, 1, 'ChunkSize', 1);
+h5write(fullFilename, ds, distortion(5));
+
+ds = [d 'd'];
+h5create(fullFilename, ds, 1, 'ChunkSize', 1);
+h5write(fullFilename, ds, distortion(4));
+
+% write bounds
+d = '/bounds/';
+
+ds = [d 'xMin'];
+h5create(fullFilename, ds, 1, 'ChunkSize', 1);
+h5write(fullFilename, ds, bounds.xMin);
+
+ds = [d 'xMax'];
+h5create(fullFilename, ds, 1, 'ChunkSize', 1);
+h5write(fullFilename, ds, bounds.xMax);
+
+ds = [d 'yMin'];
+h5create(fullFilename, ds, 1, 'ChunkSize', 1);
+h5write(fullFilename, ds, bounds.yMin);
+
+ds = [d 'yMax'];
+h5create(fullFilename, ds, 1, 'ChunkSize', 1);
+h5write(fullFilename, ds, bounds.yMax);

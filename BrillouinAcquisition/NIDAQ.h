@@ -8,6 +8,9 @@
 #include "simplemath.h"
 #include <gsl/gsl>
 
+#include "H5Cpp.h"
+#include "filesystem"
+
 struct VOLTAGE2 {
 	double Ux{ 0 };
 	double Uy{ 0 };
@@ -31,6 +34,7 @@ private:
 	TaskHandle taskHandle = 0;
 	
 	struct Calibration {
+		std::string date{ "" };
 		POINT2 translation{ -3.8008e-6, 1.1829e-6 };	// [m]	translation
 		double rho{ -0.2528 };		// [rad]	rotation
 		COEFFICIANTS5 coef{
@@ -80,7 +84,8 @@ public slots:
 	void setPositionRelativeZ(double position);
 	void setHome();
 	void calculateBounds();
-	void loadCalibration(std::string filepath);
+	void loadVoltagePositionCalibration(std::string filepath) override;
+	double getCalibrationValue(H5::H5File file, std::string datasetName);
 };
 
 #endif // NIDAQMX_H

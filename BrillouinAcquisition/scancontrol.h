@@ -104,7 +104,7 @@ public slots:
 	void savePosition();
 	void moveToSavedPosition(int index);
 	void deleteSavedPosition(int index);
-	virtual void loadVoltagePositionMap(std::string filepath) {};
+	virtual void loadVoltagePositionCalibration(std::string filepath) {};
 
 	std::vector<POINT3> getSavedPositionsNormalized();
 	void announceSavedPositionsNormalized();
