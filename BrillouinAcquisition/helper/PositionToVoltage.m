@@ -23,7 +23,7 @@ function [Ux, Uy] = PositionToVoltage(x, y, distortion)
         end
     end
     
-    if (R_old == 0)
+    if (abs(R_old) < 1e-12)
         Ux = x_rot;
         Uy = y_rot;
     else

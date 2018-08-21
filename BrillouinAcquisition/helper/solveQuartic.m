@@ -28,7 +28,8 @@ function [x] = solveQuartic(poly)
     
     %% select only the real, positive solutions
     % select only the real ones
-    x = x(imag(x)==0);
+    x = x(abs(imag(x)) < 1e-10);
+    x = real(x);
     % select only the positive one
     x = x(x>0);
     if isempty(x)
