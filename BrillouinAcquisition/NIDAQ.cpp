@@ -147,6 +147,7 @@ void NIDAQ::setPosition(POINT3 position) {
 	float64 data[2] = { m_voltages.Ux, m_voltages.Uy };
 	DAQmxWriteAnalogF64(taskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
 	// set z-position once implemented
+	announcePosition();
 }
 
 void NIDAQ::setPositionRelativeX(double positionX) {
@@ -167,6 +168,7 @@ void NIDAQ::setPositionRelativeZ(double positionZ) {
 void NIDAQ::setHome() {
 	m_homePosition = getPosition();
 	announceSavedPositionsNormalized();
+	announcePosition();
 	calculateBounds();
 	announceBounds();
 }
@@ -215,6 +217,7 @@ void NIDAQ::loadVoltagePositionCalibration(std::string filepath) {
 		m_calibration.bounds.yMax = getCalibrationValue(file, "/bounds/yMax");
 		m_calibration.valid = true;
 	}
+	centerPosition();
 	calculateBounds();
 	announceBounds();
 }
