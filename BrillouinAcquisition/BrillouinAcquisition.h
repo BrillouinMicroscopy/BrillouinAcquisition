@@ -108,7 +108,8 @@ private slots:
 	void cameraOptionsChanged(CAMERA_OPTIONS);
 	void showAcqPosition(POINT3, int);
 	void showPosition(POINT3);
-	void setBounds(BOUNDS);
+	void setHomePositionBounds(BOUNDS);
+	void setCurrentPositionBounds(BOUNDS bounds);
 	void showAcqProgress(int state, double progress, int seconds);
 	void showCalibrationInterval(int);
 	void showCalibrationRunning(bool);

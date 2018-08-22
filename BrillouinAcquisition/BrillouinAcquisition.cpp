@@ -288,7 +288,7 @@ void BrillouinAcquisition::showPosition(POINT3 position) {
 	}
 }
 
-void BrillouinAcquisition::setBounds(BOUNDS bounds) {
+void BrillouinAcquisition::setHomePositionBounds(BOUNDS bounds) {
 	// set limits on manual stage control
 	ui->setPositionX->setMinimum(bounds.xMin);
 	ui->setPositionX->setMaximum(bounds.xMax);
@@ -296,7 +296,9 @@ void BrillouinAcquisition::setBounds(BOUNDS bounds) {
 	ui->setPositionY->setMaximum(bounds.yMax);
 	ui->setPositionZ->setMinimum(bounds.zMin);
 	ui->setPositionZ->setMaximum(bounds.zMax);
+}
 
+void BrillouinAcquisition::setCurrentPositionBounds(BOUNDS bounds) {
 	// set limits on AOI control
 	//x
 	ui->startX->setMinimum(bounds.xMin);
@@ -974,9 +976,15 @@ void BrillouinAcquisition::initScanControl() {
 	);
 	connection = QWidget::connect(
 		m_scanControl,
-		SIGNAL(boundsChanged(BOUNDS)),
+		SIGNAL(homePositionBoundsChanged(BOUNDS)),
 		this,
-		SLOT(setBounds(BOUNDS))
+		SLOT(setHomePositionBounds(BOUNDS))
+	);
+	connection = QWidget::connect(
+		m_scanControl,
+		SIGNAL(currentPositionBoundsChanged(BOUNDS)),
+		this,
+		SLOT(setCurrentPositionBounds(BOUNDS))
 	);
 	tableModel->setStorage(m_scanControl->getSavedPositionsNormalized());
 

@@ -28,11 +28,16 @@ class ScanControl: public QObject {
 protected:
 	bool m_isConnected = false;
 	bool m_isCompatible = false;
-	POINT3 m_homePosition = { 0,0,0 };
+	POINT3 m_homePosition = { 0, 0, 0 };
 
 	std::vector<POINT3> m_savedPositions;
 
-	BOUNDS m_normalizedBounds;
+	void calculateHomePositionBounds();
+	void calculateCurrentPositionBounds();
+
+	BOUNDS m_absoluteBounds;
+	BOUNDS m_homePositionBounds;
+	BOUNDS m_currentPositionBounds;
 
 public:
 	ScanControl() noexcept {};
@@ -99,7 +104,6 @@ public slots:
 	virtual void setPositionRelativeY(double position) = 0;
 	virtual void setPositionRelativeZ(double position) = 0;
 	void setHome();
-	void announceBounds();
 	void moveHome();
 	void savePosition();
 	void moveToSavedPosition(int index);
@@ -115,7 +119,8 @@ signals:
 	void elementPositionChanged(ScanControl::DEVICE_ELEMENT, int);
 	void currentPosition(POINT3);
 	void savedPositionsChanged(std::vector<POINT3>);
-	void boundsChanged(BOUNDS);
+	void homePositionBoundsChanged(BOUNDS);
+	void currentPositionBoundsChanged(BOUNDS);
 };
 
 #endif // SCANCONTROL_H

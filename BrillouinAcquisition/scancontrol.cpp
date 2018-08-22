@@ -30,11 +30,31 @@ void ScanControl::stopAnnouncingPosition() {
 void ScanControl::setHome() {
 	m_homePosition = getPosition();
 	announceSavedPositionsNormalized();
-	announceBounds();
+	announcePosition();
+	calculateHomePositionBounds();
 }
 
-void ScanControl::announceBounds() {
-	emit(boundsChanged(m_normalizedBounds));
+void ScanControl::calculateHomePositionBounds() {
+	m_homePositionBounds.xMin = m_absoluteBounds.xMin - m_homePosition.x;
+	m_homePositionBounds.xMax = m_absoluteBounds.xMax - m_homePosition.x;
+	m_homePositionBounds.yMin = m_absoluteBounds.yMin - m_homePosition.y;
+	m_homePositionBounds.yMax = m_absoluteBounds.yMax - m_homePosition.y;
+	m_homePositionBounds.zMin = m_absoluteBounds.zMin - m_homePosition.z;
+	m_homePositionBounds.zMax = m_absoluteBounds.zMax - m_homePosition.z;
+
+	emit(homePositionBoundsChanged(m_homePositionBounds));
+}
+
+void ScanControl::calculateCurrentPositionBounds() {
+	POINT3 currentPosition = getPosition();
+	m_currentPositionBounds.xMin = m_absoluteBounds.xMin - currentPosition.x;
+	m_currentPositionBounds.xMax = m_absoluteBounds.xMax - currentPosition.x;
+	m_currentPositionBounds.yMin = m_absoluteBounds.yMin - currentPosition.y;
+	m_currentPositionBounds.yMax = m_absoluteBounds.yMax - currentPosition.y;
+	m_currentPositionBounds.zMin = m_absoluteBounds.zMin - currentPosition.z;
+	m_currentPositionBounds.zMax = m_absoluteBounds.zMax - currentPosition.z;
+
+	emit(currentPositionBoundsChanged(m_currentPositionBounds));
 }
 
 void ScanControl::moveHome() {

@@ -68,15 +68,7 @@ NIDAQ::NIDAQ() noexcept {
 	m_availablePresets = {};
 	m_availableElements = {};
 
-	// bounds of the stage
-	m_normalizedBounds = {
-		-53,	// [µm] minimal x-value
-		 53,	// [µm] maximal x-value
-		-43,	// [µm] minimal y-value
-		 43,	// [µm] maximal y-value
-		  0,	// [µm] minimal z-value
-		  0		// [µm] maximal z-value
-	};
+	m_absoluteBounds = m_calibration.bounds;
 }
 
 NIDAQ::~NIDAQ() {
@@ -94,6 +86,8 @@ bool NIDAQ::connectDevice() {
 		m_isConnected = true;
 		m_isCompatible = true;
 		centerPosition();
+		calculateHomePositionBounds();
+		calculateCurrentPositionBounds();
 	}
 	emit(connectedDevice(m_isConnected && m_isCompatible));
 	return m_isConnected && m_isCompatible;
@@ -112,7 +106,7 @@ bool NIDAQ::disconnectDevice() {
 }
 
 void NIDAQ::init() {
-	announceBounds();
+	calculateHomePositionBounds();
 }
 
 void NIDAQ::setElement(ScanControl::DEVICE_ELEMENT element, int position) {
@@ -148,6 +142,7 @@ void NIDAQ::setPosition(POINT3 position) {
 	DAQmxWriteAnalogF64(taskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
 	// set z-position once implemented
 	announcePosition();
+	calculateCurrentPositionBounds();
 }
 
 void NIDAQ::setPositionRelativeX(double positionX) {
@@ -163,25 +158,6 @@ void NIDAQ::setPositionRelativeY(double positionY) {
 void NIDAQ::setPositionRelativeZ(double positionZ) {
 	m_position.z = positionZ + m_homePosition.z;
 	setPosition(m_position);
-}
-
-void NIDAQ::setHome() {
-	m_homePosition = getPosition();
-	announceSavedPositionsNormalized();
-	announcePosition();
-	calculateBounds();
-	announceBounds();
-}
-
-void NIDAQ::calculateBounds() {
-	BOUNDS normalizedBounds = m_calibration.bounds;
-	normalizedBounds.xMin -= m_homePosition.x;
-	normalizedBounds.xMax -= m_homePosition.x;
-	normalizedBounds.yMin -= m_homePosition.y;
-	normalizedBounds.yMax -= m_homePosition.y;
-	normalizedBounds.zMin -= m_homePosition.z;
-	normalizedBounds.zMax -= m_homePosition.z;
-	m_normalizedBounds = normalizedBounds;
 }
 
 void NIDAQ::loadVoltagePositionCalibration(std::string filepath) {
@@ -215,11 +191,11 @@ void NIDAQ::loadVoltagePositionCalibration(std::string filepath) {
 		m_calibration.bounds.xMax = getCalibrationValue(file, "/bounds/xMax");
 		m_calibration.bounds.yMin = getCalibrationValue(file, "/bounds/yMin");
 		m_calibration.bounds.yMax = getCalibrationValue(file, "/bounds/yMax");
+		m_absoluteBounds = m_calibration.bounds;
 		m_calibration.valid = true;
 	}
 	centerPosition();
-	calculateBounds();
-	announceBounds();
+	calculateHomePositionBounds();
 }
 
 double NIDAQ::getCalibrationValue(H5::H5File file, std::string datasetName) {

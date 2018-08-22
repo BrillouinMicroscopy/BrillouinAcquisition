@@ -82,8 +82,6 @@ public slots:
 	void setPositionRelativeX(double position);
 	void setPositionRelativeY(double position);
 	void setPositionRelativeZ(double position);
-	void setHome();
-	void calculateBounds();
 	void loadVoltagePositionCalibration(std::string filepath) override;
 	double getCalibrationValue(H5::H5File file, std::string datasetName);
 };
