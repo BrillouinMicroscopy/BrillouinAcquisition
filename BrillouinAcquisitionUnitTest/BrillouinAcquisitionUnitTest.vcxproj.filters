@@ -32,13 +32,19 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="unittest1.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ScanControlTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MockMicroscope.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ZeissECUTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ZeissECUHelpers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NIDAQ_PositionVoltage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="simplemath.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -82,7 +88,16 @@
     <Object Include="..\BrillouinAcquisition\x64\Debug\stdafx.obj">
       <Filter>Source Files</Filter>
     </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\thread.obj">
+    <Object Include="..\BrillouinAcquisition\x64\Debug\ZeissECU.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_ZeissECU.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\NIDAQ.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_NIDAQ.obj">
       <Filter>Source Files</Filter>
     </Object>
   </ItemGroup>

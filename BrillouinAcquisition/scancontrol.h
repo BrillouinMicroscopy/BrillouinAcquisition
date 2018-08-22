@@ -13,15 +13,31 @@ struct POINT3 {
 	}
 };
 
+struct BOUNDS {
+	double xMin{ -1e3 };	// [µm] minimal x-value
+	double xMax{  1e3 };	// [µm] maximal x-value
+	double yMin{ -1e3 };	// [µm] minimal y-value
+	double yMax{  1e3 };	// [µm] maximal y-value
+	double zMin{ -1e3 };	// [µm] minimal z-value
+	double zMax{  1e3 };	// [µm] maximal z-value
+};
+
 class ScanControl: public QObject {
 	Q_OBJECT
 
 protected:
 	bool m_isConnected = false;
 	bool m_isCompatible = false;
-	POINT3 m_homePosition = { 0,0,0 };
+	POINT3 m_homePosition = { 0, 0, 0 };
 
 	std::vector<POINT3> m_savedPositions;
+
+	void calculateHomePositionBounds();
+	void calculateCurrentPositionBounds();
+
+	BOUNDS m_absoluteBounds;
+	BOUNDS m_homePositionBounds;
+	BOUNDS m_currentPositionBounds;
 
 public:
 	ScanControl() noexcept {};
@@ -68,7 +84,7 @@ public:
 
 	virtual void setPosition(POINT3 position) = 0;
 	// moves the position relative to current position
-	virtual void movePosition(POINT3 distance) = 0;
+	void movePosition(POINT3 distance);
 	virtual POINT3 getPosition() = 0;
 
 	QTimer *positionTimer = nullptr;
@@ -92,6 +108,7 @@ public slots:
 	void savePosition();
 	void moveToSavedPosition(int index);
 	void deleteSavedPosition(int index);
+	virtual void loadVoltagePositionCalibration(std::string filepath) {};
 
 	std::vector<POINT3> getSavedPositionsNormalized();
 	void announceSavedPositionsNormalized();
@@ -102,6 +119,8 @@ signals:
 	void elementPositionChanged(ScanControl::DEVICE_ELEMENT, int);
 	void currentPosition(POINT3);
 	void savedPositionsChanged(std::vector<POINT3>);
+	void homePositionBoundsChanged(BOUNDS);
+	void currentPositionBoundsChanged(BOUNDS);
 };
 
 #endif // SCANCONTROL_H

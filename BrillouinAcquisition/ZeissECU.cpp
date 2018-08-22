@@ -14,7 +14,11 @@ std::string helper::dec2hex(int dec, int digits = 6) {
 }
 
 int helper::hex2dec(std::string s) {
-	return std::stoul(s, nullptr, 16);
+	if (s.size() < 6) {
+		return NAN;
+	} else {
+		return std::stoul(s, nullptr, 16);
+	}
 }
 
 std::string helper::parse(std::string answer, std::string prefix) {
@@ -34,6 +38,15 @@ std::string helper::parse(std::string answer, std::string prefix) {
 ZeissECU::ZeissECU() noexcept {
 	m_availablePresets = { 0,1,2,3 };
 	m_availableElements = { 0,1,2,3,4,5 };
+	// bounds of the stage
+	m_absoluteBounds = {
+		-150000,	// [µm] minimal x-value
+		 150000,	// [µm] maximal x-value
+		-150000,	// [µm] minimal y-value
+		 150000,	// [µm] maximal y-value
+		-150000,	// [µm] minimal z-value
+		 150000		// [µm] maximal z-value
+	};
 }
 
 ZeissECU::~ZeissECU() {
@@ -60,6 +73,7 @@ void ZeissECU::init() {
 
 	positionTimer = new QTimer();
 	connection = QWidget::connect(positionTimer, SIGNAL(timeout()), this, SLOT(announcePosition()));
+	calculateHomePositionBounds();
 }
 
 bool ZeissECU::connectDevice() {
@@ -104,6 +118,8 @@ bool ZeissECU::connectDevice() {
 				setElements(SCAN_PRESET::SCAN_BRIGHTFIELD);
 				m_homePosition = getPosition();
 				startAnnouncingPosition();
+				calculateHomePositionBounds();
+				calculateCurrentPositionBounds();
 			}
 
 		} catch (QString e) {
@@ -132,25 +148,22 @@ void ZeissECU::setPosition(POINT3 position) {
 	m_mcu->setX(position.x);
 	m_mcu->setY(position.y);
 	m_focus->setZ(position.z);
-}
-
-void ZeissECU::movePosition(POINT3 distance) {
-	POINT3 position = getPosition() + distance;
-	m_mcu->setX(position.x);
-	m_mcu->setY(position.y);
-	m_focus->setZ(position.z);
+	calculateCurrentPositionBounds();
 }
 
 void ZeissECU::setPositionRelativeX(double positionX) {
 	m_mcu->setX(positionX + m_homePosition.x);
+	calculateCurrentPositionBounds();
 }
 
 void ZeissECU::setPositionRelativeY(double positionY) {
 	m_mcu->setY(positionY + m_homePosition.y);
+	calculateCurrentPositionBounds();
 }
 
 void ZeissECU::setPositionRelativeZ(double positionZ) {
 	m_focus->setZ(positionZ + m_homePosition.z);
+	calculateCurrentPositionBounds();
 }
 
 POINT3 ZeissECU::getPosition() {

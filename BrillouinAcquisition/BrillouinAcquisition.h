@@ -51,6 +51,7 @@ Q_DECLARE_METATYPE(ScanControl::DEVICE_ELEMENT);
 Q_DECLARE_METATYPE(SensorTemperature);
 Q_DECLARE_METATYPE(POINT3);
 Q_DECLARE_METATYPE(std::vector<POINT3>);
+Q_DECLARE_METATYPE(BOUNDS);
 
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
@@ -75,6 +76,7 @@ private slots:
 	void cancelSettings();
 	void initSettingsDialog();
 	void selectScanningDevice(int index);
+	void on_actionLoad_Voltage_Position_calibration_triggered();
 
 	void initBeampathButtons();
 
@@ -106,6 +108,8 @@ private slots:
 	void cameraOptionsChanged(CAMERA_OPTIONS);
 	void showAcqPosition(POINT3, int);
 	void showPosition(POINT3);
+	void setHomePositionBounds(BOUNDS);
+	void setCurrentPositionBounds(BOUNDS bounds);
 	void showAcqProgress(int state, double progress, int seconds);
 	void showCalibrationInterval(int);
 	void showCalibrationRunning(bool);
@@ -170,6 +174,7 @@ private:
 	ScanControl::SCAN_DEVICE m_scanControllerTypeTemporary = m_scanControllerType;
 	void initScanControl();
 	QComboBox *m_scanControlDropdown;
+	std::string m_calibrationFilePath;
 
 	QDialog *m_settingsDialog = nullptr;
 	void checkElementButtons();

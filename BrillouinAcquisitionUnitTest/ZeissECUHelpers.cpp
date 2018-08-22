@@ -1,12 +1,12 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
-#include "../BrillouinAcquisition/scancontrol.h"
+#include "../BrillouinAcquisition/ZeissECU.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace BrillouinAcquisitionUnitTest
 {		
-	TEST_CLASS(UnitTest1) {
+	TEST_CLASS(TestZeissECUHelpers) {
 	public:
 		
 		TEST_METHOD(TestMethod1) {

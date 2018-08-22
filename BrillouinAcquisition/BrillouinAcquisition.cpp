@@ -157,6 +157,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<SensorTemperature>("SensorTemperature");
 	qRegisterMetaType<POINT3>("POINT3");
 	qRegisterMetaType<std::vector<POINT3>>("std::vector<POINT3>");
+	qRegisterMetaType<BOUNDS>("BOUNDS");
 	
 
 	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
@@ -285,6 +286,37 @@ void BrillouinAcquisition::showPosition(POINT3 position) {
 		ui->setPositionZ->setValue(position.z);
 		ui->setPositionZ->blockSignals(false);
 	}
+}
+
+void BrillouinAcquisition::setHomePositionBounds(BOUNDS bounds) {
+	// set limits on manual stage control
+	ui->setPositionX->setMinimum(bounds.xMin);
+	ui->setPositionX->setMaximum(bounds.xMax);
+	ui->setPositionY->setMinimum(bounds.yMin);
+	ui->setPositionY->setMaximum(bounds.yMax);
+	ui->setPositionZ->setMinimum(bounds.zMin);
+	ui->setPositionZ->setMaximum(bounds.zMax);
+}
+
+void BrillouinAcquisition::setCurrentPositionBounds(BOUNDS bounds) {
+	// set limits on AOI control
+	//x
+	ui->startX->setMinimum(bounds.xMin);
+	ui->startX->setMaximum(bounds.xMax);
+	ui->endX->setMinimum(bounds.xMin);
+	ui->endX->setMaximum(bounds.xMax);
+
+	//y
+	ui->startY->setMinimum(bounds.yMin);
+	ui->startY->setMaximum(bounds.yMax);
+	ui->endY->setMinimum(bounds.yMin);
+	ui->endY->setMaximum(bounds.yMax);
+
+	//z
+	ui->startZ->setMinimum(bounds.zMin);
+	ui->startZ->setMaximum(bounds.zMax);
+	ui->endZ->setMinimum(bounds.zMin);
+	ui->endZ->setMaximum(bounds.zMax);
 }
 
 void BrillouinAcquisition::showAcqProgress(int state, double progress, int seconds) {
@@ -794,6 +826,12 @@ void BrillouinAcquisition::selectScanningDevice(int index) {
 	m_scanControllerTypeTemporary = (ScanControl::SCAN_DEVICE)index;
 }
 
+void BrillouinAcquisition::on_actionLoad_Voltage_Position_calibration_triggered() {
+	m_calibrationFilePath = QFileDialog::getOpenFileName(this, tr("Select Voltage-Position map"),
+		QString::fromStdString(m_calibrationFilePath), tr("Calibration map (*.h5)")).toStdString();
+	m_scanControl->loadVoltagePositionCalibration(m_calibrationFilePath);
+}
+
 void BrillouinAcquisition::initBeampathButtons() {
 	for (auto widget : ui->beamPathBox->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly)) {
 		delete widget;
@@ -879,16 +917,17 @@ void BrillouinAcquisition::initScanControl() {
 	switch (m_scanControllerType) {
 		case ScanControl::SCAN_DEVICE::ZEISSECU:
 			m_scanControl = new ZeissECU();
+			ui->actionLoad_Voltage_Position_calibration->setVisible(false);
 			break;
 		case ScanControl::SCAN_DEVICE::NIDAQ:
 			m_scanControl = new NIDAQ();
+			ui->actionLoad_Voltage_Position_calibration->setVisible(true);
 			break;
 		default:
 			m_scanControl = new ZeissECU();
+			ui->actionLoad_Voltage_Position_calibration->setVisible(false);
 			break;
 	}
-
-	m_acquisitionThread.startWorker(m_scanControl);
 
 	// reestablish m_scanControl connections
 	QMetaObject::Connection connection = QWidget::connect(
@@ -935,7 +974,21 @@ void BrillouinAcquisition::initScanControl() {
 		tableModel,
 		SLOT(setStorage(std::vector<POINT3>))
 	);
+	connection = QWidget::connect(
+		m_scanControl,
+		SIGNAL(homePositionBoundsChanged(BOUNDS)),
+		this,
+		SLOT(setHomePositionBounds(BOUNDS))
+	);
+	connection = QWidget::connect(
+		m_scanControl,
+		SIGNAL(currentPositionBoundsChanged(BOUNDS)),
+		this,
+		SLOT(setCurrentPositionBounds(BOUNDS))
+	);
 	tableModel->setStorage(m_scanControl->getSavedPositionsNormalized());
+
+	m_acquisitionThread.startWorker(m_scanControl);
 
 	QMetaObject::invokeMethod(m_scanControl, "connectDevice", Qt::AutoConnection);
 
