@@ -66,8 +66,8 @@ POINT2 NIDAQ::voltageToPosition(VOLTAGE2 voltage) {
 
 NIDAQ::NIDAQ() noexcept {
 	m_presets = {
-		{ 2, 1 },	// Calibration
-		{ 1, 1 }	// Brillouin
+		{ 1, 1 },	// Brillouin
+		{ 2, 1 }	// Calibration
 	};
 	m_availablePresets = { 1, 2 };
 	m_availableElements = { 6, 7 };
@@ -172,6 +172,7 @@ void NIDAQ::getElement(ScanControl::DEVICE_ELEMENT element) {
 void NIDAQ::setElements(ScanControl::SCAN_PRESET preset) {
 	int presetNr{ 0 };
 	switch (preset) {
+		case ScanControl::SCAN_BRIGHTFIELD:
 		case ScanControl::SCAN_BRILLOUIN:
 			presetNr = 0;
 			break;
