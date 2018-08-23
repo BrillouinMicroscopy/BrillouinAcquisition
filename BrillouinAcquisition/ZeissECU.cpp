@@ -81,6 +81,9 @@ void ZeissECU::init() {
 
 	positionTimer = new QTimer();
 	connection = QWidget::connect(positionTimer, SIGNAL(timeout()), this, SLOT(announcePosition()));
+
+	elementPositionTimer = new QTimer();
+	connection = QWidget::connect(elementPositionTimer, SIGNAL(timeout()), this, SLOT(getElements()));
 	calculateHomePositionBounds();
 }
 
@@ -126,6 +129,7 @@ bool ZeissECU::connectDevice() {
 				setElements(SCAN_PRESET::SCAN_BRIGHTFIELD);
 				m_homePosition = getPosition();
 				startAnnouncingPosition();
+				startAnnouncingElementPosition();
 				calculateHomePositionBounds();
 				calculateCurrentPositionBounds();
 			}
@@ -142,6 +146,7 @@ bool ZeissECU::connectDevice() {
 bool ZeissECU::disconnectDevice() {
 	if (m_comObject && m_isConnected) {
 		stopAnnouncingPosition();
+		stopAnnouncingElementPosition();
 		m_comObject->close();
 		m_isConnected = false;
 		m_isCompatible = false;
