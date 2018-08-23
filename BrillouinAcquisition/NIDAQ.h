@@ -62,6 +62,7 @@ private:
 	// TODO: make the following parameters changeable:
 	char const *m_serialNo = "65864438";	// serial number of the TCube Inertial motor controller device (can be found in Kinesis)
 	TIM_Channels m_channelPosZ{ Channel1 };
+	int m_PiezoIncPerMum{ 50 };
 
 public:
 	NIDAQ() noexcept;
