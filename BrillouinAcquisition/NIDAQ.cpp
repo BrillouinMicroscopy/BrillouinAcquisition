@@ -94,7 +94,10 @@ bool NIDAQ::connectDevice() {
 			calculateHomePositionBounds();
 		}
 		Thorlabs_FF::FF_Open(m_serialNo_FF1);
+		Thorlabs_FF::FF_StartPolling(m_serialNo_FF1, 200);
 		Thorlabs_FF::FF_Open(m_serialNo_FF2);
+		Thorlabs_FF::FF_StartPolling(m_serialNo_FF2, 200);
+		startAnnouncingElementPosition();
 	}
 	emit(connectedDevice(m_isConnected && m_isCompatible));
 	return m_isConnected && m_isCompatible;
@@ -102,6 +105,7 @@ bool NIDAQ::connectDevice() {
 
 bool NIDAQ::disconnectDevice() {
 	if (m_isConnected) {
+		stopAnnouncingElementPosition();
 		// Stop and clear DAQ task
 		DAQmxStopTask(taskHandle);
 		DAQmxClearTask(taskHandle);
@@ -112,7 +116,9 @@ bool NIDAQ::disconnectDevice() {
 		Thorlabs_TIM::TIM_Close(m_serialNo_TIM);
 
 		Thorlabs_FF::FF_Close(m_serialNo_FF1);
+		Thorlabs_FF::FF_StopPolling(m_serialNo_FF1);
 		Thorlabs_FF::FF_Close(m_serialNo_FF2);
+		Thorlabs_FF::FF_StopPolling(m_serialNo_FF2);
 
 		m_isConnected = false;
 		m_isCompatible = false;
@@ -124,6 +130,9 @@ bool NIDAQ::disconnectDevice() {
 
 void NIDAQ::init() {
 	calculateHomePositionBounds();
+
+	elementPositionTimer = new QTimer();
+	QMetaObject::Connection connection = QWidget::connect(elementPositionTimer, SIGNAL(timeout()), this, SLOT(getElements()));
 }
 
 void NIDAQ::setElement(ScanControl::DEVICE_ELEMENT element, int position) {
@@ -137,35 +146,44 @@ void NIDAQ::setElement(ScanControl::DEVICE_ELEMENT element, int position) {
 		default:
 			break;
 	}
+	getElement(element);
+}
+
+void NIDAQ::getElement(ScanControl::DEVICE_ELEMENT element) {
+	int position{ -1 };
+	switch (element) {
+		case ScanControl::CALFLIPMIRROR:
+			position = Thorlabs_FF::FF_GetPosition(m_serialNo_FF1);
+			break;
+		case ScanControl::BEAMBLOCK:
+			position = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
+			break;
+		default:
+			break;
+	}
 	emit(elementPositionChanged(element, position));
+
 }
 
 void NIDAQ::setElements(ScanControl::SCAN_PRESET preset) {
 	setCalFlipMirror(m_presets[preset][6]);
 	setBeamBlock(m_presets[preset][7]);
-	emit(elementPositionsChanged(m_presets[preset]));
+	getElements();
 }
 
 void NIDAQ::getElements() {
 	std::vector<int> elementPositions(enDeviceElement::DEVICE_ELEMENT_COUNT, -1);
-	elementPositions[6] = m_elementPositions.CalFlipMirror + 1;
-	elementPositions[7] = m_elementPositions.BeamBlock + 1;
+	elementPositions[6] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF1);
+	elementPositions[7] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
 	emit(elementPositionsChanged(elementPositions));
 }
 
 void NIDAQ::setCalFlipMirror(int position) {
-	m_elementPositions.CalFlipMirror = (Thorlabs_FF::FF_Positions)position;
-	applyElementPosition();
+	Thorlabs_FF::FF_MoveToPosition(m_serialNo_FF1, (Thorlabs_FF::FF_Positions)position);
 }
 
 void NIDAQ::setBeamBlock(int position) {
-	m_elementPositions.BeamBlock = (Thorlabs_FF::FF_Positions)position;
-	applyElementPosition();
-}
-
-void NIDAQ::applyElementPosition() {
-	Thorlabs_FF::FF_MoveToPosition(m_serialNo_FF1, m_elementPositions.CalFlipMirror);
-	Thorlabs_FF::FF_MoveToPosition(m_serialNo_FF2, m_elementPositions.BeamBlock);
+	Thorlabs_FF::FF_MoveToPosition(m_serialNo_FF2, (Thorlabs_FF::FF_Positions)position);
 }
 
 void NIDAQ::applyScanPosition() {

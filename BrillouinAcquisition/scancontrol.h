@@ -94,17 +94,21 @@ public:
 	virtual POINT3 getPosition() = 0;
 
 	QTimer *positionTimer = nullptr;
+	QTimer *elementPositionTimer = nullptr;
 
 public slots:
 	virtual void init() = 0;
 	virtual bool connectDevice() = 0;
 	virtual bool disconnectDevice() = 0;
 	virtual void setElement(ScanControl::DEVICE_ELEMENT, int) = 0;
+	virtual void getElement(ScanControl::DEVICE_ELEMENT) = 0;
 	virtual void setElements(ScanControl::SCAN_PRESET) = 0;
 	virtual void getElements() = 0;
 	void announcePosition();
 	void startAnnouncingPosition();
 	void stopAnnouncingPosition();
+	void startAnnouncingElementPosition();
+	void stopAnnouncingElementPosition();
 	// sets the position relative to the home position m_homePosition
 	virtual void setPositionRelativeX(double position) = 0;
 	virtual void setPositionRelativeY(double position) = 0;

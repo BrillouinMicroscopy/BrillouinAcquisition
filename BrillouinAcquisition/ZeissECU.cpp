@@ -229,6 +229,9 @@ void ZeissECU::getElements() {
 	emit(elementPositionsChanged(elementPositions));
 };
 
+void ZeissECU::getElement(ScanControl::DEVICE_ELEMENT element) {
+}
+
 /*
 * Functions regarding the serial communication
 *

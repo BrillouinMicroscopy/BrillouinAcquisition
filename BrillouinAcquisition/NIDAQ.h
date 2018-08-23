@@ -99,11 +99,11 @@ public slots:
 	bool connectDevice();
 	bool disconnectDevice();
 	void setElement(ScanControl::DEVICE_ELEMENT element, int position);
+	void getElement(ScanControl::DEVICE_ELEMENT element);
 	void setElements(ScanControl::SCAN_PRESET preset);
 	void getElements();
 	void setCalFlipMirror(int position);
 	void setBeamBlock(int position);
-	void applyElementPosition();
 	// sets the position relative to the home position m_homePosition
 	void setPositionRelativeX(double position);
 	void setPositionRelativeY(double position);
