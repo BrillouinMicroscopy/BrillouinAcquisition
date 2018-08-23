@@ -36,7 +36,14 @@ std::string helper::parse(std::string answer, std::string prefix) {
 }
 
 ZeissECU::ZeissECU() noexcept {
-	m_availablePresets = { 0,1,2,3 };
+	m_availablePresets = { 0, 1, 2, 3 };
+	m_presets = {
+		{ 1, 1, 3, 1, 2, 2 },	// Brightfield
+		{ 1, 1, 3, 1, 3, 2 },	// Calibration
+		{ 1, 1, 3, 1, 2, 1 },	// Brillouin
+		{ 1, 1, 3, 2, 3, 2 },	// Eyepiece
+	};
+
 	m_availableElements = { 0,1,2,3,4,5 };
 	// bounds of the stage
 	m_absoluteBounds = {
@@ -47,6 +54,7 @@ ZeissECU::ZeissECU() noexcept {
 		-150000,	// [µm] minimal z-value
 		 150000		// [µm] maximal z-value
 	};
+
 }
 
 ZeissECU::~ZeissECU() {
@@ -219,7 +227,7 @@ void ZeissECU::setElement(ScanControl::DEVICE_ELEMENT element, int position) {
 }
 
 void ZeissECU::getElements() {
-	std::vector<int> elementPositions(enDeviceElement::DEVICE_ELEMENT_COUNT, -1);
+	std::vector<int> elementPositions(m_availableElements.size(), -1);
 	elementPositions[0] = m_stand->getReflector();
 	elementPositions[1] = m_stand->getObjective();
 	elementPositions[2] = m_stand->getTubelens();

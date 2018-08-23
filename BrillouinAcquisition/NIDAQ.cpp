@@ -65,7 +65,11 @@ POINT2 NIDAQ::voltageToPosition(VOLTAGE2 voltage) {
 }
 
 NIDAQ::NIDAQ() noexcept {
-	m_availablePresets = { 4, 5 };
+	m_presets = {
+		{ 2, 1 },	// Calibration
+		{ 1, 1 }	// Brillouin
+	};
+	m_availablePresets = { 1, 2 };
 	m_availableElements = { 6, 7 };
 
 	m_absoluteBounds = m_calibration.bounds;
@@ -146,7 +150,7 @@ void NIDAQ::setElement(ScanControl::DEVICE_ELEMENT element, int position) {
 		default:
 			break;
 	}
-	getElement(element);
+	getElements();
 }
 
 void NIDAQ::getElement(ScanControl::DEVICE_ELEMENT element) {
@@ -159,22 +163,33 @@ void NIDAQ::getElement(ScanControl::DEVICE_ELEMENT element) {
 			position = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
 			break;
 		default:
-			break;
+			return;
 	}
-	emit(elementPositionChanged(element, position));
-
+	// TODO: This currently fails for NIDAQ class, since "element" is larger than "m_deviceElementPositions.size()"
+	//emit(elementPositionChanged(element, position));
 }
 
 void NIDAQ::setElements(ScanControl::SCAN_PRESET preset) {
-	setCalFlipMirror(m_presets[preset][6]);
-	setBeamBlock(m_presets[preset][7]);
+	int presetNr{ 0 };
+	switch (preset) {
+		case ScanControl::SCAN_BRILLOUIN:
+			presetNr = 0;
+			break;
+		case ScanControl::SCAN_CALIBRATION:
+			presetNr = 1;
+			break;
+		default:
+			return;
+	}
+	setCalFlipMirror(m_presets[presetNr][0]);
+	setBeamBlock(m_presets[presetNr][1]);
 	getElements();
 }
 
 void NIDAQ::getElements() {
-	std::vector<int> elementPositions(enDeviceElement::DEVICE_ELEMENT_COUNT, -1);
-	elementPositions[6] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF1);
-	elementPositions[7] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
+	std::vector<int> elementPositions(m_availableElements.size(), -1);
+	elementPositions[0] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF1);
+	elementPositions[1] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
 	emit(elementPositionsChanged(elementPositions));
 }
 

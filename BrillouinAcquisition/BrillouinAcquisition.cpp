@@ -1005,7 +1005,7 @@ void BrillouinAcquisition::microscopeElementPositionChanged(ScanControl::DEVICE_
 void BrillouinAcquisition::checkElementButtons() {
 	for (gsl::index ii = 0; ii < elementButtons.size(); ii++) {
 		for (gsl::index jj = 0; jj < elementButtons[ii].size(); jj++) {
-			if (m_deviceElementPositions[m_scanControl->m_availableElements[ii]] == jj + 1) {
+			if (m_deviceElementPositions[ii] == jj + 1) {
 				elementButtons[ii][jj]->setProperty("class", "active");
 			} else {
 				elementButtons[ii][jj]->setProperty("class", "");
@@ -1016,7 +1016,7 @@ void BrillouinAcquisition::checkElementButtons() {
 		}
 	}
 	for (gsl::index ii = 0; ii < m_scanControl->m_availablePresets.size(); ii++) {
-		if (m_scanControl->m_presets[m_scanControl->m_availablePresets[ii]] == m_deviceElementPositions) {
+		if (m_scanControl->m_presets[ii] == m_deviceElementPositions) {
 			presetButtons[ii]->setProperty("class", "active");
 		} else {
 			presetButtons[ii]->setProperty("class", "");

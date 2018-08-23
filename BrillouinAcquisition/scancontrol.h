@@ -50,25 +50,16 @@ public:
 	std::vector<std::string> SCAN_DEVICE_NAMES = { "Zeiss ECU", "NI-DAQmx" };
 
 	// pre-defined presets for element positions
-	std::vector<std::string> m_presetLabels = { "Brightfield", "Calibration", "Brillouin", "Eyepiece", "Calibration", "Brillouin" };
+	std::vector<std::string> m_presetLabels = { "Brightfield", "Calibration", "Brillouin", "Eyepiece" };
 	typedef enum enScanPreset {
 		SCAN_BRIGHTFIELD,
 		SCAN_CALIBRATION,
 		SCAN_BRILLOUIN,
 		SCAN_EYEPIECE,
-		SCAN_CALIBRATION_FOB,
-		SCAN_BRILLOUIN_FOB,
 		SCAN_PRESET_COUNT
 	} SCAN_PRESET;
 
-	std::vector<std::vector<int>> m_presets = {
-		{ 1, 1, 3, 1, 2, 2, -1, -1 },	// Brightfield
-		{ 1, 1, 3, 1, 3, 2, -1, -1 },	// Calibration
-		{ 1, 1, 3, 1, 2, 1, -1, -1 },	// Brillouin
-		{ 1, 1, 3, 2, 3, 2, -1, -1 },	// Eyepiece
-		{ -1, -1, -1, -1, -1, -1, 2, 1 },	// Calibration on FOB microscope
-		{ -1, -1, -1, -1, -1, -1, 1, 1 },	// Brillouin on FOB microscope
-	};
+	std::vector<std::vector<int>> m_presets;
 	std::vector<int> m_availablePresets;
 
 	std::vector<std::string> m_groupLabels = { "Reflector", "Objective", "Tubelens", "Baseport", "Sideport", "Mirror", "Flip Mirror", "Beam Block" };
