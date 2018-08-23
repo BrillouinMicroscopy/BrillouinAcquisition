@@ -7,6 +7,7 @@
 #include "scancontrol.h"
 #include "simplemath.h"
 #include <gsl/gsl>
+#include <Thorlabs.MotionControl.TCube.InertialMotor.h>
 
 #include "H5Cpp.h"
 #include "filesystem"
@@ -49,14 +50,19 @@ private:
 			 53,	// [µm] maximal x-value
 			-43,	// [µm] minimal y-value
 			 43,	// [µm] maximal y-value
-			  0,	// [µm] minimal z-value
-			  0		// [µm] maximal z-value
+			 -1000,	// [µm] minimal z-value
+			  1000	// [µm] maximal z-value
 		};
 		bool valid = false;
 	} m_calibration;
 
 	VOLTAGE2 m_voltages{ 0, 0 };	// current voltage
 	POINT3 m_position{ 0, 0, 0 };	// current position
+	
+	// TODO: make the following parameters changeable:
+	char const *m_serialNo = "65864438";	// serial number of the TCube Inertial motor controller device (can be found in Kinesis)
+	TIM_Channels m_channelPosZ{ Channel1 };
+	int m_PiezoIncPerMum{ 50 };
 
 public:
 	NIDAQ() noexcept;

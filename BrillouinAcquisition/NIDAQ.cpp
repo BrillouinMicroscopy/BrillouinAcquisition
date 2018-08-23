@@ -83,11 +83,17 @@ bool NIDAQ::connectDevice() {
 		DAQmxCreateAOVoltageChan(taskHandle, "Dev1/ao0:1", "", -1.0, 1.0, DAQmx_Val_Volts, "");
 		// Start DAQ task
 		DAQmxStartTask(taskHandle);
-		m_isConnected = true;
-		m_isCompatible = true;
-		centerPosition();
-		calculateHomePositionBounds();
-		calculateCurrentPositionBounds();
+		// Connect to T-Cube Piezo Inertial Controller
+		int ret = TIM_Open(m_serialNo);
+		if (ret == 0) {
+			TIM_Enable(m_serialNo);
+			TIM_StartPolling(m_serialNo, 200);
+			m_isConnected = true;
+			m_isCompatible = true;
+			centerPosition();
+			calculateHomePositionBounds();
+			calculateCurrentPositionBounds();
+		}
 	}
 	emit(connectedDevice(m_isConnected && m_isCompatible));
 	return m_isConnected && m_isCompatible;
@@ -98,6 +104,12 @@ bool NIDAQ::disconnectDevice() {
 		// Stop and clear DAQ task
 		DAQmxStopTask(taskHandle);
 		DAQmxClearTask(taskHandle);
+
+		// Disconnect from T-Cube Piezo Inertial Controller
+		TIM_StopPolling(m_serialNo);
+		TIM_Disconnect(m_serialNo);
+		TIM_Close(m_serialNo);
+
 		m_isConnected = false;
 		m_isCompatible = false;
 	}
@@ -141,6 +153,7 @@ void NIDAQ::setPosition(POINT3 position) {
 	float64 data[2] = { m_voltages.Ux, m_voltages.Uy };
 	DAQmxWriteAnalogF64(taskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
 	// set z-position once implemented
+	TIM_MoveAbsolute(m_serialNo, m_channelPosZ, m_PiezoIncPerMum * position.z);
 	announcePosition();
 	calculateCurrentPositionBounds();
 }
@@ -222,4 +235,7 @@ void NIDAQ::centerPosition() {
 	m_voltages = positionToVoltage(POINT2{ 1e-6*m_position.x, 1e-6*m_position.y });
 	float64 data[2] = { m_voltages.Ux, m_voltages.Uy };
 	DAQmxWriteAnalogF64(taskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
+	// Set current position to zero
+	TIM_Home(m_serialNo, m_channelPosZ);
+	announcePosition();
 }
