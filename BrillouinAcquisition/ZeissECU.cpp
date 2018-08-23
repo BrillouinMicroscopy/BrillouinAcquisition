@@ -127,6 +127,7 @@ bool ZeissECU::connectDevice() {
 		}
 	}
 	emit(connectedDevice(m_isConnected && m_isCompatible));
+	getElements();
 	return m_isConnected && m_isCompatible;
 }
 
@@ -218,7 +219,7 @@ void ZeissECU::setElement(ScanControl::DEVICE_ELEMENT element, int position) {
 }
 
 void ZeissECU::getElements() {
-	std::vector<int> elementPositions(6, 0);
+	std::vector<int> elementPositions(enDeviceElement::DEVICE_ELEMENT_COUNT, -1);
 	elementPositions[0] = m_stand->getReflector();
 	elementPositions[1] = m_stand->getObjective();
 	elementPositions[2] = m_stand->getTubelens();
@@ -427,9 +428,17 @@ void MCU::stopY() {
  *
  */
 
+int Stand::getElementPosition(std::string device) {
+	std::string answer = receive("Cr" + device + ",1");
+	if (answer.empty()) {
+		return -1;
+	} else {
+		return std::stoi(answer);
+	}
+};
+
 int Stand::getReflector() {
-	std::string answer = receive("Cr1,1");
-	return std::stoi(answer);
+	return getElementPosition("1");
 }
 
 void Stand::setReflector(int position) {
@@ -439,8 +448,7 @@ void Stand::setReflector(int position) {
 }
 
 int Stand::getObjective() {
-	std::string answer = receive("Cr2,1");
-	return std::stoi(answer);
+	return getElementPosition("2");
 }
 
 void Stand::setObjective(int position) {
@@ -450,8 +458,7 @@ void Stand::setObjective(int position) {
 }
 
 int Stand::getTubelens() {
-	std::string answer = receive("Cr36,1");
-	return std::stoi(answer);
+	return getElementPosition("36");
 }
 
 void Stand::setTubelens(int position) {
@@ -461,8 +468,7 @@ void Stand::setTubelens(int position) {
 }
 
 int Stand::getBaseport() {
-	std::string answer = receive("Cr38,1");
-	return std::stoi(answer);
+	return getElementPosition("38");
 }
 
 void Stand::setBaseport(int position) {
@@ -472,8 +478,7 @@ void Stand::setBaseport(int position) {
 }
 
 int Stand::getSideport() {
-	std::string answer = receive("Cr39,1");
-	return std::stoi(answer);
+	return getElementPosition("39");
 }
 
 void Stand::setSideport(int position) {
@@ -483,8 +488,7 @@ void Stand::setSideport(int position) {
 }
 
 int Stand::getMirror() {
-	std::string answer = receive("Cr51,1");
-	return std::stoi(answer);
+	return getElementPosition("51");
 }
 
 void Stand::setMirror(int position) {

@@ -728,7 +728,6 @@ void BrillouinAcquisition::microscopeConnectionChanged(bool isConnected) {
 		QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
 		ui->settingsWidget->setTabIcon(1, icon);
 		ui->settingsWidget->setTabIcon(2, icon);
-		microscopeElementPositionsChanged({ 0,0,0,0,0,0 });
 	}
 }
 
@@ -861,7 +860,6 @@ void BrillouinAcquisition::initBeampathButtons() {
 		QHBoxLayout *layout = new QHBoxLayout();
 		layout->setAlignment(Qt::AlignLeft);
 		for (gsl::index ii = 0; ii < m_scanControl->m_availablePresets.size(); ii++) {
-			buttonLabel = std::to_string(ii + 1);
 			QPushButton *button = new QPushButton(m_scanControl->m_presetLabels[m_scanControl->m_availablePresets[ii]].c_str());
 			button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 			button->setMinimumWidth(90);
@@ -869,7 +867,7 @@ void BrillouinAcquisition::initBeampathButtons() {
 			layout->addWidget(button);
 
 			connection = QObject::connect(button, &QPushButton::clicked, [=] {
-				setPreset((ScanControl::SCAN_PRESET)ii);
+				setPreset((ScanControl::SCAN_PRESET)m_scanControl->m_availablePresets[ii]);
 			});
 			presetButtons.push_back(button);
 		}
@@ -895,7 +893,7 @@ void BrillouinAcquisition::initBeampathButtons() {
 			layout->addWidget(button);
 
 			connection = QObject::connect(button, &QPushButton::clicked, [=] {
-				setElement((ScanControl::DEVICE_ELEMENT)ii, jj + 1);
+				setElement((ScanControl::DEVICE_ELEMENT)m_scanControl->m_availableElements[ii], jj + 1);
 			});
 			buttons.push_back(button);
 		}
@@ -1007,7 +1005,7 @@ void BrillouinAcquisition::microscopeElementPositionChanged(ScanControl::DEVICE_
 void BrillouinAcquisition::checkElementButtons() {
 	for (gsl::index ii = 0; ii < elementButtons.size(); ii++) {
 		for (gsl::index jj = 0; jj < elementButtons[ii].size(); jj++) {
-			if (m_deviceElementPositions[ii] == jj + 1) {
+			if (m_deviceElementPositions[m_scanControl->m_availableElements[ii]] == jj + 1) {
 				elementButtons[ii][jj]->setProperty("class", "active");
 			} else {
 				elementButtons[ii][jj]->setProperty("class", "");

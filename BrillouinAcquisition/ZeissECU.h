@@ -46,6 +46,7 @@ class Stand : public Element {
 public:
 	Stand(com *comObject) : Element(comObject, "H", { "AV_V3_17" }) {};
 
+	int getElementPosition(std::string device);
 	void setReflector(int position);
 	int getReflector();
 	void setObjective(int position);
