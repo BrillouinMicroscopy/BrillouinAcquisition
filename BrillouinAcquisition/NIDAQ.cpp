@@ -66,8 +66,8 @@ POINT2 NIDAQ::voltageToPosition(VOLTAGE2 voltage) {
 
 NIDAQ::NIDAQ() noexcept {
 	m_presets = {
-		{ 1, 1 },	// Brillouin
-		{ 2, 1 }	// Calibration
+		{ 1, 2 },	// Brillouin
+		{ 2, 2}		// Calibration
 	};
 	m_availablePresets = { 1, 2 };
 

@@ -77,7 +77,7 @@ private:
 	int m_PiezoIncPerMum{ 50 };
 
 	char const *m_serialNo_FF1 = "37000784";
-	char const *m_serialNo_FF2 = "37000785";
+	char const *m_serialNo_FF2 = "37000251";
 
 	enum class DEVICE_ELEMENT {
 		CALFLIPMIRROR,
