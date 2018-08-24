@@ -79,6 +79,12 @@ private:
 	char const *m_serialNo_FF1 = "37000784";
 	char const *m_serialNo_FF2 = "37000785";
 
+	enum class DEVICE_ELEMENT {
+		CALFLIPMIRROR,
+		BEAMBLOCK,
+		DEVICE_ELEMENT_COUNT
+	};
+
 public:
 	NIDAQ() noexcept;
 	~NIDAQ();
@@ -93,13 +99,16 @@ public:
 
 	// NIDAQ specific function to move position to center of field of view
 	void centerPosition();
+	
+	std::vector<std::string> m_groupLabels = { "Flip Mirror", "Beam Block" };
+	std::vector<int> m_maxOptions = { 2, 2 };
 
 public slots:
 	void init();
 	bool connectDevice();
 	bool disconnectDevice();
-	void setElement(ScanControl::DEVICE_ELEMENT element, int position);
-	void getElement(ScanControl::DEVICE_ELEMENT element);
+	void setElement(DeviceElement element, int position);
+	void getElement(DeviceElement element);
 	void setElements(ScanControl::SCAN_PRESET preset);
 	void getElements();
 	void setCalFlipMirror(int position);

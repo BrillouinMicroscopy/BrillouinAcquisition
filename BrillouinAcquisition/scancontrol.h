@@ -22,6 +22,34 @@ struct BOUNDS {
 	double zMax{  1e3 };	// [µm] maximal z-value
 };
 
+struct DeviceElement {
+	std::string name{ "" };
+	int maxOptions{ 0 };
+	int index{ 0 };
+};
+
+class DeviceElements {
+private:
+	std::vector<DeviceElement> m_deviceElements;
+
+public:
+	DeviceElements() {};
+	DeviceElements(std::vector<DeviceElement> deviceElements) {
+		m_deviceElements = deviceElements;
+	};
+	void operator=(std::vector<DeviceElement> deviceElements) {
+		m_deviceElements = deviceElements;
+	}
+
+	std::vector<DeviceElement> getDeviceElements() {
+		return m_deviceElements;
+	};
+
+	int deviceCount() {
+		return m_deviceElements.size();
+	};
+};
+
 class ScanControl: public QObject {
 	Q_OBJECT
 
@@ -62,20 +90,7 @@ public:
 	std::vector<std::vector<int>> m_presets;
 	std::vector<int> m_availablePresets;
 
-	std::vector<std::string> m_groupLabels = { "Reflector", "Objective", "Tubelens", "Baseport", "Sideport", "Mirror", "Flip Mirror", "Beam Block" };
-	std::vector<int> m_maxOptions = { 5, 6, 3, 3, 3, 2, 2, 2 };
-	typedef enum enDeviceElement {
-		REFLECTOR,
-		OBJECTIVE,
-		TUBELENS,
-		BASEPORT,
-		SIDEPORT,
-		MIRROR,
-		CALFLIPMIRROR,
-		BEAMBLOCK,
-		DEVICE_ELEMENT_COUNT
-	} DEVICE_ELEMENT;
-	std::vector<int> m_availableElements;
+	DeviceElements m_deviceElements;
 
 	bool getConnectionStatus();
 
@@ -91,8 +106,8 @@ public slots:
 	virtual void init() = 0;
 	virtual bool connectDevice() = 0;
 	virtual bool disconnectDevice() = 0;
-	virtual void setElement(ScanControl::DEVICE_ELEMENT, int) = 0;
-	virtual void getElement(ScanControl::DEVICE_ELEMENT) = 0;
+	virtual void setElement(DeviceElement, int) = 0;
+	virtual void getElement(DeviceElement) = 0;
 	virtual void setElements(ScanControl::SCAN_PRESET) = 0;
 	virtual void getElements() = 0;
 	void announcePosition();
@@ -117,7 +132,7 @@ public slots:
 signals:
 	void connectedDevice(bool);
 	void elementPositionsChanged(std::vector<int>);
-	void elementPositionChanged(ScanControl::DEVICE_ELEMENT, int);
+	void elementPositionChanged(DeviceElement, int);
 	void currentPosition(POINT3);
 	void savedPositionsChanged(std::vector<POINT3>);
 	void homePositionBoundsChanged(BOUNDS);

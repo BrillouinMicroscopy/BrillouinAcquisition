@@ -47,7 +47,7 @@ Q_DECLARE_METATYPE(QSerialPort::SerialPortError);
 Q_DECLARE_METATYPE(IMAGE*);
 Q_DECLARE_METATYPE(CALIBRATION*);
 Q_DECLARE_METATYPE(ScanControl::SCAN_PRESET);
-Q_DECLARE_METATYPE(ScanControl::DEVICE_ELEMENT);
+Q_DECLARE_METATYPE(DeviceElement);
 Q_DECLARE_METATYPE(SensorTemperature);
 Q_DECLARE_METATYPE(POINT3);
 Q_DECLARE_METATYPE(std::vector<POINT3>);
@@ -82,7 +82,7 @@ private slots:
 
 	void on_acquisitionStart_clicked();
 	void microscopeElementPositionsChanged(std::vector<int>);
-	void microscopeElementPositionChanged(ScanControl::DEVICE_ELEMENT element, int position);
+	void microscopeElementPositionChanged(DeviceElement element, int position);
 	void on_camera_playPause_clicked();
 	void onNewImage();
 	void initializePlot();
@@ -98,7 +98,7 @@ private slots:
 	std::vector<AT_64> checkROI(std::vector<AT_64>, std::vector<AT_64>);
 
 	void setColormap(QCPColorGradient *, CustomGradientPreset);
-	void setElement(ScanControl::DEVICE_ELEMENT element, int position);
+	void setElement(DeviceElement element, int position);
 	void setPreset(ScanControl::SCAN_PRESET preset);
 	void updatePreview();
 	void showPreviewRunning(bool);

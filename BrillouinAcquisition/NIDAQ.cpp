@@ -70,9 +70,13 @@ NIDAQ::NIDAQ() noexcept {
 		{ 2, 1 }	// Calibration
 	};
 	m_availablePresets = { 1, 2 };
-	m_availableElements = { 6, 7 };
 
 	m_absoluteBounds = m_calibration.bounds;
+
+	m_deviceElements = {
+		{ "Flip Mirror",	2, (int)DEVICE_ELEMENT::CALFLIPMIRROR },
+		{ "Beam Block",		2, (int)DEVICE_ELEMENT::BEAMBLOCK }
+	};
 }
 
 NIDAQ::~NIDAQ() {
@@ -139,34 +143,33 @@ void NIDAQ::init() {
 	QMetaObject::Connection connection = QWidget::connect(elementPositionTimer, SIGNAL(timeout()), this, SLOT(getElements()));
 }
 
-void NIDAQ::setElement(ScanControl::DEVICE_ELEMENT element, int position) {
-	switch (element) {
-		case ScanControl::CALFLIPMIRROR:
+void NIDAQ::setElement(DeviceElement element, int position) {
+	switch ((DEVICE_ELEMENT)element.index) {
+		case DEVICE_ELEMENT::CALFLIPMIRROR:
 			setCalFlipMirror(position);
 			break;
-		case ScanControl::BEAMBLOCK:
+		case DEVICE_ELEMENT::BEAMBLOCK:
 			setBeamBlock(position);
 			break;
 		default:
 			break;
 	}
-	getElements();
+	getElement(element);
 }
 
-void NIDAQ::getElement(ScanControl::DEVICE_ELEMENT element) {
+void NIDAQ::getElement(DeviceElement element) {
 	int position{ -1 };
-	switch (element) {
-		case ScanControl::CALFLIPMIRROR:
+	switch ((DEVICE_ELEMENT)element.index) {
+		case DEVICE_ELEMENT::CALFLIPMIRROR:
 			position = Thorlabs_FF::FF_GetPosition(m_serialNo_FF1);
 			break;
-		case ScanControl::BEAMBLOCK:
+		case DEVICE_ELEMENT::BEAMBLOCK:
 			position = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
 			break;
 		default:
 			return;
 	}
-	// TODO: This currently fails for NIDAQ class, since "element" is larger than "m_deviceElementPositions.size()"
-	//emit(elementPositionChanged(element, position));
+	emit(elementPositionChanged(element, position));
 }
 
 void NIDAQ::setElements(ScanControl::SCAN_PRESET preset) {
@@ -188,7 +191,7 @@ void NIDAQ::setElements(ScanControl::SCAN_PRESET preset) {
 }
 
 void NIDAQ::getElements() {
-	std::vector<int> elementPositions(m_availableElements.size(), -1);
+	std::vector<int> elementPositions(m_deviceElements.deviceCount(), -1);
 	elementPositions[0] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF1);
 	elementPositions[1] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
 	emit(elementPositionsChanged(elementPositions));

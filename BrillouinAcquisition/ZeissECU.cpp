@@ -44,7 +44,6 @@ ZeissECU::ZeissECU() noexcept {
 		{ 1, 1, 3, 2, 3, 2 },	// Eyepiece
 	};
 
-	m_availableElements = { 0,1,2,3,4,5 };
 	// bounds of the stage
 	m_absoluteBounds = {
 		-150000,	// [µm] minimal x-value
@@ -55,6 +54,14 @@ ZeissECU::ZeissECU() noexcept {
 		 150000		// [µm] maximal z-value
 	};
 
+	m_deviceElements = {
+		{ "Reflector",	5, (int)DEVICE_ELEMENT::REFLECTOR },
+		{ "Objective",	6, (int)DEVICE_ELEMENT::OBJECTIVE },
+		{ "Tubelens",	3, (int)DEVICE_ELEMENT::TUBELENS },
+		{ "Baseport",	3, (int)DEVICE_ELEMENT::BASEPORT },
+		{ "Sideport",	3, (int)DEVICE_ELEMENT::SIDEPORT },
+		{ "Mirror",		2, (int)DEVICE_ELEMENT::MIRROR }
+	};
 }
 
 ZeissECU::~ZeissECU() {
@@ -205,24 +212,24 @@ void ZeissECU::setElements(ScanControl::SCAN_PRESET preset) {
 	emit(elementPositionsChanged(m_presets[preset]));
 }
 
-void ZeissECU::setElement(ScanControl::DEVICE_ELEMENT element, int position) {
-	switch (element) {
-		case ScanControl::REFLECTOR:
+void ZeissECU::setElement(DeviceElement element, int position) {
+	switch ((DEVICE_ELEMENT)element.index) {
+		case DEVICE_ELEMENT::REFLECTOR:
 			m_stand->setReflector(position);
 			break;
-		case ScanControl::OBJECTIVE:
+		case DEVICE_ELEMENT::OBJECTIVE:
 			m_stand->setObjective(position);
 			break;
-		case ScanControl::TUBELENS:
+		case DEVICE_ELEMENT::TUBELENS:
 			m_stand->setTubelens(position);
 			break;
-		case ScanControl::BASEPORT:
+		case DEVICE_ELEMENT::BASEPORT:
 			m_stand->setBaseport(position);
 			break;
-		case ScanControl::SIDEPORT:
+		case DEVICE_ELEMENT::SIDEPORT:
 			m_stand->setSideport(position);
 			break;
-		case ScanControl::MIRROR:
+		case DEVICE_ELEMENT::MIRROR:
 			m_stand->setMirror(position);
 			break;
 		default:
@@ -232,7 +239,7 @@ void ZeissECU::setElement(ScanControl::DEVICE_ELEMENT element, int position) {
 }
 
 void ZeissECU::getElements() {
-	std::vector<int> elementPositions(m_availableElements.size(), -1);
+	std::vector<int> elementPositions(m_deviceElements.deviceCount(), -1);
 	elementPositions[0] = m_stand->getReflector();
 	elementPositions[1] = m_stand->getObjective();
 	elementPositions[2] = m_stand->getTubelens();
@@ -242,7 +249,7 @@ void ZeissECU::getElements() {
 	emit(elementPositionsChanged(elementPositions));
 };
 
-void ZeissECU::getElement(ScanControl::DEVICE_ELEMENT element) {
+void ZeissECU::getElement(DeviceElement element) {
 }
 
 /*
