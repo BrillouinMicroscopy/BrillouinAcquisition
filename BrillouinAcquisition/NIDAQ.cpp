@@ -65,10 +65,18 @@ POINT2 NIDAQ::voltageToPosition(VOLTAGE2 voltage) {
 }
 
 NIDAQ::NIDAQ() noexcept {
-	m_availablePresets = {};
-	m_availableElements = {};
+	m_presets = {
+		{ 1, 2 },	// Brillouin
+		{ 2, 2 }	// Calibration
+	};
+	m_availablePresets = { 2, 1 };
 
 	m_absoluteBounds = m_calibration.bounds;
+
+	m_deviceElements = {
+		{ "Flip Mirror",	2, (int)DEVICE_ELEMENT::CALFLIPMIRROR },
+		{ "Beam Block",		2, (int)DEVICE_ELEMENT::BEAMBLOCK }
+	};
 }
 
 NIDAQ::~NIDAQ() {
@@ -84,16 +92,20 @@ bool NIDAQ::connectDevice() {
 		// Start DAQ task
 		DAQmxStartTask(taskHandle);
 		// Connect to T-Cube Piezo Inertial Controller
-		int ret = TIM_Open(m_serialNo);
+		int ret = Thorlabs_TIM::TIM_Open(m_serialNo_TIM);
 		if (ret == 0) {
-			TIM_Enable(m_serialNo);
-			TIM_StartPolling(m_serialNo, 200);
+			Thorlabs_TIM::TIM_Enable(m_serialNo_TIM);
+			Thorlabs_TIM::TIM_StartPolling(m_serialNo_TIM, 200);
 			m_isConnected = true;
 			m_isCompatible = true;
 			centerPosition();
 			calculateHomePositionBounds();
-			calculateCurrentPositionBounds();
 		}
+		Thorlabs_FF::FF_Open(m_serialNo_FF1);
+		Thorlabs_FF::FF_StartPolling(m_serialNo_FF1, 200);
+		Thorlabs_FF::FF_Open(m_serialNo_FF2);
+		Thorlabs_FF::FF_StartPolling(m_serialNo_FF2, 200);
+		startAnnouncingElementPosition();
 	}
 	emit(connectedDevice(m_isConnected && m_isCompatible));
 	return m_isConnected && m_isCompatible;
@@ -101,33 +113,107 @@ bool NIDAQ::connectDevice() {
 
 bool NIDAQ::disconnectDevice() {
 	if (m_isConnected) {
+		stopAnnouncingElementPosition();
 		// Stop and clear DAQ task
 		DAQmxStopTask(taskHandle);
 		DAQmxClearTask(taskHandle);
 
 		// Disconnect from T-Cube Piezo Inertial Controller
-		TIM_StopPolling(m_serialNo);
-		TIM_Disconnect(m_serialNo);
-		TIM_Close(m_serialNo);
+		Thorlabs_TIM::TIM_StopPolling(m_serialNo_TIM);
+		Thorlabs_TIM::TIM_Disconnect(m_serialNo_TIM);
+		Thorlabs_TIM::TIM_Close(m_serialNo_TIM);
+
+		Thorlabs_FF::FF_Close(m_serialNo_FF1);
+		Thorlabs_FF::FF_StopPolling(m_serialNo_FF1);
+		Thorlabs_FF::FF_Close(m_serialNo_FF2);
+		Thorlabs_FF::FF_StopPolling(m_serialNo_FF2);
 
 		m_isConnected = false;
 		m_isCompatible = false;
 	}
 	emit(connectedDevice(m_isConnected && m_isCompatible));
+	getElements();
 	return m_isConnected && m_isCompatible;
 }
 
 void NIDAQ::init() {
 	calculateHomePositionBounds();
+
+	elementPositionTimer = new QTimer();
+	QMetaObject::Connection connection = QWidget::connect(elementPositionTimer, SIGNAL(timeout()), this, SLOT(getElements()));
 }
 
-void NIDAQ::setElement(ScanControl::DEVICE_ELEMENT element, int position) {
+void NIDAQ::setElement(DeviceElement element, int position) {
+	switch ((DEVICE_ELEMENT)element.index) {
+		case DEVICE_ELEMENT::CALFLIPMIRROR:
+			setCalFlipMirror(position);
+			break;
+		case DEVICE_ELEMENT::BEAMBLOCK:
+			setBeamBlock(position);
+			break;
+		default:
+			break;
+	}
+	getElement(element);
+}
+
+void NIDAQ::getElement(DeviceElement element) {
+	int position{ -1 };
+	switch ((DEVICE_ELEMENT)element.index) {
+		case DEVICE_ELEMENT::CALFLIPMIRROR:
+			position = Thorlabs_FF::FF_GetPosition(m_serialNo_FF1);
+			break;
+		case DEVICE_ELEMENT::BEAMBLOCK:
+			position = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
+			break;
+		default:
+			return;
+	}
+	emit(elementPositionChanged(element, position));
 }
 
 void NIDAQ::setElements(ScanControl::SCAN_PRESET preset) {
+	int presetNr{ 0 };
+	switch (preset) {
+		case ScanControl::SCAN_BRIGHTFIELD:
+		case ScanControl::SCAN_BRILLOUIN:
+			presetNr = 0;
+			break;
+		case ScanControl::SCAN_CALIBRATION:
+			presetNr = 1;
+			break;
+		default:
+			return;
+	}
+	setCalFlipMirror(m_presets[presetNr][0]);
+	setBeamBlock(m_presets[presetNr][1]);
+	getElements();
 }
 
 void NIDAQ::getElements() {
+	std::vector<int> elementPositions(m_deviceElements.deviceCount(), -1);
+	elementPositions[0] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF1);
+	elementPositions[1] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
+	emit(elementPositionsChanged(elementPositions));
+}
+
+void NIDAQ::setCalFlipMirror(int position) {
+	Thorlabs_FF::FF_MoveToPosition(m_serialNo_FF1, (Thorlabs_FF::FF_Positions)position);
+}
+
+void NIDAQ::setBeamBlock(int position) {
+	Thorlabs_FF::FF_MoveToPosition(m_serialNo_FF2, (Thorlabs_FF::FF_Positions)position);
+}
+
+void NIDAQ::applyScanPosition() {
+	// set the x- and y-position
+	m_voltages = positionToVoltage(POINT2{ 1e-6*m_position.x, 1e-6*m_position.y });
+	float64 data[2] = { m_voltages.Ux, m_voltages.Uy };
+	DAQmxWriteAnalogF64(taskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
+	// set the z-position
+	Thorlabs_TIM::TIM_MoveAbsolute(m_serialNo_TIM, m_channelPosZ, m_PiezoIncPerMum * m_position.z);
+	calculateCurrentPositionBounds();
+	announcePosition();
 }
 
 void NIDAQ::setPosition(POINT3 position) {
@@ -149,13 +235,8 @@ void NIDAQ::setPosition(POINT3 position) {
 	}
 
 	m_position = position;
-	m_voltages = positionToVoltage(POINT2{ 1e-6*m_position.x, 1e-6*m_position.y });
-	float64 data[2] = { m_voltages.Ux, m_voltages.Uy };
-	DAQmxWriteAnalogF64(taskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
-	// set z-position once implemented
-	TIM_MoveAbsolute(m_serialNo, m_channelPosZ, m_PiezoIncPerMum * position.z);
-	announcePosition();
-	calculateCurrentPositionBounds();
+	// set the scan position
+	applyScanPosition();
 }
 
 void NIDAQ::setPositionRelativeX(double positionX) {
@@ -232,10 +313,8 @@ POINT3 NIDAQ::getPosition() {
 
 void NIDAQ::centerPosition() {
 	m_position = { 0, 0, 0 };
-	m_voltages = positionToVoltage(POINT2{ 1e-6*m_position.x, 1e-6*m_position.y });
-	float64 data[2] = { m_voltages.Ux, m_voltages.Uy };
-	DAQmxWriteAnalogF64(taskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
 	// Set current position to zero
-	TIM_Home(m_serialNo, m_channelPosZ);
-	announcePosition();
+	Thorlabs_TIM::TIM_Home(m_serialNo_TIM, m_channelPosZ);
+	// set the scan position
+	applyScanPosition();
 }

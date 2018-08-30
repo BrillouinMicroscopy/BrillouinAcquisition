@@ -36,8 +36,14 @@ std::string helper::parse(std::string answer, std::string prefix) {
 }
 
 ZeissECU::ZeissECU() noexcept {
-	m_availablePresets = { 0,1,2,3 };
-	m_availableElements = { 0,1,2,3,4,5 };
+	m_availablePresets = { 0, 1, 2, 3 };
+	m_presets = {
+		{ 1, 1, 3, 1, 2, 2 },	// Brightfield
+		{ 1, 1, 3, 1, 3, 2 },	// Calibration
+		{ 1, 1, 3, 1, 2, 1 },	// Brillouin
+		{ 1, 1, 3, 2, 3, 2 },	// Eyepiece
+	};
+
 	// bounds of the stage
 	m_absoluteBounds = {
 		-150000,	// [µm] minimal x-value
@@ -46,6 +52,15 @@ ZeissECU::ZeissECU() noexcept {
 		 150000,	// [µm] maximal y-value
 		-150000,	// [µm] minimal z-value
 		 150000		// [µm] maximal z-value
+	};
+
+	m_deviceElements = {
+		{ "Reflector",	5, (int)DEVICE_ELEMENT::REFLECTOR },
+		{ "Objective",	6, (int)DEVICE_ELEMENT::OBJECTIVE },
+		{ "Tubelens",	3, (int)DEVICE_ELEMENT::TUBELENS },
+		{ "Baseport",	3, (int)DEVICE_ELEMENT::BASEPORT },
+		{ "Sideport",	3, (int)DEVICE_ELEMENT::SIDEPORT },
+		{ "Mirror",		2, (int)DEVICE_ELEMENT::MIRROR }
 	};
 }
 
@@ -73,6 +88,9 @@ void ZeissECU::init() {
 
 	positionTimer = new QTimer();
 	connection = QWidget::connect(positionTimer, SIGNAL(timeout()), this, SLOT(announcePosition()));
+
+	elementPositionTimer = new QTimer();
+	connection = QWidget::connect(elementPositionTimer, SIGNAL(timeout()), this, SLOT(getElements()));
 	calculateHomePositionBounds();
 }
 
@@ -118,6 +136,7 @@ bool ZeissECU::connectDevice() {
 				setElements(SCAN_PRESET::SCAN_BRIGHTFIELD);
 				m_homePosition = getPosition();
 				startAnnouncingPosition();
+				startAnnouncingElementPosition();
 				calculateHomePositionBounds();
 				calculateCurrentPositionBounds();
 			}
@@ -127,12 +146,14 @@ bool ZeissECU::connectDevice() {
 		}
 	}
 	emit(connectedDevice(m_isConnected && m_isCompatible));
+	getElements();
 	return m_isConnected && m_isCompatible;
 }
 
 bool ZeissECU::disconnectDevice() {
 	if (m_comObject && m_isConnected) {
 		stopAnnouncingPosition();
+		stopAnnouncingElementPosition();
 		m_comObject->close();
 		m_isConnected = false;
 		m_isCompatible = false;
@@ -191,24 +212,24 @@ void ZeissECU::setElements(ScanControl::SCAN_PRESET preset) {
 	emit(elementPositionsChanged(m_presets[preset]));
 }
 
-void ZeissECU::setElement(ScanControl::DEVICE_ELEMENT element, int position) {
-	switch (element) {
-		case ScanControl::REFLECTOR:
+void ZeissECU::setElement(DeviceElement element, int position) {
+	switch ((DEVICE_ELEMENT)element.index) {
+		case DEVICE_ELEMENT::REFLECTOR:
 			m_stand->setReflector(position);
 			break;
-		case ScanControl::OBJECTIVE:
+		case DEVICE_ELEMENT::OBJECTIVE:
 			m_stand->setObjective(position);
 			break;
-		case ScanControl::TUBELENS:
+		case DEVICE_ELEMENT::TUBELENS:
 			m_stand->setTubelens(position);
 			break;
-		case ScanControl::BASEPORT:
+		case DEVICE_ELEMENT::BASEPORT:
 			m_stand->setBaseport(position);
 			break;
-		case ScanControl::SIDEPORT:
+		case DEVICE_ELEMENT::SIDEPORT:
 			m_stand->setSideport(position);
 			break;
-		case ScanControl::MIRROR:
+		case DEVICE_ELEMENT::MIRROR:
 			m_stand->setMirror(position);
 			break;
 		default:
@@ -218,7 +239,7 @@ void ZeissECU::setElement(ScanControl::DEVICE_ELEMENT element, int position) {
 }
 
 void ZeissECU::getElements() {
-	std::vector<int> elementPositions(6, 0);
+	std::vector<int> elementPositions(m_deviceElements.deviceCount(), -1);
 	elementPositions[0] = m_stand->getReflector();
 	elementPositions[1] = m_stand->getObjective();
 	elementPositions[2] = m_stand->getTubelens();
@@ -227,6 +248,9 @@ void ZeissECU::getElements() {
 	elementPositions[5] = m_stand->getMirror();
 	emit(elementPositionsChanged(elementPositions));
 };
+
+void ZeissECU::getElement(DeviceElement element) {
+}
 
 /*
 * Functions regarding the serial communication
@@ -427,68 +451,75 @@ void MCU::stopY() {
  *
  */
 
+int Stand::getElementPosition(std::string device) {
+	std::string answer = receive("Cr" + device + ",1");
+	if (answer.empty()) {
+		return -1;
+	} else {
+		return std::stoi(answer);
+	}
+};
+
+void Stand::setElementPosition(std::string device, int position) {
+	send("CR" + device + "," + std::to_string(position));
+}
+
 int Stand::getReflector() {
-	std::string answer = receive("Cr1,1");
-	return std::stoi(answer);
+	return getElementPosition("1");
 }
 
 void Stand::setReflector(int position) {
 	if (position > 0 && position < 6) {
-		send("CR1," + std::to_string(position));
+		setElementPosition("1", position);
 	}
 }
 
 int Stand::getObjective() {
-	std::string answer = receive("Cr2,1");
-	return std::stoi(answer);
+	return getElementPosition("2");
 }
 
 void Stand::setObjective(int position) {
 	if (position > 0 && position < 7) {
-		send("CR2," + std::to_string(position));
+		setElementPosition("2", position);
 	}
 }
 
 int Stand::getTubelens() {
-	std::string answer = receive("Cr36,1");
-	return std::stoi(answer);
+	return getElementPosition("36");
 }
 
 void Stand::setTubelens(int position) {
 	if (position > 0 && position < 4) {
-		send("CR36," + std::to_string(position));
+		setElementPosition("36", position);
 	}
 }
 
 int Stand::getBaseport() {
-	std::string answer = receive("Cr38,1");
-	return std::stoi(answer);
+	return getElementPosition("38");
 }
 
 void Stand::setBaseport(int position) {
 	if (position > 0 && position < 4) {
-		send("CR38," + std::to_string(position));
+		setElementPosition("38", position);
 	}
 }
 
 int Stand::getSideport() {
-	std::string answer = receive("Cr39,1");
-	return std::stoi(answer);
+	return getElementPosition("39");
 }
 
 void Stand::setSideport(int position) {
 	if (position > 0 && position < 4) {
-		send("CR39," + std::to_string(position));
+		setElementPosition("39", position);
 	}
 }
 
 int Stand::getMirror() {
-	std::string answer = receive("Cr51,1");
-	return std::stoi(answer);
+	return getElementPosition("51");
 }
 
 void Stand::setMirror(int position) {
 	if (position > 0 && position < 3) {
-		send("CR51," + std::to_string(position));
+		setElementPosition("51", position);
 	}
 }

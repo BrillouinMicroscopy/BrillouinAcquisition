@@ -7,7 +7,12 @@
 #include "scancontrol.h"
 #include "simplemath.h"
 #include <gsl/gsl>
-#include <Thorlabs.MotionControl.TCube.InertialMotor.h>
+namespace Thorlabs_TIM {
+	#include <Thorlabs.MotionControl.TCube.InertialMotor.h>
+}
+namespace Thorlabs_FF {
+	#include <Thorlabs.MotionControl.FilterFlipper.h>
+}
 
 #include "H5Cpp.h"
 #include "filesystem"
@@ -15,6 +20,11 @@
 struct VOLTAGE2 {
 	double Ux{ 0 };
 	double Uy{ 0 };
+};
+
+struct ELEMENTPOSITION {
+	Thorlabs_FF::FF_Positions CalFlipMirror{ Thorlabs_FF::FF_Positions::Position1 };	// Brillouin measurement
+	Thorlabs_FF::FF_Positions BeamBlock{ Thorlabs_FF::FF_Positions::Position1 };		// Beam path blocked
 };
 
 struct POINT2 {
@@ -58,11 +68,22 @@ private:
 
 	VOLTAGE2 m_voltages{ 0, 0 };	// current voltage
 	POINT3 m_position{ 0, 0, 0 };	// current position
+	ELEMENTPOSITION m_elementPositions{ Thorlabs_FF::FF_Positions::Position1, Thorlabs_FF::FF_Positions::Position1 };
+	
 	
 	// TODO: make the following parameters changeable:
-	char const *m_serialNo = "65864438";	// serial number of the TCube Inertial motor controller device (can be found in Kinesis)
-	TIM_Channels m_channelPosZ{ Channel1 };
+	char const *m_serialNo_TIM = "65864438";	// serial number of the TCube Inertial motor controller device (can be found in Kinesis)
+	Thorlabs_TIM::TIM_Channels m_channelPosZ{ Thorlabs_TIM::Channel1 };
 	int m_PiezoIncPerMum{ 50 };
+
+	char const *m_serialNo_FF1 = "37000784";
+	char const *m_serialNo_FF2 = "37000251";
+
+	enum class DEVICE_ELEMENT {
+		CALFLIPMIRROR,
+		BEAMBLOCK,
+		DEVICE_ELEMENT_COUNT
+	};
 
 public:
 	NIDAQ() noexcept;
@@ -71,19 +92,27 @@ public:
 	VOLTAGE2 positionToVoltage(POINT2 position);
 	POINT2 voltageToPosition(VOLTAGE2 position);
 
+	void applyScanPosition();
+
 	void setPosition(POINT3 position);
 	POINT3 getPosition();
 
 	// NIDAQ specific function to move position to center of field of view
 	void centerPosition();
+	
+	std::vector<std::string> m_groupLabels = { "Flip Mirror", "Beam Block" };
+	std::vector<int> m_maxOptions = { 2, 2 };
 
 public slots:
 	void init();
 	bool connectDevice();
 	bool disconnectDevice();
-	void setElement(ScanControl::DEVICE_ELEMENT element, int position);
+	void setElement(DeviceElement element, int position);
+	void getElement(DeviceElement element);
 	void setElements(ScanControl::SCAN_PRESET preset);
 	void getElements();
+	void setCalFlipMirror(int position);
+	void setBeamBlock(int position);
 	// sets the position relative to the home position m_homePosition
 	void setPositionRelativeX(double position);
 	void setPositionRelativeY(double position);

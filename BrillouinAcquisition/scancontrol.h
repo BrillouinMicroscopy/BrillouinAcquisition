@@ -22,6 +22,34 @@ struct BOUNDS {
 	double zMax{  1e3 };	// [µm] maximal z-value
 };
 
+struct DeviceElement {
+	std::string name{ "" };
+	int maxOptions{ 0 };
+	int index{ 0 };
+};
+
+class DeviceElements {
+private:
+	std::vector<DeviceElement> m_deviceElements;
+
+public:
+	DeviceElements() {};
+	DeviceElements(std::vector<DeviceElement> deviceElements) {
+		m_deviceElements = deviceElements;
+	};
+	void operator=(std::vector<DeviceElement> deviceElements) {
+		m_deviceElements = deviceElements;
+	}
+
+	std::vector<DeviceElement> getDeviceElements() {
+		return m_deviceElements;
+	};
+
+	int deviceCount() {
+		return m_deviceElements.size();
+	};
+};
+
 class ScanControl: public QObject {
 	Q_OBJECT
 
@@ -59,26 +87,10 @@ public:
 		SCAN_PRESET_COUNT
 	} SCAN_PRESET;
 
-	std::vector<std::vector<int>> m_presets = {
-		{ 1, 1, 3, 1, 2, 2 },	// Brightfield
-		{ 1, 1, 3, 1, 3, 2 },	// Calibration
-		{ 1, 1, 3, 1, 2, 1 },	// Brillouin
-		{ 1, 1, 3, 2, 3, 2 }	// Eyepiece
-	};
+	std::vector<std::vector<int>> m_presets;
 	std::vector<int> m_availablePresets;
 
-	std::vector<std::string> m_groupLabels = { "Reflector", "Objective", "Tubelens", "Baseport", "Sideport", "Mirror" };
-	std::vector<int> m_maxOptions = { 5, 6, 3, 3, 3, 2 };
-	typedef enum enDeviceElement {
-		REFLECTOR,
-		OBJECTIVE,
-		TUBELENS,
-		BASEPORT,
-		SIDEPORT,
-		MIRROR,
-		DEVICE_ELEMENT_COUNT
-	} DEVICE_ELEMENT;
-	std::vector<int> m_availableElements;
+	DeviceElements m_deviceElements;
 
 	bool getConnectionStatus();
 
@@ -88,17 +100,21 @@ public:
 	virtual POINT3 getPosition() = 0;
 
 	QTimer *positionTimer = nullptr;
+	QTimer *elementPositionTimer = nullptr;
 
 public slots:
 	virtual void init() = 0;
 	virtual bool connectDevice() = 0;
 	virtual bool disconnectDevice() = 0;
-	virtual void setElement(ScanControl::DEVICE_ELEMENT, int) = 0;
+	virtual void setElement(DeviceElement, int) = 0;
+	virtual void getElement(DeviceElement) = 0;
 	virtual void setElements(ScanControl::SCAN_PRESET) = 0;
 	virtual void getElements() = 0;
 	void announcePosition();
 	void startAnnouncingPosition();
 	void stopAnnouncingPosition();
+	void startAnnouncingElementPosition();
+	void stopAnnouncingElementPosition();
 	// sets the position relative to the home position m_homePosition
 	virtual void setPositionRelativeX(double position) = 0;
 	virtual void setPositionRelativeY(double position) = 0;
@@ -116,7 +132,7 @@ public slots:
 signals:
 	void connectedDevice(bool);
 	void elementPositionsChanged(std::vector<int>);
-	void elementPositionChanged(ScanControl::DEVICE_ELEMENT, int);
+	void elementPositionChanged(DeviceElement, int);
 	void currentPosition(POINT3);
 	void savedPositionsChanged(std::vector<POINT3>);
 	void homePositionBoundsChanged(BOUNDS);

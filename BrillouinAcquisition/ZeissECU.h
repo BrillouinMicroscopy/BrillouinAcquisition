@@ -46,6 +46,8 @@ class Stand : public Element {
 public:
 	Stand(com *comObject) : Element(comObject, "H", { "AV_V3_17" }) {};
 
+	int getElementPosition(std::string device);
+	void setElementPosition(std::string device, int position);
 	void setReflector(int position);
 	int getReflector();
 	void setObjective(int position);
@@ -116,6 +118,16 @@ private:
 	MCU *m_mcu = nullptr;
 	Stand *m_stand = nullptr;
 
+	enum class DEVICE_ELEMENT {
+		REFLECTOR,
+		OBJECTIVE,
+		TUBELENS,
+		BASEPORT,
+		SIDEPORT,
+		MIRROR,
+		DEVICE_ELEMENT_COUNT
+	};
+
 public:
 	ZeissECU() noexcept;
 	~ZeissECU();
@@ -129,9 +141,10 @@ public slots:
 	bool connectDevice();
 	bool disconnectDevice();
 	void errorHandler(QSerialPort::SerialPortError error);
-	void setElement(ScanControl::DEVICE_ELEMENT element, int position);
+	void setElement(DeviceElement element, int position);
 	void setElements(ScanControl::SCAN_PRESET preset);
 	void getElements();
+	void getElement(DeviceElement element);
 	// sets the position relative to the home position m_homePosition
 	void setPositionRelativeX(double position);
 	void setPositionRelativeY(double position);
