@@ -731,6 +731,10 @@ void BrillouinAcquisition::microscopeConnectionChanged(bool isConnected) {
 	}
 }
 
+void BrillouinAcquisition::on_actionConnect_Brightfield_camera_triggered() {
+	m_pointGrey->connectDevice();
+}
+
 void BrillouinAcquisition::on_actionSettings_Stage_triggered() {
 	m_scanControlDropdown->setCurrentIndex((int)m_scanControllerType);
 	m_settingsDialog->show();

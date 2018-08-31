@@ -13,6 +13,8 @@
 #include "NIDAQ.h"
 #include "tableModel.h"
 
+#include "PointGrey.h"
+
 #include <QtWidgets/QMainWindow>
 #include "ui_BrillouinAcquisition.h"
 
@@ -70,6 +72,8 @@ private slots:
 	// connect microscope and react
 	void on_actionConnect_Stage_triggered();
 	void microscopeConnectionChanged(bool);
+
+	void on_actionConnect_Brightfield_camera_triggered();
 
 	void on_actionSettings_Stage_triggered();
 	void saveSettings();
@@ -194,6 +198,8 @@ private:
 	bool m_measurementRunning = false;
 
 	bool m_autoscalePlot = false;
+
+	PointGrey *m_pointGrey = new PointGrey();
 
 	//std::vector<POINT3> m_savedPositions = { {0,0,0}, {100,100,100}, {-200,200,300}, { -10.4,100,100 } };
 

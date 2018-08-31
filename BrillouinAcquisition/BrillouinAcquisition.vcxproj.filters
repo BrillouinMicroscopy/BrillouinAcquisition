@@ -138,6 +138,15 @@
     <ClCompile Include="tableModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_PointGrey.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_PointGrey.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PointGrey.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -200,6 +209,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="tableModel.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="PointGrey.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

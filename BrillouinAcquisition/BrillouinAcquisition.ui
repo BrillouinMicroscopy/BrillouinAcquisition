@@ -742,8 +742,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>285</width>
-                <height>340</height>
+                <width>446</width>
+                <height>475</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -796,8 +796,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>285</width>
-                <height>440</height>
+                <width>446</width>
+                <height>475</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -2121,6 +2121,7 @@ border: none;</string>
     <addaction name="actionLoad_Voltage_Position_calibration"/>
     <addaction name="actionSettings_Stage"/>
     <addaction name="separator"/>
+    <addaction name="actionConnect_Brightfield_camera"/>
    </widget>
    <widget class="QMenu" name="menuFile">
     <property name="title">
@@ -2192,6 +2193,11 @@ border: none;</string>
   <action name="actionLoad_Voltage_Position_calibration">
    <property name="text">
     <string>Load V-µm calibration</string>
+   </property>
+  </action>
+  <action name="actionConnect_Brightfield_camera">
+   <property name="text">
+    <string>Connect Brightfield camera</string>
    </property>
   </action>
  </widget>
