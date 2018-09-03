@@ -74,6 +74,8 @@ private slots:
 	void microscopeConnectionChanged(bool);
 
 	void on_actionConnect_Brightfield_camera_triggered();
+	void brightfieldCameraConnectionChanged(bool);
+	void on_camera_playPause_brightfield_clicked();
 
 	void on_actionSettings_Stage_triggered();
 	void saveSettings();
@@ -89,7 +91,8 @@ private slots:
 	void microscopeElementPositionChanged(DeviceElement element, int position);
 	void on_camera_playPause_clicked();
 	void onNewImage();
-	void initializePlot();
+	void onNewBrightfieldImage();
+	void initializePlot(QCustomPlot *customPlot, QCPColorMap *colorMap);
 
 	// set and check camera ROI
 	void xAxisRangeChanged(const QCPRange & newRange);
@@ -105,8 +108,11 @@ private slots:
 	void setElement(DeviceElement element, int position);
 	void setPreset(ScanControl::SCAN_PRESET preset);
 	void updatePreview();
+	void updateBrightfieldPreview();
 	void showPreviewRunning(bool);
+	void showBrightfieldPreviewRunning(bool isRunning);
 	void startPreview(bool);
+	void startBrightfieldPreview(bool isRunning);
 	void cameraSettingsChanged(CAMERA_SETTINGS);
 	void sensorTemperatureChanged(SensorTemperature);
 	void cameraOptionsChanged(CAMERA_OPTIONS);
@@ -190,11 +196,13 @@ private:
 	ScanControl *m_scanControl = nullptr;
 	Acquisition *m_acquisition = new Acquisition(nullptr, m_andor, &m_scanControl);
 	QCPColorMap *m_colorMap;
+	QCPColorMap *m_brightfieldColorMap;
 	QCPRange m_cLim_Default = { 100, 300 };	// default colormap range
 	SETTINGS_DEVICES m_deviceSettings;
 	CAMERA_OPTIONS m_cameraOptions;
 	ACQUISITION_SETTINGS m_acquisitionSettings;
 	bool m_previewRunning = false;
+	bool m_brightfieldPreviewRunning = false;
 	bool m_measurementRunning = false;
 
 	bool m_autoscalePlot = false;

@@ -73,6 +73,27 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		SLOT(sensorTemperatureChanged(SensorTemperature))
 	);
 
+	connection = QWidget::connect(
+		m_pointGrey,
+		SIGNAL(connectedDevice(bool)),
+		this,
+		SLOT(brightfieldCameraConnectionChanged(bool))
+	);
+
+	connection = QWidget::connect(
+		m_pointGrey,
+		SIGNAL(s_previewBufferSettingsChanged()),
+		this,
+		SLOT(updateBrightfieldPreview())
+	);
+
+	connection = QWidget::connect(
+		m_pointGrey,
+		SIGNAL(s_previewRunning(bool)),
+		this,
+		SLOT(showBrightfieldPreviewRunning(bool))
+	);
+
 	// slot to limit the axis of the camera display after user interaction
 	connection = QWidget::connect(
 		ui->customplot->xAxis,
@@ -172,14 +193,17 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	initScanControl();
 	// start camera thread
 	m_acquisitionThread.startWorker(m_andor);
+	m_acquisitionThread.startWorker(m_pointGrey);
 	// start acquisition thread
 	m_acquisitionThread.startWorker(m_acquisition);
 
 	// set up the QCPColorMap:
 	m_colorMap = new QCPColorMap(ui->customplot->xAxis, ui->customplot->yAxis);
+	m_brightfieldColorMap = new QCPColorMap(ui->customplot_brightfield->xAxis, ui->customplot_brightfield->yAxis);
 
 	// set up the camera image plot
-	BrillouinAcquisition::initializePlot();
+	BrillouinAcquisition::initializePlot(ui->customplot, m_colorMap);
+	BrillouinAcquisition::initializePlot(ui->customplot_brightfield, m_brightfieldColorMap);
 
 	updateAcquisitionSettings();
 	initSettingsDialog();
@@ -195,6 +219,8 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	ui->setPositionZ->setKeyboardTracking(false);
 
 	ui->parametersWidget->layout()->setAlignment(Qt::AlignTop);
+
+	ui->brightfieldImage->hide();
 }
 
 BrillouinAcquisition::~BrillouinAcquisition() {
@@ -205,6 +231,7 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 	m_acquisitionThread.exit();
 	m_acquisitionThread.wait();
 	delete m_andor;
+	delete m_pointGrey;
 	qInfo(logInfo()) << "BrillouinAcquisition closed.";
 	delete ui;
 }
@@ -411,9 +438,8 @@ void BrillouinAcquisition::sensorTemperatureChanged(SensorTemperature sensorTemp
 	ui->settingsWidget->setTabIcon(0, icon);
 }
 
-void BrillouinAcquisition::initializePlot() {
+void BrillouinAcquisition::initializePlot(QCustomPlot *customPlot, QCPColorMap *colorMap) {
 	// configure axis rect
-	QCustomPlot *customPlot = ui->customplot;
 
 	customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom); // this will also allow rescaling the color scale by dragging/zooming
 	customPlot->axisRect()->setupFullAxesBox(true);
@@ -429,27 +455,27 @@ void BrillouinAcquisition::initializePlot() {
 	customPlot->axisRect()->setBackground(Qt::white);
 
 	// fill map with zero
-	m_colorMap->data()->fill(0);
+	colorMap->data()->fill(0);
 
 	// turn off interpolation
-	m_colorMap->setInterpolate(false);
+	colorMap->setInterpolate(false);
 
 	// add a color scale:
 	QCPColorScale *colorScale = new QCPColorScale(customPlot);
 	customPlot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
 	colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
-	m_colorMap->setColorScale(colorScale); // associate the color map with the color scale
+	colorMap->setColorScale(colorScale); // associate the color map with the color scale
 	colorScale->axis()->setLabel("Intensity");
 
 	// set the color gradient of the color map to one of the presets:
 	QCPColorGradient gradient = QCPColorGradient();
 	setColormap(&gradient, gpParula);
-	m_colorMap->setGradient(gradient);
+	colorMap->setGradient(gradient);
 
-	m_colorMap->setDataRange(m_cLim_Default);
+	colorMap->setDataRange(m_cLim_Default);
 	// rescale the data dimension (color) such that all data points lie in the span visualized by the color gradient:
 	if (m_autoscalePlot) {
-		m_colorMap->rescaleDataRange();
+		colorMap->rescaleDataRange();
 	}
 
 	// make sure the axis rect and color scale synchronize their bottom and top margins (so they line up):
@@ -581,6 +607,16 @@ void BrillouinAcquisition::updatePreview() {
 			m_andor->previewBuffer->m_bufferSettings.roi.height + m_andor->previewBuffer->m_bufferSettings.roi.top - 1));
 }
 
+void BrillouinAcquisition::updateBrightfieldPreview() {
+	// set the properties of the colormap to the correct values of the preview buffer
+	m_brightfieldColorMap->data()->setSize(m_pointGrey->previewBuffer->m_bufferSettings.roi.width, m_pointGrey->previewBuffer->m_bufferSettings.roi.height);
+	m_brightfieldColorMap->data()->setRange(
+		QCPRange(m_pointGrey->previewBuffer->m_bufferSettings.roi.left,
+			m_pointGrey->previewBuffer->m_bufferSettings.roi.width + m_pointGrey->previewBuffer->m_bufferSettings.roi.left - 1),
+		QCPRange(m_pointGrey->previewBuffer->m_bufferSettings.roi.top,
+			m_pointGrey->previewBuffer->m_bufferSettings.roi.height + m_pointGrey->previewBuffer->m_bufferSettings.roi.top - 1));
+}
+
 void BrillouinAcquisition::showPreviewRunning(bool isRunning) {
 	if (isRunning) {
 		ui->camera_playPause->setText("Stop");
@@ -588,6 +624,15 @@ void BrillouinAcquisition::showPreviewRunning(bool isRunning) {
 		ui->camera_playPause->setText("Play");
 	}
 	startPreview(isRunning);
+}
+
+void BrillouinAcquisition::showBrightfieldPreviewRunning(bool isRunning) {
+	if (isRunning) {
+		ui->camera_playPause_brightfield->setText("Stop");
+	} else {
+		ui->camera_playPause_brightfield->setText("Play");
+	}
+	startBrightfieldPreview(isRunning);
 }
 
 void BrillouinAcquisition::showAcqRunning(bool isRunning) {
@@ -623,6 +668,15 @@ void BrillouinAcquisition::startPreview(bool isRunning) {
 	m_previewRunning = isRunning;
 }
 
+void BrillouinAcquisition::startBrightfieldPreview(bool isRunning) {
+	// if preview was not running, start it, else leave it running (don't start it twice)
+	if (!m_brightfieldPreviewRunning && isRunning) {
+		m_brightfieldPreviewRunning = true;
+		onNewBrightfieldImage();
+	}
+	m_brightfieldPreviewRunning = isRunning;
+}
+
 void BrillouinAcquisition::onNewImage() {
 	if (m_previewRunning) {
 		{
@@ -651,6 +705,37 @@ void BrillouinAcquisition::onNewImage() {
 		ui->customplot->replot();
 		
 		QMetaObject::invokeMethod(this, "onNewImage", Qt::QueuedConnection);
+	}
+}
+
+void BrillouinAcquisition::onNewBrightfieldImage() {
+	if (m_brightfieldPreviewRunning) {
+		{
+			std::lock_guard<std::mutex> lockGuard(m_pointGrey->previewBuffer->m_mutex);
+			// if no image is ready return immediately
+			if (!m_pointGrey->previewBuffer->m_buffer->m_usedBuffers->tryAcquire()) {
+				QMetaObject::invokeMethod(this, "onNewBrightfieldImage", Qt::QueuedConnection);
+				return;
+			}
+
+			unsigned char* unpackedBuffer = m_pointGrey->previewBuffer->m_buffer->getReadBuffer();
+
+			int tIndex;
+			for (gsl::index xIndex = 0; xIndex < m_pointGrey->previewBuffer->m_bufferSettings.roi.height; ++xIndex) {
+				for (gsl::index yIndex = 0; yIndex < m_pointGrey->previewBuffer->m_bufferSettings.roi.width; ++yIndex) {
+					tIndex = xIndex * m_pointGrey->previewBuffer->m_bufferSettings.roi.width + yIndex;
+					m_brightfieldColorMap->data()->setCell(yIndex, xIndex, unpackedBuffer[tIndex]);
+				}
+			}
+
+		}
+		m_pointGrey->previewBuffer->m_buffer->m_freeBuffers->release();
+		if (m_autoscalePlot) {
+			m_brightfieldColorMap->rescaleDataRange();
+		}
+		ui->customplot_brightfield->replot();
+
+		QMetaObject::invokeMethod(this, "onNewBrightfieldImage", Qt::QueuedConnection);
 	}
 }
 
@@ -732,7 +817,33 @@ void BrillouinAcquisition::microscopeConnectionChanged(bool isConnected) {
 }
 
 void BrillouinAcquisition::on_actionConnect_Brightfield_camera_triggered() {
-	m_pointGrey->connectDevice();
+	if (m_pointGrey->getConnectionStatus()) {
+		QMetaObject::invokeMethod(m_pointGrey, "disconnectDevice", Qt::QueuedConnection);
+	} else {
+		QMetaObject::invokeMethod(m_pointGrey, "connectDevice", Qt::QueuedConnection);
+	}
+}
+
+void BrillouinAcquisition::brightfieldCameraConnectionChanged(bool isConnected) {
+	if (isConnected) {
+		ui->actionConnect_Brightfield_camera->setText("Disconnect Brightfield Camera");
+		ui->brightfieldImage->show();
+		ui->camera_playPause_brightfield->setEnabled(true);
+	}
+	else {
+		ui->actionConnect_Brightfield_camera->setText("Connect Brightfield Camera");
+		ui->brightfieldImage->hide();
+		ui->camera_playPause_brightfield->setEnabled(false);
+	}
+}
+
+void BrillouinAcquisition::on_camera_playPause_brightfield_clicked() {
+	if (!m_pointGrey->m_isPreviewRunning) {
+		QMetaObject::invokeMethod(m_pointGrey, "startPreview", Qt::QueuedConnection, Q_ARG(CAMERA_SETTINGS, m_acquisitionSettings.camera));
+	}
+	else {
+		m_pointGrey->m_isPreviewRunning = false;
+	}
 }
 
 void BrillouinAcquisition::on_actionSettings_Stage_triggered() {

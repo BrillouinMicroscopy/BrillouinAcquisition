@@ -43,7 +43,7 @@ bool Andor::initialize() {
 
 void Andor::init() {
 	// create timers and connect their signals
-	// after moving daq_PS2000 to another thread
+	// after moving andor to another thread
 	m_tempTimer = new QTimer();
 	QMetaObject::Connection connection = QWidget::connect(m_tempTimer, SIGNAL(timeout()), this, SLOT(checkSensorTemperature()));
 }

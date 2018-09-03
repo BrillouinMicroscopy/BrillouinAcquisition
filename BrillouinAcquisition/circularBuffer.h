@@ -38,7 +38,7 @@ inline CircularBuffer<T>::CircularBuffer(const int bufferNumber, const int buffe
 
 	m_buffers = new T*[m_bufferNumber];
 	for (gsl::index i = 0; i < m_bufferNumber; i++) {
-		m_buffers[i] = new T[m_bufferSize]{0};
+		m_buffers[i] = new T[m_bufferSize]{};
 	}
 }
 
