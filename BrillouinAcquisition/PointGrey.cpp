@@ -6,45 +6,48 @@ PointGrey::~PointGrey() {
 }
 
 void PointGrey::connectDevice() {
+	if (!m_isConnected) {
+		m_system = System::GetInstance();
+		m_cameraList = m_system->GetCameras();
 
-	m_system = System::GetInstance();
-	m_cameraList = m_system->GetCameras();
+		int numCameras = m_cameraList.GetSize();
 
-	int numCameras = m_cameraList.GetSize();
+		if (numCameras > 0) {
+			// Select camera
+			m_camera = m_cameraList.GetByIndex(0);
 
-	if (numCameras > 0) {
-		// Select camera
-		m_camera = m_cameraList.GetByIndex(0);
+			// Retrieve TL device nodemap
+			m_nodeMapTLDevice = &m_camera->GetTLDeviceNodeMap();
 
-		// Retrieve TL device nodemap
-		m_nodeMapTLDevice = &m_camera->GetTLDeviceNodeMap();
+			// Initialize camera
+			m_camera->Init();
 
-		// Initialize camera
-		m_camera->Init();
+			// Retrieve GenICam nodemap
+			m_nodeMap = &m_camera->GetNodeMap();
 
-		// Retrieve GenICam nodemap
-		m_nodeMap = &m_camera->GetNodeMap();
-
-		m_isConnected = true;
+			m_isConnected = true;
+		}
 	}
 
 	emit(connectedDevice(m_isConnected));
 }
 
 void PointGrey::disconnectDevice() {
-	// Deinitialize camera
-	m_camera->DeInit();
+	if (m_isConnected) {
+		// Deinitialize camera
+		m_camera->DeInit();
 
-	// Release reference to the camera
-	m_camera = NULL;
+		// Release reference to the camera
+		m_camera = NULL;
 
-	// Clear camera list before releasing system
-	m_cameraList.Clear();
+		// Clear camera list before releasing system
+		m_cameraList.Clear();
 
-	// Release system
-	m_system->ReleaseInstance();
+		// Release system
+		m_system->ReleaseInstance();
 
-	m_isConnected = false;
+		m_isConnected = false;
+	}
 
 	emit(connectedDevice(m_isConnected));
 }
