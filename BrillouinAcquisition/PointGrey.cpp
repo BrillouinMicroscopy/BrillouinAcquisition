@@ -60,51 +60,28 @@ void PointGrey::setSettings() {
 	/*
 	 * Set acquisition to continuous
 	 */
-	// Retrieve enumeration node from nodemap
-	CEnumerationPtr ptrAcquisitionMode = m_nodeMap->GetNode("AcquisitionMode");
-	// Retrieve entry node from enumeration node
-	CEnumEntryPtr ptrAcquisitionModeContinuous = ptrAcquisitionMode->GetEntryByName("Continuous");
-	// Retrieve integer value from entry node and set integer value from entry node as new value of enumeration node
-	ptrAcquisitionMode->SetIntValue(ptrAcquisitionModeContinuous->GetValue());
+	m_camera->AcquisitionMode.SetValue(AcquisitionModeEnums::AcquisitionMode_Continuous);
 
 	/*
 	* Set pixel format to Mono8
 	*/
-	CEnumerationPtr ptrPixelformat = m_nodeMap->GetNode("PixelFormat");
-	CEnumEntryPtr ptrPixelformatRaw = ptrPixelformat->GetEntryByName("Mono8");
-	ptrPixelformat->SetIntValue(ptrPixelformatRaw->GetValue());
+	m_camera->PixelFormat.SetValue(PixelFormatEnums::PixelFormat_Mono8);
 
 	/*
 	* Set region of interest
 	*/
 	// Offset x to minimum
-	CIntegerPtr ptrOffsetX = m_nodeMap->GetNode("OffsetX");
-	if (IsAvailable(ptrOffsetX) && IsWritable(ptrOffsetX)) {
-		int64_t offsetX = ptrOffsetX->GetMin();
-		m_settings.roi.left = offsetX;
-		ptrOffsetX->SetValue(offsetX);
-	}
+	m_settings.roi.left = m_camera->OffsetX.GetMin();
+	m_camera->OffsetX.SetValue(m_settings.roi.left);
 	// Offset y to minimum
-	CIntegerPtr ptrOffsetY = m_nodeMap->GetNode("OffsetY");
-	if (IsAvailable(ptrOffsetY) && IsWritable(ptrOffsetY)) {
-		int64_t offsetY = ptrOffsetY->GetMin();
-		m_settings.roi.top = offsetY;
-		ptrOffsetY->SetValue(offsetY);
-	}
+	m_settings.roi.top = m_camera->OffsetY.GetMin();
+	m_camera->OffsetY.SetValue(m_settings.roi.top);
 	// Width to maximum
-	CIntegerPtr ptrWidth = m_nodeMap->GetNode("Width");
-	if (IsAvailable(ptrWidth) && IsWritable(ptrWidth)) {
-		int64_t widthToSet = ptrWidth->GetMax();
-		m_settings.roi.width = widthToSet;
-		ptrWidth->SetValue(widthToSet);
-	}
+	m_settings.roi.width = m_camera->Width.GetMax();
+	m_camera->Width.SetValue(m_settings.roi.width);
 	// Height to maximum
-	CIntegerPtr ptrHeight = m_nodeMap->GetNode("Height");
-	if (IsAvailable(ptrHeight) && IsWritable(ptrHeight)) {
-		int64_t heightToSet = ptrHeight->GetMax();
-		m_settings.roi.height = heightToSet;
-		ptrHeight->SetValue(heightToSet);
-	}
+	m_settings.roi.height = m_camera->Height.GetMax();
+	m_camera->Height.SetValue(m_settings.roi.height);
 }
 
 void PointGrey::startPreview(CAMERA_SETTINGS settings) {
