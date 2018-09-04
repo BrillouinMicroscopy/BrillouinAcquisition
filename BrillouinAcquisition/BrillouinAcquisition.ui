@@ -53,6 +53,9 @@
        </property>
        <item>
         <widget class="QTabWidget" name="settingsWidget">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -100,7 +103,7 @@ QTabBar::tab:!selected {
 }</string>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>3</number>
          </property>
          <widget class="QWidget" name="cameraTab">
           <property name="sizePolicy">
@@ -116,7 +119,7 @@ QTabBar::tab:!selected {
            </size>
           </property>
           <attribute name="title">
-           <string>Camera</string>
+           <string>BM Camera</string>
           </attribute>
           <layout class="QHBoxLayout" name="horizontalLayout_3">
            <property name="leftMargin">
@@ -1017,6 +1020,332 @@ QTabBar::tab:!selected {
                <property name="text">
                 <string>Save position</string>
                </property>
+              </widget>
+             </widget>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="ODTcameraTab">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <attribute name="title">
+           <string>ODT Camera</string>
+          </attribute>
+          <layout class="QHBoxLayout" name="horizontalLayout_9">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QScrollArea" name="sTScrollArea_3">
+             <property name="minimumSize">
+              <size>
+               <width>300</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+             <property name="lineWidth">
+              <number>0</number>
+             </property>
+             <property name="widgetResizable">
+              <bool>true</bool>
+             </property>
+             <widget class="QWidget" name="ODTcameraBox">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>446</width>
+                <height>475</height>
+               </rect>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>340</height>
+               </size>
+              </property>
+              <widget class="QLabel" name="exposureTimeLabel_2">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>151</width>
+                 <height>30</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Exposure time [s]</string>
+               </property>
+              </widget>
+              <widget class="QGroupBox" name="binningROIBox_2">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>50</y>
+                 <width>401</width>
+                 <height>101</height>
+                </rect>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="title">
+                <string>ROI</string>
+               </property>
+               <widget class="QLabel" name="ROILeftLabel_2">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>25</y>
+                  <width>61</width>
+                  <height>30</height>
+                 </rect>
+                </property>
+                <property name="text">
+                 <string>Left</string>
+                </property>
+               </widget>
+               <widget class="QLabel" name="ROITopLabel_2">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>60</y>
+                  <width>61</width>
+                  <height>30</height>
+                 </rect>
+                </property>
+                <property name="text">
+                 <string>Top</string>
+                </property>
+               </widget>
+               <widget class="QLabel" name="ROIWidthLabel_2">
+                <property name="geometry">
+                 <rect>
+                  <x>210</x>
+                  <y>25</y>
+                  <width>61</width>
+                  <height>30</height>
+                 </rect>
+                </property>
+                <property name="text">
+                 <string>Width</string>
+                </property>
+               </widget>
+               <widget class="QLabel" name="ROIHeightLabel_2">
+                <property name="geometry">
+                 <rect>
+                  <x>210</x>
+                  <y>60</y>
+                  <width>61</width>
+                  <height>30</height>
+                 </rect>
+                </property>
+                <property name="text">
+                 <string>Height</string>
+                </property>
+               </widget>
+               <widget class="QSpinBox" name="ROILeft_2">
+                <property name="geometry">
+                 <rect>
+                  <x>85</x>
+                  <y>25</y>
+                  <width>101</width>
+                  <height>30</height>
+                 </rect>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>2048</number>
+                </property>
+                <property name="value">
+                 <number>1</number>
+                </property>
+               </widget>
+               <widget class="QSpinBox" name="ROITop_2">
+                <property name="geometry">
+                 <rect>
+                  <x>85</x>
+                  <y>60</y>
+                  <width>101</width>
+                  <height>30</height>
+                 </rect>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>2048</number>
+                </property>
+                <property name="value">
+                 <number>1</number>
+                </property>
+               </widget>
+               <widget class="QSpinBox" name="ROIWidth_2">
+                <property name="geometry">
+                 <rect>
+                  <x>290</x>
+                  <y>25</y>
+                  <width>101</width>
+                  <height>29</height>
+                 </rect>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>2048</number>
+                </property>
+                <property name="value">
+                 <number>1</number>
+                </property>
+               </widget>
+               <widget class="QSpinBox" name="ROIHeight_2">
+                <property name="geometry">
+                 <rect>
+                  <x>290</x>
+                  <y>60</y>
+                  <width>101</width>
+                  <height>30</height>
+                 </rect>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>2048</number>
+                </property>
+                <property name="value">
+                 <number>1</number>
+                </property>
+               </widget>
+              </widget>
+              <widget class="QDoubleSpinBox" name="exposureTime_2">
+               <property name="geometry">
+                <rect>
+                 <x>170</x>
+                 <y>10</y>
+                 <width>241</width>
+                 <height>30</height>
+                </rect>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.000000000000000</double>
+               </property>
+              </widget>
+              <widget class="QGroupBox" name="readoutBox_2">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>160</y>
+                 <width>401</width>
+                 <height>101</height>
+                </rect>
+               </property>
+               <property name="title">
+                <string>Readout</string>
+               </property>
+               <widget class="QLabel" name="pixelEncodingLabel_2">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>25</y>
+                  <width>131</width>
+                  <height>30</height>
+                 </rect>
+                </property>
+                <property name="text">
+                 <string>Pixel encoding</string>
+                </property>
+               </widget>
+               <widget class="QLabel" name="cycleModeLabel_2">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>60</y>
+                  <width>131</width>
+                  <height>30</height>
+                 </rect>
+                </property>
+                <property name="text">
+                 <string>Cycle mode</string>
+                </property>
+               </widget>
+               <widget class="QComboBox" name="pixelEncoding_2">
+                <property name="geometry">
+                 <rect>
+                  <x>160</x>
+                  <y>25</y>
+                  <width>231</width>
+                  <height>30</height>
+                 </rect>
+                </property>
+                <property name="currentIndex">
+                 <number>0</number>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Mono8</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Mono12</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Mono16</string>
+                 </property>
+                </item>
+               </widget>
+               <widget class="QComboBox" name="cycleMode_2">
+                <property name="geometry">
+                 <rect>
+                  <x>160</x>
+                  <y>60</y>
+                  <width>231</width>
+                  <height>30</height>
+                 </rect>
+                </property>
+                <property name="currentIndex">
+                 <number>0</number>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Fixed</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Continuous</string>
+                 </property>
+                </item>
+               </widget>
               </widget>
              </widget>
             </widget>

@@ -164,6 +164,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	ui->settingsWidget->setTabIcon(0, icon);
 	ui->settingsWidget->setTabIcon(1, icon);
 	ui->settingsWidget->setTabIcon(2, icon);
+	ui->settingsWidget->setTabIcon(3, icon);
 	ui->settingsWidget->setIconSize(QSize(16, 16));
 
 	ui->actionEnable_Cooling->setEnabled(false);
@@ -808,11 +809,15 @@ void BrillouinAcquisition::brightfieldCameraConnectionChanged(bool isConnected) 
 		ui->actionConnect_Brightfield_camera->setText("Disconnect Brightfield Camera");
 		ui->brightfieldImage->show();
 		ui->camera_playPause_brightfield->setEnabled(true);
+		QIcon icon(":/BrillouinAcquisition/assets/03ready.png");
+		ui->settingsWidget->setTabIcon(3, icon);
 	}
 	else {
 		ui->actionConnect_Brightfield_camera->setText("Connect Brightfield Camera");
 		ui->brightfieldImage->hide();
 		ui->camera_playPause_brightfield->setEnabled(false);
+		QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
+		ui->settingsWidget->setTabIcon(3, icon);
 	}
 }
 
@@ -1137,18 +1142,23 @@ void BrillouinAcquisition::initCamera() {
 	}
 
 	// initialize correct camera type
+	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
 	switch (m_cameraType) {
 		case CAMERA_DEVICE::NONE:
 			m_pointGrey = nullptr;
 			ui->actionConnect_Brightfield_camera->setVisible(false);
+			ui->settingsWidget->removeTab(3);
 			break;
 		case CAMERA_DEVICE::POINTGREY:
 			m_pointGrey = new PointGrey();
 			ui->actionConnect_Brightfield_camera->setVisible(true);
+			ui->settingsWidget->addTab(ui->ODTcameraTab, "ODT Camera");
+			ui->settingsWidget->setTabIcon(3, icon);
 			break;
 		default:
 			m_pointGrey = nullptr;
 			ui->actionConnect_Brightfield_camera->setVisible(false);
+			ui->settingsWidget->removeTab(3);
 			break;
 	}
 
