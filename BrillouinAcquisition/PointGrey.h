@@ -18,12 +18,10 @@ class PointGrey : public QObject {
 
 private:
 
-	SystemPtr m_system;
+	SystemPtr m_system{ NULL };
 	CameraList m_cameraList;
 
 	CameraPtr m_camera{ NULL };
-	INodeMap *m_nodeMapTLDevice = nullptr;
-	INodeMap *m_nodeMap;
 
 	bool m_isConnected{ false };
 

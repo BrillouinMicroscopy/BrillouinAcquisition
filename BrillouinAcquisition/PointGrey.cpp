@@ -16,16 +16,14 @@ void PointGrey::connectDevice() {
 			// Select camera
 			m_camera = m_cameraList.GetByIndex(0);
 
-			// Retrieve TL device nodemap
-			m_nodeMapTLDevice = &m_camera->GetTLDeviceNodeMap();
-
 			// Initialize camera
 			m_camera->Init();
 
-			// Retrieve GenICam nodemap
-			m_nodeMap = &m_camera->GetNodeMap();
-
 			m_isConnected = true;
+		} else {
+			m_cameraList.Clear();
+			// Release system
+			m_system->ReleaseInstance();
 		}
 	}
 
