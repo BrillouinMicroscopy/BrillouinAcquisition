@@ -836,12 +836,16 @@ void BrillouinAcquisition::on_actionSettings_Stage_triggered() {
 }
 
 void BrillouinAcquisition::saveSettings() {
-	m_scanControllerType = m_scanControllerTypeTemporary;
-	m_cameraType = m_cameraTypeTemporary;
+	if (m_scanControllerType != m_scanControllerTypeTemporary) {
+		m_scanControllerType = m_scanControllerTypeTemporary;
+		initScanControl();
+		initBeampathButtons();
+	}
+	if (m_cameraType != m_cameraTypeTemporary) {
+		m_cameraType = m_cameraTypeTemporary;
+		initCamera();
+	}
 	m_settingsDialog->hide();
-	initScanControl();
-	initCamera();
-	initBeampathButtons();
 }
 
 void BrillouinAcquisition::cancelSettings() {
