@@ -73,27 +73,6 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		SLOT(sensorTemperatureChanged(SensorTemperature))
 	);
 
-	connection = QWidget::connect(
-		m_pointGrey,
-		SIGNAL(connectedDevice(bool)),
-		this,
-		SLOT(brightfieldCameraConnectionChanged(bool))
-	);
-
-	connection = QWidget::connect(
-		m_pointGrey,
-		SIGNAL(s_previewBufferSettingsChanged()),
-		this,
-		SLOT(updateBrightfieldPreview())
-	);
-
-	connection = QWidget::connect(
-		m_pointGrey,
-		SIGNAL(s_previewRunning(bool)),
-		this,
-		SLOT(showBrightfieldPreviewRunning(bool))
-	);
-
 	// slot to limit the axis of the camera display after user interaction
 	connection = QWidget::connect(
 		ui->customplot->xAxis,
@@ -191,9 +170,9 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	ui->autoscalePlot->setChecked(m_autoscalePlot);
 
 	initScanControl();
+	initCamera();
 	// start camera thread
 	m_acquisitionThread.startWorker(m_andor);
-	m_acquisitionThread.startWorker(m_pointGrey);
 	// start acquisition thread
 	m_acquisitionThread.startWorker(m_acquisition);
 
@@ -853,13 +832,16 @@ void BrillouinAcquisition::on_actionSettings_Stage_triggered() {
 
 void BrillouinAcquisition::saveSettings() {
 	m_scanControllerType = m_scanControllerTypeTemporary;
+	m_cameraType = m_cameraTypeTemporary;
 	m_settingsDialog->hide();
 	initScanControl();
+	initCamera();
 	initBeampathButtons();
 }
 
 void BrillouinAcquisition::cancelSettings() {
 	m_scanControllerTypeTemporary = m_scanControllerType;
+	m_cameraTypeTemporary = m_cameraType;
 	m_settingsDialog->hide();
 }
 
@@ -876,7 +858,7 @@ void BrillouinAcquisition::initSettingsDialog() {
 	daqWidget->setMinimumWidth(400);
 	QGroupBox *box = new QGroupBox(daqWidget);
 	box->setTitle("Scanning device");
-	box->setMinimumHeight(100);
+	box->setMinimumHeight(80);
 	box->setMinimumWidth(400);
 
 	vLayout->addWidget(daqWidget);
@@ -902,6 +884,43 @@ void BrillouinAcquisition::initSettingsDialog() {
 		SLOT(selectScanningDevice(int))
 	);
 
+	/*
+	 * Widget for ODT/Fluorescence camera selection
+	 */
+	QWidget *cameraWidget = new QWidget();
+	cameraWidget->setMinimumHeight(100);
+	cameraWidget->setMinimumWidth(400);
+	QGroupBox *camBox = new QGroupBox(cameraWidget);
+	camBox->setTitle("ODT/Fluorescence camera");
+	camBox->setMinimumHeight(80);
+	camBox->setMinimumWidth(400);
+
+	vLayout->addWidget(cameraWidget);
+
+	QHBoxLayout *camLayout = new QHBoxLayout(camBox);
+
+	QLabel *camLabel = new QLabel("Currently selected camera");
+	camLayout->addWidget(camLabel);
+
+	m_cameraDropdown = new QComboBox();
+	camLayout->addWidget(m_cameraDropdown);
+	i = 0;
+	for (auto type : CAMERA_DEVICE_NAMES) {
+		m_cameraDropdown->insertItem(i, QString::fromStdString(type));
+		i++;
+	}
+	m_cameraDropdown->setCurrentIndex((int)m_cameraType);
+
+	connection = QWidget::connect(
+		m_cameraDropdown,
+		SIGNAL(currentIndexChanged(int)),
+		this,
+		SLOT(selectCameraDevice(int))
+	);
+
+	/*
+	 * Ok and Cancel buttons
+	 */
 	QWidget *buttonWidget = new QWidget();
 	vLayout->addWidget(buttonWidget);
 
@@ -938,6 +957,10 @@ void BrillouinAcquisition::initSettingsDialog() {
 
 void BrillouinAcquisition::selectScanningDevice(int index) {
 	m_scanControllerTypeTemporary = (ScanControl::SCAN_DEVICE)index;
+}
+
+void BrillouinAcquisition::selectCameraDevice(int index) {
+	m_cameraTypeTemporary = (CAMERA_DEVICE)index;
 }
 
 void BrillouinAcquisition::on_actionLoad_Voltage_Position_calibration_triggered() {
@@ -1020,13 +1043,13 @@ void BrillouinAcquisition::initBeampathButtons() {
 }
 
 void BrillouinAcquisition::initScanControl() {
-	// deinitialize DAQ if necessary
+	// deinitialize scanner if necessary
 	if (m_scanControl) {
 		m_scanControl->deleteLater();
 		m_scanControl = nullptr;
 	}
 
-	// initialize correct DAQ type
+	// initialize correct scanner type
 	switch (m_scanControllerType) {
 		case ScanControl::SCAN_DEVICE::ZEISSECU:
 			m_scanControl = new ZeissECU();
@@ -1104,7 +1127,61 @@ void BrillouinAcquisition::initScanControl() {
 	m_acquisitionThread.startWorker(m_scanControl);
 
 	QMetaObject::invokeMethod(m_scanControl, "connectDevice", Qt::AutoConnection);
+}
 
+void BrillouinAcquisition::initCamera() {
+	// deinitialize camera if necessary
+	if (m_pointGrey) {
+		m_pointGrey->deleteLater();
+		m_pointGrey = nullptr;
+	}
+
+	// initialize correct camera type
+	switch (m_cameraType) {
+		case CAMERA_DEVICE::NONE:
+			m_pointGrey = nullptr;
+			ui->actionConnect_Brightfield_camera->setVisible(false);
+			break;
+		case CAMERA_DEVICE::POINTGREY:
+			m_pointGrey = new PointGrey();
+			ui->actionConnect_Brightfield_camera->setVisible(true);
+			break;
+		default:
+			m_pointGrey = nullptr;
+			ui->actionConnect_Brightfield_camera->setVisible(false);
+			break;
+	}
+
+	// don't do anything if no camera is connected
+	if (m_cameraType == CAMERA_DEVICE::NONE) {
+		return;
+	}
+
+	// reestablish camera connections
+	QMetaObject::Connection connection = QWidget::connect(
+		m_pointGrey,
+		SIGNAL(connectedDevice(bool)),
+		this,
+		SLOT(brightfieldCameraConnectionChanged(bool))
+	);
+
+	connection = QWidget::connect(
+		m_pointGrey,
+		SIGNAL(s_previewBufferSettingsChanged()),
+		this,
+		SLOT(updateBrightfieldPreview())
+	);
+
+	connection = QWidget::connect(
+		m_pointGrey,
+		SIGNAL(s_previewRunning(bool)),
+		this,
+		SLOT(showBrightfieldPreviewRunning(bool))
+	);
+
+	m_acquisitionThread.startWorker(m_pointGrey);
+
+	QMetaObject::invokeMethod(m_pointGrey, "connectDevice", Qt::AutoConnection);
 }
 
 void BrillouinAcquisition::microscopeElementPositionsChanged(std::vector<int> positions) {

@@ -82,6 +82,7 @@ private slots:
 	void cancelSettings();
 	void initSettingsDialog();
 	void selectScanningDevice(int index);
+	void selectCameraDevice(int index);
 	void on_actionLoad_Voltage_Position_calibration_triggered();
 
 	void initBeampathButtons();
@@ -182,8 +183,20 @@ private:
 	Ui::BrillouinAcquisitionClass *ui;
 	ScanControl::SCAN_DEVICE m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSECU;
 	ScanControl::SCAN_DEVICE m_scanControllerTypeTemporary = m_scanControllerType;
+
+	typedef enum class enCameraDevice {
+		NONE = 0,
+		POINTGREY = 1
+	} CAMERA_DEVICE;
+	std::vector<std::string> CAMERA_DEVICE_NAMES = { "None", "PointGrey" };
+
+	CAMERA_DEVICE m_cameraType = CAMERA_DEVICE::NONE;
+	CAMERA_DEVICE m_cameraTypeTemporary = m_cameraType;
+
 	void initScanControl();
+	void initCamera();
 	QComboBox *m_scanControlDropdown;
+	QComboBox *m_cameraDropdown;
 	std::string m_calibrationFilePath;
 
 	QDialog *m_settingsDialog = nullptr;
@@ -194,6 +207,7 @@ private:
 	Thread m_acquisitionThread;
 	Andor *m_andor = new Andor();
 	ScanControl *m_scanControl = nullptr;
+	PointGrey *m_pointGrey = nullptr;
 	Acquisition *m_acquisition = new Acquisition(nullptr, m_andor, &m_scanControl);
 	QCPColorMap *m_colorMap;
 	QCPColorMap *m_brightfieldColorMap;
@@ -206,8 +220,6 @@ private:
 	bool m_measurementRunning = false;
 
 	bool m_autoscalePlot = false;
-
-	PointGrey *m_pointGrey = new PointGrey();
 
 	//std::vector<POINT3> m_savedPositions = { {0,0,0}, {100,100,100}, {-200,200,300}, { -10.4,100,100 } };
 
