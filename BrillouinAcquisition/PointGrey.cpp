@@ -68,6 +68,15 @@ void PointGrey::setSettings() {
 	m_camera->PixelFormat.SetValue(PixelFormatEnums::PixelFormat_Mono8);
 
 	/*
+	 * Set the exposure time
+	 */
+	m_camera->ExposureAuto.SetValue(ExposureAutoEnums::ExposureAuto_Off);
+	m_camera->ExposureMode.SetValue(ExposureModeEnums::ExposureMode_Timed);
+
+	// exposure time in microseconds
+	m_camera->ExposureTime.SetValue(1000);
+
+	/*
 	* Set region of interest
 	*/
 	// Offset x to minimum
