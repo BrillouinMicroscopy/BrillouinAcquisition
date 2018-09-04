@@ -168,7 +168,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	ui->settingsWidget->setIconSize(QSize(16, 16));
 
 	ui->actionEnable_Cooling->setEnabled(false);
-	ui->autoscalePlot->setChecked(m_autoscalePlot);
+	ui->autoscalePlot->setChecked(m_BrillouinPlot.autoscale);
 
 	initScanControl();
 	initCamera();
@@ -178,12 +178,24 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	m_acquisitionThread.startWorker(m_acquisition);
 
 	// set up the QCPColorMap:
-	m_colorMap = new QCPColorMap(ui->customplot->xAxis, ui->customplot->yAxis);
-	m_brightfieldColorMap = new QCPColorMap(ui->customplot_brightfield->xAxis, ui->customplot_brightfield->yAxis);
+	m_BrillouinPlot = {
+		ui->customplot,
+		new QCPColorMap(ui->customplot->xAxis, ui->customplot->yAxis),
+		{ 100, 300 },
+		false,
+		gpParula
+	};
+	m_ODTPlot = {
+		ui->customplot_brightfield,
+		new QCPColorMap(ui->customplot_brightfield->xAxis, ui->customplot_brightfield->yAxis),
+		{ 0, 100 },
+		false,
+		gpGrayscale
+	};
 
 	// set up the camera image plot
-	BrillouinAcquisition::initializePlot(ui->customplot, m_colorMap);
-	BrillouinAcquisition::initializePlot(ui->customplot_brightfield, m_brightfieldColorMap);
+	BrillouinAcquisition::initializePlot(m_BrillouinPlot);
+	BrillouinAcquisition::initializePlot(m_ODTPlot);
 
 	updateAcquisitionSettings();
 	initSettingsDialog();
@@ -229,7 +241,11 @@ void BrillouinAcquisition::setElement(DeviceElement element, int position) {
 }
 
 void BrillouinAcquisition::on_autoscalePlot_stateChanged(int state) {
-	m_autoscalePlot = (bool)state;
+	m_BrillouinPlot.autoscale = (bool)state;
+}
+
+void BrillouinAcquisition::on_autoscalePlot_brightfield_stateChanged(int state) {
+	m_ODTPlot.autoscale = (bool)state;
 }
 
 void BrillouinAcquisition::setPreset(ScanControl::SCAN_PRESET preset) {
@@ -241,7 +257,7 @@ void BrillouinAcquisition::cameraOptionsChanged(CAMERA_OPTIONS options) {
 	m_cameraOptions.ROIWidthLimits = options.ROIWidthLimits;
 
 	// set size of colormap to maximum image size
-	m_colorMap->data()->setSize(options.ROIWidthLimits[1], options.ROIHeightLimits[1]);
+	m_BrillouinPlot.colorMap->data()->setSize(options.ROIWidthLimits[1], options.ROIHeightLimits[1]);
 
 	addListToComboBox(ui->triggerMode, options.triggerModes);
 	addListToComboBox(ui->binning, options.imageBinnings);
@@ -418,53 +434,53 @@ void BrillouinAcquisition::sensorTemperatureChanged(SensorTemperature sensorTemp
 	ui->settingsWidget->setTabIcon(0, icon);
 }
 
-void BrillouinAcquisition::initializePlot(QCustomPlot *customPlot, QCPColorMap *colorMap) {
+void BrillouinAcquisition::initializePlot(PLOT_SETTINGS plotSettings) {
 	// configure axis rect
 
-	customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom); // this will also allow rescaling the color scale by dragging/zooming
-	customPlot->axisRect()->setupFullAxesBox(true);
+	plotSettings.plotHandle->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom); // this will also allow rescaling the color scale by dragging/zooming
+	plotSettings.plotHandle->axisRect()->setupFullAxesBox(true);
 	//customPlot->xAxis->setLabel("x");
 	//customPlot->yAxis->setLabel("y");
 
 	// this are the selection modes
-	customPlot->setSelectionRectMode(QCP::srmZoom);	// allows to select region by rectangle
-	customPlot->setSelectionRectMode(QCP::srmNone);	// allows to drag the position
+	plotSettings.plotHandle->setSelectionRectMode(QCP::srmZoom);	// allows to select region by rectangle
+	plotSettings.plotHandle->setSelectionRectMode(QCP::srmNone);	// allows to drag the position
 
 	// set background color to default light gray
-	customPlot->setBackground(QColor(240, 240, 240, 255));
-	customPlot->axisRect()->setBackground(Qt::white);
+	plotSettings.plotHandle->setBackground(QColor(240, 240, 240, 255));
+	plotSettings.plotHandle->axisRect()->setBackground(Qt::white);
 
 	// fill map with zero
-	colorMap->data()->fill(0);
+	plotSettings.colorMap->data()->fill(0);
 
 	// turn off interpolation
-	colorMap->setInterpolate(false);
+	plotSettings.colorMap->setInterpolate(false);
 
 	// add a color scale:
-	QCPColorScale *colorScale = new QCPColorScale(customPlot);
-	customPlot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
+	QCPColorScale *colorScale = new QCPColorScale(plotSettings.plotHandle);
+	plotSettings.plotHandle->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
 	colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
-	colorMap->setColorScale(colorScale); // associate the color map with the color scale
+	plotSettings.colorMap->setColorScale(colorScale); // associate the color map with the color scale
 	colorScale->axis()->setLabel("Intensity");
 
 	// set the color gradient of the color map to one of the presets:
 	QCPColorGradient gradient = QCPColorGradient();
-	setColormap(&gradient, gpParula);
-	colorMap->setGradient(gradient);
+	setColormap(&gradient, plotSettings.gradient);
+	plotSettings.colorMap->setGradient(gradient);
 
-	colorMap->setDataRange(m_cLim_Default);
+	plotSettings.colorMap->setDataRange(plotSettings.cLim);
 	// rescale the data dimension (color) such that all data points lie in the span visualized by the color gradient:
-	if (m_autoscalePlot) {
-		colorMap->rescaleDataRange();
+	if (plotSettings.autoscale) {
+		plotSettings.colorMap->rescaleDataRange();
 	}
 
 	// make sure the axis rect and color scale synchronize their bottom and top margins (so they line up):
-	QCPMarginGroup *marginGroup = new QCPMarginGroup(customPlot);
-	customPlot->axisRect()->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
+	QCPMarginGroup *marginGroup = new QCPMarginGroup(plotSettings.plotHandle);
+	plotSettings.plotHandle->axisRect()->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
 	colorScale->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
 
 	// rescale the key (x) and value (y) axes so the whole color map is visible:
-	customPlot->rescaleAxes();
+	plotSettings.plotHandle->rescaleAxes();
 }
 
 void BrillouinAcquisition::xAxisRangeChanged(const QCPRange &newRange) {
@@ -578,9 +594,10 @@ std::vector<AT_64> BrillouinAcquisition::checkROI(std::vector<AT_64> values, std
 }
 
 void BrillouinAcquisition::updatePreview() {
+	PLOT_SETTINGS plotSettings = m_BrillouinPlot;
 	// set the properties of the colormap to the correct values of the preview buffer
-	m_colorMap->data()->setSize(m_andor->previewBuffer->m_bufferSettings.roi.width, m_andor->previewBuffer->m_bufferSettings.roi.height);
-	m_colorMap->data()->setRange(
+	plotSettings.colorMap->data()->setSize(m_andor->previewBuffer->m_bufferSettings.roi.width, m_andor->previewBuffer->m_bufferSettings.roi.height);
+	plotSettings.colorMap->data()->setRange(
 		QCPRange(m_andor->previewBuffer->m_bufferSettings.roi.left,
 			m_andor->previewBuffer->m_bufferSettings.roi.width + m_andor->previewBuffer->m_bufferSettings.roi.left - 1),
 		QCPRange(m_andor->previewBuffer->m_bufferSettings.roi.top,
@@ -588,9 +605,10 @@ void BrillouinAcquisition::updatePreview() {
 }
 
 void BrillouinAcquisition::updateBrightfieldPreview() {
+	PLOT_SETTINGS plotSettings = m_ODTPlot;
 	// set the properties of the colormap to the correct values of the preview buffer
-	m_brightfieldColorMap->data()->setSize(m_pointGrey->previewBuffer->m_bufferSettings.roi.width, m_pointGrey->previewBuffer->m_bufferSettings.roi.height);
-	m_brightfieldColorMap->data()->setRange(
+	plotSettings.colorMap->data()->setSize(m_pointGrey->previewBuffer->m_bufferSettings.roi.width, m_pointGrey->previewBuffer->m_bufferSettings.roi.height);
+	plotSettings.colorMap->data()->setRange(
 		QCPRange(m_pointGrey->previewBuffer->m_bufferSettings.roi.left,
 			m_pointGrey->previewBuffer->m_bufferSettings.roi.width + m_pointGrey->previewBuffer->m_bufferSettings.roi.left - 1),
 		QCPRange(m_pointGrey->previewBuffer->m_bufferSettings.roi.top,
@@ -659,6 +677,7 @@ void BrillouinAcquisition::startBrightfieldPreview(bool isRunning) {
 
 void BrillouinAcquisition::onNewImage() {
 	if (m_previewRunning) {
+		PLOT_SETTINGS plotSettings = m_BrillouinPlot;
 		{
 			std::lock_guard<std::mutex> lockGuard(m_andor->previewBuffer->m_mutex);
 			// if no image is ready return immediately
@@ -667,22 +686,22 @@ void BrillouinAcquisition::onNewImage() {
 				return;
 			}
 
-			unsigned short* unpackedBuffer = reinterpret_cast<unsigned short*>(m_andor->previewBuffer->m_buffer->getReadBuffer());
+			auto unpackedBuffer = reinterpret_cast<unsigned short*>(m_andor->previewBuffer->m_buffer->getReadBuffer());
 
 			int tIndex;
 			for (gsl::index xIndex = 0; xIndex < m_andor->previewBuffer->m_bufferSettings.roi.height; ++xIndex) {
 				for (gsl::index yIndex = 0; yIndex < m_andor->previewBuffer->m_bufferSettings.roi.width; ++yIndex) {
 					tIndex = xIndex * m_andor->previewBuffer->m_bufferSettings.roi.width + yIndex;
-					m_colorMap->data()->setCell(yIndex, xIndex, unpackedBuffer[tIndex]);
+					plotSettings.colorMap->data()->setCell(yIndex, xIndex, unpackedBuffer[tIndex]);
 				}
 			}
 
 		}
 		m_andor->previewBuffer->m_buffer->m_freeBuffers->release();
-		if (m_autoscalePlot) {
-			m_colorMap->rescaleDataRange();
+		if (plotSettings.autoscale) {
+			plotSettings.colorMap->rescaleDataRange();
 		}
-		ui->customplot->replot();
+		plotSettings.plotHandle->replot();
 		
 		QMetaObject::invokeMethod(this, "onNewImage", Qt::QueuedConnection);
 	}
@@ -690,6 +709,7 @@ void BrillouinAcquisition::onNewImage() {
 
 void BrillouinAcquisition::onNewBrightfieldImage() {
 	if (m_brightfieldPreviewRunning) {
+		PLOT_SETTINGS plotSettings = m_ODTPlot;
 		{
 			std::lock_guard<std::mutex> lockGuard(m_pointGrey->previewBuffer->m_mutex);
 			// if no image is ready return immediately
@@ -698,22 +718,22 @@ void BrillouinAcquisition::onNewBrightfieldImage() {
 				return;
 			}
 
-			unsigned char* unpackedBuffer = m_pointGrey->previewBuffer->m_buffer->getReadBuffer();
+			auto unpackedBuffer = m_pointGrey->previewBuffer->m_buffer->getReadBuffer();
 
 			int tIndex;
 			for (gsl::index xIndex = 0; xIndex < m_pointGrey->previewBuffer->m_bufferSettings.roi.height; ++xIndex) {
 				for (gsl::index yIndex = 0; yIndex < m_pointGrey->previewBuffer->m_bufferSettings.roi.width; ++yIndex) {
 					tIndex = xIndex * m_pointGrey->previewBuffer->m_bufferSettings.roi.width + yIndex;
-					m_brightfieldColorMap->data()->setCell(yIndex, xIndex, unpackedBuffer[tIndex]);
+					plotSettings.colorMap->data()->setCell(yIndex, xIndex, unpackedBuffer[tIndex]);
 				}
 			}
 
 		}
 		m_pointGrey->previewBuffer->m_buffer->m_freeBuffers->release();
-		if (m_autoscalePlot) {
-			m_brightfieldColorMap->rescaleDataRange();
+		if (plotSettings.autoscale) {
+			plotSettings.colorMap->rescaleDataRange();
 		}
-		ui->customplot_brightfield->replot();
+		plotSettings.plotHandle->replot();
 
 		QMetaObject::invokeMethod(this, "onNewBrightfieldImage", Qt::QueuedConnection);
 	}
@@ -1482,6 +1502,12 @@ void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradien
 			gradient->setColorStopAt(0.90, QColor(250, 209,  43));
 			gradient->setColorStopAt(0.95, QColor(245, 227,  30));
 			gradient->setColorStopAt(1.00, QColor(249, 251,  14));
+			break;
+		case gpGrayscale:
+			gradient->loadPreset(QCPColorGradient::gpGrayscale);
+			break;
+		default:
+			gradient->loadPreset(QCPColorGradient::gpGrayscale);
 			break;
 	}
 }

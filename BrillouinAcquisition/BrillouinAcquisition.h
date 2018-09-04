@@ -31,7 +31,11 @@ typedef struct {
 } SETTINGS_DEVICES;
 
 enum CustomGradientPreset {
-	gpParula
+	gpParula,
+	gpGrayscale,
+	gpRed,
+	gpGreen,
+	gpBlue
 };
 
 enum ROI_SOURCE {
@@ -57,6 +61,14 @@ Q_DECLARE_METATYPE(BOUNDS);
 
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
+
+	struct PLOT_SETTINGS {
+		QCustomPlot *plotHandle{ nullptr };
+		QCPColorMap *colorMap{ nullptr };
+		QCPRange cLim = { 100, 300 };
+		bool autoscale{ false };
+		CustomGradientPreset gradient = CustomGradientPreset::gpParula;
+	};
 
 private slots:
 	void showEvent(QShowEvent* event);
@@ -93,7 +105,7 @@ private slots:
 	void on_camera_playPause_clicked();
 	void onNewImage();
 	void onNewBrightfieldImage();
-	void initializePlot(QCustomPlot *customPlot, QCPColorMap *colorMap);
+	void initializePlot(PLOT_SETTINGS plotSettings);
 
 	// set and check camera ROI
 	void xAxisRangeChanged(const QCPRange & newRange);
@@ -132,6 +144,7 @@ private slots:
 	void on_actionQuit_triggered();
 
 	void on_autoscalePlot_stateChanged(int);
+	void on_autoscalePlot_brightfield_stateChanged(int);
 
 	void updateAcquisitionSettings();
 
@@ -209,17 +222,16 @@ private:
 	ScanControl *m_scanControl = nullptr;
 	PointGrey *m_pointGrey = nullptr;
 	Acquisition *m_acquisition = new Acquisition(nullptr, m_andor, &m_scanControl);
-	QCPColorMap *m_colorMap;
-	QCPColorMap *m_brightfieldColorMap;
-	QCPRange m_cLim_Default = { 100, 300 };	// default colormap range
+
+	PLOT_SETTINGS m_BrillouinPlot;
+	PLOT_SETTINGS m_ODTPlot;
+
 	SETTINGS_DEVICES m_deviceSettings;
 	CAMERA_OPTIONS m_cameraOptions;
 	ACQUISITION_SETTINGS m_acquisitionSettings;
 	bool m_previewRunning = false;
 	bool m_brightfieldPreviewRunning = false;
 	bool m_measurementRunning = false;
-
-	bool m_autoscalePlot = false;
 
 	//std::vector<POINT3> m_savedPositions = { {0,0,0}, {100,100,100}, {-200,200,300}, { -10.4,100,100 } };
 
