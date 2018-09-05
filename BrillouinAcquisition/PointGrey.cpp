@@ -36,6 +36,10 @@ void PointGrey::connectDevice() {
 
 void PointGrey::disconnectDevice() {
 	if (m_isConnected) {
+		if (m_isPreviewRunning) {
+			stopPreview();
+		}
+
 		// Deinitialize camera
 		m_camera->DeInit();
 

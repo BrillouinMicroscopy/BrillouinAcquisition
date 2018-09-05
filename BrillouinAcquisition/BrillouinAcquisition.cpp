@@ -233,14 +233,15 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 }
 
 BrillouinAcquisition::~BrillouinAcquisition() {
+	delete m_pointGrey;
+	delete m_andor;
 	//m_cameraThread.exit();
 	//m_cameraThread.wait();
 	//m_microscopeThread.exit();
 	//m_microscopeThread.wait();
 	m_acquisitionThread.exit();
+	m_acquisitionThread.terminate();
 	m_acquisitionThread.wait();
-	delete m_andor;
-	delete m_pointGrey;
 	qInfo(logInfo()) << "BrillouinAcquisition closed.";
 	delete ui;
 }
