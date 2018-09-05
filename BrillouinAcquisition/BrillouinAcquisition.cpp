@@ -87,6 +87,20 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		SLOT(yAxisRangeChanged(QCPRange))
 	);
 
+	// slot to limit the axis of the camera display after user interaction
+	connection = QWidget::connect(
+		ui->customplot_brightfield->xAxis,
+		SIGNAL(rangeChanged(QCPRange)),
+		this,
+		SLOT(xAxisRangeChangedODT(QCPRange))
+	);
+	connection = QWidget::connect(
+		ui->customplot_brightfield->yAxis,
+		SIGNAL(rangeChanged(QCPRange)),
+		this,
+		SLOT(yAxisRangeChangedODT(QCPRange))
+	);
+
 	// slot to show current acquisition progress
 	connection = QWidget::connect(
 		m_acquisition,
@@ -298,8 +312,12 @@ void BrillouinAcquisition::cameraOptionsChanged(CAMERA_OPTIONS options) {
 }
 
 void BrillouinAcquisition::cameraODTOptionsChanged(CAMERA_OPTIONS options) {
-	//m_cameraOptions.ROIHeightLimits = options.ROIHeightLimits;
-	//m_cameraOptions.ROIWidthLimits = options.ROIWidthLimits;
+	m_cameraOptionsODT.ROIHeightLimits = options.ROIHeightLimits;
+	m_cameraOptionsODT.ROIWidthLimits = options.ROIWidthLimits;
+
+	m_ODTPlot.plotHandle->xAxis->setRange(QCPRange(1, options.ROIWidthLimits[1]));
+	m_ODTPlot.plotHandle->yAxis->setRange(QCPRange(1, options.ROIHeightLimits[1]));
+
 	addListToComboBox(ui->cycleModeODT, options.cycleModes);
 	addListToComboBox(ui->pixelEncodingODT, options.pixelEncodings);
 }
@@ -512,6 +530,14 @@ void BrillouinAcquisition::initializePlot(PLOT_SETTINGS plotSettings) {
 
 	// rescale the key (x) and value (y) axes so the whole color map is visible:
 	plotSettings.plotHandle->rescaleAxes();
+}
+
+void BrillouinAcquisition::xAxisRangeChangedODT(const QCPRange &newRange) {
+	m_ODTPlot.plotHandle->xAxis->setRange(newRange.bounded(1, m_cameraOptionsODT.ROIWidthLimits[1]));
+}
+
+void BrillouinAcquisition::yAxisRangeChangedODT(const QCPRange &newRange) {
+	m_ODTPlot.plotHandle->yAxis->setRange(newRange.bounded(1, m_cameraOptionsODT.ROIHeightLimits[1]));
 }
 
 void BrillouinAcquisition::xAxisRangeChanged(const QCPRange &newRange) {

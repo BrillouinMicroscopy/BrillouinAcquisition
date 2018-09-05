@@ -108,6 +108,9 @@ private slots:
 	void onNewBrightfieldImage();
 	void initializePlot(PLOT_SETTINGS plotSettings);
 
+	void xAxisRangeChangedODT(const QCPRange & newRange);
+	void yAxisRangeChangedODT(const QCPRange & newRange);
+
 	void plotClick(QMouseEvent* event);
 
 	// set and check camera ROI
@@ -232,6 +235,7 @@ private:
 
 	SETTINGS_DEVICES m_deviceSettings;
 	CAMERA_OPTIONS m_cameraOptions;
+	CAMERA_OPTIONS m_cameraOptionsODT;
 	ACQUISITION_SETTINGS m_acquisitionSettings;
 	bool m_previewRunning = false;
 	bool m_brightfieldPreviewRunning = false;
