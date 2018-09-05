@@ -158,6 +158,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<POINT3>("POINT3");
 	qRegisterMetaType<std::vector<POINT3>>("std::vector<POINT3>");
 	qRegisterMetaType<BOUNDS>("BOUNDS");
+	qRegisterMetaType<QMouseEvent*>("QMouseEvent*");
 	
 
 	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
@@ -197,6 +198,8 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	BrillouinAcquisition::initializePlot(m_BrillouinPlot);
 	BrillouinAcquisition::initializePlot(m_ODTPlot);
 
+	connect(m_ODTPlot.plotHandle, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(plotClick(QMouseEvent*)));
+
 	updateAcquisitionSettings();
 	initSettingsDialog();
 
@@ -226,6 +229,15 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 	delete m_pointGrey;
 	qInfo(logInfo()) << "BrillouinAcquisition closed.";
 	delete ui;
+}
+
+void BrillouinAcquisition::plotClick(QMouseEvent* event) {
+	QPoint position = event->pos();
+
+	double posX = m_ODTPlot.plotHandle->xAxis->pixelToCoord(position.x());
+	double posY = m_ODTPlot.plotHandle->yAxis->pixelToCoord(position.y());
+
+	// TODO: Set laser focus to this position
 }
 
 void BrillouinAcquisition::showEvent(QShowEvent* event) {

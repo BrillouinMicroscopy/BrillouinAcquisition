@@ -58,6 +58,7 @@ Q_DECLARE_METATYPE(SensorTemperature);
 Q_DECLARE_METATYPE(POINT3);
 Q_DECLARE_METATYPE(std::vector<POINT3>);
 Q_DECLARE_METATYPE(BOUNDS);
+Q_DECLARE_METATYPE(QMouseEvent*);
 
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
@@ -106,6 +107,8 @@ private slots:
 	void onNewImage();
 	void onNewBrightfieldImage();
 	void initializePlot(PLOT_SETTINGS plotSettings);
+
+	void plotClick(QMouseEvent* event);
 
 	// set and check camera ROI
 	void xAxisRangeChanged(const QCPRange & newRange);
