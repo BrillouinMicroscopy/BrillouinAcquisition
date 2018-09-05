@@ -12,9 +12,9 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	static QMetaObject::Connection connection;
 	connection = QWidget::connect(
 		m_andor,
-		SIGNAL(s_previewBufferSettingsChanged()),
+		&Andor::s_previewBufferSettingsChanged,
 		this,
-		SLOT(updatePreview())
+		[this] { updatePlotLimits(m_BrillouinPlot, m_andor->previewBuffer->m_bufferSettings.roi); }
 	);
 
 	connection = QWidget::connect(
@@ -605,26 +605,13 @@ std::vector<AT_64> BrillouinAcquisition::checkROI(std::vector<AT_64> values, std
 	return values;
 }
 
-void BrillouinAcquisition::updatePreview() {
-	PLOT_SETTINGS plotSettings = m_BrillouinPlot;
+void BrillouinAcquisition::updatePlotLimits(PLOT_SETTINGS plotSettings, CAMERA_ROI roi) {
 	// set the properties of the colormap to the correct values of the preview buffer
-	plotSettings.colorMap->data()->setSize(m_andor->previewBuffer->m_bufferSettings.roi.width, m_andor->previewBuffer->m_bufferSettings.roi.height);
+	plotSettings.colorMap->data()->setSize(roi.width, roi.height);
 	plotSettings.colorMap->data()->setRange(
-		QCPRange(m_andor->previewBuffer->m_bufferSettings.roi.left,
-			m_andor->previewBuffer->m_bufferSettings.roi.width + m_andor->previewBuffer->m_bufferSettings.roi.left - 1),
-		QCPRange(m_andor->previewBuffer->m_bufferSettings.roi.top,
-			m_andor->previewBuffer->m_bufferSettings.roi.height + m_andor->previewBuffer->m_bufferSettings.roi.top - 1));
-}
-
-void BrillouinAcquisition::updateBrightfieldPreview() {
-	PLOT_SETTINGS plotSettings = m_ODTPlot;
-	// set the properties of the colormap to the correct values of the preview buffer
-	plotSettings.colorMap->data()->setSize(m_pointGrey->previewBuffer->m_bufferSettings.roi.width, m_pointGrey->previewBuffer->m_bufferSettings.roi.height);
-	plotSettings.colorMap->data()->setRange(
-		QCPRange(m_pointGrey->previewBuffer->m_bufferSettings.roi.left,
-			m_pointGrey->previewBuffer->m_bufferSettings.roi.width + m_pointGrey->previewBuffer->m_bufferSettings.roi.left - 1),
-		QCPRange(m_pointGrey->previewBuffer->m_bufferSettings.roi.top,
-			m_pointGrey->previewBuffer->m_bufferSettings.roi.height + m_pointGrey->previewBuffer->m_bufferSettings.roi.top - 1));
+		QCPRange(roi.left, roi.width + roi.left - 1),
+		QCPRange(roi.top, roi.height + roi.top - 1)
+	);
 }
 
 void BrillouinAcquisition::showPreviewRunning(bool isRunning) {
@@ -1213,9 +1200,9 @@ void BrillouinAcquisition::initCamera() {
 
 	connection = QWidget::connect(
 		m_pointGrey,
-		SIGNAL(s_previewBufferSettingsChanged()),
+		&PointGrey::s_previewBufferSettingsChanged,
 		this,
-		SLOT(updateBrightfieldPreview())
+		[this] { updatePlotLimits(m_ODTPlot, m_pointGrey->previewBuffer->m_bufferSettings.roi); }
 	);
 
 	connection = QWidget::connect(
