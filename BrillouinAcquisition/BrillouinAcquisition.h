@@ -129,8 +129,10 @@ private slots:
 	void startPreview(bool);
 	void startBrightfieldPreview(bool isRunning);
 	void cameraSettingsChanged(CAMERA_SETTINGS);
+	void cameraODTSettingsChanged(CAMERA_SETTINGS settings);
 	void sensorTemperatureChanged(SensorTemperature);
 	void cameraOptionsChanged(CAMERA_OPTIONS);
+	void cameraODTOptionsChanged(CAMERA_OPTIONS options);
 	void showAcqPosition(POINT3, int);
 	void showPosition(POINT3);
 	void setHomePositionBounds(BOUNDS);
@@ -216,7 +218,7 @@ private:
 
 	QDialog *m_settingsDialog = nullptr;
 	void checkElementButtons();
-	void addListToComboBox(QComboBox*, std::vector<AT_WC*>, bool clear = true);
+	void addListToComboBox(QComboBox*, std::vector<std::wstring>, bool clear = true);
 	//Thread m_cameraThread;
 	//Thread m_microscopeThread;
 	Thread m_acquisitionThread;

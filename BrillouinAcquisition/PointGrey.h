@@ -33,6 +33,9 @@ private:
 
 	void acquireImage(unsigned char * buffer);
 
+	void readOptions();
+	CAMERA_SETTINGS readSettings();
+
 private slots:
 	void init() {};
 	void getImageForPreview();
@@ -61,6 +64,8 @@ signals:
 	void connectedDevice(bool);
 	void s_previewRunning(bool);
 	void s_previewBufferSettingsChanged();
+	void settingsChanged(CAMERA_SETTINGS);
+	void optionsChanged(CAMERA_OPTIONS);
 };
 
 #endif // POINTGREY_H

@@ -106,14 +106,14 @@ void Andor::setDefaultSettings() {
 	AT_SetInt(m_cameraHndl, L"AOIWidth", m_settings.roi.width);
 	AT_SetInt(m_cameraHndl, L"AOILeft", m_settings.roi.left);
 	AT_SetInt(m_cameraHndl, L"AOITop", m_settings.roi.top);
-	AT_SetEnumeratedString(m_cameraHndl, L"AOIBinning", m_settings.roi.binning);
+	AT_SetEnumeratedString(m_cameraHndl, L"AOIBinning", m_settings.roi.binning.c_str());
 
 	// readout parameters
-	AT_SetEnumeratedString(m_cameraHndl, L"CycleMode", m_settings.readout.cycleMode);
-	AT_SetEnumeratedString(m_cameraHndl, L"Pixel Encoding", m_settings.readout.pixelEncoding);
-	AT_SetEnumeratedString(m_cameraHndl, L"Pixel Readout Rate", m_settings.readout.pixelReadoutRate);
-	AT_SetEnumeratedString(m_cameraHndl, L"SimplePreAmpGainControl", m_settings.readout.preAmpGain);
-	AT_SetEnumeratedString(m_cameraHndl, L"TriggerMode", m_settings.readout.triggerMode);
+	AT_SetEnumeratedString(m_cameraHndl, L"CycleMode", m_settings.readout.cycleMode.c_str());
+	AT_SetEnumeratedString(m_cameraHndl, L"Pixel Encoding", m_settings.readout.pixelEncoding.c_str());
+	AT_SetEnumeratedString(m_cameraHndl, L"Pixel Readout Rate", m_settings.readout.pixelReadoutRate.c_str());
+	AT_SetEnumeratedString(m_cameraHndl, L"SimplePreAmpGainControl", m_settings.readout.preAmpGain.c_str());
+	AT_SetEnumeratedString(m_cameraHndl, L"TriggerMode", m_settings.readout.triggerMode.c_str());
 };
 
 CAMERA_SETTINGS Andor::readSettings() {
@@ -127,14 +127,14 @@ CAMERA_SETTINGS Andor::readSettings() {
 	AT_GetInt(m_cameraHndl, L"AOIWidth", &m_settings.roi.width);
 	AT_GetInt(m_cameraHndl, L"AOILeft", &m_settings.roi.left);
 	AT_GetInt(m_cameraHndl, L"AOITop", &m_settings.roi.top);
-	getEnumString(L"AOIBinning", m_settings.roi.binning);
+	getEnumString(L"AOIBinning", &m_settings.roi.binning[0]);
 
 	// readout parameters
-	getEnumString(L"CycleMode", m_settings.readout.cycleMode);
-	getEnumString(L"Pixel Encoding", m_settings.readout.pixelEncoding);
-	getEnumString(L"Pixel Readout Rate", m_settings.readout.pixelReadoutRate);
-	getEnumString(L"SimplePreAmpGainControl", m_settings.readout.preAmpGain);
-	getEnumString(L"TriggerMode", m_settings.readout.triggerMode);
+	getEnumString(L"CycleMode", &m_settings.readout.cycleMode[0]);
+	getEnumString(L"Pixel Encoding", &m_settings.readout.pixelEncoding[0]);
+	getEnumString(L"Pixel Readout Rate", &m_settings.readout.pixelReadoutRate[0]);
+	getEnumString(L"SimplePreAmpGainControl", &m_settings.readout.preAmpGain[0]);
+	getEnumString(L"TriggerMode", &m_settings.readout.triggerMode[0]);
 
 	// emit signal that settings changed
 	emit(settingsChanged(m_settings));
@@ -290,7 +290,7 @@ void Andor::acquireImage(AT_U8* buffer) {
 	AT_GetInt(m_cameraHndl, L"AOIWidth", &m_settings.roi.width);
 	AT_GetInt(m_cameraHndl, L"AOIStride", &m_imageStride);
 
-	AT_ConvertBuffer(Buffer, buffer, m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding, L"Mono16");
+	AT_ConvertBuffer(Buffer, buffer, m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding.c_str(), L"Mono16");
 
 	delete[] Buffer;
 };
@@ -318,10 +318,10 @@ void Andor::getImageForMeasurement(AT_U8* buffer) {
 
 void Andor::setSettings() {
 	// Set the pixel Encoding
-	AT_SetEnumeratedString(m_cameraHndl, L"Pixel Encoding", m_settings.readout.pixelEncoding);
+	AT_SetEnumeratedString(m_cameraHndl, L"Pixel Encoding", m_settings.readout.pixelEncoding.c_str());
 
 	// Set the pixel Readout Rate
-	AT_SetEnumeratedString(m_cameraHndl, L"Pixel Readout Rate", m_settings.readout.pixelReadoutRate);
+	AT_SetEnumeratedString(m_cameraHndl, L"Pixel Readout Rate", m_settings.readout.pixelReadoutRate.c_str());
 
 	// Set the exposure time
 	AT_SetFloat(m_cameraHndl, L"ExposureTime", m_settings.exposureTime);
@@ -334,11 +334,11 @@ void Andor::setSettings() {
 	AT_SetInt(m_cameraHndl, L"AOILeft", m_settings.roi.left);
 	AT_SetInt(m_cameraHndl, L"AOIHeight", m_settings.roi.height);
 	AT_SetInt(m_cameraHndl, L"AOITop", m_settings.roi.top);
-	AT_SetEnumeratedString(m_cameraHndl, L"AOIBinning", m_settings.roi.binning);
-	AT_SetEnumeratedString(m_cameraHndl, L"SimplePreAmpGainControl", m_settings.readout.preAmpGain);
+	AT_SetEnumeratedString(m_cameraHndl, L"AOIBinning", m_settings.roi.binning.c_str());
+	AT_SetEnumeratedString(m_cameraHndl, L"SimplePreAmpGainControl", m_settings.readout.preAmpGain.c_str());
 
-	AT_SetEnumeratedString(m_cameraHndl, L"CycleMode", m_settings.readout.cycleMode);
-	AT_SetEnumeratedString(m_cameraHndl, L"TriggerMode", m_settings.readout.triggerMode);
+	AT_SetEnumeratedString(m_cameraHndl, L"CycleMode", m_settings.readout.cycleMode.c_str());
+	AT_SetEnumeratedString(m_cameraHndl, L"TriggerMode", m_settings.readout.triggerMode.c_str());
 
 	// Allocate a buffer
 	// Get the number of bytes required to store one frame

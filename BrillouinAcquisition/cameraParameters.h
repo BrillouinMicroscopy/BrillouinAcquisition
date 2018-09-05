@@ -5,12 +5,12 @@
 
 // possible parameters
 struct CAMERA_OPTIONS {
-	const std::vector<AT_WC*> pixelReadoutRates = { L"100 MHz", L"280 MHz" };
-	const std::vector<AT_WC*> pixelEncodings = { L"Mono12", L"Mono12Packed", L"Mono16", L"Mono32" };
-	const std::vector<AT_WC*> cycleModes = { L"Fixed", L"Continuous" };
-	const std::vector<AT_WC*> triggerModes = { L"Internal", L"Software", L"External", L"External Start", L"External Exposure" };
-	const std::vector<AT_WC*> preAmpGains = { L"12-bit (low noise)", L"12-bit (high well capacity)", L"16-bit (low noise & high well capacity)" };
-	const std::vector<AT_WC*> imageBinnings = { L"1x1", L"2x2", L"3x3", L"4x4", L"8x8" };
+	const std::vector<std::wstring> pixelReadoutRates = { L"100 MHz", L"280 MHz" };
+	std::vector<std::wstring> pixelEncodings = { L"Mono12", L"Mono12Packed", L"Mono16", L"Mono32" };
+	std::vector<std::wstring> cycleModes = { L"Fixed", L"Continuous" };
+	const std::vector<std::wstring> triggerModes = { L"Internal", L"Software", L"External", L"External Start", L"External Exposure" };
+	const std::vector<std::wstring> preAmpGains = { L"12-bit (low noise)", L"12-bit (high well capacity)", L"16-bit (low noise & high well capacity)" };
+	const std::vector<std::wstring> imageBinnings = { L"1x1", L"2x2", L"3x3", L"4x4", L"8x8" };
 	std::vector<double> exposureTimeLimits = { 0.01, 1 };
 	std::vector<AT_64> frameCountLimits = { 1, 100 };
 	std::vector<AT_64> ROIWidthLimits = { 1, 2 };		// minimum and maximum ROI width
@@ -22,15 +22,15 @@ struct CAMERA_ROI {
 	AT_64 width = 2048;
 	AT_64 top = 1;
 	AT_64 height = 2048;
-	AT_WC binning[256] = L"1x1";
+	std::wstring binning{ L"1x1", 256 };
 };
 
 struct CAMERA_READOUT {
-	AT_WC pixelReadoutRate[256] = L"100 MHz";
-	AT_WC pixelEncoding[256] = L"Mono16";
-	AT_WC cycleMode[256] = L"Continuous";
-	AT_WC triggerMode[256] = L"Software";
-	AT_WC preAmpGain[256] = L"16-bit (low noise & high well capacity)";
+	std::wstring pixelReadoutRate{ L"100 MHz", 256 };
+	std::wstring pixelEncoding{ L"Mono16", 256 };
+	std::wstring cycleMode{ L"Continuous", 256 };
+	std::wstring triggerMode{ L"Software", 256 };
+	std::wstring preAmpGain{ L"16-bit (low noise & high well capacity)", 256 };
 };
 
 struct CAMERA_SETTINGS {

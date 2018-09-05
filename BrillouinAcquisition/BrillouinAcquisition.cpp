@@ -297,6 +297,13 @@ void BrillouinAcquisition::cameraOptionsChanged(CAMERA_OPTIONS options) {
 	ui->ROILeft->setValue(1);
 }
 
+void BrillouinAcquisition::cameraODTOptionsChanged(CAMERA_OPTIONS options) {
+	//m_cameraOptions.ROIHeightLimits = options.ROIHeightLimits;
+	//m_cameraOptions.ROIWidthLimits = options.ROIWidthLimits;
+	addListToComboBox(ui->cycleModeODT, options.cycleModes);
+	addListToComboBox(ui->pixelEncodingODT, options.pixelEncodings);
+}
+
 void BrillouinAcquisition::showAcqPosition(POINT3 position, int imageNr) {
 	showPosition(position);
 	ui->imageNr->setText(QString::number(imageNr));
@@ -405,12 +412,12 @@ void BrillouinAcquisition::showCalibrationRunning(bool isCalibrating) {
 	}
 }
 
-void BrillouinAcquisition::addListToComboBox(QComboBox* box, std::vector<AT_WC*> list, bool clear) {
+void BrillouinAcquisition::addListToComboBox(QComboBox* box, std::vector<std::wstring> list, bool clear) {
 	if (clear) {
 		box->clear();
 	}
-	std::for_each(list.begin(), list.end(), [box](AT_WC* &item) {
-		box->addItem(QString::fromWCharArray(item));
+	std::for_each(list.begin(), list.end(), [box](std::wstring &item) {
+		box->addItem(QString::fromStdWString(item));
 	});
 };
 
@@ -422,13 +429,25 @@ void BrillouinAcquisition::cameraSettingsChanged(CAMERA_SETTINGS settings) {
 	//ui->ROITop->setValue(settings.roi.top);
 	//ui->ROIHeight->setValue(settings.roi.height);
 
-	ui->triggerMode->setCurrentText(QString::fromWCharArray(settings.readout.triggerMode));
-	ui->binning->setCurrentText(QString::fromWCharArray(settings.roi.binning));
+	ui->triggerMode->setCurrentText(QString::fromStdWString(settings.readout.triggerMode));
+	ui->binning->setCurrentText(QString::fromStdWString(settings.roi.binning));
 
-	ui->pixelReadoutRate->setCurrentText(QString::fromWCharArray(settings.readout.pixelReadoutRate));
-	ui->cycleMode->setCurrentText(QString::fromWCharArray(settings.readout.cycleMode));
-	ui->preAmpGain->setCurrentText(QString::fromWCharArray(settings.readout.preAmpGain));
-	ui->pixelEncoding->setCurrentText(QString::fromWCharArray(settings.readout.pixelEncoding));
+	ui->pixelReadoutRate->setCurrentText(QString::fromStdWString(settings.readout.pixelReadoutRate));
+	ui->cycleMode->setCurrentText(QString::fromStdWString(settings.readout.cycleMode));
+	ui->preAmpGain->setCurrentText(QString::fromStdWString(settings.readout.preAmpGain));
+	ui->pixelEncoding->setCurrentText(QString::fromStdWString(settings.readout.pixelEncoding));
+}
+
+void BrillouinAcquisition::cameraODTSettingsChanged(CAMERA_SETTINGS settings) {
+	ui->exposureTimeODT->setValue(settings.exposureTime);
+	//ui->frameCount->setValue(settings.frameCount);
+	ui->ROILeftODT->setValue(settings.roi.left);
+	ui->ROIWidthODT->setValue(settings.roi.width);
+	ui->ROITopODT->setValue(settings.roi.top);
+	ui->ROIHeightODT->setValue(settings.roi.height);
+
+	ui->cycleModeODT->setCurrentText(QString::fromStdWString(settings.readout.cycleMode));
+	ui->pixelEncodingODT->setCurrentText(QString::fromStdWString(settings.readout.pixelEncoding));
 }
 
 void BrillouinAcquisition::sensorTemperatureChanged(SensorTemperature sensorTemperature) {
@@ -1210,6 +1229,20 @@ void BrillouinAcquisition::initCamera() {
 		SIGNAL(s_previewRunning(bool)),
 		this,
 		SLOT(showBrightfieldPreviewRunning(bool))
+	);
+
+	connection = QWidget::connect(
+		m_pointGrey,
+		SIGNAL(settingsChanged(CAMERA_SETTINGS)),
+		this,
+		SLOT(cameraODTSettingsChanged(CAMERA_SETTINGS))
+	);
+
+	connection = QWidget::connect(
+		m_pointGrey,
+		SIGNAL(optionsChanged(CAMERA_OPTIONS)),
+		this,
+		SLOT(cameraODTOptionsChanged(CAMERA_OPTIONS))
 	);
 
 	m_acquisitionThread.startWorker(m_pointGrey);

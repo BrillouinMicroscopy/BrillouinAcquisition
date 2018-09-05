@@ -168,7 +168,7 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>446</width>
+                <width>429</width>
                 <height>475</height>
                </rect>
               </property>
@@ -745,8 +745,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>285</width>
-                <height>340</height>
+                <width>446</width>
+                <height>464</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -799,8 +799,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>285</width>
-                <height>440</height>
+                <width>446</width>
+                <height>464</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -1069,7 +1069,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>446</width>
-                <height>475</height>
+                <height>464</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -1078,7 +1078,7 @@ QTabBar::tab:!selected {
                 <height>340</height>
                </size>
               </property>
-              <widget class="QLabel" name="exposureTimeLabel_2">
+              <widget class="QLabel" name="exposureTimeODT_Label">
                <property name="geometry">
                 <rect>
                  <x>10</x>
@@ -1091,7 +1091,7 @@ QTabBar::tab:!selected {
                 <string>Exposure time [s]</string>
                </property>
               </widget>
-              <widget class="QGroupBox" name="binningROIBox_2">
+              <widget class="QGroupBox" name="binningROIBoxODT">
                <property name="geometry">
                 <rect>
                  <x>10</x>
@@ -1109,7 +1109,7 @@ QTabBar::tab:!selected {
                <property name="title">
                 <string>ROI</string>
                </property>
-               <widget class="QLabel" name="ROILeftLabel_2">
+               <widget class="QLabel" name="ROILeftODTLabel">
                 <property name="geometry">
                  <rect>
                   <x>10</x>
@@ -1122,7 +1122,7 @@ QTabBar::tab:!selected {
                  <string>Left</string>
                 </property>
                </widget>
-               <widget class="QLabel" name="ROITopLabel_2">
+               <widget class="QLabel" name="ROITopODTLabel">
                 <property name="geometry">
                  <rect>
                   <x>10</x>
@@ -1135,7 +1135,7 @@ QTabBar::tab:!selected {
                  <string>Top</string>
                 </property>
                </widget>
-               <widget class="QLabel" name="ROIWidthLabel_2">
+               <widget class="QLabel" name="ROIWidthODTLabel">
                 <property name="geometry">
                  <rect>
                   <x>210</x>
@@ -1148,7 +1148,7 @@ QTabBar::tab:!selected {
                  <string>Width</string>
                 </property>
                </widget>
-               <widget class="QLabel" name="ROIHeightLabel_2">
+               <widget class="QLabel" name="ROIHeightODTLabel">
                 <property name="geometry">
                  <rect>
                   <x>210</x>
@@ -1161,7 +1161,7 @@ QTabBar::tab:!selected {
                  <string>Height</string>
                 </property>
                </widget>
-               <widget class="QSpinBox" name="ROILeft_2">
+               <widget class="QSpinBox" name="ROILeftODT">
                 <property name="geometry">
                  <rect>
                   <x>85</x>
@@ -1180,7 +1180,7 @@ QTabBar::tab:!selected {
                  <number>1</number>
                 </property>
                </widget>
-               <widget class="QSpinBox" name="ROITop_2">
+               <widget class="QSpinBox" name="ROITopODT">
                 <property name="geometry">
                  <rect>
                   <x>85</x>
@@ -1199,7 +1199,7 @@ QTabBar::tab:!selected {
                  <number>1</number>
                 </property>
                </widget>
-               <widget class="QSpinBox" name="ROIWidth_2">
+               <widget class="QSpinBox" name="ROIWidthODT">
                 <property name="geometry">
                  <rect>
                   <x>290</x>
@@ -1218,7 +1218,7 @@ QTabBar::tab:!selected {
                  <number>1</number>
                 </property>
                </widget>
-               <widget class="QSpinBox" name="ROIHeight_2">
+               <widget class="QSpinBox" name="ROIHeightODT">
                 <property name="geometry">
                  <rect>
                   <x>290</x>
@@ -1238,7 +1238,7 @@ QTabBar::tab:!selected {
                 </property>
                </widget>
               </widget>
-              <widget class="QDoubleSpinBox" name="exposureTime_2">
+              <widget class="QDoubleSpinBox" name="exposureTimeODT">
                <property name="geometry">
                 <rect>
                  <x>170</x>
@@ -1257,7 +1257,7 @@ QTabBar::tab:!selected {
                 <double>0.000000000000000</double>
                </property>
               </widget>
-              <widget class="QGroupBox" name="readoutBox_2">
+              <widget class="QGroupBox" name="readoutBoxODT">
                <property name="geometry">
                 <rect>
                  <x>10</x>
@@ -1269,7 +1269,7 @@ QTabBar::tab:!selected {
                <property name="title">
                 <string>Readout</string>
                </property>
-               <widget class="QLabel" name="pixelEncodingLabel_2">
+               <widget class="QLabel" name="pixelEncodingODTLabel">
                 <property name="geometry">
                  <rect>
                   <x>10</x>
@@ -1282,7 +1282,7 @@ QTabBar::tab:!selected {
                  <string>Pixel encoding</string>
                 </property>
                </widget>
-               <widget class="QLabel" name="cycleModeLabel_2">
+               <widget class="QLabel" name="cycleModeODTLabel">
                 <property name="geometry">
                  <rect>
                   <x>10</x>
@@ -1295,7 +1295,7 @@ QTabBar::tab:!selected {
                  <string>Cycle mode</string>
                 </property>
                </widget>
-               <widget class="QComboBox" name="pixelEncoding_2">
+               <widget class="QComboBox" name="pixelEncodingODT">
                 <property name="geometry">
                  <rect>
                   <x>160</x>
@@ -1323,7 +1323,7 @@ QTabBar::tab:!selected {
                  </property>
                 </item>
                </widget>
-               <widget class="QComboBox" name="cycleMode_2">
+               <widget class="QComboBox" name="cycleModeODT">
                 <property name="geometry">
                  <rect>
                   <x>160</x>
@@ -1442,7 +1442,7 @@ QTabBar::tab:!selected {
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>433</width>
+                  <width>429</width>
                   <height>775</height>
                  </rect>
                 </property>
@@ -2501,7 +2501,7 @@ border: none;</string>
      <x>0</x>
      <y>0</y>
      <width>1318</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">
