@@ -103,7 +103,7 @@ QTabBar::tab:!selected {
 }</string>
          </property>
          <property name="currentIndex">
-          <number>3</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="cameraTab">
           <property name="sizePolicy">
@@ -168,7 +168,7 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>429</width>
+                <width>446</width>
                 <height>475</height>
                </rect>
               </property>
@@ -746,7 +746,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>446</width>
-                <height>464</height>
+                <height>475</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -800,7 +800,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>446</width>
-                <height>464</height>
+                <height>475</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -1069,7 +1069,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>446</width>
-                <height>464</height>
+                <height>475</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -1371,7 +1371,7 @@ QTabBar::tab:!selected {
          <property name="maximumSize">
           <size>
            <width>450</width>
-           <height>800</height>
+           <height>10000</height>
           </size>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -1404,7 +1404,7 @@ QTabBar::tab:!selected {
             <property name="title">
              <string>Acquisition</string>
             </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <layout class="QVBoxLayout" name="verticalLayout_3">
              <property name="spacing">
               <number>0</number>
              </property>
@@ -1421,927 +1421,1399 @@ QTabBar::tab:!selected {
               <number>0</number>
              </property>
              <item>
-              <widget class="QScrollArea" name="scrollArea">
+              <widget class="QWidget" name="widget" native="true">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="minimumSize">
                 <size>
-                 <width>350</width>
-                 <height>0</height>
+                 <width>0</width>
+                 <height>40</height>
                 </size>
                </property>
-               <property name="frameShadow">
-                <enum>QFrame::Raised</enum>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>40</height>
+                </size>
                </property>
-               <property name="lineWidth">
-                <number>0</number>
-               </property>
-               <property name="widgetResizable">
-                <bool>true</bool>
-               </property>
-               <widget class="QWidget" name="scrollAreaWidgetContents">
+               <widget class="QLabel" name="acquisitionFilename_label">
                 <property name="geometry">
                  <rect>
-                  <x>0</x>
-                  <y>0</y>
-                  <width>429</width>
-                  <height>775</height>
+                  <x>10</x>
+                  <y>5</y>
+                  <width>71</width>
+                  <height>30</height>
                  </rect>
                 </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>775</height>
-                 </size>
+                <property name="frameShadow">
+                 <enum>QFrame::Raised</enum>
                 </property>
-                <widget class="QGroupBox" name="acquisitionAOI">
-                 <property name="geometry">
-                  <rect>
-                   <x>10</x>
-                   <y>60</y>
-                   <width>401</width>
-                   <height>181</height>
-                  </rect>
+                <property name="text">
+                 <string>Filename:</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+               <widget class="QToolButton" name="selectFolder">
+                <property name="geometry">
+                 <rect>
+                  <x>400</x>
+                  <y>5</y>
+                  <width>41</width>
+                  <height>30</height>
+                 </rect>
+                </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+               </widget>
+               <widget class="QLineEdit" name="acquisitionFilename">
+                <property name="geometry">
+                 <rect>
+                  <x>90</x>
+                  <y>5</y>
+                  <width>301</width>
+                  <height>30</height>
+                 </rect>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background: #E4E4E4;
+border: none;</string>
+                </property>
+                <property name="text">
+                 <string>Brillouin.h5</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </widget>
+             </item>
+             <item>
+              <widget class="QTabWidget" name="tabWidget">
+               <property name="styleSheet">
+                <string notr="true">QTabWidget::pane {
+	border: 0.5px solid #E4E4E4;
+}
+
+QTabWidget::tab-bar {
+	top: 1px;
+}
+
+QTabBar::tab {
+	background: #D4D4D4;
+	border: 1px solid #C9C9C9;
+	min-width: 1ex;
+	padding: 4px;
+}
+
+QTabBar::tab:selected, QTabBar::tab:hover {
+	background: #F0F0F0;
+}
+QTabBar::tab:selected {
+	border-color: #E4E4E4;
+	border-bottom: none;
+}
+
+QTabBar::tab:!selected {
+	margin-top: 2px;
+}</string>
+               </property>
+               <property name="currentIndex">
+                <number>1</number>
+               </property>
+               <widget class="QWidget" name="tab">
+                <attribute name="title">
+                 <string>Brillouin</string>
+                </attribute>
+                <layout class="QHBoxLayout" name="horizontalLayout_6">
+                 <property name="leftMargin">
+                  <number>0</number>
                  </property>
-                 <property name="title">
-                  <string>Area of interest</string>
+                 <property name="topMargin">
+                  <number>0</number>
                  </property>
-                 <widget class="QLabel" name="stepsLabel">
-                  <property name="geometry">
-                   <rect>
-                    <x>290</x>
-                    <y>15</y>
-                    <width>101</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string># Steps</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                 <widget class="QLabel" name="startLabel">
-                  <property name="geometry">
-                   <rect>
-                    <x>70</x>
-                    <y>15</y>
-                    <width>101</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>Start [µm]</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                 <widget class="QLabel" name="endLabel">
-                  <property name="geometry">
-                   <rect>
-                    <x>180</x>
-                    <y>15</y>
-                    <width>101</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>End [µm]</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                 <widget class="QLabel" name="xLabel">
-                  <property name="geometry">
-                   <rect>
-                    <x>10</x>
-                    <y>50</y>
-                    <width>51</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>x</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                 <widget class="QLabel" name="yLabel">
-                  <property name="geometry">
-                   <rect>
-                    <x>10</x>
-                    <y>90</y>
-                    <width>51</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>y</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                 <widget class="QLabel" name="zLabel">
-                  <property name="geometry">
-                   <rect>
-                    <x>10</x>
-                    <y>130</y>
-                    <width>51</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>z</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                 <widget class="QDoubleSpinBox" name="startX">
-                  <property name="geometry">
-                   <rect>
-                    <x>70</x>
-                    <y>50</y>
-                    <width>101</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="decimals">
-                   <number>1</number>
-                  </property>
-                  <property name="minimum">
-                   <double>-1000.000000000000000</double>
-                  </property>
-                  <property name="maximum">
-                   <double>1000.000000000000000</double>
-                  </property>
-                  <property name="singleStep">
-                   <double>1.000000000000000</double>
-                  </property>
-                 </widget>
-                 <widget class="QDoubleSpinBox" name="endX">
-                  <property name="geometry">
-                   <rect>
-                    <x>180</x>
-                    <y>50</y>
-                    <width>101</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="decimals">
-                   <number>1</number>
-                  </property>
-                  <property name="minimum">
-                   <double>-1000.000000000000000</double>
-                  </property>
-                  <property name="maximum">
-                   <double>1000.000000000000000</double>
-                  </property>
-                  <property name="singleStep">
-                   <double>1.000000000000000</double>
-                  </property>
-                 </widget>
-                 <widget class="QDoubleSpinBox" name="endZ">
-                  <property name="geometry">
-                   <rect>
-                    <x>180</x>
-                    <y>130</y>
-                    <width>101</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="decimals">
-                   <number>1</number>
-                  </property>
-                  <property name="minimum">
-                   <double>-1000.000000000000000</double>
-                  </property>
-                  <property name="maximum">
-                   <double>1000.000000000000000</double>
-                  </property>
-                  <property name="singleStep">
-                   <double>1.000000000000000</double>
-                  </property>
-                 </widget>
-                 <widget class="QDoubleSpinBox" name="startZ">
-                  <property name="geometry">
-                   <rect>
-                    <x>70</x>
-                    <y>130</y>
-                    <width>101</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="decimals">
-                   <number>1</number>
-                  </property>
-                  <property name="minimum">
-                   <double>-1000.000000000000000</double>
-                  </property>
-                  <property name="maximum">
-                   <double>1000.000000000000000</double>
-                  </property>
-                  <property name="singleStep">
-                   <double>1.000000000000000</double>
-                  </property>
-                 </widget>
-                 <widget class="QDoubleSpinBox" name="startY">
-                  <property name="geometry">
-                   <rect>
-                    <x>70</x>
-                    <y>90</y>
-                    <width>101</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="decimals">
-                   <number>1</number>
-                  </property>
-                  <property name="minimum">
-                   <double>-1000.000000000000000</double>
-                  </property>
-                  <property name="maximum">
-                   <double>1000.000000000000000</double>
-                  </property>
-                  <property name="singleStep">
-                   <double>1.000000000000000</double>
-                  </property>
-                 </widget>
-                 <widget class="QDoubleSpinBox" name="endY">
-                  <property name="geometry">
-                   <rect>
-                    <x>180</x>
-                    <y>90</y>
-                    <width>101</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="decimals">
-                   <number>1</number>
-                  </property>
-                  <property name="minimum">
-                   <double>-1000.000000000000000</double>
-                  </property>
-                  <property name="maximum">
-                   <double>1000.000000000000000</double>
-                  </property>
-                  <property name="singleStep">
-                   <double>1.000000000000000</double>
-                  </property>
-                 </widget>
-                 <widget class="QSpinBox" name="stepsX">
-                  <property name="geometry">
-                   <rect>
-                    <x>291</x>
-                    <y>50</y>
-                    <width>101</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="minimum">
-                   <number>1</number>
-                  </property>
-                  <property name="maximum">
-                   <number>1000</number>
-                  </property>
-                 </widget>
-                 <widget class="QSpinBox" name="stepsZ">
-                  <property name="geometry">
-                   <rect>
-                    <x>290</x>
-                    <y>130</y>
-                    <width>101</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="minimum">
-                   <number>1</number>
-                  </property>
-                  <property name="maximum">
-                   <number>1000</number>
-                  </property>
-                 </widget>
-                 <widget class="QSpinBox" name="stepsY">
-                  <property name="geometry">
-                   <rect>
-                    <x>290</x>
-                    <y>90</y>
-                    <width>101</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="minimum">
-                   <number>1</number>
-                  </property>
-                  <property name="maximum">
-                   <number>1000</number>
-                  </property>
-                 </widget>
-                </widget>
-                <widget class="QGroupBox" name="liveCalibration">
-                 <property name="geometry">
-                  <rect>
-                   <x>10</x>
-                   <y>250</y>
-                   <width>401</width>
-                   <height>221</height>
-                  </rect>
+                 <property name="rightMargin">
+                  <number>0</number>
                  </property>
-                 <property name="title">
-                  <string>Live calibration</string>
+                 <property name="bottomMargin">
+                  <number>0</number>
                  </property>
-                 <widget class="QCheckBox" name="preCalibration">
-                  <property name="geometry">
-                   <rect>
-                    <x>10</x>
-                    <y>20</y>
-                    <width>181</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>Pre calibration</string>
-                  </property>
-                  <property name="checked">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                 <widget class="QCheckBox" name="conCalibration">
-                  <property name="geometry">
-                   <rect>
-                    <x>10</x>
-                    <y>60</y>
-                    <width>141</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>Calibrate every</string>
-                  </property>
-                  <property name="checked">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                 <widget class="QCheckBox" name="postCalibration">
-                  <property name="geometry">
-                   <rect>
-                    <x>220</x>
-                    <y>20</y>
-                    <width>171</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>Post calibration</string>
-                  </property>
-                  <property name="checked">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                 <widget class="QLabel" name="label_11">
-                  <property name="geometry">
-                   <rect>
-                    <x>200</x>
-                    <y>60</y>
-                    <width>41</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>min</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                 <widget class="QProgressBar" name="calibrationProgress">
-                  <property name="geometry">
-                   <rect>
-                    <x>10</x>
-                    <y>180</y>
-                    <width>381</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="value">
-                   <number>0</number>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                  <property name="format">
-                   <string>Time to next calibration</string>
-                  </property>
-                 </widget>
-                 <widget class="QLabel" name="label_12">
-                  <property name="geometry">
-                   <rect>
-                    <x>10</x>
-                    <y>140</y>
-                    <width>141</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>Number of images</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                  </property>
-                 </widget>
-                 <widget class="QLabel" name="label_13">
-                  <property name="geometry">
-                   <rect>
-                    <x>210</x>
-                    <y>140</y>
-                    <width>131</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>Exposure time [s]</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                  </property>
-                 </widget>
-                 <widget class="QLabel" name="label_14">
-                  <property name="geometry">
-                   <rect>
-                    <x>10</x>
-                    <y>100</y>
-                    <width>171</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>Calibration sample</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                  </property>
-                 </widget>
-                 <widget class="QComboBox" name="sampleSelection">
-                  <property name="geometry">
-                   <rect>
-                    <x>190</x>
-                    <y>100</y>
-                    <width>201</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <item>
-                   <property name="text">
-                    <string>Methanol &amp; Water</string>
+                 <item>
+                  <widget class="QScrollArea" name="scrollArea">
+                   <property name="minimumSize">
+                    <size>
+                     <width>340</width>
+                     <height>0</height>
+                    </size>
                    </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Methanol</string>
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
                    </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Water</string>
+                   <property name="lineWidth">
+                    <number>0</number>
                    </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>PMMA</string>
+                   <property name="widgetResizable">
+                    <bool>true</bool>
                    </property>
-                  </item>
-                 </widget>
-                 <widget class="QDoubleSpinBox" name="conCalibrationInterval">
-                  <property name="geometry">
-                   <rect>
-                    <x>150</x>
-                    <y>60</y>
-                    <width>51</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                  <property name="buttonSymbols">
-                   <enum>QAbstractSpinBox::NoButtons</enum>
-                  </property>
-                  <property name="decimals">
-                   <number>0</number>
-                  </property>
-                  <property name="value">
-                   <double>10.000000000000000</double>
-                  </property>
-                 </widget>
-                 <widget class="QDoubleSpinBox" name="calibrationExposureTime">
-                  <property name="geometry">
-                   <rect>
-                    <x>340</x>
-                    <y>140</y>
-                    <width>51</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                  <property name="buttonSymbols">
-                   <enum>QAbstractSpinBox::NoButtons</enum>
-                  </property>
-                  <property name="decimals">
-                   <number>0</number>
-                  </property>
-                  <property name="value">
-                   <double>1.000000000000000</double>
-                  </property>
-                 </widget>
-                 <widget class="QSpinBox" name="nrCalibrationImages">
-                  <property name="geometry">
-                   <rect>
-                    <x>150</x>
-                    <y>140</y>
-                    <width>51</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                  <property name="buttonSymbols">
-                   <enum>QAbstractSpinBox::NoButtons</enum>
-                  </property>
-                 </widget>
-                </widget>
-                <widget class="QGroupBox" name="acquisitionProgress">
-                 <property name="geometry">
-                  <rect>
-                   <x>10</x>
-                   <y>595</y>
-                   <width>401</width>
-                   <height>171</height>
-                  </rect>
-                 </property>
-                 <property name="title">
-                  <string>Current position &amp;&amp; acquisition progress</string>
-                 </property>
-                 <widget class="QProgressBar" name="progressBar">
-                  <property name="geometry">
-                   <rect>
-                    <x>10</x>
-                    <y>130</y>
-                    <width>381</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="value">
-                   <number>100</number>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                  <property name="format">
-                   <string extracomment="Test">Acquisition stopped</string>
-                  </property>
-                 </widget>
-                 <widget class="QLineEdit" name="positionX">
-                  <property name="geometry">
-                   <rect>
-                    <x>10</x>
-                    <y>50</y>
-                    <width>121</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">background: #E4E4E4;
+                   <widget class="QWidget" name="scrollAreaWidgetContents">
+                    <property name="geometry">
+                     <rect>
+                      <x>0</x>
+                      <y>0</y>
+                      <width>431</width>
+                      <height>775</height>
+                     </rect>
+                    </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>775</height>
+                     </size>
+                    </property>
+                    <widget class="QGroupBox" name="acquisitionAOI">
+                     <property name="geometry">
+                      <rect>
+                       <x>10</x>
+                       <y>60</y>
+                       <width>401</width>
+                       <height>181</height>
+                      </rect>
+                     </property>
+                     <property name="title">
+                      <string>Area of interest</string>
+                     </property>
+                     <widget class="QLabel" name="stepsLabel">
+                      <property name="geometry">
+                       <rect>
+                        <x>290</x>
+                        <y>15</y>
+                        <width>101</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string># Steps</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="startLabel">
+                      <property name="geometry">
+                       <rect>
+                        <x>70</x>
+                        <y>15</y>
+                        <width>101</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Start [µm]</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="endLabel">
+                      <property name="geometry">
+                       <rect>
+                        <x>180</x>
+                        <y>15</y>
+                        <width>101</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>End [µm]</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="xLabel">
+                      <property name="geometry">
+                       <rect>
+                        <x>10</x>
+                        <y>50</y>
+                        <width>51</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>x</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="yLabel">
+                      <property name="geometry">
+                       <rect>
+                        <x>10</x>
+                        <y>90</y>
+                        <width>51</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>y</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="zLabel">
+                      <property name="geometry">
+                       <rect>
+                        <x>10</x>
+                        <y>130</y>
+                        <width>51</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>z</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                     </widget>
+                     <widget class="QDoubleSpinBox" name="startX">
+                      <property name="geometry">
+                       <rect>
+                        <x>70</x>
+                        <y>50</y>
+                        <width>101</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="decimals">
+                       <number>1</number>
+                      </property>
+                      <property name="minimum">
+                       <double>-1000.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>1000.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>1.000000000000000</double>
+                      </property>
+                     </widget>
+                     <widget class="QDoubleSpinBox" name="endX">
+                      <property name="geometry">
+                       <rect>
+                        <x>180</x>
+                        <y>50</y>
+                        <width>101</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="decimals">
+                       <number>1</number>
+                      </property>
+                      <property name="minimum">
+                       <double>-1000.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>1000.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>1.000000000000000</double>
+                      </property>
+                     </widget>
+                     <widget class="QDoubleSpinBox" name="endZ">
+                      <property name="geometry">
+                       <rect>
+                        <x>180</x>
+                        <y>130</y>
+                        <width>101</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="decimals">
+                       <number>1</number>
+                      </property>
+                      <property name="minimum">
+                       <double>-1000.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>1000.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>1.000000000000000</double>
+                      </property>
+                     </widget>
+                     <widget class="QDoubleSpinBox" name="startZ">
+                      <property name="geometry">
+                       <rect>
+                        <x>70</x>
+                        <y>130</y>
+                        <width>101</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="decimals">
+                       <number>1</number>
+                      </property>
+                      <property name="minimum">
+                       <double>-1000.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>1000.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>1.000000000000000</double>
+                      </property>
+                     </widget>
+                     <widget class="QDoubleSpinBox" name="startY">
+                      <property name="geometry">
+                       <rect>
+                        <x>70</x>
+                        <y>90</y>
+                        <width>101</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="decimals">
+                       <number>1</number>
+                      </property>
+                      <property name="minimum">
+                       <double>-1000.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>1000.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>1.000000000000000</double>
+                      </property>
+                     </widget>
+                     <widget class="QDoubleSpinBox" name="endY">
+                      <property name="geometry">
+                       <rect>
+                        <x>180</x>
+                        <y>90</y>
+                        <width>101</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="decimals">
+                       <number>1</number>
+                      </property>
+                      <property name="minimum">
+                       <double>-1000.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>1000.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>1.000000000000000</double>
+                      </property>
+                     </widget>
+                     <widget class="QSpinBox" name="stepsX">
+                      <property name="geometry">
+                       <rect>
+                        <x>291</x>
+                        <y>50</y>
+                        <width>101</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="minimum">
+                       <number>1</number>
+                      </property>
+                      <property name="maximum">
+                       <number>1000</number>
+                      </property>
+                     </widget>
+                     <widget class="QSpinBox" name="stepsZ">
+                      <property name="geometry">
+                       <rect>
+                        <x>290</x>
+                        <y>130</y>
+                        <width>101</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="minimum">
+                       <number>1</number>
+                      </property>
+                      <property name="maximum">
+                       <number>1000</number>
+                      </property>
+                     </widget>
+                     <widget class="QSpinBox" name="stepsY">
+                      <property name="geometry">
+                       <rect>
+                        <x>290</x>
+                        <y>90</y>
+                        <width>101</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="minimum">
+                       <number>1</number>
+                      </property>
+                      <property name="maximum">
+                       <number>1000</number>
+                      </property>
+                     </widget>
+                    </widget>
+                    <widget class="QGroupBox" name="liveCalibration">
+                     <property name="geometry">
+                      <rect>
+                       <x>10</x>
+                       <y>250</y>
+                       <width>401</width>
+                       <height>221</height>
+                      </rect>
+                     </property>
+                     <property name="title">
+                      <string>Live calibration</string>
+                     </property>
+                     <widget class="QCheckBox" name="preCalibration">
+                      <property name="geometry">
+                       <rect>
+                        <x>10</x>
+                        <y>20</y>
+                        <width>181</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Pre calibration</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                     <widget class="QCheckBox" name="conCalibration">
+                      <property name="geometry">
+                       <rect>
+                        <x>10</x>
+                        <y>60</y>
+                        <width>141</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Calibrate every</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                     <widget class="QCheckBox" name="postCalibration">
+                      <property name="geometry">
+                       <rect>
+                        <x>220</x>
+                        <y>20</y>
+                        <width>171</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Post calibration</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="label_11">
+                      <property name="geometry">
+                       <rect>
+                        <x>200</x>
+                        <y>60</y>
+                        <width>41</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>min</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                     </widget>
+                     <widget class="QProgressBar" name="calibrationProgress">
+                      <property name="geometry">
+                       <rect>
+                        <x>10</x>
+                        <y>180</y>
+                        <width>381</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="value">
+                       <number>0</number>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                      <property name="format">
+                       <string>Time to next calibration</string>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="label_12">
+                      <property name="geometry">
+                       <rect>
+                        <x>10</x>
+                        <y>140</y>
+                        <width>141</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Number of images</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="label_13">
+                      <property name="geometry">
+                       <rect>
+                        <x>210</x>
+                        <y>140</y>
+                        <width>131</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Exposure time [s]</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="label_14">
+                      <property name="geometry">
+                       <rect>
+                        <x>10</x>
+                        <y>100</y>
+                        <width>171</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Calibration sample</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                      </property>
+                     </widget>
+                     <widget class="QComboBox" name="sampleSelection">
+                      <property name="geometry">
+                       <rect>
+                        <x>190</x>
+                        <y>100</y>
+                        <width>201</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <item>
+                       <property name="text">
+                        <string>Methanol &amp; Water</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>Methanol</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>Water</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>PMMA</string>
+                       </property>
+                      </item>
+                     </widget>
+                     <widget class="QDoubleSpinBox" name="conCalibrationInterval">
+                      <property name="geometry">
+                       <rect>
+                        <x>150</x>
+                        <y>60</y>
+                        <width>51</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                      <property name="buttonSymbols">
+                       <enum>QAbstractSpinBox::NoButtons</enum>
+                      </property>
+                      <property name="decimals">
+                       <number>0</number>
+                      </property>
+                      <property name="value">
+                       <double>10.000000000000000</double>
+                      </property>
+                     </widget>
+                     <widget class="QDoubleSpinBox" name="calibrationExposureTime">
+                      <property name="geometry">
+                       <rect>
+                        <x>340</x>
+                        <y>140</y>
+                        <width>51</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                      <property name="buttonSymbols">
+                       <enum>QAbstractSpinBox::NoButtons</enum>
+                      </property>
+                      <property name="decimals">
+                       <number>0</number>
+                      </property>
+                      <property name="value">
+                       <double>1.000000000000000</double>
+                      </property>
+                     </widget>
+                     <widget class="QSpinBox" name="nrCalibrationImages">
+                      <property name="geometry">
+                       <rect>
+                        <x>150</x>
+                        <y>140</y>
+                        <width>51</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                      <property name="buttonSymbols">
+                       <enum>QAbstractSpinBox::NoButtons</enum>
+                      </property>
+                     </widget>
+                    </widget>
+                    <widget class="QGroupBox" name="acquisitionProgress">
+                     <property name="geometry">
+                      <rect>
+                       <x>10</x>
+                       <y>595</y>
+                       <width>401</width>
+                       <height>171</height>
+                      </rect>
+                     </property>
+                     <property name="title">
+                      <string>Current position &amp;&amp; acquisition progress</string>
+                     </property>
+                     <widget class="QProgressBar" name="progressBar">
+                      <property name="geometry">
+                       <rect>
+                        <x>10</x>
+                        <y>130</y>
+                        <width>381</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="value">
+                       <number>100</number>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                      <property name="format">
+                       <string extracomment="Test">Acquisition stopped</string>
+                      </property>
+                     </widget>
+                     <widget class="QLineEdit" name="positionX">
+                      <property name="geometry">
+                       <rect>
+                        <x>10</x>
+                        <y>50</y>
+                        <width>121</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">background: #E4E4E4;
 border: none;</string>
-                  </property>
-                  <property name="text">
-                   <string>0</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                  <property name="readOnly">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                 <widget class="QLineEdit" name="positionY">
-                  <property name="geometry">
-                   <rect>
-                    <x>140</x>
-                    <y>50</y>
-                    <width>121</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">background: #E4E4E4;
+                      </property>
+                      <property name="text">
+                       <string>0</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                      <property name="readOnly">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                     <widget class="QLineEdit" name="positionY">
+                      <property name="geometry">
+                       <rect>
+                        <x>140</x>
+                        <y>50</y>
+                        <width>121</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">background: #E4E4E4;
 border: none;</string>
-                  </property>
-                  <property name="text">
-                   <string>0</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                  <property name="readOnly">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                 <widget class="QLineEdit" name="positionZ">
-                  <property name="geometry">
-                   <rect>
-                    <x>270</x>
-                    <y>50</y>
-                    <width>121</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">background: #E4E4E4;
+                      </property>
+                      <property name="text">
+                       <string>0</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                      <property name="readOnly">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                     <widget class="QLineEdit" name="positionZ">
+                      <property name="geometry">
+                       <rect>
+                        <x>270</x>
+                        <y>50</y>
+                        <width>121</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">background: #E4E4E4;
 border: none;</string>
-                  </property>
-                  <property name="text">
-                   <string>0</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                  <property name="readOnly">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                 <widget class="QLineEdit" name="imageNr">
-                  <property name="geometry">
-                   <rect>
-                    <x>140</x>
-                    <y>90</y>
-                    <width>121</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">background: #E4E4E4;
+                      </property>
+                      <property name="text">
+                       <string>0</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                      <property name="readOnly">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                     <widget class="QLineEdit" name="imageNr">
+                      <property name="geometry">
+                       <rect>
+                        <x>140</x>
+                        <y>90</y>
+                        <width>121</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">background: #E4E4E4;
 border: none;</string>
-                  </property>
-                  <property name="text">
-                   <string>0</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                  <property name="readOnly">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                 <widget class="QLabel" name="imageNr_label">
-                  <property name="geometry">
-                   <rect>
-                    <x>10</x>
-                    <y>90</y>
-                    <width>131</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>Image number</string>
-                  </property>
-                 </widget>
-                 <widget class="QLabel" name="positionX_label">
-                  <property name="geometry">
-                   <rect>
-                    <x>10</x>
-                    <y>15</y>
-                    <width>121</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>x [µm]</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                 <widget class="QLabel" name="positionY_label">
-                  <property name="geometry">
-                   <rect>
-                    <x>140</x>
-                    <y>15</y>
-                    <width>121</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>y [µm]</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                 <widget class="QLabel" name="positionZ_label">
-                  <property name="geometry">
-                   <rect>
-                    <x>270</x>
-                    <y>15</y>
-                    <width>121</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>z [µm]</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </widget>
-                <widget class="QGroupBox" name="repetitions">
-                 <property name="enabled">
-                  <bool>true</bool>
+                      </property>
+                      <property name="text">
+                       <string>0</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                      <property name="readOnly">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="imageNr_label">
+                      <property name="geometry">
+                       <rect>
+                        <x>10</x>
+                        <y>90</y>
+                        <width>131</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Image number</string>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="positionX_label">
+                      <property name="geometry">
+                       <rect>
+                        <x>10</x>
+                        <y>15</y>
+                        <width>121</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>x [µm]</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="positionY_label">
+                      <property name="geometry">
+                       <rect>
+                        <x>140</x>
+                        <y>15</y>
+                        <width>121</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>y [µm]</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="positionZ_label">
+                      <property name="geometry">
+                       <rect>
+                        <x>270</x>
+                        <y>15</y>
+                        <width>121</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>z [µm]</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                     </widget>
+                    </widget>
+                    <widget class="QGroupBox" name="repetitions">
+                     <property name="enabled">
+                      <bool>true</bool>
+                     </property>
+                     <property name="geometry">
+                      <rect>
+                       <x>10</x>
+                       <y>480</y>
+                       <width>401</width>
+                       <height>106</height>
+                      </rect>
+                     </property>
+                     <property name="title">
+                      <string>Repetitions</string>
+                     </property>
+                     <widget class="QLabel" name="repetitionCount_label">
+                      <property name="geometry">
+                       <rect>
+                        <x>10</x>
+                        <y>25</y>
+                        <width>141</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Count</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="repetitionInterval_label">
+                      <property name="geometry">
+                       <rect>
+                        <x>210</x>
+                        <y>25</y>
+                        <width>131</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Interval [min]</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                      </property>
+                     </widget>
+                     <widget class="QProgressBar" name="repetitionProgress">
+                      <property name="geometry">
+                       <rect>
+                        <x>10</x>
+                        <y>65</y>
+                        <width>381</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="value">
+                       <number>100</number>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                      <property name="format">
+                       <string extracomment="Test">Repetition 1 of 1.</string>
+                      </property>
+                     </widget>
+                     <widget class="QSpinBox" name="repetitionCount">
+                      <property name="geometry">
+                       <rect>
+                        <x>150</x>
+                        <y>25</y>
+                        <width>51</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                      <property name="buttonSymbols">
+                       <enum>QAbstractSpinBox::NoButtons</enum>
+                      </property>
+                      <property name="minimum">
+                       <number>1</number>
+                      </property>
+                      <property name="maximum">
+                       <number>100</number>
+                      </property>
+                     </widget>
+                     <widget class="QDoubleSpinBox" name="repetitionInterval">
+                      <property name="geometry">
+                       <rect>
+                        <x>340</x>
+                        <y>25</y>
+                        <width>51</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                      <property name="buttonSymbols">
+                       <enum>QAbstractSpinBox::NoButtons</enum>
+                      </property>
+                      <property name="decimals">
+                       <number>2</number>
+                      </property>
+                      <property name="value">
+                       <double>10.000000000000000</double>
+                      </property>
+                     </widget>
+                    </widget>
+                    <widget class="QPushButton" name="acquisitionStart">
+                     <property name="enabled">
+                      <bool>true</bool>
+                     </property>
+                     <property name="geometry">
+                      <rect>
+                       <x>300</x>
+                       <y>15</y>
+                       <width>111</width>
+                       <height>30</height>
+                      </rect>
+                     </property>
+                     <property name="text">
+                      <string>Start</string>
+                     </property>
+                    </widget>
+                   </widget>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+               <widget class="QWidget" name="tab_2">
+                <attribute name="title">
+                 <string>ODT</string>
+                </attribute>
+                <layout class="QHBoxLayout" name="horizontalLayout_10">
+                 <property name="leftMargin">
+                  <number>0</number>
                  </property>
-                 <property name="geometry">
-                  <rect>
-                   <x>10</x>
-                   <y>480</y>
-                   <width>401</width>
-                   <height>106</height>
-                  </rect>
+                 <property name="topMargin">
+                  <number>0</number>
                  </property>
-                 <property name="title">
-                  <string>Repetitions</string>
+                 <property name="rightMargin">
+                  <number>0</number>
                  </property>
-                 <widget class="QLabel" name="repetitionCount_label">
-                  <property name="geometry">
-                   <rect>
-                    <x>10</x>
-                    <y>25</y>
-                    <width>141</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>Count</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                  </property>
-                 </widget>
-                 <widget class="QLabel" name="repetitionInterval_label">
-                  <property name="geometry">
-                   <rect>
-                    <x>210</x>
-                    <y>25</y>
-                    <width>131</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>Interval [min]</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                  </property>
-                 </widget>
-                 <widget class="QProgressBar" name="repetitionProgress">
-                  <property name="geometry">
-                   <rect>
-                    <x>10</x>
-                    <y>65</y>
-                    <width>381</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="value">
-                   <number>100</number>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                  <property name="format">
-                   <string extracomment="Test">Repetition 1 of 1.</string>
-                  </property>
-                 </widget>
-                 <widget class="QSpinBox" name="repetitionCount">
-                  <property name="geometry">
-                   <rect>
-                    <x>150</x>
-                    <y>25</y>
-                    <width>51</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                  <property name="buttonSymbols">
-                   <enum>QAbstractSpinBox::NoButtons</enum>
-                  </property>
-                  <property name="minimum">
-                   <number>1</number>
-                  </property>
-                  <property name="maximum">
-                   <number>100</number>
-                  </property>
-                 </widget>
-                 <widget class="QDoubleSpinBox" name="repetitionInterval">
-                  <property name="geometry">
-                   <rect>
-                    <x>340</x>
-                    <y>25</y>
-                    <width>51</width>
-                    <height>30</height>
-                   </rect>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                  <property name="buttonSymbols">
-                   <enum>QAbstractSpinBox::NoButtons</enum>
-                  </property>
-                  <property name="decimals">
-                   <number>2</number>
-                  </property>
-                  <property name="value">
-                   <double>10.000000000000000</double>
-                  </property>
-                 </widget>
-                </widget>
-                <widget class="QLabel" name="acquisitionFilename_label">
-                 <property name="geometry">
-                  <rect>
-                   <x>10</x>
-                   <y>15</y>
-                   <width>71</width>
-                   <height>30</height>
-                  </rect>
+                 <property name="bottomMargin">
+                  <number>0</number>
                  </property>
-                 <property name="frameShadow">
-                  <enum>QFrame::Raised</enum>
-                 </property>
-                 <property name="text">
-                  <string>Filename:</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                 </property>
-                </widget>
-                <widget class="QLineEdit" name="acquisitionFilename">
-                 <property name="geometry">
-                  <rect>
-                   <x>90</x>
-                   <y>15</y>
-                   <width>161</width>
-                   <height>30</height>
-                  </rect>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">background: #E4E4E4;
-border: none;</string>
-                 </property>
-                 <property name="text">
-                  <string>Brillouin.h5</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                 <property name="readOnly">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-                <widget class="QPushButton" name="acquisitionStart">
-                 <property name="enabled">
-                  <bool>true</bool>
-                 </property>
-                 <property name="geometry">
-                  <rect>
-                   <x>300</x>
-                   <y>15</y>
-                   <width>111</width>
-                   <height>30</height>
-                  </rect>
-                 </property>
-                 <property name="text">
-                  <string>Start</string>
-                 </property>
-                </widget>
-                <widget class="QToolButton" name="selectFolder">
-                 <property name="geometry">
-                  <rect>
-                   <x>255</x>
-                   <y>15</y>
-                   <width>41</width>
-                   <height>30</height>
-                  </rect>
-                 </property>
-                 <property name="text">
-                  <string>...</string>
-                 </property>
-                </widget>
+                 <item>
+                  <widget class="QScrollArea" name="scrollArea_2">
+                   <property name="minimumSize">
+                    <size>
+                     <width>340</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                   </property>
+                   <property name="lineWidth">
+                    <number>0</number>
+                   </property>
+                   <property name="widgetResizable">
+                    <bool>true</bool>
+                   </property>
+                   <widget class="QWidget" name="scrollAreaWidgetContents_2">
+                    <property name="geometry">
+                     <rect>
+                      <x>0</x>
+                      <y>0</y>
+                      <width>444</width>
+                      <height>423</height>
+                     </rect>
+                    </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>420</height>
+                     </size>
+                    </property>
+                    <widget class="QGroupBox" name="alignmentODT">
+                     <property name="geometry">
+                      <rect>
+                       <x>10</x>
+                       <y>10</y>
+                       <width>401</width>
+                       <height>181</height>
+                      </rect>
+                     </property>
+                     <property name="title">
+                      <string>Alignment</string>
+                     </property>
+                     <widget class="QCustomPlot" name="alignmentPositionsODT" native="true">
+                      <property name="geometry">
+                       <rect>
+                        <x>10</x>
+                        <y>20</y>
+                        <width>150</width>
+                        <height>150</height>
+                       </rect>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="alignmentNumber_ODT_label">
+                      <property name="geometry">
+                       <rect>
+                        <x>170</x>
+                        <y>100</y>
+                        <width>131</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Number of points</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="alignmentUR_ODT_label">
+                      <property name="geometry">
+                       <rect>
+                        <x>170</x>
+                        <y>60</y>
+                        <width>101</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>UR [V]</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="alignmentRate_ODT_label">
+                      <property name="geometry">
+                       <rect>
+                        <x>170</x>
+                        <y>140</y>
+                        <width>101</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Scanrate [Hz]</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                      </property>
+                     </widget>
+                     <widget class="QDoubleSpinBox" name="alignmentUR_ODT">
+                      <property name="geometry">
+                       <rect>
+                        <x>310</x>
+                        <y>60</y>
+                        <width>81</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="decimals">
+                       <number>1</number>
+                      </property>
+                      <property name="minimum">
+                       <double>0.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>1.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>0.100000000000000</double>
+                      </property>
+                      <property name="value">
+                       <double>0.300000000000000</double>
+                      </property>
+                     </widget>
+                     <widget class="QDoubleSpinBox" name="alignmentRate_ODT">
+                      <property name="geometry">
+                       <rect>
+                        <x>310</x>
+                        <y>140</y>
+                        <width>81</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="decimals">
+                       <number>1</number>
+                      </property>
+                      <property name="minimum">
+                       <double>0.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>1000.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>10.000000000000000</double>
+                      </property>
+                      <property name="value">
+                       <double>100.000000000000000</double>
+                      </property>
+                     </widget>
+                     <widget class="QPushButton" name="alignmentStartODT">
+                      <property name="enabled">
+                       <bool>true</bool>
+                      </property>
+                      <property name="geometry">
+                       <rect>
+                        <x>280</x>
+                        <y>20</y>
+                        <width>111</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Start</string>
+                      </property>
+                     </widget>
+                     <widget class="QSpinBox" name="alignmentNumber_ODT">
+                      <property name="geometry">
+                       <rect>
+                        <x>310</x>
+                        <y>100</y>
+                        <width>81</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="minimum">
+                       <number>1</number>
+                      </property>
+                      <property name="maximum">
+                       <number>1000</number>
+                      </property>
+                      <property name="singleStep">
+                       <number>5</number>
+                      </property>
+                      <property name="value">
+                       <number>30</number>
+                      </property>
+                     </widget>
+                    </widget>
+                    <widget class="QGroupBox" name="acquisitionODT">
+                     <property name="geometry">
+                      <rect>
+                       <x>10</x>
+                       <y>200</y>
+                       <width>401</width>
+                       <height>221</height>
+                      </rect>
+                     </property>
+                     <property name="title">
+                      <string>Acquisition</string>
+                     </property>
+                     <widget class="QProgressBar" name="acquisitionProgress_ODT">
+                      <property name="geometry">
+                       <rect>
+                        <x>10</x>
+                        <y>180</y>
+                        <width>381</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="value">
+                       <number>0</number>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                      <property name="format">
+                       <string>Acquisition stopped.</string>
+                      </property>
+                     </widget>
+                     <widget class="QCustomPlot" name="acquisitionPositionsODT" native="true">
+                      <property name="geometry">
+                       <rect>
+                        <x>10</x>
+                        <y>20</y>
+                        <width>150</width>
+                        <height>150</height>
+                       </rect>
+                      </property>
+                     </widget>
+                     <widget class="QDoubleSpinBox" name="acquisitionUR_ODT">
+                      <property name="geometry">
+                       <rect>
+                        <x>310</x>
+                        <y>60</y>
+                        <width>81</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="decimals">
+                       <number>1</number>
+                      </property>
+                      <property name="minimum">
+                       <double>0.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>1.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>0.100000000000000</double>
+                      </property>
+                      <property name="value">
+                       <double>0.300000000000000</double>
+                      </property>
+                     </widget>
+                     <widget class="QDoubleSpinBox" name="acquisitionRate_ODT">
+                      <property name="geometry">
+                       <rect>
+                        <x>310</x>
+                        <y>140</y>
+                        <width>81</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="decimals">
+                       <number>1</number>
+                      </property>
+                      <property name="minimum">
+                       <double>0.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>1000.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>10.000000000000000</double>
+                      </property>
+                      <property name="value">
+                       <double>100.000000000000000</double>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="acquisitionRate_ODT_label">
+                      <property name="geometry">
+                       <rect>
+                        <x>170</x>
+                        <y>140</y>
+                        <width>101</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Scanrate [Hz]</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                      </property>
+                     </widget>
+                     <widget class="QPushButton" name="acquisitionStartODT">
+                      <property name="enabled">
+                       <bool>true</bool>
+                      </property>
+                      <property name="geometry">
+                       <rect>
+                        <x>280</x>
+                        <y>20</y>
+                        <width>111</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Start</string>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="acquisitionUR_ODT_label">
+                      <property name="geometry">
+                       <rect>
+                        <x>170</x>
+                        <y>60</y>
+                        <width>101</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>UR [V]</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="acquisitionNumber_ODT_label">
+                      <property name="geometry">
+                       <rect>
+                        <x>170</x>
+                        <y>100</y>
+                        <width>131</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Number of points</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                      </property>
+                     </widget>
+                     <widget class="QSpinBox" name="acquisitionNumber_ODT">
+                      <property name="geometry">
+                       <rect>
+                        <x>310</x>
+                        <y>100</y>
+                        <width>81</width>
+                        <height>30</height>
+                       </rect>
+                      </property>
+                      <property name="minimum">
+                       <number>1</number>
+                      </property>
+                      <property name="maximum">
+                       <number>1000</number>
+                      </property>
+                      <property name="singleStep">
+                       <number>5</number>
+                      </property>
+                      <property name="value">
+                       <number>150</number>
+                      </property>
+                     </widget>
+                    </widget>
+                   </widget>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+               <widget class="QWidget" name="tab_3">
+                <attribute name="title">
+                 <string>Fluorescence</string>
+                </attribute>
                </widget>
               </widget>
              </item>
@@ -2501,7 +2973,7 @@ border: none;</string>
      <x>0</x>
      <y>0</y>
      <width>1318</width>
-     <height>21</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">
@@ -2628,26 +3100,6 @@ border: none;</string>
   <tabstop>sTScrollArea</tabstop>
   <tabstop>settingsWidget</tabstop>
   <tabstop>sTScrollArea_2</tabstop>
-  <tabstop>scrollArea</tabstop>
-  <tabstop>acquisitionFilename</tabstop>
-  <tabstop>acquisitionStart</tabstop>
-  <tabstop>startX</tabstop>
-  <tabstop>endX</tabstop>
-  <tabstop>stepsX</tabstop>
-  <tabstop>startY</tabstop>
-  <tabstop>endY</tabstop>
-  <tabstop>stepsY</tabstop>
-  <tabstop>startZ</tabstop>
-  <tabstop>endZ</tabstop>
-  <tabstop>stepsZ</tabstop>
-  <tabstop>preCalibration</tabstop>
-  <tabstop>postCalibration</tabstop>
-  <tabstop>conCalibration</tabstop>
-  <tabstop>sampleSelection</tabstop>
-  <tabstop>positionX</tabstop>
-  <tabstop>positionY</tabstop>
-  <tabstop>positionZ</tabstop>
-  <tabstop>imageNr</tabstop>
   <tabstop>camera_singleShot</tabstop>
   <tabstop>camera_playPause</tabstop>
   <tabstop>sensorTemp</tabstop>
@@ -2658,12 +3110,6 @@ border: none;</string>
   <tabstop>setPositionY</tabstop>
   <tabstop>setPositionZ</tabstop>
   <tabstop>tableView</tabstop>
-  <tabstop>conCalibrationInterval</tabstop>
-  <tabstop>calibrationExposureTime</tabstop>
-  <tabstop>nrCalibrationImages</tabstop>
-  <tabstop>repetitionCount</tabstop>
-  <tabstop>repetitionInterval</tabstop>
-  <tabstop>selectFolder</tabstop>
   <tabstop>autoscalePlot</tabstop>
  </tabstops>
  <resources>
