@@ -34,6 +34,12 @@ public:
 	}
 
 	template <typename T = double>
+	static T max(std::vector<T> vector) {
+		std::vector<T>::iterator result = std::max_element(std::begin(vector), std::end(vector));
+		return *result;
+	}
+
+	template <typename T = double>
 	static std::vector<std::complex<T>> solveQuartic(COEFFICIANTS5 coef) {
 		// shorthands for the variables
 		double a = coef.a;

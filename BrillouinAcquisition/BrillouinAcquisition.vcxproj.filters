@@ -147,6 +147,9 @@
     <ClCompile Include="PointGrey.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ODT.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -212,6 +215,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="PointGrey.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="ODT.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

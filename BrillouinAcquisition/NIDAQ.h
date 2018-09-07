@@ -17,25 +17,9 @@ namespace Thorlabs_FF {
 #include "H5Cpp.h"
 #include "filesystem"
 
-struct VOLTAGE2 {
-	double Ux{ 0 };
-	double Uy{ 0 };
-};
-
 struct ELEMENTPOSITION {
 	Thorlabs_FF::FF_Positions CalFlipMirror{ Thorlabs_FF::FF_Positions::Position1 };	// Brillouin measurement
 	Thorlabs_FF::FF_Positions BeamBlock{ Thorlabs_FF::FF_Positions::Position1 };		// Beam path blocked
-};
-
-struct POINT2 {
-	double x{ 0 };
-	double y{ 0 };
-	POINT2 operator+(const POINT2 &pos) {
-		return POINT2{ x + pos.x, y + pos.y };
-	}
-	POINT2 operator-(const POINT2 &pos) {
-		return POINT2{ x - pos.x, y - pos.y };
-	}
 };
 
 class NIDAQ: public ScanControl {

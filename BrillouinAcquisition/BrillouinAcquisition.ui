@@ -2457,15 +2457,15 @@ border: none;</string>
                     <property name="geometry">
                      <rect>
                       <x>0</x>
-                      <y>0</y>
-                      <width>444</width>
-                      <height>423</height>
+                      <y>-33</y>
+                      <width>431</width>
+                      <height>865</height>
                      </rect>
                     </property>
                     <property name="minimumSize">
                      <size>
                       <width>0</width>
-                      <height>420</height>
+                      <height>865</height>
                      </size>
                     </property>
                     <widget class="QGroupBox" name="alignmentODT">
@@ -2474,27 +2474,27 @@ border: none;</string>
                        <x>10</x>
                        <y>10</y>
                        <width>401</width>
-                       <height>181</height>
+                       <height>401</height>
                       </rect>
                      </property>
                      <property name="title">
                       <string>Alignment</string>
                      </property>
-                     <widget class="QCustomPlot" name="alignmentPositionsODT" native="true">
+                     <widget class="QCustomPlot" name="alignmentVoltagesODT" native="true">
                       <property name="geometry">
                        <rect>
-                        <x>10</x>
-                        <y>20</y>
-                        <width>150</width>
-                        <height>150</height>
+                        <x>60</x>
+                        <y>140</y>
+                        <width>281</width>
+                        <height>250</height>
                        </rect>
                       </property>
                      </widget>
                      <widget class="QLabel" name="alignmentNumber_ODT_label">
                       <property name="geometry">
                        <rect>
-                        <x>170</x>
-                        <y>100</y>
+                        <x>10</x>
+                        <y>60</y>
                         <width>131</width>
                         <height>30</height>
                        </rect>
@@ -2509,9 +2509,9 @@ border: none;</string>
                      <widget class="QLabel" name="alignmentUR_ODT_label">
                       <property name="geometry">
                        <rect>
-                        <x>170</x>
-                        <y>60</y>
-                        <width>101</width>
+                        <x>10</x>
+                        <y>20</y>
+                        <width>131</width>
                         <height>30</height>
                        </rect>
                       </property>
@@ -2525,8 +2525,8 @@ border: none;</string>
                      <widget class="QLabel" name="alignmentRate_ODT_label">
                       <property name="geometry">
                        <rect>
-                        <x>170</x>
-                        <y>140</y>
+                        <x>10</x>
+                        <y>100</y>
                         <width>101</width>
                         <height>30</height>
                        </rect>
@@ -2541,14 +2541,14 @@ border: none;</string>
                      <widget class="QDoubleSpinBox" name="alignmentUR_ODT">
                       <property name="geometry">
                        <rect>
-                        <x>310</x>
-                        <y>60</y>
+                        <x>170</x>
+                        <y>20</y>
                         <width>81</width>
                         <height>30</height>
                        </rect>
                       </property>
                       <property name="decimals">
-                       <number>1</number>
+                       <number>2</number>
                       </property>
                       <property name="minimum">
                        <double>0.000000000000000</double>
@@ -2557,7 +2557,7 @@ border: none;</string>
                        <double>1.000000000000000</double>
                       </property>
                       <property name="singleStep">
-                       <double>0.100000000000000</double>
+                       <double>0.010000000000000</double>
                       </property>
                       <property name="value">
                        <double>0.300000000000000</double>
@@ -2566,8 +2566,8 @@ border: none;</string>
                      <widget class="QDoubleSpinBox" name="alignmentRate_ODT">
                       <property name="geometry">
                        <rect>
-                        <x>310</x>
-                        <y>140</y>
+                        <x>170</x>
+                        <y>100</y>
                         <width>81</width>
                         <height>30</height>
                        </rect>
@@ -2594,9 +2594,9 @@ border: none;</string>
                       </property>
                       <property name="geometry">
                        <rect>
-                        <x>280</x>
+                        <x>270</x>
                         <y>20</y>
-                        <width>111</width>
+                        <width>121</width>
                         <height>30</height>
                        </rect>
                       </property>
@@ -2607,8 +2607,8 @@ border: none;</string>
                      <widget class="QSpinBox" name="alignmentNumber_ODT">
                       <property name="geometry">
                        <rect>
-                        <x>310</x>
-                        <y>100</y>
+                        <x>170</x>
+                        <y>60</y>
                         <width>81</width>
                         <height>30</height>
                        </rect>
@@ -2631,9 +2631,9 @@ border: none;</string>
                      <property name="geometry">
                       <rect>
                        <x>10</x>
-                       <y>200</y>
+                       <y>420</y>
                        <width>401</width>
-                       <height>221</height>
+                       <height>441</height>
                       </rect>
                      </property>
                      <property name="title">
@@ -2643,7 +2643,7 @@ border: none;</string>
                       <property name="geometry">
                        <rect>
                         <x>10</x>
-                        <y>180</y>
+                        <y>400</y>
                         <width>381</width>
                         <height>30</height>
                        </rect>
@@ -2658,27 +2658,27 @@ border: none;</string>
                        <string>Acquisition stopped.</string>
                       </property>
                      </widget>
-                     <widget class="QCustomPlot" name="acquisitionPositionsODT" native="true">
+                     <widget class="QCustomPlot" name="acquisitionVoltagesODT" native="true">
                       <property name="geometry">
                        <rect>
-                        <x>10</x>
-                        <y>20</y>
-                        <width>150</width>
-                        <height>150</height>
+                        <x>60</x>
+                        <y>140</y>
+                        <width>281</width>
+                        <height>250</height>
                        </rect>
                       </property>
                      </widget>
                      <widget class="QDoubleSpinBox" name="acquisitionUR_ODT">
                       <property name="geometry">
                        <rect>
-                        <x>310</x>
-                        <y>60</y>
+                        <x>170</x>
+                        <y>20</y>
                         <width>81</width>
                         <height>30</height>
                        </rect>
                       </property>
                       <property name="decimals">
-                       <number>1</number>
+                       <number>2</number>
                       </property>
                       <property name="minimum">
                        <double>0.000000000000000</double>
@@ -2687,7 +2687,7 @@ border: none;</string>
                        <double>1.000000000000000</double>
                       </property>
                       <property name="singleStep">
-                       <double>0.100000000000000</double>
+                       <double>0.010000000000000</double>
                       </property>
                       <property name="value">
                        <double>0.300000000000000</double>
@@ -2696,8 +2696,8 @@ border: none;</string>
                      <widget class="QDoubleSpinBox" name="acquisitionRate_ODT">
                       <property name="geometry">
                        <rect>
-                        <x>310</x>
-                        <y>140</y>
+                        <x>170</x>
+                        <y>100</y>
                         <width>81</width>
                         <height>30</height>
                        </rect>
@@ -2721,9 +2721,9 @@ border: none;</string>
                      <widget class="QLabel" name="acquisitionRate_ODT_label">
                       <property name="geometry">
                        <rect>
-                        <x>170</x>
-                        <y>140</y>
-                        <width>101</width>
+                        <x>10</x>
+                        <y>100</y>
+                        <width>151</width>
                         <height>30</height>
                        </rect>
                       </property>
@@ -2740,9 +2740,9 @@ border: none;</string>
                       </property>
                       <property name="geometry">
                        <rect>
-                        <x>280</x>
+                        <x>270</x>
                         <y>20</y>
-                        <width>111</width>
+                        <width>121</width>
                         <height>30</height>
                        </rect>
                       </property>
@@ -2753,9 +2753,9 @@ border: none;</string>
                      <widget class="QLabel" name="acquisitionUR_ODT_label">
                       <property name="geometry">
                        <rect>
-                        <x>170</x>
-                        <y>60</y>
-                        <width>101</width>
+                        <x>10</x>
+                        <y>20</y>
+                        <width>151</width>
                         <height>30</height>
                        </rect>
                       </property>
@@ -2769,9 +2769,9 @@ border: none;</string>
                      <widget class="QLabel" name="acquisitionNumber_ODT_label">
                       <property name="geometry">
                        <rect>
-                        <x>170</x>
-                        <y>100</y>
-                        <width>131</width>
+                        <x>10</x>
+                        <y>60</y>
+                        <width>151</width>
                         <height>30</height>
                        </rect>
                       </property>
@@ -2785,14 +2785,14 @@ border: none;</string>
                      <widget class="QSpinBox" name="acquisitionNumber_ODT">
                       <property name="geometry">
                        <rect>
-                        <x>310</x>
-                        <y>100</y>
+                        <x>170</x>
+                        <y>60</y>
                         <width>81</width>
                         <height>30</height>
                        </rect>
                       </property>
                       <property name="minimum">
-                       <number>1</number>
+                       <number>10</number>
                       </property>
                       <property name="maximum">
                        <number>1000</number>

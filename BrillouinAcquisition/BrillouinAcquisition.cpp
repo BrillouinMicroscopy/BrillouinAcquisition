@@ -214,6 +214,25 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 
 	connect(m_ODTPlot.plotHandle, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(plotClick(QMouseEvent*)));
 
+	initializeODTVoltagePlot(ui->alignmentVoltagesODT);
+	initializeODTVoltagePlot(ui->acquisitionVoltagesODT);
+
+	connection = QWidget::connect(
+		m_ODT,
+		&ODT::s_acqSettingsChanged,
+		this,
+		[this](ODT_SETTINGS settings) { plotODTVoltages(settings, ODT_MODES::ACQ); }
+	);
+
+	connection = QWidget::connect(
+		m_ODT,
+		&ODT::s_algnSettingsChanged,
+		this,
+		[this](ODT_SETTINGS settings) { plotODTVoltages(settings, ODT_MODES::ALGN); }
+	);
+
+	m_ODT->initialize();
+
 	updateAcquisitionSettings();
 	initSettingsDialog();
 
@@ -482,6 +501,103 @@ void BrillouinAcquisition::sensorTemperatureChanged(SensorTemperature sensorTemp
 		icon = QIcon(":/BrillouinAcquisition/assets/00disconnected.png");
 	}
 	ui->settingsWidget->setTabIcon(0, icon);
+}
+
+void BrillouinAcquisition::initializeODTVoltagePlot(QCustomPlot *plot) {
+	plot->setBackground(QColor(240, 240, 240, 255));
+	plot->axisRect()->setBackground(Qt::white);
+	//plot->xAxis->setLabel("Ux [V]");
+	//plot->yAxis->setLabel("Uy [V]");
+
+	plot->axisRect()->setupFullAxesBox(true);
+
+	plot->axisRect()->setMaximumSize(210, 210); // make bottom right axis rect size fixed 150x150
+	plot->axisRect()->setMinimumSize(210, 210);
+
+	plot->addGraph();
+	plot->graph(0)->setLineStyle(QCPGraph::LineStyle::lsNone);
+	plot->graph(0)->setScatterStyle(QCPScatterStyle::ScatterShape::ssCircle);
+	plot->replot();
+}
+
+/*
+* ODT signals
+*/
+
+void BrillouinAcquisition::on_alignmentUR_ODT_valueChanged(double voltage) {
+	m_ODT->setSettings(ODT_MODES::ALGN, ODT_SETTING::VOLTAGE, voltage);
+}
+
+void BrillouinAcquisition::on_alignmentNumber_ODT_valueChanged(int number) {
+	m_ODT->setSettings(ODT_MODES::ALGN, ODT_SETTING::NRPOINTS, number);
+}
+
+void BrillouinAcquisition::on_alignmentRate_ODT_valueChanged(double rate) {
+	m_ODT->setSettings(ODT_MODES::ALGN, ODT_SETTING::SCANRATE, rate);
+}
+
+void BrillouinAcquisition::on_alignmentStartODT_clicked() {
+}
+
+void BrillouinAcquisition::on_acquisitionUR_ODT_valueChanged(double voltage) {
+	m_ODT->setSettings(ODT_MODES::ACQ, ODT_SETTING::VOLTAGE, voltage);
+}
+
+void BrillouinAcquisition::on_acquisitionNumber_ODT_valueChanged(int number) {
+	m_ODT->setSettings(ODT_MODES::ACQ, ODT_SETTING::NRPOINTS, number);
+}
+
+void BrillouinAcquisition::on_acquisitionRate_ODT_valueChanged(double rate) {
+	m_ODT->setSettings(ODT_MODES::ACQ, ODT_SETTING::SCANRATE, rate);
+}
+
+void BrillouinAcquisition::on_acquisitionStartODT_clicked() {
+}
+
+void BrillouinAcquisition::plotODTVoltages(ODT_SETTINGS settings, ODT_MODES mode) {
+	QCustomPlot *plot;
+	switch (mode) {
+		case ODT_MODES::ALGN:
+			plot = ui->alignmentVoltagesODT;
+			ui->alignmentUR_ODT->blockSignals(true);
+			ui->alignmentNumber_ODT->blockSignals(true);
+			ui->alignmentRate_ODT->blockSignals(true);
+			ui->alignmentUR_ODT->setValue(settings.radialVoltage);
+			ui->alignmentNumber_ODT->setValue(settings.numberPoints);
+			ui->alignmentRate_ODT->setValue(settings.scanRate);
+			ui->alignmentUR_ODT->blockSignals(false);
+			ui->alignmentNumber_ODT->blockSignals(false);
+			ui->alignmentRate_ODT->blockSignals(false);
+			break;
+		case ODT_MODES::ACQ:
+			plot = ui->acquisitionVoltagesODT;
+			ui->acquisitionUR_ODT->blockSignals(true);
+			ui->acquisitionNumber_ODT->blockSignals(true);
+			ui->acquisitionRate_ODT->blockSignals(true);
+			ui->acquisitionUR_ODT->setValue(settings.radialVoltage);
+			ui->acquisitionNumber_ODT->setValue(settings.numberPoints);
+			ui->acquisitionRate_ODT->setValue(settings.scanRate);
+			ui->acquisitionUR_ODT->blockSignals(false);
+			ui->acquisitionNumber_ODT->blockSignals(false);
+			ui->acquisitionRate_ODT->blockSignals(false);
+			break;
+	}
+
+	std::vector<VOLTAGE2> voltages = settings.voltages;
+	QVector<double> Ux(voltages.size()), Uy(voltages.size());
+	for (gsl::index index{ 0 }; index < voltages.size(); ++index) {
+		Ux[index] = voltages[index].Ux;
+		Uy[index] = voltages[index].Uy;
+	}
+
+	plot->graph(0)->setData(Ux, Uy);
+	// scale the axis appropriately
+	plot->xAxis->setRange(-1.1*settings.radialVoltage, 1.1*settings.radialVoltage);
+	plot->yAxis->setRange(-1.1*settings.radialVoltage, 1.1*settings.radialVoltage);
+	
+	// set the aspect ratio
+	//plot->yAxis->setScaleRatio(plot->xAxis, 1.0); // somehow makes it worse
+	plot->replot();
 }
 
 void BrillouinAcquisition::initializePlot(PLOT_SETTINGS plotSettings) {

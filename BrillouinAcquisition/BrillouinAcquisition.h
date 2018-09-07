@@ -14,6 +14,7 @@
 #include "tableModel.h"
 
 #include "PointGrey.h"
+#include "ODT.h"
 
 #include <QtWidgets/QMainWindow>
 #include "ui_BrillouinAcquisition.h"
@@ -134,6 +135,8 @@ private slots:
 	void cameraSettingsChanged(CAMERA_SETTINGS);
 	void cameraODTSettingsChanged(CAMERA_SETTINGS settings);
 	void sensorTemperatureChanged(SensorTemperature);
+	void initializeODTVoltagePlot(QCustomPlot *plot);
+	void plotODTVoltages(ODT_SETTINGS settings, ODT_MODES mode);
 	void cameraOptionsChanged(CAMERA_OPTIONS);
 	void cameraODTOptionsChanged(CAMERA_OPTIONS options);
 	void showAcqPosition(POINT3, int);
@@ -145,6 +148,16 @@ private slots:
 	void showCalibrationRunning(bool);
 	void showAcqRunning(bool);
 	void updateFilename(std::string);
+
+	// ODT signals
+	void on_alignmentUR_ODT_valueChanged(double);
+	void on_alignmentNumber_ODT_valueChanged(int);
+	void on_alignmentRate_ODT_valueChanged(double);
+	void on_alignmentStartODT_clicked();
+	void on_acquisitionUR_ODT_valueChanged(double);
+	void on_acquisitionNumber_ODT_valueChanged(int);
+	void on_acquisitionRate_ODT_valueChanged(double);
+	void on_acquisitionStartODT_clicked();
 
 	QString formatSeconds(int seconds);
 
@@ -229,6 +242,8 @@ private:
 	ScanControl *m_scanControl = nullptr;
 	PointGrey *m_pointGrey = nullptr;
 	Acquisition *m_acquisition = new Acquisition(nullptr, m_andor, &m_scanControl);
+
+	ODT *m_ODT = new ODT(nullptr, &m_pointGrey, &m_scanControl);
 
 	PLOT_SETTINGS m_BrillouinPlot;
 	PLOT_SETTINGS m_ODTPlot;

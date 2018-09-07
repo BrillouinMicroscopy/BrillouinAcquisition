@@ -13,6 +13,22 @@ struct POINT3 {
 	}
 };
 
+struct POINT2 {
+	double x{ 0 };
+	double y{ 0 };
+	POINT2 operator+(const POINT2 &pos) {
+		return POINT2{ x + pos.x, y + pos.y };
+	}
+	POINT2 operator-(const POINT2 &pos) {
+		return POINT2{ x - pos.x, y - pos.y };
+	}
+};
+
+struct VOLTAGE2 {
+	double Ux{ 0 };
+	double Uy{ 0 };
+};
+
 struct BOUNDS {
 	double xMin{ -1e3 };	// [µm] minimal x-value
 	double xMax{  1e3 };	// [µm] maximal x-value
