@@ -195,8 +195,6 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	m_acquisitionThread.startWorker(m_andor);
 	// start acquisition thread
 	m_acquisitionThread.startWorker(m_acquisition);
-	// start ODT thread
-	m_acquisitionThread.startWorker(m_ODT);
 
 	// set up the QCPColorMap:
 	m_BrillouinPlot = {
@@ -222,45 +220,6 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 
 	initializeODTVoltagePlot(ui->alignmentVoltagesODT);
 	initializeODTVoltagePlot(ui->acquisitionVoltagesODT);
-
-	connection = QWidget::connect(
-		m_ODT,
-		&ODT::s_acqSettingsChanged,
-		this,
-		[this](ODT_SETTINGS settings) { plotODTVoltages(settings, ODT_MODES::ACQ); }
-	);
-
-	connection = QWidget::connect(
-		m_ODT,
-		&ODT::s_algnSettingsChanged,
-		this,
-		[this](ODT_SETTINGS settings) { plotODTVoltages(settings, ODT_MODES::ALGN); }
-	);
-
-	connection = QWidget::connect(
-		m_ODT,
-		&ODT::s_algnRunning,
-		this,
-		[this](bool isRunning) { showODTAlgnRunning(isRunning); }
-	);
-
-	connection = QWidget::connect(
-		m_ODT,
-		&ODT::s_acqRunning,
-		this,
-		[this](bool isRunning) { showODTAcqRunning(isRunning); }
-	);
-
-	connection = QWidget::connect(
-		m_ODT,
-		&ODT::s_mirrorVoltageChanged,
-		this,
-		[this](VOLTAGE2 voltage, ODT_MODES mode) { plotODTVoltage(voltage, mode); }
-	);
-
-	QObject::dumpObjectInfo();
-
-	m_ODT->initialize();
 
 	updateAcquisitionSettings();
 	initSettingsDialog();
@@ -1313,24 +1272,76 @@ void BrillouinAcquisition::initScanControl() {
 		m_scanControl = nullptr;
 	}
 
+	static QMetaObject::Connection connection;
 	// initialize correct scanner type
 	switch (m_scanControllerType) {
 		case ScanControl::SCAN_DEVICE::ZEISSECU:
 			m_scanControl = new ZeissECU();
 			ui->actionLoad_Voltage_Position_calibration->setVisible(false);
+			ui->acquisitionModeTabs->removeTab(1);
+			if (m_ODT) {
+				m_ODT->deleteLater();
+				m_ODT = nullptr;
+			}
 			break;
 		case ScanControl::SCAN_DEVICE::NIDAQ:
 			m_scanControl = new NIDAQ();
+			m_ODT = new ODT(nullptr, &m_pointGrey, (NIDAQ**)&m_scanControl);
+
+			connection = QWidget::connect(
+				m_ODT,
+				&ODT::s_acqSettingsChanged,
+				this,
+				[this](ODT_SETTINGS settings) { plotODTVoltages(settings, ODT_MODES::ACQ); }
+			);
+
+			connection = QWidget::connect(
+				m_ODT,
+				&ODT::s_algnSettingsChanged,
+				this,
+				[this](ODT_SETTINGS settings) { plotODTVoltages(settings, ODT_MODES::ALGN); }
+			);
+
+			connection = QWidget::connect(
+				m_ODT,
+				&ODT::s_algnRunning,
+				this,
+				[this](bool isRunning) { showODTAlgnRunning(isRunning); }
+			);
+
+			connection = QWidget::connect(
+				m_ODT,
+				&ODT::s_acqRunning,
+				this,
+				[this](bool isRunning) { showODTAcqRunning(isRunning); }
+			);
+
+			connection = QWidget::connect(
+				m_ODT,
+				&ODT::s_mirrorVoltageChanged,
+				this,
+				[this](VOLTAGE2 voltage, ODT_MODES mode) { plotODTVoltage(voltage, mode); }
+			);
+
+			// start ODT thread
+			m_acquisitionThread.startWorker(m_ODT);
+			ui->acquisitionModeTabs->insertTab(1, ui->ODT, "ODT");
+			m_ODT->initialize();
 			ui->actionLoad_Voltage_Position_calibration->setVisible(true);
 			break;
 		default:
 			m_scanControl = new ZeissECU();
 			ui->actionLoad_Voltage_Position_calibration->setVisible(false);
+			ui->acquisitionModeTabs->removeTab(1);
+			if (m_ODT) {
+				m_ODT->deleteLater();
+				m_ODT = nullptr;
+			}
 			break;
 	}
 
 	// reestablish m_scanControl connections
-	QMetaObject::Connection connection = QWidget::connect(
+	connection = QWidget::connect(
 		m_scanControl,
 		SIGNAL(connectedDevice(bool)),
 		this,

@@ -239,6 +239,11 @@ void NIDAQ::setPosition(POINT3 position) {
 	applyScanPosition();
 }
 
+void NIDAQ::setVoltage(VOLTAGE2 voltages) {
+	float64 data[2] = { voltages.Ux, voltages.Uy };
+	DAQmxWriteAnalogF64(taskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
+}
+
 void NIDAQ::setPositionRelativeX(double positionX) {
 	m_position.x = positionX + m_homePosition.x;
 	setPosition(m_position);

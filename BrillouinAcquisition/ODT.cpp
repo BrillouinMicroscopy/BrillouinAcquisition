@@ -2,8 +2,8 @@
 #include "simplemath.h"
 #include "ODT.h"
 
-ODT::ODT(QObject *parent, PointGrey **pointGrey, ScanControl **scanControl)
-	: QObject(parent), m_pointGrey(pointGrey), m_scanControl(scanControl) {
+ODT::ODT(QObject *parent, PointGrey **pointGrey, NIDAQ **nidaq)
+	: QObject(parent), m_pointGrey(pointGrey), m_NIDAQ(nidaq) {
 }
 
 ODT::~ODT() {
@@ -136,6 +136,7 @@ void ODT::nextAlgnPosition() {
 	}
 	VOLTAGE2 voltage = m_algnSettings.voltages[m_algnPositionIndex];
 	// set new voltage to galvo mirrors
+	(*m_NIDAQ)->setVoltage(voltage);
 
 	// announce mirror voltage
 	emit(s_mirrorVoltageChanged(voltage, ALGN));

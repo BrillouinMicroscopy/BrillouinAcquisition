@@ -251,7 +251,7 @@ private:
 	PointGrey *m_pointGrey = nullptr;
 	Acquisition *m_acquisition = new Acquisition(nullptr, m_andor, &m_scanControl);
 
-	ODT *m_ODT = new ODT(nullptr, &m_pointGrey, &m_scanControl);
+	ODT *m_ODT = nullptr;
 
 	PLOT_SETTINGS m_BrillouinPlot;
 	PLOT_SETTINGS m_ODTPlot;

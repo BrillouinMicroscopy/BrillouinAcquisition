@@ -81,6 +81,8 @@ public:
 	void setPosition(POINT3 position);
 	POINT3 getPosition();
 
+	void setVoltage(VOLTAGE2 voltage);
+
 	// NIDAQ specific function to move position to center of field of view
 	void centerPosition();
 	

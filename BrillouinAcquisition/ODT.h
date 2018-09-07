@@ -2,7 +2,7 @@
 #define ODT_H
 
 #include "PointGrey.h"
-#include "scancontrol.h"
+#include "NIDAQ.h"
 #include "circularBuffer.h"
 
 enum ODT_STATES {
@@ -35,7 +35,7 @@ class ODT : public QObject {
 	Q_OBJECT
 
 public:
-	ODT(QObject *parent, PointGrey **pointGrey, ScanControl **scanControl);
+	ODT(QObject *parent, PointGrey **pointGrey, NIDAQ **nidaq);
 	~ODT();
 	bool m_abortAcquisition = false;
 	bool m_abortAlignment = false;
@@ -64,7 +64,7 @@ private:
 	};
 	ODT_SETTINGS m_algnSettings;
 	PointGrey **m_pointGrey;
-	ScanControl **m_scanControl;
+	NIDAQ **m_NIDAQ;
 	bool m_acqRunning{ false };				// is acquisition currently running
 	bool m_algnRunning{ false };			// is alignment currently running
 

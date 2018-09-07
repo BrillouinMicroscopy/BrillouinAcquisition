@@ -1498,7 +1498,7 @@ border: none;</string>
               </widget>
              </item>
              <item>
-              <widget class="QTabWidget" name="tabWidget">
+              <widget class="QTabWidget" name="acquisitionModeTabs">
                <property name="styleSheet">
                 <string notr="true">QTabWidget::pane {
 	border: 0.5px solid #E4E4E4;
@@ -1528,9 +1528,9 @@ QTabBar::tab:!selected {
 }</string>
                </property>
                <property name="currentIndex">
-                <number>1</number>
+                <number>0</number>
                </property>
-               <widget class="QWidget" name="tab">
+               <widget class="QWidget" name="Brillouin">
                 <attribute name="title">
                  <string>Brillouin</string>
                 </attribute>
@@ -1569,7 +1569,7 @@ QTabBar::tab:!selected {
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>325</width>
+                      <width>431</width>
                       <height>775</height>
                      </rect>
                     </property>
@@ -2419,7 +2419,7 @@ border: none;</string>
                  </item>
                 </layout>
                </widget>
-               <widget class="QWidget" name="tab_2">
+               <widget class="QWidget" name="ODT">
                 <attribute name="title">
                  <string>ODT</string>
                 </attribute>
@@ -2458,7 +2458,7 @@ border: none;</string>
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>431</width>
+                      <width>325</width>
                       <height>865</height>
                      </rect>
                     </property>
@@ -2810,7 +2810,7 @@ border: none;</string>
                  </item>
                 </layout>
                </widget>
-               <widget class="QWidget" name="tab_3">
+               <widget class="QWidget" name="Fluorescence">
                 <attribute name="title">
                  <string>Fluorescence</string>
                 </attribute>
