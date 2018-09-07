@@ -320,13 +320,17 @@ void BrillouinAcquisition::cameraOptionsChanged(CAMERA_OPTIONS options) {
 }
 
 void BrillouinAcquisition::cameraODTOptionsChanged(CAMERA_OPTIONS options) {
+	m_cameraOptionsODT.exposureTimeLimits = options.exposureTimeLimits;
+
 	m_cameraOptionsODT.ROIHeightLimits = options.ROIHeightLimits;
 	m_cameraOptionsODT.ROIWidthLimits = options.ROIWidthLimits;
 
 	m_ODTPlot.plotHandle->xAxis->setRange(QCPRange(1, options.ROIWidthLimits[1]));
 	m_ODTPlot.plotHandle->yAxis->setRange(QCPRange(1, options.ROIHeightLimits[1]));
 
-	addListToComboBox(ui->cycleModeODT, options.cycleModes);
+	ui->exposureTimeODT->setMinimum(m_cameraOptionsODT.exposureTimeLimits[0]);
+	ui->exposureTimeODT->setMaximum(m_cameraOptionsODT.exposureTimeLimits[1]);
+
 	addListToComboBox(ui->pixelEncodingODT, options.pixelEncodings);
 }
 
@@ -472,7 +476,6 @@ void BrillouinAcquisition::cameraODTSettingsChanged(CAMERA_SETTINGS settings) {
 	ui->ROITopODT->setValue(settings.roi.top);
 	ui->ROIHeightODT->setValue(settings.roi.height);
 
-	ui->cycleModeODT->setCurrentText(QString::fromStdWString(settings.readout.cycleMode));
 	ui->pixelEncodingODT->setCurrentText(QString::fromStdWString(settings.readout.pixelEncoding));
 }
 

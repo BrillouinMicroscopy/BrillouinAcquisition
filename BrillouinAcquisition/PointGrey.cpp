@@ -7,27 +7,22 @@ PointGrey::~PointGrey() {
 
 void PointGrey::connectDevice() {
 	if (!m_isConnected) {
-		m_system = System::GetInstance();
-		m_cameraList = m_system->GetCameras();
-
-		int numCameras = m_cameraList.GetSize();
+		
+		unsigned int numCameras;
+		m_busManager.GetNumOfCameras(&numCameras);
 
 		if (numCameras > 0) {
 			// Select camera
-			m_camera = m_cameraList.GetByIndex(0);
 
-			// Initialize camera
-			m_camera->Init();
+			m_busManager.GetCameraFromIndex(0, &m_guid);
+
+			m_camera.Connect(&m_guid);
 
 			m_isConnected = true;
 			
 			readOptions();
 			readSettings();
 
-		} else {
-			m_cameraList.Clear();
-			// Release system
-			m_system->ReleaseInstance();
 		}
 	}
 
@@ -41,16 +36,7 @@ void PointGrey::disconnectDevice() {
 		}
 
 		// Deinitialize camera
-		m_camera->DeInit();
-
-		// Release reference to the camera
-		m_camera = NULL;
-
-		// Clear camera list before releasing system
-		m_cameraList.Clear();
-
-		// Release system
-		m_system->ReleaseInstance();
+		m_camera.Disconnect();
 
 		m_isConnected = false;
 	}
@@ -60,63 +46,84 @@ void PointGrey::disconnectDevice() {
 
 void PointGrey::readOptions() {
 
-	m_options.pixelEncodings = { L"Mono8", L"Mono12 Packed", L"Mono12 Packed (IIDC-msb)", L"Mono16" };
-	m_options.cycleModes = { L"Continuous", L"Fixed single", L"Fixed multiple" };
+	Format7Info fmt7Info;
+	bool supported;
+	fmt7Info.mode = FlyCapture2::MODE_0;
+	m_camera.GetFormat7Info(&fmt7Info, &supported);
 
-	m_options.exposureTimeLimits[0] = 1e-6*m_camera->ExposureTime.GetMin();
-	m_options.exposureTimeLimits[1] = 1e-6*m_camera->ExposureTime.GetMax();
+	m_options.pixelEncodings = { L"Raw8", L"Mono8", L"Mono12", L"Mono16" };
+	//m_options.cycleModes = { L"Continuous", L"Fixed single", L"Fixed multiple" };
 
-	int64_t tmp1 = m_camera->WidthMax();
-	int64_t tmp2 = m_camera->WidthMax.GetMax();
+	m_options.exposureTimeLimits[0] = 1e-3;
+	m_options.exposureTimeLimits[1] = 1;
 
-	m_options.ROIWidthLimits[0] = 0;
-	m_options.ROIWidthLimits[1] = m_camera->WidthMax();
+	m_options.ROIWidthLimits[0] = 1;
+	m_options.ROIWidthLimits[1] = fmt7Info.maxWidth;
 
-	m_options.ROIHeightLimits[0] = 0;
-	m_options.ROIHeightLimits[1] = m_camera->HeightMax();
+	m_options.ROIHeightLimits[0] = 1;
+	m_options.ROIHeightLimits[1] = fmt7Info.maxHeight;
 
 	emit(optionsChanged(m_options));
 }
 
 CAMERA_SETTINGS PointGrey::readSettings() {
+
+	// Get the camera configuration
+	FC2Config config;
+	m_camera.GetConfiguration(&config);
+
+	/*
+	* Get the exposure time
+	*/
+	Property prop;
+	//Define the property to adjust.
+	prop.type = SHUTTER;
+	//Set the property.
+	m_camera.GetProperty(&prop);
 	// general settings
-	m_settings.exposureTime = 1e-6*m_camera->ExposureTime.GetValue();
+	m_settings.exposureTime = 1e-3*prop.absValue;	// [s] exposure time
 
-	//// ROI
-	m_settings.roi.height = m_camera->Height.GetValue();
-	m_settings.roi.width = m_camera->Width.GetValue();
-	m_settings.roi.left = m_camera->OffsetX.GetValue();
-	m_settings.roi.top = m_camera->OffsetY.GetValue();
 
-	//// readout parameters
-	PixelFormatEnums pixelFormat = m_camera->PixelFormat.GetValue();
-	switch (pixelFormat) {
-		case PixelFormat_Mono8:
+	// Create a Format7 Configuration
+	Format7ImageSettings fmt7ImageSettings;
+	unsigned int packetSize;
+	float speed;
+	m_camera.GetFormat7Configuration(&fmt7ImageSettings, &packetSize, &speed);
+
+	// ROI
+	m_settings.roi.height = fmt7ImageSettings.height;
+	m_settings.roi.width = fmt7ImageSettings.width;
+	m_settings.roi.left = fmt7ImageSettings.offsetX;
+	m_settings.roi.top = fmt7ImageSettings.offsetY;
+
+	// readout parameters
+	switch (fmt7ImageSettings.pixelFormat) {
+		case PIXEL_FORMAT_RAW8 :
+			m_settings.readout.pixelEncoding = L"Raw8";
+			break;
+		case PIXEL_FORMAT_MONO8:
 			m_settings.readout.pixelEncoding = L"Mono8";
 			break;
-		case PixelFormat_Mono12p:
-			m_settings.readout.pixelEncoding = L"Mono12 Packed";
+		case PIXEL_FORMAT_MONO12:
+			m_settings.readout.pixelEncoding = L"Mono12";
 			break;
-		case PixelFormat_Mono12Packed:
-			m_settings.readout.pixelEncoding = L"Mono12 Packed (IIDC-msb)";
-			break;
-		case PixelFormat_Mono16:
+		case PIXEL_FORMAT_MONO16:
 			m_settings.readout.pixelEncoding = L"Mono16";
 			break;
 	}
 
-	AcquisitionModeEnums cycleMode = m_camera->AcquisitionMode.GetValue();
-	switch (cycleMode) {
-		case AcquisitionMode_Continuous:
-			m_settings.readout.cycleMode = L"Continuous";
-			break;
-		case AcquisitionMode_SingleFrame:
-			m_settings.readout.cycleMode = L"Fixed single";
-			break;
-		case AcquisitionMode_MultiFrame:
-			m_settings.readout.cycleMode = L"Fixed multiple";
-			break;
-	}
+	//AcquisitionModeEnums cycleMode = m_camera->AcquisitionMode.GetValue();
+	//switch (cycleMode) {
+	//	case AcquisitionMode_Continuous:
+	//		m_settings.readout.cycleMode = L"Continuous";
+	//		break;
+	//	case AcquisitionMode_SingleFrame:
+	//		m_settings.readout.cycleMode = L"Fixed single";
+	//		break;
+	//	case AcquisitionMode_MultiFrame:
+	//		m_settings.readout.cycleMode = L"Fixed multiple";
+	//		break;
+	//}
 
 	// emit signal that settings changed
 	emit(settingsChanged(m_settings));
@@ -132,46 +139,72 @@ void PointGrey::setSettings() {
 	/*
 	 * Set acquisition to continuous
 	 */
-	m_camera->AcquisitionMode.SetValue(AcquisitionModeEnums::AcquisitionMode_Continuous);
-
-	/*
-	* Set pixel format to Mono8
-	*/
-	// Possible values: PixelFormat_Mono8, PixelFormat_Mono12p, PixelFormat_Mono12packed, PixelFormat_Mono16 
-	m_camera->PixelFormat.SetValue(PixelFormatEnums::PixelFormat_Mono8);
+	//m_camera->AcquisitionMode.SetValue(AcquisitionModeEnums::AcquisitionMode_Continuous);
 
 	/*
 	 * Set the exposure time
 	 */
-	m_camera->ExposureAuto.SetValue(ExposureAutoEnums::ExposureAuto_Off);
-	m_camera->ExposureMode.SetValue(ExposureModeEnums::ExposureMode_Timed);
-
-	// exposure time in microseconds
-	m_settings.exposureTime = 0.001;
-	m_camera->ExposureTime.SetValue(1e6*m_settings.exposureTime);
+	Property prop;
+	//Define the property to adjust.
+	prop.type = SHUTTER;
+	//Ensure the property is on.
+	prop.onOff = true;
+	// Ensure auto - adjust mode is off.
+	prop.autoManualMode = false;
+	//Ensure the property is set up to use absolute value control.
+	prop.absControl = true;
+	//Set the absolute value of shutter to 1 ms.
+	m_settings.exposureTime = 0.001;	// [s]
+	prop.absValue = 1e3*m_settings.exposureTime;
+	//Set the property.
+	m_camera.SetProperty(&prop);
 
 	/*
-	* Set region of interest
-	*/
+	 * Set ROI and pixel format
+	 */
+	// Create a Format7 Configuration
+	Format7ImageSettings fmt7ImageSettings;
+
+	Mode fmt7Mode = MODE_0;
+	fmt7ImageSettings.mode = fmt7Mode;
+	// Possible values: PIXEL_FORMAT_RAW8, PIXEL_FORMAT_MONO8, PIXEL_FORMAT_MONO12, PIXEL_FORMAT_MONO16
+	fmt7ImageSettings.pixelFormat = PIXEL_FORMAT_RAW8;
+
 	// Offset x to minimum
-	m_settings.roi.left = m_camera->OffsetX.GetMin();
-	m_camera->OffsetX.SetValue(m_settings.roi.left);
+	m_settings.roi.left = 0;
+	fmt7ImageSettings.offsetX = m_settings.roi.left;
 	// Offset y to minimum
-	m_settings.roi.top = m_camera->OffsetY.GetMin();
-	m_camera->OffsetY.SetValue(m_settings.roi.top);
+	m_settings.roi.top = 0;
+	fmt7ImageSettings.offsetY = m_settings.roi.top;
 	// Width to maximum
-	m_settings.roi.width = m_camera->Width.GetMax();
-	m_camera->Width.SetValue(m_settings.roi.width);
+	m_settings.roi.width = m_options.ROIWidthLimits[1];
+	fmt7ImageSettings.width = m_settings.roi.width;
 	// Height to maximum
-	m_settings.roi.height = m_camera->Height.GetMax();
-	m_camera->Height.SetValue(m_settings.roi.height);
+	m_settings.roi.height = m_options.ROIHeightLimits[1];
+	fmt7ImageSettings.height = m_settings.roi.height;
 
-	m_camera->TriggerMode.SetValue(TriggerModeEnums::TriggerMode_Off);
+	Format7PacketInfo fmt7PacketInfo;
+	bool valid;
+	m_camera.ValidateFormat7Settings(&fmt7ImageSettings, &valid, &fmt7PacketInfo);
+	if (valid) {
+		m_camera.SetFormat7Configuration(&fmt7ImageSettings, fmt7PacketInfo.recommendedBytesPerPacket);
+	}
 
-	m_camera->TriggerSource.SetValue(TriggerSourceEnums::TriggerSource_Software);
+	/*
+	 * Set trigger mode
+	 */
+	TriggerMode triggerMode;
+	m_camera.GetTriggerMode(&triggerMode);
+	triggerMode.onOff = true;
+	triggerMode.source = 7;	// 7 for software trigger
+	triggerMode.mode = 0;
+	triggerMode.parameter = 0;
 
-	m_camera->TriggerMode.SetValue(TriggerModeEnums::TriggerMode_On);
+	m_camera.SetTriggerMode(&triggerMode);
 
+	PollForTriggerReady(&m_camera);
+
+	// Read the settings back
 	readSettings();
 }
 
@@ -184,9 +217,9 @@ void PointGrey::startPreview(CAMERA_SETTINGS settings) {
 
 void PointGrey::preparePreview() {
 	// always use full camera image for live preview
-	m_settings.roi.width = 1280;
+	m_settings.roi.width = m_options.ROIWidthLimits[1];
 	m_settings.roi.left = 1;
-	m_settings.roi.height = 1024;
+	m_settings.roi.height = m_options.ROIHeightLimits[1];
 	m_settings.roi.top = 1;
 
 	setSettings();
@@ -196,7 +229,7 @@ void PointGrey::preparePreview() {
 	previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
-	m_camera->BeginAcquisition();
+	m_camera.StartCapture();
 
 	emit(s_previewRunning(true));
 }
@@ -208,7 +241,7 @@ void PointGrey::stopPreview() {
 }
 
 void PointGrey::cleanupAcquisition() {
-	m_camera->EndAcquisition();
+	m_camera.StopCapture();
 }
 
 void PointGrey::getImageForPreview() {
@@ -226,17 +259,53 @@ void PointGrey::getImageForPreview() {
 
 void PointGrey::acquireImage(unsigned char* buffer) {
 
-	m_camera->TriggerSoftware();
+	PollForTriggerReady(&m_camera);
 
-	ImagePtr pResultImage = m_camera->GetNextImage();
+	// Fire the software trigger
+	FireSoftwareTrigger(&m_camera);
 
-	if (!pResultImage->IsIncomplete()) {
-		ImagePtr convertedImage = pResultImage->Convert(PixelFormat_Mono8);
+	Image rawImage;
+	m_camera.RetrieveBuffer(&rawImage);
 
-		unsigned char* data = static_cast<unsigned char*>(convertedImage->GetData());
+	// Convert the raw image
+	Image convertedImage;
+	rawImage.Convert(PIXEL_FORMAT_RAW8, &convertedImage);
 
+	// Get access to raw data
+	unsigned char* data = static_cast<unsigned char*>(convertedImage.GetData());
+
+	// Copy data to preview buffer
+	if (data != NULL) {
 		memcpy(buffer, data, m_settings.roi.width*m_settings.roi.height);
 	}
 
-	pResultImage->Release();
 };
+
+bool PointGrey::PollForTriggerReady(Camera *camera) {
+	const unsigned int k_softwareTrigger = 0x62C;
+	Error error;
+	unsigned int regVal = 0;
+
+	do {
+		error = camera->ReadRegister(k_softwareTrigger, &regVal);
+		if (error != PGRERROR_OK) {
+			return false;
+		}
+
+	} while ((regVal >> 31) != 0);
+
+	return true;
+}
+
+bool PointGrey::FireSoftwareTrigger(Camera *camera) {
+	const unsigned int k_softwareTrigger = 0x62C;
+	const unsigned int k_fireVal = 0x80000000;
+	Error error;
+
+	error = camera->WriteRegister(k_softwareTrigger, k_fireVal);
+	if (error != PGRERROR_OK) {
+		return false;
+	}
+
+	return true;
+}

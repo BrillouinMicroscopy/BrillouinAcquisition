@@ -103,7 +103,7 @@ QTabBar::tab:!selected {
 }</string>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>3</number>
          </property>
          <widget class="QWidget" name="cameraTab">
           <property name="sizePolicy">
@@ -168,7 +168,7 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>446</width>
+                <width>429</width>
                 <height>475</height>
                </rect>
               </property>
@@ -745,7 +745,7 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>285</width>
+                <width>281</width>
                 <height>340</height>
                </rect>
               </property>
@@ -799,7 +799,7 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>285</width>
+                <width>281</width>
                 <height>440</height>
                </rect>
               </property>
@@ -1068,8 +1068,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>285</width>
-                <height>340</height>
+                <width>446</width>
+                <height>464</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -1263,7 +1263,7 @@ QTabBar::tab:!selected {
                  <x>10</x>
                  <y>160</y>
                  <width>401</width>
-                 <height>101</height>
+                 <height>71</height>
                 </rect>
                </property>
                <property name="title">
@@ -1280,19 +1280,6 @@ QTabBar::tab:!selected {
                 </property>
                 <property name="text">
                  <string>Pixel encoding</string>
-                </property>
-               </widget>
-               <widget class="QLabel" name="cycleModeODTLabel">
-                <property name="geometry">
-                 <rect>
-                  <x>10</x>
-                  <y>60</y>
-                  <width>131</width>
-                  <height>30</height>
-                 </rect>
-                </property>
-                <property name="text">
-                 <string>Cycle mode</string>
                 </property>
                </widget>
                <widget class="QComboBox" name="pixelEncodingODT">
@@ -1320,29 +1307,6 @@ QTabBar::tab:!selected {
                 <item>
                  <property name="text">
                   <string>Mono16</string>
-                 </property>
-                </item>
-               </widget>
-               <widget class="QComboBox" name="cycleModeODT">
-                <property name="geometry">
-                 <rect>
-                  <x>160</x>
-                  <y>60</y>
-                  <width>231</width>
-                  <height>30</height>
-                 </rect>
-                </property>
-                <property name="currentIndex">
-                 <number>0</number>
-                </property>
-                <item>
-                 <property name="text">
-                  <string>Fixed</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Continuous</string>
                  </property>
                 </item>
                </widget>
@@ -1569,7 +1533,7 @@ QTabBar::tab:!selected {
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>431</width>
+                      <width>427</width>
                       <height>775</height>
                      </rect>
                     </property>
@@ -2458,7 +2422,7 @@ border: none;</string>
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>325</width>
+                      <width>321</width>
                       <height>865</height>
                      </rect>
                     </property>
@@ -2973,7 +2937,7 @@ border: none;</string>
      <x>0</x>
      <y>0</y>
      <width>1318</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">

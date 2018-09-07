@@ -3,25 +3,20 @@
 
 #include <gsl/gsl>
 
-#include "Spinnaker.h"
-#include "SpinGenApi/SpinnakerGenApi.h"
+#include "FlyCapture2.h"
 
 #include "cameraParameters.h"
 #include "previewBuffer.h"
 
-using namespace Spinnaker;
-using namespace Spinnaker::GenApi;
-using namespace Spinnaker::GenICam;
+using namespace FlyCapture2;
 
 class PointGrey : public QObject {
 	Q_OBJECT
 
 private:
-
-	SystemPtr m_system{ NULL };
-	CameraList m_cameraList;
-
-	CameraPtr m_camera{ NULL };
+	BusManager m_busManager;
+	PGRGuid m_guid;
+	Camera m_camera;
 
 	bool m_isConnected{ false };
 
@@ -32,6 +27,10 @@ private:
 	void cleanupAcquisition();
 
 	void acquireImage(unsigned char * buffer);
+
+	bool PollForTriggerReady(Camera * camera);
+
+	bool FireSoftwareTrigger(Camera * camera);
 
 	void readOptions();
 	CAMERA_SETTINGS readSettings();
