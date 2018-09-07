@@ -166,6 +166,12 @@ void PointGrey::setSettings() {
 	m_settings.roi.height = m_camera->Height.GetMax();
 	m_camera->Height.SetValue(m_settings.roi.height);
 
+	m_camera->TriggerMode.SetValue(TriggerModeEnums::TriggerMode_Off);
+
+	m_camera->TriggerSource.SetValue(TriggerSourceEnums::TriggerSource_Software);
+
+	m_camera->TriggerMode.SetValue(TriggerModeEnums::TriggerMode_On);
+
 	readSettings();
 }
 
@@ -219,6 +225,8 @@ void PointGrey::getImageForPreview() {
 }
 
 void PointGrey::acquireImage(unsigned char* buffer) {
+
+	m_camera->TriggerSoftware();
 
 	ImagePtr pResultImage = m_camera->GetNextImage();
 
