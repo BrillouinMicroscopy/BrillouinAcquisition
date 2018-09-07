@@ -173,6 +173,10 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<std::vector<POINT3>>("std::vector<POINT3>");
 	qRegisterMetaType<BOUNDS>("BOUNDS");
 	qRegisterMetaType<QMouseEvent*>("QMouseEvent*");
+	qRegisterMetaType<VOLTAGE2>("VOLTAGE2");
+	qRegisterMetaType<ODT_MODES>("ODT_MODES");
+	qRegisterMetaType<ODT_SETTING>("ODT_SETTING");
+	qRegisterMetaType<ODT_SETTINGS>("ODT_SETTINGS");
 	
 
 	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
@@ -191,6 +195,8 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	m_acquisitionThread.startWorker(m_andor);
 	// start acquisition thread
 	m_acquisitionThread.startWorker(m_acquisition);
+	// start ODT thread
+	m_acquisitionThread.startWorker(m_ODT);
 
 	// set up the QCPColorMap:
 	m_BrillouinPlot = {
@@ -230,6 +236,29 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		this,
 		[this](ODT_SETTINGS settings) { plotODTVoltages(settings, ODT_MODES::ALGN); }
 	);
+
+	connection = QWidget::connect(
+		m_ODT,
+		&ODT::s_algnRunning,
+		this,
+		[this](bool isRunning) { showODTAlgnRunning(isRunning); }
+	);
+
+	connection = QWidget::connect(
+		m_ODT,
+		&ODT::s_acqRunning,
+		this,
+		[this](bool isRunning) { showODTAcqRunning(isRunning); }
+	);
+
+	connection = QWidget::connect(
+		m_ODT,
+		&ODT::s_mirrorVoltageChanged,
+		this,
+		[this](VOLTAGE2 voltage, ODT_MODES mode) { plotODTVoltage(voltage, mode); }
+	);
+
+	QObject::dumpObjectInfo();
 
 	m_ODT->initialize();
 
@@ -517,6 +546,9 @@ void BrillouinAcquisition::initializeODTVoltagePlot(QCustomPlot *plot) {
 	plot->addGraph();
 	plot->graph(0)->setLineStyle(QCPGraph::LineStyle::lsNone);
 	plot->graph(0)->setScatterStyle(QCPScatterStyle::ScatterShape::ssCircle);
+	plot->addGraph();
+	plot->graph(1)->setLineStyle(QCPGraph::LineStyle::lsNone);
+	plot->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, Qt::red, 10));
 	plot->replot();
 }
 
@@ -529,14 +561,26 @@ void BrillouinAcquisition::on_alignmentUR_ODT_valueChanged(double voltage) {
 }
 
 void BrillouinAcquisition::on_alignmentNumber_ODT_valueChanged(int number) {
-	m_ODT->setSettings(ODT_MODES::ALGN, ODT_SETTING::NRPOINTS, number);
+	QMetaObject::invokeMethod(m_ODT, "setSettings", Qt::AutoConnection,
+		Q_ARG(ODT_MODES, ODT_MODES::ALGN), Q_ARG(ODT_SETTING, ODT_SETTING::NRPOINTS), Q_ARG(double, (double)number));
 }
 
 void BrillouinAcquisition::on_alignmentRate_ODT_valueChanged(double rate) {
-	m_ODT->setSettings(ODT_MODES::ALGN, ODT_SETTING::SCANRATE, rate);
+	QMetaObject::invokeMethod(m_ODT, "setSettings", Qt::AutoConnection,
+		Q_ARG(ODT_MODES, ODT_MODES::ALGN), Q_ARG(ODT_SETTING, ODT_SETTING::SCANRATE), Q_ARG(double, rate));
 }
 
 void BrillouinAcquisition::on_alignmentStartODT_clicked() {
+	QMetaObject::invokeMethod(m_ODT, "startAlignment", Qt::AutoConnection);
+}
+
+void BrillouinAcquisition::showODTAlgnRunning(bool isRunning) {
+	if (isRunning) {
+		ui->alignmentStartODT->setText("Stop");
+	}
+	else {
+		ui->alignmentStartODT->setText("Start");
+	}
 }
 
 void BrillouinAcquisition::on_acquisitionUR_ODT_valueChanged(double voltage) {
@@ -552,6 +596,19 @@ void BrillouinAcquisition::on_acquisitionRate_ODT_valueChanged(double rate) {
 }
 
 void BrillouinAcquisition::on_acquisitionStartODT_clicked() {
+	if (!m_ODT->isAcqRunning()) {
+		QMetaObject::invokeMethod(m_ODT, "startAcquisition", Qt::AutoConnection);
+	} else {
+		m_ODT->abortAcquisition();
+	}
+}
+
+void BrillouinAcquisition::showODTAcqRunning(bool isRunning) {
+	if (isRunning) {
+		ui->acquisitionStartODT->setText("Cancel");
+	} else {
+		ui->acquisitionStartODT->setText("Start");
+	}
 }
 
 void BrillouinAcquisition::plotODTVoltages(ODT_SETTINGS settings, ODT_MODES mode) {
@@ -597,6 +654,23 @@ void BrillouinAcquisition::plotODTVoltages(ODT_SETTINGS settings, ODT_MODES mode
 	
 	// set the aspect ratio
 	//plot->yAxis->setScaleRatio(plot->xAxis, 1.0); // somehow makes it worse
+	plot->replot();
+}
+
+void BrillouinAcquisition::plotODTVoltage(VOLTAGE2 voltage, ODT_MODES mode) {
+	QCustomPlot *plot;
+	switch (mode) {
+		case ODT_MODES::ALGN:
+			plot = ui->alignmentVoltagesODT;
+			break;
+		case ODT_MODES::ACQ:
+			plot = ui->acquisitionVoltagesODT;
+			break;
+		default:
+			return;
+	}
+	QVector<double> Ux{ voltage.Ux }, Uy{ voltage.Uy };
+	plot->graph(1)->setData(Ux, Uy);
 	plot->replot();
 }
 

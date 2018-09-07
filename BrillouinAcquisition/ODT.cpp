@@ -19,6 +19,10 @@ bool ODT::isAlgnRunning() {
 	return m_algnRunning;
 }
 
+void ODT::abortAcquisition() {
+	m_abortAcquisition = true;
+}
+
 void ODT::setAlgnSettings(ODT_SETTINGS settings) {
 	m_algnSettings = settings;
 	calculateVoltages(ALGN);
@@ -47,11 +51,22 @@ void ODT::setSettings(ODT_MODES mode, ODT_SETTING settingType, double value) {
 		case NRPOINTS:
 			settings->numberPoints = value;
 			calculateVoltages(mode);
+			if (mode == ALGN && m_algnRunning) {
+				m_algnTimer->start(1e3 / (m_algnSettings.scanRate * m_algnSettings.numberPoints));
+			}
 			break;
 		case SCANRATE:
 			settings->scanRate = value;
+			if (mode == ALGN && m_algnRunning) {
+				m_algnTimer->start(1e3 / (m_algnSettings.scanRate * m_algnSettings.numberPoints));
+			}
 			break;
 	}
+}
+
+void ODT::init() {
+	m_algnTimer = new QTimer();
+	QMetaObject::Connection connection = QWidget::connect(m_algnTimer, SIGNAL(timeout()), this, SLOT(nextAlgnPosition()));
 }
 
 void ODT::initialize() {
@@ -59,11 +74,79 @@ void ODT::initialize() {
 	calculateVoltages(ACQ);
 }
 
+void ODT::startAcquisition() {
+	if (!m_acqRunning) {
+		// start acquisition
+		m_acqRunning = true;
+		m_abortAcquisition = false;
+		emit(s_acqRunning(m_acqRunning));
+		acquisition();
+	} else {
+		// abort acquisition
+		m_acqRunning = false;
+		emit(s_acqRunning(m_acqRunning));
+	}
+}
+
+void ODT::acquisition() {
+	if (m_acqRunning) {
+		VOLTAGE2 voltage;
+		for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
+			if (m_abortAcquisition) {
+				break;
+			}
+			voltage = m_acqSettings.voltages[i];
+			// set new voltage to galvo mirrors
+
+			// announce mirror voltage
+			emit(s_mirrorVoltageChanged(voltage, ACQ));
+
+			// wait appropriate time
+			Sleep(10);
+
+			// trigger image acquisition
+		}
+
+		// read images from camera
+
+		// store images
+		m_acqRunning = false;
+	}
+	emit(s_acqRunning(m_algnRunning));
+}
+
+void ODT::startAlignment() {
+	if (!m_algnRunning) {
+		m_algnRunning = true;
+		if (!m_algnTimer->isActive()) {
+			m_algnTimer->start(1e3 / (m_algnSettings.scanRate * m_algnSettings.numberPoints));
+		}
+	} else {
+		m_algnRunning = false;
+		if (m_algnTimer->isActive()) {
+			m_algnTimer->stop();
+		}
+	}
+	emit(s_algnRunning(m_algnRunning));
+}
+
+void ODT::nextAlgnPosition() {
+	if (++m_algnPositionIndex >= m_algnSettings.numberPoints) {
+		m_algnPositionIndex = 0;
+	}
+	VOLTAGE2 voltage = m_algnSettings.voltages[m_algnPositionIndex];
+	// set new voltage to galvo mirrors
+
+	// announce mirror voltage
+	emit(s_mirrorVoltageChanged(voltage, ALGN));
+}
+
 void ODT::calculateVoltages(ODT_MODES mode) {
 	if (mode == ALGN) {
 		double Ux{ 0 };
 		double Uy{ 0 };
-		std::vector<double> theta = simplemath::linspace<double>(0, 360, m_algnSettings.numberPoints);
+		std::vector<double> theta = simplemath::linspace<double>(0, 360, m_algnSettings.numberPoints + 1);
+		theta.erase(theta.end() - 1);
 		m_algnSettings.voltages.resize(theta.size());
 		for (gsl::index i{ 0 }; i < theta.size(); i++) {
 			Ux = m_algnSettings.radialVoltage * cos(theta[i]* M_PI / 180);
@@ -95,7 +178,7 @@ void ODT::calculateVoltages(ODT_MODES mode) {
 
 		theta = simplemath::linspace<double>(0, 2 * M_PI, n3);
 		theta.erase(theta.begin());
-		theta.erase(theta.end()-1);
+		theta.erase(theta.end() - 1);
 		for (gsl::index i{ 0 }; i < theta.size(); i++) {
 
 			double r = sqrt(abs(theta[i]));

@@ -745,8 +745,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>446</width>
-                <height>475</height>
+                <width>285</width>
+                <height>340</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -799,8 +799,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>446</width>
-                <height>475</height>
+                <width>285</width>
+                <height>440</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -1068,8 +1068,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>446</width>
-                <height>475</height>
+                <width>285</width>
+                <height>340</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -1569,7 +1569,7 @@ QTabBar::tab:!selected {
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>431</width>
+                      <width>325</width>
                       <height>775</height>
                      </rect>
                     </property>
@@ -2457,7 +2457,7 @@ border: none;</string>
                     <property name="geometry">
                      <rect>
                       <x>0</x>
-                      <y>-33</y>
+                      <y>0</y>
                       <width>431</width>
                       <height>865</height>
                      </rect>
@@ -2579,13 +2579,13 @@ border: none;</string>
                        <double>0.000000000000000</double>
                       </property>
                       <property name="maximum">
-                       <double>1000.000000000000000</double>
+                       <double>5.000000000000000</double>
                       </property>
                       <property name="singleStep">
-                       <double>10.000000000000000</double>
+                       <double>0.100000000000000</double>
                       </property>
                       <property name="value">
-                       <double>100.000000000000000</double>
+                       <double>1.000000000000000</double>
                       </property>
                      </widget>
                      <widget class="QPushButton" name="alignmentStartODT">

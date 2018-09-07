@@ -24,10 +24,10 @@ enum ODT_MODES {
 };
 
 struct ODT_SETTINGS {
-	double radialVoltage{ 0.1 };	// maximum voltage for the galvo scanners
-	int numberPoints{ 30 };			// number of points
-	double scanRate{ 100 };			// scan rate
-	std::vector<VOLTAGE2> voltages;	// voltages to apply
+	double radialVoltage{ 0.1 };	// [V]	maximum voltage for the galvo scanners
+	int numberPoints{ 30 };			// [1]	number of points
+	double scanRate{ 1 };			// [Hz]	scan rate, for alignment: rate for one rotation, for acquisition: rate for one step
+	std::vector<VOLTAGE2> voltages;	// [V]	voltages to apply
 	CAMERA_SETTINGS camera;
 };
 
@@ -41,17 +41,18 @@ public:
 	bool m_abortAlignment = false;
 	bool isAcqRunning();
 	bool isAlgnRunning();
+	void abortAcquisition();
 	ODT_SETTINGS getAcqSettings();
 	ODT_SETTINGS getAlgnSettings();
 	void setAlgnSettings(ODT_SETTINGS);
 	void setAcqSettings(ODT_SETTINGS);
-	void setSettings(ODT_MODES, ODT_SETTING, double);
 
 public slots:
-	void init() {};
+	void init();
 	void initialize();
-	void startAcquisition(ODT_SETTINGS acqSettings) {};
-	void startAlignment(ODT_SETTINGS algnSettings) {};
+	void startAcquisition();
+	void startAlignment();
+	void setSettings(ODT_MODES, ODT_SETTING, double);
 
 private:
 	ODT_SETTINGS m_acqSettings{
@@ -66,10 +67,16 @@ private:
 	ScanControl **m_scanControl;
 	bool m_acqRunning{ false };				// is acquisition currently running
 	bool m_algnRunning{ false };			// is alignment currently running
-	void abortAcquisition();
-	void abortAlignment();
+
+	int m_algnPositionIndex{ 0 };
+
+	QTimer *m_algnTimer = nullptr;
 
 	void calculateVoltages(ODT_MODES);
+
+private slots:
+	void acquisition();
+	void nextAlgnPosition();
 
 signals:
 	void s_acqRunning(bool);					// is acquisition running
@@ -77,6 +84,7 @@ signals:
 	void s_acqProgress(int, double, int);		// progress in percent and the remaining time in seconds
 	void s_algnRunning(bool);					// is alignment running
 	void s_algnSettingsChanged(ODT_SETTINGS);	// emit the alignment voltages
+	void s_mirrorVoltageChanged(VOLTAGE2, ODT_MODES);		// emit the mirror voltage
 };
 
 #endif //ODT_H

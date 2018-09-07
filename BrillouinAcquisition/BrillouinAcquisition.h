@@ -60,6 +60,10 @@ Q_DECLARE_METATYPE(POINT3);
 Q_DECLARE_METATYPE(std::vector<POINT3>);
 Q_DECLARE_METATYPE(BOUNDS);
 Q_DECLARE_METATYPE(QMouseEvent*);
+Q_DECLARE_METATYPE(VOLTAGE2);
+Q_DECLARE_METATYPE(ODT_MODES);
+Q_DECLARE_METATYPE(ODT_SETTING);
+Q_DECLARE_METATYPE(ODT_SETTINGS);
 
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
@@ -137,6 +141,7 @@ private slots:
 	void sensorTemperatureChanged(SensorTemperature);
 	void initializeODTVoltagePlot(QCustomPlot *plot);
 	void plotODTVoltages(ODT_SETTINGS settings, ODT_MODES mode);
+	void plotODTVoltage(VOLTAGE2 voltage, ODT_MODES mode);
 	void cameraOptionsChanged(CAMERA_OPTIONS);
 	void cameraODTOptionsChanged(CAMERA_OPTIONS options);
 	void showAcqPosition(POINT3, int);
@@ -158,6 +163,9 @@ private slots:
 	void on_acquisitionNumber_ODT_valueChanged(int);
 	void on_acquisitionRate_ODT_valueChanged(double);
 	void on_acquisitionStartODT_clicked();
+
+	void showODTAlgnRunning(bool);
+	void showODTAcqRunning(bool);
 
 	QString formatSeconds(int seconds);
 
