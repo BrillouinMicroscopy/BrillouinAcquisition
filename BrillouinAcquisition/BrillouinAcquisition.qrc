@@ -1,10 +1,26 @@
 <RCC>
     <qresource prefix="/BrillouinAcquisition">
-        <file>assets/00disconnected.png</file>
-        <file>assets/01standby.png</file>
-        <file>assets/02cooling.png</file>
-        <file>assets/03ready.png</file>
         <file>assets/moveToPosition.png</file>
         <file>assets/deletePosition.png</file>
+        <file>assets/01standby.svg</file>
+        <file>assets/01standby10px.png</file>
+        <file>assets/01standby16px.png</file>
+        <file>assets/01standby24px.png</file>
+        <file>assets/01standby32px.png</file>
+        <file>assets/02cooling.svg</file>
+        <file>assets/02cooling10px.png</file>
+        <file>assets/02cooling16px.png</file>
+        <file>assets/02cooling24px.png</file>
+        <file>assets/02cooling32px.png</file>
+        <file>assets/03ready.svg</file>
+        <file>assets/03ready10px.png</file>
+        <file>assets/03ready16px.png</file>
+        <file>assets/03ready24px.png</file>
+        <file>assets/03ready32px.png</file>
+        <file>assets/00disconnected.svg</file>
+        <file>assets/00disconnected10px.png</file>
+        <file>assets/00disconnected16px.png</file>
+        <file>assets/00disconnected24px.png</file>
+        <file>assets/00disconnected32px.png</file>
     </qresource>
 </RCC>

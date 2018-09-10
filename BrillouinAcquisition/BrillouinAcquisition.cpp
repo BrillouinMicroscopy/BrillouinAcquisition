@@ -178,13 +178,32 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<ODT_SETTING>("ODT_SETTING");
 	qRegisterMetaType<ODT_SETTINGS>("ODT_SETTINGS");
 	
+	// Set up icons
+	m_icons.disconnected.addFile(":/BrillouinAcquisition/assets/00disconnected10px.png", QSize(10, 10));
+	m_icons.disconnected.addFile(":/BrillouinAcquisition/assets/00disconnected16px.png", QSize(16, 16));
+	m_icons.disconnected.addFile(":/BrillouinAcquisition/assets/00disconnected24px.png", QSize(24, 24));
+	m_icons.disconnected.addFile(":/BrillouinAcquisition/assets/00disconnected32px.png", QSize(32, 32));
 
-	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
-	ui->settingsWidget->setTabIcon(0, icon);
-	ui->settingsWidget->setTabIcon(1, icon);
-	ui->settingsWidget->setTabIcon(2, icon);
-	ui->settingsWidget->setTabIcon(3, icon);
-	ui->settingsWidget->setIconSize(QSize(16, 16));
+	m_icons.standby.addFile(":/BrillouinAcquisition/assets/01standby10px.png", QSize(10, 10));
+	m_icons.standby.addFile(":/BrillouinAcquisition/assets/01standby16px.png", QSize(16, 16));
+	m_icons.standby.addFile(":/BrillouinAcquisition/assets/01standby24px.png", QSize(24, 24));
+	m_icons.standby.addFile(":/BrillouinAcquisition/assets/01standby32px.png", QSize(32, 32));
+
+	m_icons.cooling.addFile(":/BrillouinAcquisition/assets/02cooling10px.png", QSize(10, 10));
+	m_icons.cooling.addFile(":/BrillouinAcquisition/assets/02cooling16px.png", QSize(16, 16));
+	m_icons.cooling.addFile(":/BrillouinAcquisition/assets/02cooling24px.png", QSize(24, 24));
+	m_icons.cooling.addFile(":/BrillouinAcquisition/assets/02cooling32px.png", QSize(32, 32));
+
+	m_icons.ready.addFile(":/BrillouinAcquisition/assets/03ready10px.png", QSize(10, 10));
+	m_icons.ready.addFile(":/BrillouinAcquisition/assets/03ready16px.png", QSize(16, 16));
+	m_icons.ready.addFile(":/BrillouinAcquisition/assets/03ready24px.png", QSize(24, 24));
+	m_icons.ready.addFile(":/BrillouinAcquisition/assets/03ready32px.png", QSize(32, 32));
+
+	ui->settingsWidget->setTabIcon(0, m_icons.disconnected);
+	ui->settingsWidget->setTabIcon(1, m_icons.disconnected);
+	ui->settingsWidget->setTabIcon(2, m_icons.disconnected);
+	ui->settingsWidget->setTabIcon(3, m_icons.disconnected);
+	ui->settingsWidget->setIconSize(QSize(10, 10));
 
 	ui->actionEnable_Cooling->setEnabled(false);
 	ui->autoscalePlot->setChecked(m_BrillouinPlot.autoscale);
@@ -481,17 +500,15 @@ void BrillouinAcquisition::cameraODTSettingsChanged(CAMERA_SETTINGS settings) {
 
 void BrillouinAcquisition::sensorTemperatureChanged(SensorTemperature sensorTemperature) {
 	ui->sensorTemp->setValue(sensorTemperature.temperature);
-	QIcon icon;
 	if (sensorTemperature.status == COOLER_OFF || sensorTemperature.status == FAULT || sensorTemperature.status == DRIFT) {
-		icon = QIcon(":/BrillouinAcquisition/assets/01standby.png");
+		ui->settingsWidget->setTabIcon(0, m_icons.standby);
 	} else if (sensorTemperature.status == COOLING || sensorTemperature.status == NOT_STABILISED) {
-		icon = QIcon(":/BrillouinAcquisition/assets/02cooling.png");
+		ui->settingsWidget->setTabIcon(0, m_icons.cooling);
 	} else if (sensorTemperature.status == STABILISED) {
-		icon = QIcon(":/BrillouinAcquisition/assets/03ready.png");
+		ui->settingsWidget->setTabIcon(0, m_icons.ready);
 	} else {
-		icon = QIcon(":/BrillouinAcquisition/assets/00disconnected.png");
+		ui->settingsWidget->setTabIcon(0, m_icons.disconnected);
 	}
-	ui->settingsWidget->setTabIcon(0, icon);
 }
 
 void BrillouinAcquisition::initializeODTVoltagePlot(QCustomPlot *plot) {
@@ -947,8 +964,7 @@ void BrillouinAcquisition::on_actionConnect_Camera_triggered() {
 void BrillouinAcquisition::cameraConnectionChanged(bool isConnected) {
 	if (isConnected) {
 		ui->actionConnect_Camera->setText("Disconnect Camera");
-		QIcon icon(":/BrillouinAcquisition/assets/01standby.png");
-		ui->settingsWidget->setTabIcon(0, icon);
+		ui->settingsWidget->setTabIcon(0, m_icons.standby);
 		ui->actionEnable_Cooling->setEnabled(true);
 		ui->camera_playPause->setEnabled(true);
 		ui->camera_singleShot->setEnabled(true);
@@ -957,8 +973,7 @@ void BrillouinAcquisition::cameraConnectionChanged(bool isConnected) {
 	} else {
 		ui->actionConnect_Camera->setText("Connect Camera");
 		ui->actionEnable_Cooling->setText("Enable Cooling");
-		QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
-		ui->settingsWidget->setTabIcon(0, icon);
+		ui->settingsWidget->setTabIcon(0, m_icons.disconnected);
 		ui->actionEnable_Cooling->setEnabled(false);
 		ui->camera_playPause->setEnabled(false);
 		ui->camera_singleShot->setEnabled(false);
@@ -982,12 +997,10 @@ void BrillouinAcquisition::on_actionEnable_Cooling_triggered() {
 void BrillouinAcquisition::cameraCoolingChanged(bool isCooling) {
 	if (isCooling) {
 		ui->actionEnable_Cooling->setText("Disable Cooling");
-		QIcon icon(":/BrillouinAcquisition/assets/02cooling.png");
-		ui->settingsWidget->setTabIcon(0, icon);
+		ui->settingsWidget->setTabIcon(0, m_icons.cooling);
 	} else {
 		ui->actionEnable_Cooling->setText("Enable Cooling");
-		QIcon icon(":/BrillouinAcquisition/assets/01standby.png");
-		ui->settingsWidget->setTabIcon(0, icon);
+		ui->settingsWidget->setTabIcon(0, m_icons.standby);
 	}
 }
 
@@ -1002,14 +1015,12 @@ void BrillouinAcquisition::on_actionConnect_Stage_triggered() {
 void BrillouinAcquisition::microscopeConnectionChanged(bool isConnected) {
 	if (isConnected) {
 		ui->actionConnect_Stage->setText("Disconnect Microscope");
-		QIcon icon(":/BrillouinAcquisition/assets/03ready.png");
-		ui->settingsWidget->setTabIcon(1, icon);
-		ui->settingsWidget->setTabIcon(2, icon);
+		ui->settingsWidget->setTabIcon(1, m_icons.ready);
+		ui->settingsWidget->setTabIcon(2, m_icons.ready);
 	} else {
 		ui->actionConnect_Stage->setText("Connect Microscope");
-		QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
-		ui->settingsWidget->setTabIcon(1, icon);
-		ui->settingsWidget->setTabIcon(2, icon);
+		ui->settingsWidget->setTabIcon(1, m_icons.disconnected);
+		ui->settingsWidget->setTabIcon(2, m_icons.disconnected);
 	}
 }
 
@@ -1026,15 +1037,13 @@ void BrillouinAcquisition::brightfieldCameraConnectionChanged(bool isConnected) 
 		ui->actionConnect_Brightfield_camera->setText("Disconnect Brightfield Camera");
 		ui->brightfieldImage->show();
 		ui->camera_playPause_brightfield->setEnabled(true);
-		QIcon icon(":/BrillouinAcquisition/assets/03ready.png");
-		ui->settingsWidget->setTabIcon(3, icon);
+		ui->settingsWidget->setTabIcon(3, m_icons.ready);
 	}
 	else {
 		ui->actionConnect_Brightfield_camera->setText("Connect Brightfield Camera");
 		ui->brightfieldImage->hide();
 		ui->camera_playPause_brightfield->setEnabled(false);
-		QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
-		ui->settingsWidget->setTabIcon(3, icon);
+		ui->settingsWidget->setTabIcon(3, m_icons.disconnected);
 	}
 }
 
@@ -1226,8 +1235,8 @@ void BrillouinAcquisition::initBeampathButtons() {
 		for (gsl::index ii = 0; ii < m_scanControl->m_availablePresets.size(); ii++) {
 			QPushButton *button = new QPushButton(m_scanControl->m_presetLabels[m_scanControl->m_availablePresets[ii]].c_str());
 			button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-			button->setMinimumWidth(90);
-			button->setMaximumWidth(90);
+			button->setMinimumWidth(24);
+			button->setMaximumWidth(64);
 			layout->addWidget(button);
 
 			connection = QObject::connect(button, &QPushButton::clicked, [=] {
@@ -1244,16 +1253,16 @@ void BrillouinAcquisition::initBeampathButtons() {
 		layout->setAlignment(Qt::AlignLeft);
 		QLabel *groupLabel = new QLabel(m_scanControl->m_deviceElements.getDeviceElements()[ii].name.c_str());
 		groupLabel->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-		groupLabel->setMinimumWidth(80);
-		groupLabel->setMaximumWidth(80);
+		groupLabel->setMinimumWidth(40);
+		groupLabel->setMaximumWidth(40);
 		layout->addWidget(groupLabel);
 		std::vector<QPushButton*> buttons;
 		for (gsl::index jj = 0; jj < m_scanControl->m_deviceElements.getDeviceElements()[ii].maxOptions; jj++) {
 			buttonLabel = std::to_string(jj + 1);
 			QPushButton *button = new QPushButton(buttonLabel.c_str());
 			button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-			button->setMinimumWidth(40);
-			button->setMaximumWidth(40);
+			button->setMinimumWidth(16);
+			button->setMaximumWidth(24);
 			layout->addWidget(button);
 
 			connection = QObject::connect(button, &QPushButton::clicked, [=] {
@@ -1415,7 +1424,6 @@ void BrillouinAcquisition::initCamera() {
 	}
 
 	// initialize correct camera type
-	QIcon icon(":/BrillouinAcquisition/assets/00disconnected.png");
 	switch (m_cameraType) {
 		case CAMERA_DEVICE::NONE:
 			m_pointGrey = nullptr;
@@ -1426,7 +1434,7 @@ void BrillouinAcquisition::initCamera() {
 			m_pointGrey = new PointGrey();
 			ui->actionConnect_Brightfield_camera->setVisible(true);
 			ui->settingsWidget->addTab(ui->ODTcameraTab, "ODT Camera");
-			ui->settingsWidget->setTabIcon(3, icon);
+			ui->settingsWidget->setTabIcon(3, m_icons.disconnected);
 			break;
 		default:
 			m_pointGrey = nullptr;

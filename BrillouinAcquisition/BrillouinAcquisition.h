@@ -273,6 +273,13 @@ private:
 
 	std::vector<std::vector<QPushButton*>> elementButtons;
 	std::vector<QPushButton*> presetButtons;
+
+	struct {
+		QIcon disconnected;
+		QIcon standby;
+		QIcon cooling;
+		QIcon ready;
+	} m_icons;
 };
 
 #endif // BRILLOUINACQUISITON_H
