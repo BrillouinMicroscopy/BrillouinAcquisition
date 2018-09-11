@@ -9,27 +9,27 @@ ButtonDelegate::ButtonDelegate(QObject *parent)
 
 void ButtonDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const {
 	QRect r = option.rect; // rectangle of the cell
-	int buttonLeft = 0, buttonTop = r.top() + 3;
+	int buttonLeft = 0, buttonTop = r.top() + 1;
 
 	// move to button
 	QStyleOptionButton moveButton;
-	buttonLeft = r.left() + r.width() - 35;
+	buttonLeft = r.left() + r.width() - 22;
 	moveButton.rect = QRect(buttonLeft, buttonTop, m_buttonWidth, m_buttonHeight);
 	moveButton.state = QStyle::State_Enabled;
 	
 	moveButton.icon = QIcon(":/BrillouinAcquisition/assets/moveToPosition.png");
-	moveButton.iconSize = QSize(24, 24);
+	moveButton.iconSize = QSize(12, 12);
 
 	QApplication::style()->drawControl(QStyle::CE_PushButton, &moveButton, painter);
 
 	// delete button
 	QStyleOptionButton deleteButton;
-	buttonLeft = r.left() + r.width() - 70;
+	buttonLeft = r.left() + r.width() - 42;
 	deleteButton.rect = QRect(buttonLeft, buttonTop, m_buttonWidth, m_buttonHeight);
 	deleteButton.state = QStyle::State_Enabled;
 
 	deleteButton.icon = QIcon(":/BrillouinAcquisition/assets/deletePosition.png");
-	deleteButton.iconSize = QSize(24, 24);
+	deleteButton.iconSize = QSize(12, 12);
 
 	QApplication::style()->drawControl(QStyle::CE_PushButton, &deleteButton, painter);
 }
@@ -40,10 +40,10 @@ bool ButtonDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, const
 		int clickX = e->x();
 		int clickY = e->y();
 		QRect r = option.rect; // rectangle of the cell
-		int buttonLeft = 0, buttonTop = r.top() + 3;
+		int buttonLeft = 0, buttonTop = r.top() + 1;
 
-		int buttonLeftDelete = r.left() + r.width() - 70;
-		int buttonLeftMove = r.left() + r.width() - 35;
+		int buttonLeftDelete = r.left() + r.width() - 42;
+		int buttonLeftMove = r.left() + r.width() - 22;
 
 		if (clickY > buttonTop && clickY < buttonTop + m_buttonHeight) {
 			if (clickX > buttonLeftDelete && clickX < buttonLeftDelete + m_buttonWidth) {

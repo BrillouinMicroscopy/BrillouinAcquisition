@@ -1728,7 +1728,7 @@ void BrillouinAcquisition::on_setPositionZ_valueChanged(double positionZ) {
 void BrillouinAcquisition::updateSavedPositions() {
 	ui->tableView->setModel(tableModel);
 	ui->tableView->setItemDelegateForColumn(3, &buttonDelegate);
-	ui->tableView->verticalHeader()->setDefaultSectionSize(35);
+	ui->tableView->verticalHeader()->setDefaultSectionSize(22);
 	ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	ui->tableView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 	ui->tableView->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);

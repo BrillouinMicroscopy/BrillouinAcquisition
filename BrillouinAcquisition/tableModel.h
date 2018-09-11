@@ -8,8 +8,8 @@ class ButtonDelegate : public QItemDelegate {
 	Q_OBJECT
 
 private:
-	int m_buttonWidth = 30;
-	int m_buttonHeight = 30;
+	int m_buttonWidth = 18;
+	int m_buttonHeight = 18;
 
 public:
 	ButtonDelegate(QObject *parent = 0);
