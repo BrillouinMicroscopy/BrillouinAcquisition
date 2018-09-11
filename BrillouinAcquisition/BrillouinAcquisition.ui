@@ -180,7 +180,7 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>223</width>
+                <width>219</width>
                 <height>310</height>
                </rect>
               </property>
@@ -408,7 +408,7 @@ QTabBar::tab:!selected {
                  <rect>
                   <x>8</x>
                   <y>40</y>
-                  <width>64</width>
+                  <width>72</width>
                   <height>18</height>
                  </rect>
                 </property>
@@ -421,7 +421,7 @@ QTabBar::tab:!selected {
                  <rect>
                   <x>8</x>
                   <y>64</y>
-                  <width>64</width>
+                  <width>72</width>
                   <height>18</height>
                  </rect>
                 </property>
@@ -434,7 +434,7 @@ QTabBar::tab:!selected {
                  <rect>
                   <x>8</x>
                   <y>16</y>
-                  <width>64</width>
+                  <width>72</width>
                   <height>18</height>
                  </rect>
                 </property>
@@ -447,7 +447,7 @@ QTabBar::tab:!selected {
                  <rect>
                   <x>8</x>
                   <y>88</y>
-                  <width>64</width>
+                  <width>72</width>
                   <height>18</height>
                  </rect>
                 </property>
@@ -458,9 +458,9 @@ QTabBar::tab:!selected {
                <widget class="QComboBox" name="pixelReadoutRate">
                 <property name="geometry">
                  <rect>
-                  <x>72</x>
+                  <x>88</x>
                   <y>16</y>
-                  <width>128</width>
+                  <width>112</width>
                   <height>18</height>
                  </rect>
                 </property>
@@ -478,9 +478,9 @@ QTabBar::tab:!selected {
                <widget class="QComboBox" name="preAmpGain">
                 <property name="geometry">
                  <rect>
-                  <x>72</x>
+                  <x>88</x>
                   <y>40</y>
-                  <width>128</width>
+                  <width>112</width>
                   <height>18</height>
                  </rect>
                 </property>
@@ -506,9 +506,9 @@ QTabBar::tab:!selected {
                <widget class="QComboBox" name="pixelEncoding">
                 <property name="geometry">
                  <rect>
-                  <x>72</x>
+                  <x>88</x>
                   <y>64</y>
-                  <width>128</width>
+                  <width>112</width>
                   <height>18</height>
                  </rect>
                 </property>
@@ -539,9 +539,9 @@ QTabBar::tab:!selected {
                <widget class="QComboBox" name="cycleMode">
                 <property name="geometry">
                  <rect>
-                  <x>72</x>
+                  <x>88</x>
                   <y>88</y>
-                  <width>128</width>
+                  <width>112</width>
                   <height>18</height>
                  </rect>
                 </property>
@@ -563,9 +563,9 @@ QTabBar::tab:!selected {
               <widget class="QComboBox" name="triggerMode">
                <property name="geometry">
                 <rect>
-                 <x>96</x>
+                 <x>104</x>
                  <y>56</y>
-                 <width>120</width>
+                 <width>112</width>
                  <height>18</height>
                 </rect>
                </property>
@@ -613,7 +613,7 @@ QTabBar::tab:!selected {
                 <rect>
                  <x>8</x>
                  <y>8</y>
-                 <width>80</width>
+                 <width>88</width>
                  <height>18</height>
                 </rect>
                </property>
@@ -626,7 +626,7 @@ QTabBar::tab:!selected {
                 <rect>
                  <x>8</x>
                  <y>32</y>
-                 <width>80</width>
+                 <width>88</width>
                  <height>18</height>
                 </rect>
                </property>
@@ -637,9 +637,9 @@ QTabBar::tab:!selected {
               <widget class="QSpinBox" name="frameCount">
                <property name="geometry">
                 <rect>
-                 <x>96</x>
+                 <x>104</x>
                  <y>32</y>
-                 <width>120</width>
+                 <width>112</width>
                  <height>18</height>
                 </rect>
                </property>
@@ -653,9 +653,9 @@ QTabBar::tab:!selected {
               <widget class="QDoubleSpinBox" name="exposureTime">
                <property name="geometry">
                 <rect>
-                 <x>96</x>
+                 <x>104</x>
                  <y>8</y>
-                 <width>120</width>
+                 <width>112</width>
                  <height>18</height>
                 </rect>
                </property>
@@ -764,7 +764,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>236</width>
-                <height>211</height>
+                <height>199</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -823,7 +823,7 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>223</width>
+                <width>219</width>
                 <height>220</height>
                </rect>
               </property>
@@ -853,7 +853,7 @@ QTabBar::tab:!selected {
                <property name="geometry">
                 <rect>
                  <x>152</x>
-                 <y>32</y>
+                 <y>28</y>
                  <width>64</width>
                  <height>18</height>
                 </rect>
@@ -894,7 +894,7 @@ QTabBar::tab:!selected {
                <property name="geometry">
                 <rect>
                  <x>80</x>
-                 <y>32</y>
+                 <y>28</y>
                  <width>64</width>
                  <height>18</height>
                 </rect>
@@ -910,7 +910,7 @@ QTabBar::tab:!selected {
                <property name="geometry">
                 <rect>
                  <x>8</x>
-                 <y>32</y>
+                 <y>28</y>
                  <width>64</width>
                  <height>18</height>
                 </rect>
@@ -927,7 +927,7 @@ QTabBar::tab:!selected {
                 <rect>
                  <x>10</x>
                  <y>72</y>
-                 <width>64</width>
+                 <width>96</width>
                  <height>18</height>
                 </rect>
                </property>
@@ -1099,7 +1099,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>236</width>
-                <height>211</height>
+                <height>199</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -1118,7 +1118,7 @@ QTabBar::tab:!selected {
                 </rect>
                </property>
                <property name="text">
-                <string>Exposure time [s]</string>
+                <string>Exposure [s]</string>
                </property>
               </widget>
               <widget class="QGroupBox" name="binningROIBoxODT">
@@ -1304,7 +1304,7 @@ QTabBar::tab:!selected {
                  <rect>
                   <x>8</x>
                   <y>16</y>
-                  <width>64</width>
+                  <width>72</width>
                   <height>18</height>
                  </rect>
                 </property>
@@ -1315,9 +1315,9 @@ QTabBar::tab:!selected {
                <widget class="QComboBox" name="pixelEncodingODT">
                 <property name="geometry">
                  <rect>
-                  <x>72</x>
+                  <x>88</x>
                   <y>16</y>
-                  <width>128</width>
+                  <width>112</width>
                   <height>18</height>
                  </rect>
                 </property>
@@ -1439,7 +1439,7 @@ QTabBar::tab:!selected {
                  <rect>
                   <x>8</x>
                   <y>8</y>
-                  <width>40</width>
+                  <width>48</width>
                   <height>18</height>
                  </rect>
                 </property>
@@ -1469,9 +1469,9 @@ QTabBar::tab:!selected {
                <widget class="QLineEdit" name="acquisitionFilename">
                 <property name="geometry">
                  <rect>
-                  <x>55</x>
+                  <x>64</x>
                   <y>8</y>
-                  <width>129</width>
+                  <width>120</width>
                   <height>18</height>
                  </rect>
                 </property>
@@ -1569,7 +1569,7 @@ QTabBar::tab:!selected {
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>221</width>
+                      <width>217</width>
                       <height>480</height>
                      </rect>
                     </property>
@@ -1610,9 +1610,9 @@ QTabBar::tab:!selected {
                      <widget class="QLabel" name="startLabel">
                       <property name="geometry">
                        <rect>
-                        <x>40</x>
+                        <x>36</x>
                         <y>16</y>
-                        <width>48</width>
+                        <width>56</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -1901,7 +1901,7 @@ QTabBar::tab:!selected {
                        <rect>
                         <x>8</x>
                         <y>40</y>
-                        <width>88</width>
+                        <width>104</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -1915,9 +1915,9 @@ QTabBar::tab:!selected {
                      <widget class="QCheckBox" name="postCalibration">
                       <property name="geometry">
                        <rect>
-                        <x>112</x>
+                        <x>104</x>
                         <y>16</y>
-                        <width>88</width>
+                        <width>96</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -1931,7 +1931,7 @@ QTabBar::tab:!selected {
                      <widget class="QLabel" name="label_11">
                       <property name="geometry">
                        <rect>
-                        <x>128</x>
+                        <x>140</x>
                         <y>40</y>
                         <width>41</width>
                         <height>18</height>
@@ -1973,7 +1973,7 @@ QTabBar::tab:!selected {
                        </rect>
                       </property>
                       <property name="text">
-                       <string>Number of images</string>
+                       <string>Number images</string>
                       </property>
                       <property name="alignment">
                        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -1989,7 +1989,7 @@ QTabBar::tab:!selected {
                        </rect>
                       </property>
                       <property name="text">
-                       <string>Exposure time [s]</string>
+                       <string>Exposure [s]</string>
                       </property>
                       <property name="alignment">
                        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -2005,7 +2005,7 @@ QTabBar::tab:!selected {
                        </rect>
                       </property>
                       <property name="text">
-                       <string>Calibration sample</string>
+                       <string>Sample</string>
                       </property>
                       <property name="alignment">
                        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -2044,7 +2044,7 @@ QTabBar::tab:!selected {
                      <widget class="QDoubleSpinBox" name="conCalibrationInterval">
                       <property name="geometry">
                        <rect>
-                        <x>104</x>
+                        <x>116</x>
                         <y>40</y>
                         <width>24</width>
                         <height>18</height>
@@ -2088,7 +2088,7 @@ QTabBar::tab:!selected {
                      <widget class="QSpinBox" name="nrCalibrationImages">
                       <property name="geometry">
                        <rect>
-                        <x>80</x>
+                        <x>84</x>
                         <y>88</y>
                         <width>24</width>
                         <height>18</height>
@@ -2205,7 +2205,7 @@ border: none;</string>
                      <widget class="QLineEdit" name="imageNr">
                       <property name="geometry">
                        <rect>
-                        <x>76</x>
+                        <x>144</x>
                         <y>64</y>
                         <width>56</width>
                         <height>18</height>
@@ -2230,7 +2230,7 @@ border: none;</string>
                        <rect>
                         <x>8</x>
                         <y>64</y>
-                        <width>56</width>
+                        <width>120</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -2321,9 +2321,9 @@ border: none;</string>
                      <widget class="QLabel" name="repetitionInterval_label">
                       <property name="geometry">
                        <rect>
-                        <x>112</x>
+                        <x>90</x>
                         <y>16</y>
-                        <width>56</width>
+                        <width>72</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -2337,7 +2337,7 @@ border: none;</string>
                      <widget class="QProgressBar" name="repetitionProgress">
                       <property name="geometry">
                        <rect>
-                        <x>10</x>
+                        <x>8</x>
                         <y>40</y>
                         <width>192</width>
                         <height>18</height>
@@ -2356,9 +2356,9 @@ border: none;</string>
                      <widget class="QSpinBox" name="repetitionCount">
                       <property name="geometry">
                        <rect>
-                        <x>80</x>
+                        <x>52</x>
                         <y>16</y>
-                        <width>24</width>
+                        <width>32</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -2378,9 +2378,9 @@ border: none;</string>
                      <widget class="QDoubleSpinBox" name="repetitionInterval">
                       <property name="geometry">
                        <rect>
-                        <x>176</x>
+                        <x>168</x>
                         <y>16</y>
-                        <width>24</width>
+                        <width>32</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -2464,7 +2464,7 @@ border: none;</string>
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>221</width>
+                      <width>217</width>
                       <height>550</height>
                      </rect>
                     </property>
@@ -2501,7 +2501,7 @@ border: none;</string>
                        <rect>
                         <x>8</x>
                         <y>40</y>
-                        <width>64</width>
+                        <width>88</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -2517,7 +2517,7 @@ border: none;</string>
                        <rect>
                         <x>8</x>
                         <y>16</y>
-                        <width>64</width>
+                        <width>88</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -2533,7 +2533,7 @@ border: none;</string>
                        <rect>
                         <x>8</x>
                         <y>64</y>
-                        <width>64</width>
+                        <width>88</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -2547,9 +2547,9 @@ border: none;</string>
                      <widget class="QDoubleSpinBox" name="alignmentUR_ODT">
                       <property name="geometry">
                        <rect>
-                        <x>80</x>
+                        <x>96</x>
                         <y>16</y>
-                        <width>40</width>
+                        <width>48</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -2572,9 +2572,9 @@ border: none;</string>
                      <widget class="QDoubleSpinBox" name="alignmentRate_ODT">
                       <property name="geometry">
                        <rect>
-                        <x>80</x>
+                        <x>96</x>
                         <y>64</y>
-                        <width>40</width>
+                        <width>48</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -2600,9 +2600,9 @@ border: none;</string>
                       </property>
                       <property name="geometry">
                        <rect>
-                        <x>136</x>
+                        <x>152</x>
                         <y>16</y>
-                        <width>64</width>
+                        <width>48</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -2613,9 +2613,9 @@ border: none;</string>
                      <widget class="QSpinBox" name="alignmentNumber_ODT">
                       <property name="geometry">
                        <rect>
-                        <x>80</x>
+                        <x>96</x>
                         <y>40</y>
-                        <width>40</width>
+                        <width>48</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -2677,9 +2677,9 @@ border: none;</string>
                      <widget class="QDoubleSpinBox" name="acquisitionUR_ODT">
                       <property name="geometry">
                        <rect>
-                        <x>80</x>
+                        <x>96</x>
                         <y>16</y>
-                        <width>40</width>
+                        <width>48</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -2702,9 +2702,9 @@ border: none;</string>
                      <widget class="QDoubleSpinBox" name="acquisitionRate_ODT">
                       <property name="geometry">
                        <rect>
-                        <x>80</x>
+                        <x>96</x>
                         <y>64</y>
-                        <width>40</width>
+                        <width>48</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -2729,7 +2729,7 @@ border: none;</string>
                        <rect>
                         <x>8</x>
                         <y>64</y>
-                        <width>64</width>
+                        <width>88</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -2746,9 +2746,9 @@ border: none;</string>
                       </property>
                       <property name="geometry">
                        <rect>
-                        <x>136</x>
+                        <x>152</x>
                         <y>16</y>
-                        <width>64</width>
+                        <width>48</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -2761,7 +2761,7 @@ border: none;</string>
                        <rect>
                         <x>8</x>
                         <y>16</y>
-                        <width>64</width>
+                        <width>88</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -2777,7 +2777,7 @@ border: none;</string>
                        <rect>
                         <x>8</x>
                         <y>40</y>
-                        <width>64</width>
+                        <width>88</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -2791,9 +2791,9 @@ border: none;</string>
                      <widget class="QSpinBox" name="acquisitionNumber_ODT">
                       <property name="geometry">
                        <rect>
-                        <x>80</x>
+                        <x>96</x>
                         <y>40</y>
-                        <width>40</width>
+                        <width>48</width>
                         <height>18</height>
                        </rect>
                       </property>
@@ -2979,7 +2979,7 @@ border: none;</string>
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">
