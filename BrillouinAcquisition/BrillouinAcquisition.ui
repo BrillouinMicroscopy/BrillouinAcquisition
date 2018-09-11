@@ -43,7 +43,7 @@
       </property>
       <property name="maximumSize">
        <size>
-        <width>450</width>
+        <width>240</width>
         <height>16777215</height>
        </size>
       </property>
@@ -180,7 +180,7 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>219</width>
+                <width>223</width>
                 <height>310</height>
                </rect>
               </property>
@@ -763,8 +763,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>161</width>
-                <height>180</height>
+                <width>236</width>
+                <height>211</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -823,7 +823,7 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>161</width>
+                <width>223</width>
                 <height>220</height>
                </rect>
               </property>
@@ -1098,8 +1098,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>161</width>
-                <height>160</height>
+                <width>236</width>
+                <height>211</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -1569,7 +1569,7 @@ QTabBar::tab:!selected {
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>217</width>
+                      <width>221</width>
                       <height>480</height>
                      </rect>
                     </property>
@@ -2464,7 +2464,7 @@ border: none;</string>
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>217</width>
+                      <width>221</width>
                       <height>550</height>
                      </rect>
                     </property>
@@ -2979,7 +2979,7 @@ border: none;</string>
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">
