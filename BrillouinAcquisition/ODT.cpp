@@ -2,62 +2,53 @@
 #include "simplemath.h"
 #include "ODT.h"
 
-ODT::ODT(QObject *parent, PointGrey **pointGrey, NIDAQ **nidaq)
-	: QObject(parent), m_pointGrey(pointGrey), m_NIDAQ(nidaq) {
+ODT::ODT(QObject *parent, Acquisition *acquisition, PointGrey **pointGrey, NIDAQ **nidaq)
+	: AcquisitionMode(parent, acquisition), m_pointGrey(pointGrey), m_NIDAQ(nidaq) {
 }
 
 ODT::~ODT() {
-	m_acqRunning = false;
 	m_algnRunning = false;
-}
-
-bool ODT::isAcqRunning() {
-	return m_acqRunning;
 }
 
 bool ODT::isAlgnRunning() {
 	return m_algnRunning;
 }
 
-void ODT::abortAcquisition() {
-	m_abortAcquisition = true;
-}
-
 void ODT::setAlgnSettings(ODT_SETTINGS settings) {
 	m_algnSettings = settings;
-	calculateVoltages(ALGN);
+	calculateVoltages(ODT_MODE::ALGN);
 }
 
-void ODT::setAcqSettings(ODT_SETTINGS settings) {
+void ODT::setSettings(ODT_SETTINGS settings) {
 	m_acqSettings = settings;
-	calculateVoltages(ACQ);
+	calculateVoltages(ODT_MODE::ACQ);
 }
 
-void ODT::setSettings(ODT_MODES mode, ODT_SETTING settingType, double value) {
+void ODT::setSettings(ODT_MODE mode, ODT_SETTING settingType, double value) {
 	ODT_SETTINGS *settings;
-	if (mode == ACQ) {
+	if (mode == ODT_MODE::ACQ) {
 		settings = &m_acqSettings;
-	} else if (mode == ALGN) {
+	} else if (mode == ODT_MODE::ALGN) {
 		settings = &m_algnSettings;
 	} else {
 		return;
 	}
 
 	switch (settingType) {
-		case VOLTAGE:
+		case ODT_SETTING::VOLTAGE:
 			settings->radialVoltage = value;
 			calculateVoltages(mode);
 			break;
-		case NRPOINTS:
+		case ODT_SETTING::NRPOINTS:
 			settings->numberPoints = value;
 			calculateVoltages(mode);
-			if (mode == ALGN && m_algnRunning) {
+			if (mode == ODT_MODE::ALGN && m_algnRunning) {
 				m_algnTimer->start(1e3 / (m_algnSettings.scanRate * m_algnSettings.numberPoints));
 			}
 			break;
-		case SCANRATE:
+		case ODT_SETTING::SCANRATE:
 			settings->scanRate = value;
-			if (mode == ALGN && m_algnRunning) {
+			if (mode == ODT_MODE::ALGN && m_algnRunning) {
 				m_algnTimer->start(1e3 / (m_algnSettings.scanRate * m_algnSettings.numberPoints));
 			}
 			break;
@@ -70,36 +61,36 @@ void ODT::init() {
 }
 
 void ODT::initialize() {
-	calculateVoltages(ALGN);
-	calculateVoltages(ACQ);
+	calculateVoltages(ODT_MODE::ALGN);
+	calculateVoltages(ODT_MODE::ACQ);
 }
 
-void ODT::startAcquisition() {
-	if (!m_acqRunning) {
+void ODT::startRepetitions() {
+	if (!m_running) {
 		// start acquisition
-		m_acqRunning = true;
-		m_abortAcquisition = false;
-		emit(s_acqRunning(m_acqRunning));
-		acquisition();
+		m_running = true;
+		m_abort = false;
+		emit(s_repetitionRunning(m_running));
+		acquire(m_acquisition->m_storage);
 	} else {
 		// abort acquisition
-		m_acqRunning = false;
-		emit(s_acqRunning(m_acqRunning));
+		m_running = false;
+		emit(s_repetitionRunning(m_running));
 	}
 }
 
-void ODT::acquisition() {
-	if (m_acqRunning) {
+void ODT::acquire(StorageWrapper *storage) {
+	if (m_running) {
 		VOLTAGE2 voltage;
 		for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
-			if (m_abortAcquisition) {
+			if (m_abort) {
 				break;
 			}
 			voltage = m_acqSettings.voltages[i];
 			// set new voltage to galvo mirrors
 
 			// announce mirror voltage
-			emit(s_mirrorVoltageChanged(voltage, ACQ));
+			emit(s_mirrorVoltageChanged(voltage, ODT_MODE::ACQ));
 
 			// wait appropriate time
 			Sleep(10);
@@ -110,9 +101,9 @@ void ODT::acquisition() {
 		// read images from camera
 
 		// store images
-		m_acqRunning = false;
+		m_running = false;
 	}
-	emit(s_acqRunning(m_algnRunning));
+	emit(s_repetitionRunning(m_running));
 }
 
 void ODT::startAlignment() {
@@ -139,11 +130,11 @@ void ODT::nextAlgnPosition() {
 	(*m_NIDAQ)->setVoltage(voltage);
 
 	// announce mirror voltage
-	emit(s_mirrorVoltageChanged(voltage, ALGN));
+	emit(s_mirrorVoltageChanged(voltage, ODT_MODE::ALGN));
 }
 
-void ODT::calculateVoltages(ODT_MODES mode) {
-	if (mode == ALGN) {
+void ODT::calculateVoltages(ODT_MODE mode) {
+	if (mode == ODT_MODE::ALGN) {
 		double Ux{ 0 };
 		double Uy{ 0 };
 		std::vector<double> theta = simplemath::linspace<double>(0, 360, m_algnSettings.numberPoints + 1);
@@ -156,7 +147,7 @@ void ODT::calculateVoltages(ODT_MODES mode) {
 		}
 		emit(s_algnSettingsChanged(m_algnSettings));
 	}
-	if (mode == ACQ) {
+	if (mode == ODT_MODE::ACQ) {
 		m_acqSettings.voltages.clear();
 		if (m_acqSettings.numberPoints < 10) {
 			return;

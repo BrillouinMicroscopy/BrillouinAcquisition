@@ -15,6 +15,7 @@
 
 #include "PointGrey.h"
 #include "ODT.h"
+#include "Brillouin.h"
 
 #include <QtWidgets/QMainWindow>
 #include "ui_BrillouinAcquisition.h"
@@ -46,7 +47,9 @@ enum ROI_SOURCE {
 
 Q_DECLARE_METATYPE(std::string);
 Q_DECLARE_METATYPE(AT_64);
-Q_DECLARE_METATYPE(ACQUISITION_SETTINGS);
+Q_DECLARE_METATYPE(StoragePath);
+Q_DECLARE_METATYPE(ACQUISITION_STATE);
+Q_DECLARE_METATYPE(BRILLOUIN_SETTINGS);
 Q_DECLARE_METATYPE(CAMERA_SETTINGS);
 Q_DECLARE_METATYPE(CAMERA_OPTIONS);
 Q_DECLARE_METATYPE(std::vector<int>);
@@ -61,7 +64,7 @@ Q_DECLARE_METATYPE(std::vector<POINT3>);
 Q_DECLARE_METATYPE(BOUNDS);
 Q_DECLARE_METATYPE(QMouseEvent*);
 Q_DECLARE_METATYPE(VOLTAGE2);
-Q_DECLARE_METATYPE(ODT_MODES);
+Q_DECLARE_METATYPE(ODT_MODE);
 Q_DECLARE_METATYPE(ODT_SETTING);
 Q_DECLARE_METATYPE(ODT_SETTINGS);
 
@@ -105,7 +108,7 @@ private slots:
 
 	void initBeampathButtons();
 
-	void on_acquisitionStart_clicked();
+	void on_BrillouinStart_clicked();
 	void microscopeElementPositionsChanged(std::vector<int>);
 	void microscopeElementPositionChanged(DeviceElement element, int position);
 	void on_camera_playPause_clicked();
@@ -140,15 +143,15 @@ private slots:
 	void cameraODTSettingsChanged(CAMERA_SETTINGS settings);
 	void sensorTemperatureChanged(SensorTemperature);
 	void initializeODTVoltagePlot(QCustomPlot *plot);
-	void plotODTVoltages(ODT_SETTINGS settings, ODT_MODES mode);
-	void plotODTVoltage(VOLTAGE2 voltage, ODT_MODES mode);
+	void plotODTVoltages(ODT_SETTINGS settings, ODT_MODE mode);
+	void plotODTVoltage(VOLTAGE2 voltage, ODT_MODE mode);
 	void cameraOptionsChanged(CAMERA_OPTIONS);
 	void cameraODTOptionsChanged(CAMERA_OPTIONS options);
 	void showAcqPosition(POINT3, int);
 	void showPosition(POINT3);
 	void setHomePositionBounds(BOUNDS);
 	void setCurrentPositionBounds(BOUNDS bounds);
-	void showAcqProgress(int state, double progress, int seconds);
+	void showBrillouinProgress(ACQUISITION_STATE state, double progress, int seconds);
 	void showCalibrationInterval(int);
 	void showCalibrationRunning(bool);
 	void showAcqRunning(bool);
@@ -174,7 +177,7 @@ private slots:
 	void on_autoscalePlot_stateChanged(int);
 	void on_autoscalePlot_brightfield_stateChanged(int);
 
-	void updateAcquisitionSettings();
+	void updateBrillouinSettings();
 
 	void on_exposureTime_valueChanged(double);
 	void on_frameCount_valueChanged(int);
@@ -249,8 +252,10 @@ private:
 	Andor *m_andor = new Andor();
 	ScanControl *m_scanControl = nullptr;
 	PointGrey *m_pointGrey = nullptr;
-	Acquisition *m_acquisition = new Acquisition(nullptr, m_andor, &m_scanControl);
-
+	Acquisition *m_acquisition = new Acquisition(nullptr);
+	
+	Brillouin *m_Brillouin = new Brillouin(nullptr, m_acquisition, m_andor, &m_scanControl);
+	BRILLOUIN_SETTINGS m_BrillouinSettings;
 	ODT *m_ODT = nullptr;
 
 	PLOT_SETTINGS m_BrillouinPlot;
@@ -259,7 +264,7 @@ private:
 	SETTINGS_DEVICES m_deviceSettings;
 	CAMERA_OPTIONS m_cameraOptions;
 	CAMERA_OPTIONS m_cameraOptionsODT;
-	ACQUISITION_SETTINGS m_acquisitionSettings;
+	StoragePath m_storagePath;
 	bool m_previewRunning = false;
 	bool m_brightfieldPreviewRunning = false;
 	bool m_measurementRunning = false;

@@ -2,7 +2,12 @@
 #define STORAGEWRAPPER_H
 
 #include "external/h5bm/h5bm.h"
-#include "andor.h"
+
+struct StoragePath {
+	std::string filename = "Brillouin.h5";	// filename
+	std::string folder = ".";
+	std::string fullPath = folder + filename;
+};
 
 struct IMAGE {
 public:
@@ -35,6 +40,7 @@ public:
 class StorageWrapper : public H5BM {
 	Q_OBJECT
 private:
+	StoragePath m_path;
 	bool m_finished = false;
 	bool m_observeQueues = false;
 	bool m_finishedQueueing = false;
@@ -42,9 +48,9 @@ private:
 public:
 	StorageWrapper(
 		QObject *parent = nullptr,
-		const std::string filename = "Brillouin.h5",
+		const StoragePath path = {},
 		int flags = H5F_ACC_RDONLY
-	) noexcept : H5BM(parent, filename, flags) {};
+	) noexcept : H5BM(parent, path.fullPath, flags) {};
 	~StorageWrapper();
 
 	QQueue<IMAGE*> m_payloadQueue;

@@ -180,7 +180,7 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>219</width>
+                <width>223</width>
                 <height>310</height>
                </rect>
               </property>
@@ -763,7 +763,7 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>161</width>
+                <width>165</width>
                 <height>180</height>
                </rect>
               </property>
@@ -824,7 +824,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>230</width>
-                <height>199</height>
+                <height>180</height>
                </rect>
               </property>
               <property name="sizePolicy">
@@ -1078,7 +1078,7 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>161</width>
+                <width>165</width>
                 <height>160</height>
                </rect>
               </property>
@@ -1549,7 +1549,7 @@ QTabBar::tab:!selected {
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>217</width>
+                      <width>221</width>
                       <height>480</height>
                      </rect>
                     </property>
@@ -2378,7 +2378,7 @@ border: none;</string>
                       </property>
                      </widget>
                     </widget>
-                    <widget class="QPushButton" name="acquisitionStart">
+                    <widget class="QPushButton" name="BrillouinStart">
                      <property name="enabled">
                       <bool>true</bool>
                      </property>
@@ -2444,7 +2444,7 @@ border: none;</string>
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>217</width>
+                      <width>165</width>
                       <height>545</height>
                      </rect>
                     </property>
@@ -2959,7 +2959,7 @@ border: none;</string>
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">

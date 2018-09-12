@@ -19,148 +19,150 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 
 	connection = QWidget::connect(
 		m_andor,
-		SIGNAL(cameraConnected(bool)),
+		&Andor::cameraConnected,
 		this,
-		SLOT(cameraConnectionChanged(bool))
+		[this](bool isConnected) { cameraConnectionChanged(isConnected); }
 	);
 
 	connection = QWidget::connect(
 		m_andor,
-		SIGNAL(noCameraFound()),
+		&Andor::noCameraFound,
 		this,
-		SLOT(showNoCameraFound())
+		[this] { showNoCameraFound(); }
 	);
 
 	connection = QWidget::connect(
 		m_andor,
-		SIGNAL(cameraCoolingChanged(bool)),
+		&Andor::cameraCoolingChanged,
 		this,
-		SLOT(cameraCoolingChanged(bool))
+		[this](bool isCooling) { cameraCoolingChanged(isCooling); }
 	);
 
 	connection = QWidget::connect(
 		m_andor,
-		SIGNAL(s_previewRunning(bool)),
+		&Andor::s_previewRunning,
 		this,
-		SLOT(showPreviewRunning(bool))
+		[this](bool isRunning) { showPreviewRunning(isRunning); }
 	);
 
 	connection = QWidget::connect(
 		m_andor,
-		SIGNAL(s_measurementRunning(bool)),
+		&Andor::s_measurementRunning,
 		this,
-		SLOT(startPreview(bool))
+		[this](bool isRunning) { startPreview(isRunning); }
 	);
 
 	connection = QWidget::connect(
 		m_andor,
-		SIGNAL(optionsChanged(CAMERA_OPTIONS)),
+		&Andor::optionsChanged,
 		this,
-		SLOT(cameraOptionsChanged(CAMERA_OPTIONS))
+		[this](CAMERA_OPTIONS options) { cameraOptionsChanged(options); }
 	);
 
 	connection = QWidget::connect(
 		m_andor,
-		SIGNAL(settingsChanged(CAMERA_SETTINGS)),
+		&Andor::settingsChanged,
 		this,
-		SLOT(cameraSettingsChanged(CAMERA_SETTINGS))
+		[this](CAMERA_SETTINGS settings) { cameraSettingsChanged(settings); }
 	);
 
 	connection = QWidget::connect(
 		m_andor,
-		SIGNAL(s_sensorTemperatureChanged(SensorTemperature)),
+		&Andor::s_sensorTemperatureChanged,
 		this,
-		SLOT(sensorTemperatureChanged(SensorTemperature))
+		[this](SensorTemperature sensorTemperature) { sensorTemperatureChanged(sensorTemperature); }
 	);
 
 	// slot to limit the axis of the camera display after user interaction
-	connection = QWidget::connect(
+	connection = QWidget::connect<void(QCPAxis::*)(const QCPRange &)>(
 		ui->customplot->xAxis,
-		SIGNAL(rangeChanged(QCPRange)),
+		&QCPAxis::rangeChanged,
 		this,
-		SLOT(xAxisRangeChanged(QCPRange))
+		[this](QCPRange newRange) { xAxisRangeChanged(newRange); }
 	);
-	connection = QWidget::connect(
+	connection = QWidget::connect<void(QCPAxis::*)(const QCPRange &)>(
 		ui->customplot->yAxis,
-		SIGNAL(rangeChanged(QCPRange)),
+		&QCPAxis::rangeChanged,
 		this,
-		SLOT(yAxisRangeChanged(QCPRange))
+		[this](QCPRange newRange) { yAxisRangeChanged(newRange); }
 	);
 
 	// slot to limit the axis of the camera display after user interaction
-	connection = QWidget::connect(
+	connection = QWidget::connect<void(QCPAxis::*)(const QCPRange &)>(
 		ui->customplot_brightfield->xAxis,
-		SIGNAL(rangeChanged(QCPRange)),
+		&QCPAxis::rangeChanged,
 		this,
-		SLOT(xAxisRangeChangedODT(QCPRange))
+		[this](QCPRange newRange) { xAxisRangeChangedODT(newRange); }
 	);
-	connection = QWidget::connect(
+	connection = QWidget::connect<void(QCPAxis::*)(const QCPRange &)>(
 		ui->customplot_brightfield->yAxis,
-		SIGNAL(rangeChanged(QCPRange)),
+		&QCPAxis::rangeChanged,
 		this,
-		SLOT(yAxisRangeChangedODT(QCPRange))
-	);
-
-	// slot to show current acquisition progress
-	connection = QWidget::connect(
-		m_acquisition,
-		SIGNAL(s_acqRunning(bool)),
-		this,
-		SLOT(showAcqRunning(bool))
-	);
-
-	// slot to show current acquisition position
-	connection = QWidget::connect(
-		m_acquisition,
-		SIGNAL(s_acqPosition(POINT3, int)),
-		this,
-		SLOT(showAcqPosition(POINT3, int))
-	);
-
-	// slot to show current acquisition progress
-	connection = QWidget::connect(
-		m_acquisition,
-		SIGNAL(s_acqProgress(int, double, int)),
-		this,
-		SLOT(showAcqProgress(int, double, int))
+		[this](QCPRange newRange) { yAxisRangeChangedODT(newRange); }
 	);
 
 	// slot to update filename
 	connection = QWidget::connect(
 		m_acquisition,
-		SIGNAL(s_filenameChanged(std::string)),
+		&Acquisition::s_filenameChanged,
 		this,
-		SLOT(updateFilename(std::string))
+		[this](std::string filename) { updateFilename(filename); }
+	);
+
+	// slot to show current acquisition progress
+	connection = QWidget::connect(
+		m_Brillouin,
+		&Brillouin::s_repetitionRunning,
+		this,
+		[this](bool isRunning) { showAcqRunning(isRunning); }
+	);
+
+	// slot to show current acquisition position
+	connection = QWidget::connect(
+		m_Brillouin,
+		&Brillouin::s_positionChanged,
+		this,
+		[this](POINT3 position, int imageNr) { showAcqPosition(position, imageNr); }
+	);
+
+	// slot to show current acquisition progress
+	connection = QWidget::connect(
+		m_Brillouin,
+		&Brillouin::s_repetitionProgress,
+		this,
+		[this](ACQUISITION_STATE state, double progress, int seconds) { showBrillouinProgress(state, progress, seconds); }
 	);
 
 	// slot to show calibration running
 	connection = QWidget::connect(
-		m_acquisition,
-		SIGNAL(s_acqCalibrationRunning(bool)),
+		m_Brillouin,
+		&Brillouin::s_calibrationRunning,
 		this,
-		SLOT(showCalibrationRunning(bool))
+		[this](bool isCalibrating) { showCalibrationRunning(isCalibrating); }
 	);
 
 	// slot to show time until next calibration
 	connection = QWidget::connect(
-		m_acquisition,
-		SIGNAL(s_acqTimeToCalibration(int)),
+		m_Brillouin,
+		&Brillouin::s_timeToCalibration,
 		this,
-		SLOT(showCalibrationInterval(int))
+		[this](int value) { showCalibrationInterval(value); }
 	);
 
 	// slot to show repetitions
 	connection = QWidget::connect(
-		m_acquisition,
-		SIGNAL(s_acqRepetitionProgress(int, int)),
+		m_Brillouin,
+		&Brillouin::s_totalProgress,
 		this,
-		SLOT(showRepProgress(int, int))
+		[this](int repNumber, int timeToNext) { showRepProgress(repNumber, timeToNext); }
 	);
 
 	qRegisterMetaType<std::string>("std::string");
 	qRegisterMetaType<AT_64>("AT_64");
-	qRegisterMetaType<ACQUISITION_SETTINGS>("ACQUISITION_SETTINGS");
-	qRegisterMetaType<CAMERA_SETTINGS>("ACQUISITION_SETTINGS");
+	qRegisterMetaType<StoragePath>("StoragePath");
+	qRegisterMetaType<ACQUISITION_STATE>("ACQUISITION_STATE");
+	qRegisterMetaType<BRILLOUIN_SETTINGS>("BRILLOUIN_SETTINGS");
+	qRegisterMetaType<CAMERA_SETTINGS>("CAMERA_SETTINGS");
 	qRegisterMetaType<CAMERA_OPTIONS>("CAMERA_OPTIONS");
 	qRegisterMetaType<std::vector<int>>("std::vector<int>");
 	qRegisterMetaType<QSerialPort::SerialPortError>("QSerialPort::SerialPortError");
@@ -174,7 +176,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<BOUNDS>("BOUNDS");
 	qRegisterMetaType<QMouseEvent*>("QMouseEvent*");
 	qRegisterMetaType<VOLTAGE2>("VOLTAGE2");
-	qRegisterMetaType<ODT_MODES>("ODT_MODES");
+	qRegisterMetaType<ODT_MODE>("ODT_MODE");
 	qRegisterMetaType<ODT_SETTING>("ODT_SETTING");
 	qRegisterMetaType<ODT_SETTINGS>("ODT_SETTINGS");
 	
@@ -214,6 +216,8 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	m_acquisitionThread.startWorker(m_andor);
 	// start acquisition thread
 	m_acquisitionThread.startWorker(m_acquisition);
+	// start Brillouin thread
+	m_acquisitionThread.startWorker(m_Brillouin);
 
 	// set up the QCPColorMap:
 	m_BrillouinPlot = {
@@ -235,12 +239,17 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	BrillouinAcquisition::initializePlot(m_BrillouinPlot);
 	BrillouinAcquisition::initializePlot(m_ODTPlot);
 
-	connect(m_ODTPlot.plotHandle, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(plotClick(QMouseEvent*)));
+	connection = QWidget::connect(
+		m_ODTPlot.plotHandle,
+		&QCustomPlot::mousePress,
+		this,
+		[this](QMouseEvent* event) { plotClick(event); }
+	);
 
 	initializeODTVoltagePlot(ui->alignmentVoltagesODT);
 	initializeODTVoltagePlot(ui->acquisitionVoltagesODT);
 
-	updateAcquisitionSettings();
+	updateBrillouinSettings();
 	initSettingsDialog();
 
 	// Set up GUI
@@ -410,15 +419,15 @@ void BrillouinAcquisition::setCurrentPositionBounds(BOUNDS bounds) {
 	ui->endZ->setMaximum(bounds.zMax);
 }
 
-void BrillouinAcquisition::showAcqProgress(int state, double progress, int seconds) {
+void BrillouinAcquisition::showBrillouinProgress(ACQUISITION_STATE state, double progress, int seconds) {
 	ui->progressBar->setValue(progress);
 
 	QString string;
-	if (state == ACQUISITION_STATES::ABORTED) {
+	if (state == ACQUISITION_STATE::ABORTED) {
 		string = "Acquisition aborted.";
-	} else if (state == ACQUISITION_STATES::STARTED) {
+	} else if (state == ACQUISITION_STATE::STARTED) {
 		string = "Acquisition started.";
-	} else if (state == ACQUISITION_STATES::FINISHED) {
+	} else if (state == ACQUISITION_STATE::FINISHED) {
 		string = "Acquisition finished.";
 	} else {
 		QString timeString = formatSeconds(seconds);
@@ -536,17 +545,17 @@ void BrillouinAcquisition::initializeODTVoltagePlot(QCustomPlot *plot) {
 */
 
 void BrillouinAcquisition::on_alignmentUR_ODT_valueChanged(double voltage) {
-	m_ODT->setSettings(ODT_MODES::ALGN, ODT_SETTING::VOLTAGE, voltage);
+	m_ODT->setSettings(ODT_MODE::ALGN, ODT_SETTING::VOLTAGE, voltage);
 }
 
 void BrillouinAcquisition::on_alignmentNumber_ODT_valueChanged(int number) {
 	QMetaObject::invokeMethod(m_ODT, "setSettings", Qt::AutoConnection,
-		Q_ARG(ODT_MODES, ODT_MODES::ALGN), Q_ARG(ODT_SETTING, ODT_SETTING::NRPOINTS), Q_ARG(double, (double)number));
+		Q_ARG(ODT_MODE, ODT_MODE::ALGN), Q_ARG(ODT_SETTING, ODT_SETTING::NRPOINTS), Q_ARG(double, (double)number));
 }
 
 void BrillouinAcquisition::on_alignmentRate_ODT_valueChanged(double rate) {
 	QMetaObject::invokeMethod(m_ODT, "setSettings", Qt::AutoConnection,
-		Q_ARG(ODT_MODES, ODT_MODES::ALGN), Q_ARG(ODT_SETTING, ODT_SETTING::SCANRATE), Q_ARG(double, rate));
+		Q_ARG(ODT_MODE, ODT_MODE::ALGN), Q_ARG(ODT_SETTING, ODT_SETTING::SCANRATE), Q_ARG(double, rate));
 }
 
 void BrillouinAcquisition::on_alignmentStartODT_clicked() {
@@ -563,22 +572,22 @@ void BrillouinAcquisition::showODTAlgnRunning(bool isRunning) {
 }
 
 void BrillouinAcquisition::on_acquisitionUR_ODT_valueChanged(double voltage) {
-	m_ODT->setSettings(ODT_MODES::ACQ, ODT_SETTING::VOLTAGE, voltage);
+	m_ODT->setSettings(ODT_MODE::ACQ, ODT_SETTING::VOLTAGE, voltage);
 }
 
 void BrillouinAcquisition::on_acquisitionNumber_ODT_valueChanged(int number) {
-	m_ODT->setSettings(ODT_MODES::ACQ, ODT_SETTING::NRPOINTS, number);
+	m_ODT->setSettings(ODT_MODE::ACQ, ODT_SETTING::NRPOINTS, number);
 }
 
 void BrillouinAcquisition::on_acquisitionRate_ODT_valueChanged(double rate) {
-	m_ODT->setSettings(ODT_MODES::ACQ, ODT_SETTING::SCANRATE, rate);
+	m_ODT->setSettings(ODT_MODE::ACQ, ODT_SETTING::SCANRATE, rate);
 }
 
 void BrillouinAcquisition::on_acquisitionStartODT_clicked() {
-	if (!m_ODT->isAcqRunning()) {
-		QMetaObject::invokeMethod(m_ODT, "startAcquisition", Qt::AutoConnection);
+	if (!m_ODT->isRunning()) {
+		QMetaObject::invokeMethod(m_ODT, "startRepetitions", Qt::AutoConnection);
 	} else {
-		m_ODT->abortAcquisition();
+		m_ODT->abort();
 	}
 }
 
@@ -590,10 +599,10 @@ void BrillouinAcquisition::showODTAcqRunning(bool isRunning) {
 	}
 }
 
-void BrillouinAcquisition::plotODTVoltages(ODT_SETTINGS settings, ODT_MODES mode) {
+void BrillouinAcquisition::plotODTVoltages(ODT_SETTINGS settings, ODT_MODE mode) {
 	QCustomPlot *plot;
 	switch (mode) {
-		case ODT_MODES::ALGN:
+		case ODT_MODE::ALGN:
 			plot = ui->alignmentVoltagesODT;
 			ui->alignmentUR_ODT->blockSignals(true);
 			ui->alignmentNumber_ODT->blockSignals(true);
@@ -605,7 +614,7 @@ void BrillouinAcquisition::plotODTVoltages(ODT_SETTINGS settings, ODT_MODES mode
 			ui->alignmentNumber_ODT->blockSignals(false);
 			ui->alignmentRate_ODT->blockSignals(false);
 			break;
-		case ODT_MODES::ACQ:
+		case ODT_MODE::ACQ:
 			plot = ui->acquisitionVoltagesODT;
 			ui->acquisitionUR_ODT->blockSignals(true);
 			ui->acquisitionNumber_ODT->blockSignals(true);
@@ -636,13 +645,13 @@ void BrillouinAcquisition::plotODTVoltages(ODT_SETTINGS settings, ODT_MODES mode
 	plot->replot();
 }
 
-void BrillouinAcquisition::plotODTVoltage(VOLTAGE2 voltage, ODT_MODES mode) {
+void BrillouinAcquisition::plotODTVoltage(VOLTAGE2 voltage, ODT_MODE mode) {
 	QCustomPlot *plot;
 	switch (mode) {
-		case ODT_MODES::ALGN:
+		case ODT_MODE::ALGN:
 			plot = ui->alignmentVoltagesODT;
 			break;
-		case ODT_MODES::ACQ:
+		case ODT_MODE::ACQ:
 			plot = ui->acquisitionVoltagesODT;
 			break;
 		default:
@@ -849,9 +858,9 @@ void BrillouinAcquisition::showBrightfieldPreviewRunning(bool isRunning) {
 
 void BrillouinAcquisition::showAcqRunning(bool isRunning) {
 	if (isRunning) {
-		ui->acquisitionStart->setText("Stop");
+		ui->BrillouinStart->setText("Stop");
 	} else {
-		ui->acquisitionStart->setText("Start");
+		ui->BrillouinStart->setText("Start");
 	}
 	m_measurementRunning = isRunning;
 	ui->startX->setEnabled(!m_measurementRunning);
@@ -1049,7 +1058,7 @@ void BrillouinAcquisition::brightfieldCameraConnectionChanged(bool isConnected) 
 
 void BrillouinAcquisition::on_camera_playPause_brightfield_clicked() {
 	if (!m_pointGrey->m_isPreviewRunning) {
-		QMetaObject::invokeMethod(m_pointGrey, "startPreview", Qt::QueuedConnection, Q_ARG(CAMERA_SETTINGS, m_acquisitionSettings.camera));
+		QMetaObject::invokeMethod(m_pointGrey, "startPreview", Qt::QueuedConnection, Q_ARG(CAMERA_SETTINGS, m_BrillouinSettings.camera));
 	}
 	else {
 		m_pointGrey->m_isPreviewRunning = false;
@@ -1112,11 +1121,11 @@ void BrillouinAcquisition::initSettingsDialog() {
 	}
 	m_scanControlDropdown->setCurrentIndex((int)m_scanControllerType);
 
-	static QMetaObject::Connection connection = QWidget::connect(
+	static QMetaObject::Connection connection = QWidget::connect<void(QComboBox::*)(int)>(
 		m_scanControlDropdown,
-		SIGNAL(currentIndexChanged(int)),
+		&QComboBox::currentIndexChanged,
 		this,
-		SLOT(selectScanningDevice(int))
+		[this](int index) { selectScanningDevice(index); }
 	);
 
 	/*
@@ -1146,11 +1155,11 @@ void BrillouinAcquisition::initSettingsDialog() {
 	}
 	m_cameraDropdown->setCurrentIndex((int)m_cameraType);
 
-	connection = QWidget::connect(
+	connection = QWidget::connect<void(QComboBox::*)(int)>(
 		m_cameraDropdown,
-		SIGNAL(currentIndexChanged(int)),
+		&QComboBox::currentIndexChanged,
 		this,
-		SLOT(selectCameraDevice(int))
+		[this](int index) { selectCameraDevice(index); }
 	);
 
 	/*
@@ -1170,9 +1179,9 @@ void BrillouinAcquisition::initSettingsDialog() {
 
 	connection = QWidget::connect(
 		okButton,
-		SIGNAL(clicked()),
+		&QPushButton::clicked,
 		this,
-		SLOT(saveSettings())
+		[this]() { saveSettings(); }
 	);
 
 	QPushButton *cancelButton = new QPushButton();
@@ -1182,9 +1191,9 @@ void BrillouinAcquisition::initSettingsDialog() {
 
 	connection = QWidget::connect(
 		cancelButton,
-		SIGNAL(clicked()),
+		&QPushButton::clicked,
 		this,
-		SLOT(cancelSettings())
+		[this]() { cancelSettings(); }
 	);
 
 	m_settingsDialog->layout()->setSizeConstraint(QLayout::SetFixedSize);
@@ -1298,20 +1307,20 @@ void BrillouinAcquisition::initScanControl() {
 			break;
 		case ScanControl::SCAN_DEVICE::NIDAQ:
 			m_scanControl = new NIDAQ();
-			m_ODT = new ODT(nullptr, &m_pointGrey, (NIDAQ**)&m_scanControl);
+			m_ODT = new ODT(nullptr, m_acquisition, &m_pointGrey, (NIDAQ**)&m_scanControl);
 
 			connection = QWidget::connect(
 				m_ODT,
 				&ODT::s_acqSettingsChanged,
 				this,
-				[this](ODT_SETTINGS settings) { plotODTVoltages(settings, ODT_MODES::ACQ); }
+				[this](ODT_SETTINGS settings) { plotODTVoltages(settings, ODT_MODE::ACQ); }
 			);
 
 			connection = QWidget::connect(
 				m_ODT,
 				&ODT::s_algnSettingsChanged,
 				this,
-				[this](ODT_SETTINGS settings) { plotODTVoltages(settings, ODT_MODES::ALGN); }
+				[this](ODT_SETTINGS settings) { plotODTVoltages(settings, ODT_MODE::ALGN); }
 			);
 
 			connection = QWidget::connect(
@@ -1323,7 +1332,7 @@ void BrillouinAcquisition::initScanControl() {
 
 			connection = QWidget::connect(
 				m_ODT,
-				&ODT::s_acqRunning,
+				&ODT::s_repetitionRunning,
 				this,
 				[this](bool isRunning) { showODTAcqRunning(isRunning); }
 			);
@@ -1332,7 +1341,7 @@ void BrillouinAcquisition::initScanControl() {
 				m_ODT,
 				&ODT::s_mirrorVoltageChanged,
 				this,
-				[this](VOLTAGE2 voltage, ODT_MODES mode) { plotODTVoltage(voltage, mode); }
+				[this](VOLTAGE2 voltage, ODT_MODE mode) { plotODTVoltage(voltage, mode); }
 			);
 
 			// start ODT thread
@@ -1355,59 +1364,59 @@ void BrillouinAcquisition::initScanControl() {
 	// reestablish m_scanControl connections
 	connection = QWidget::connect(
 		m_scanControl,
-		SIGNAL(connectedDevice(bool)),
+		&ScanControl::connectedDevice,
 		this,
-		SLOT(microscopeConnectionChanged(bool))
+		[this](bool isConnected) { microscopeConnectionChanged(isConnected); }
 	);
 
 	// slot to update microscope element button background color
 	connection = QWidget::connect(
 		m_scanControl,
-		SIGNAL(elementPositionsChanged(std::vector<int>)),
+		&ScanControl::elementPositionsChanged,
 		this,
-		SLOT(microscopeElementPositionsChanged(std::vector<int>))
+		[this](std::vector<int> positions) { microscopeElementPositionsChanged(positions); }
 	);
 	connection = QWidget::connect(
 		m_scanControl,
-		SIGNAL(elementPositionChanged(DeviceElement, int)),
+		&ScanControl::elementPositionChanged,
 		this,
-		SLOT(microscopeElementPositionChanged(DeviceElement, int))
+		[this](DeviceElement element, int position) { microscopeElementPositionChanged(element, position); }
 	);
 	connection = QWidget::connect(
 		m_scanControl,
-		SIGNAL(currentPosition(POINT3)),
+		&ScanControl::currentPosition,
 		this,
-		SLOT(showPosition(POINT3))
+		[this](POINT3 position) { showPosition(position); }
 	);
 	connection = QWidget::connect(
 		&buttonDelegate,
-		SIGNAL(deletePosition(int)),
-		m_scanControl,
-		SLOT(deleteSavedPosition(int))
+		&ButtonDelegate::deletePosition,
+		this->m_scanControl,
+		[this](int index) { this->m_scanControl->deleteSavedPosition(index); }
 	);
 	connection = QWidget::connect(
 		&buttonDelegate,
-		SIGNAL(moveToPosition(int)),
-		m_scanControl,
-		SLOT(moveToSavedPosition(int))
+		&ButtonDelegate::moveToPosition,
+		this->m_scanControl,
+		[this](int index) { this->m_scanControl->moveToSavedPosition(index); }
 	);
 	connection = QWidget::connect(
 		m_scanControl,
-		SIGNAL(savedPositionsChanged(std::vector<POINT3>)),
-		tableModel,
-		SLOT(setStorage(std::vector<POINT3>))
+		&ScanControl::savedPositionsChanged,
+		this->tableModel,
+		[this](std::vector<POINT3> storage) { this->tableModel->setStorage(storage); }
 	);
 	connection = QWidget::connect(
 		m_scanControl,
-		SIGNAL(homePositionBoundsChanged(BOUNDS)),
+		&ScanControl::homePositionBoundsChanged,
 		this,
-		SLOT(setHomePositionBounds(BOUNDS))
+		[this](BOUNDS bounds) { setHomePositionBounds(bounds); }
 	);
 	connection = QWidget::connect(
 		m_scanControl,
-		SIGNAL(currentPositionBoundsChanged(BOUNDS)),
+		&ScanControl::currentPositionBoundsChanged,
 		this,
-		SLOT(setCurrentPositionBounds(BOUNDS))
+		[this](BOUNDS bounds) { setCurrentPositionBounds(bounds); }
 	);
 	tableModel->setStorage(m_scanControl->getSavedPositionsNormalized());
 
@@ -1451,9 +1460,9 @@ void BrillouinAcquisition::initCamera() {
 	// reestablish camera connections
 	QMetaObject::Connection connection = QWidget::connect(
 		m_pointGrey,
-		SIGNAL(connectedDevice(bool)),
+		&PointGrey::connectedDevice,
 		this,
-		SLOT(brightfieldCameraConnectionChanged(bool))
+		[this](bool isConnected) { brightfieldCameraConnectionChanged(isConnected); }
 	);
 
 	connection = QWidget::connect(
@@ -1465,23 +1474,23 @@ void BrillouinAcquisition::initCamera() {
 
 	connection = QWidget::connect(
 		m_pointGrey,
-		SIGNAL(s_previewRunning(bool)),
+		&PointGrey::s_previewRunning,
 		this,
-		SLOT(showBrightfieldPreviewRunning(bool))
+		[this](bool isRunning) { showBrightfieldPreviewRunning(isRunning); }
 	);
 
 	connection = QWidget::connect(
 		m_pointGrey,
-		SIGNAL(settingsChanged(CAMERA_SETTINGS)),
+		&PointGrey::settingsChanged,
 		this,
-		SLOT(cameraODTSettingsChanged(CAMERA_SETTINGS))
+		[this](CAMERA_SETTINGS settings) { cameraODTSettingsChanged(settings); }
 	);
 
 	connection = QWidget::connect(
 		m_pointGrey,
-		SIGNAL(optionsChanged(CAMERA_OPTIONS)),
+		&PointGrey::optionsChanged,
 		this,
-		SLOT(cameraODTOptionsChanged(CAMERA_OPTIONS))
+		[this](CAMERA_OPTIONS options) { cameraODTOptionsChanged(options); }
 	);
 
 	m_acquisitionThread.startWorker(m_pointGrey);
@@ -1550,7 +1559,7 @@ void BrillouinAcquisition::on_actionAbout_triggered() {
 
 void BrillouinAcquisition::on_camera_playPause_clicked() {
 	if (!m_andor->m_isPreviewRunning) {
-		QMetaObject::invokeMethod(m_andor, "startPreview", Qt::QueuedConnection, Q_ARG(CAMERA_SETTINGS, m_acquisitionSettings.camera));
+		QMetaObject::invokeMethod(m_andor, "startPreview", Qt::QueuedConnection, Q_ARG(CAMERA_SETTINGS, m_BrillouinSettings.camera));
 	} else {
 		m_andor->m_isPreviewRunning = false;
 	}
@@ -1560,109 +1569,110 @@ void BrillouinAcquisition::on_camera_singleShot_clicked() {
 	QMetaObject::invokeMethod(m_andor, "acquireSingle", Qt::QueuedConnection);
 }
 
-void BrillouinAcquisition::on_acquisitionStart_clicked() {
-	// set camera ROI
-	m_acquisitionSettings.camera.roi = m_deviceSettings.camera.roi;
-	if (!m_acquisition->isAcqRunning()) {
-		QMetaObject::invokeMethod(m_acquisition, "startAcquisition", Qt::QueuedConnection, Q_ARG(ACQUISITION_SETTINGS, m_acquisitionSettings));
+void BrillouinAcquisition::on_BrillouinStart_clicked() {
+	if (!m_Brillouin->isRunning()) {
+		// set camera ROI
+		m_BrillouinSettings.camera.roi = m_deviceSettings.camera.roi;
+		m_Brillouin->setSettings(m_BrillouinSettings);
+		QMetaObject::invokeMethod(m_Brillouin, "startRepetitions", Qt::AutoConnection);
 	} else {
-		m_acquisition->m_abort = 1;
+		m_Brillouin->m_abort = 1;
 	}
 }
 
 void BrillouinAcquisition::updateFilename(std::string filename) {
-	m_acquisitionSettings.filename = filename;
-	updateAcquisitionSettings();
+	m_storagePath.filename = filename;
+	updateBrillouinSettings();
 }
 
-void BrillouinAcquisition::updateAcquisitionSettings() {
-	ui->acquisitionFilename->setText(QString::fromStdString(m_acquisitionSettings.filename));
+void BrillouinAcquisition::updateBrillouinSettings() {
+	ui->acquisitionFilename->setText(QString::fromStdString(m_storagePath.filename));
 
 	// AOI settings
-	ui->startX->setValue(m_acquisitionSettings.xMin);
-	ui->startY->setValue(m_acquisitionSettings.yMin);
-	ui->startZ->setValue(m_acquisitionSettings.zMin);
-	ui->endX->setValue(m_acquisitionSettings.xMax);
-	ui->endY->setValue(m_acquisitionSettings.yMax);
-	ui->endZ->setValue(m_acquisitionSettings.zMax);
-	ui->stepsX->setValue(m_acquisitionSettings.xSteps);
-	ui->stepsY->setValue(m_acquisitionSettings.ySteps);
-	ui->stepsZ->setValue(m_acquisitionSettings.zSteps);
+	ui->startX->setValue(m_BrillouinSettings.xMin);
+	ui->startY->setValue(m_BrillouinSettings.yMin);
+	ui->startZ->setValue(m_BrillouinSettings.zMin);
+	ui->endX->setValue(m_BrillouinSettings.xMax);
+	ui->endY->setValue(m_BrillouinSettings.yMax);
+	ui->endZ->setValue(m_BrillouinSettings.zMax);
+	ui->stepsX->setValue(m_BrillouinSettings.xSteps);
+	ui->stepsY->setValue(m_BrillouinSettings.ySteps);
+	ui->stepsZ->setValue(m_BrillouinSettings.zSteps);
 
 	// calibration settings
-	ui->preCalibration->setChecked(m_acquisitionSettings.preCalibration);
-	ui->postCalibration->setChecked(m_acquisitionSettings.postCalibration);
-	ui->conCalibration->setChecked(m_acquisitionSettings.conCalibration);
-	ui->conCalibrationInterval->setValue(m_acquisitionSettings.conCalibrationInterval);
-	ui->nrCalibrationImages->setValue(m_acquisitionSettings.nrCalibrationImages);
-	ui->calibrationExposureTime->setValue(m_acquisitionSettings.calibrationExposureTime);
-	ui->sampleSelection->setCurrentText(QString::fromStdString(m_acquisitionSettings.sample));
+	ui->preCalibration->setChecked(m_BrillouinSettings.preCalibration);
+	ui->postCalibration->setChecked(m_BrillouinSettings.postCalibration);
+	ui->conCalibration->setChecked(m_BrillouinSettings.conCalibration);
+	ui->conCalibrationInterval->setValue(m_BrillouinSettings.conCalibrationInterval);
+	ui->nrCalibrationImages->setValue(m_BrillouinSettings.nrCalibrationImages);
+	ui->calibrationExposureTime->setValue(m_BrillouinSettings.calibrationExposureTime);
+	ui->sampleSelection->setCurrentText(QString::fromStdString(m_BrillouinSettings.sample));
 
 }
 
 void BrillouinAcquisition::on_startX_valueChanged(double value) {
-	m_acquisitionSettings.xMin = value;
+	m_BrillouinSettings.xMin = value;
 }
 
 void BrillouinAcquisition::on_startY_valueChanged(double value) {
-	m_acquisitionSettings.yMin = value;
+	m_BrillouinSettings.yMin = value;
 }
 
 void BrillouinAcquisition::on_startZ_valueChanged(double value) {
-	m_acquisitionSettings.zMin = value;
+	m_BrillouinSettings.zMin = value;
 }
 
 void BrillouinAcquisition::on_endX_valueChanged(double value) {
-	m_acquisitionSettings.xMax = value;
+	m_BrillouinSettings.xMax = value;
 }
 
 void BrillouinAcquisition::on_endY_valueChanged(double value) {
-	m_acquisitionSettings.yMax = value;
+	m_BrillouinSettings.yMax = value;
 }
 
 void BrillouinAcquisition::on_endZ_valueChanged(double value) {
-	m_acquisitionSettings.zMax = value;
+	m_BrillouinSettings.zMax = value;
 }
 
 void BrillouinAcquisition::on_stepsX_valueChanged(int value) {
-	m_acquisitionSettings.xSteps = value;
+	m_BrillouinSettings.xSteps = value;
 }
 
 void BrillouinAcquisition::on_stepsY_valueChanged(int value) {
-	m_acquisitionSettings.ySteps = value;
+	m_BrillouinSettings.ySteps = value;
 }
 
 void BrillouinAcquisition::on_stepsZ_valueChanged(int value) {
-	m_acquisitionSettings.zSteps = value;
+	m_BrillouinSettings.zSteps = value;
 }
 
 void BrillouinAcquisition::on_preCalibration_stateChanged(int state) {
-	m_acquisitionSettings.preCalibration = (bool)state;
+	m_BrillouinSettings.preCalibration = (bool)state;
 }
 
 void BrillouinAcquisition::on_postCalibration_stateChanged(int state) {
-	m_acquisitionSettings.postCalibration = (bool)state;
+	m_BrillouinSettings.postCalibration = (bool)state;
 }
 
 void BrillouinAcquisition::on_conCalibration_stateChanged(int state) {
-	m_acquisitionSettings.conCalibration = (bool)state;
+	m_BrillouinSettings.conCalibration = (bool)state;
 }
 
 
 void BrillouinAcquisition::on_sampleSelection_currentIndexChanged(const QString &text) {
-	m_acquisitionSettings.sample = text.toStdString();
+	m_BrillouinSettings.sample = text.toStdString();
 };
 
 void BrillouinAcquisition::on_conCalibrationInterval_valueChanged(double value) {
-	m_acquisitionSettings.conCalibrationInterval = value;
+	m_BrillouinSettings.conCalibrationInterval = value;
 }
 
 void BrillouinAcquisition::on_nrCalibrationImages_valueChanged(int value) {
-	m_acquisitionSettings.nrCalibrationImages = value;
+	m_BrillouinSettings.nrCalibrationImages = value;
 };
 
 void BrillouinAcquisition::on_calibrationExposureTime_valueChanged(double value) {
-	m_acquisitionSettings.calibrationExposureTime = value;
+	m_BrillouinSettings.calibrationExposureTime = value;
 };
 
 /*
@@ -1670,24 +1680,24 @@ void BrillouinAcquisition::on_calibrationExposureTime_valueChanged(double value)
  */
 
 void BrillouinAcquisition::on_repetitionCount_valueChanged(int count) {
-	m_acquisitionSettings.repetitions.count = count;
+	m_BrillouinSettings.repetitions.count = count;
 };
 
 void BrillouinAcquisition::on_repetitionInterval_valueChanged(double interval) {
-	m_acquisitionSettings.repetitions.interval = interval;
+	m_BrillouinSettings.repetitions.interval = interval;
 };
 
 void BrillouinAcquisition::showRepProgress(int repNumber, int timeToNext) {
-	ui->repetitionProgress->setValue(100 * ((double)repNumber + 1) / m_acquisitionSettings.repetitions.count);
+	ui->repetitionProgress->setValue(100 * ((double)repNumber + 1) / m_BrillouinSettings.repetitions.count);
 
 	QString string;
 	if (timeToNext > 0) {
 		string = formatSeconds(timeToNext) + " to next repetition.";
 	} else {
-		if (repNumber < m_acquisitionSettings.repetitions.count) {
-			string.sprintf("Measuring repetition %1.0d of %1.0d.", repNumber + 1, m_acquisitionSettings.repetitions.count);
+		if (repNumber < m_BrillouinSettings.repetitions.count) {
+			string.sprintf("Measuring repetition %1.0d of %1.0d.", repNumber + 1, m_BrillouinSettings.repetitions.count);
 		} else {
-			string.sprintf("Finished %1.0d repetitions.", m_acquisitionSettings.repetitions.count);
+			string.sprintf("Finished %1.0d repetitions.", m_BrillouinSettings.repetitions.count);
 		}
 	}
 	ui->repetitionProgress->setFormat(string);
@@ -1736,15 +1746,15 @@ void BrillouinAcquisition::updateSavedPositions() {
 }
 
 void BrillouinAcquisition::on_exposureTime_valueChanged(double value) {
-	m_acquisitionSettings.camera.exposureTime = value;
+	m_BrillouinSettings.camera.exposureTime = value;
 };
 
 void BrillouinAcquisition::on_frameCount_valueChanged(int value) {
-	m_acquisitionSettings.camera.frameCount = value;
+	m_BrillouinSettings.camera.frameCount = value;
 }
 void BrillouinAcquisition::on_selectFolder_clicked() {
-	m_acquisitionSettings.folder = QFileDialog::getExistingDirectory(this, tr("Select directory to store measurements"),
-		QString::fromStdString(m_acquisitionSettings.folder), QFileDialog::ShowDirsOnly	| QFileDialog::DontResolveSymlinks).toStdString();
+	m_storagePath.folder = QFileDialog::getExistingDirectory(this, tr("Select directory to store measurements"),
+		QString::fromStdString(m_storagePath.folder), QFileDialog::ShowDirsOnly	| QFileDialog::DontResolveSymlinks).toStdString();
 };
 
 void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradientPreset preset) {
