@@ -57,12 +57,12 @@ private:
 	POINT3 m_startPosition{ 0, 0, 0 };
 
 	int nrCalibrations = 1;
-	void calibrate(StorageWrapper *storage);
+	void calibrate(std::unique_ptr <StorageWrapper> & storage);
 
 	void abort() override;
 
 private slots:
-	void acquire(StorageWrapper *storage) override;
+	void acquire(std::unique_ptr <StorageWrapper> & storage) override;
 
 signals:
 	// current position in x, y and z, as well as the current image number

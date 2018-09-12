@@ -60,7 +60,7 @@ void Brillouin::startRepetitions() {
 	emit(s_repetitionRunning(m_running));
 }
 
-void Brillouin::acquire(StorageWrapper *storage) {
+void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 
 	emit(s_repetitionProgress(ACQUISITION_STATE::STARTED, 0.0, -1));
 	
@@ -182,7 +182,7 @@ void Brillouin::acquire(StorageWrapper *storage) {
 					.toString(Qt::ISODateWithMs).toStdString();
 				IMAGE *img = new IMAGE(jj, kk, ii, rank_data, dims_data, date, *images_);
 
-				QMetaObject::invokeMethod(storage, "s_enqueuePayload", Qt::AutoConnection, Q_ARG(IMAGE*, img));
+				QMetaObject::invokeMethod(storage.get(), "s_enqueuePayload", Qt::AutoConnection, Q_ARG(IMAGE*, img));
 
 				// increase position index
 				ll++;
@@ -200,7 +200,7 @@ void Brillouin::acquire(StorageWrapper *storage) {
 	// close camera libraries, clear buffers
 	m_andor->stopMeasurement();
 
-	QMetaObject::invokeMethod(storage, "s_finishedQueueing", Qt::AutoConnection);
+	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
 
 	(*m_scanControl)->setPosition(m_startPosition);
 	emit(s_positionChanged({ 0, 0, 0 }, 0));
@@ -223,7 +223,7 @@ void Brillouin::abort() {
 	emit(s_timeToCalibration(0));
 }
 
-void Brillouin::calibrate(StorageWrapper *storage) {
+void Brillouin::calibrate(std::unique_ptr <StorageWrapper> & storage) {
 	// announce calibration start
 	emit(s_calibrationRunning(true));
 
@@ -266,7 +266,9 @@ void Brillouin::calibrate(StorageWrapper *storage) {
 		shift,					// the Brillouin shift of the sample
 		date					// the datetime
 	);
-	QMetaObject::invokeMethod(storage, "s_enqueueCalibration", Qt::AutoConnection, Q_ARG(CALIBRATION*, cal));
+
+	QMetaObject::invokeMethod(storage.get(), "s_enqueueCalibration", Qt::AutoConnection, Q_ARG(CALIBRATION*, cal));
+
 	nrCalibrations++;
 
 	// revert optical elements to position for brightfield/Brillouin imaging

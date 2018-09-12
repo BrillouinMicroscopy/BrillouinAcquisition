@@ -36,7 +36,7 @@ public:
 	Acquisition(QObject *parent);
 	~Acquisition();
 	ACQUISITION_MODE isAcqRunning();
-	StorageWrapper *m_storage;
+	std::unique_ptr <StorageWrapper> m_storage = nullptr;
 
 public slots:
 	void init() {};

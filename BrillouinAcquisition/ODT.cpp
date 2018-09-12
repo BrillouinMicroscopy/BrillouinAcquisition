@@ -79,7 +79,7 @@ void ODT::startRepetitions() {
 	}
 }
 
-void ODT::acquire(StorageWrapper *storage) {
+void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	if (m_running) {
 		VOLTAGE2 voltage;
 		for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {

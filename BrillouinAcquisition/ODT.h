@@ -65,7 +65,7 @@ private:
 	void calculateVoltages(ODT_MODE);
 
 private slots:
-	void acquire(StorageWrapper *storage) override;
+	void acquire(std::unique_ptr <StorageWrapper> & storage) override;
 	void nextAlgnPosition();
 
 signals:

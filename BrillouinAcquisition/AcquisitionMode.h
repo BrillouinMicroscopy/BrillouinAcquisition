@@ -21,11 +21,11 @@ public slots:
 	virtual void startRepetitions() = 0;
 
 protected:
-	Acquisition * m_acquisition = nullptr;
+	Acquisition *m_acquisition = nullptr;
 	bool m_running = false;				// is acquisition currently running
 
 private slots:
-	virtual void acquire(StorageWrapper *storage) = 0;
+	virtual void acquire(std::unique_ptr <StorageWrapper> & storage) = 0;
 
 signals:
 	void s_repetitionRunning(bool);								// is acquisition running

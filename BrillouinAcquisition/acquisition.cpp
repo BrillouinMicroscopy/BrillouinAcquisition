@@ -28,8 +28,8 @@ void Acquisition::newAcquisition(StoragePath path) {
 	m_path = path;
 
 	checkFilename();
-
-	m_storage = new StorageWrapper(nullptr, m_path, H5F_ACC_RDWR);
+	
+	m_storage = std::make_unique <StorageWrapper>(nullptr, m_path, H5F_ACC_RDWR);
 }
 
 void Acquisition::setAcquisitionMode(ACQUISITION_MODE mode) {
