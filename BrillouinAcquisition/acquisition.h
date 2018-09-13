@@ -4,13 +4,6 @@
 #include "storageWrapper.h"
 #include "thread.h"
 
-enum class ACQUISITION_MODE {
-	NONE,
-	BRILLOUIN,
-	ODT,
-	FLUORESCENCE
-};
-
 enum class ACQUISITION_STATE {
 	STARTED,
 	RUNNING,
@@ -41,9 +34,9 @@ public:
 public slots:
 	void init() {};
 	void newAcquisition(StoragePath path);
+	void newRepetition(ACQUISITION_MODE mode);
 	void setAcquisitionMode(ACQUISITION_MODE mode);
 	void setAcquisitionState(ACQUISITION_MODE mode, ACQUISITION_STATE state);
-	void createRepetition(ACQUISITION_MODE mode) {};
 
 private:
 	StoragePath m_path;

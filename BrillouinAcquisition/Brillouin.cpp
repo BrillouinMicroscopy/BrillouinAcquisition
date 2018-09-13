@@ -40,6 +40,8 @@ void Brillouin::startRepetitions() {
 			return;
 		}
 
+		m_acquisition->newRepetition(ACQUISITION_MODE::BRILLOUIN);
+
 		if (repNumber == 0) {
 			emit(s_totalProgress(repNumber, -1));
 			acquire(m_acquisition->m_storage);

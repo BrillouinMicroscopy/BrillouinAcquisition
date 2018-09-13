@@ -32,6 +32,10 @@ void Acquisition::newAcquisition(StoragePath path) {
 	m_storage = std::make_unique <StorageWrapper>(nullptr, m_path, H5F_ACC_RDWR);
 }
 
+void Acquisition::newRepetition(ACQUISITION_MODE mode) {
+	m_storage->newRepetition(mode);
+}
+
 void Acquisition::setAcquisitionMode(ACQUISITION_MODE mode) {
 	m_modeRunning = mode;
 	emit(s_acqModeRunning(m_modeRunning));
