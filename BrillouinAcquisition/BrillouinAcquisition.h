@@ -71,7 +71,7 @@ Q_DECLARE_METATYPE(ODT_SETTINGS);
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
 
-	struct PLOT_SETTINGS {
+		struct PLOT_SETTINGS {
 		QCustomPlot *plotHandle{ nullptr };
 		QCPColorMap *colorMap{ nullptr };
 		QCPRange cLim = { 100, 300 };
@@ -182,7 +182,12 @@ private slots:
 	void on_exposureTime_valueChanged(double);
 	void on_frameCount_valueChanged(int);
 
-	void on_selectFolder_clicked();
+	StoragePath splitFilePath(QString fullPath);
+	QString checkFilename(QString absoluteFilePath);
+
+	void on_actionNew_Acquisition_triggered();
+	void on_actionOpen_Acquisition_triggered();
+	void on_actionClose_Acquisition_triggered();
 
 	// acquisition AOI
 	void on_startX_valueChanged(double);
@@ -253,7 +258,7 @@ private:
 	ScanControl *m_scanControl = nullptr;
 	PointGrey *m_pointGrey = nullptr;
 	Acquisition *m_acquisition = new Acquisition(nullptr);
-	
+
 	Brillouin *m_Brillouin = new Brillouin(nullptr, m_acquisition, m_andor, &m_scanControl);
 	BRILLOUIN_SETTINGS m_BrillouinSettings;
 	ODT *m_ODT = nullptr;
@@ -264,7 +269,7 @@ private:
 	SETTINGS_DEVICES m_deviceSettings;
 	CAMERA_OPTIONS m_cameraOptions;
 	CAMERA_OPTIONS m_cameraOptionsODT;
-	StoragePath m_storagePath;
+	StoragePath m_storagePath{ "", ".", "." };
 	bool m_previewRunning = false;
 	bool m_brightfieldPreviewRunning = false;
 	bool m_measurementRunning = false;

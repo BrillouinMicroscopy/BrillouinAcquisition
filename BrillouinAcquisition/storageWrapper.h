@@ -6,7 +6,7 @@
 struct StoragePath {
 	std::string filename = "Brillouin.h5";	// filename
 	std::string folder = ".";
-	std::string fullPath = folder + filename;
+	std::string fullPath = folder + '/' + filename;
 };
 
 struct IMAGE {

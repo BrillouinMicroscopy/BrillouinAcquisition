@@ -1433,25 +1433,12 @@ QTabBar::tab:!selected {
                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                 </property>
                </widget>
-               <widget class="QToolButton" name="selectFolder">
-                <property name="geometry">
-                 <rect>
-                  <x>192</x>
-                  <y>8</y>
-                  <width>24</width>
-                  <height>18</height>
-                 </rect>
-                </property>
-                <property name="text">
-                 <string>...</string>
-                </property>
-               </widget>
                <widget class="QLineEdit" name="acquisitionFilename">
                 <property name="geometry">
                  <rect>
                   <x>64</x>
                   <y>8</y>
-                  <width>120</width>
+                  <width>153</width>
                   <height>18</height>
                  </rect>
                 </property>
@@ -2986,8 +2973,9 @@ border: none;</string>
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionSave"/>
-    <addaction name="actionLoad"/>
+    <addaction name="actionNew_Acquisition"/>
+    <addaction name="actionOpen_Acquisition"/>
+    <addaction name="actionClose_Acquisition"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -3019,14 +3007,20 @@ border: none;</string>
     <string>Connect Microscope</string>
    </property>
   </action>
-  <action name="actionSave">
+  <action name="actionNew_Acquisition">
    <property name="text">
-    <string>Save</string>
+    <string>New Acquisition</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
-  <action name="actionLoad">
+  <action name="actionOpen_Acquisition">
    <property name="text">
-    <string>Load</string>
+    <string>Open Acquisition</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="actionQuit">
@@ -3057,6 +3051,14 @@ border: none;</string>
   <action name="actionConnect_Brightfield_camera">
    <property name="text">
     <string>Connect ODT camera</string>
+   </property>
+  </action>
+  <action name="actionClose_Acquisition">
+   <property name="text">
+    <string>Close Acquisition</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
    </property>
   </action>
  </widget>

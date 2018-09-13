@@ -3,6 +3,9 @@
 #include "version.h"
 #include "logger.h"
 #include "simplemath.h"
+#include "filesystem"
+
+using namespace std::experimental::filesystem::v1;
 
 BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	QMainWindow(parent), ui(new Ui::BrillouinAcquisitionClass) {
@@ -1759,10 +1762,77 @@ void BrillouinAcquisition::on_exposureTime_valueChanged(double value) {
 void BrillouinAcquisition::on_frameCount_valueChanged(int value) {
 	m_BrillouinSettings.camera.frameCount = value;
 }
-void BrillouinAcquisition::on_selectFolder_clicked() {
-	m_storagePath.folder = QFileDialog::getExistingDirectory(this, tr("Select directory to store measurements"),
-		QString::fromStdString(m_storagePath.folder), QFileDialog::ShowDirsOnly	| QFileDialog::DontResolveSymlinks).toStdString();
-};
+
+StoragePath BrillouinAcquisition::splitFilePath(QString fullPath) {
+	QFileInfo fileInfo(fullPath);
+	return {
+		fileInfo.fileName().toStdString(),
+		fileInfo.absolutePath().toStdString(),
+		fileInfo.absoluteFilePath().toStdString()
+	};
+}
+
+QString BrillouinAcquisition::checkFilename(QString absoluteFilePath) {
+	QFileInfo fileInfo(absoluteFilePath);
+	// get filename without extension
+	std::string rawFilename = fileInfo.baseName().toStdString();
+	// remove possibly attached number separated by a hyphen
+	rawFilename = rawFilename.substr(0, rawFilename.find_last_of("-"));
+	int count = 0;
+	std::string filename;
+	std::string fullPath = absoluteFilePath.toStdString();
+	while (exists(fullPath)) {
+		filename = rawFilename + '-' + std::to_string(count) + '.' + fileInfo.completeSuffix().toStdString();
+		fullPath = fileInfo.absolutePath().toStdString() + "/" + filename;
+		count++;
+	}
+	return QString::fromStdString(fullPath);
+}
+
+void BrillouinAcquisition::on_actionNew_Acquisition_triggered() {
+
+	StoragePath tmpStorage = m_storagePath;
+
+	if (tmpStorage.filename.length() == 0) {
+		tmpStorage = StoragePath{};
+	}
+
+	QString proposedFileName = QString::fromStdString(tmpStorage.fullPath);
+
+	proposedFileName = checkFilename(proposedFileName);
+
+	// TODO: Check if filename already exsists and increment accordingly
+
+	QString fullPath = QFileDialog::getSaveFileName(this, tr("Save new Acquisition as"),
+		proposedFileName, tr("Brillouin data (*.h5)"));
+
+	if (fullPath.isEmpty()) {
+		return;
+	}
+
+	m_storagePath = splitFilePath(fullPath);
+	ui->acquisitionFilename->setText(QString::fromStdString(m_storagePath.filename));
+	m_acquisition->newAcquisition(m_storagePath);
+}
+
+void BrillouinAcquisition::on_actionOpen_Acquisition_triggered() {
+	QString fullPath = QFileDialog::getOpenFileName(this, tr("Save new Acquisition as"),
+		QString::fromStdString(m_storagePath.folder), tr("Brillouin data (*.h5)"));
+
+	if (fullPath.isEmpty()) {
+		return;
+	}
+
+	m_storagePath = splitFilePath(fullPath);
+	ui->acquisitionFilename->setText(QString::fromStdString(m_storagePath.filename));
+	m_acquisition->openAcquisition(m_storagePath);
+}
+
+void BrillouinAcquisition::on_actionClose_Acquisition_triggered() {
+	m_acquisition->closeAcquisition();
+	m_storagePath.filename = "";
+	ui->acquisitionFilename->setText(QString::fromStdString(m_storagePath.filename));
+}
 
 void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradientPreset preset) {
 	gradient->clearColorStops();

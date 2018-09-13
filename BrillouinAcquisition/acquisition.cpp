@@ -20,20 +20,33 @@ ACQUISITION_MODE Acquisition::isAcqRunning() {
 }
 
 void Acquisition::newAcquisition(StoragePath path) {
+	openAcquisition(path, H5F_ACC_TRUNC);
+}
+
+void Acquisition::openAcquisition(StoragePath path, int flag) {
 	// if an acquisition is running, do nothing
 	if (m_modeRunning != ACQUISITION_MODE::NONE) {
 		emit(s_acqModeRunning(m_modeRunning));
 		return;
 	}
 	m_path = path;
-
-	checkFilename();
 	
-	m_storage = std::make_unique <StorageWrapper>(nullptr, m_path, H5F_ACC_RDWR);
+	m_storage = std::make_unique <StorageWrapper>(nullptr, m_path, flag);
 }
 
 void Acquisition::newRepetition(ACQUISITION_MODE mode) {
+	if (m_storage == nullptr) {
+		m_path = StoragePath{};
+
+		checkFilename();
+
+		openAcquisition(m_path);
+	}
 	m_storage->newRepetition(mode);
+}
+
+void Acquisition::closeAcquisition() {
+	m_storage.reset();
 }
 
 void Acquisition::setAcquisitionMode(ACQUISITION_MODE mode) {

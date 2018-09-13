@@ -22,8 +22,6 @@ void Brillouin::setSettings(BRILLOUIN_SETTINGS settings) {
 void Brillouin::startRepetitions() {
 	m_running = true;
 	m_abort = false;
-
-	m_acquisition->newAcquisition(StoragePath{});
 	
 	std::string info = "Acquisition started.";
 	qInfo(logInfo()) << info.c_str();
