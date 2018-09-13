@@ -268,6 +268,13 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 }
 
 BrillouinAcquisition::~BrillouinAcquisition() {
+	delete m_acquisition;
+	delete m_Brillouin;
+	if (m_ODT) {
+		m_ODT->deleteLater();
+		m_ODT = nullptr;
+	}
+	delete m_scanControl;
 	delete m_pointGrey;
 	delete m_andor;
 	//m_cameraThread.exit();

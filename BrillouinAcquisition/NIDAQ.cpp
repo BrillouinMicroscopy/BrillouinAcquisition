@@ -80,6 +80,7 @@ NIDAQ::NIDAQ() noexcept {
 }
 
 NIDAQ::~NIDAQ() {
+	elementPositionTimer->stop();
 	disconnectDevice();
 }
 

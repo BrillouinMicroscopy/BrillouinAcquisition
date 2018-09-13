@@ -9,6 +9,7 @@ Andor::Andor(QObject *parent) noexcept
 }
 
 Andor::~Andor() {
+	m_tempTimer->stop();
 	if (m_isConnected) {
 		AT_Close(m_cameraHndl);
 	}

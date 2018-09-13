@@ -65,6 +65,8 @@ ZeissECU::ZeissECU() noexcept {
 }
 
 ZeissECU::~ZeissECU() {
+	positionTimer->stop();
+	elementPositionTimer->stop();
 	disconnectDevice();
 	delete m_focus;
 	delete m_mcu;
