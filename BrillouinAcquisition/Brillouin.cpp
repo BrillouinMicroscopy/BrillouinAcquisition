@@ -76,11 +76,6 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	// get current stage position
 	m_startPosition = (*m_scanControl)->getPosition();
 
-	std::string now = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
-		.toString(Qt::ISODateWithMs).toStdString();
-
-	storage->setDate(now);
-
 	std::string commentIn = "Brillouin data";
 	storage->setComment(commentIn);
 
