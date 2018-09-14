@@ -12,7 +12,6 @@ Brillouin::Brillouin(QObject *parent, Acquisition *acquisition, Andor *andor, Sc
 }
 
 Brillouin::~Brillouin() {
-	m_running = false;
 }
 
 void Brillouin::setSettings(BRILLOUIN_SETTINGS settings) {
@@ -20,13 +19,15 @@ void Brillouin::setSettings(BRILLOUIN_SETTINGS settings) {
 }
 
 void Brillouin::startRepetitions() {
-	m_running = true;
+	bool allowed = m_acquisition->startMode(ACQUISITION_MODE::BRILLOUIN);
+	if (!allowed) {
+		return;
+	}
+
 	m_abort = false;
 	
 	std::string info = "Acquisition started.";
 	qInfo(logInfo()) << info.c_str();
-
-	emit(s_repetitionRunning(m_running));
 
 	QElapsedTimer startOfLastRepetition;
 	startOfLastRepetition.start();
@@ -56,8 +57,7 @@ void Brillouin::startRepetitions() {
 		}
 	}
 	emit(s_totalProgress(m_settings.repetitions.count, -1));
-	m_running = false;
-	emit(s_repetitionRunning(m_running));
+	m_acquisition->stopMode(ACQUISITION_MODE::BRILLOUIN);
 }
 
 void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
@@ -211,8 +211,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 void Brillouin::abort() {
 	m_andor->stopMeasurement();
 	(*m_scanControl)->setPosition(m_startPosition);
-	m_running = false;
-	emit(s_repetitionRunning(m_running));
+	m_acquisition->stopMode(ACQUISITION_MODE::BRILLOUIN);
 	emit(s_repetitionProgress(ACQUISITION_STATE::ABORTED, 0, 0));
 	emit(s_positionChanged(m_startPosition, 0));
 	emit(s_timeToCalibration(0));

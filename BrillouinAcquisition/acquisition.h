@@ -40,21 +40,29 @@ public slots:
 	 * Different behaviour can be specified by supplying a different flag.
 	 */
 	void openAcquisition(StoragePath path, int flag = H5F_ACC_RDWR);
+	void openAcquisition();
 	void newRepetition(ACQUISITION_MODE mode);
 	void closeAcquisition();
-	void setAcquisitionMode(ACQUISITION_MODE mode);
 	void setAcquisitionState(ACQUISITION_MODE mode, ACQUISITION_STATE state);
+	
+	bool isModeRunning(ACQUISITION_MODE mode);
 
-	void checkFilename();
+	bool startMode(ACQUISITION_MODE);
+	void stopMode(ACQUISITION_MODE);
 
 private:
 	StoragePath m_path;
 	ACQUISITION_MODE m_modeRunning = ACQUISITION_MODE::NONE;	// which mode is currently acquiring
 	ACQUISITION_STATES m_states;								// state of the acquisition modes
 
+private slots:
+	void checkFilename();
+	StoragePath checkFilename(StoragePath desiredPath);
+
 signals:
 	void s_acqModeRunning(ACQUISITION_MODE);	// which acquisition mode is running
 	void s_filenameChanged(std::string);
+	void s_openFileFailed();
 };
 
 #endif //ACQUISITION_H

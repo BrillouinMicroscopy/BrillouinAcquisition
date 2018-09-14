@@ -31,27 +31,26 @@ void Acquisition::openAcquisition(StoragePath path, int flag) {
 	}
 	m_path = path;
 	
+	emit(s_filenameChanged(m_path.filename));
 	m_storage = std::make_unique <StorageWrapper>(nullptr, m_path, flag);
+}
+
+void Acquisition::openAcquisition() {
+	StoragePath defaultPath = StoragePath{};
+	defaultPath = checkFilename(defaultPath);
+
+	openAcquisition(defaultPath);
 }
 
 void Acquisition::newRepetition(ACQUISITION_MODE mode) {
 	if (m_storage == nullptr) {
-		m_path = StoragePath{};
-
-		checkFilename();
-
-		openAcquisition(m_path);
+		openAcquisition();
 	}
 	m_storage->newRepetition(mode);
 }
 
 void Acquisition::closeAcquisition() {
 	m_storage.reset();
-}
-
-void Acquisition::setAcquisitionMode(ACQUISITION_MODE mode) {
-	m_modeRunning = mode;
-	emit(s_acqModeRunning(m_modeRunning));
 }
 
 void Acquisition::setAcquisitionState(ACQUISITION_MODE mode, ACQUISITION_STATE state) {
@@ -70,20 +69,62 @@ void Acquisition::setAcquisitionState(ACQUISITION_MODE mode, ACQUISITION_STATE s
 	}
 }
 
+bool Acquisition::isModeRunning(ACQUISITION_MODE mode) {
+	return (bool)(m_modeRunning & mode);
+}
+
+/*
+ * Function checks if starting an acquisition of given mode is allowed.
+ * If yes, it adds the requested mode to the currently running acquisition to modes.
+ */
+bool Acquisition::startMode(ACQUISITION_MODE mode) {
+	// If no acquisition file is open, open one.
+	if (m_storage == nullptr) {
+		openAcquisition();
+	}
+
+	// Check that the requested mode is not already running.
+	if ((bool)(mode & m_modeRunning)) {
+		return false;
+	}
+	// Check, that Brillouin and ODT don't run simultaneously.
+	if (((mode | m_modeRunning) & (ACQUISITION_MODE::BRILLOUIN | ACQUISITION_MODE::ODT))
+		== (ACQUISITION_MODE::BRILLOUIN | ACQUISITION_MODE::ODT)) {
+		return false;
+	}
+	// Add the requested mode to the running modes.
+	m_modeRunning |= mode;
+	emit(s_acqModeRunning(m_modeRunning));
+	return true;
+}
+
+/* 
+ * Stops the selected mode.
+ */
+void Acquisition::stopMode(ACQUISITION_MODE mode) {
+	m_modeRunning &= ~mode;
+	emit(s_acqModeRunning(m_modeRunning));
+}
+
 void Acquisition::checkFilename() {
-	std::string oldFilename = m_path.filename;
+	m_path = checkFilename(m_path);
+}
+
+StoragePath Acquisition::checkFilename(StoragePath desiredPath) {
+	std::string oldFilename = desiredPath.filename;
 	// get filename without extension
 	std::string rawFilename = oldFilename.substr(0, oldFilename.find_last_of("."));
 	// remove possibly attached number separated by a hyphen
 	rawFilename = rawFilename.substr(0, rawFilename.find_last_of("-"));
-	m_path.fullPath = m_path.folder + "/" + m_path.filename;
+	desiredPath.fullPath = desiredPath.folder + "/" + desiredPath.filename;
 	int count = 0;
-	while (exists(m_path.fullPath)) {
-		m_path.filename = rawFilename + '-' + std::to_string(count) + oldFilename.substr(oldFilename.find_last_of("."), std::string::npos);
-		m_path.fullPath = m_path.folder + "/" + m_path.filename;
+	while (exists(desiredPath.fullPath)) {
+		desiredPath.filename = rawFilename + '-' + std::to_string(count) + oldFilename.substr(oldFilename.find_last_of("."), std::string::npos);
+		desiredPath.fullPath = desiredPath.folder + "/" + desiredPath.filename;
 		count++;
 	}
-	if (m_path.filename != oldFilename) {
-		emit(s_filenameChanged(m_path.filename));
+	if (desiredPath.filename != oldFilename) {
+		emit(s_filenameChanged(desiredPath.filename));
 	}
+	return desiredPath;
 }

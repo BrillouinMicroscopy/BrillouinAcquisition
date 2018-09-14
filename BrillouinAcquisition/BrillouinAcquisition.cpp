@@ -114,10 +114,10 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 
 	// slot to show current acquisition progress
 	connection = QWidget::connect(
-		m_Brillouin,
-		&Brillouin::s_repetitionRunning,
+		m_acquisition,
+		&Acquisition::s_acqModeRunning,
 		this,
-		[this](bool isRunning) { showAcqRunning(isRunning); }
+		[this](ACQUISITION_MODE mode) { showModeRunning(mode); }
 	);
 
 	// slot to show current acquisition position
@@ -163,6 +163,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<std::string>("std::string");
 	qRegisterMetaType<AT_64>("AT_64");
 	qRegisterMetaType<StoragePath>("StoragePath");
+	qRegisterMetaType<ACQUISITION_MODE>("ACQUISITION_MODE");
 	qRegisterMetaType<ACQUISITION_STATE>("ACQUISITION_STATE");
 	qRegisterMetaType<BRILLOUIN_SETTINGS>("BRILLOUIN_SETTINGS");
 	qRegisterMetaType<CAMERA_SETTINGS>("CAMERA_SETTINGS");
@@ -594,19 +595,48 @@ void BrillouinAcquisition::on_acquisitionRate_ODT_valueChanged(double rate) {
 }
 
 void BrillouinAcquisition::on_acquisitionStartODT_clicked() {
-	if (!m_ODT->isRunning()) {
+	if (!m_acquisition->isModeRunning(ACQUISITION_MODE::ODT)) {
 		QMetaObject::invokeMethod(m_ODT, "startRepetitions", Qt::AutoConnection);
 	} else {
 		m_ODT->abort();
 	}
 }
 
-void BrillouinAcquisition::showODTAcqRunning(bool isRunning) {
-	if (isRunning) {
+void BrillouinAcquisition::showModeRunning(ACQUISITION_MODE mode) {
+	m_modeRunning = mode;
+	// Brillouin
+	bool brillouinRunning = (bool)(m_modeRunning & ACQUISITION_MODE::BRILLOUIN);
+	if (brillouinRunning) {
+		ui->BrillouinStart->setText("Stop");
+	} else {
+		ui->BrillouinStart->setText("Start");
+	}
+	ui->startX->setEnabled(!brillouinRunning);
+	ui->startY->setEnabled(!brillouinRunning);
+	ui->startZ->setEnabled(!brillouinRunning);
+	ui->endX->setEnabled(!brillouinRunning);
+	ui->endY->setEnabled(!brillouinRunning);
+	ui->endZ->setEnabled(!brillouinRunning);
+	ui->stepsX->setEnabled(!brillouinRunning);
+	ui->stepsY->setEnabled(!brillouinRunning);
+	ui->stepsZ->setEnabled(!brillouinRunning);
+	ui->camera_playPause->setEnabled(!brillouinRunning);
+	ui->camera_singleShot->setEnabled(!brillouinRunning);
+	ui->setHome->setEnabled(!brillouinRunning);
+	ui->setPositionX->setEnabled(!brillouinRunning);
+	ui->setPositionY->setEnabled(!brillouinRunning);
+	ui->setPositionZ->setEnabled(!brillouinRunning);
+
+	// Brillouin
+	bool ODTRunning = (bool)(m_modeRunning & ACQUISITION_MODE::ODT);
+	if (ODTRunning) {
 		ui->acquisitionStartODT->setText("Cancel");
 	} else {
 		ui->acquisitionStartODT->setText("Start");
 	}
+
+	// Fluorescence
+	bool FluorescenceRunning = (bool)(m_modeRunning & ACQUISITION_MODE::FLUORESCENCE);
 }
 
 void BrillouinAcquisition::plotODTVoltages(ODT_SETTINGS settings, ODT_MODE mode) {
@@ -864,30 +894,6 @@ void BrillouinAcquisition::showBrightfieldPreviewRunning(bool isRunning) {
 		ui->camera_playPause_brightfield->setText("Play");
 	}
 	startBrightfieldPreview(isRunning);
-}
-
-void BrillouinAcquisition::showAcqRunning(bool isRunning) {
-	if (isRunning) {
-		ui->BrillouinStart->setText("Stop");
-	} else {
-		ui->BrillouinStart->setText("Start");
-	}
-	m_measurementRunning = isRunning;
-	ui->startX->setEnabled(!m_measurementRunning);
-	ui->startY->setEnabled(!m_measurementRunning);
-	ui->startZ->setEnabled(!m_measurementRunning);
-	ui->endX->setEnabled(!m_measurementRunning);
-	ui->endY->setEnabled(!m_measurementRunning);
-	ui->endZ->setEnabled(!m_measurementRunning);
-	ui->stepsX->setEnabled(!m_measurementRunning);
-	ui->stepsY->setEnabled(!m_measurementRunning);
-	ui->stepsZ->setEnabled(!m_measurementRunning);
-	ui->camera_playPause->setEnabled(!m_measurementRunning);
-	ui->camera_singleShot->setEnabled(!m_measurementRunning);
-	ui->setHome->setEnabled(!m_measurementRunning);
-	ui->setPositionX->setEnabled(!m_measurementRunning);
-	ui->setPositionY->setEnabled(!m_measurementRunning);
-	ui->setPositionZ->setEnabled(!m_measurementRunning);
 }
 
 void BrillouinAcquisition::startPreview(bool isRunning) {
@@ -1342,13 +1348,6 @@ void BrillouinAcquisition::initScanControl() {
 
 			connection = QWidget::connect(
 				m_ODT,
-				&ODT::s_repetitionRunning,
-				this,
-				[this](bool isRunning) { showODTAcqRunning(isRunning); }
-			);
-
-			connection = QWidget::connect(
-				m_ODT,
 				&ODT::s_mirrorVoltageChanged,
 				this,
 				[this](VOLTAGE2 voltage, ODT_MODE mode) { plotODTVoltage(voltage, mode); }
@@ -1580,7 +1579,7 @@ void BrillouinAcquisition::on_camera_singleShot_clicked() {
 }
 
 void BrillouinAcquisition::on_BrillouinStart_clicked() {
-	if (!m_Brillouin->isRunning()) {
+	if (!m_acquisition->isModeRunning(ACQUISITION_MODE::BRILLOUIN)) {
 		// set camera ROI
 		m_BrillouinSettings.camera.roi = m_deviceSettings.camera.roi;
 		m_Brillouin->setSettings(m_BrillouinSettings);
@@ -1722,25 +1721,25 @@ void BrillouinAcquisition::on_setHome_clicked() {
 }
 
 void BrillouinAcquisition::on_moveHome_clicked() {
-	if (!m_measurementRunning) {
+	if (m_modeRunning == ACQUISITION_MODE::NONE) {
 		QMetaObject::invokeMethod(m_scanControl, "moveHome", Qt::AutoConnection);
 	}
 }
 
 void BrillouinAcquisition::on_setPositionX_valueChanged(double positionX) {
-	if (!m_measurementRunning) {
+	if (m_modeRunning == ACQUISITION_MODE::NONE) {
 		QMetaObject::invokeMethod(m_scanControl, "setPositionRelativeX", Qt::AutoConnection, Q_ARG(double, positionX));
 	}
 }
 
 void BrillouinAcquisition::on_setPositionY_valueChanged(double positionY) {
-	if (!m_measurementRunning) {
+	if (m_modeRunning == ACQUISITION_MODE::NONE) {
 		QMetaObject::invokeMethod(m_scanControl, "setPositionRelativeY", Qt::AutoConnection, Q_ARG(double, positionY));
 	}
 }
 
 void BrillouinAcquisition::on_setPositionZ_valueChanged(double positionZ) {
-	if (!m_measurementRunning) {
+	if (m_modeRunning == ACQUISITION_MODE::NONE) {
 		QMetaObject::invokeMethod(m_scanControl, "setPositionRelativeZ", Qt::AutoConnection, Q_ARG(double, positionZ));
 	}
 }

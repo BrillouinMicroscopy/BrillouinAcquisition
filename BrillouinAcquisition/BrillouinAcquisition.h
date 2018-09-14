@@ -48,6 +48,7 @@ enum ROI_SOURCE {
 Q_DECLARE_METATYPE(std::string);
 Q_DECLARE_METATYPE(AT_64);
 Q_DECLARE_METATYPE(StoragePath);
+Q_DECLARE_METATYPE(ACQUISITION_MODE);
 Q_DECLARE_METATYPE(ACQUISITION_STATE);
 Q_DECLARE_METATYPE(BRILLOUIN_SETTINGS);
 Q_DECLARE_METATYPE(CAMERA_SETTINGS);
@@ -154,7 +155,7 @@ private slots:
 	void showBrillouinProgress(ACQUISITION_STATE state, double progress, int seconds);
 	void showCalibrationInterval(int);
 	void showCalibrationRunning(bool);
-	void showAcqRunning(bool);
+	void showModeRunning(ACQUISITION_MODE mode);
 	void updateFilename(std::string);
 
 	// ODT signals
@@ -168,7 +169,6 @@ private slots:
 	void on_acquisitionStartODT_clicked();
 
 	void showODTAlgnRunning(bool);
-	void showODTAcqRunning(bool);
 
 	QString formatSeconds(int seconds);
 
@@ -272,7 +272,7 @@ private:
 	StoragePath m_storagePath{ "", ".", "." };
 	bool m_previewRunning = false;
 	bool m_brightfieldPreviewRunning = false;
-	bool m_measurementRunning = false;
+	ACQUISITION_MODE m_modeRunning = ACQUISITION_MODE::NONE;
 
 	//std::vector<POINT3> m_savedPositions = { {0,0,0}, {100,100,100}, {-200,200,300}, { -10.4,100,100 } };
 

@@ -6,11 +6,6 @@ AcquisitionMode::AcquisitionMode(QObject *parent, Acquisition *acquisition)
 }
 
 AcquisitionMode::~AcquisitionMode() {
-	m_running = false;
-}
-
-bool AcquisitionMode::isRunning() {
-	return m_running;
 }
 
 void AcquisitionMode::abort() {

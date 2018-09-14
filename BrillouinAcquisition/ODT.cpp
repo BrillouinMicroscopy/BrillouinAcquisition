@@ -66,47 +66,47 @@ void ODT::initialize() {
 }
 
 void ODT::startRepetitions() {
-	if (!m_running) {
-		// start acquisition
-		m_running = true;
-		m_abort = false;
-		emit(s_repetitionRunning(m_running));
-		acquire(m_acquisition->m_storage);
-	} else {
-		// abort acquisition
-		m_running = false;
-		emit(s_repetitionRunning(m_running));
+	bool allowed = m_acquisition->startMode(ACQUISITION_MODE::ODT);
+	if (!allowed) {
+		return;
 	}
+
+	m_abort = false;
+	acquire(m_acquisition->m_storage);
+
+	m_acquisition->stopMode(ACQUISITION_MODE::ODT);
 }
 
 void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
-	if (m_running) {
-		VOLTAGE2 voltage;
-		for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
-			if (m_abort) {
-				break;
-			}
-			voltage = m_acqSettings.voltages[i];
-			// set new voltage to galvo mirrors
-
-			// announce mirror voltage
-			emit(s_mirrorVoltageChanged(voltage, ODT_MODE::ACQ));
-
-			// wait appropriate time
-			Sleep(10);
-
-			// trigger image acquisition
+	VOLTAGE2 voltage;
+	for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
+		if (m_abort) {
+			m_acquisition->stopMode(ACQUISITION_MODE::ODT);
+			break;
 		}
+		voltage = m_acqSettings.voltages[i];
+		// set new voltage to galvo mirrors
 
-		// read images from camera
+		// announce mirror voltage
+		emit(s_mirrorVoltageChanged(voltage, ODT_MODE::ACQ));
 
-		// store images
-		m_running = false;
+		// wait appropriate time
+		Sleep(10);
+
+		// trigger image acquisition
 	}
-	emit(s_repetitionRunning(m_running));
+
+	// read images from camera
+
+	// store images
+
 }
 
 void ODT::startAlignment() {
+	bool allowed = m_acquisition->startMode(ACQUISITION_MODE::ODT);
+	if (!allowed) {
+		return;
+	}
 	if (!m_algnRunning) {
 		m_algnRunning = true;
 		if (!m_algnTimer->isActive()) {
@@ -119,6 +119,7 @@ void ODT::startAlignment() {
 		}
 	}
 	emit(s_algnRunning(m_algnRunning));
+	m_acquisition->stopMode(ACQUISITION_MODE::ODT);
 }
 
 void ODT::nextAlgnPosition() {
