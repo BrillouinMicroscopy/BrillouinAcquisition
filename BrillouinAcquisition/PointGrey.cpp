@@ -135,7 +135,7 @@ bool PointGrey::getConnectionStatus() {
 	return m_isConnected;
 }
 
-void PointGrey::setSettings() {
+void PointGrey::setSettingsPreview() {
 	/*
 	 * Set acquisition to continuous
 	 */
@@ -208,6 +208,79 @@ void PointGrey::setSettings() {
 	readSettings();
 }
 
+void PointGrey::setSettingsMeasurement() {
+	/*
+	* Set acquisition to continuous
+	*/
+	//m_camera->AcquisitionMode.SetValue(AcquisitionModeEnums::AcquisitionMode_Continuous);
+
+	/*
+	* Set the exposure time
+	*/
+	Property prop;
+	//Define the property to adjust.
+	prop.type = SHUTTER;
+	//Ensure the property is on.
+	prop.onOff = true;
+	// Ensure auto - adjust mode is off.
+	prop.autoManualMode = false;
+	//Ensure the property is set up to use absolute value control.
+	prop.absControl = true;
+	//Set the absolute value of shutter to 1 ms.
+	m_settings.exposureTime = 0.001;	// [s]
+	prop.absValue = 1e3*m_settings.exposureTime;
+	//Set the property.
+	m_camera.SetProperty(&prop);
+
+	/*
+	* Set ROI and pixel format
+	*/
+	// Create a Format7 Configuration
+	Format7ImageSettings fmt7ImageSettings;
+
+	Mode fmt7Mode = MODE_0;
+	fmt7ImageSettings.mode = fmt7Mode;
+	// Possible values: PIXEL_FORMAT_RAW8, PIXEL_FORMAT_MONO8, PIXEL_FORMAT_MONO12, PIXEL_FORMAT_MONO16
+	fmt7ImageSettings.pixelFormat = PIXEL_FORMAT_RAW8;
+
+	// Offset x to minimum
+	m_settings.roi.left = 127;
+	fmt7ImageSettings.offsetX = m_settings.roi.left;
+	// Offset y to minimum
+	m_settings.roi.top = 0;
+	fmt7ImageSettings.offsetY = m_settings.roi.top;
+	// Width to maximum
+	m_settings.roi.width = 1024;
+	fmt7ImageSettings.width = m_settings.roi.width;
+	// Height to maximum
+	m_settings.roi.height = m_options.ROIHeightLimits[1];
+	fmt7ImageSettings.height = m_settings.roi.height;
+
+	Format7PacketInfo fmt7PacketInfo;
+	bool valid;
+	m_camera.ValidateFormat7Settings(&fmt7ImageSettings, &valid, &fmt7PacketInfo);
+	if (valid) {
+		m_camera.SetFormat7Configuration(&fmt7ImageSettings, fmt7PacketInfo.recommendedBytesPerPacket);
+	}
+
+	/*
+	* Set trigger mode
+	*/
+	TriggerMode triggerMode;
+	m_camera.GetTriggerMode(&triggerMode);
+	triggerMode.onOff = true;
+	triggerMode.source = 0;	// 7 for software trigger
+	triggerMode.mode = 0;
+	triggerMode.parameter = 0;
+
+	m_camera.SetTriggerMode(&triggerMode);
+
+	PollForTriggerReady(&m_camera);
+
+	// Read the settings back
+	readSettings();
+}
+
 void PointGrey::startPreview(CAMERA_SETTINGS settings) {
 	m_isPreviewRunning = true;
 	m_settings = settings;
@@ -222,7 +295,7 @@ void PointGrey::preparePreview() {
 	m_settings.roi.height = m_options.ROIHeightLimits[1];
 	m_settings.roi.top = 1;
 
-	setSettings();
+	setSettingsPreview();
 
 	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
 	BUFFER_SETTINGS bufferSettings = { 4, pixelNumber, m_settings.roi };
@@ -242,6 +315,23 @@ void PointGrey::stopPreview() {
 
 void PointGrey::cleanupAcquisition() {
 	m_camera.StopCapture();
+}
+
+void PointGrey::readImageFromCamera(unsigned char * buffer) {
+	Image rawImage;
+	m_camera.RetrieveBuffer(&rawImage);
+
+	// Convert the raw image
+	Image convertedImage;
+	rawImage.Convert(PIXEL_FORMAT_RAW8, &convertedImage);
+
+	// Get access to raw data
+	unsigned char* data = static_cast<unsigned char*>(convertedImage.GetData());
+
+	// Copy data to preview buffer
+	if (data != NULL) {
+		memcpy(buffer, data, m_settings.roi.width*m_settings.roi.height);
+	}
 }
 
 void PointGrey::getImageForPreview() {
@@ -264,21 +354,7 @@ void PointGrey::acquireImage(unsigned char* buffer) {
 	// Fire the software trigger
 	FireSoftwareTrigger(&m_camera);
 
-	Image rawImage;
-	m_camera.RetrieveBuffer(&rawImage);
-
-	// Convert the raw image
-	Image convertedImage;
-	rawImage.Convert(PIXEL_FORMAT_RAW8, &convertedImage);
-
-	// Get access to raw data
-	unsigned char* data = static_cast<unsigned char*>(convertedImage.GetData());
-
-	// Copy data to preview buffer
-	if (data != NULL) {
-		memcpy(buffer, data, m_settings.roi.width*m_settings.roi.height);
-	}
-
+	readImageFromCamera(buffer);
 };
 
 bool PointGrey::PollForTriggerReady(Camera *camera) {

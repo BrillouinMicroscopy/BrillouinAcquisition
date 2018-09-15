@@ -63,6 +63,7 @@ private:
 	QTimer *m_algnTimer = nullptr;
 
 	void calculateVoltages(ODT_MODE);
+	void configureCamera(ODT_MODE);
 
 private slots:
 	void acquire(std::unique_ptr <StorageWrapper> & storage) override;

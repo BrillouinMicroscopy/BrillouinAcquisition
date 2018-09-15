@@ -47,7 +47,8 @@ public:
 
 	bool getConnectionStatus();
 
-	void setSettings();
+	void setSettingsPreview();
+	void setSettingsMeasurement();
 	void stopPreview();
 
 	// preview buffer for live acquisition
@@ -58,6 +59,7 @@ public slots:
 	void disconnectDevice();
 
 	void startPreview(CAMERA_SETTINGS settings);
+	void readImageFromCamera(unsigned char* buffer);
 
 signals:
 	void connectedDevice(bool);

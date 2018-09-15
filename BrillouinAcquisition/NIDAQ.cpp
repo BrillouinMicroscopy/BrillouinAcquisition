@@ -86,12 +86,22 @@ NIDAQ::~NIDAQ() {
 
 bool NIDAQ::connectDevice() {
 	if (!m_isConnected) {
-		// Connect to DAQ
-		DAQmxCreateTask("", &taskHandle);
+		// Create task for analog output
+		DAQmxCreateTask("AO", &AOtaskHandle);
 		// Configure analog output channels
-		DAQmxCreateAOVoltageChan(taskHandle, "Dev1/ao0:1", "", -1.0, 1.0, DAQmx_Val_Volts, "");
-		// Start DAQ task
-		DAQmxStartTask(taskHandle);
+		DAQmxCreateAOVoltageChan(AOtaskHandle, "Dev1/ao0:1", "AO", -1.0, 1.0, DAQmx_Val_Volts, "");
+		// Start analog task
+		DAQmxStartTask(AOtaskHandle);
+
+		// Create task for digital output
+		DAQmxCreateTask("DO", &DOtaskHandle);
+		// Configure digital output channel
+		DAQmxCreateDOChan(DOtaskHandle, "Dev1/port0/line1:1", "DO", DAQmx_Val_ChanForAllLines);
+		// Start digital task
+		DAQmxStartTask(AOtaskHandle);
+		// Set digital line to low
+		DAQmxWriteDigitalLines(DOtaskHandle, 1, 1, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
+
 		// Connect to T-Cube Piezo Inertial Controller
 		int ret = Thorlabs_TIM::TIM_Open(m_serialNo_TIM);
 		if (ret == 0) {
@@ -116,8 +126,8 @@ bool NIDAQ::disconnectDevice() {
 	if (m_isConnected) {
 		stopAnnouncingElementPosition();
 		// Stop and clear DAQ task
-		DAQmxStopTask(taskHandle);
-		DAQmxClearTask(taskHandle);
+		DAQmxStopTask(AOtaskHandle);
+		DAQmxClearTask(AOtaskHandle);
 
 		// Disconnect from T-Cube Piezo Inertial Controller
 		Thorlabs_TIM::TIM_StopPolling(m_serialNo_TIM);
@@ -210,7 +220,7 @@ void NIDAQ::applyScanPosition() {
 	// set the x- and y-position
 	m_voltages = positionToVoltage(POINT2{ 1e-6*m_position.x, 1e-6*m_position.y });
 	float64 data[2] = { m_voltages.Ux, m_voltages.Uy };
-	DAQmxWriteAnalogF64(taskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
+	DAQmxWriteAnalogF64(AOtaskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
 	// set the z-position
 	Thorlabs_TIM::TIM_MoveAbsolute(m_serialNo_TIM, m_channelPosZ, m_PiezoIncPerMum * m_position.z);
 	calculateCurrentPositionBounds();
@@ -242,7 +252,7 @@ void NIDAQ::setPosition(POINT3 position) {
 
 void NIDAQ::setVoltage(VOLTAGE2 voltages) {
 	float64 data[2] = { voltages.Ux, voltages.Uy };
-	DAQmxWriteAnalogF64(taskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
+	DAQmxWriteAnalogF64(AOtaskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
 }
 
 void NIDAQ::setPositionRelativeX(double positionX) {
@@ -311,6 +321,12 @@ double NIDAQ::getCalibrationValue(H5::H5File file, std::string datasetName) {
 	dataset.read(&value, PredType::NATIVE_DOUBLE, memspace, filespace);
 
 	return value;
+}
+
+void NIDAQ::triggerCamera() {
+	DAQmxWriteDigitalLines(DOtaskHandle, 1, 1, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
+	DAQmxWriteDigitalLines(DOtaskHandle, 1, 1, 10, DAQmx_Val_GroupByChannel, &m_TTL.high, NULL, NULL);
+	DAQmxWriteDigitalLines(DOtaskHandle, 1, 1, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
 }
 
 POINT3 NIDAQ::getPosition() {

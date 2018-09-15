@@ -7,8 +7,12 @@ StorageWrapper::~StorageWrapper() {
 	// clear image queue in case acquisition was aborted
 	// and the queue is still filled
 	if (m_abort) {
-		while (!m_payloadQueue.isEmpty()) {
-			IMAGE *img = m_payloadQueue.dequeue();
+		while (!m_payloadQueueBrillouin.isEmpty()) {
+			IMAGE *img = m_payloadQueueBrillouin.dequeue();
+			delete img;
+		}
+		while (!m_payloadQueueODT.isEmpty()) {
+			ODTIMAGE *img = m_payloadQueueODT.dequeue();
 			delete img;
 		}
 		while (!m_calibrationQueue.isEmpty()) {
@@ -19,7 +23,12 @@ StorageWrapper::~StorageWrapper() {
 }
 
 void StorageWrapper::s_enqueuePayload(IMAGE *img) {
-	m_payloadQueue.enqueue(img);
+	m_payloadQueueBrillouin.enqueue(img);
+	s_writeQueues();
+}
+
+void StorageWrapper::s_enqueuePayload(ODTIMAGE *img) {
+	m_payloadQueueODT.enqueue(img);
 	s_writeQueues();
 }
 
@@ -43,13 +52,27 @@ void StorageWrapper::stopWritingQueues() {
 }
 
 void StorageWrapper::s_writeQueues() {
-	while (!m_payloadQueue.isEmpty()) {
+	while (!m_payloadQueueBrillouin.isEmpty()) {
 		if (m_abort) {
 			m_finished = true;
 			return;
 		}
-		IMAGE *img = m_payloadQueue.dequeue();
-		setPayloadData(img->indX, img->indY, img->indZ, img->data, img->rank, img->dims, img->date);
+		IMAGE *img = m_payloadQueueBrillouin.dequeue();
+		setPayloadData(img);
+		//std::string info = "Image written " + std::to_string(m_writtenImagesNr);
+		//qInfo(logInfo()) << info.c_str();
+		m_writtenImagesNr++;
+		delete img;
+		img = nullptr;
+	}
+
+	while (!m_payloadQueueODT.isEmpty()) {
+		if (m_abort) {
+			m_finished = true;
+			return;
+		}
+		ODTIMAGE *img = m_payloadQueueODT.dequeue();
+		setPayloadData(img);
 		//std::string info = "Image written " + std::to_string(m_writtenImagesNr);
 		//qInfo(logInfo()) << info.c_str();
 		m_writtenImagesNr++;

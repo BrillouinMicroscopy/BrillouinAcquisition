@@ -72,7 +72,15 @@ void ODT::startRepetitions() {
 	}
 
 	m_abort = false;
+
+	// configure camera for measurement
+	configureCamera(ODT_MODE::ACQ);
+
+	// start repetition
 	acquire(m_acquisition->m_storage);
+
+	// configure camera for preview
+	configureCamera(ODT_MODE::ALGN);
 
 	m_acquisition->stopMode(ACQUISITION_MODE::ODT);
 }
@@ -86,20 +94,54 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 		}
 		voltage = m_acqSettings.voltages[i];
 		// set new voltage to galvo mirrors
+		(*m_NIDAQ)->setVoltage(voltage);
 
 		// announce mirror voltage
 		emit(s_mirrorVoltageChanged(voltage, ODT_MODE::ACQ));
 
 		// wait appropriate time
-		Sleep(10);
+		Sleep(0.4);
 
 		// trigger image acquisition
+		(*m_NIDAQ)->triggerCamera();
 	}
 
-	// read images from camera
+	/*
+	 * Read the images from the camera
+	 */
+	int rank_data{ 3 };
+	hsize_t dims_data[3] = { m_acqSettings.camera.frameCount, m_acqSettings.camera.roi.height, m_acqSettings.camera.roi.width };
+	int bytesPerFrame = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height;
+	for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
+		if (m_abort) {
+			break;
+		}
 
-	// store images
+		// read images from camera
+		std::vector<unsigned char> images(bytesPerFrame * m_acqSettings.camera.frameCount);
 
+		for (gsl::index mm{ 0 }; mm < m_acqSettings.camera.frameCount; mm++) {
+			if (m_abort) {
+				break;
+			}
+
+			// acquire images
+			int64_t pointerPos = (int64_t)bytesPerFrame * mm;
+			(*m_pointGrey)->readImageFromCamera(&images[pointerPos]);
+		}
+
+		// cast the vector to unsigned short
+		std::vector<unsigned char> *images_ = (std::vector<unsigned char> *) &images;
+
+		// store images
+		// asynchronously write image to disk
+		// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
+		std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
+			.toString(Qt::ISODateWithMs).toStdString();
+		ODTIMAGE *img = new ODTIMAGE((int)i, rank_data, dims_data, date, *images_);
+
+		QMetaObject::invokeMethod(storage.get(), "s_enqueuePayload", Qt::AutoConnection, Q_ARG(ODTIMAGE*, img));
+	}
 }
 
 void ODT::startAlignment() {
@@ -194,5 +236,16 @@ void ODT::calculateVoltages(ODT_MODE mode) {
 		m_acqSettings.numberPoints = m_acqSettings.voltages.size();
 
 		emit(s_acqSettingsChanged(m_acqSettings));
+	}
+}
+
+void ODT::configureCamera(ODT_MODE mode) {
+	switch (mode) {
+		case ODT_MODE::ACQ:
+			(*m_pointGrey)->setSettingsMeasurement();
+			break;
+		case ODT_MODE::ALGN:
+			(*m_pointGrey)->setSettingsPreview();
+			break;
 	}
 }

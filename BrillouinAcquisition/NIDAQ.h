@@ -26,7 +26,13 @@ class NIDAQ: public ScanControl {
 	Q_OBJECT
 
 private:
-	TaskHandle taskHandle = 0;
+	TaskHandle AOtaskHandle = 0;
+	TaskHandle DOtaskHandle = 0;
+
+	struct TTL {
+		const uInt8 low = 0;
+		const uInt8 high = 1;
+	} m_TTL;
 	
 	struct Calibration {
 		std::string date{ "" };
@@ -105,6 +111,8 @@ public slots:
 	void setPositionRelativeZ(double position);
 	void loadVoltagePositionCalibration(std::string filepath) override;
 	double getCalibrationValue(H5::H5File file, std::string datasetName);
+
+	void triggerCamera();
 };
 
 #endif // NIDAQMX_H

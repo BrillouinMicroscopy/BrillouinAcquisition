@@ -9,34 +9,6 @@ struct StoragePath {
 	std::string fullPath = folder + '/' + filename;
 };
 
-struct IMAGE {
-public:
-	IMAGE(int indX, int indY, int indZ, int rank, hsize_t *dims, std::string date, std::vector<unsigned short> data) :
-		indX(indX), indY(indY), indZ(indZ), rank(rank), dims(dims), date(date), data(data) {};
-
-	const int indX;
-	const int indY;
-	const int indZ;
-	const int rank;
-	const hsize_t *dims;
-	const std::string date;
-	const std::vector<unsigned short> data;
-};
-
-struct CALIBRATION {
-public:
-	CALIBRATION(int index, std::vector<unsigned short> data, int rank, hsize_t *dims, std::string sample, double shift, std::string date) :
-		index(index), data(data), rank(rank), dims(dims), sample(sample), shift(shift), date(date) {};
-
-	const int index;
-	const std::vector<unsigned short> data;
-	const int rank;
-	const hsize_t *dims;
-	const std::string sample;
-	const double shift;
-	const std::string date;
-};
-
 class StorageWrapper : public H5BM {
 	Q_OBJECT
 private:
@@ -53,20 +25,22 @@ public:
 	) noexcept : H5BM(parent, path.fullPath, flags) {};
 	~StorageWrapper();
 
-	QQueue<IMAGE*> m_payloadQueue;
+	QQueue<IMAGE*> m_payloadQueueBrillouin;
+	QQueue<ODTIMAGE*> m_payloadQueueODT;
 	QQueue<CALIBRATION*> m_calibrationQueue;
 	bool m_abort = false;
 
 	void startWritingQueues();
 	void stopWritingQueues();
 
-	int m_writtenImagesNr = 0;
-	int m_writtenCalibrationsNr = 0;
+	int m_writtenImagesNr{ 0 };
+	int m_writtenCalibrationsNr{ 0 };
 
 public slots:
 	void s_writeQueues();
 
 	void s_enqueuePayload(IMAGE*);
+	void s_enqueuePayload(ODTIMAGE*);
 	void s_enqueueCalibration(CALIBRATION *cal);
 
 	void s_finishedQueueing();
