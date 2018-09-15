@@ -319,7 +319,7 @@ void PointGrey::cleanupAcquisition() {
 
 void PointGrey::readImageFromCamera(unsigned char * buffer) {
 	Image rawImage;
-	m_camera.RetrieveBuffer(&rawImage);
+	Error tmp = m_camera.RetrieveBuffer(&rawImage);
 
 	// Convert the raw image
 	Image convertedImage;

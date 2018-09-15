@@ -76,16 +76,23 @@ void ODT::startRepetitions() {
 	// configure camera for measurement
 	configureCamera(ODT_MODE::ACQ);
 
+	(*m_pointGrey)->m_camera.StartCapture();
+
+	m_acquisition->newRepetition(ACQUISITION_MODE::ODT);
+
 	// start repetition
 	acquire(m_acquisition->m_storage);
 
 	// configure camera for preview
+
+	(*m_pointGrey)->m_camera.StopCapture();
 	configureCamera(ODT_MODE::ALGN);
 
 	m_acquisition->stopMode(ACQUISITION_MODE::ODT);
 }
 
 void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
+
 	VOLTAGE2 voltage;
 	for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
 		if (m_abort) {
@@ -109,6 +116,10 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	/*
 	 * Read the images from the camera
 	 */
+
+	m_acqSettings.camera.frameCount = 1;
+	m_acqSettings.camera.roi.height = 1024;
+	m_acqSettings.camera.roi.width = 1024;
 	int rank_data{ 3 };
 	hsize_t dims_data[3] = { m_acqSettings.camera.frameCount, m_acqSettings.camera.roi.height, m_acqSettings.camera.roi.width };
 	int bytesPerFrame = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height;
@@ -118,7 +129,7 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 		}
 
 		// read images from camera
-		std::vector<unsigned char> images(bytesPerFrame * m_acqSettings.camera.frameCount);
+		std::vector<unsigned char> images(bytesPerFrame);
 
 		for (gsl::index mm{ 0 }; mm < m_acqSettings.camera.frameCount; mm++) {
 			if (m_abort) {

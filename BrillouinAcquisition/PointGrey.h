@@ -16,7 +16,6 @@ class PointGrey : public QObject {
 private:
 	BusManager m_busManager;
 	PGRGuid m_guid;
-	Camera m_camera;
 
 	bool m_isConnected{ false };
 
@@ -42,6 +41,7 @@ private slots:
 public:
 	PointGrey() noexcept {};
 	~PointGrey();
+	Camera m_camera;
 
 	bool m_isPreviewRunning = false;
 
