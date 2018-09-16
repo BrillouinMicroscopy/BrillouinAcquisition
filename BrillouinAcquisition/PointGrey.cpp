@@ -244,7 +244,7 @@ void PointGrey::setSettingsMeasurement() {
 	fmt7ImageSettings.pixelFormat = PIXEL_FORMAT_RAW8;
 
 	// Offset x to minimum
-	m_settings.roi.left = 127;
+	m_settings.roi.left = 128;
 	fmt7ImageSettings.offsetX = m_settings.roi.left;
 	// Offset y to minimum
 	m_settings.roi.top = 0;
