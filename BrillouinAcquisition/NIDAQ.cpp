@@ -96,11 +96,11 @@ bool NIDAQ::connectDevice() {
 		// Create task for digital output
 		DAQmxCreateTask("DO", &DOtaskHandle);
 		// Configure digital output channel
-		DAQmxCreateDOChan(DOtaskHandle, "Dev1/port0/line1:1", "DO", DAQmx_Val_ChanForAllLines);
+		DAQmxCreateDOChan(DOtaskHandle, "Dev1/Port0/Line0:0", "DO", DAQmx_Val_ChanForAllLines);
 		// Start digital task
-		DAQmxStartTask(AOtaskHandle);
+		DAQmxStartTask(DOtaskHandle);
 		// Set digital line to low
-		DAQmxWriteDigitalLines(DOtaskHandle, 1, 1, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
+		DAQmxWriteDigitalLines(DOtaskHandle, 1, true, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
 
 		// Connect to T-Cube Piezo Inertial Controller
 		int ret = Thorlabs_TIM::TIM_Open(m_serialNo_TIM);
@@ -125,9 +125,11 @@ bool NIDAQ::connectDevice() {
 bool NIDAQ::disconnectDevice() {
 	if (m_isConnected) {
 		stopAnnouncingElementPosition();
-		// Stop and clear DAQ task
+		// Stop and clear DAQ tasks
 		DAQmxStopTask(AOtaskHandle);
 		DAQmxClearTask(AOtaskHandle);
+		DAQmxStopTask(DOtaskHandle);
+		DAQmxClearTask(DOtaskHandle);
 
 		// Disconnect from T-Cube Piezo Inertial Controller
 		Thorlabs_TIM::TIM_StopPolling(m_serialNo_TIM);
@@ -324,9 +326,10 @@ double NIDAQ::getCalibrationValue(H5::H5File file, std::string datasetName) {
 }
 
 void NIDAQ::triggerCamera() {
-	DAQmxWriteDigitalLines(DOtaskHandle, 1, 1, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
-	DAQmxWriteDigitalLines(DOtaskHandle, 1, 1, 10, DAQmx_Val_GroupByChannel, &m_TTL.high, NULL, NULL);
-	DAQmxWriteDigitalLines(DOtaskHandle, 1, 1, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
+	DAQmxWriteDigitalLines(DOtaskHandle, 1, true, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
+	DAQmxWriteDigitalLines(DOtaskHandle, 1, true, 10, DAQmx_Val_GroupByChannel, &m_TTL.high, NULL, NULL);
+	Sleep(1);
+	DAQmxWriteDigitalLines(DOtaskHandle, 1, true, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
 }
 
 POINT3 NIDAQ::getPosition() {
