@@ -272,6 +272,7 @@ void PointGrey::setSettingsMeasurement() {
 	triggerMode.source = 0;	// 7 for software trigger
 	triggerMode.mode = 0;
 	triggerMode.parameter = 0;
+	triggerMode.polarity = 0;
 
 	m_camera.SetTriggerMode(&triggerMode);
 
