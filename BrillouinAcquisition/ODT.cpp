@@ -94,6 +94,16 @@ void ODT::startRepetitions() {
 void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 
 	VOLTAGE2 voltage;
+
+	/*
+	 * Set the mirror voltage and get the camera images
+	 */
+	m_acqSettings.camera.frameCount = 1;
+	m_acqSettings.camera.roi.height = 1024;
+	m_acqSettings.camera.roi.width = 1024;
+	int rank_data{ 3 };
+	hsize_t dims_data[3] = { m_acqSettings.camera.frameCount, m_acqSettings.camera.roi.height, m_acqSettings.camera.roi.width };
+	int bytesPerFrame = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height;
 	for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
 		if (m_abort) {
 			m_acquisition->stopMode(ACQUISITION_MODE::ODT);
@@ -109,25 +119,6 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 		// wait appropriate time
 		Sleep(0.4);
 
-		// trigger image acquisition
-		(*m_NIDAQ)->triggerCamera();
-	}
-
-	/*
-	 * Read the images from the camera
-	 */
-
-	m_acqSettings.camera.frameCount = 1;
-	m_acqSettings.camera.roi.height = 1024;
-	m_acqSettings.camera.roi.width = 1024;
-	int rank_data{ 3 };
-	hsize_t dims_data[3] = { m_acqSettings.camera.frameCount, m_acqSettings.camera.roi.height, m_acqSettings.camera.roi.width };
-	int bytesPerFrame = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height;
-	for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
-		if (m_abort) {
-			break;
-		}
-
 		// read images from camera
 		std::vector<unsigned char> images(bytesPerFrame);
 
@@ -135,6 +126,9 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 			if (m_abort) {
 				break;
 			}
+
+			// trigger image acquisition
+			(*m_NIDAQ)->triggerCamera();
 
 			// acquire images
 			int64_t pointerPos = (int64_t)bytesPerFrame * mm;
