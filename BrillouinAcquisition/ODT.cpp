@@ -115,20 +115,25 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 
 		// announce mirror voltage
 		emit(s_mirrorVoltageChanged(voltage, ODT_MODE::ACQ));
-
+		
 		// wait appropriate time
-		Sleep(0.4);
+		Sleep(2);
+
+		// trigger image acquisition
+		(*m_NIDAQ)->triggerCamera();
+	}
+
+
+	for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
 
 		// read images from camera
 		std::vector<unsigned char> images(bytesPerFrame);
 
 		for (gsl::index mm{ 0 }; mm < m_acqSettings.camera.frameCount; mm++) {
 			if (m_abort) {
+				m_acquisition->stopMode(ACQUISITION_MODE::ODT);
 				break;
 			}
-
-			// trigger image acquisition
-			(*m_NIDAQ)->triggerCamera();
 
 			// acquire images
 			int64_t pointerPos = (int64_t)bytesPerFrame * mm;

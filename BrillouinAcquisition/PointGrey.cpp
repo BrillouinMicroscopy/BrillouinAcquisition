@@ -154,7 +154,7 @@ void PointGrey::setSettingsPreview() {
 	//Ensure the property is set up to use absolute value control.
 	prop.absControl = true;
 	//Set the absolute value of shutter to 1 ms.
-	m_settings.exposureTime = 0.001;	// [s]
+	m_settings.exposureTime = 0.005;	// [s]
 	prop.absValue = 1e3*m_settings.exposureTime;
 	//Set the property.
 	m_camera.SetProperty(&prop);
@@ -204,6 +204,16 @@ void PointGrey::setSettingsPreview() {
 
 	PollForTriggerReady(&m_camera);
 
+	/*
+	* Set the buffering mode.
+	*/
+	FC2Config BufferFrame;
+	m_camera.GetConfiguration(&BufferFrame);
+	BufferFrame.grabMode = DROP_FRAMES;
+	BufferFrame.numBuffers = 10;
+	BufferFrame.highPerformanceRetrieveBuffer = false;
+	m_camera.SetConfiguration(&BufferFrame);
+
 	// Read the settings back
 	readSettings();
 }
@@ -227,7 +237,7 @@ void PointGrey::setSettingsMeasurement() {
 	//Ensure the property is set up to use absolute value control.
 	prop.absControl = true;
 	//Set the absolute value of shutter to 1 ms.
-	m_settings.exposureTime = 0.001;	// [s]
+	m_settings.exposureTime = 0.005;	// [s]
 	prop.absValue = 1e3*m_settings.exposureTime;
 	//Set the property.
 	m_camera.SetProperty(&prop);
@@ -276,7 +286,15 @@ void PointGrey::setSettingsMeasurement() {
 
 	m_camera.SetTriggerMode(&triggerMode);
 
-	PollForTriggerReady(&m_camera);
+	/*
+	 * Set the buffering mode.
+	 */
+	FC2Config BufferFrame;
+	m_camera.GetConfiguration(&BufferFrame);
+	BufferFrame.grabMode = BUFFER_FRAMES;
+	BufferFrame.numBuffers = 150;
+	BufferFrame.highPerformanceRetrieveBuffer = true;
+	m_camera.SetConfiguration(&BufferFrame);
 
 	// Read the settings back
 	readSettings();

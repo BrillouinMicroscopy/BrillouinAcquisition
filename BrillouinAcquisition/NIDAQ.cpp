@@ -90,6 +90,8 @@ bool NIDAQ::connectDevice() {
 		DAQmxCreateTask("AO", &AOtaskHandle);
 		// Configure analog output channels
 		DAQmxCreateAOVoltageChan(AOtaskHandle, "Dev1/ao0:1", "AO", -1.0, 1.0, DAQmx_Val_Volts, "");
+		// Configure sample rate
+		//DAQmxCfgSampClkTiming(AOtaskHandle, "", 10000.0, DAQmx_Val_Rising, DAQmx_Val_FiniteSamps, 1000);
 		// Start analog task
 		DAQmxStartTask(AOtaskHandle);
 
@@ -97,10 +99,13 @@ bool NIDAQ::connectDevice() {
 		DAQmxCreateTask("DO", &DOtaskHandle);
 		// Configure digital output channel
 		DAQmxCreateDOChan(DOtaskHandle, "Dev1/Port0/Line0:0", "DO", DAQmx_Val_ChanForAllLines);
+		// Configure sample rate
+		//DAQmxCfgSampClkTiming(DOtaskHandle, "", 10000.0, DAQmx_Val_Rising, DAQmx_Val_FiniteSamps, 1000);
 		// Start digital task
 		DAQmxStartTask(DOtaskHandle);
 		// Set digital line to low
 		DAQmxWriteDigitalLines(DOtaskHandle, 1, true, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
+
 
 		// Connect to T-Cube Piezo Inertial Controller
 		int ret = Thorlabs_TIM::TIM_Open(m_serialNo_TIM);
@@ -327,9 +332,11 @@ double NIDAQ::getCalibrationValue(H5::H5File file, std::string datasetName) {
 
 void NIDAQ::triggerCamera() {
 	DAQmxWriteDigitalLines(DOtaskHandle, 1, true, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
+	Sleep(10);
 	DAQmxWriteDigitalLines(DOtaskHandle, 1, true, 10, DAQmx_Val_GroupByChannel, &m_TTL.high, NULL, NULL);
-	Sleep(1);
+	Sleep(10);
 	DAQmxWriteDigitalLines(DOtaskHandle, 1, true, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
+	Sleep(10);
 }
 
 POINT3 NIDAQ::getPosition() {
