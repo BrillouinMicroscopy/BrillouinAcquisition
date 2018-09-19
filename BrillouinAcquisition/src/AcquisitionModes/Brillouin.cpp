@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Brillouin.h"
-#include "simplemath.h"
-#include "logger.h"
+#include "..\simplemath.h"
+#include "..\logger.h"
 #include "filesystem"
 
 using namespace std::experimental::filesystem::v1;

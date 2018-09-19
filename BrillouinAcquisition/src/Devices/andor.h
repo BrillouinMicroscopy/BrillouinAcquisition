@@ -4,7 +4,7 @@
 #include "atcore.h"
 #include "atutility.h"
 #include "cameraParameters.h"
-#include "previewBuffer.h"
+#include "..\previewBuffer.h"
 
 typedef enum enAndorTemperatureStatus{
 	COOLER_OFF,

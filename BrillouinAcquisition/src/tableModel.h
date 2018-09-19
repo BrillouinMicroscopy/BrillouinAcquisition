@@ -2,7 +2,7 @@
 #define TABLEMODEL_H
 
 #include <QAbstractTableModel>
-#include "scancontrol.h"
+#include "Devices\scancontrol.h"
 
 class ButtonDelegate : public QItemDelegate {
 	Q_OBJECT

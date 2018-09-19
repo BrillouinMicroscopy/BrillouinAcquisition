@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "simplemath.h"
+#include "..\simplemath.h"
 #include "ODT.h"
 
 ODT::ODT(QObject *parent, Acquisition *acquisition, PointGrey **pointGrey, NIDAQ **nidaq)

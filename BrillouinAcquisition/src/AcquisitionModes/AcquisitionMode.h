@@ -4,7 +4,7 @@
 #include <QtCore>
 #include <gsl/gsl>
 
-#include "acquisition.h"
+#include "..\acquisition.h"
 
 class AcquisitionMode : public QObject {
 	Q_OBJECT

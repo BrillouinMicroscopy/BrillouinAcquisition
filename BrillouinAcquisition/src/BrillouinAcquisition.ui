@@ -3067,7 +3067,7 @@ border: none;</string>
   <customwidget>
    <class>QCustomPlot</class>
    <extends>QWidget</extends>
-   <header>qcustomplot.h</header>
+   <header>../external/qcustomplot/qcustomplot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -3100,7 +3100,7 @@ border: none;</string>
   <tabstop>autoscalePlot</tabstop>
  </tabstops>
  <resources>
-  <include location="BrillouinAcquisition.qrc"/>
+  <include location="../BrillouinAcquisition.qrc"/>
  </resources>
  <connections/>
 </ui>

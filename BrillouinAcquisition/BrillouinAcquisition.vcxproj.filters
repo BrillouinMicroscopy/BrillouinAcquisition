@@ -30,15 +30,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BrillouinAcquisition.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_BrillouinAcquisition.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -47,12 +38,6 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\qrc_BrillouinAcquisition.cpp">
       <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="logger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="andor.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_thread.cpp">
       <Filter>Generated Files</Filter>
@@ -72,9 +57,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_qcustomplot.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="qcustomplot.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_h5bm.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -84,17 +66,11 @@
     <ClCompile Include="external\h5bm\h5bm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="acquisition.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_acquisition.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_acquisition.cpp">
       <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="storageWrapper.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_storageWrapper.cpp">
       <Filter>Generated Files</Filter>
@@ -108,17 +84,11 @@
     <ClCompile Include="GeneratedFiles\Release\moc_ZeissECU.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="ZeissECU.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_scancontrol.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_scancontrol.cpp">
       <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="scancontrol.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_NIDAQ.cpp">
       <Filter>Generated Files</Filter>
@@ -126,32 +96,17 @@
     <ClCompile Include="GeneratedFiles\Release\moc_NIDAQ.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="NIDAQ.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_tableModel.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_tableModel.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="tableModel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_PointGrey.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_PointGrey.cpp">
       <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PointGrey.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ODT.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Brillouin.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_Brillouin.cpp">
       <Filter>Generated Files</Filter>
@@ -171,90 +126,135 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AcquisitionMode.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="AcquisitionMode.cpp">
+    <ClCompile Include="src\acquisition.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BrillouinAcquisition.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\logger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\storageWrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tableModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="external\qcustomplot\qcustomplot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Devices\andor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Devices\NIDAQ.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Devices\PointGrey.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Devices\ZeissECU.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Devices\scancontrol.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AcquisitionModes\AcquisitionMode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AcquisitionModes\Brillouin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AcquisitionModes\ODT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_BrillouinAcquisition.h">
       <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="logger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="simplemath.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="circularBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cameraParameters.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="external\h5bm\TypesafeBitmask.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\circularBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\logger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\simplemath.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Devices\cameraParameters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="BrillouinAcquisition.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="BrillouinAcquisition.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="BrillouinAcquisition.qrc">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="thread.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="andor.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="qcustomplot.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="external\h5bm\h5bm.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="acquisition.h">
+    <CustomBuild Include="src\acquisition.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="storageWrapper.h">
+    <CustomBuild Include="src\BrillouinAcquisition.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="previewBuffer.h">
+    <CustomBuild Include="src\previewBuffer.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="ZeissECU.h">
+    <CustomBuild Include="src\storageWrapper.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="scancontrol.h">
+    <CustomBuild Include="src\tableModel.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="NIDAQ.h">
+    <CustomBuild Include="src\thread.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="tableModel.h">
+    <CustomBuild Include="external\qcustomplot\qcustomplot.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="PointGrey.h">
+    <CustomBuild Include="src\BrillouinAcquisition.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Devices\andor.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="ODT.h">
+    <CustomBuild Include="src\Devices\NIDAQ.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="Brillouin.h">
+    <CustomBuild Include="src\Devices\PointGrey.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="AcquisitionMode.h">
+    <CustomBuild Include="src\Devices\ZeissECU.h">
       <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Devices\scancontrol.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\AcquisitionModes\AcquisitionMode.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\AcquisitionModes\Brillouin.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\AcquisitionModes\ODT.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\BrillouinAcquisition.qrc">
+      <Filter>Resource Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="BrillouinAcquisition.rc" />
+    <ResourceCompile Include="src\BrillouinAcquisition.rc" />
   </ItemGroup>
 </Project>

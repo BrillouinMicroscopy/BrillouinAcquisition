@@ -1,8 +1,8 @@
 #include "stdafx.h"
-#include <iostream>
-#include "andor.h"
-#include "logger.h"
 #include <windows.h>
+#include <iostream>
+#include "..\logger.h"
+#include "andor.h"
 
 Andor::Andor(QObject *parent) noexcept
 	: QObject(parent) {

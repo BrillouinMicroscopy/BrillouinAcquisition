@@ -2,10 +2,10 @@
 #define BRILLOUIN_H
 
 #include "AcquisitionMode.h"
-#include "thread.h"
-#include "andor.h"
-#include "scancontrol.h"
-#include "circularBuffer.h"
+#include "..\Devices\andor.h"
+#include "..\Devices\scancontrol.h"
+#include "..\thread.h"
+#include "..\circularBuffer.h"
 
 struct BRILLOUIN_SETTINGS {
 

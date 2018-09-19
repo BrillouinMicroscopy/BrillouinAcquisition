@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
-#include "../BrillouinAcquisition/NIDAQ.h"
+#include "..\BrillouinAcquisition\src\NIDAQ.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -11,7 +11,7 @@ namespace BrillouinAcquisitionUnitTest
 		
 		TEST_METHOD(TestVtoP_center) {
 			NIDAQ *nidaq = new NIDAQ();
-			nidaq->loadCalibration("");
+			nidaq->loadVoltagePositionCalibration("");
 			VOLTAGE2 voltage{ 0, 0 };
 			POINT2 answer = nidaq->voltageToPosition(voltage);
 			POINT2 expected{ 0, 0 };
@@ -21,7 +21,7 @@ namespace BrillouinAcquisitionUnitTest
 
 		TEST_METHOD(TestVtoV_center) {
 			NIDAQ *nidaq = new NIDAQ();
-			nidaq->loadCalibration("");
+			nidaq->loadVoltagePositionCalibration("");
 			VOLTAGE2 voltage{ 0, 0 };
 			POINT2 position = nidaq->voltageToPosition(voltage);
 			VOLTAGE2 voltage2 = nidaq->positionToVoltage(position);

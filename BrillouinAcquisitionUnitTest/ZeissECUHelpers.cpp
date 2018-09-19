@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
-#include "../BrillouinAcquisition/ZeissECU.h"
+#include "..\BrillouinAcquisition\src\ZeissECU.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

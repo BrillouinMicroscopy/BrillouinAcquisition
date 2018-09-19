@@ -8,7 +8,7 @@ Param (
   [String]$GitRoot,
   $Author = "Raimund Schlüßler",
   $AuthorEmail = "raimund.schluessler@tu-dresden.de",
-  [String]$HeaderFile = "version.h",
+  [String]$HeaderFile = "src/version.h",
   [String]$VerPrefix = "https://github.com/BrillouinMicroscopy/BrillouinAcquisitionCpp/commit/"
 )
 

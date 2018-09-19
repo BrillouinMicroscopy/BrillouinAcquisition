@@ -5,7 +5,7 @@
 #include <vector>
 #include "NIDAQmx.h"
 #include "scancontrol.h"
-#include "simplemath.h"
+#include "..\simplemath.h"
 #include <gsl/gsl>
 namespace Thorlabs_TIM {
 	#include <Thorlabs.MotionControl.TCube.InertialMotor.h>

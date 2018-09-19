@@ -4,18 +4,20 @@
 #include <gsl/gsl>
 
 #include "thread.h"
-#include "andor.h"
+
+#include "Devices\andor.h"
+#include "Devices\scancontrol.h"
+#include "Devices\ZeissECU.h"
+#include "Devices\NIDAQ.h"
+#include "Devices\PointGrey.h"
+
 #include "acquisition.h"
-#include "qcustomplot.h"
+#include "external/qcustomplot/qcustomplot.h"
 #include "external/h5bm/h5bm.h"
-#include "scancontrol.h"
-#include "ZeissECU.h"
-#include "NIDAQ.h"
 #include "tableModel.h"
 
-#include "PointGrey.h"
-#include "ODT.h"
-#include "Brillouin.h"
+#include "AcquisitionModes\ODT.h"
+#include "AcquisitionModes\Brillouin.h"
 
 #include <QtWidgets/QMainWindow>
 #include "ui_BrillouinAcquisition.h"

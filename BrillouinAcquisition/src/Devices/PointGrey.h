@@ -6,7 +6,7 @@
 #include "FlyCapture2.h"
 
 #include "cameraParameters.h"
-#include "previewBuffer.h"
+#include "..\previewBuffer.h"
 
 using namespace FlyCapture2;
 
