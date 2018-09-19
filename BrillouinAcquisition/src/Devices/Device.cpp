@@ -6,3 +6,7 @@ Device::Device() {
 
 Device::~Device() {
 }
+
+bool Device::getConnectionStatus() {
+	return m_isConnected;
+}

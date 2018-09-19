@@ -11,10 +11,18 @@ public:
 	Device();
 	~Device();
 
+	bool getConnectionStatus();
+
+protected:
+	bool m_isConnected{ false };
+
 public slots:
 	virtual void init() = 0;
 	virtual bool connectDevice() = 0;
 	virtual bool disconnectDevice() = 0;
+
+signals:
+	void connectedDevice(bool);
 };
 
 #endif //DEVICE_H

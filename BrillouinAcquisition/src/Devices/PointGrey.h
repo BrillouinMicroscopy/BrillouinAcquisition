@@ -1,51 +1,37 @@
 #ifndef POINTGREY_H
 #define POINTGREY_H
 
-#include <gsl/gsl>
+#include "Camera.h"
 
 #include "FlyCapture2.h"
 
-#include "cameraParameters.h"
-#include "..\previewBuffer.h"
+//using namespace FlyCapture2;
 
-using namespace FlyCapture2;
-
-class PointGrey : public QObject {
+class PointGrey : public Camera {
 	Q_OBJECT
 
 private:
-	BusManager m_busManager;
-	PGRGuid m_guid;
+	FlyCapture2::BusManager m_busManager;
+	FlyCapture2::PGRGuid m_guid;
 
-	bool m_isConnected{ false };
-
-	CAMERA_OPTIONS m_options;
-	CAMERA_SETTINGS m_settings;
+	bool PollForTriggerReady(FlyCapture2::Camera * camera);
+	bool FireSoftwareTrigger(FlyCapture2::Camera * camera);
 
 	void preparePreview();
 	void cleanupAcquisition();
 
 	void acquireImage(unsigned char * buffer);
 
-	bool PollForTriggerReady(Camera * camera);
-
-	bool FireSoftwareTrigger(Camera * camera);
-
 	void readOptions();
 	CAMERA_SETTINGS readSettings();
 
 private slots:
-	void init() {};
 	void getImageForPreview();
 
 public:
 	PointGrey() noexcept {};
 	~PointGrey();
-	Camera m_camera;
-
-	bool m_isPreviewRunning = false;
-
-	bool getConnectionStatus();
+	FlyCapture2::Camera m_camera;
 
 	void setSettingsPreview();
 	void setSettingsMeasurement();
@@ -55,18 +41,15 @@ public:
 	PreviewBuffer<unsigned char>* previewBuffer = new PreviewBuffer<unsigned char>;
 
 public slots:
-	void connectDevice();
-	void disconnectDevice();
+	void init() {};
+	bool connectDevice();
+	bool disconnectDevice();
 
 	void startPreview(CAMERA_SETTINGS settings);
 	void readImageFromCamera(unsigned char* buffer);
 
 signals:
-	void connectedDevice(bool);
 	void s_previewRunning(bool);
-	void s_previewBufferSettingsChanged();
-	void settingsChanged(CAMERA_SETTINGS);
-	void optionsChanged(CAMERA_OPTIONS);
 };
 
 #endif // POINTGREY_H

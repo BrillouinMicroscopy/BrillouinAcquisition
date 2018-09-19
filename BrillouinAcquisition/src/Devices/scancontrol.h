@@ -145,7 +145,6 @@ public slots:
 	void announceSavedPositionsNormalized();
 
 signals:
-	void connectedDevice(bool);
 	void elementPositionsChanged(std::vector<int>);
 	void elementPositionChanged(DeviceElement, int);
 	void currentPosition(POINT3);

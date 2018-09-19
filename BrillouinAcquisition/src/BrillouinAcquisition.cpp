@@ -22,7 +22,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 
 	connection = QWidget::connect(
 		m_andor,
-		&Andor::cameraConnected,
+		&Andor::connectedDevice,
 		this,
 		[this](bool isConnected) { cameraConnectionChanged(isConnected); }
 	);

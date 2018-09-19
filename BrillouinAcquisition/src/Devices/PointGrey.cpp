@@ -5,7 +5,7 @@ PointGrey::~PointGrey() {
 	disconnectDevice();
 }
 
-void PointGrey::connectDevice() {
+bool PointGrey::connectDevice() {
 	if (!m_isConnected) {
 		
 		unsigned int numCameras;
@@ -27,9 +27,10 @@ void PointGrey::connectDevice() {
 	}
 
 	emit(connectedDevice(m_isConnected));
+	return m_isConnected;
 }
 
-void PointGrey::disconnectDevice() {
+bool PointGrey::disconnectDevice() {
 	if (m_isConnected) {
 		if (m_isPreviewRunning) {
 			stopPreview();
@@ -42,11 +43,12 @@ void PointGrey::disconnectDevice() {
 	}
 
 	emit(connectedDevice(m_isConnected));
+	return m_isConnected;
 }
 
 void PointGrey::readOptions() {
 
-	Format7Info fmt7Info;
+	FlyCapture2::Format7Info fmt7Info;
 	bool supported;
 	fmt7Info.mode = FlyCapture2::MODE_0;
 	m_camera.GetFormat7Info(&fmt7Info, &supported);
@@ -69,15 +71,15 @@ void PointGrey::readOptions() {
 CAMERA_SETTINGS PointGrey::readSettings() {
 
 	// Get the camera configuration
-	FC2Config config;
+	FlyCapture2::FC2Config config;
 	m_camera.GetConfiguration(&config);
 
 	/*
 	* Get the exposure time
 	*/
-	Property prop;
+	FlyCapture2::Property prop;
 	//Define the property to adjust.
-	prop.type = SHUTTER;
+	prop.type = FlyCapture2::SHUTTER;
 	//Set the property.
 	m_camera.GetProperty(&prop);
 	// general settings
@@ -85,7 +87,7 @@ CAMERA_SETTINGS PointGrey::readSettings() {
 
 
 	// Create a Format7 Configuration
-	Format7ImageSettings fmt7ImageSettings;
+	FlyCapture2::Format7ImageSettings fmt7ImageSettings;
 	unsigned int packetSize;
 	float speed;
 	m_camera.GetFormat7Configuration(&fmt7ImageSettings, &packetSize, &speed);
@@ -98,16 +100,16 @@ CAMERA_SETTINGS PointGrey::readSettings() {
 
 	// readout parameters
 	switch (fmt7ImageSettings.pixelFormat) {
-		case PIXEL_FORMAT_RAW8 :
+		case FlyCapture2::PIXEL_FORMAT_RAW8 :
 			m_settings.readout.pixelEncoding = L"Raw8";
 			break;
-		case PIXEL_FORMAT_MONO8:
+		case FlyCapture2::PIXEL_FORMAT_MONO8:
 			m_settings.readout.pixelEncoding = L"Mono8";
 			break;
-		case PIXEL_FORMAT_MONO12:
+		case FlyCapture2::PIXEL_FORMAT_MONO12:
 			m_settings.readout.pixelEncoding = L"Mono12";
 			break;
-		case PIXEL_FORMAT_MONO16:
+		case FlyCapture2::PIXEL_FORMAT_MONO16:
 			m_settings.readout.pixelEncoding = L"Mono16";
 			break;
 	}
@@ -131,10 +133,6 @@ CAMERA_SETTINGS PointGrey::readSettings() {
 	return m_settings;
 };
 
-bool PointGrey::getConnectionStatus() {
-	return m_isConnected;
-}
-
 void PointGrey::setSettingsPreview() {
 	/*
 	 * Set acquisition to continuous
@@ -144,9 +142,9 @@ void PointGrey::setSettingsPreview() {
 	/*
 	 * Set the exposure time
 	 */
-	Property prop;
+	FlyCapture2::Property prop;
 	//Define the property to adjust.
-	prop.type = SHUTTER;
+	prop.type = FlyCapture2::SHUTTER;
 	//Ensure the property is on.
 	prop.onOff = true;
 	// Ensure auto - adjust mode is off.
@@ -163,12 +161,12 @@ void PointGrey::setSettingsPreview() {
 	 * Set ROI and pixel format
 	 */
 	// Create a Format7 Configuration
-	Format7ImageSettings fmt7ImageSettings;
+	FlyCapture2::Format7ImageSettings fmt7ImageSettings;
 
-	Mode fmt7Mode = MODE_0;
+	FlyCapture2::Mode fmt7Mode = FlyCapture2::MODE_0;
 	fmt7ImageSettings.mode = fmt7Mode;
 	// Possible values: PIXEL_FORMAT_RAW8, PIXEL_FORMAT_MONO8, PIXEL_FORMAT_MONO12, PIXEL_FORMAT_MONO16
-	fmt7ImageSettings.pixelFormat = PIXEL_FORMAT_RAW8;
+	fmt7ImageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_RAW8;
 
 	// Offset x to minimum
 	m_settings.roi.left = 0;
@@ -183,7 +181,7 @@ void PointGrey::setSettingsPreview() {
 	m_settings.roi.height = m_options.ROIHeightLimits[1];
 	fmt7ImageSettings.height = m_settings.roi.height;
 
-	Format7PacketInfo fmt7PacketInfo;
+	FlyCapture2::Format7PacketInfo fmt7PacketInfo;
 	bool valid;
 	m_camera.ValidateFormat7Settings(&fmt7ImageSettings, &valid, &fmt7PacketInfo);
 	if (valid) {
@@ -193,7 +191,7 @@ void PointGrey::setSettingsPreview() {
 	/*
 	 * Set trigger mode
 	 */
-	TriggerMode triggerMode;
+	FlyCapture2::TriggerMode triggerMode;
 	m_camera.GetTriggerMode(&triggerMode);
 	triggerMode.onOff = true;
 	triggerMode.source = 7;	// 7 for software trigger
@@ -207,9 +205,9 @@ void PointGrey::setSettingsPreview() {
 	/*
 	* Set the buffering mode.
 	*/
-	FC2Config BufferFrame;
+	FlyCapture2::FC2Config BufferFrame;
 	m_camera.GetConfiguration(&BufferFrame);
-	BufferFrame.grabMode = DROP_FRAMES;
+	BufferFrame.grabMode = FlyCapture2::DROP_FRAMES;
 	BufferFrame.numBuffers = 10;
 	BufferFrame.highPerformanceRetrieveBuffer = false;
 	m_camera.SetConfiguration(&BufferFrame);
@@ -227,9 +225,9 @@ void PointGrey::setSettingsMeasurement() {
 	/*
 	* Set the exposure time
 	*/
-	Property prop;
+	FlyCapture2::Property prop;
 	//Define the property to adjust.
-	prop.type = SHUTTER;
+	prop.type = FlyCapture2::SHUTTER;
 	//Ensure the property is on.
 	prop.onOff = true;
 	// Ensure auto - adjust mode is off.
@@ -246,12 +244,12 @@ void PointGrey::setSettingsMeasurement() {
 	* Set ROI and pixel format
 	*/
 	// Create a Format7 Configuration
-	Format7ImageSettings fmt7ImageSettings;
+	FlyCapture2::Format7ImageSettings fmt7ImageSettings;
 
-	Mode fmt7Mode = MODE_0;
+	FlyCapture2::Mode fmt7Mode = FlyCapture2::MODE_0;
 	fmt7ImageSettings.mode = fmt7Mode;
 	// Possible values: PIXEL_FORMAT_RAW8, PIXEL_FORMAT_MONO8, PIXEL_FORMAT_MONO12, PIXEL_FORMAT_MONO16
-	fmt7ImageSettings.pixelFormat = PIXEL_FORMAT_RAW8;
+	fmt7ImageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_RAW8;
 
 	// Offset x to minimum
 	m_settings.roi.left = 128;
@@ -266,7 +264,7 @@ void PointGrey::setSettingsMeasurement() {
 	m_settings.roi.height = m_options.ROIHeightLimits[1];
 	fmt7ImageSettings.height = m_settings.roi.height;
 
-	Format7PacketInfo fmt7PacketInfo;
+	FlyCapture2::Format7PacketInfo fmt7PacketInfo;
 	bool valid;
 	m_camera.ValidateFormat7Settings(&fmt7ImageSettings, &valid, &fmt7PacketInfo);
 	if (valid) {
@@ -276,7 +274,7 @@ void PointGrey::setSettingsMeasurement() {
 	/*
 	* Set trigger mode
 	*/
-	TriggerMode triggerMode;
+	FlyCapture2::TriggerMode triggerMode;
 	m_camera.GetTriggerMode(&triggerMode);
 	triggerMode.onOff = true;
 	triggerMode.source = 0;	// 7 for software trigger
@@ -289,9 +287,9 @@ void PointGrey::setSettingsMeasurement() {
 	/*
 	 * Set the buffering mode.
 	 */
-	FC2Config BufferFrame;
+	FlyCapture2::FC2Config BufferFrame;
 	m_camera.GetConfiguration(&BufferFrame);
-	BufferFrame.grabMode = BUFFER_FRAMES;
+	BufferFrame.grabMode = FlyCapture2::BUFFER_FRAMES;
 	BufferFrame.numBuffers = 150;
 	BufferFrame.highPerformanceRetrieveBuffer = true;
 	m_camera.SetConfiguration(&BufferFrame);
@@ -337,12 +335,12 @@ void PointGrey::cleanupAcquisition() {
 }
 
 void PointGrey::readImageFromCamera(unsigned char * buffer) {
-	Image rawImage;
-	Error tmp = m_camera.RetrieveBuffer(&rawImage);
+	FlyCapture2::Image rawImage;
+	FlyCapture2::Error tmp = m_camera.RetrieveBuffer(&rawImage);
 
 	// Convert the raw image
-	Image convertedImage;
-	rawImage.Convert(PIXEL_FORMAT_RAW8, &convertedImage);
+	FlyCapture2::Image convertedImage;
+	rawImage.Convert(FlyCapture2::PIXEL_FORMAT_RAW8, &convertedImage);
 
 	// Get access to raw data
 	unsigned char* data = static_cast<unsigned char*>(convertedImage.GetData());
@@ -376,14 +374,14 @@ void PointGrey::acquireImage(unsigned char* buffer) {
 	readImageFromCamera(buffer);
 };
 
-bool PointGrey::PollForTriggerReady(Camera *camera) {
+bool PointGrey::PollForTriggerReady(FlyCapture2::Camera *camera) {
 	const unsigned int k_softwareTrigger = 0x62C;
-	Error error;
+	FlyCapture2::Error error;
 	unsigned int regVal = 0;
 
 	do {
 		error = camera->ReadRegister(k_softwareTrigger, &regVal);
-		if (error != PGRERROR_OK) {
+		if (error != FlyCapture2::PGRERROR_OK) {
 			return false;
 		}
 
@@ -392,13 +390,13 @@ bool PointGrey::PollForTriggerReady(Camera *camera) {
 	return true;
 }
 
-bool PointGrey::FireSoftwareTrigger(Camera *camera) {
+bool PointGrey::FireSoftwareTrigger(FlyCapture2::Camera *camera) {
 	const unsigned int k_softwareTrigger = 0x62C;
 	const unsigned int k_fireVal = 0x80000000;
-	Error error;
+	FlyCapture2::Error error;
 
 	error = camera->WriteRegister(k_softwareTrigger, k_fireVal);
-	if (error != PGRERROR_OK) {
+	if (error != FlyCapture2::PGRERROR_OK) {
 		return false;
 	}
 

@@ -1,17 +1,10 @@
 #include "stdafx.h"
-#include <windows.h>
-#include <iostream>
-#include "..\logger.h"
 #include "andor.h"
-
-Andor::Andor(QObject *parent) noexcept
-	: QObject(parent) {
-}
 
 Andor::~Andor() {
 	m_tempTimer->stop();
 	if (m_isConnected) {
-		AT_Close(m_cameraHndl);
+		AT_Close(m_camera);
 	}
 	AT_FinaliseLibrary();
 }
@@ -49,11 +42,11 @@ void Andor::init() {
 	QMetaObject::Connection connection = QWidget::connect(m_tempTimer, SIGNAL(timeout()), this, SLOT(checkSensorTemperature()));
 }
 
-void Andor::connectDevice() {
+bool Andor::connectDevice() {
 	// initialize library
 	initialize();
 	if (!m_isConnected && m_isInitialised) {
-		int i_retCode = AT_Open(0, &m_cameraHndl);
+		int i_retCode = AT_Open(0, &m_camera);
 		if (i_retCode == AT_SUCCESS) {
 			m_isConnected = true;
 			readOptions();
@@ -64,70 +57,72 @@ void Andor::connectDevice() {
 			}
 		}
 	}
-	emit(cameraConnected(m_isConnected));
+	emit(connectedDevice(m_isConnected));
+	return m_isConnected;
 }
 
-void Andor::disconnectDevice() {
+bool Andor::disconnectDevice() {
 	if (m_isConnected) {
 		if (m_tempTimer->isActive()) {
 			m_tempTimer->stop();
 		}
-		int i_retCode = AT_Close(m_cameraHndl);
+		int i_retCode = AT_Close(m_camera);
 		if (i_retCode == AT_SUCCESS) {
 			m_isConnected = false;
 		}
 	}
-	emit(cameraConnected(m_isConnected));
+	emit(connectedDevice(m_isConnected));
+	return m_isConnected;
 }
 
 void Andor::readOptions() {
 
-	AT_GetFloatMin(m_cameraHndl, L"ExposureTime", &m_options.exposureTimeLimits[0]);
-	AT_GetFloatMax(m_cameraHndl, L"ExposureTime", &m_options.exposureTimeLimits[1]);
-	AT_GetIntMin(m_cameraHndl, L"FrameCount", &m_options.frameCountLimits[0]);
-	AT_GetIntMax(m_cameraHndl, L"FrameCount", &m_options.frameCountLimits[1]);
+	AT_GetFloatMin(m_camera, L"ExposureTime", &m_options.exposureTimeLimits[0]);
+	AT_GetFloatMax(m_camera, L"ExposureTime", &m_options.exposureTimeLimits[1]);
+	AT_GetIntMin(m_camera, L"FrameCount", &m_options.frameCountLimits[0]);
+	AT_GetIntMax(m_camera, L"FrameCount", &m_options.frameCountLimits[1]);
 
-	AT_GetIntMin(m_cameraHndl, L"AOIHeight", &m_options.ROIHeightLimits[0]);
-	AT_GetIntMax(m_cameraHndl, L"AOIHeight", &m_options.ROIHeightLimits[1]);
+	AT_GetIntMin(m_camera, L"AOIHeight", &m_options.ROIHeightLimits[0]);
+	AT_GetIntMax(m_camera, L"AOIHeight", &m_options.ROIHeightLimits[1]);
 
-	AT_GetIntMin(m_cameraHndl, L"AOIWidth", &m_options.ROIWidthLimits[0]);
-	AT_GetIntMax(m_cameraHndl, L"AOIWidth", &m_options.ROIWidthLimits[1]);
+	AT_GetIntMin(m_camera, L"AOIWidth", &m_options.ROIWidthLimits[0]);
+	AT_GetIntMax(m_camera, L"AOIWidth", &m_options.ROIWidthLimits[1]);
 
 	emit(optionsChanged(m_options));
 }
 
 void Andor::setDefaultSettings() {
 	// general settings
-	AT_SetFloat(m_cameraHndl, L"ExposureTime", m_settings.exposureTime);
-	AT_SetInt(m_cameraHndl, L"FrameCount", m_settings.frameCount);
-	AT_SetBool(m_cameraHndl, L"SpuriousNoiseFilter", m_settings.spuriousNoiseFilter);
+	AT_SetFloat(m_camera, L"ExposureTime", m_settings.exposureTime);
+	AT_SetInt(m_camera, L"FrameCount", m_settings.frameCount);
+	AT_SetBool(m_camera, L"SpuriousNoiseFilter", m_settings.spuriousNoiseFilter);
 
 	// ROI
-	AT_SetInt(m_cameraHndl, L"AOIHeight", m_settings.roi.height);
-	AT_SetInt(m_cameraHndl, L"AOIWidth", m_settings.roi.width);
-	AT_SetInt(m_cameraHndl, L"AOILeft", m_settings.roi.left);
-	AT_SetInt(m_cameraHndl, L"AOITop", m_settings.roi.top);
-	AT_SetEnumeratedString(m_cameraHndl, L"AOIBinning", m_settings.roi.binning.c_str());
+	AT_SetInt(m_camera, L"AOIHeight", m_settings.roi.height);
+	AT_SetInt(m_camera, L"AOIWidth", m_settings.roi.width);
+	AT_SetInt(m_camera, L"AOILeft", m_settings.roi.left);
+	AT_SetInt(m_camera, L"AOITop", m_settings.roi.top);
+	AT_SetEnumeratedString(m_camera, L"AOIBinning", m_settings.roi.binning.c_str());
 
 	// readout parameters
-	AT_SetEnumeratedString(m_cameraHndl, L"CycleMode", m_settings.readout.cycleMode.c_str());
-	AT_SetEnumeratedString(m_cameraHndl, L"Pixel Encoding", m_settings.readout.pixelEncoding.c_str());
-	AT_SetEnumeratedString(m_cameraHndl, L"Pixel Readout Rate", m_settings.readout.pixelReadoutRate.c_str());
-	AT_SetEnumeratedString(m_cameraHndl, L"SimplePreAmpGainControl", m_settings.readout.preAmpGain.c_str());
-	AT_SetEnumeratedString(m_cameraHndl, L"TriggerMode", m_settings.readout.triggerMode.c_str());
+	AT_SetEnumeratedString(m_camera, L"CycleMode", m_settings.readout.cycleMode.c_str());
+	AT_SetEnumeratedString(m_camera, L"Pixel Encoding", m_settings.readout.pixelEncoding.c_str());
+	AT_SetEnumeratedString(m_camera, L"Pixel Readout Rate", m_settings.readout.pixelReadoutRate.c_str());
+	AT_SetEnumeratedString(m_camera, L"SimplePreAmpGainControl", m_settings.readout.preAmpGain.c_str());
+	AT_SetEnumeratedString(m_camera, L"TriggerMode", m_settings.readout.triggerMode.c_str());
 };
 
 CAMERA_SETTINGS Andor::readSettings() {
 	// general settings
-	AT_GetFloat(m_cameraHndl, L"ExposureTime", &m_settings.exposureTime);
-	AT_GetInt(m_cameraHndl, L"FrameCount", &m_settings.frameCount);
-	AT_GetBool(m_cameraHndl, L"SpuriousNoiseFilter", &m_settings.spuriousNoiseFilter);
+	AT_GetFloat(m_camera, L"ExposureTime", &m_settings.exposureTime);
+	AT_GetInt(m_camera, L"FrameCount", &m_settings.frameCount);
+	AT_GetBool(m_camera, L"SpuriousNoiseFilter", &m_settings.spuriousNoiseFilter);
 
 	// ROI
-	AT_GetInt(m_cameraHndl, L"AOIHeight", &m_settings.roi.height);
-	AT_GetInt(m_cameraHndl, L"AOIWidth", &m_settings.roi.width);
-	AT_GetInt(m_cameraHndl, L"AOILeft", &m_settings.roi.left);
-	AT_GetInt(m_cameraHndl, L"AOITop", &m_settings.roi.top);
+	AT_GetInt(m_camera, L"AOIHeight", &m_settings.roi.height);
+	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width);
+	AT_GetInt(m_camera, L"AOILeft", &m_settings.roi.left);
+	AT_GetInt(m_camera, L"AOITop", &m_settings.roi.top);
 	getEnumString(L"AOIBinning", &m_settings.roi.binning[0]);
 
 	// readout parameters
@@ -145,29 +140,25 @@ CAMERA_SETTINGS Andor::readSettings() {
 
 void Andor::getEnumString(AT_WC* feature, AT_WC* string) {
 	int enumIndex;
-	AT_GetEnumIndex(m_cameraHndl, feature, &enumIndex);
-	AT_GetEnumStringByIndex(m_cameraHndl, feature, enumIndex, string, 256);
-}
-
-bool Andor::getConnectionStatus() {
-	return m_isConnected;
+	AT_GetEnumIndex(m_camera, feature, &enumIndex);
+	AT_GetEnumStringByIndex(m_camera, feature, enumIndex, string, 256);
 }
 
 void Andor::setSensorCooling(bool cooling) {
-	int i_retCode = AT_SetBool(m_cameraHndl, L"SensorCooling", (int)cooling);
+	int i_retCode = AT_SetBool(m_camera, L"SensorCooling", (int)cooling);
 	m_isCooling = cooling;
 	emit(cameraCoolingChanged(m_isCooling));
 }
 
 bool Andor::getSensorCooling() {
 	AT_BOOL szValue;
-	int i_retCode = AT_GetBool(m_cameraHndl, L"SensorCooling", &szValue);
+	int i_retCode = AT_GetBool(m_camera, L"SensorCooling", &szValue);
 	return szValue;
 }
 
 const std::string Andor::getTemperatureStatus() {
-	int i_retCode = AT_GetEnumIndex(m_cameraHndl, L"TemperatureStatus", &m_temperatureStatusIndex);
-	AT_GetEnumStringByIndex(m_cameraHndl, L"TemperatureStatus", m_temperatureStatusIndex, temperatureStatus, 256);
+	int i_retCode = AT_GetEnumIndex(m_camera, L"TemperatureStatus", &m_temperatureStatusIndex);
+	AT_GetEnumStringByIndex(m_camera, L"TemperatureStatus", m_temperatureStatusIndex, temperatureStatus, 256);
 	std::wstring ws(temperatureStatus);
 	std::string m_temperatureStatus(ws.begin(), ws.end());
 	return m_temperatureStatus;
@@ -175,7 +166,7 @@ const std::string Andor::getTemperatureStatus() {
 
 double Andor::getSensorTemperature() {
 	double szValue;
-	int i_retCode = AT_GetFloat(m_cameraHndl, L"SensorTemperature", &szValue);
+	int i_retCode = AT_GetFloat(m_camera, L"SensorTemperature", &szValue);
 	return szValue;
 }
 
@@ -222,7 +213,7 @@ void Andor::preparePreview() {
 	emit(s_previewBufferSettingsChanged());
 
 	// Start acquisition
-	AT_Command(m_cameraHndl, L"AcquisitionStart");
+	AT_Command(m_camera, L"AcquisitionStart");
 	AT_InitialiseUtilityLibrary();
 
 	emit(s_previewRunning(true));
@@ -250,7 +241,7 @@ CAMERA_SETTINGS Andor::prepareMeasurement(CAMERA_SETTINGS settings) {
 	emit(s_previewBufferSettingsChanged());
 
 	// Start acquisition
-	AT_Command(m_cameraHndl, L"AcquisitionStart");
+	AT_Command(m_camera, L"AcquisitionStart");
 	AT_InitialiseUtilityLibrary();
 
 	emit(s_measurementRunning(true));
@@ -265,21 +256,21 @@ void Andor::stopMeasurement() {
 
 void Andor::cleanupAcquisition() {
 	AT_FinaliseUtilityLibrary();
-	AT_Command(m_cameraHndl, L"AcquisitionStop");
-	AT_Flush(m_cameraHndl);
+	AT_Command(m_camera, L"AcquisitionStop");
+	AT_Flush(m_camera);
 }
 
 void Andor::acquireImage(AT_U8* buffer) {
 	// Pass this buffer to the SDK
 	unsigned char* UserBuffer = new unsigned char[m_bufferSize];
-	AT_QueueBuffer(m_cameraHndl, UserBuffer, m_bufferSize);
+	AT_QueueBuffer(m_camera, UserBuffer, m_bufferSize);
 
 	// Acquire camera images
-	AT_Command(m_cameraHndl, L"SoftwareTrigger");
+	AT_Command(m_camera, L"SoftwareTrigger");
 
 	// Sleep in this thread until data is ready
 	unsigned char* Buffer;
-	int ret = AT_WaitBuffer(m_cameraHndl, &Buffer, &m_bufferSize, 1500 * m_settings.exposureTime);
+	int ret = AT_WaitBuffer(m_camera, &Buffer, &m_bufferSize, 1500 * m_settings.exposureTime);
 	// return if AT_WaitBuffer timed out
 	if (ret == AT_ERR_TIMEDOUT) {
 		return;
@@ -287,9 +278,9 @@ void Andor::acquireImage(AT_U8* buffer) {
 
 	// Process the image
 	//Unpack the 12 bit packed data
-	AT_GetInt(m_cameraHndl, L"AOIHeight", &m_settings.roi.height);
-	AT_GetInt(m_cameraHndl, L"AOIWidth", &m_settings.roi.width);
-	AT_GetInt(m_cameraHndl, L"AOIStride", &m_imageStride);
+	AT_GetInt(m_camera, L"AOIHeight", &m_settings.roi.height);
+	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width);
+	AT_GetInt(m_camera, L"AOIStride", &m_imageStride);
 
 	AT_ConvertBuffer(Buffer, buffer, m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding.c_str(), L"Mono16");
 
@@ -319,38 +310,38 @@ void Andor::getImageForMeasurement(AT_U8* buffer) {
 
 void Andor::setSettings() {
 	// Set the pixel Encoding
-	AT_SetEnumeratedString(m_cameraHndl, L"Pixel Encoding", m_settings.readout.pixelEncoding.c_str());
+	AT_SetEnumeratedString(m_camera, L"Pixel Encoding", m_settings.readout.pixelEncoding.c_str());
 
 	// Set the pixel Readout Rate
-	AT_SetEnumeratedString(m_cameraHndl, L"Pixel Readout Rate", m_settings.readout.pixelReadoutRate.c_str());
+	AT_SetEnumeratedString(m_camera, L"Pixel Readout Rate", m_settings.readout.pixelReadoutRate.c_str());
 
 	// Set the exposure time
-	AT_SetFloat(m_cameraHndl, L"ExposureTime", m_settings.exposureTime);
+	AT_SetFloat(m_camera, L"ExposureTime", m_settings.exposureTime);
 
 	// enable spurious noise filter
-	AT_SetBool(m_cameraHndl, L"SpuriousNoiseFilter", m_settings.spuriousNoiseFilter);
+	AT_SetBool(m_camera, L"SpuriousNoiseFilter", m_settings.spuriousNoiseFilter);
 
 	// Set the AOI
-	AT_SetInt(m_cameraHndl, L"AOIWidth", m_settings.roi.width);
-	AT_SetInt(m_cameraHndl, L"AOILeft", m_settings.roi.left);
-	AT_SetInt(m_cameraHndl, L"AOIHeight", m_settings.roi.height);
-	AT_SetInt(m_cameraHndl, L"AOITop", m_settings.roi.top);
-	AT_SetEnumeratedString(m_cameraHndl, L"AOIBinning", m_settings.roi.binning.c_str());
-	AT_SetEnumeratedString(m_cameraHndl, L"SimplePreAmpGainControl", m_settings.readout.preAmpGain.c_str());
+	AT_SetInt(m_camera, L"AOIWidth", m_settings.roi.width);
+	AT_SetInt(m_camera, L"AOILeft", m_settings.roi.left);
+	AT_SetInt(m_camera, L"AOIHeight", m_settings.roi.height);
+	AT_SetInt(m_camera, L"AOITop", m_settings.roi.top);
+	AT_SetEnumeratedString(m_camera, L"AOIBinning", m_settings.roi.binning.c_str());
+	AT_SetEnumeratedString(m_camera, L"SimplePreAmpGainControl", m_settings.readout.preAmpGain.c_str());
 
-	AT_SetEnumeratedString(m_cameraHndl, L"CycleMode", m_settings.readout.cycleMode.c_str());
-	AT_SetEnumeratedString(m_cameraHndl, L"TriggerMode", m_settings.readout.triggerMode.c_str());
+	AT_SetEnumeratedString(m_camera, L"CycleMode", m_settings.readout.cycleMode.c_str());
+	AT_SetEnumeratedString(m_camera, L"TriggerMode", m_settings.readout.triggerMode.c_str());
 
 	// Allocate a buffer
 	// Get the number of bytes required to store one frame
 	AT_64 ImageSizeBytes;
-	AT_GetInt(m_cameraHndl, L"ImageSizeBytes", &ImageSizeBytes);
+	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
 	m_bufferSize = static_cast<int>(ImageSizeBytes);
 
-	AT_GetInt(m_cameraHndl, L"AOIHeight", &m_settings.roi.height);
-	AT_GetInt(m_cameraHndl, L"AOIWidth", &m_settings.roi.width);
-	AT_GetInt(m_cameraHndl, L"AOILeft", &m_settings.roi.left);
-	AT_GetInt(m_cameraHndl, L"AOITop", &m_settings.roi.top);
+	AT_GetInt(m_camera, L"AOIHeight", &m_settings.roi.height);
+	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width);
+	AT_GetInt(m_camera, L"AOILeft", &m_settings.roi.left);
+	AT_GetInt(m_camera, L"AOITop", &m_settings.roi.top);
 
 	// emit signal that settings changed
 	emit(settingsChanged(m_settings));
@@ -358,9 +349,9 @@ void Andor::setSettings() {
 
 void Andor::setCalibrationExposureTime(double exposureTime) {
 	m_settings.exposureTime = exposureTime;
-	AT_Command(m_cameraHndl, L"AcquisitionStop");
+	AT_Command(m_camera, L"AcquisitionStop");
 	// Set the exposure time
-	AT_SetFloat(m_cameraHndl, L"ExposureTime", m_settings.exposureTime);
+	AT_SetFloat(m_camera, L"ExposureTime", m_settings.exposureTime);
 
-	AT_Command(m_cameraHndl, L"AcquisitionStart");
+	AT_Command(m_camera, L"AcquisitionStart");
 }
