@@ -1,6 +1,8 @@
 #ifndef SCANCONTROL_H
 #define SCANCONTROL_H
 
+#include "Device.h"
+
 struct POINT3 {
 	double x{ 0 };
 	double y{ 0 };
@@ -66,7 +68,7 @@ public:
 	};
 };
 
-class ScanControl: public QObject {
+class ScanControl: public Device {
 	Q_OBJECT
 
 protected:
@@ -119,9 +121,6 @@ public:
 	QTimer *elementPositionTimer = nullptr;
 
 public slots:
-	virtual void init() = 0;
-	virtual bool connectDevice() = 0;
-	virtual bool disconnectDevice() = 0;
 	virtual void setElement(DeviceElement, int) = 0;
 	virtual void getElement(DeviceElement) = 0;
 	virtual void setElements(ScanControl::SCAN_PRESET) = 0;
