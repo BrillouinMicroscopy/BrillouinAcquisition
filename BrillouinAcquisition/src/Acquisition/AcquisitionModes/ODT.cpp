@@ -66,7 +66,7 @@ void ODT::initialize() {
 }
 
 void ODT::startRepetitions() {
-	bool allowed = m_acquisition->startMode(ACQUISITION_MODE::ODT);
+	bool allowed = m_acquisition->enableMode(ACQUISITION_MODE::ODT);
 	if (!allowed) {
 		return;
 	}
@@ -104,7 +104,7 @@ void ODT::startRepetitions() {
 	// configure camera for preview
 	(*m_pointGrey)->stopAcquisition();
 
-	m_acquisition->stopMode(ACQUISITION_MODE::ODT);
+	m_acquisition->disableMode(ACQUISITION_MODE::ODT);
 }
 
 void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
@@ -169,7 +169,7 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 
 void ODT::startAlignment() {
 	if (!m_algnRunning) {
-		bool allowed = m_acquisition->startMode(ACQUISITION_MODE::ODT);
+		bool allowed = m_acquisition->enableMode(ACQUISITION_MODE::ODT);
 		if (!allowed) {
 			return;
 		}
@@ -183,7 +183,7 @@ void ODT::startAlignment() {
 		if (m_algnTimer->isActive()) {
 			m_algnTimer->stop();
 		}
-		m_acquisition->stopMode(ACQUISITION_MODE::ODT);
+		m_acquisition->disableMode(ACQUISITION_MODE::ODT);
 	}
 	emit(s_algnRunning(m_algnRunning));
 }
@@ -272,5 +272,5 @@ void ODT::abortMode() {
 	if (m_algnTimer->isActive()) {
 		m_algnTimer->stop();
 	}
-	m_acquisition->stopMode(ACQUISITION_MODE::ODT);
+	m_acquisition->disableMode(ACQUISITION_MODE::ODT);
 }

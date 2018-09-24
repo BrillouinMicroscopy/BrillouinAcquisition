@@ -19,7 +19,7 @@ void Brillouin::setSettings(BRILLOUIN_SETTINGS settings) {
 }
 
 void Brillouin::startRepetitions() {
-	bool allowed = m_acquisition->startMode(ACQUISITION_MODE::BRILLOUIN);
+	bool allowed = m_acquisition->enableMode(ACQUISITION_MODE::BRILLOUIN);
 	if (!allowed) {
 		return;
 	}
@@ -57,7 +57,7 @@ void Brillouin::startRepetitions() {
 		}
 	}
 	emit(s_totalProgress(m_settings.repetitions.count, -1));
-	m_acquisition->stopMode(ACQUISITION_MODE::BRILLOUIN);
+	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
 }
 
 void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
@@ -212,7 +212,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 void Brillouin::abortMode() {
 	m_andor->stopAcquisition();
 	(*m_scanControl)->setPosition(m_startPosition);
-	m_acquisition->stopMode(ACQUISITION_MODE::BRILLOUIN);
+	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
 	emit(s_repetitionProgress(ACQUISITION_STATE::ABORTED, 0, 0));
 	emit(s_positionChanged(m_startPosition, 0));
 	emit(s_timeToCalibration(0));

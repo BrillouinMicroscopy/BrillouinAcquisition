@@ -69,7 +69,7 @@ void Acquisition::setAcquisitionState(ACQUISITION_MODE mode, ACQUISITION_STATE s
 	}
 }
 
-bool Acquisition::isModeRunning(ACQUISITION_MODE mode) {
+bool Acquisition::isModeEnabled(ACQUISITION_MODE mode) {
 	return (bool)(m_currentModes & mode);
 }
 
@@ -77,7 +77,7 @@ bool Acquisition::isModeRunning(ACQUISITION_MODE mode) {
  * Function checks if starting an acquisition of given mode is allowed.
  * If yes, it adds the requested mode to the currently running acquisition to modes.
  */
-bool Acquisition::startMode(ACQUISITION_MODE mode) {
+bool Acquisition::enableMode(ACQUISITION_MODE mode) {
 	// If no acquisition file is open, open one.
 	if (m_storage == nullptr) {
 		openFile();
@@ -106,7 +106,7 @@ bool Acquisition::startMode(ACQUISITION_MODE mode) {
 /* 
  * Stops the selected mode.
  */
-void Acquisition::stopMode(ACQUISITION_MODE mode) {
+void Acquisition::disableMode(ACQUISITION_MODE mode) {
 	m_currentModes &= ~mode;
 	emit(s_currentModes(m_currentModes));
 }

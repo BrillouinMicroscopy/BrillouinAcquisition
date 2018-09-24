@@ -45,10 +45,10 @@ public slots:
 	void closeFile();
 	void setAcquisitionState(ACQUISITION_MODE mode, ACQUISITION_STATE state);
 	
-	bool isModeRunning(ACQUISITION_MODE mode);
+	bool isModeEnabled(ACQUISITION_MODE mode);
 
-	bool startMode(ACQUISITION_MODE);
-	void stopMode(ACQUISITION_MODE);
+	bool enableMode(ACQUISITION_MODE);
+	void disableMode(ACQUISITION_MODE);
 
 private:
 	StoragePath m_path;

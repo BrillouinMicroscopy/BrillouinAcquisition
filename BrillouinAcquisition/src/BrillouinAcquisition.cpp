@@ -594,7 +594,7 @@ void BrillouinAcquisition::on_acquisitionRate_ODT_valueChanged(double rate) {
 }
 
 void BrillouinAcquisition::on_acquisitionStartODT_clicked() {
-	if (!m_acquisition->isModeRunning(ACQUISITION_MODE::ODT)) {
+	if (!m_acquisition->isModeEnabled(ACQUISITION_MODE::ODT)) {
 		QMetaObject::invokeMethod(m_ODT, "startRepetitions", Qt::AutoConnection);
 	} else {
 		m_ODT->m_abort = true;
@@ -1578,7 +1578,7 @@ void BrillouinAcquisition::on_camera_singleShot_clicked() {
 }
 
 void BrillouinAcquisition::on_BrillouinStart_clicked() {
-	if (!m_acquisition->isModeRunning(ACQUISITION_MODE::BRILLOUIN)) {
+	if (!m_acquisition->isModeEnabled(ACQUISITION_MODE::BRILLOUIN)) {
 		// set camera ROI
 		m_BrillouinSettings.camera.roi = m_deviceSettings.camera.roi;
 		m_Brillouin->setSettings(m_BrillouinSettings);
