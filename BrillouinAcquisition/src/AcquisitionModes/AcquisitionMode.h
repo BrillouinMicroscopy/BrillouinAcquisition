@@ -13,7 +13,6 @@ public:
 	AcquisitionMode(QObject *parent, Acquisition *acquisition);
 	~AcquisitionMode();
 	bool m_abort = false;
-	virtual void abort();
 
 public slots:
 	void init() {};
@@ -21,6 +20,7 @@ public slots:
 
 protected:
 	Acquisition *m_acquisition = nullptr;
+	virtual void abortMode() = 0;
 
 private slots:
 	virtual void acquire(std::unique_ptr <StorageWrapper> & storage) = 0;

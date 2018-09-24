@@ -96,7 +96,7 @@ void ZeissECU::init() {
 	calculateHomePositionBounds();
 }
 
-bool ZeissECU::connectDevice() {
+void ZeissECU::connectDevice() {
 	if (!m_isConnected) {
 		try {
 			m_comObject->setPortName("COM1");
@@ -136,11 +136,14 @@ bool ZeissECU::connectDevice() {
 
 			if (m_isConnected && m_isCompatible) {
 				setElements(SCAN_PRESET::SCAN_BRIGHTFIELD);
+				getElements();
 				m_homePosition = getPosition();
 				startAnnouncingPosition();
 				startAnnouncingElementPosition();
 				calculateHomePositionBounds();
 				calculateCurrentPositionBounds();
+			} else {
+				m_isConnected = false;
 			}
 
 		} catch (QString e) {
@@ -148,11 +151,9 @@ bool ZeissECU::connectDevice() {
 		}
 	}
 	emit(connectedDevice(m_isConnected && m_isCompatible));
-	getElements();
-	return m_isConnected && m_isCompatible;
 }
 
-bool ZeissECU::disconnectDevice() {
+void ZeissECU::disconnectDevice() {
 	if (m_comObject && m_isConnected) {
 		stopAnnouncingPosition();
 		stopAnnouncingElementPosition();
@@ -161,7 +162,6 @@ bool ZeissECU::disconnectDevice() {
 		m_isCompatible = false;
 	}
 	emit(connectedDevice(m_isConnected && m_isCompatible));
-	return m_isConnected && m_isCompatible;
 }
 
 void ZeissECU::errorHandler(QSerialPort::SerialPortError error) {

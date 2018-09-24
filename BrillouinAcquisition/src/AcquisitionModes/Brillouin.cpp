@@ -35,7 +35,7 @@ void Brillouin::startRepetitions() {
 	for (gsl::index repNumber = 0; repNumber < m_settings.repetitions.count; repNumber++) {
 
 		if (m_abort) {
-			abort();
+			this->abortMode();
 			return;
 		}
 
@@ -65,7 +65,9 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	emit(s_repetitionProgress(ACQUISITION_STATE::STARTED, 0.0, -1));
 	
 	// prepare camera for image acquisition
-	m_settings.camera = m_andor->prepareMeasurement(m_settings.camera);
+	m_andor->setSettings(m_settings.camera);
+	m_settings.camera = m_andor->getSettings();
+	m_andor->startAcquisition();
 	(*m_scanControl)->stopAnnouncingPosition();
 	// set optical elements for brightfield/Brillouin imaging
 	(*m_scanControl)->setElements(ScanControl::SCAN_BRIGHTFIELD);
@@ -159,13 +161,13 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 
 				for (gsl::index mm = 0; mm < m_settings.camera.frameCount; mm++) {
 					if (m_abort) {
-						abort();
+						this->abortMode();
 						return;
 					}
 					emit(s_positionChanged( newPosition - m_startPosition, mm + 1));
 					// acquire images
 					int64_t pointerPos = (int64_t)bytesPerFrame * mm;
-					m_andor->getImageForMeasurement(&images[pointerPos]);
+					m_andor->getImageForAcquisition(&images[pointerPos]);
 				}
 
 				// cast the vector to unsigned short
@@ -193,7 +195,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	}
 
 	// close camera libraries, clear buffers
-	m_andor->stopMeasurement();
+	m_andor->stopAcquisition();
 
 	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
 
@@ -208,8 +210,8 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	emit(s_timeToCalibration(0));
 }
 
-void Brillouin::abort() {
-	m_andor->stopMeasurement();
+void Brillouin::abortMode() {
+	m_andor->stopAcquisition();
 	(*m_scanControl)->setPosition(m_startPosition);
 	m_acquisition->stopMode(ACQUISITION_MODE::BRILLOUIN);
 	emit(s_repetitionProgress(ACQUISITION_STATE::ABORTED, 0, 0));
@@ -238,12 +240,12 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper> & storage) {
 	std::vector<AT_U8> images((int64_t)bytesPerFrame * m_settings.nrCalibrationImages);
 	for (gsl::index mm = 0; mm < m_settings.nrCalibrationImages; mm++) {
 		if (m_abort) {
-			abort();
+			this->abortMode();
 			return;
 		}
 		// acquire images
 		int64_t pointerPos = (int64_t)bytesPerFrame * mm;
-		m_andor->getImageForMeasurement(&images[pointerPos]);
+		m_andor->getImageForAcquisition(&images[pointerPos]);
 	}
 	// cast the vector to unsigned short
 	std::vector<unsigned short> *images_ = (std::vector<unsigned short> *) &images;

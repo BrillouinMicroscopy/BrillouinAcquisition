@@ -59,7 +59,7 @@ private:
 	int nrCalibrations = 1;
 	void calibrate(std::unique_ptr <StorageWrapper> & storage);
 
-	void abort() override;
+	void abortMode() override;
 
 private slots:
 	void acquire(std::unique_ptr <StorageWrapper> & storage) override;

@@ -5,7 +5,7 @@ PointGrey::~PointGrey() {
 	disconnectDevice();
 }
 
-bool PointGrey::connectDevice() {
+void PointGrey::connectDevice() {
 	if (!m_isConnected) {
 		
 		unsigned int numCameras;
@@ -27,10 +27,9 @@ bool PointGrey::connectDevice() {
 	}
 
 	emit(connectedDevice(m_isConnected));
-	return m_isConnected;
 }
 
-bool PointGrey::disconnectDevice() {
+void PointGrey::disconnectDevice() {
 	if (m_isConnected) {
 		if (m_isPreviewRunning) {
 			stopPreview();
@@ -43,7 +42,6 @@ bool PointGrey::disconnectDevice() {
 	}
 
 	emit(connectedDevice(m_isConnected));
-	return m_isConnected;
 }
 
 void PointGrey::readOptions() {
@@ -68,7 +66,7 @@ void PointGrey::readOptions() {
 	emit(optionsChanged(m_options));
 }
 
-CAMERA_SETTINGS PointGrey::readSettings() {
+void PointGrey::readSettings() {
 
 	// Get the camera configuration
 	FlyCapture2::FC2Config config;
@@ -114,113 +112,12 @@ CAMERA_SETTINGS PointGrey::readSettings() {
 			break;
 	}
 
-	//AcquisitionModeEnums cycleMode = m_camera->AcquisitionMode.GetValue();
-	//switch (cycleMode) {
-	//	case AcquisitionMode_Continuous:
-	//		m_settings.readout.cycleMode = L"Continuous";
-	//		break;
-	//	case AcquisitionMode_SingleFrame:
-	//		m_settings.readout.cycleMode = L"Fixed single";
-	//		break;
-	//	case AcquisitionMode_MultiFrame:
-	//		m_settings.readout.cycleMode = L"Fixed multiple";
-	//		break;
-	//}
-
 	// emit signal that settings changed
 	emit(settingsChanged(m_settings));
-
-	return m_settings;
 };
 
-void PointGrey::setSettingsPreview() {
-	/*
-	 * Set acquisition to continuous
-	 */
-	//m_camera->AcquisitionMode.SetValue(AcquisitionModeEnums::AcquisitionMode_Continuous);
-
-	/*
-	 * Set the exposure time
-	 */
-	FlyCapture2::Property prop;
-	//Define the property to adjust.
-	prop.type = FlyCapture2::SHUTTER;
-	//Ensure the property is on.
-	prop.onOff = true;
-	// Ensure auto - adjust mode is off.
-	prop.autoManualMode = false;
-	//Ensure the property is set up to use absolute value control.
-	prop.absControl = true;
-	//Set the absolute value of shutter to 1 ms.
-	m_settings.exposureTime = 0.005;	// [s]
-	prop.absValue = 1e3*m_settings.exposureTime;
-	//Set the property.
-	m_camera.SetProperty(&prop);
-
-	/*
-	 * Set ROI and pixel format
-	 */
-	// Create a Format7 Configuration
-	FlyCapture2::Format7ImageSettings fmt7ImageSettings;
-
-	FlyCapture2::Mode fmt7Mode = FlyCapture2::MODE_0;
-	fmt7ImageSettings.mode = fmt7Mode;
-	// Possible values: PIXEL_FORMAT_RAW8, PIXEL_FORMAT_MONO8, PIXEL_FORMAT_MONO12, PIXEL_FORMAT_MONO16
-	fmt7ImageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_RAW8;
-
-	// Offset x to minimum
-	m_settings.roi.left = 0;
-	fmt7ImageSettings.offsetX = m_settings.roi.left;
-	// Offset y to minimum
-	m_settings.roi.top = 0;
-	fmt7ImageSettings.offsetY = m_settings.roi.top;
-	// Width to maximum
-	m_settings.roi.width = m_options.ROIWidthLimits[1];
-	fmt7ImageSettings.width = m_settings.roi.width;
-	// Height to maximum
-	m_settings.roi.height = m_options.ROIHeightLimits[1];
-	fmt7ImageSettings.height = m_settings.roi.height;
-
-	FlyCapture2::Format7PacketInfo fmt7PacketInfo;
-	bool valid;
-	m_camera.ValidateFormat7Settings(&fmt7ImageSettings, &valid, &fmt7PacketInfo);
-	if (valid) {
-		m_camera.SetFormat7Configuration(&fmt7ImageSettings, fmt7PacketInfo.recommendedBytesPerPacket);
-	}
-
-	/*
-	 * Set trigger mode
-	 */
-	FlyCapture2::TriggerMode triggerMode;
-	m_camera.GetTriggerMode(&triggerMode);
-	triggerMode.onOff = true;
-	triggerMode.source = 7;	// 7 for software trigger
-	triggerMode.mode = 0;
-	triggerMode.parameter = 0;
-
-	m_camera.SetTriggerMode(&triggerMode);
-
-	PollForTriggerReady(&m_camera);
-
-	/*
-	* Set the buffering mode.
-	*/
-	FlyCapture2::FC2Config BufferFrame;
-	m_camera.GetConfiguration(&BufferFrame);
-	BufferFrame.grabMode = FlyCapture2::DROP_FRAMES;
-	BufferFrame.numBuffers = 10;
-	BufferFrame.highPerformanceRetrieveBuffer = false;
-	m_camera.SetConfiguration(&BufferFrame);
-
-	// Read the settings back
-	readSettings();
-}
-
-void PointGrey::setSettingsMeasurement() {
-	/*
-	* Set acquisition to continuous
-	*/
-	//m_camera->AcquisitionMode.SetValue(AcquisitionModeEnums::AcquisitionMode_Continuous);
+void PointGrey::setSettings(CAMERA_SETTINGS settings) {
+	m_settings = settings;
 
 	/*
 	* Set the exposure time
@@ -234,34 +131,36 @@ void PointGrey::setSettingsMeasurement() {
 	prop.autoManualMode = false;
 	//Ensure the property is set up to use absolute value control.
 	prop.absControl = true;
-	//Set the absolute value of shutter to 1 ms.
-	m_settings.exposureTime = 0.005;	// [s]
+	//Set the absolute value of shutter
 	prop.absValue = 1e3*m_settings.exposureTime;
 	//Set the property.
 	m_camera.SetProperty(&prop);
 
 	/*
-	* Set ROI and pixel format
+	* Set region of interest and pixel format
 	*/
 	// Create a Format7 Configuration
 	FlyCapture2::Format7ImageSettings fmt7ImageSettings;
+	// Acquisition mode is always "MODE_0" for this application
+	fmt7ImageSettings.mode = FlyCapture2::MODE_0;
+	// Set the pixel format, possible values are: PIXEL_FORMAT_RAW8, PIXEL_FORMAT_MONO8, PIXEL_FORMAT_MONO12, PIXEL_FORMAT_MONO16
+	if (m_settings.readout.pixelEncoding == L"Raw8") {
+		fmt7ImageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_RAW8;
+	} else if (m_settings.readout.pixelEncoding == L"Mono8") {
+		fmt7ImageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_MONO8;
+	} else if (m_settings.readout.pixelEncoding == L"Mono12") {
+		fmt7ImageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_MONO12;
+	} else if (m_settings.readout.pixelEncoding == L"Mono16") {
+		fmt7ImageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_MONO16;
+	}
 
-	FlyCapture2::Mode fmt7Mode = FlyCapture2::MODE_0;
-	fmt7ImageSettings.mode = fmt7Mode;
-	// Possible values: PIXEL_FORMAT_RAW8, PIXEL_FORMAT_MONO8, PIXEL_FORMAT_MONO12, PIXEL_FORMAT_MONO16
-	fmt7ImageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_RAW8;
-
-	// Offset x to minimum
-	m_settings.roi.left = 128;
+	// Offset x
 	fmt7ImageSettings.offsetX = m_settings.roi.left;
-	// Offset y to minimum
-	m_settings.roi.top = 0;
+	// Offset y
 	fmt7ImageSettings.offsetY = m_settings.roi.top;
-	// Width to maximum
-	m_settings.roi.width = 1024;
+	// Width
 	fmt7ImageSettings.width = m_settings.roi.width;
-	// Height to maximum
-	m_settings.roi.height = m_options.ROIHeightLimits[1];
+	// Height
 	fmt7ImageSettings.height = m_settings.roi.height;
 
 	FlyCapture2::Format7PacketInfo fmt7PacketInfo;
@@ -276,65 +175,102 @@ void PointGrey::setSettingsMeasurement() {
 	*/
 	FlyCapture2::TriggerMode triggerMode;
 	m_camera.GetTriggerMode(&triggerMode);
-	triggerMode.onOff = true;
-	triggerMode.source = 0;	// 7 for software trigger
 	triggerMode.mode = 0;
 	triggerMode.parameter = 0;
 	triggerMode.polarity = 0;
+	if (m_settings.readout.triggerMode == L"Internal") {
+		triggerMode.onOff = false;
+	} else if (m_settings.readout.triggerMode == L"Software") {
+		triggerMode.onOff = true;
+		triggerMode.source = 7;	// 7 for software trigger
+	} else if (m_settings.readout.triggerMode == L"External") {
+		triggerMode.onOff = true;
+		triggerMode.source = 0;	// 0 for external trigger
+	}
 
 	m_camera.SetTriggerMode(&triggerMode);
 
+	// Wait for software trigger ready
+	if (m_settings.readout.triggerMode == L"Software") {
+		PollForTriggerReady(&m_camera);
+	}
+
 	/*
-	 * Set the buffering mode.
-	 */
+	* Set the buffering mode.
+	*/
 	FlyCapture2::FC2Config BufferFrame;
 	m_camera.GetConfiguration(&BufferFrame);
-	BufferFrame.grabMode = FlyCapture2::BUFFER_FRAMES;
-	BufferFrame.numBuffers = 150;
-	BufferFrame.highPerformanceRetrieveBuffer = true;
+	if (m_settings.readout.cycleMode == L"Fixed") {				// For image preview
+		BufferFrame.grabMode = FlyCapture2::DROP_FRAMES;
+		BufferFrame.highPerformanceRetrieveBuffer = false;
+	} else if (m_settings.readout.cycleMode == L"Continuous") {	// For image preview
+		BufferFrame.grabMode = FlyCapture2::BUFFER_FRAMES;
+		BufferFrame.highPerformanceRetrieveBuffer = true;
+	}
+	BufferFrame.numBuffers = m_settings.frameCount;
 	m_camera.SetConfiguration(&BufferFrame);
 
-	// Read the settings back
+	// Read back the settings
 	readSettings();
 }
 
-void PointGrey::startPreview(CAMERA_SETTINGS settings) {
+void PointGrey::startPreview() {
+	// don't do anything if an acquisition is running
+	if (m_isAcquisitionRunning) {
+		return;
+	}
 	m_isPreviewRunning = true;
-	m_settings = settings;
 	preparePreview();
 	getImageForPreview();
+
+	emit(s_previewRunning(m_isPreviewRunning));
 }
 
 void PointGrey::preparePreview() {
-	// always use full camera image for live preview
+	m_settings.exposureTime = 0.005; // [s]
+	m_settings.roi.left = 0;
+	m_settings.roi.top = 0;
 	m_settings.roi.width = m_options.ROIWidthLimits[1];
-	m_settings.roi.left = 1;
 	m_settings.roi.height = m_options.ROIHeightLimits[1];
-	m_settings.roi.top = 1;
+	m_settings.readout.pixelEncoding = L"Raw8";
+	m_settings.readout.triggerMode = L"Software";
+	m_settings.readout.cycleMode = L"Fixed";
+	m_settings.frameCount = 10;
 
-	setSettingsPreview();
+	setSettings(m_settings);
 
 	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
 	BUFFER_SETTINGS bufferSettings = { 4, pixelNumber, m_settings.roi };
-	previewBuffer->initializeBuffer(bufferSettings);
+	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
 	m_camera.StartCapture();
-
-	emit(s_previewRunning(true));
 }
 
 void PointGrey::stopPreview() {
-	m_isPreviewRunning = false;
-	cleanupAcquisition();
-	emit(s_previewRunning(false));
-}
-
-void PointGrey::cleanupAcquisition() {
 	m_camera.StopCapture();
+	m_isPreviewRunning = false;
+	emit(s_previewRunning(m_isPreviewRunning));
 }
 
-void PointGrey::readImageFromCamera(unsigned char * buffer) {
+void PointGrey::startAcquisition() {
+	// check if currently a preview is running and stop it in case
+	if (m_isPreviewRunning) {
+		stopPreview();
+	}
+
+	m_camera.StartCapture();
+	m_isAcquisitionRunning = true;
+	emit(s_previewRunning(m_isAcquisitionRunning));
+}
+
+void PointGrey::stopAcquisition() {
+	m_camera.StopCapture();
+	m_isAcquisitionRunning = false;
+	emit(s_previewRunning(m_isAcquisitionRunning));
+}
+
+void PointGrey::acquireImage(unsigned char * buffer) {
 	FlyCapture2::Image rawImage;
 	FlyCapture2::Error tmp = m_camera.RetrieveBuffer(&rawImage);
 
@@ -354,9 +290,14 @@ void PointGrey::readImageFromCamera(unsigned char * buffer) {
 void PointGrey::getImageForPreview() {
 	if (m_isPreviewRunning) {
 
-		previewBuffer->m_buffer->m_freeBuffers->acquire();
-		acquireImage(previewBuffer->m_buffer->getWriteBuffer());
-		previewBuffer->m_buffer->m_usedBuffers->release();
+		PollForTriggerReady(&m_camera);
+
+		// Fire the software trigger
+		FireSoftwareTrigger(&m_camera);
+
+		m_previewBuffer->m_buffer->m_freeBuffers->acquire();
+		acquireImage(m_previewBuffer->m_buffer->getWriteBuffer());
+		m_previewBuffer->m_buffer->m_usedBuffers->release();
 
 		QMetaObject::invokeMethod(this, "getImageForPreview", Qt::QueuedConnection);
 	} else {
@@ -364,14 +305,8 @@ void PointGrey::getImageForPreview() {
 	}
 }
 
-void PointGrey::acquireImage(unsigned char* buffer) {
-
-	PollForTriggerReady(&m_camera);
-
-	// Fire the software trigger
-	FireSoftwareTrigger(&m_camera);
-
-	readImageFromCamera(buffer);
+void PointGrey::getImageForAcquisition(unsigned char* buffer) {
+	acquireImage(buffer);
 };
 
 bool PointGrey::PollForTriggerReady(FlyCapture2::Camera *camera) {

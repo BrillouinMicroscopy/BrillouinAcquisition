@@ -7,7 +7,3 @@ AcquisitionMode::AcquisitionMode(QObject *parent, Acquisition *acquisition)
 
 AcquisitionMode::~AcquisitionMode() {
 }
-
-void AcquisitionMode::abort() {
-	m_abort = true;
-}

@@ -1,8 +1,11 @@
 #include "stdafx.h"
 #include "Camera.h"
 
-Camera::Camera() {
+CAMERA_OPTIONS Camera::getOptions() {
+	return m_options;
 }
 
-Camera::~Camera() {
+CAMERA_SETTINGS Camera::getSettings() {
+	return m_settings;
 }
+

@@ -4,6 +4,7 @@
 
 ODT::ODT(QObject *parent, Acquisition *acquisition, PointGrey **pointGrey, NIDAQ **nidaq)
 	: AcquisitionMode(parent, acquisition), m_pointGrey(pointGrey), m_NIDAQ(nidaq) {
+	m_cameraOptions = (*m_pointGrey)->getOptions();
 }
 
 ODT::~ODT() {
@@ -71,12 +72,21 @@ void ODT::startRepetitions() {
 		return;
 	}
 
+	// stop alignment if it is running
+	if (m_algnTimer->isActive()) {
+		m_algnTimer->stop();
+	}
+
+	// reset abort flag
 	m_abort = false;
 
 	// configure camera for measurement
 	configureCamera(ODT_MODE::ACQ);
 
-	(*m_pointGrey)->m_camera.StartCapture();
+	// read back the applied settings
+	m_acqSettings.camera = (*m_pointGrey)->getSettings();
+
+	(*m_pointGrey)->startAcquisition();
 
 	m_acquisition->newRepetition(ACQUISITION_MODE::ODT);
 
@@ -84,8 +94,7 @@ void ODT::startRepetitions() {
 	acquire(m_acquisition->m_storage);
 
 	// configure camera for preview
-
-	(*m_pointGrey)->m_camera.StopCapture();
+	(*m_pointGrey)->stopAcquisition();
 	configureCamera(ODT_MODE::ALGN);
 
 	m_acquisition->stopMode(ACQUISITION_MODE::ODT);
@@ -98,16 +107,13 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	/*
 	 * Set the mirror voltage and get the camera images
 	 */
-	m_acqSettings.camera.frameCount = 1;
-	m_acqSettings.camera.roi.height = 1024;
-	m_acqSettings.camera.roi.width = 1024;
 	int rank_data{ 3 };
-	hsize_t dims_data[3] = { m_acqSettings.camera.frameCount, m_acqSettings.camera.roi.height, m_acqSettings.camera.roi.width };
+	hsize_t dims_data[3] = { 1, m_acqSettings.camera.roi.height, m_acqSettings.camera.roi.width };
 	int bytesPerFrame = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height;
 	for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
 		if (m_abort) {
-			m_acquisition->stopMode(ACQUISITION_MODE::ODT);
-			break;
+			this->abortMode();
+			return;
 		}
 		voltage = m_acqSettings.voltages[i];
 		// set new voltage to galvo mirrors
@@ -129,15 +135,15 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 		// read images from camera
 		std::vector<unsigned char> images(bytesPerFrame);
 
-		for (gsl::index mm{ 0 }; mm < m_acqSettings.camera.frameCount; mm++) {
+		for (gsl::index mm{ 0 }; mm < 1; mm++) {
 			if (m_abort) {
-				m_acquisition->stopMode(ACQUISITION_MODE::ODT);
-				break;
+				this->abortMode();
+				return;
 			}
 
 			// acquire images
 			int64_t pointerPos = (int64_t)bytesPerFrame * mm;
-			(*m_pointGrey)->readImageFromCamera(&images[pointerPos]);
+			(*m_pointGrey)->getImageForAcquisition(&images[pointerPos]);
 		}
 
 		// cast the vector to unsigned short
@@ -155,12 +161,13 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 }
 
 void ODT::startAlignment() {
-	bool allowed = m_acquisition->startMode(ACQUISITION_MODE::ODT);
-	if (!allowed) {
-		return;
-	}
 	if (!m_algnRunning) {
+		bool allowed = m_acquisition->startMode(ACQUISITION_MODE::ODT);
+		if (!allowed) {
+			return;
+		}
 		m_algnRunning = true;
+		// start the timer
 		if (!m_algnTimer->isActive()) {
 			m_algnTimer->start(1e3 / (m_algnSettings.scanRate * m_algnSettings.numberPoints));
 		}
@@ -169,12 +176,16 @@ void ODT::startAlignment() {
 		if (m_algnTimer->isActive()) {
 			m_algnTimer->stop();
 		}
+		m_acquisition->stopMode(ACQUISITION_MODE::ODT);
 	}
 	emit(s_algnRunning(m_algnRunning));
-	m_acquisition->stopMode(ACQUISITION_MODE::ODT);
 }
 
 void ODT::nextAlgnPosition() {
+	if (m_abortAlignment) {
+		this->abortMode();
+		return;
+	}
 	if (++m_algnPositionIndex >= m_algnSettings.numberPoints) {
 		m_algnPositionIndex = 0;
 	}
@@ -250,12 +261,40 @@ void ODT::calculateVoltages(ODT_MODE mode) {
 }
 
 void ODT::configureCamera(ODT_MODE mode) {
+	CAMERA_SETTINGS settings;
 	switch (mode) {
 		case ODT_MODE::ACQ:
-			(*m_pointGrey)->setSettingsMeasurement();
+			settings.exposureTime = 0.005; // [s]
+			settings.roi.left = 128;
+			settings.roi.top = 0;
+			settings.roi.width = 1024;
+			settings.roi.height = 1024;
+			settings.readout.pixelEncoding = L"Raw8";
+			settings.readout.triggerMode = L"External";
+			settings.readout.cycleMode = L"Continuous";
+			settings.frameCount = m_acqSettings.numberPoints;
 			break;
 		case ODT_MODE::ALGN:
-			(*m_pointGrey)->setSettingsPreview();
+			settings.exposureTime = 0.005; // [s]
+			settings.roi.left = 0;
+			settings.roi.top = 0;
+			settings.roi.width = m_cameraOptions.ROIWidthLimits[1];
+			settings.roi.height = m_cameraOptions.ROIHeightLimits[1];
+			settings.readout.pixelEncoding = L"Raw8";
+			settings.readout.triggerMode = L"Software";
+			settings.readout.cycleMode = L"Fixed";
+			settings.frameCount = 10;
 			break;
+		default:
+			return;
 	}
+	(*m_pointGrey)->setSettings(settings);
+}
+
+void ODT::abortMode() {
+	// stop alignment if it is running
+	if (m_algnTimer->isActive()) {
+		m_algnTimer->stop();
+	}
+	m_acquisition->stopMode(ACQUISITION_MODE::ODT);
 }

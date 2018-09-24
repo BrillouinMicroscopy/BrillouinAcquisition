@@ -84,7 +84,7 @@ NIDAQ::~NIDAQ() {
 	disconnectDevice();
 }
 
-bool NIDAQ::connectDevice() {
+void NIDAQ::connectDevice() {
 	if (!m_isConnected) {
 		// Create task for analog output
 		DAQmxCreateTask("AO", &AOtaskHandle);
@@ -122,12 +122,12 @@ bool NIDAQ::connectDevice() {
 		Thorlabs_FF::FF_Open(m_serialNo_FF2);
 		Thorlabs_FF::FF_StartPolling(m_serialNo_FF2, 200);
 		startAnnouncingElementPosition();
+		getElements();
 	}
 	emit(connectedDevice(m_isConnected && m_isCompatible));
-	return m_isConnected && m_isCompatible;
 }
 
-bool NIDAQ::disconnectDevice() {
+void NIDAQ::disconnectDevice() {
 	if (m_isConnected) {
 		stopAnnouncingElementPosition();
 		// Stop and clear DAQ tasks
@@ -150,8 +150,6 @@ bool NIDAQ::disconnectDevice() {
 		m_isCompatible = false;
 	}
 	emit(connectedDevice(m_isConnected && m_isCompatible));
-	getElements();
-	return m_isConnected && m_isCompatible;
 }
 
 void NIDAQ::init() {

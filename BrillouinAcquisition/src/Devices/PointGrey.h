@@ -11,6 +11,10 @@ class PointGrey : public Camera {
 	Q_OBJECT
 
 private:
+	/*
+	 * Members and functions specific to PointGrey class
+	 */
+	FlyCapture2::Camera m_camera;
 	FlyCapture2::BusManager m_busManager;
 	FlyCapture2::PGRGuid m_guid;
 
@@ -18,12 +22,14 @@ private:
 	bool FireSoftwareTrigger(FlyCapture2::Camera * camera);
 
 	void preparePreview();
-	void cleanupAcquisition();
 
 	void acquireImage(unsigned char * buffer);
 
+	/*
+	 * Members and functions inherited from base class
+	 */
 	void readOptions();
-	CAMERA_SETTINGS readSettings();
+	void readSettings();
 
 private slots:
 	void getImageForPreview();
@@ -31,22 +37,22 @@ private slots:
 public:
 	PointGrey() noexcept {};
 	~PointGrey();
-	FlyCapture2::Camera m_camera;
-
-	void setSettingsPreview();
-	void setSettingsMeasurement();
-	void stopPreview();
 
 	// preview buffer for live acquisition
-	PreviewBuffer<unsigned char>* previewBuffer = new PreviewBuffer<unsigned char>;
+	PreviewBuffer<unsigned char>* m_previewBuffer = new PreviewBuffer<unsigned char>;
 
 public slots:
 	void init() {};
-	bool connectDevice();
-	bool disconnectDevice();
+	void connectDevice();
+	void disconnectDevice();
 
-	void startPreview(CAMERA_SETTINGS settings);
-	void readImageFromCamera(unsigned char* buffer);
+	void setSettings(CAMERA_SETTINGS);
+	void startPreview();
+	void stopPreview();
+	void startAcquisition();
+	void stopAcquisition();
+
+	void getImageForAcquisition(unsigned char* buffer);
 
 signals:
 	void s_previewRunning(bool);

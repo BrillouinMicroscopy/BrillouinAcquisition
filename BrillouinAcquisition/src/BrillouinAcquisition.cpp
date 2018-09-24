@@ -17,7 +17,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		m_andor,
 		&Andor::s_previewBufferSettingsChanged,
 		this,
-		[this] { updatePlotLimits(m_BrillouinPlot, m_andor->previewBuffer->m_bufferSettings.roi); }
+		[this] { updatePlotLimits(m_BrillouinPlot, m_andor->m_previewBuffer->m_bufferSettings.roi); }
 	);
 
 	connection = QWidget::connect(
@@ -50,7 +50,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 
 	connection = QWidget::connect(
 		m_andor,
-		&Andor::s_measurementRunning,
+		&Andor::s_acquisitionRunning,
 		this,
 		[this](bool isRunning) { startPreview(isRunning); }
 	);
@@ -576,8 +576,7 @@ void BrillouinAcquisition::on_alignmentStartODT_clicked() {
 void BrillouinAcquisition::showODTAlgnRunning(bool isRunning) {
 	if (isRunning) {
 		ui->alignmentStartODT->setText("Stop");
-	}
-	else {
+	} else {
 		ui->alignmentStartODT->setText("Start");
 	}
 }
@@ -598,7 +597,7 @@ void BrillouinAcquisition::on_acquisitionStartODT_clicked() {
 	if (!m_acquisition->isModeRunning(ACQUISITION_MODE::ODT)) {
 		QMetaObject::invokeMethod(m_ODT, "startRepetitions", Qt::AutoConnection);
 	} else {
-		m_ODT->abort();
+		m_ODT->m_abort = true;
 	}
 }
 
@@ -918,25 +917,25 @@ void BrillouinAcquisition::onNewImage() {
 	if (m_previewRunning) {
 		PLOT_SETTINGS plotSettings = m_BrillouinPlot;
 		{
-			std::lock_guard<std::mutex> lockGuard(m_andor->previewBuffer->m_mutex);
+			std::lock_guard<std::mutex> lockGuard(m_andor->m_previewBuffer->m_mutex);
 			// if no image is ready return immediately
-			if (!m_andor->previewBuffer->m_buffer->m_usedBuffers->tryAcquire()) {
+			if (!m_andor->m_previewBuffer->m_buffer->m_usedBuffers->tryAcquire()) {
 				QMetaObject::invokeMethod(this, "onNewImage", Qt::QueuedConnection);
 				return;
 			}
 
-			auto unpackedBuffer = reinterpret_cast<unsigned short*>(m_andor->previewBuffer->m_buffer->getReadBuffer());
+			auto unpackedBuffer = reinterpret_cast<unsigned short*>(m_andor->m_previewBuffer->m_buffer->getReadBuffer());
 
 			int tIndex;
-			for (gsl::index xIndex = 0; xIndex < m_andor->previewBuffer->m_bufferSettings.roi.height; ++xIndex) {
-				for (gsl::index yIndex = 0; yIndex < m_andor->previewBuffer->m_bufferSettings.roi.width; ++yIndex) {
-					tIndex = xIndex * m_andor->previewBuffer->m_bufferSettings.roi.width + yIndex;
+			for (gsl::index xIndex = 0; xIndex < m_andor->m_previewBuffer->m_bufferSettings.roi.height; ++xIndex) {
+				for (gsl::index yIndex = 0; yIndex < m_andor->m_previewBuffer->m_bufferSettings.roi.width; ++yIndex) {
+					tIndex = xIndex * m_andor->m_previewBuffer->m_bufferSettings.roi.width + yIndex;
 					plotSettings.colorMap->data()->setCell(yIndex, xIndex, unpackedBuffer[tIndex]);
 				}
 			}
 
 		}
-		m_andor->previewBuffer->m_buffer->m_freeBuffers->release();
+		m_andor->m_previewBuffer->m_buffer->m_freeBuffers->release();
 		if (plotSettings.autoscale) {
 			plotSettings.colorMap->rescaleDataRange();
 		}
@@ -950,25 +949,25 @@ void BrillouinAcquisition::onNewBrightfieldImage() {
 	if (m_brightfieldPreviewRunning) {
 		PLOT_SETTINGS plotSettings = m_ODTPlot;
 		{
-			std::lock_guard<std::mutex> lockGuard(m_pointGrey->previewBuffer->m_mutex);
+			std::lock_guard<std::mutex> lockGuard(m_pointGrey->m_previewBuffer->m_mutex);
 			// if no image is ready return immediately
-			if (!m_pointGrey->previewBuffer->m_buffer->m_usedBuffers->tryAcquire()) {
+			if (!m_pointGrey->m_previewBuffer->m_buffer->m_usedBuffers->tryAcquire()) {
 				QMetaObject::invokeMethod(this, "onNewBrightfieldImage", Qt::QueuedConnection);
 				return;
 			}
 
-			auto unpackedBuffer = m_pointGrey->previewBuffer->m_buffer->getReadBuffer();
+			auto unpackedBuffer = m_pointGrey->m_previewBuffer->m_buffer->getReadBuffer();
 
 			int tIndex;
-			for (gsl::index xIndex = 0; xIndex < m_pointGrey->previewBuffer->m_bufferSettings.roi.height; ++xIndex) {
-				for (gsl::index yIndex = 0; yIndex < m_pointGrey->previewBuffer->m_bufferSettings.roi.width; ++yIndex) {
-					tIndex = xIndex * m_pointGrey->previewBuffer->m_bufferSettings.roi.width + yIndex;
+			for (gsl::index xIndex = 0; xIndex < m_pointGrey->m_previewBuffer->m_bufferSettings.roi.height; ++xIndex) {
+				for (gsl::index yIndex = 0; yIndex < m_pointGrey->m_previewBuffer->m_bufferSettings.roi.width; ++yIndex) {
+					tIndex = xIndex * m_pointGrey->m_previewBuffer->m_bufferSettings.roi.width + yIndex;
 					plotSettings.colorMap->data()->setCell(yIndex, xIndex, unpackedBuffer[tIndex]);
 				}
 			}
 
 		}
-		m_pointGrey->previewBuffer->m_buffer->m_freeBuffers->release();
+		m_pointGrey->m_previewBuffer->m_buffer->m_freeBuffers->release();
 		if (plotSettings.autoscale) {
 			plotSettings.colorMap->rescaleDataRange();
 		}
@@ -1478,7 +1477,7 @@ void BrillouinAcquisition::initCamera() {
 		m_pointGrey,
 		&PointGrey::s_previewBufferSettingsChanged,
 		this,
-		[this] { updatePlotLimits(m_ODTPlot, m_pointGrey->previewBuffer->m_bufferSettings.roi); }
+		[this] { updatePlotLimits(m_ODTPlot, m_pointGrey->m_previewBuffer->m_bufferSettings.roi); }
 	);
 
 	connection = QWidget::connect(
@@ -1585,7 +1584,7 @@ void BrillouinAcquisition::on_BrillouinStart_clicked() {
 		m_Brillouin->setSettings(m_BrillouinSettings);
 		QMetaObject::invokeMethod(m_Brillouin, "startRepetitions", Qt::AutoConnection);
 	} else {
-		m_Brillouin->m_abort = 1;
+		m_Brillouin->m_abort = true;
 	}
 }
 

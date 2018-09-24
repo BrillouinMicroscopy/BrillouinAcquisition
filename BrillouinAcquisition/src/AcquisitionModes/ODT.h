@@ -18,7 +18,7 @@ enum class ODT_MODE {
 };
 
 struct ODT_SETTINGS {
-	double radialVoltage{ 0.1 };	// [V]	maximum voltage for the galvo scanners
+	double radialVoltage{ 0.3 };	// [V]	maximum voltage for the galvo scanners
 	int numberPoints{ 30 };			// [1]	number of points
 	double scanRate{ 1 };			// [Hz]	scan rate, for alignment: rate for one rotation, for acquisition: rate for one step
 	std::vector<VOLTAGE2> voltages;	// [V]	voltages to apply
@@ -31,10 +31,8 @@ class ODT : public AcquisitionMode {
 public:
 	ODT(QObject *parent, Acquisition *acquisition, PointGrey **pointGrey, NIDAQ **nidaq);
 	~ODT();
-	bool m_abortAlignment = false;
+	bool m_abortAlignment{ false };
 	bool isAlgnRunning();
-	ODT_SETTINGS getAcqSettings();
-	ODT_SETTINGS getAlgnSettings();
 	void setAlgnSettings(ODT_SETTINGS);
 	void setSettings(ODT_SETTINGS);
 
@@ -47,13 +45,14 @@ public slots:
 
 private:
 	ODT_SETTINGS m_acqSettings{
-		0.1,
+		0.3,
 		150,
 		100,
 		{},
 		CAMERA_SETTINGS()
 	};
 	ODT_SETTINGS m_algnSettings;
+	CAMERA_OPTIONS m_cameraOptions;
 	PointGrey **m_pointGrey;
 	NIDAQ **m_NIDAQ;
 	bool m_algnRunning{ false };			// is alignment currently running
@@ -64,6 +63,8 @@ private:
 
 	void calculateVoltages(ODT_MODE);
 	void configureCamera(ODT_MODE);
+
+	void abortMode() override;
 
 private slots:
 	void acquire(std::unique_ptr <StorageWrapper> & storage) override;

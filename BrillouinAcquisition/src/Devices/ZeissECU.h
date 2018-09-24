@@ -138,8 +138,8 @@ public:
 
 public slots:
 	void init();
-	bool connectDevice();
-	bool disconnectDevice();
+	void connectDevice();
+	void disconnectDevice();
 	void errorHandler(QSerialPort::SerialPortError error);
 	void setElement(DeviceElement element, int position);
 	void setElements(ScanControl::SCAN_PRESET preset);

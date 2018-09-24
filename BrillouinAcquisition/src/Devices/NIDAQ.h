@@ -97,8 +97,8 @@ public:
 
 public slots:
 	void init();
-	bool connectDevice();
-	bool disconnectDevice();
+	void connectDevice();
+	void disconnectDevice();
 	void setElement(DeviceElement element, int position);
 	void getElement(DeviceElement element);
 	void setElements(ScanControl::SCAN_PRESET preset);

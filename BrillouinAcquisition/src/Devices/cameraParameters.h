@@ -5,12 +5,12 @@
 
 // possible parameters
 struct CAMERA_OPTIONS {
-	const std::vector<std::wstring> pixelReadoutRates = { L"100 MHz", L"280 MHz" };
+	std::vector<std::wstring> pixelReadoutRates = { L"100 MHz", L"280 MHz" };
 	std::vector<std::wstring> pixelEncodings = { L"Mono12", L"Mono12Packed", L"Mono16", L"Mono32" };
 	std::vector<std::wstring> cycleModes = { L"Fixed", L"Continuous" };
-	const std::vector<std::wstring> triggerModes = { L"Internal", L"Software", L"External", L"External Start", L"External Exposure" };
-	const std::vector<std::wstring> preAmpGains = { L"12-bit (low noise)", L"12-bit (high well capacity)", L"16-bit (low noise & high well capacity)" };
-	const std::vector<std::wstring> imageBinnings = { L"1x1", L"2x2", L"3x3", L"4x4", L"8x8" };
+	std::vector<std::wstring> triggerModes = { L"Internal", L"Software", L"External", L"External Start", L"External Exposure" };
+	std::vector<std::wstring> preAmpGains = { L"12-bit (low noise)", L"12-bit (high well capacity)", L"16-bit (low noise & high well capacity)" };
+	std::vector<std::wstring> imageBinnings = { L"1x1", L"2x2", L"3x3", L"4x4", L"8x8" };
 	std::vector<double> exposureTimeLimits = { 0.01, 1 };
 	std::vector<AT_64> frameCountLimits = { 1, 100 };
 	std::vector<AT_64> ROIWidthLimits = { 1, 2 };		// minimum and maximum ROI width

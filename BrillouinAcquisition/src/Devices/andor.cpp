@@ -7,6 +7,7 @@ Andor::~Andor() {
 		AT_Close(m_camera);
 	}
 	AT_FinaliseLibrary();
+	disconnectDevice();
 }
 
 bool Andor::initialize() {
@@ -42,7 +43,7 @@ void Andor::init() {
 	QMetaObject::Connection connection = QWidget::connect(m_tempTimer, SIGNAL(timeout()), this, SLOT(checkSensorTemperature()));
 }
 
-bool Andor::connectDevice() {
+void Andor::connectDevice() {
 	// initialize library
 	initialize();
 	if (!m_isConnected && m_isInitialised) {
@@ -50,7 +51,7 @@ bool Andor::connectDevice() {
 		if (i_retCode == AT_SUCCESS) {
 			m_isConnected = true;
 			readOptions();
-			setDefaultSettings();
+			setSettings(m_settings);
 			readSettings();
 			if (!m_tempTimer->isActive()) {
 				m_tempTimer->start(1000);
@@ -58,10 +59,9 @@ bool Andor::connectDevice() {
 		}
 	}
 	emit(connectedDevice(m_isConnected));
-	return m_isConnected;
 }
 
-bool Andor::disconnectDevice() {
+void Andor::disconnectDevice() {
 	if (m_isConnected) {
 		if (m_tempTimer->isActive()) {
 			m_tempTimer->stop();
@@ -72,7 +72,6 @@ bool Andor::disconnectDevice() {
 		}
 	}
 	emit(connectedDevice(m_isConnected));
-	return m_isConnected;
 }
 
 void Andor::readOptions() {
@@ -91,32 +90,52 @@ void Andor::readOptions() {
 	emit(optionsChanged(m_options));
 }
 
-void Andor::setDefaultSettings() {
-	// general settings
+void Andor::setSettings(CAMERA_SETTINGS settings) {
+	m_settings = settings;
+
+	// Set the pixel Encoding
+	AT_SetEnumeratedString(m_camera, L"Pixel Encoding", m_settings.readout.pixelEncoding.c_str());
+
+	// Set the pixel Readout Rate
+	AT_SetEnumeratedString(m_camera, L"Pixel Readout Rate", m_settings.readout.pixelReadoutRate.c_str());
+
+	// Set the exposure time
 	AT_SetFloat(m_camera, L"ExposureTime", m_settings.exposureTime);
-	AT_SetInt(m_camera, L"FrameCount", m_settings.frameCount);
+
+	// enable spurious noise filter
 	AT_SetBool(m_camera, L"SpuriousNoiseFilter", m_settings.spuriousNoiseFilter);
 
-	// ROI
-	AT_SetInt(m_camera, L"AOIHeight", m_settings.roi.height);
+	// Set the AOI
 	AT_SetInt(m_camera, L"AOIWidth", m_settings.roi.width);
 	AT_SetInt(m_camera, L"AOILeft", m_settings.roi.left);
+	AT_SetInt(m_camera, L"AOIHeight", m_settings.roi.height);
 	AT_SetInt(m_camera, L"AOITop", m_settings.roi.top);
 	AT_SetEnumeratedString(m_camera, L"AOIBinning", m_settings.roi.binning.c_str());
-
-	// readout parameters
-	AT_SetEnumeratedString(m_camera, L"CycleMode", m_settings.readout.cycleMode.c_str());
-	AT_SetEnumeratedString(m_camera, L"Pixel Encoding", m_settings.readout.pixelEncoding.c_str());
-	AT_SetEnumeratedString(m_camera, L"Pixel Readout Rate", m_settings.readout.pixelReadoutRate.c_str());
 	AT_SetEnumeratedString(m_camera, L"SimplePreAmpGainControl", m_settings.readout.preAmpGain.c_str());
-	AT_SetEnumeratedString(m_camera, L"TriggerMode", m_settings.readout.triggerMode.c_str());
-};
 
-CAMERA_SETTINGS Andor::readSettings() {
+	AT_SetEnumeratedString(m_camera, L"CycleMode", m_settings.readout.cycleMode.c_str());
+	AT_SetEnumeratedString(m_camera, L"TriggerMode", m_settings.readout.triggerMode.c_str());
+
+	// Allocate a buffer
+	// Get the number of bytes required to store one frame
+	AT_64 ImageSizeBytes;
+	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
+	m_bufferSize = static_cast<int>(ImageSizeBytes);
+
+	AT_GetInt(m_camera, L"AOIHeight", &m_settings.roi.height);
+	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width);
+	AT_GetInt(m_camera, L"AOILeft", &m_settings.roi.left);
+	AT_GetInt(m_camera, L"AOITop", &m_settings.roi.top);
+
+	// emit signal that settings changed
+	emit(settingsChanged(m_settings));
+}
+
+void Andor::readSettings() {
 	// general settings
 	AT_GetFloat(m_camera, L"ExposureTime", &m_settings.exposureTime);
 	AT_GetInt(m_camera, L"FrameCount", &m_settings.frameCount);
-	AT_GetBool(m_camera, L"SpuriousNoiseFilter", &m_settings.spuriousNoiseFilter);
+	AT_GetBool(m_camera, L"SpuriousNoiseFilter", (int*)&m_settings.spuriousNoiseFilter);
 
 	// ROI
 	AT_GetInt(m_camera, L"AOIHeight", &m_settings.roi.height);
@@ -134,9 +153,7 @@ CAMERA_SETTINGS Andor::readSettings() {
 
 	// emit signal that settings changed
 	emit(settingsChanged(m_settings));
-
-	return m_settings;
-};
+}
 
 void Andor::getEnumString(AT_WC* feature, AT_WC* string) {
 	int enumIndex;
@@ -191,11 +208,12 @@ void Andor::checkSensorTemperature() {
 	emit(s_sensorTemperatureChanged(m_sensorTemperature));
 }
 
-void Andor::startPreview(CAMERA_SETTINGS settings) {
-	m_isPreviewRunning = true;
-	m_settings = settings;
+void Andor::startPreview() {
 	preparePreview();
 	getImageForPreview();
+	m_isPreviewRunning = true;
+
+	emit(s_previewRunning(m_isPreviewRunning));
 }
 
 void Andor::preparePreview() {
@@ -205,53 +223,47 @@ void Andor::preparePreview() {
 	m_settings.roi.height = m_options.ROIHeightLimits[1];
 	m_settings.roi.top = 1;
 
-	setSettings();
+	setSettings(m_settings);
 
 	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
 	BUFFER_SETTINGS bufferSettings = { 5, pixelNumber * 2, m_settings.roi };
-	previewBuffer->initializeBuffer(bufferSettings);
+	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
 	// Start acquisition
 	AT_Command(m_camera, L"AcquisitionStart");
 	AT_InitialiseUtilityLibrary();
-
-	emit(s_previewRunning(true));
 }
 
 void Andor::stopPreview() {
-	m_isPreviewRunning = false;
 	cleanupAcquisition();
-	emit(s_previewRunning(false));
+	m_isPreviewRunning = false;
+	emit(s_previewRunning(m_isPreviewRunning));
 }
 
-CAMERA_SETTINGS Andor::prepareMeasurement(CAMERA_SETTINGS settings) {
-	m_settings = settings;
-
+void Andor::startAcquisition() {
 	// check if currently a preview is running and stop it in case
 	if (m_isPreviewRunning) {
 		stopPreview();
 	}
 
-	setSettings();
-
 	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
 	BUFFER_SETTINGS bufferSettings = { 4, pixelNumber * 2, m_settings.roi };
-	previewBuffer->initializeBuffer(bufferSettings);
+	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
 	// Start acquisition
 	AT_Command(m_camera, L"AcquisitionStart");
 	AT_InitialiseUtilityLibrary();
 
-	emit(s_measurementRunning(true));
+	m_isAcquisitionRunning = true;
+	emit(s_acquisitionRunning(m_isAcquisitionRunning));
+}
 
-	return readSettings();
-};
-
-void Andor::stopMeasurement() {
+void Andor::stopAcquisition() {
 	cleanupAcquisition();
-	emit(s_measurementRunning(false));
+	m_isAcquisitionRunning = false;
+	emit(s_acquisitionRunning(m_isAcquisitionRunning));
 }
 
 void Andor::cleanupAcquisition() {
@@ -285,14 +297,14 @@ void Andor::acquireImage(AT_U8* buffer) {
 	AT_ConvertBuffer(Buffer, buffer, m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding.c_str(), L"Mono16");
 
 	delete[] Buffer;
-};
+}
 
 void Andor::getImageForPreview() {
 	if (m_isPreviewRunning) {
 
-		previewBuffer->m_buffer->m_freeBuffers->acquire();
-		acquireImage(previewBuffer->m_buffer->getWriteBuffer());
-		previewBuffer->m_buffer->m_usedBuffers->release();
+		m_previewBuffer->m_buffer->m_freeBuffers->acquire();
+		acquireImage(m_previewBuffer->m_buffer->getWriteBuffer());
+		m_previewBuffer->m_buffer->m_usedBuffers->release();
 
 		QMetaObject::invokeMethod(this, "getImageForPreview", Qt::QueuedConnection);
 	} else {
@@ -300,51 +312,12 @@ void Andor::getImageForPreview() {
 	}
 }
 
-void Andor::getImageForMeasurement(AT_U8* buffer) {
+void Andor::getImageForAcquisition(AT_U8* buffer) {
 	acquireImage(buffer);
 
 	// write image to preview buffer
-	memcpy(previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.width * m_settings.roi.height * 2);
-	previewBuffer->m_buffer->m_usedBuffers->release();
-}
-
-void Andor::setSettings() {
-	// Set the pixel Encoding
-	AT_SetEnumeratedString(m_camera, L"Pixel Encoding", m_settings.readout.pixelEncoding.c_str());
-
-	// Set the pixel Readout Rate
-	AT_SetEnumeratedString(m_camera, L"Pixel Readout Rate", m_settings.readout.pixelReadoutRate.c_str());
-
-	// Set the exposure time
-	AT_SetFloat(m_camera, L"ExposureTime", m_settings.exposureTime);
-
-	// enable spurious noise filter
-	AT_SetBool(m_camera, L"SpuriousNoiseFilter", m_settings.spuriousNoiseFilter);
-
-	// Set the AOI
-	AT_SetInt(m_camera, L"AOIWidth", m_settings.roi.width);
-	AT_SetInt(m_camera, L"AOILeft", m_settings.roi.left);
-	AT_SetInt(m_camera, L"AOIHeight", m_settings.roi.height);
-	AT_SetInt(m_camera, L"AOITop", m_settings.roi.top);
-	AT_SetEnumeratedString(m_camera, L"AOIBinning", m_settings.roi.binning.c_str());
-	AT_SetEnumeratedString(m_camera, L"SimplePreAmpGainControl", m_settings.readout.preAmpGain.c_str());
-
-	AT_SetEnumeratedString(m_camera, L"CycleMode", m_settings.readout.cycleMode.c_str());
-	AT_SetEnumeratedString(m_camera, L"TriggerMode", m_settings.readout.triggerMode.c_str());
-
-	// Allocate a buffer
-	// Get the number of bytes required to store one frame
-	AT_64 ImageSizeBytes;
-	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
-	m_bufferSize = static_cast<int>(ImageSizeBytes);
-
-	AT_GetInt(m_camera, L"AOIHeight", &m_settings.roi.height);
-	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width);
-	AT_GetInt(m_camera, L"AOILeft", &m_settings.roi.left);
-	AT_GetInt(m_camera, L"AOITop", &m_settings.roi.top);
-
-	// emit signal that settings changed
-	emit(settingsChanged(m_settings));
+	memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.width * m_settings.roi.height * 2);
+	m_previewBuffer->m_buffer->m_usedBuffers->release();
 }
 
 void Andor::setCalibrationExposureTime(double exposureTime) {

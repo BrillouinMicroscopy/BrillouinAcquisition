@@ -8,8 +8,8 @@ class Device : public QObject {
 	Q_OBJECT
 
 public:
-	Device();
-	~Device();
+	Device() {};
+	~Device() {};
 
 	bool getConnectionStatus();
 
@@ -18,8 +18,8 @@ protected:
 
 public slots:
 	virtual void init() = 0;
-	virtual bool connectDevice() = 0;
-	virtual bool disconnectDevice() = 0;
+	virtual void connectDevice() = 0;
+	virtual void disconnectDevice() = 0;
 
 signals:
 	void connectedDevice(bool);
