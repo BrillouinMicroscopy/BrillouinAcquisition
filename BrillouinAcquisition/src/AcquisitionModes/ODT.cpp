@@ -4,7 +4,6 @@
 
 ODT::ODT(QObject *parent, Acquisition *acquisition, PointGrey **pointGrey, NIDAQ **nidaq)
 	: AcquisitionMode(parent, acquisition), m_pointGrey(pointGrey), m_NIDAQ(nidaq) {
-	m_cameraOptions = (*m_pointGrey)->getOptions();
 }
 
 ODT::~ODT() {
@@ -81,12 +80,21 @@ void ODT::startRepetitions() {
 	m_abort = false;
 
 	// configure camera for measurement
-	configureCamera(ODT_MODE::ACQ);
+	CAMERA_SETTINGS settings;
+	settings.exposureTime = 0.005; // [s]
+	settings.roi.left = 128;
+	settings.roi.top = 0;
+	settings.roi.width = 1024;
+	settings.roi.height = 1024;
+	settings.readout.pixelEncoding = L"Raw8";
+	settings.readout.triggerMode = L"External";
+	settings.readout.cycleMode = L"Continuous";
+	settings.frameCount = m_acqSettings.numberPoints;
+
+	(*m_pointGrey)->startAcquisition(settings);
 
 	// read back the applied settings
 	m_acqSettings.camera = (*m_pointGrey)->getSettings();
-
-	(*m_pointGrey)->startAcquisition();
 
 	m_acquisition->newRepetition(ACQUISITION_MODE::ODT);
 
@@ -95,7 +103,6 @@ void ODT::startRepetitions() {
 
 	// configure camera for preview
 	(*m_pointGrey)->stopAcquisition();
-	configureCamera(ODT_MODE::ALGN);
 
 	m_acquisition->stopMode(ACQUISITION_MODE::ODT);
 }
@@ -258,37 +265,6 @@ void ODT::calculateVoltages(ODT_MODE mode) {
 
 		emit(s_acqSettingsChanged(m_acqSettings));
 	}
-}
-
-void ODT::configureCamera(ODT_MODE mode) {
-	CAMERA_SETTINGS settings;
-	switch (mode) {
-		case ODT_MODE::ACQ:
-			settings.exposureTime = 0.005; // [s]
-			settings.roi.left = 128;
-			settings.roi.top = 0;
-			settings.roi.width = 1024;
-			settings.roi.height = 1024;
-			settings.readout.pixelEncoding = L"Raw8";
-			settings.readout.triggerMode = L"External";
-			settings.readout.cycleMode = L"Continuous";
-			settings.frameCount = m_acqSettings.numberPoints;
-			break;
-		case ODT_MODE::ALGN:
-			settings.exposureTime = 0.005; // [s]
-			settings.roi.left = 0;
-			settings.roi.top = 0;
-			settings.roi.width = m_cameraOptions.ROIWidthLimits[1];
-			settings.roi.height = m_cameraOptions.ROIHeightLimits[1];
-			settings.readout.pixelEncoding = L"Raw8";
-			settings.readout.triggerMode = L"Software";
-			settings.readout.cycleMode = L"Fixed";
-			settings.frameCount = 10;
-			break;
-		default:
-			return;
-	}
-	(*m_pointGrey)->setSettings(settings);
 }
 
 void ODT::abortMode() {

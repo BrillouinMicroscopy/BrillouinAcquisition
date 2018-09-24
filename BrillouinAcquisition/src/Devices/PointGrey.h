@@ -47,9 +47,10 @@ public slots:
 	void disconnectDevice();
 
 	void setSettings(CAMERA_SETTINGS);
+
 	void startPreview();
 	void stopPreview();
-	void startAcquisition();
+	void startAcquisition(CAMERA_SETTINGS);
 	void stopAcquisition();
 
 	void getImageForAcquisition(unsigned char* buffer);

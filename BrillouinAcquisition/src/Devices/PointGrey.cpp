@@ -253,11 +253,13 @@ void PointGrey::stopPreview() {
 	emit(s_previewRunning(m_isPreviewRunning));
 }
 
-void PointGrey::startAcquisition() {
+void PointGrey::startAcquisition(CAMERA_SETTINGS settings) {
 	// check if currently a preview is running and stop it in case
 	if (m_isPreviewRunning) {
 		stopPreview();
 	}
+
+	setSettings(settings);
 
 	m_camera.StartCapture();
 	m_isAcquisitionRunning = true;

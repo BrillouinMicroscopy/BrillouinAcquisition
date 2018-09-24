@@ -209,9 +209,9 @@ void Andor::checkSensorTemperature() {
 }
 
 void Andor::startPreview() {
+	m_isPreviewRunning = true;
 	preparePreview();
 	getImageForPreview();
-	m_isPreviewRunning = true;
 
 	emit(s_previewRunning(m_isPreviewRunning));
 }
@@ -241,11 +241,13 @@ void Andor::stopPreview() {
 	emit(s_previewRunning(m_isPreviewRunning));
 }
 
-void Andor::startAcquisition() {
+void Andor::startAcquisition(CAMERA_SETTINGS settings) {
 	// check if currently a preview is running and stop it in case
 	if (m_isPreviewRunning) {
 		stopPreview();
 	}
+
+	setSettings(settings);
 
 	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
 	BUFFER_SETTINGS bufferSettings = { 4, pixelNumber * 2, m_settings.roi };

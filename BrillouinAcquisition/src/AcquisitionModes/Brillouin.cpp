@@ -65,9 +65,8 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	emit(s_repetitionProgress(ACQUISITION_STATE::STARTED, 0.0, -1));
 	
 	// prepare camera for image acquisition
-	m_andor->setSettings(m_settings.camera);
+	m_andor->startAcquisition(m_settings.camera);
 	m_settings.camera = m_andor->getSettings();
-	m_andor->startAcquisition();
 	(*m_scanControl)->stopAnnouncingPosition();
 	// set optical elements for brightfield/Brillouin imaging
 	(*m_scanControl)->setElements(ScanControl::SCAN_BRIGHTFIELD);

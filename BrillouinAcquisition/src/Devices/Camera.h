@@ -26,7 +26,7 @@ public slots:
 	virtual void setSettings(CAMERA_SETTINGS) = 0;
 	virtual void startPreview() = 0;
 	virtual void stopPreview() = 0;
-	virtual void startAcquisition() = 0;
+	virtual void startAcquisition(CAMERA_SETTINGS) = 0;
 	virtual void stopAcquisition() = 0;
 
 protected:

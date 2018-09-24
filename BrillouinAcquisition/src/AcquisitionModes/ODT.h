@@ -52,7 +52,6 @@ private:
 		CAMERA_SETTINGS()
 	};
 	ODT_SETTINGS m_algnSettings;
-	CAMERA_OPTIONS m_cameraOptions;
 	PointGrey **m_pointGrey;
 	NIDAQ **m_NIDAQ;
 	bool m_algnRunning{ false };			// is alignment currently running
@@ -62,7 +61,6 @@ private:
 	QTimer *m_algnTimer = nullptr;
 
 	void calculateVoltages(ODT_MODE);
-	void configureCamera(ODT_MODE);
 
 	void abortMode() override;
 

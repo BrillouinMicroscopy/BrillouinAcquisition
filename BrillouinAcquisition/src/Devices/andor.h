@@ -86,11 +86,11 @@ public slots:
 	void connectDevice();
 	void disconnectDevice();
 
-	void setSettings(CAMERA_SETTINGS settings);
+	void setSettings(CAMERA_SETTINGS);
 
 	void startPreview();
 	void stopPreview();
-	void startAcquisition();
+	void startAcquisition(CAMERA_SETTINGS);
 	void stopAcquisition();
 
 	/*

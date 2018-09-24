@@ -1073,7 +1073,7 @@ void BrillouinAcquisition::brightfieldCameraConnectionChanged(bool isConnected) 
 
 void BrillouinAcquisition::on_camera_playPause_brightfield_clicked() {
 	if (!m_pointGrey->m_isPreviewRunning) {
-		QMetaObject::invokeMethod(m_pointGrey, "startPreview", Qt::QueuedConnection, Q_ARG(CAMERA_SETTINGS, m_BrillouinSettings.camera));
+		QMetaObject::invokeMethod(m_pointGrey, "startPreview", Qt::AutoConnection);
 	}
 	else {
 		m_pointGrey->m_isPreviewRunning = false;
@@ -1567,14 +1567,14 @@ void BrillouinAcquisition::on_actionAbout_triggered() {
 
 void BrillouinAcquisition::on_camera_playPause_clicked() {
 	if (!m_andor->m_isPreviewRunning) {
-		QMetaObject::invokeMethod(m_andor, "startPreview", Qt::QueuedConnection, Q_ARG(CAMERA_SETTINGS, m_BrillouinSettings.camera));
+		m_andor->setSettings(m_BrillouinSettings.camera);
+		QMetaObject::invokeMethod(m_andor, "startPreview", Qt::AutoConnection);
 	} else {
 		m_andor->m_isPreviewRunning = false;
 	}
 }
 
 void BrillouinAcquisition::on_camera_singleShot_clicked() {
-	QMetaObject::invokeMethod(m_andor, "acquireSingle", Qt::QueuedConnection);
 }
 
 void BrillouinAcquisition::on_BrillouinStart_clicked() {
