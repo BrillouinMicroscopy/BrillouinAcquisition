@@ -263,13 +263,13 @@ void PointGrey::startAcquisition(CAMERA_SETTINGS settings) {
 
 	m_camera.StartCapture();
 	m_isAcquisitionRunning = true;
-	emit(s_previewRunning(m_isAcquisitionRunning));
+	emit(s_acquisitionRunning(m_isAcquisitionRunning));
 }
 
 void PointGrey::stopAcquisition() {
 	m_camera.StopCapture();
 	m_isAcquisitionRunning = false;
-	emit(s_previewRunning(m_isAcquisitionRunning));
+	emit(s_acquisitionRunning(m_isAcquisitionRunning));
 }
 
 void PointGrey::acquireImage(unsigned char * buffer) {

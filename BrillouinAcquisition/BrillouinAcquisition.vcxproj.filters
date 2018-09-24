@@ -28,6 +28,24 @@
       <Extensions>moc;h;cpp</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
+    <Filter Include="Header Files\Devices">
+      <UniqueIdentifier>{401171e7-8c89-4258-b723-1835211a66d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Acquisition">
+      <UniqueIdentifier>{318607a8-a2b1-4b9e-adeb-c945b11f2e4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Acquisition\AcquisitionModes">
+      <UniqueIdentifier>{264fe909-a11b-42b9-a49c-61fed7708081}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Devices">
+      <UniqueIdentifier>{5481ad0f-87df-4724-9868-42f7fca04a72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Acquisition">
+      <UniqueIdentifier>{386340b8-754b-4a59-8e19-4d0faa378b63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Acquisition\AcquisitionModes">
+      <UniqueIdentifier>{db791b25-91d9-4fdf-b812-1ddf72d2bf37}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeneratedFiles\Debug\moc_BrillouinAcquisition.cpp">
@@ -63,13 +81,25 @@
     <ClCompile Include="GeneratedFiles\Release\moc_h5bm.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_Camera.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_Camera.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_Device.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_Device.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
     <ClCompile Include="external\h5bm\h5bm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_acquisition.cpp">
+    <ClCompile Include="GeneratedFiles\Debug\moc_Acquisition.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_acquisition.cpp">
+    <ClCompile Include="GeneratedFiles\Release\moc_Acquisition.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_storageWrapper.cpp">
@@ -126,9 +156,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AcquisitionMode.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\acquisition.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\BrillouinAcquisition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -151,46 +178,37 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Devices\andor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Devices\NIDAQ.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Devices\PointGrey.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Devices\ZeissECU.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Devices\scancontrol.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\AcquisitionModes\AcquisitionMode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\AcquisitionModes\Brillouin.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\AcquisitionModes\ODT.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_device.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_device.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Devices\Device.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Devices</Filter>
     </ClCompile>
     <ClCompile Include="src\Devices\Camera.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Devices</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_camera.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\Devices\Device.cpp">
+      <Filter>Source Files\Devices</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_camera.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\Devices\NIDAQ.cpp">
+      <Filter>Source Files\Devices</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Devices\PointGrey.cpp">
+      <Filter>Source Files\Devices</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Devices\scancontrol.cpp">
+      <Filter>Source Files\Devices</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Devices\ZeissECU.cpp">
+      <Filter>Source Files\Devices</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Acquisition\Acquisition.cpp">
+      <Filter>Source Files\Acquisition</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Acquisition\AcquisitionModes\AcquisitionMode.cpp">
+      <Filter>Source Files\Acquisition\AcquisitionModes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Acquisition\AcquisitionModes\Brillouin.cpp">
+      <Filter>Source Files\Acquisition\AcquisitionModes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Acquisition\AcquisitionModes\ODT.cpp">
+      <Filter>Source Files\Acquisition\AcquisitionModes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -213,14 +231,11 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Devices\cameraParameters.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Devices</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="external\h5bm\h5bm.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\acquisition.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="src\BrillouinAcquisition.h">
@@ -244,38 +259,41 @@
     <CustomBuild Include="src\BrillouinAcquisition.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\Devices\andor.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Devices\NIDAQ.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Devices\PointGrey.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Devices\ZeissECU.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Devices\scancontrol.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\AcquisitionModes\AcquisitionMode.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\AcquisitionModes\Brillouin.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\AcquisitionModes\ODT.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Devices\Device.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="BrillouinAcquisition.qrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="src\Devices\andor.h">
+      <Filter>Header Files\Devices</Filter>
+    </CustomBuild>
     <CustomBuild Include="src\Devices\Camera.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Devices</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Devices\Device.h">
+      <Filter>Header Files\Devices</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Devices\NIDAQ.h">
+      <Filter>Header Files\Devices</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Devices\PointGrey.h">
+      <Filter>Header Files\Devices</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Devices\scancontrol.h">
+      <Filter>Header Files\Devices</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Devices\ZeissECU.h">
+      <Filter>Header Files\Devices</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Acquisition\Acquisition.h">
+      <Filter>Header Files\Acquisition</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Acquisition\AcquisitionModes\AcquisitionMode.h">
+      <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Acquisition\AcquisitionModes\Brillouin.h">
+      <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Acquisition\AcquisitionModes\ODT.h">
+      <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

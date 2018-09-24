@@ -115,9 +115,9 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	// slot to show current acquisition progress
 	connection = QWidget::connect(
 		m_acquisition,
-		&Acquisition::s_acqModeRunning,
+		&Acquisition::s_currentModes,
 		this,
-		[this](ACQUISITION_MODE mode) { showModeRunning(mode); }
+		[this](ACQUISITION_MODE modes) { showCurrentModes(modes); }
 	);
 
 	// slot to show current acquisition position
@@ -601,7 +601,7 @@ void BrillouinAcquisition::on_acquisitionStartODT_clicked() {
 	}
 }
 
-void BrillouinAcquisition::showModeRunning(ACQUISITION_MODE mode) {
+void BrillouinAcquisition::showCurrentModes(ACQUISITION_MODE mode) {
 	m_modeRunning = mode;
 	// Brillouin
 	bool brillouinRunning = (bool)(m_modeRunning & ACQUISITION_MODE::BRILLOUIN);

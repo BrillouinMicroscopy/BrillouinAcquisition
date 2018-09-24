@@ -2,9 +2,9 @@
 #define ODT_H
 
 #include "AcquisitionMode.h"
-#include "..\Devices\PointGrey.h"
-#include "..\Devices\NIDAQ.h"
-#include "..\circularBuffer.h"
+#include "../../Devices/PointGrey.h"
+#include "../../Devices/NIDAQ.h"
+#include "../../circularBuffer.h"
 
 enum class ODT_SETTING {
 	VOLTAGE,

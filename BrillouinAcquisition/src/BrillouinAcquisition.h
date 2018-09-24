@@ -5,19 +5,19 @@
 
 #include "thread.h"
 
-#include "Devices\andor.h"
-#include "Devices\scancontrol.h"
-#include "Devices\ZeissECU.h"
-#include "Devices\NIDAQ.h"
-#include "Devices\PointGrey.h"
+#include "Devices/andor.h"
+#include "Devices/scancontrol.h"
+#include "Devices/ZeissECU.h"
+#include "Devices/NIDAQ.h"
+#include "Devices/PointGrey.h"
 
-#include "acquisition.h"
+#include "Acquisition/Acquisition.h"
 #include "external/qcustomplot/qcustomplot.h"
 #include "external/h5bm/h5bm.h"
 #include "tableModel.h"
 
-#include "AcquisitionModes\ODT.h"
-#include "AcquisitionModes\Brillouin.h"
+#include"Acquisition/AcquisitionModes/Brillouin.h"
+#include"Acquisition/AcquisitionModes/ODT.h"
 
 #include <QtWidgets/QMainWindow>
 #include "ui_BrillouinAcquisition.h"
@@ -157,7 +157,7 @@ private slots:
 	void showBrillouinProgress(ACQUISITION_STATE state, double progress, int seconds);
 	void showCalibrationInterval(int);
 	void showCalibrationRunning(bool);
-	void showModeRunning(ACQUISITION_MODE mode);
+	void showCurrentModes(ACQUISITION_MODE mode);
 	void updateFilename(std::string);
 
 	// ODT signals

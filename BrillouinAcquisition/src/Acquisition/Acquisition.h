@@ -1,8 +1,8 @@
 #ifndef ACQUISITION_H
 #define ACQUISITION_H
 
-#include "storageWrapper.h"
-#include "thread.h"
+#include "../storageWrapper.h"
+#include "../thread.h"
 
 enum class ACQUISITION_STATE {
 	STARTED,
@@ -28,7 +28,7 @@ class Acquisition : public QObject {
 public:
 	Acquisition(QObject *parent);
 	~Acquisition();
-	ACQUISITION_MODE isAcqRunning();
+	ACQUISITION_MODE getCurrentModes();
 	std::unique_ptr <StorageWrapper> m_storage = nullptr;
 
 public slots:
@@ -52,7 +52,7 @@ public slots:
 
 private:
 	StoragePath m_path;
-	ACQUISITION_MODE m_modeRunning = ACQUISITION_MODE::NONE;	// which mode is currently acquiring
+	ACQUISITION_MODE m_currentModes = ACQUISITION_MODE::NONE;	// which mode is currently acquiring
 	ACQUISITION_STATES m_states;								// state of the acquisition modes
 
 private slots:
@@ -60,7 +60,7 @@ private slots:
 	StoragePath checkFilename(StoragePath desiredPath);
 
 signals:
-	void s_acqModeRunning(ACQUISITION_MODE);	// which acquisition mode is running
+	void s_currentModes(ACQUISITION_MODE);	// which acquisition mode is running
 	void s_filenameChanged(std::string);
 	void s_openFileFailed();
 };

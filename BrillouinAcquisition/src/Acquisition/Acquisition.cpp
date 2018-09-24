@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "acquisition.h"
-#include "simplemath.h"
-#include "logger.h"
+#include "../simplemath.h"
+#include "../logger.h"
 #include "filesystem"
 
 using namespace std::experimental::filesystem::v1;
@@ -12,11 +12,11 @@ Acquisition::Acquisition(QObject *parent)
 }
 
 Acquisition::~Acquisition() {
-	m_modeRunning = ACQUISITION_MODE::NONE;
+	m_currentModes = ACQUISITION_MODE::NONE;
 }
 
-ACQUISITION_MODE Acquisition::isAcqRunning() {
-	return m_modeRunning;
+ACQUISITION_MODE Acquisition::getCurrentModes() {
+	return m_currentModes;
 }
 
 void Acquisition::newAcquisition(StoragePath path) {
@@ -25,8 +25,8 @@ void Acquisition::newAcquisition(StoragePath path) {
 
 void Acquisition::openAcquisition(StoragePath path, int flag) {
 	// if an acquisition is running, do nothing
-	if (m_modeRunning != ACQUISITION_MODE::NONE) {
-		emit(s_acqModeRunning(m_modeRunning));
+	if (m_currentModes != ACQUISITION_MODE::NONE) {
+		emit(s_currentModes(m_currentModes));
 		return;
 	}
 	m_path = path;
@@ -70,7 +70,7 @@ void Acquisition::setAcquisitionState(ACQUISITION_MODE mode, ACQUISITION_STATE s
 }
 
 bool Acquisition::isModeRunning(ACQUISITION_MODE mode) {
-	return (bool)(m_modeRunning & mode);
+	return (bool)(m_currentModes & mode);
 }
 
 /*
@@ -84,17 +84,22 @@ bool Acquisition::startMode(ACQUISITION_MODE mode) {
 	}
 
 	// Check that the requested mode is not already running.
-	if ((bool)(mode & m_modeRunning)) {
-		return false;
+	if ((bool)(mode & m_currentModes)) {
+		return true;
 	}
 	// Check, that Brillouin and ODT don't run simultaneously.
-	if (((mode | m_modeRunning) & (ACQUISITION_MODE::BRILLOUIN | ACQUISITION_MODE::ODT))
+	if (((mode | m_currentModes) & (ACQUISITION_MODE::BRILLOUIN | ACQUISITION_MODE::ODT))
 		== (ACQUISITION_MODE::BRILLOUIN | ACQUISITION_MODE::ODT)) {
 		return false;
 	}
+	// Check, that Fluorescence and ODT don't run simultaneously.
+	if (((mode | m_currentModes) & (ACQUISITION_MODE::FLUORESCENCE | ACQUISITION_MODE::ODT))
+		== (ACQUISITION_MODE::FLUORESCENCE | ACQUISITION_MODE::ODT)) {
+		return false;
+	}
 	// Add the requested mode to the running modes.
-	m_modeRunning |= mode;
-	emit(s_acqModeRunning(m_modeRunning));
+	m_currentModes |= mode;
+	emit(s_currentModes(m_currentModes));
 	return true;
 }
 
@@ -102,8 +107,8 @@ bool Acquisition::startMode(ACQUISITION_MODE mode) {
  * Stops the selected mode.
  */
 void Acquisition::stopMode(ACQUISITION_MODE mode) {
-	m_modeRunning &= ~mode;
-	emit(s_acqModeRunning(m_modeRunning));
+	m_currentModes &= ~mode;
+	emit(s_currentModes(m_currentModes));
 }
 
 void Acquisition::checkFilename() {

@@ -1,6 +1,6 @@
 #include "stdafx.h"
-#include "..\simplemath.h"
 #include "ODT.h"
+#include "../../simplemath.h"
 
 ODT::ODT(QObject *parent, Acquisition *acquisition, PointGrey **pointGrey, NIDAQ **nidaq)
 	: AcquisitionMode(parent, acquisition), m_pointGrey(pointGrey), m_NIDAQ(nidaq) {

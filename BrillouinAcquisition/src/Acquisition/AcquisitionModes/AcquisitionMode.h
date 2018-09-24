@@ -4,7 +4,7 @@
 #include <QtCore>
 #include <gsl/gsl>
 
-#include "..\acquisition.h"
+#include "../Acquisition.h"
 
 class AcquisitionMode : public QObject {
 	Q_OBJECT
@@ -28,6 +28,7 @@ private slots:
 signals:
 	void s_repetitionProgress(ACQUISITION_STATE, double, int);	// progress in percent and the remaining time in seconds
 	void s_totalProgress(int, int);								// repetitions
+	void s_acqRunning(bool);									// is the acquisition running
 };
 
 #endif //ACQUISITIONMODE_H
