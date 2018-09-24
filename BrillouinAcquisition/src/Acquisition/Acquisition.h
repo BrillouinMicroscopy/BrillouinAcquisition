@@ -34,15 +34,15 @@ public:
 public slots:
 	void init() {};
 	// overrides previous acquisition (potential dataloss)
-	void newAcquisition(StoragePath path);
+	void newFile(StoragePath path);
 	/*
 	 * Opens acquisition and adds new repetitions without overriding by default.
 	 * Different behaviour can be specified by supplying a different flag.
 	 */
-	void openAcquisition(StoragePath path, int flag = H5F_ACC_RDWR);
-	void openAcquisition();
+	void openFile(StoragePath path, int flag = H5F_ACC_RDWR);
+	void openFile();
 	void newRepetition(ACQUISITION_MODE mode);
-	void closeAcquisition();
+	void closeFile();
 	void setAcquisitionState(ACQUISITION_MODE mode, ACQUISITION_STATE state);
 	
 	bool isModeRunning(ACQUISITION_MODE mode);

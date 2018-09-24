@@ -19,11 +19,11 @@ ACQUISITION_MODE Acquisition::getCurrentModes() {
 	return m_currentModes;
 }
 
-void Acquisition::newAcquisition(StoragePath path) {
-	openAcquisition(path, H5F_ACC_TRUNC);
+void Acquisition::newFile(StoragePath path) {
+	openFile(path, H5F_ACC_TRUNC);
 }
 
-void Acquisition::openAcquisition(StoragePath path, int flag) {
+void Acquisition::openFile(StoragePath path, int flag) {
 	// if an acquisition is running, do nothing
 	if (m_currentModes != ACQUISITION_MODE::NONE) {
 		emit(s_currentModes(m_currentModes));
@@ -35,21 +35,21 @@ void Acquisition::openAcquisition(StoragePath path, int flag) {
 	m_storage = std::make_unique <StorageWrapper>(nullptr, m_path, flag);
 }
 
-void Acquisition::openAcquisition() {
+void Acquisition::openFile() {
 	StoragePath defaultPath = StoragePath{};
 	defaultPath = checkFilename(defaultPath);
 
-	openAcquisition(defaultPath);
+	openFile(defaultPath);
 }
 
 void Acquisition::newRepetition(ACQUISITION_MODE mode) {
 	if (m_storage == nullptr) {
-		openAcquisition();
+		openFile();
 	}
 	m_storage->newRepetition(mode);
 }
 
-void Acquisition::closeAcquisition() {
+void Acquisition::closeFile() {
 	m_storage.reset();
 }
 
@@ -80,7 +80,7 @@ bool Acquisition::isModeRunning(ACQUISITION_MODE mode) {
 bool Acquisition::startMode(ACQUISITION_MODE mode) {
 	// If no acquisition file is open, open one.
 	if (m_storage == nullptr) {
-		openAcquisition();
+		openFile();
 	}
 
 	// Check that the requested mode is not already running.

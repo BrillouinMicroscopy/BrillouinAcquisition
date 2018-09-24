@@ -1810,7 +1810,7 @@ void BrillouinAcquisition::on_actionNew_Acquisition_triggered() {
 
 	m_storagePath = splitFilePath(fullPath);
 	ui->acquisitionFilename->setText(QString::fromStdString(m_storagePath.filename));
-	m_acquisition->newAcquisition(m_storagePath);
+	m_acquisition->newFile(m_storagePath);
 }
 
 void BrillouinAcquisition::on_actionOpen_Acquisition_triggered() {
@@ -1823,11 +1823,11 @@ void BrillouinAcquisition::on_actionOpen_Acquisition_triggered() {
 
 	m_storagePath = splitFilePath(fullPath);
 	ui->acquisitionFilename->setText(QString::fromStdString(m_storagePath.filename));
-	m_acquisition->openAcquisition(m_storagePath);
+	m_acquisition->openFile(m_storagePath);
 }
 
 void BrillouinAcquisition::on_actionClose_Acquisition_triggered() {
-	m_acquisition->closeAcquisition();
+	m_acquisition->closeFile();
 	m_storagePath.filename = "";
 	ui->acquisitionFilename->setText(QString::fromStdString(m_storagePath.filename));
 }
