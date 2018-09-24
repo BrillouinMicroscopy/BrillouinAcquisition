@@ -127,14 +127,14 @@ void Andor::setSettings(CAMERA_SETTINGS settings) {
 	AT_GetInt(m_camera, L"AOILeft", &m_settings.roi.left);
 	AT_GetInt(m_camera, L"AOITop", &m_settings.roi.top);
 
-	// emit signal that settings changed
-	emit(settingsChanged(m_settings));
+	// read back the settings
+	readSettings();
 }
 
 void Andor::readSettings() {
 	// general settings
 	AT_GetFloat(m_camera, L"ExposureTime", &m_settings.exposureTime);
-	AT_GetInt(m_camera, L"FrameCount", &m_settings.frameCount);
+	//AT_GetInt(m_camera, L"FrameCount", &m_settings.frameCount);
 	AT_GetBool(m_camera, L"SpuriousNoiseFilter", (int*)&m_settings.spuriousNoiseFilter);
 
 	// ROI
