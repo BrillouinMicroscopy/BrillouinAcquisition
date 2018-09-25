@@ -61,8 +61,8 @@ void Brillouin::startRepetitions() {
 }
 
 void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
-
-	emit(s_acquisitionStatus(ACQUISITION_STATUS::STARTED));
+	m_status = ACQUISITION_STATUS::STARTED;
+	emit(s_acquisitionStatus(m_status));
 	
 	// prepare camera for image acquisition
 	m_andor->startAcquisition(m_settings.camera);
@@ -205,7 +205,8 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	std::string info = "Acquisition finished.";
 	qInfo(logInfo()) << info.c_str();
 	emit(s_calibrationRunning(false));
-	emit(s_acquisitionStatus(ACQUISITION_STATUS::FINISHED));
+	m_status = ACQUISITION_STATUS::FINISHED;
+	emit(s_acquisitionStatus(m_status));
 	emit(s_timeToCalibration(0));
 }
 
@@ -213,7 +214,8 @@ void Brillouin::abortMode() {
 	m_andor->stopAcquisition();
 	(*m_scanControl)->setPosition(m_startPosition);
 	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
-	emit(s_acquisitionStatus(ACQUISITION_STATUS::ABORTED));
+	m_status = ACQUISITION_STATUS::ABORTED;
+	emit(s_acquisitionStatus(m_status));
 	emit(s_positionChanged(m_startPosition, 0));
 	emit(s_timeToCalibration(0));
 }

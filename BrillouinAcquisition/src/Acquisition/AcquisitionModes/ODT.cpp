@@ -73,6 +73,7 @@ void ODT::startRepetitions() {
 
 	// stop alignment if it is running
 	if (m_algnTimer->isActive()) {
+		m_algnRunning = false;
 		m_algnTimer->stop();
 	}
 
@@ -108,8 +109,8 @@ void ODT::startRepetitions() {
 }
 
 void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
-
-	emit(s_acquisitionStatus(ACQUISITION_STATUS::STARTED));
+	m_status = ACQUISITION_STATUS::STARTED;
+	emit(s_acquisitionStatus(m_status));
 
 	VOLTAGE2 voltage;
 
@@ -168,7 +169,8 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 		QMetaObject::invokeMethod(storage.get(), "s_enqueuePayload", Qt::AutoConnection, Q_ARG(ODTIMAGE*, img));
 	}
 
-	emit(s_acquisitionStatus(ACQUISITION_STATUS::FINISHED));
+	m_status = ACQUISITION_STATUS::FINISHED;
+	emit(s_acquisitionStatus(m_status));
 }
 
 void ODT::startAlignment() {
@@ -177,7 +179,8 @@ void ODT::startAlignment() {
 		if (!allowed) {
 			return;
 		}
-		emit(s_acquisitionStatus(ACQUISITION_STATUS::ALIGNING));
+		m_status = ACQUISITION_STATUS::ALIGNING;
+		emit(s_acquisitionStatus(m_status));
 		m_algnRunning = true;
 		// start the timer
 		if (!m_algnTimer->isActive()) {
@@ -189,7 +192,8 @@ void ODT::startAlignment() {
 			m_algnTimer->stop();
 		}
 		m_acquisition->disableMode(ACQUISITION_MODE::ODT);
-		emit(s_acquisitionStatus(ACQUISITION_STATUS::STOPPED));
+		m_status = ACQUISITION_STATUS::STOPPED;
+		emit(s_acquisitionStatus(m_status));
 	}
 }
 
@@ -275,8 +279,10 @@ void ODT::calculateVoltages(ODT_MODE mode) {
 void ODT::abortMode() {
 	// stop alignment if it is running
 	if (m_algnTimer->isActive()) {
+		m_algnRunning = false;
 		m_algnTimer->stop();
 	}
 	m_acquisition->disableMode(ACQUISITION_MODE::ODT);
-	emit(s_acquisitionStatus(ACQUISITION_STATUS::ABORTED));
+	m_status = ACQUISITION_STATUS::ABORTED;
+	emit(s_acquisitionStatus(m_status));
 }

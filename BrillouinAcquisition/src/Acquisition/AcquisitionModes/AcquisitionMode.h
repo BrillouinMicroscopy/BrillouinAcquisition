@@ -11,10 +11,10 @@ enum class ACQUISITION_STATUS {
 	ENABLED,
 	ABORTED,
 	FINISHED,
-	STARTED,
-	RUNNING,
+	STOPPED,
 	ALIGNING,
-	STOPPED
+	STARTED,
+	RUNNING
 };
 
 class AcquisitionMode : public QObject {
@@ -28,10 +28,12 @@ public:
 public slots:
 	void init() {};
 	virtual void startRepetitions() = 0;
+	ACQUISITION_STATUS getStatus();
 
 protected:
 	Acquisition *m_acquisition = nullptr;
 	virtual void abortMode() = 0;
+	ACQUISITION_STATUS m_status{ ACQUISITION_STATUS::DISABLED };
 
 private slots:
 	virtual void acquire(std::unique_ptr <StorageWrapper> & storage) = 0;

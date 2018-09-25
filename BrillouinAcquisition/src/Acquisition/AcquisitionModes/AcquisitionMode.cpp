@@ -7,3 +7,7 @@ AcquisitionMode::AcquisitionMode(QObject *parent, Acquisition *acquisition)
 
 AcquisitionMode::~AcquisitionMode() {
 }
+
+ACQUISITION_STATUS AcquisitionMode::getStatus() {
+	return m_status;
+}
