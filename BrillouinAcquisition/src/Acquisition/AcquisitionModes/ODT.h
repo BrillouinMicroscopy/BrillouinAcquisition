@@ -70,7 +70,6 @@ private slots:
 
 signals:
 	void s_acqSettingsChanged(ODT_SETTINGS);				// emit the acquisition voltages
-	void s_algnRunning(bool);								// is alignment running
 	void s_algnSettingsChanged(ODT_SETTINGS);				// emit the alignment voltages
 	void s_mirrorVoltageChanged(VOLTAGE2, ODT_MODE);		// emit the mirror voltage
 };

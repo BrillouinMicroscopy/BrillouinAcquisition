@@ -175,8 +175,6 @@ private slots:
 	void on_acquisitionRate_ODT_valueChanged(double);
 	void on_acquisitionStartODT_clicked();
 
-	void showODTAlgnRunning(bool);
-
 	QString formatSeconds(int seconds);
 
 	void on_actionQuit_triggered();

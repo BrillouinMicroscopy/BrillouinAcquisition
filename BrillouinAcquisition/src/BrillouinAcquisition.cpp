@@ -546,14 +546,6 @@ void BrillouinAcquisition::on_alignmentStartODT_clicked() {
 	QMetaObject::invokeMethod(m_ODT, "startAlignment", Qt::AutoConnection);
 }
 
-void BrillouinAcquisition::showODTAlgnRunning(bool isRunning) {
-	if (isRunning) {
-		ui->alignmentStartODT->setText("Stop");
-	} else {
-		ui->alignmentStartODT->setText("Start");
-	}
-}
-
 void BrillouinAcquisition::on_acquisitionUR_ODT_valueChanged(double voltage) {
 	m_ODT->setSettings(ODT_MODE::ACQ, ODT_SETTING::VOLTAGE, voltage);
 }
@@ -690,6 +682,12 @@ void BrillouinAcquisition::showODTStatus(ACQUISITION_STATUS status) {
 	ui->acquisitionUR_ODT->setDisabled(running);
 	ui->acquisitionNumber_ODT->setDisabled(running);
 	ui->acquisitionRate_ODT->setDisabled(running);
+
+	if (status == ACQUISITION_STATUS::ALIGNING) {
+		ui->alignmentStartODT->setText("Stop");
+	} else {
+		ui->alignmentStartODT->setText("Start");
+	}
 }
 
 void BrillouinAcquisition::showODTProgress(double progress, int seconds) {
@@ -1419,13 +1417,6 @@ void BrillouinAcquisition::initScanControl() {
 				&ODT::s_algnSettingsChanged,
 				this,
 				[this](ODT_SETTINGS settings) { plotODTVoltages(settings, ODT_MODE::ALGN); }
-			);
-
-			connection = QWidget::connect(
-				m_ODT,
-				&ODT::s_algnRunning,
-				this,
-				[this](bool isRunning) { showODTAlgnRunning(isRunning); }
 			);
 
 			connection = QWidget::connect(

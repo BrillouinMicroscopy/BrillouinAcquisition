@@ -191,7 +191,6 @@ void ODT::startAlignment() {
 		m_acquisition->disableMode(ACQUISITION_MODE::ODT);
 		emit(s_acquisitionStatus(ACQUISITION_STATUS::STOPPED));
 	}
-	emit(s_algnRunning(m_algnRunning));
 }
 
 void ODT::nextAlgnPosition() {
