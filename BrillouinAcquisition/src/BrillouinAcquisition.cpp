@@ -286,7 +286,7 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 		m_ODT->deleteLater();
 		m_ODT = nullptr;
 	}
-	delete m_scanControl;
+	m_scanControl->deleteLater();
 	delete m_pointGrey;
 	delete m_andor;
 	//m_cameraThread.exit();
