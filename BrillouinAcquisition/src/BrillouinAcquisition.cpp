@@ -115,9 +115,9 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	// slot to show current acquisition progress
 	connection = QWidget::connect(
 		m_acquisition,
-		&Acquisition::s_currentModes,
+		&Acquisition::s_enabledModes,
 		this,
-		[this](ACQUISITION_MODE modes) { showCurrentModes(modes); }
+		[this](ACQUISITION_MODE modes) { showEnabledModes(modes); }
 	);
 
 	// slot to show current acquisition position
@@ -128,12 +128,20 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		[this](POINT3 position, int imageNr) { showAcqPosition(position, imageNr); }
 	);
 
-	// slot to show current acquisition progress
+	// slot to show current acquisition state
+	connection = QWidget::connect(
+		m_Brillouin,
+		&Brillouin::s_acquisitionStatus,
+		this,
+		[this](ACQUISITION_STATUS state) { showBrillouinStatus(state); }
+	);
+
+	// slot to show current repetition progress
 	connection = QWidget::connect(
 		m_Brillouin,
 		&Brillouin::s_repetitionProgress,
 		this,
-		[this](ACQUISITION_STATE state, double progress, int seconds) { showBrillouinProgress(state, progress, seconds); }
+		[this](double progress, int seconds) { showBrillouinProgress(progress, seconds); }
 	);
 
 	// slot to show calibration running
@@ -164,7 +172,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<AT_64>("AT_64");
 	qRegisterMetaType<StoragePath>("StoragePath");
 	qRegisterMetaType<ACQUISITION_MODE>("ACQUISITION_MODE");
-	qRegisterMetaType<ACQUISITION_STATE>("ACQUISITION_STATE");
+	qRegisterMetaType<ACQUISITION_STATUS>("ACQUISITION_STATUS");
 	qRegisterMetaType<BRILLOUIN_SETTINGS>("BRILLOUIN_SETTINGS");
 	qRegisterMetaType<CAMERA_SETTINGS>("CAMERA_SETTINGS");
 	qRegisterMetaType<CAMERA_OPTIONS>("CAMERA_OPTIONS");
@@ -430,41 +438,6 @@ void BrillouinAcquisition::setCurrentPositionBounds(BOUNDS bounds) {
 	ui->endZ->setMaximum(bounds.zMax);
 }
 
-void BrillouinAcquisition::showBrillouinProgress(ACQUISITION_STATE state, double progress, int seconds) {
-	ui->progressBar->setValue(progress);
-
-	QString string;
-	if (state == ACQUISITION_STATE::ABORTED) {
-		string = "Acquisition aborted.";
-	} else if (state == ACQUISITION_STATE::STARTED) {
-		string = "Acquisition started.";
-	} else if (state == ACQUISITION_STATE::FINISHED) {
-		string = "Acquisition finished.";
-	} else {
-		QString timeString = formatSeconds(seconds);
-		string.sprintf("%02.1f %% finished, ", progress);
-		string += timeString;
-		string += " remaining.";
-	}
-	ui->progressBar->setFormat(string);
-}
-
-QString BrillouinAcquisition::formatSeconds(int seconds) {
-	QString string;
-	if (seconds > 3600) {
-		int hours = floor((double)seconds / 3600);
-		int minutes = floor((seconds - hours * 3600) / 60);
-		string.sprintf("%02.0f:%02.0f hours", (double)hours, (double)minutes);
-	} else if (seconds > 60) {
-		int minutes = floor(seconds / 60);
-		seconds = floor(seconds - minutes * 60);
-		string.sprintf("%02.0f:%02.0f minutes", (double)minutes, (double)seconds);
-	} else {
-		string.sprintf("%2.0f seconds", (double)seconds);
-	}
-	return string;
-}
-
 void BrillouinAcquisition::on_actionQuit_triggered() {
 	QApplication::quit();
 }
@@ -601,41 +574,151 @@ void BrillouinAcquisition::on_acquisitionStartODT_clicked() {
 	}
 }
 
-void BrillouinAcquisition::showCurrentModes(ACQUISITION_MODE mode) {
-	m_modeRunning = mode;
-	// Brillouin
-	bool brillouinRunning = (bool)(m_modeRunning & ACQUISITION_MODE::BRILLOUIN);
-	if (brillouinRunning) {
-		ui->BrillouinStart->setText("Stop");
+void BrillouinAcquisition::showEnabledModes(ACQUISITION_MODE modes) {
+	m_enabledModes = modes;
+	/*
+	 * Handle Brillouin and fluorescence mode
+	 *
+	 * If either Brillouin or fluorescence mode is enabled, disable ODT controls (enable otherwise).
+	 */
+	bool BrillouinMode = (bool)(m_enabledModes & ACQUISITION_MODE::BRILLOUIN);
+	bool FluorescenceMode = (bool)(m_enabledModes & ACQUISITION_MODE::FLUORESCENCE);
+
+	if (BrillouinMode | FluorescenceMode) {
+		ui->acquisitionStartODT->setEnabled(false);
+		ui->alignmentStartODT->setEnabled(false);
+	} else {
+		ui->acquisitionStartODT->setEnabled(true);
+		ui->alignmentStartODT->setEnabled(true);
+	}
+
+	/*
+	* Handle ODT mode
+	*
+	* If ODT mode is enabled, disable Brillouin and Fluorescence controls (enable otherwise).
+	*/
+	bool ODTMode = (bool)(m_enabledModes & ACQUISITION_MODE::ODT);
+
+	if (ODTMode) {
+		ui->BrillouinStart->setEnabled(false);
+	} else {
+		ui->BrillouinStart->setEnabled(true);
+	}
+}
+
+void BrillouinAcquisition::showBrillouinStatus(ACQUISITION_STATUS status) {
+	QString string;
+	if (status == ACQUISITION_STATUS::ABORTED) {
+		string = "Acquisition aborted.";
+		ui->progressBar->setValue(0);
+	} else if (status == ACQUISITION_STATUS::FINISHED) {
+		string = "Acquisition finished.";
+	} else if (status == ACQUISITION_STATUS::STARTED) {
+		string = "Acquisition started.";
+	}
+	ui->progressBar->setFormat(string);
+
+	bool running{ false };
+	if (status == ACQUISITION_STATUS::RUNNING || status == ACQUISITION_STATUS::STARTED) {
+		ui->BrillouinStart->setText("Cancel");
+		running = true;
 	} else {
 		ui->BrillouinStart->setText("Start");
 	}
-	ui->startX->setEnabled(!brillouinRunning);
-	ui->startY->setEnabled(!brillouinRunning);
-	ui->startZ->setEnabled(!brillouinRunning);
-	ui->endX->setEnabled(!brillouinRunning);
-	ui->endY->setEnabled(!brillouinRunning);
-	ui->endZ->setEnabled(!brillouinRunning);
-	ui->stepsX->setEnabled(!brillouinRunning);
-	ui->stepsY->setEnabled(!brillouinRunning);
-	ui->stepsZ->setEnabled(!brillouinRunning);
-	ui->camera_playPause->setEnabled(!brillouinRunning);
-	ui->camera_singleShot->setEnabled(!brillouinRunning);
-	ui->setHome->setEnabled(!brillouinRunning);
-	ui->setPositionX->setEnabled(!brillouinRunning);
-	ui->setPositionY->setEnabled(!brillouinRunning);
-	ui->setPositionZ->setEnabled(!brillouinRunning);
 
-	// Brillouin
-	bool ODTRunning = (bool)(m_modeRunning & ACQUISITION_MODE::ODT);
-	if (ODTRunning) {
+	ui->startX->setDisabled(running);
+	ui->startY->setDisabled(running);
+	ui->startZ->setDisabled(running);
+	ui->endX->setDisabled(running);
+	ui->endY->setDisabled(running);
+	ui->endZ->setDisabled(running);
+	ui->stepsX->setDisabled(running);
+	ui->stepsY->setDisabled(running);
+	ui->stepsZ->setDisabled(running);
+	ui->camera_playPause->setDisabled(running);
+	ui->camera_singleShot->setDisabled(running);
+	ui->setHome->setDisabled(running);
+	ui->setPositionX->setDisabled(running);
+	ui->setPositionY->setDisabled(running);
+	ui->setPositionZ->setDisabled(running);
+
+	ui->postCalibration->setDisabled(running);
+	ui->preCalibration->setDisabled(running);
+	ui->conCalibration->setDisabled(running);
+	ui->conCalibrationInterval->setDisabled(running);
+	ui->sampleSelection->setDisabled(running);
+	ui->nrCalibrationImages->setDisabled(running);
+	ui->calibrationExposureTime->setDisabled(running);
+	ui->repetitionInterval->setDisabled(running);
+	ui->repetitionCount->setDisabled(running);
+}
+
+void BrillouinAcquisition::showBrillouinProgress(double progress, int seconds) {
+	ui->progressBar->setValue(progress);
+
+	QString string;
+	QString timeString = formatSeconds(seconds);
+	string.sprintf("%02.1f %% finished, ", progress);
+	string += timeString;
+	string += " remaining.";
+	ui->progressBar->setFormat(string);
+}
+
+void BrillouinAcquisition::showODTStatus(ACQUISITION_STATUS status) {
+	QString string;
+	if (status == ACQUISITION_STATUS::ABORTED) {
+		string = "Acquisition aborted.";
+		ui->acquisitionProgress_ODT->setValue(0);
+	}
+	else if (status == ACQUISITION_STATUS::FINISHED) {
+		string = "Acquisition finished.";
+	}
+	else if (status == ACQUISITION_STATUS::STARTED) {
+		string = "Acquisition started.";
+	}
+	ui->acquisitionProgress_ODT->setFormat(string);
+
+	bool running{ false };
+	if (status == ACQUISITION_STATUS::RUNNING || status == ACQUISITION_STATUS::STARTED) {
 		ui->acquisitionStartODT->setText("Cancel");
+		running = true;
 	} else {
 		ui->acquisitionStartODT->setText("Start");
 	}
 
-	// Fluorescence
-	bool FluorescenceRunning = (bool)(m_modeRunning & ACQUISITION_MODE::FLUORESCENCE);
+	ui->alignmentStartODT->setDisabled(running);
+	ui->acquisitionUR_ODT->setDisabled(running);
+	ui->acquisitionNumber_ODT->setDisabled(running);
+	ui->acquisitionRate_ODT->setDisabled(running);
+}
+
+void BrillouinAcquisition::showODTProgress(double progress, int seconds) {
+	ui->acquisitionProgress_ODT->setValue(progress);
+
+	QString string;
+	QString timeString = formatSeconds(seconds);
+	string.sprintf("%02.1f %% finished, ", progress);
+	string += timeString;
+	string += " remaining.";
+	ui->acquisitionProgress_ODT->setFormat(string);
+}
+
+QString BrillouinAcquisition::formatSeconds(int seconds) {
+	QString string;
+	if (seconds > 3600) {
+		int hours = floor((double)seconds / 3600);
+		int minutes = floor((seconds - hours * 3600) / 60);
+		string.sprintf("%02.0f:%02.0f hours", (double)hours, (double)minutes);
+	}
+	else if (seconds > 60) {
+		int minutes = floor(seconds / 60);
+		seconds = floor(seconds - minutes * 60);
+		string.sprintf("%02.0f:%02.0f minutes", (double)minutes, (double)seconds);
+	}
+	else {
+		string.sprintf("%2.0f seconds", (double)seconds);
+	}
+	return string;
 }
 
 void BrillouinAcquisition::plotODTVoltages(ODT_SETTINGS settings, ODT_MODE mode) {
@@ -1352,6 +1435,22 @@ void BrillouinAcquisition::initScanControl() {
 				[this](VOLTAGE2 voltage, ODT_MODE mode) { plotODTVoltage(voltage, mode); }
 			);
 
+			// slot to show current acquisition state
+			connection = QWidget::connect(
+				m_ODT,
+				&ODT::s_acquisitionStatus,
+				this,
+				[this](ACQUISITION_STATUS state) { showODTStatus(state); }
+			);
+
+			// slot to show current repetition progress
+			connection = QWidget::connect(
+				m_ODT,
+				&ODT::s_repetitionProgress,
+				this,
+				[this](double progress, int seconds) { showODTProgress(progress, seconds); }
+			);
+
 			// start ODT thread
 			m_acquisitionThread.startWorker(m_ODT);
 			ui->acquisitionModeTabs->insertTab(1, ui->ODT, "ODT");
@@ -1720,25 +1819,25 @@ void BrillouinAcquisition::on_setHome_clicked() {
 }
 
 void BrillouinAcquisition::on_moveHome_clicked() {
-	if (m_modeRunning == ACQUISITION_MODE::NONE) {
+	if (m_enabledModes == ACQUISITION_MODE::NONE) {
 		QMetaObject::invokeMethod(m_scanControl, "moveHome", Qt::AutoConnection);
 	}
 }
 
 void BrillouinAcquisition::on_setPositionX_valueChanged(double positionX) {
-	if (m_modeRunning == ACQUISITION_MODE::NONE) {
+	if (m_enabledModes == ACQUISITION_MODE::NONE) {
 		QMetaObject::invokeMethod(m_scanControl, "setPositionRelativeX", Qt::AutoConnection, Q_ARG(double, positionX));
 	}
 }
 
 void BrillouinAcquisition::on_setPositionY_valueChanged(double positionY) {
-	if (m_modeRunning == ACQUISITION_MODE::NONE) {
+	if (m_enabledModes == ACQUISITION_MODE::NONE) {
 		QMetaObject::invokeMethod(m_scanControl, "setPositionRelativeY", Qt::AutoConnection, Q_ARG(double, positionY));
 	}
 }
 
 void BrillouinAcquisition::on_setPositionZ_valueChanged(double positionZ) {
-	if (m_modeRunning == ACQUISITION_MODE::NONE) {
+	if (m_enabledModes == ACQUISITION_MODE::NONE) {
 		QMetaObject::invokeMethod(m_scanControl, "setPositionRelativeZ", Qt::AutoConnection, Q_ARG(double, positionZ));
 	}
 }

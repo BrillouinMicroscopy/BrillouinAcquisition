@@ -51,7 +51,7 @@ Q_DECLARE_METATYPE(std::string);
 Q_DECLARE_METATYPE(AT_64);
 Q_DECLARE_METATYPE(StoragePath);
 Q_DECLARE_METATYPE(ACQUISITION_MODE);
-Q_DECLARE_METATYPE(ACQUISITION_STATE);
+Q_DECLARE_METATYPE(ACQUISITION_STATUS);
 Q_DECLARE_METATYPE(BRILLOUIN_SETTINGS);
 Q_DECLARE_METATYPE(CAMERA_SETTINGS);
 Q_DECLARE_METATYPE(CAMERA_OPTIONS);
@@ -154,11 +154,16 @@ private slots:
 	void showPosition(POINT3);
 	void setHomePositionBounds(BOUNDS);
 	void setCurrentPositionBounds(BOUNDS bounds);
-	void showBrillouinProgress(ACQUISITION_STATE state, double progress, int seconds);
 	void showCalibrationInterval(int);
 	void showCalibrationRunning(bool);
-	void showCurrentModes(ACQUISITION_MODE mode);
 	void updateFilename(std::string);
+
+
+	void showEnabledModes(ACQUISITION_MODE mode);
+	void showBrillouinStatus(ACQUISITION_STATUS state);
+	void showBrillouinProgress(double progress, int seconds);
+	void showODTStatus(ACQUISITION_STATUS state);
+	void showODTProgress(double progress, int seconds);
 
 	// ODT signals
 	void on_alignmentUR_ODT_valueChanged(double);
@@ -274,7 +279,7 @@ private:
 	StoragePath m_storagePath{ "", ".", "." };
 	bool m_previewRunning = false;
 	bool m_brightfieldPreviewRunning = false;
-	ACQUISITION_MODE m_modeRunning = ACQUISITION_MODE::NONE;
+	ACQUISITION_MODE m_enabledModes = ACQUISITION_MODE::NONE;
 
 	//std::vector<POINT3> m_savedPositions = { {0,0,0}, {100,100,100}, {-200,200,300}, { -10.4,100,100 } };
 

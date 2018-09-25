@@ -12,11 +12,11 @@ Acquisition::Acquisition(QObject *parent)
 }
 
 Acquisition::~Acquisition() {
-	m_currentModes = ACQUISITION_MODE::NONE;
+	m_enabledModes = ACQUISITION_MODE::NONE;
 }
 
-ACQUISITION_MODE Acquisition::getCurrentModes() {
-	return m_currentModes;
+ACQUISITION_MODE Acquisition::getEnabledModes() {
+	return m_enabledModes;
 }
 
 void Acquisition::newFile(StoragePath path) {
@@ -25,8 +25,8 @@ void Acquisition::newFile(StoragePath path) {
 
 void Acquisition::openFile(StoragePath path, int flag) {
 	// if an acquisition is running, do nothing
-	if (m_currentModes != ACQUISITION_MODE::NONE) {
-		emit(s_currentModes(m_currentModes));
+	if (m_enabledModes != ACQUISITION_MODE::NONE) {
+		emit(s_enabledModes(m_enabledModes));
 		return;
 	}
 	m_path = path;
@@ -53,24 +53,8 @@ void Acquisition::closeFile() {
 	m_storage.reset();
 }
 
-void Acquisition::setAcquisitionState(ACQUISITION_MODE mode, ACQUISITION_STATE state) {
-	switch (mode) {
-		case ACQUISITION_MODE::BRILLOUIN:
-			m_states.Brillouin = state;
-			break;
-		case ACQUISITION_MODE::ODT:
-			m_states.ODT = state;
-			break;
-		case ACQUISITION_MODE::FLUORESCENCE:
-			m_states.Fluorescence = state;
-			break;
-		default:
-			break;
-	}
-}
-
 bool Acquisition::isModeEnabled(ACQUISITION_MODE mode) {
-	return (bool)(m_currentModes & mode);
+	return (bool)(m_enabledModes & mode);
 }
 
 /*
@@ -84,22 +68,22 @@ bool Acquisition::enableMode(ACQUISITION_MODE mode) {
 	}
 
 	// Check that the requested mode is not already running.
-	if ((bool)(mode & m_currentModes)) {
+	if ((bool)(mode & m_enabledModes)) {
 		return true;
 	}
 	// Check, that Brillouin and ODT don't run simultaneously.
-	if (((mode | m_currentModes) & (ACQUISITION_MODE::BRILLOUIN | ACQUISITION_MODE::ODT))
+	if (((mode | m_enabledModes) & (ACQUISITION_MODE::BRILLOUIN | ACQUISITION_MODE::ODT))
 		== (ACQUISITION_MODE::BRILLOUIN | ACQUISITION_MODE::ODT)) {
 		return false;
 	}
 	// Check, that Fluorescence and ODT don't run simultaneously.
-	if (((mode | m_currentModes) & (ACQUISITION_MODE::FLUORESCENCE | ACQUISITION_MODE::ODT))
+	if (((mode | m_enabledModes) & (ACQUISITION_MODE::FLUORESCENCE | ACQUISITION_MODE::ODT))
 		== (ACQUISITION_MODE::FLUORESCENCE | ACQUISITION_MODE::ODT)) {
 		return false;
 	}
 	// Add the requested mode to the running modes.
-	m_currentModes |= mode;
-	emit(s_currentModes(m_currentModes));
+	m_enabledModes |= mode;
+	emit(s_enabledModes(m_enabledModes));
 	return true;
 }
 
@@ -107,8 +91,8 @@ bool Acquisition::enableMode(ACQUISITION_MODE mode) {
  * Stops the selected mode.
  */
 void Acquisition::disableMode(ACQUISITION_MODE mode) {
-	m_currentModes &= ~mode;
-	emit(s_currentModes(m_currentModes));
+	m_enabledModes &= ~mode;
+	emit(s_enabledModes(m_enabledModes));
 }
 
 void Acquisition::checkFilename() {

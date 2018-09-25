@@ -4,19 +4,6 @@
 #include "../storageWrapper.h"
 #include "../thread.h"
 
-enum class ACQUISITION_STATE {
-	STARTED,
-	RUNNING,
-	FINISHED,
-	ABORTED
-};
-
-struct ACQUISITION_STATES {
-	ACQUISITION_STATE Brillouin = ACQUISITION_STATE::FINISHED;
-	ACQUISITION_STATE ODT = ACQUISITION_STATE::FINISHED;
-	ACQUISITION_STATE Fluorescence = ACQUISITION_STATE::FINISHED;
-};
-
 struct REPETITIONS {
 	int count = 1;			// [1]		number of repetitions
 	double interval = 10;	// [min]	interval between repetitions
@@ -28,7 +15,7 @@ class Acquisition : public QObject {
 public:
 	Acquisition(QObject *parent);
 	~Acquisition();
-	ACQUISITION_MODE getCurrentModes();
+	ACQUISITION_MODE getEnabledModes();
 	std::unique_ptr <StorageWrapper> m_storage = nullptr;
 
 public slots:
@@ -43,7 +30,6 @@ public slots:
 	void openFile();
 	void newRepetition(ACQUISITION_MODE mode);
 	void closeFile();
-	void setAcquisitionState(ACQUISITION_MODE mode, ACQUISITION_STATE state);
 	
 	bool isModeEnabled(ACQUISITION_MODE mode);
 
@@ -52,15 +38,14 @@ public slots:
 
 private:
 	StoragePath m_path;
-	ACQUISITION_MODE m_currentModes = ACQUISITION_MODE::NONE;	// which mode is currently acquiring
-	ACQUISITION_STATES m_states;								// state of the acquisition modes
+	ACQUISITION_MODE m_enabledModes = ACQUISITION_MODE::NONE;	// which mode is currently acquiring
 
 private slots:
 	void checkFilename();
 	StoragePath checkFilename(StoragePath desiredPath);
 
 signals:
-	void s_currentModes(ACQUISITION_MODE);	// which acquisition mode is running
+	void s_enabledModes(ACQUISITION_MODE);	// which acquisition mode is running
 	void s_filenameChanged(std::string);
 	void s_openFileFailed();
 };

@@ -62,7 +62,7 @@ void Brillouin::startRepetitions() {
 
 void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 
-	emit(s_repetitionProgress(ACQUISITION_STATE::STARTED, 0.0, -1));
+	emit(s_acquisitionStatus(ACQUISITION_STATUS::STARTED));
 	
 	// prepare camera for image acquisition
 	m_andor->startAcquisition(m_settings.camera);
@@ -184,7 +184,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 				ll++;
 				double percentage = 100 * (double)ll / nrPositions;
 				int remaining = 1e-3 * measurementTimer.elapsed() / ll * ((int64_t)nrPositions - ll);
-				emit(s_repetitionProgress(ACQUISITION_STATE::RUNNING, percentage, remaining));
+				emit(s_repetitionProgress(percentage, remaining));
 			}
 		}
 	}
@@ -205,7 +205,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	std::string info = "Acquisition finished.";
 	qInfo(logInfo()) << info.c_str();
 	emit(s_calibrationRunning(false));
-	emit(s_repetitionProgress(ACQUISITION_STATE::FINISHED, 100.0, 0));
+	emit(s_acquisitionStatus(ACQUISITION_STATUS::FINISHED));
 	emit(s_timeToCalibration(0));
 }
 
@@ -213,7 +213,7 @@ void Brillouin::abortMode() {
 	m_andor->stopAcquisition();
 	(*m_scanControl)->setPosition(m_startPosition);
 	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
-	emit(s_repetitionProgress(ACQUISITION_STATE::ABORTED, 0, 0));
+	emit(s_acquisitionStatus(ACQUISITION_STATUS::ABORTED));
 	emit(s_positionChanged(m_startPosition, 0));
 	emit(s_timeToCalibration(0));
 }

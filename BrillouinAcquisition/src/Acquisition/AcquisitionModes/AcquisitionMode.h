@@ -6,6 +6,17 @@
 
 #include "../Acquisition.h"
 
+enum class ACQUISITION_STATUS {
+	DISABLED,
+	ENABLED,
+	ABORTED,
+	FINISHED,
+	STARTED,
+	RUNNING,
+	ALIGNING,
+	STOPPED
+};
+
 class AcquisitionMode : public QObject {
 	Q_OBJECT
 
@@ -26,9 +37,9 @@ private slots:
 	virtual void acquire(std::unique_ptr <StorageWrapper> & storage) = 0;
 
 signals:
-	void s_repetitionProgress(ACQUISITION_STATE, double, int);	// progress in percent and the remaining time in seconds
-	void s_totalProgress(int, int);								// repetitions
-	void s_acqRunning(bool);									// is the acquisition running
+	void s_acquisitionStatus(ACQUISITION_STATUS);	// current acquisition state
+	void s_repetitionProgress(double, int);		// progress in percent and the remaining time in seconds
+	void s_totalProgress(int, int);				// repetitions
 };
 
 #endif //ACQUISITIONMODE_H
