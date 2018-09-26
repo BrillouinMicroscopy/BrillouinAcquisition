@@ -112,34 +112,25 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	m_status = ACQUISITION_STATUS::STARTED;
 	emit(s_acquisitionStatus(m_status));
 
-	VOLTAGE2 voltage;
+	ACQ_VOLTAGES voltages;
 
 	/*
-	 * Set the mirror voltage and get the camera images
+	 * Set the mirror voltage and trigger the camera
 	 */
+	// Construct the analog voltage vector and the trigger vector
+	voltages.trigger = std::vector<uInt8>(m_acqSettings.numberPoints * 10, 0);
+	voltages.mirror = std::vector<float64>(m_acqSettings.numberPoints * 20, 0);
+	for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
+		voltages.trigger[i * 10 + 2] = 1;
+		std::fill_n(voltages.mirror.begin() + i * 10, 10, m_acqSettings.voltages[i].Ux);
+		std::fill_n(voltages.mirror.begin() + i * 10 + m_acqSettings.numberPoints * 10, 10, m_acqSettings.voltages[i].Uy);
+	}
+	// Apply voltages to NIDAQ board
+	(*m_NIDAQ)->setAcquisitionVoltages(voltages);
+
 	int rank_data{ 3 };
 	hsize_t dims_data[3] = { 1, m_acqSettings.camera.roi.height, m_acqSettings.camera.roi.width };
 	int bytesPerFrame = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height;
-	for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
-		if (m_abort) {
-			this->abortMode();
-			return;
-		}
-		voltage = m_acqSettings.voltages[i];
-		// set new voltage to galvo mirrors
-		(*m_NIDAQ)->setVoltage(voltage);
-
-		// announce mirror voltage
-		emit(s_mirrorVoltageChanged(voltage, ODT_MODE::ACQ));
-		
-		// wait appropriate time
-		Sleep(2);
-
-		// trigger image acquisition
-		(*m_NIDAQ)->triggerCamera();
-	}
-
-
 	for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
 
 		// read images from camera

@@ -22,6 +22,11 @@ struct ELEMENTPOSITION {
 	Thorlabs_FF::FF_Positions BeamBlock{ Thorlabs_FF::FF_Positions::Position1 };		// Beam path blocked
 };
 
+struct ACQ_VOLTAGES {
+	std::vector<float64> mirror;
+	std::vector<uInt8> trigger;
+};
+
 class NIDAQ: public ScanControl {
 	Q_OBJECT
 
@@ -113,6 +118,7 @@ public slots:
 	double getCalibrationValue(H5::H5File file, std::string datasetName);
 
 	void triggerCamera();
+	void setAcquisitionVoltages(ACQ_VOLTAGES voltages);
 };
 
 #endif // NIDAQMX_H

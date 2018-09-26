@@ -90,19 +90,23 @@ void NIDAQ::connectDevice() {
 		DAQmxCreateTask("AO", &AOtaskHandle);
 		// Configure analog output channels
 		DAQmxCreateAOVoltageChan(AOtaskHandle, "Dev1/ao0:1", "AO", -1.0, 1.0, DAQmx_Val_Volts, "");
-		// Configure sample rate
-		//DAQmxCfgSampClkTiming(AOtaskHandle, "", 10000.0, DAQmx_Val_Rising, DAQmx_Val_FiniteSamps, 1000);
-		// Start analog task
-		DAQmxStartTask(AOtaskHandle);
+		// Configure sample rate to 1000 Hz
+		DAQmxCfgSampClkTiming(AOtaskHandle, "", 1000.0, DAQmx_Val_Rising, DAQmx_Val_ContSamps, 1000);
 
 		// Create task for digital output
 		DAQmxCreateTask("DO", &DOtaskHandle);
 		// Configure digital output channel
 		DAQmxCreateDOChan(DOtaskHandle, "Dev1/Port0/Line0:0", "DO", DAQmx_Val_ChanForAllLines);
-		// Configure sample rate
-		//DAQmxCfgSampClkTiming(DOtaskHandle, "", 10000.0, DAQmx_Val_Rising, DAQmx_Val_FiniteSamps, 1000);
+		// Configure sample rate to 1000 Hz
+		DAQmxCfgSampClkTiming(DOtaskHandle, "", 1000.0, DAQmx_Val_Rising, DAQmx_Val_ContSamps, 1000);
+		// Set the trigger source to synchronize AO and DO tasks
+		DAQmxCfgDigEdgeStartTrig(DOtaskHandle, "Dev1/ao/SampleClock", DAQmx_Val_Rising);
 		// Start digital task
 		DAQmxStartTask(DOtaskHandle);
+
+		// Start analog task after digital task since AO is the master
+		DAQmxStartTask(AOtaskHandle);
+
 		// Set digital line to low
 		DAQmxWriteDigitalLines(DOtaskHandle, 1, true, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
 
@@ -330,11 +334,24 @@ double NIDAQ::getCalibrationValue(H5::H5File file, std::string datasetName) {
 
 void NIDAQ::triggerCamera() {
 	DAQmxWriteDigitalLines(DOtaskHandle, 1, true, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
-	Sleep(10);
 	DAQmxWriteDigitalLines(DOtaskHandle, 1, true, 10, DAQmx_Val_GroupByChannel, &m_TTL.high, NULL, NULL);
-	Sleep(10);
 	DAQmxWriteDigitalLines(DOtaskHandle, 1, true, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
-	Sleep(10);
+}
+
+void NIDAQ::setAcquisitionVoltages(ACQ_VOLTAGES voltages) {
+
+	// Stop DAQ tasks
+	DAQmxStopTask(AOtaskHandle);
+	DAQmxStopTask(DOtaskHandle);
+
+	// Write analog voltages
+	DAQmxWriteAnalogF64(AOtaskHandle, voltages.mirror.size(), false, 10.0, DAQmx_Val_GroupByChannel, &voltages.mirror[0], NULL, NULL);
+	// Write digital voltages
+	DAQmxWriteDigitalLines(DOtaskHandle, voltages.trigger.size(), false, 10, DAQmx_Val_GroupByChannel, &voltages.trigger[0], NULL, NULL);
+
+	// Start DAQ tasks
+	DAQmxStartTask(DOtaskHandle);
+	DAQmxStartTask(AOtaskHandle);
 }
 
 POINT3 NIDAQ::getPosition() {
