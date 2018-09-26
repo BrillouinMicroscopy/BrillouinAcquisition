@@ -23,6 +23,7 @@ struct ELEMENTPOSITION {
 };
 
 struct ACQ_VOLTAGES {
+	int numberSamples{ 0 };
 	std::vector<float64> mirror;
 	std::vector<uInt8> trigger;
 };

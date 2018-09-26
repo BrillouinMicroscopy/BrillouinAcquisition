@@ -118,12 +118,15 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	 * Set the mirror voltage and trigger the camera
 	 */
 	// Construct the analog voltage vector and the trigger vector
-	voltages.trigger = std::vector<uInt8>(m_acqSettings.numberPoints * 10, 0);
-	voltages.mirror = std::vector<float64>(m_acqSettings.numberPoints * 20, 0);
+	int samplesPerAngle{ 10 };
+	int numberChannels{ 2 };
+	voltages.numberSamples = m_acqSettings.numberPoints * samplesPerAngle;
+	voltages.trigger = std::vector<uInt8>(m_acqSettings.numberPoints * samplesPerAngle, 0);
+	voltages.mirror = std::vector<float64>(m_acqSettings.numberPoints * samplesPerAngle * numberChannels, 0);
 	for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
-		voltages.trigger[i * 10 + 2] = 1;
-		std::fill_n(voltages.mirror.begin() + i * 10, 10, m_acqSettings.voltages[i].Ux);
-		std::fill_n(voltages.mirror.begin() + i * 10 + m_acqSettings.numberPoints * 10, 10, m_acqSettings.voltages[i].Uy);
+		voltages.trigger[i * samplesPerAngle + 2] = 1;
+		std::fill_n(voltages.mirror.begin() + i * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i].Ux);
+		std::fill_n(voltages.mirror.begin() + i * samplesPerAngle + m_acqSettings.numberPoints * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i].Uy);
 	}
 	// Apply voltages to NIDAQ board
 	(*m_NIDAQ)->setAcquisitionVoltages(voltages);
