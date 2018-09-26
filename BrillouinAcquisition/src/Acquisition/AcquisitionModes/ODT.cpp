@@ -82,7 +82,7 @@ void ODT::startRepetitions() {
 
 	// configure camera for measurement
 	CAMERA_SETTINGS settings;
-	settings.exposureTime = 0.005; // [s]
+	settings.exposureTime = 0.004; // [s]
 	settings.roi.left = 128;
 	settings.roi.top = 0;
 	settings.roi.width = 1024;
