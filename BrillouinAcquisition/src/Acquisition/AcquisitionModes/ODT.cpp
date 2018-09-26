@@ -112,6 +112,10 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	m_status = ACQUISITION_STATUS::STARTED;
 	emit(s_acquisitionStatus(m_status));
 
+	// Set first mirror voltage already
+	(*m_NIDAQ)->setVoltage(m_acqSettings.voltages[0]);
+	Sleep(100);
+
 	ACQ_VOLTAGES voltages;
 
 	/*
