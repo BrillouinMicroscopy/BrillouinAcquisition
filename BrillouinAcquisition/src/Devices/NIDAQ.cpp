@@ -93,22 +93,29 @@ void NIDAQ::connectDevice() {
 		// Configure sample rate to 1000 Hz
 		DAQmxCfgSampClkTiming(AOtaskHandle, "", 1000.0, DAQmx_Val_Rising, DAQmx_Val_ContSamps, 1000);
 
+		// Set analog output to zero
+		float64 data[2] = { 0, 0 };
+		DAQmxWriteAnalogF64(AOtaskHandle, 1, false, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
+
+		DAQmxSetWriteAttribute(AOtaskHandle, DAQmx_Write_RegenMode, DAQmx_Val_DoNotAllowRegen);
+
 		// Create task for digital output
 		DAQmxCreateTask("DO", &DOtaskHandle);
 		// Configure digital output channel
 		DAQmxCreateDOChan(DOtaskHandle, "Dev1/Port0/Line0:0", "DO", DAQmx_Val_ChanForAllLines);
 		// Configure sample rate to 1000 Hz
-		DAQmxCfgSampClkTiming(DOtaskHandle, "", 1000.0, DAQmx_Val_Rising, DAQmx_Val_ContSamps, 1000);
-		// Set the trigger source to synchronize AO and DO tasks
-		DAQmxCfgDigEdgeStartTrig(DOtaskHandle, "Dev1/ao/SampleClock", DAQmx_Val_Rising);
+		DAQmxCfgSampClkTiming(DOtaskHandle, "/Dev1/ao/SampleClock", 1000.0, DAQmx_Val_Rising, DAQmx_Val_ContSamps, 1000);
+
+		// Set digital line to low
+		DAQmxWriteDigitalLines(DOtaskHandle, 1, false, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
+
+		DAQmxSetWriteAttribute(DOtaskHandle, DAQmx_Write_RegenMode, DAQmx_Val_DoNotAllowRegen);
+
 		// Start digital task
 		DAQmxStartTask(DOtaskHandle);
 
 		// Start analog task after digital task since AO is the master
 		DAQmxStartTask(AOtaskHandle);
-
-		// Set digital line to low
-		DAQmxWriteDigitalLines(DOtaskHandle, 1, true, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
 
 
 		// Connect to T-Cube Piezo Inertial Controller
@@ -260,8 +267,10 @@ void NIDAQ::setPosition(POINT3 position) {
 }
 
 void NIDAQ::setVoltage(VOLTAGE2 voltages) {
+	DAQmxStopTask(AOtaskHandle);
 	float64 data[2] = { voltages.Ux, voltages.Uy };
 	DAQmxWriteAnalogF64(AOtaskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
+
 }
 
 void NIDAQ::setPositionRelativeX(double positionX) {
@@ -339,16 +348,15 @@ void NIDAQ::triggerCamera() {
 }
 
 void NIDAQ::setAcquisitionVoltages(ACQ_VOLTAGES voltages) {
-
 	// Stop DAQ tasks
 	DAQmxStopTask(AOtaskHandle);
 	DAQmxStopTask(DOtaskHandle);
 
 	// Write analog voltages
-	DAQmxWriteAnalogF64(AOtaskHandle, voltages.mirror.size(), false, 10.0, DAQmx_Val_GroupByChannel, &voltages.mirror[0], NULL, NULL);
+	DAQmxWriteAnalogF64(AOtaskHandle, voltages.numberSamples, false, 10.0, DAQmx_Val_GroupByChannel, &voltages.mirror[0], NULL, NULL);
 	// Write digital voltages
-	DAQmxWriteDigitalLines(DOtaskHandle, voltages.trigger.size(), false, 10, DAQmx_Val_GroupByChannel, &voltages.trigger[0], NULL, NULL);
-
+	DAQmxWriteDigitalLines(DOtaskHandle, voltages.numberSamples, false, 10, DAQmx_Val_GroupByChannel, &voltages.trigger[0], NULL, NULL);
+	
 	// Start DAQ tasks
 	DAQmxStartTask(DOtaskHandle);
 	DAQmxStartTask(AOtaskHandle);
