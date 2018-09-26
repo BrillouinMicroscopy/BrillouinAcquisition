@@ -233,7 +233,7 @@ void PointGrey::preparePreview() {
 	m_settings.roi.width = m_options.ROIWidthLimits[1];
 	m_settings.roi.height = m_options.ROIHeightLimits[1];
 	m_settings.readout.pixelEncoding = L"Raw8";
-	m_settings.readout.triggerMode = L"Software";
+	m_settings.readout.triggerMode = L"Internal";
 	m_settings.readout.cycleMode = L"Fixed";
 	m_settings.frameCount = 10;
 
@@ -292,10 +292,10 @@ void PointGrey::acquireImage(unsigned char * buffer) {
 void PointGrey::getImageForPreview() {
 	if (m_isPreviewRunning) {
 
-		PollForTriggerReady(&m_camera);
+		//PollForTriggerReady(&m_camera);
 
-		// Fire the software trigger
-		FireSoftwareTrigger(&m_camera);
+		//// Fire the software trigger
+		//FireSoftwareTrigger(&m_camera);
 
 		m_previewBuffer->m_buffer->m_freeBuffers->acquire();
 		acquireImage(m_previewBuffer->m_buffer->getWriteBuffer());
