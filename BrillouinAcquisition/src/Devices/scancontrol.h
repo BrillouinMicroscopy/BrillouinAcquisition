@@ -96,12 +96,13 @@ public:
 	std::vector<std::string> SCAN_DEVICE_NAMES = { "Zeiss ECU", "NI-DAQmx" };
 
 	// pre-defined presets for element positions
-	std::vector<std::string> m_presetLabels = { "Brightfield", "Calibration", "Brillouin", "Eyepiece" };
+	std::vector<std::string> m_presetLabels = { "Brightfield", "Calibration", "Brillouin", "Eyepiece", "ODT" };
 	typedef enum enScanPreset {
 		SCAN_BRIGHTFIELD,
 		SCAN_CALIBRATION,
 		SCAN_BRILLOUIN,
 		SCAN_EYEPIECE,
+		SCAN_ODT,
 		SCAN_PRESET_COUNT
 	} SCAN_PRESET;
 

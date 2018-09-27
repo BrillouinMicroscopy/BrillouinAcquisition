@@ -13,6 +13,9 @@ namespace Thorlabs_TIM {
 namespace Thorlabs_FF {
 	#include <Thorlabs.MotionControl.FilterFlipper.h>
 }
+namespace Thorlabs_KDC {
+	#include <Thorlabs.MotionControl.KCube.DCServo.h>
+}
 
 #include "H5Cpp.h"
 #include "filesystem"
@@ -74,10 +77,17 @@ private:
 
 	char const *m_serialNo_FF1 = "37000784";
 	char const *m_serialNo_FF2 = "37000251";
+	
+	char const *m_serialNo_KDC = "27503225";
+	// see https://www.thorlabs.com/drawings/279d37ef141e2423-056D0D56-F367-26BE-7B83AD99FE5D61F2/Z825B-Manual.pdf, page 9
+	double m_stepsPerRev{ 512 };	// [1]  steps per revelation
+	double m_gearBoxRatio{ 67 };	// [1]  ratio of the gear box
+	double m_pitch{ 1 };			// [mm] pitch of the lead screw
 
 	enum class DEVICE_ELEMENT {
 		CALFLIPMIRROR,
 		BEAMBLOCK,
+		MOVEMIRROR,
 		DEVICE_ELEMENT_COUNT
 	};
 
@@ -111,6 +121,7 @@ public slots:
 	void getElements();
 	void setCalFlipMirror(int position);
 	void setBeamBlock(int position);
+	void setMirror(int position);
 	// sets the position relative to the home position m_homePosition
 	void setPositionRelativeX(double position);
 	void setPositionRelativeY(double position);

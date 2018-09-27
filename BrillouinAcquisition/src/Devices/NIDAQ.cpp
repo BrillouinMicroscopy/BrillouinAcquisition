@@ -66,16 +66,18 @@ POINT2 NIDAQ::voltageToPosition(VOLTAGE2 voltage) {
 
 NIDAQ::NIDAQ() noexcept {
 	m_presets = {
-		{ 1, 2 },	// Brillouin
-		{ 2, 2 }	// Calibration
+		{ 1, 2, 1 },	// Brillouin
+		{ 2, 2, 1 },	// Calibration
+		{ 2, 2, 2 },	// ODT
 	};
-	m_availablePresets = { 2, 1 };
+	m_availablePresets = { 2, 1, 4 };
 
 	m_absoluteBounds = m_calibration.bounds;
 
 	m_deviceElements = {
 		{ "Flip Mirror",	2, (int)DEVICE_ELEMENT::CALFLIPMIRROR },
-		{ "Beam Block",		2, (int)DEVICE_ELEMENT::BEAMBLOCK }
+		{ "Beam Block",		2, (int)DEVICE_ELEMENT::BEAMBLOCK },
+		{ "Moveable Mirror",2, (int)DEVICE_ELEMENT::MOVEMIRROR }
 	};
 }
 
@@ -132,6 +134,10 @@ void NIDAQ::connectDevice() {
 		Thorlabs_FF::FF_StartPolling(m_serialNo_FF1, 200);
 		Thorlabs_FF::FF_Open(m_serialNo_FF2);
 		Thorlabs_FF::FF_StartPolling(m_serialNo_FF2, 200);
+
+		Thorlabs_KDC::CC_Open(m_serialNo_KDC);
+		Thorlabs_KDC::CC_StartPolling(m_serialNo_KDC, 200);
+
 		startAnnouncingElementPosition();
 		getElements();
 	}
@@ -157,6 +163,9 @@ void NIDAQ::disconnectDevice() {
 		Thorlabs_FF::FF_Close(m_serialNo_FF2);
 		Thorlabs_FF::FF_StopPolling(m_serialNo_FF2);
 
+		Thorlabs_KDC::CC_StopPolling(m_serialNo_KDC);
+		Thorlabs_KDC::CC_Close(m_serialNo_KDC);
+
 		m_isConnected = false;
 		m_isCompatible = false;
 	}
@@ -178,6 +187,9 @@ void NIDAQ::setElement(DeviceElement element, int position) {
 		case DEVICE_ELEMENT::BEAMBLOCK:
 			setBeamBlock(position);
 			break;
+		case DEVICE_ELEMENT::MOVEMIRROR:
+			setMirror(position);
+			break;
 		default:
 			break;
 	}
@@ -192,6 +204,9 @@ void NIDAQ::getElement(DeviceElement element) {
 			break;
 		case DEVICE_ELEMENT::BEAMBLOCK:
 			position = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
+			break;
+		case DEVICE_ELEMENT::MOVEMIRROR:
+			//position = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
 			break;
 		default:
 			return;
@@ -208,6 +223,9 @@ void NIDAQ::setElements(ScanControl::SCAN_PRESET preset) {
 			break;
 		case ScanControl::SCAN_CALIBRATION:
 			presetNr = 1;
+			break;
+		case ScanControl::SCAN_ODT:
+			presetNr = 2;
 			break;
 		default:
 			return;
@@ -230,6 +248,24 @@ void NIDAQ::setCalFlipMirror(int position) {
 
 void NIDAQ::setBeamBlock(int position) {
 	Thorlabs_FF::FF_MoveToPosition(m_serialNo_FF2, (Thorlabs_FF::FF_Positions)position);
+}
+
+void NIDAQ::setMirror(int position) {
+	double realPosition{ 0 };
+	if (position == 1) {
+		realPosition = 2.0;
+	} else if (position == 2) {
+		realPosition = 18.0;
+	}
+	int incPos = realPosition * m_gearBoxRatio * m_stepsPerRev / m_pitch;
+	Thorlabs_KDC::CC_MoveToPosition(m_serialNo_KDC, incPos);
+
+	// check if motor is still moving
+	DWORD status = Thorlabs_KDC::CC_GetStatusBits(m_serialNo_KDC);
+	while (status & (0x00000010 | 0x00000020)) {
+		status = Thorlabs_KDC::CC_GetStatusBits(m_serialNo_KDC);
+	}
+	int currentPos = Thorlabs_KDC::CC_GetPosition(m_serialNo_KDC);
 }
 
 void NIDAQ::applyScanPosition() {
