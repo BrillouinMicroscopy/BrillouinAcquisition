@@ -183,6 +183,8 @@ void ODT::startAlignment() {
 		m_status = ACQUISITION_STATUS::ALIGNING;
 		emit(s_acquisitionStatus(m_status));
 		m_algnRunning = true;
+		// move to ODT configuration
+		(*m_NIDAQ)->setElements(ScanControl::SCAN_ODT);
 		// start the timer
 		if (!m_algnTimer->isActive()) {
 			m_algnTimer->start(1e3 / (m_algnSettings.scanRate * m_algnSettings.numberPoints));
