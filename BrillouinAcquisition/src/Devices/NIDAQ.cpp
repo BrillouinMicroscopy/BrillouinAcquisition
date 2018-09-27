@@ -294,6 +294,7 @@ int NIDAQ::getMirror() {
 }
 
 void NIDAQ::applyScanPosition() {
+	DAQmxStopTask(AOtaskHandle);
 	// set the x- and y-position
 	m_voltages = positionToVoltage(POINT2{ 1e-6*m_position.x, 1e-6*m_position.y });
 	float64 data[2] = { m_voltages.Ux, m_voltages.Uy };
