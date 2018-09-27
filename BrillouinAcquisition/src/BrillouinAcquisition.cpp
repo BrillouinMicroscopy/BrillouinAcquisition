@@ -191,6 +191,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<ODT_MODE>("ODT_MODE");
 	qRegisterMetaType<ODT_SETTING>("ODT_SETTING");
 	qRegisterMetaType<ODT_SETTINGS>("ODT_SETTINGS");
+	qRegisterMetaType<ODTIMAGE*>("ODTIMAGE*");
 	
 	// Set up icons
 	m_icons.disconnected.addFile(":/BrillouinAcquisition/assets/00disconnected10px.png", QSize(10, 10));
@@ -1900,7 +1901,8 @@ void BrillouinAcquisition::on_actionNew_Acquisition_triggered() {
 
 	m_storagePath = splitFilePath(fullPath);
 	ui->acquisitionFilename->setText(QString::fromStdString(m_storagePath.filename));
-	m_acquisition->newFile(m_storagePath);
+
+	QMetaObject::invokeMethod(m_acquisition, "newFile", Qt::AutoConnection, Q_ARG(StoragePath, m_storagePath));
 }
 
 void BrillouinAcquisition::on_actionOpen_Acquisition_triggered() {
@@ -1913,7 +1915,8 @@ void BrillouinAcquisition::on_actionOpen_Acquisition_triggered() {
 
 	m_storagePath = splitFilePath(fullPath);
 	ui->acquisitionFilename->setText(QString::fromStdString(m_storagePath.filename));
-	m_acquisition->openFile(m_storagePath);
+
+	QMetaObject::invokeMethod(m_acquisition, "openFile", Qt::AutoConnection, Q_ARG(StoragePath, m_storagePath));
 }
 
 void BrillouinAcquisition::on_actionClose_Acquisition_triggered() {

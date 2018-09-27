@@ -12,7 +12,6 @@ struct StoragePath {
 class StorageWrapper : public H5BM {
 	Q_OBJECT
 private:
-	StoragePath m_path;
 	bool m_finished = false;
 	bool m_observeQueues = false;
 	bool m_finishedQueueing = false;
