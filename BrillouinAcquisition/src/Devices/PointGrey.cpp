@@ -227,7 +227,7 @@ void PointGrey::startPreview() {
 }
 
 void PointGrey::preparePreview() {
-	m_settings.exposureTime = 0.005; // [s]
+	m_settings.exposureTime = 0.004; // [s]
 	m_settings.roi.left = 0;
 	m_settings.roi.top = 0;
 	m_settings.roi.width = m_options.ROIWidthLimits[1];
