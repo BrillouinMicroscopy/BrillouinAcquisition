@@ -80,9 +80,6 @@ void ODT::startRepetitions() {
 	// reset abort flag
 	m_abort = false;
 
-	// move to ODT configuration
-	(*m_NIDAQ)->setElements(ScanControl::SCAN_ODT);
-
 	// configure camera for measurement
 	CAMERA_SETTINGS settings;
 	settings.exposureTime = 0.004; // [s]
@@ -114,6 +111,9 @@ void ODT::startRepetitions() {
 void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	m_status = ACQUISITION_STATUS::STARTED;
 	emit(s_acquisitionStatus(m_status));
+
+	// move to ODT configuration
+	(*m_NIDAQ)->setElements(ScanControl::SCAN_ODT);
 
 	// Set first mirror voltage already
 	(*m_NIDAQ)->setVoltage(m_acqSettings.voltages[0]);
