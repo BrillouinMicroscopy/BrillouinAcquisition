@@ -80,6 +80,9 @@ void ODT::startRepetitions() {
 	// reset abort flag
 	m_abort = false;
 
+	// move to ODT configuration
+	(*m_NIDAQ)->setElements(ScanControl::SCAN_ODT);
+
 	// configure camera for measurement
 	CAMERA_SETTINGS settings;
 	settings.exposureTime = 0.004; // [s]

@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "NIDAQ.h"
+#include <windows.h>
+
 
 VOLTAGE2 NIDAQ::positionToVoltage(POINT2 position) {
 
@@ -68,7 +70,7 @@ NIDAQ::NIDAQ() noexcept {
 	m_presets = {
 		{ 1, 2, 1 },	// Brillouin
 		{ 2, 2, 1 },	// Calibration
-		{ 2, 2, 2 },	// ODT
+		{ 1, 2, 2 },	// ODT
 	};
 	m_availablePresets = { 2, 1, 4 };
 
@@ -206,6 +208,7 @@ void NIDAQ::getElement(DeviceElement element) {
 			position = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
 			break;
 		case DEVICE_ELEMENT::MOVEMIRROR:
+			position = getMirror();
 			//position = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
 			break;
 		default:
@@ -232,6 +235,7 @@ void NIDAQ::setElements(ScanControl::SCAN_PRESET preset) {
 	}
 	setCalFlipMirror(m_presets[presetNr][0]);
 	setBeamBlock(m_presets[presetNr][1]);
+	setMirror(m_presets[presetNr][2]);
 	getElements();
 }
 
@@ -239,6 +243,7 @@ void NIDAQ::getElements() {
 	std::vector<int> elementPositions(m_deviceElements.deviceCount(), -1);
 	elementPositions[0] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF1);
 	elementPositions[1] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
+	elementPositions[2] = getMirror();
 	emit(elementPositionsChanged(elementPositions));
 }
 
@@ -261,11 +266,31 @@ void NIDAQ::setMirror(int position) {
 	Thorlabs_KDC::CC_MoveToPosition(m_serialNo_KDC, incPos);
 
 	// check if motor is still moving
-	DWORD status = Thorlabs_KDC::CC_GetStatusBits(m_serialNo_KDC);
-	while (status & (0x00000010 | 0x00000020)) {
-		status = Thorlabs_KDC::CC_GetStatusBits(m_serialNo_KDC);
+	WORD messageType;
+	WORD messageId;
+	DWORD messageData;
+	Thorlabs_KDC::CC_WaitForMessage(m_serialNo_KDC, &messageType, &messageId, &messageData);
+	while (messageType != 2 || messageId != 1) {
+		Thorlabs_KDC::CC_WaitForMessage(m_serialNo_KDC, &messageType, &messageId, &messageData);
 	}
+
 	int currentPos = Thorlabs_KDC::CC_GetPosition(m_serialNo_KDC);
+}
+
+int NIDAQ::getMirror() {
+	int currentIndex = Thorlabs_KDC::CC_GetPosition(m_serialNo_KDC);
+	// position 1
+	double realPosition = 2.0;
+	int targetIndex = realPosition * m_gearBoxRatio * m_stepsPerRev / m_pitch;
+	if (abs(currentIndex - targetIndex) < 10) {
+		return 1;
+	}
+	// position 2
+	realPosition = 18.0;
+	targetIndex = realPosition * m_gearBoxRatio * m_stepsPerRev / m_pitch;
+	if (abs(currentIndex - targetIndex) < 10) {
+		return 2;
+	}
 }
 
 void NIDAQ::applyScanPosition() {

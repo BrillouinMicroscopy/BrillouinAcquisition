@@ -122,6 +122,7 @@ public slots:
 	void setCalFlipMirror(int position);
 	void setBeamBlock(int position);
 	void setMirror(int position);
+	int getMirror();
 	// sets the position relative to the home position m_homePosition
 	void setPositionRelativeX(double position);
 	void setPositionRelativeY(double position);
