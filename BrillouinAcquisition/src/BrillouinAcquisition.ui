@@ -115,7 +115,7 @@ QTabBar::tab:!selected {
 }</string>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>3</number>
          </property>
          <widget class="QWidget" name="cameraTab">
           <property name="sizePolicy">
@@ -180,7 +180,7 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>223</width>
+                <width>219</width>
                 <height>310</height>
                </rect>
               </property>
@@ -763,8 +763,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>165</width>
-                <height>180</height>
+                <width>236</width>
+                <height>199</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -824,7 +824,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>230</width>
-                <height>180</height>
+                <height>199</height>
                </rect>
               </property>
               <property name="sizePolicy">
@@ -1078,8 +1078,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>165</width>
-                <height>160</height>
+                <width>236</width>
+                <height>199</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -1536,7 +1536,7 @@ QTabBar::tab:!selected {
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>221</width>
+                      <width>217</width>
                       <height>480</height>
                      </rect>
                     </property>
@@ -2431,7 +2431,7 @@ border: none;</string>
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>165</width>
+                      <width>217</width>
                       <height>545</height>
                      </rect>
                     </property>
@@ -2946,7 +2946,7 @@ border: none;</string>
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">
@@ -3076,6 +3076,7 @@ border: none;</string>
   <tabstop>exposureTime</tabstop>
   <tabstop>frameCount</tabstop>
   <tabstop>triggerMode</tabstop>
+  <tabstop>sensorTemp</tabstop>
   <tabstop>binning</tabstop>
   <tabstop>ROILeft</tabstop>
   <tabstop>ROIWidth</tabstop>
@@ -3086,10 +3087,10 @@ border: none;</string>
   <tabstop>pixelEncoding</tabstop>
   <tabstop>cycleMode</tabstop>
   <tabstop>sTScrollArea</tabstop>
+  <tabstop>autoscalePlot</tabstop>
   <tabstop>settingsWidget</tabstop>
   <tabstop>camera_singleShot</tabstop>
   <tabstop>camera_playPause</tabstop>
-  <tabstop>sensorTemp</tabstop>
   <tabstop>savePosition</tabstop>
   <tabstop>setHome</tabstop>
   <tabstop>moveHome</tabstop>
@@ -3097,7 +3098,52 @@ border: none;</string>
   <tabstop>setPositionY</tabstop>
   <tabstop>setPositionZ</tabstop>
   <tabstop>tableView</tabstop>
-  <tabstop>autoscalePlot</tabstop>
+  <tabstop>sTScrollArea_2</tabstop>
+  <tabstop>sTScrollArea_3</tabstop>
+  <tabstop>exposureTimeODT</tabstop>
+  <tabstop>ROILeftODT</tabstop>
+  <tabstop>ROIWidthODT</tabstop>
+  <tabstop>ROITopODT</tabstop>
+  <tabstop>ROIHeightODT</tabstop>
+  <tabstop>pixelEncodingODT</tabstop>
+  <tabstop>acquisitionFilename</tabstop>
+  <tabstop>acquisitionModeTabs</tabstop>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>startX</tabstop>
+  <tabstop>endX</tabstop>
+  <tabstop>stepsX</tabstop>
+  <tabstop>startY</tabstop>
+  <tabstop>endY</tabstop>
+  <tabstop>stepsY</tabstop>
+  <tabstop>startZ</tabstop>
+  <tabstop>endZ</tabstop>
+  <tabstop>stepsZ</tabstop>
+  <tabstop>preCalibration</tabstop>
+  <tabstop>postCalibration</tabstop>
+  <tabstop>conCalibration</tabstop>
+  <tabstop>conCalibrationInterval</tabstop>
+  <tabstop>sampleSelection</tabstop>
+  <tabstop>nrCalibrationImages</tabstop>
+  <tabstop>calibrationExposureTime</tabstop>
+  <tabstop>positionX</tabstop>
+  <tabstop>positionY</tabstop>
+  <tabstop>positionZ</tabstop>
+  <tabstop>imageNr</tabstop>
+  <tabstop>repetitionCount</tabstop>
+  <tabstop>repetitionInterval</tabstop>
+  <tabstop>BrillouinStart</tabstop>
+  <tabstop>scrollArea_2</tabstop>
+  <tabstop>alignmentUR_ODT</tabstop>
+  <tabstop>alignmentRate_ODT</tabstop>
+  <tabstop>alignmentStartODT</tabstop>
+  <tabstop>alignmentNumber_ODT</tabstop>
+  <tabstop>acquisitionUR_ODT</tabstop>
+  <tabstop>acquisitionRate_ODT</tabstop>
+  <tabstop>acquisitionStartODT</tabstop>
+  <tabstop>acquisitionNumber_ODT</tabstop>
+  <tabstop>autoscalePlot_brightfield</tabstop>
+  <tabstop>camera_singleShot_brightfield</tabstop>
+  <tabstop>camera_playPause_brightfield</tabstop>
  </tabstops>
  <resources>
   <include location="../BrillouinAcquisition.qrc"/>
