@@ -19,6 +19,9 @@ public:
 	bool m_isPreviewRunning{ false };
 	bool m_isAcquisitionRunning{ false };
 
+	bool m_stopPreview{ false };
+	bool m_stopAcquisition{ false };
+
 	CAMERA_OPTIONS getOptions();
 	CAMERA_SETTINGS getSettings();
 

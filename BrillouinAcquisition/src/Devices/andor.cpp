@@ -209,7 +209,12 @@ void Andor::checkSensorTemperature() {
 }
 
 void Andor::startPreview() {
+	// don't do anything if an acquisition is running
+	if (m_isAcquisitionRunning) {
+		return;
+	}
 	m_isPreviewRunning = true;
+	m_stopPreview = false;
 	preparePreview();
 	getImageForPreview();
 
@@ -238,10 +243,12 @@ void Andor::preparePreview() {
 void Andor::stopPreview() {
 	cleanupAcquisition();
 	m_isPreviewRunning = false;
+	m_stopPreview = false;
 	emit(s_previewRunning(m_isPreviewRunning));
 }
 
 void Andor::startAcquisition(CAMERA_SETTINGS settings) {
+	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	// check if currently a preview is running and stop it in case
 	if (m_isPreviewRunning) {
 		stopPreview();
@@ -302,19 +309,23 @@ void Andor::acquireImage(AT_U8* buffer) {
 }
 
 void Andor::getImageForPreview() {
+	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	if (m_isPreviewRunning) {
+		if (m_stopPreview) {
+			stopPreview();
+			return;
+		}
 
 		m_previewBuffer->m_buffer->m_freeBuffers->acquire();
 		acquireImage(m_previewBuffer->m_buffer->getWriteBuffer());
 		m_previewBuffer->m_buffer->m_usedBuffers->release();
 
 		QMetaObject::invokeMethod(this, "getImageForPreview", Qt::QueuedConnection);
-	} else {
-		stopPreview();
 	}
 }
 
 void Andor::getImageForAcquisition(AT_U8* buffer) {
+	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	acquireImage(buffer);
 
 	// write image to preview buffer

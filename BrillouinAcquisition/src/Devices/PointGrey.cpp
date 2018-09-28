@@ -220,6 +220,7 @@ void PointGrey::startPreview() {
 		return;
 	}
 	m_isPreviewRunning = true;
+	m_stopPreview = false;
 	preparePreview();
 	getImageForPreview();
 
@@ -293,7 +294,7 @@ void PointGrey::acquireImage(unsigned char * buffer) {
 }
 
 void PointGrey::getImageForPreview() {
-	if (m_isPreviewRunning) {
+	if (!m_stopPreview) {
 
 		//PollForTriggerReady(&m_camera);
 

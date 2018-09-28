@@ -45,6 +45,8 @@ private:
 
 	void acquireImage(AT_U8* buffer);
 
+	std::mutex m_mutex;
+
 	/*
 	 * Members and functions inherited from base class
 	 */
