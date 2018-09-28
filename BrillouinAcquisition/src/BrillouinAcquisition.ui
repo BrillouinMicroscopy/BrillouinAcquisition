@@ -115,7 +115,7 @@ QTabBar::tab:!selected {
 }</string>
          </property>
          <property name="currentIndex">
-          <number>3</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="cameraTab">
           <property name="sizePolicy">
@@ -180,7 +180,7 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>165</width>
+                <width>223</width>
                 <height>310</height>
                </rect>
               </property>
@@ -763,8 +763,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>165</width>
-                <height>180</height>
+                <width>236</width>
+                <height>211</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -824,7 +824,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>230</width>
-                <height>180</height>
+                <height>211</height>
                </rect>
               </property>
               <property name="sizePolicy">
@@ -1414,47 +1414,50 @@ QTabBar::tab:!selected {
                  <height>40</height>
                 </size>
                </property>
-               <widget class="QLabel" name="acquisitionFilename_label">
+               <widget class="QWidget" name="">
                 <property name="geometry">
                  <rect>
                   <x>8</x>
                   <y>8</y>
-                  <width>48</width>
+                  <width>209</width>
                   <height>18</height>
                  </rect>
                 </property>
-                <property name="frameShadow">
-                 <enum>QFrame::Raised</enum>
-                </property>
-                <property name="text">
-                 <string>Filename:</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                </property>
-               </widget>
-               <widget class="QLineEdit" name="acquisitionFilename">
-                <property name="geometry">
-                 <rect>
-                  <x>64</x>
-                  <y>8</y>
-                  <width>153</width>
-                  <height>18</height>
-                 </rect>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">background: #E4E4E4;
+                <layout class="QFormLayout" name="formLayout_3">
+                 <property name="horizontalSpacing">
+                  <number>20</number>
+                 </property>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="acquisitionFilename_label">
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                   </property>
+                   <property name="text">
+                    <string>Filename:</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="acquisitionFilename">
+                   <property name="styleSheet">
+                    <string notr="true">background: #E4E4E4;
 border: none;</string>
-                </property>
-                <property name="text">
-                 <string>Brillouin.h5</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
+                   </property>
+                   <property name="text">
+                    <string>Brillouin.h5</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                   </property>
+                   <property name="readOnly">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
                </widget>
               </widget>
              </item>
@@ -1558,281 +1561,206 @@ QTabBar::tab:!selected {
                      <property name="title">
                       <string>Area of interest</string>
                      </property>
-                     <widget class="QLabel" name="stepsLabel">
+                     <widget class="QWidget" name="">
                       <property name="geometry">
                        <rect>
-                        <x>152</x>
+                        <x>8</x>
                         <y>15</y>
-                        <width>48</width>
-                        <height>18</height>
+                        <width>193</width>
+                        <height>89</height>
                        </rect>
                       </property>
-                      <property name="text">
-                       <string># Steps</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignCenter</set>
-                      </property>
-                     </widget>
-                     <widget class="QLabel" name="startLabel">
-                      <property name="geometry">
-                       <rect>
-                        <x>36</x>
-                        <y>16</y>
-                        <width>56</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="text">
-                       <string>Start [µm]</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignCenter</set>
-                      </property>
-                     </widget>
-                     <widget class="QLabel" name="endLabel">
-                      <property name="geometry">
-                       <rect>
-                        <x>96</x>
-                        <y>16</y>
-                        <width>48</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="text">
-                       <string>End [µm]</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignCenter</set>
-                      </property>
-                     </widget>
-                     <widget class="QLabel" name="xLabel">
-                      <property name="geometry">
-                       <rect>
-                        <x>8</x>
-                        <y>40</y>
-                        <width>24</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="text">
-                       <string>x</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignCenter</set>
-                      </property>
-                     </widget>
-                     <widget class="QLabel" name="yLabel">
-                      <property name="geometry">
-                       <rect>
-                        <x>8</x>
-                        <y>64</y>
-                        <width>24</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="text">
-                       <string>y</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignCenter</set>
-                      </property>
-                     </widget>
-                     <widget class="QLabel" name="zLabel">
-                      <property name="geometry">
-                       <rect>
-                        <x>8</x>
-                        <y>88</y>
-                        <width>24</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="text">
-                       <string>z</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignCenter</set>
-                      </property>
-                     </widget>
-                     <widget class="QDoubleSpinBox" name="startX">
-                      <property name="geometry">
-                       <rect>
-                        <x>40</x>
-                        <y>40</y>
-                        <width>48</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="decimals">
-                       <number>1</number>
-                      </property>
-                      <property name="minimum">
-                       <double>-1000.000000000000000</double>
-                      </property>
-                      <property name="maximum">
-                       <double>1000.000000000000000</double>
-                      </property>
-                      <property name="singleStep">
-                       <double>1.000000000000000</double>
-                      </property>
-                     </widget>
-                     <widget class="QDoubleSpinBox" name="endX">
-                      <property name="geometry">
-                       <rect>
-                        <x>96</x>
-                        <y>40</y>
-                        <width>48</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="decimals">
-                       <number>1</number>
-                      </property>
-                      <property name="minimum">
-                       <double>-1000.000000000000000</double>
-                      </property>
-                      <property name="maximum">
-                       <double>1000.000000000000000</double>
-                      </property>
-                      <property name="singleStep">
-                       <double>1.000000000000000</double>
-                      </property>
-                     </widget>
-                     <widget class="QDoubleSpinBox" name="endZ">
-                      <property name="geometry">
-                       <rect>
-                        <x>96</x>
-                        <y>88</y>
-                        <width>48</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="decimals">
-                       <number>1</number>
-                      </property>
-                      <property name="minimum">
-                       <double>-1000.000000000000000</double>
-                      </property>
-                      <property name="maximum">
-                       <double>1000.000000000000000</double>
-                      </property>
-                      <property name="singleStep">
-                       <double>1.000000000000000</double>
-                      </property>
-                     </widget>
-                     <widget class="QDoubleSpinBox" name="startZ">
-                      <property name="geometry">
-                       <rect>
-                        <x>40</x>
-                        <y>88</y>
-                        <width>48</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="decimals">
-                       <number>1</number>
-                      </property>
-                      <property name="minimum">
-                       <double>-1000.000000000000000</double>
-                      </property>
-                      <property name="maximum">
-                       <double>1000.000000000000000</double>
-                      </property>
-                      <property name="singleStep">
-                       <double>1.000000000000000</double>
-                      </property>
-                     </widget>
-                     <widget class="QDoubleSpinBox" name="startY">
-                      <property name="geometry">
-                       <rect>
-                        <x>40</x>
-                        <y>64</y>
-                        <width>48</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="decimals">
-                       <number>1</number>
-                      </property>
-                      <property name="minimum">
-                       <double>-1000.000000000000000</double>
-                      </property>
-                      <property name="maximum">
-                       <double>1000.000000000000000</double>
-                      </property>
-                      <property name="singleStep">
-                       <double>1.000000000000000</double>
-                      </property>
-                     </widget>
-                     <widget class="QDoubleSpinBox" name="endY">
-                      <property name="geometry">
-                       <rect>
-                        <x>96</x>
-                        <y>64</y>
-                        <width>48</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="decimals">
-                       <number>1</number>
-                      </property>
-                      <property name="minimum">
-                       <double>-1000.000000000000000</double>
-                      </property>
-                      <property name="maximum">
-                       <double>1000.000000000000000</double>
-                      </property>
-                      <property name="singleStep">
-                       <double>1.000000000000000</double>
-                      </property>
-                     </widget>
-                     <widget class="QSpinBox" name="stepsX">
-                      <property name="geometry">
-                       <rect>
-                        <x>152</x>
-                        <y>40</y>
-                        <width>48</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="minimum">
-                       <number>1</number>
-                      </property>
-                      <property name="maximum">
-                       <number>1000</number>
-                      </property>
-                     </widget>
-                     <widget class="QSpinBox" name="stepsZ">
-                      <property name="geometry">
-                       <rect>
-                        <x>152</x>
-                        <y>88</y>
-                        <width>48</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="minimum">
-                       <number>1</number>
-                      </property>
-                      <property name="maximum">
-                       <number>1000</number>
-                      </property>
-                     </widget>
-                     <widget class="QSpinBox" name="stepsY">
-                      <property name="geometry">
-                       <rect>
-                        <x>152</x>
-                        <y>64</y>
-                        <width>48</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="minimum">
-                       <number>1</number>
-                      </property>
-                      <property name="maximum">
-                       <number>1000</number>
-                      </property>
+                      <layout class="QGridLayout" name="gridLayout" rowstretch="0,1,1,1">
+                       <property name="horizontalSpacing">
+                        <number>10</number>
+                       </property>
+                       <item row="0" column="1">
+                        <widget class="QLabel" name="startLabel">
+                         <property name="text">
+                          <string>Start [µm]</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="2">
+                        <widget class="QLabel" name="endLabel">
+                         <property name="text">
+                          <string>End [µm]</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="3">
+                        <widget class="QLabel" name="stepsLabel">
+                         <property name="text">
+                          <string># Steps</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="0">
+                        <widget class="QLabel" name="xLabel">
+                         <property name="text">
+                          <string>x</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="1">
+                        <widget class="QDoubleSpinBox" name="startX">
+                         <property name="decimals">
+                          <number>1</number>
+                         </property>
+                         <property name="minimum">
+                          <double>-1000.000000000000000</double>
+                         </property>
+                         <property name="maximum">
+                          <double>1000.000000000000000</double>
+                         </property>
+                         <property name="singleStep">
+                          <double>1.000000000000000</double>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="2">
+                        <widget class="QDoubleSpinBox" name="endX">
+                         <property name="decimals">
+                          <number>1</number>
+                         </property>
+                         <property name="minimum">
+                          <double>-1000.000000000000000</double>
+                         </property>
+                         <property name="maximum">
+                          <double>1000.000000000000000</double>
+                         </property>
+                         <property name="singleStep">
+                          <double>1.000000000000000</double>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="3">
+                        <widget class="QSpinBox" name="stepsX">
+                         <property name="minimum">
+                          <number>1</number>
+                         </property>
+                         <property name="maximum">
+                          <number>1000</number>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="0">
+                        <widget class="QLabel" name="yLabel">
+                         <property name="text">
+                          <string>y</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="1">
+                        <widget class="QDoubleSpinBox" name="startY">
+                         <property name="decimals">
+                          <number>1</number>
+                         </property>
+                         <property name="minimum">
+                          <double>-1000.000000000000000</double>
+                         </property>
+                         <property name="maximum">
+                          <double>1000.000000000000000</double>
+                         </property>
+                         <property name="singleStep">
+                          <double>1.000000000000000</double>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="2">
+                        <widget class="QDoubleSpinBox" name="endY">
+                         <property name="decimals">
+                          <number>1</number>
+                         </property>
+                         <property name="minimum">
+                          <double>-1000.000000000000000</double>
+                         </property>
+                         <property name="maximum">
+                          <double>1000.000000000000000</double>
+                         </property>
+                         <property name="singleStep">
+                          <double>1.000000000000000</double>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="3">
+                        <widget class="QSpinBox" name="stepsY">
+                         <property name="minimum">
+                          <number>1</number>
+                         </property>
+                         <property name="maximum">
+                          <number>1000</number>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="3" column="0">
+                        <widget class="QLabel" name="zLabel">
+                         <property name="text">
+                          <string>z</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="3" column="1">
+                        <widget class="QDoubleSpinBox" name="startZ">
+                         <property name="decimals">
+                          <number>1</number>
+                         </property>
+                         <property name="minimum">
+                          <double>-1000.000000000000000</double>
+                         </property>
+                         <property name="maximum">
+                          <double>1000.000000000000000</double>
+                         </property>
+                         <property name="singleStep">
+                          <double>1.000000000000000</double>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="3" column="2">
+                        <widget class="QDoubleSpinBox" name="endZ">
+                         <property name="decimals">
+                          <number>1</number>
+                         </property>
+                         <property name="minimum">
+                          <double>-1000.000000000000000</double>
+                         </property>
+                         <property name="maximum">
+                          <double>1000.000000000000000</double>
+                         </property>
+                         <property name="singleStep">
+                          <double>1.000000000000000</double>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="3" column="3">
+                        <widget class="QSpinBox" name="stepsZ">
+                         <property name="minimum">
+                          <number>1</number>
+                         </property>
+                         <property name="maximum">
+                          <number>1000</number>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
                      </widget>
                     </widget>
                     <widget class="QGroupBox" name="liveCalibration">
@@ -2100,158 +2028,125 @@ QTabBar::tab:!selected {
                        <string extracomment="Test">Acquisition stopped</string>
                       </property>
                      </widget>
-                     <widget class="QLineEdit" name="positionX">
-                      <property name="geometry">
-                       <rect>
-                        <x>8</x>
-                        <y>40</y>
-                        <width>56</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="styleSheet">
-                       <string notr="true">background: #E4E4E4;
-border: none;</string>
-                      </property>
-                      <property name="text">
-                       <string>0</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignCenter</set>
-                      </property>
-                      <property name="readOnly">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                     <widget class="QLineEdit" name="positionY">
-                      <property name="geometry">
-                       <rect>
-                        <x>76</x>
-                        <y>40</y>
-                        <width>56</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="styleSheet">
-                       <string notr="true">background: #E4E4E4;
-border: none;</string>
-                      </property>
-                      <property name="text">
-                       <string>0</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignCenter</set>
-                      </property>
-                      <property name="readOnly">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                     <widget class="QLineEdit" name="positionZ">
-                      <property name="geometry">
-                       <rect>
-                        <x>144</x>
-                        <y>40</y>
-                        <width>56</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="styleSheet">
-                       <string notr="true">background: #E4E4E4;
-border: none;</string>
-                      </property>
-                      <property name="text">
-                       <string>0</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignCenter</set>
-                      </property>
-                      <property name="readOnly">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                     <widget class="QLineEdit" name="imageNr">
-                      <property name="geometry">
-                       <rect>
-                        <x>144</x>
-                        <y>64</y>
-                        <width>56</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="styleSheet">
-                       <string notr="true">background: #E4E4E4;
-border: none;</string>
-                      </property>
-                      <property name="text">
-                       <string>0</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignCenter</set>
-                      </property>
-                      <property name="readOnly">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                     <widget class="QLabel" name="imageNr_label">
-                      <property name="geometry">
-                       <rect>
-                        <x>8</x>
-                        <y>64</y>
-                        <width>120</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="text">
-                       <string>Image number</string>
-                      </property>
-                     </widget>
-                     <widget class="QLabel" name="positionX_label">
+                     <widget class="QWidget" name="">
                       <property name="geometry">
                        <rect>
                         <x>8</x>
                         <y>15</y>
-                        <width>56</width>
-                        <height>18</height>
+                        <width>193</width>
+                        <height>65</height>
                        </rect>
                       </property>
-                      <property name="text">
-                       <string>x [µm]</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignCenter</set>
-                      </property>
-                     </widget>
-                     <widget class="QLabel" name="positionY_label">
-                      <property name="geometry">
-                       <rect>
-                        <x>76</x>
-                        <y>15</y>
-                        <width>56</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="text">
-                       <string>y [µm]</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignCenter</set>
-                      </property>
-                     </widget>
-                     <widget class="QLabel" name="positionZ_label">
-                      <property name="geometry">
-                       <rect>
-                        <x>144</x>
-                        <y>15</y>
-                        <width>56</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="text">
-                       <string>z [µm]</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignCenter</set>
-                      </property>
+                      <layout class="QGridLayout" name="gridLayout_2">
+                       <property name="verticalSpacing">
+                        <number>6</number>
+                       </property>
+                       <item row="0" column="0">
+                        <widget class="QLabel" name="positionX_label">
+                         <property name="text">
+                          <string>x [µm]</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="1">
+                        <widget class="QLabel" name="positionY_label">
+                         <property name="text">
+                          <string>y [µm]</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="2">
+                        <widget class="QLabel" name="positionZ_label">
+                         <property name="text">
+                          <string>z [µm]</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="0">
+                        <widget class="QLineEdit" name="positionX">
+                         <property name="styleSheet">
+                          <string notr="true">background: #E4E4E4;
+border: none;</string>
+                         </property>
+                         <property name="text">
+                          <string>0</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                         <property name="readOnly">
+                          <bool>true</bool>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="1">
+                        <widget class="QLineEdit" name="positionY">
+                         <property name="styleSheet">
+                          <string notr="true">background: #E4E4E4;
+border: none;</string>
+                         </property>
+                         <property name="text">
+                          <string>0</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                         <property name="readOnly">
+                          <bool>true</bool>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="2">
+                        <widget class="QLineEdit" name="positionZ">
+                         <property name="styleSheet">
+                          <string notr="true">background: #E4E4E4;
+border: none;</string>
+                         </property>
+                         <property name="text">
+                          <string>0</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                         <property name="readOnly">
+                          <bool>true</bool>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="0" colspan="2">
+                        <widget class="QLabel" name="imageNr_label">
+                         <property name="text">
+                          <string>Image number</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="2">
+                        <widget class="QLineEdit" name="imageNr">
+                         <property name="styleSheet">
+                          <string notr="true">background: #E4E4E4;
+border: none;</string>
+                         </property>
+                         <property name="text">
+                          <string>0</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                         <property name="readOnly">
+                          <bool>true</bool>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
                      </widget>
                     </widget>
                     <widget class="QGroupBox" name="repetitions">
@@ -2463,104 +2358,6 @@ border: none;</string>
                        </rect>
                       </property>
                      </widget>
-                     <widget class="QLabel" name="alignmentNumber_ODT_label">
-                      <property name="geometry">
-                       <rect>
-                        <x>8</x>
-                        <y>40</y>
-                        <width>88</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="text">
-                       <string>Number of points</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                      </property>
-                     </widget>
-                     <widget class="QLabel" name="alignmentUR_ODT_label">
-                      <property name="geometry">
-                       <rect>
-                        <x>8</x>
-                        <y>16</y>
-                        <width>88</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="text">
-                       <string>UR [V]</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                      </property>
-                     </widget>
-                     <widget class="QLabel" name="alignmentRate_ODT_label">
-                      <property name="geometry">
-                       <rect>
-                        <x>8</x>
-                        <y>64</y>
-                        <width>88</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="text">
-                       <string>Scanrate [Hz]</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                      </property>
-                     </widget>
-                     <widget class="QDoubleSpinBox" name="alignmentUR_ODT">
-                      <property name="geometry">
-                       <rect>
-                        <x>96</x>
-                        <y>16</y>
-                        <width>48</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="decimals">
-                       <number>2</number>
-                      </property>
-                      <property name="minimum">
-                       <double>0.000000000000000</double>
-                      </property>
-                      <property name="maximum">
-                       <double>1.000000000000000</double>
-                      </property>
-                      <property name="singleStep">
-                       <double>0.010000000000000</double>
-                      </property>
-                      <property name="value">
-                       <double>0.300000000000000</double>
-                      </property>
-                     </widget>
-                     <widget class="QDoubleSpinBox" name="alignmentRate_ODT">
-                      <property name="geometry">
-                       <rect>
-                        <x>96</x>
-                        <y>64</y>
-                        <width>48</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="decimals">
-                       <number>1</number>
-                      </property>
-                      <property name="minimum">
-                       <double>0.000000000000000</double>
-                      </property>
-                      <property name="maximum">
-                       <double>5.000000000000000</double>
-                      </property>
-                      <property name="singleStep">
-                       <double>0.100000000000000</double>
-                      </property>
-                      <property name="value">
-                       <double>1.000000000000000</double>
-                      </property>
-                     </widget>
                      <widget class="QPushButton" name="alignmentStartODT">
                       <property name="enabled">
                        <bool>true</bool>
@@ -2568,35 +2365,13 @@ border: none;</string>
                       <property name="geometry">
                        <rect>
                         <x>152</x>
-                        <y>16</y>
+                        <y>17</y>
                         <width>48</width>
-                        <height>18</height>
+                        <height>17</height>
                        </rect>
                       </property>
                       <property name="text">
                        <string>Start</string>
-                      </property>
-                     </widget>
-                     <widget class="QSpinBox" name="alignmentNumber_ODT">
-                      <property name="geometry">
-                       <rect>
-                        <x>96</x>
-                        <y>40</y>
-                        <width>48</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="minimum">
-                       <number>1</number>
-                      </property>
-                      <property name="maximum">
-                       <number>1000</number>
-                      </property>
-                      <property name="singleStep">
-                       <number>5</number>
-                      </property>
-                      <property name="value">
-                       <number>30</number>
                       </property>
                      </widget>
                      <widget class="QPushButton" name="alignmentCenterODT">
@@ -2606,14 +2381,113 @@ border: none;</string>
                       <property name="geometry">
                        <rect>
                         <x>152</x>
-                        <y>40</y>
+                        <y>39</y>
                         <width>48</width>
-                        <height>18</height>
+                        <height>17</height>
                        </rect>
                       </property>
                       <property name="text">
                        <string>Center</string>
                       </property>
+                     </widget>
+                     <widget class="QWidget" name="">
+                      <property name="geometry">
+                       <rect>
+                        <x>9</x>
+                        <y>17</y>
+                        <width>137</width>
+                        <height>64</height>
+                       </rect>
+                      </property>
+                      <layout class="QFormLayout" name="formLayout_2">
+                       <property name="horizontalSpacing">
+                        <number>24</number>
+                       </property>
+                       <item row="0" column="0">
+                        <widget class="QLabel" name="alignmentUR_ODT_label">
+                         <property name="text">
+                          <string>UR [V]</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="1">
+                        <widget class="QDoubleSpinBox" name="alignmentUR_ODT">
+                         <property name="decimals">
+                          <number>2</number>
+                         </property>
+                         <property name="minimum">
+                          <double>0.000000000000000</double>
+                         </property>
+                         <property name="maximum">
+                          <double>1.000000000000000</double>
+                         </property>
+                         <property name="singleStep">
+                          <double>0.010000000000000</double>
+                         </property>
+                         <property name="value">
+                          <double>0.300000000000000</double>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="0">
+                        <widget class="QLabel" name="alignmentNumber_ODT_label">
+                         <property name="text">
+                          <string>Number of points</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="1">
+                        <widget class="QSpinBox" name="alignmentNumber_ODT">
+                         <property name="minimum">
+                          <number>1</number>
+                         </property>
+                         <property name="maximum">
+                          <number>1000</number>
+                         </property>
+                         <property name="singleStep">
+                          <number>5</number>
+                         </property>
+                         <property name="value">
+                          <number>30</number>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="0">
+                        <widget class="QLabel" name="alignmentRate_ODT_label">
+                         <property name="text">
+                          <string>Scanrate [Hz]</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="1">
+                        <widget class="QDoubleSpinBox" name="alignmentRate_ODT">
+                         <property name="decimals">
+                          <number>1</number>
+                         </property>
+                         <property name="minimum">
+                          <double>0.000000000000000</double>
+                         </property>
+                         <property name="maximum">
+                          <double>5.000000000000000</double>
+                         </property>
+                         <property name="singleStep">
+                          <double>0.100000000000000</double>
+                         </property>
+                         <property name="value">
+                          <double>1.000000000000000</double>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
                      </widget>
                     </widget>
                     <widget class="QGroupBox" name="acquisitionODT">
@@ -2657,72 +2531,6 @@ border: none;</string>
                        </rect>
                       </property>
                      </widget>
-                     <widget class="QDoubleSpinBox" name="acquisitionUR_ODT">
-                      <property name="geometry">
-                       <rect>
-                        <x>96</x>
-                        <y>16</y>
-                        <width>48</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="decimals">
-                       <number>2</number>
-                      </property>
-                      <property name="minimum">
-                       <double>0.000000000000000</double>
-                      </property>
-                      <property name="maximum">
-                       <double>1.000000000000000</double>
-                      </property>
-                      <property name="singleStep">
-                       <double>0.010000000000000</double>
-                      </property>
-                      <property name="value">
-                       <double>0.300000000000000</double>
-                      </property>
-                     </widget>
-                     <widget class="QDoubleSpinBox" name="acquisitionRate_ODT">
-                      <property name="geometry">
-                       <rect>
-                        <x>96</x>
-                        <y>64</y>
-                        <width>48</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="decimals">
-                       <number>1</number>
-                      </property>
-                      <property name="minimum">
-                       <double>0.000000000000000</double>
-                      </property>
-                      <property name="maximum">
-                       <double>1000.000000000000000</double>
-                      </property>
-                      <property name="singleStep">
-                       <double>10.000000000000000</double>
-                      </property>
-                      <property name="value">
-                       <double>100.000000000000000</double>
-                      </property>
-                     </widget>
-                     <widget class="QLabel" name="acquisitionRate_ODT_label">
-                      <property name="geometry">
-                       <rect>
-                        <x>8</x>
-                        <y>64</y>
-                        <width>88</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="text">
-                       <string>Scanrate [Hz]</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                      </property>
-                     </widget>
                      <widget class="QPushButton" name="acquisitionStartODT">
                       <property name="enabled">
                        <bool>true</bool>
@@ -2739,59 +2547,110 @@ border: none;</string>
                        <string>Start</string>
                       </property>
                      </widget>
-                     <widget class="QLabel" name="acquisitionUR_ODT_label">
+                     <widget class="QWidget" name="">
                       <property name="geometry">
                        <rect>
                         <x>8</x>
                         <y>16</y>
-                        <width>88</width>
-                        <height>18</height>
+                        <width>137</width>
+                        <height>65</height>
                        </rect>
                       </property>
-                      <property name="text">
-                       <string>UR [V]</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                      </property>
-                     </widget>
-                     <widget class="QLabel" name="acquisitionNumber_ODT_label">
-                      <property name="geometry">
-                       <rect>
-                        <x>8</x>
-                        <y>40</y>
-                        <width>88</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="text">
-                       <string>Number of points</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                      </property>
-                     </widget>
-                     <widget class="QSpinBox" name="acquisitionNumber_ODT">
-                      <property name="geometry">
-                       <rect>
-                        <x>96</x>
-                        <y>40</y>
-                        <width>48</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="minimum">
-                       <number>10</number>
-                      </property>
-                      <property name="maximum">
-                       <number>1000</number>
-                      </property>
-                      <property name="singleStep">
-                       <number>5</number>
-                      </property>
-                      <property name="value">
-                       <number>150</number>
-                      </property>
+                      <layout class="QFormLayout" name="formLayout">
+                       <property name="horizontalSpacing">
+                        <number>24</number>
+                       </property>
+                       <property name="verticalSpacing">
+                        <number>4</number>
+                       </property>
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <item row="0" column="0">
+                        <widget class="QLabel" name="acquisitionUR_ODT_label">
+                         <property name="text">
+                          <string>UR [V]</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="1">
+                        <widget class="QDoubleSpinBox" name="acquisitionUR_ODT">
+                         <property name="decimals">
+                          <number>2</number>
+                         </property>
+                         <property name="minimum">
+                          <double>0.000000000000000</double>
+                         </property>
+                         <property name="maximum">
+                          <double>1.000000000000000</double>
+                         </property>
+                         <property name="singleStep">
+                          <double>0.010000000000000</double>
+                         </property>
+                         <property name="value">
+                          <double>0.300000000000000</double>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="0">
+                        <widget class="QLabel" name="acquisitionNumber_ODT_label">
+                         <property name="text">
+                          <string>Number of points</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="1">
+                        <widget class="QSpinBox" name="acquisitionNumber_ODT">
+                         <property name="minimum">
+                          <number>10</number>
+                         </property>
+                         <property name="maximum">
+                          <number>1000</number>
+                         </property>
+                         <property name="singleStep">
+                          <number>5</number>
+                         </property>
+                         <property name="value">
+                          <number>150</number>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="0">
+                        <widget class="QLabel" name="acquisitionRate_ODT_label">
+                         <property name="text">
+                          <string>Scanrate [Hz]</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="1">
+                        <widget class="QDoubleSpinBox" name="acquisitionRate_ODT">
+                         <property name="decimals">
+                          <number>1</number>
+                         </property>
+                         <property name="minimum">
+                          <double>0.000000000000000</double>
+                         </property>
+                         <property name="maximum">
+                          <double>1000.000000000000000</double>
+                         </property>
+                         <property name="singleStep">
+                          <double>10.000000000000000</double>
+                         </property>
+                         <property name="value">
+                          <double>100.000000000000000</double>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
                      </widget>
                     </widget>
                    </widget>
