@@ -686,11 +686,9 @@ void BrillouinAcquisition::showODTStatus(ACQUISITION_STATUS status) {
 	bool running{ false };
 	if (status == ACQUISITION_STATUS::RUNNING || status == ACQUISITION_STATUS::STARTED) {
 		ui->acquisitionStartODT->setText("Cancel");
-		ui->alignmentCenterODT->setEnabled(false);
 		running = true;
 	} else {
 		ui->acquisitionStartODT->setText("Start");
-		ui->alignmentCenterODT->setEnabled(true);
 	}
 
 	ui->alignmentStartODT->setDisabled(running);
@@ -700,9 +698,13 @@ void BrillouinAcquisition::showODTStatus(ACQUISITION_STATUS status) {
 
 	if (status == ACQUISITION_STATUS::ALIGNING) {
 		ui->alignmentStartODT->setText("Stop");
-		ui->alignmentCenterODT->setEnabled(false);
 	} else {
 		ui->alignmentStartODT->setText("Start");
+	}
+
+	if (status > ACQUISITION_STATUS::STOPPED) {
+		ui->alignmentCenterODT->setEnabled(false);
+	} else {
 		ui->alignmentCenterODT->setEnabled(true);
 	}
 }
