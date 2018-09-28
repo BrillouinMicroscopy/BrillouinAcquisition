@@ -1176,7 +1176,7 @@ void BrillouinAcquisition::on_camera_playPause_brightfield_clicked() {
 		QMetaObject::invokeMethod(m_pointGrey, "startPreview", Qt::AutoConnection);
 	}
 	else {
-		m_pointGrey->m_isPreviewRunning = false;
+		m_pointGrey->m_stopPreview = true;
 	}
 }
 
@@ -1679,7 +1679,7 @@ void BrillouinAcquisition::on_camera_playPause_clicked() {
 		m_andor->setSettings(m_BrillouinSettings.camera);
 		QMetaObject::invokeMethod(m_andor, "startPreview", Qt::AutoConnection);
 	} else {
-		m_andor->m_isPreviewRunning = false;
+		m_andor->m_stopPreview = true;
 	}
 }
 
