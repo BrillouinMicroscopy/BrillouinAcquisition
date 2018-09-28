@@ -258,13 +258,15 @@ private:
 	QDialog *m_settingsDialog = nullptr;
 	void checkElementButtons();
 	void addListToComboBox(QComboBox*, std::vector<std::wstring>, bool clear = true);
-	//Thread m_cameraThread;
-	//Thread m_microscopeThread;
-	Thread m_acquisitionThread;
 	Andor *m_andor = new Andor();
 	ScanControl *m_scanControl = nullptr;
 	PointGrey *m_pointGrey = nullptr;
 	Acquisition *m_acquisition = new Acquisition(nullptr);
+
+	// Threads
+	Thread m_andorThread;
+	Thread m_pointGreyThread;
+	Thread m_acquisitionThread;
 
 	Brillouin *m_Brillouin = new Brillouin(nullptr, m_acquisition, m_andor, &m_scanControl);
 	BRILLOUIN_SETTINGS m_BrillouinSettings;

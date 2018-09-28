@@ -225,8 +225,8 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 
 	initScanControl();
 	initCamera();
-	// start camera thread
-	m_acquisitionThread.startWorker(m_andor);
+	// start andor thread
+	m_andorThread.startWorker(m_andor);
 	// start acquisition thread
 	m_acquisitionThread.startWorker(m_acquisition);
 	// start Brillouin thread
@@ -294,6 +294,12 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 	//m_cameraThread.wait();
 	//m_microscopeThread.exit();
 	//m_microscopeThread.wait();
+	m_andorThread.exit();
+	m_andorThread.terminate();
+	m_andorThread.wait();
+	m_pointGreyThread.exit();
+	m_pointGreyThread.terminate();
+	m_pointGreyThread.wait();
 	m_acquisitionThread.exit();
 	m_acquisitionThread.terminate();
 	m_acquisitionThread.wait();
@@ -1453,7 +1459,7 @@ void BrillouinAcquisition::initScanControl() {
 				[this](double progress, int seconds) { showODTProgress(progress, seconds); }
 			);
 
-			// start ODT thread
+			// start ODT threadSt4-r9A
 			m_acquisitionThread.startWorker(m_ODT);
 			ui->acquisitionModeTabs->insertTab(1, ui->ODT, "ODT");
 			m_ODT->initialize();
@@ -1602,7 +1608,7 @@ void BrillouinAcquisition::initCamera() {
 		[this](CAMERA_OPTIONS options) { cameraODTOptionsChanged(options); }
 	);
 
-	m_acquisitionThread.startWorker(m_pointGrey);
+	m_pointGreyThread.startWorker(m_pointGrey);
 
 	QMetaObject::invokeMethod(m_pointGrey, "connectDevice", Qt::AutoConnection);
 }
