@@ -200,6 +200,15 @@ void ODT::startAlignment() {
 	}
 }
 
+void ODT::centerAlignment() {
+	if (!m_algnRunning && (m_status < ACQUISITION_STATUS::RUNNING)) {
+		(*m_NIDAQ)->setVoltage({ 0, 0 });
+
+		// announce mirror voltage
+		emit(s_mirrorVoltageChanged({ 0, 0 }, ODT_MODE::ALGN));
+	}
+}
+
 void ODT::nextAlgnPosition() {
 	if (m_abortAlignment) {
 		this->abortMode();

@@ -41,6 +41,7 @@ public slots:
 	void initialize();
 	void startRepetitions();
 	void startAlignment();
+	void centerAlignment();
 	void setSettings(ODT_MODE, ODT_SETTING, double);
 
 private:

@@ -547,6 +547,10 @@ void BrillouinAcquisition::on_alignmentStartODT_clicked() {
 	QMetaObject::invokeMethod(m_ODT, "startAlignment", Qt::AutoConnection);
 }
 
+void BrillouinAcquisition::on_alignmentCenterODT_clicked() {
+	QMetaObject::invokeMethod(m_ODT, "centerAlignment", Qt::AutoConnection);
+}
+
 void BrillouinAcquisition::on_acquisitionUR_ODT_valueChanged(double voltage) {
 	m_ODT->setSettings(ODT_MODE::ACQ, ODT_SETTING::VOLTAGE, voltage);
 }
@@ -580,9 +584,11 @@ void BrillouinAcquisition::showEnabledModes(ACQUISITION_MODE modes) {
 	if (BrillouinMode | FluorescenceMode) {
 		ui->acquisitionStartODT->setEnabled(false);
 		ui->alignmentStartODT->setEnabled(false);
+		ui->alignmentCenterODT->setEnabled(false);
 	} else {
 		ui->acquisitionStartODT->setEnabled(true);
 		ui->alignmentStartODT->setEnabled(true);
+		ui->alignmentCenterODT->setEnabled(true);
 	}
 
 	/*
@@ -674,9 +680,11 @@ void BrillouinAcquisition::showODTStatus(ACQUISITION_STATUS status) {
 	bool running{ false };
 	if (status == ACQUISITION_STATUS::RUNNING || status == ACQUISITION_STATUS::STARTED) {
 		ui->acquisitionStartODT->setText("Cancel");
+		ui->alignmentCenterODT->setEnabled(false);
 		running = true;
 	} else {
 		ui->acquisitionStartODT->setText("Start");
+		ui->alignmentCenterODT->setEnabled(true);
 	}
 
 	ui->alignmentStartODT->setDisabled(running);
@@ -686,8 +694,10 @@ void BrillouinAcquisition::showODTStatus(ACQUISITION_STATUS status) {
 
 	if (status == ACQUISITION_STATUS::ALIGNING) {
 		ui->alignmentStartODT->setText("Stop");
+		ui->alignmentCenterODT->setEnabled(false);
 	} else {
 		ui->alignmentStartODT->setText("Start");
+		ui->alignmentCenterODT->setEnabled(true);
 	}
 }
 

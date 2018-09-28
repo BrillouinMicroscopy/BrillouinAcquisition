@@ -171,6 +171,7 @@ private slots:
 	void on_alignmentNumber_ODT_valueChanged(int);
 	void on_alignmentRate_ODT_valueChanged(double);
 	void on_alignmentStartODT_clicked();
+	void on_alignmentCenterODT_clicked();
 	void on_acquisitionUR_ODT_valueChanged(double);
 	void on_acquisitionNumber_ODT_valueChanged(int);
 	void on_acquisitionRate_ODT_valueChanged(double);
