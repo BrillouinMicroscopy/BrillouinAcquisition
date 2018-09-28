@@ -291,6 +291,7 @@ int NIDAQ::getMirror() {
 	if (abs(currentIndex - targetIndex) < 10) {
 		return 2;
 	}
+	return -1;
 }
 
 void NIDAQ::applyScanPosition() {
