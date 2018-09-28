@@ -225,6 +225,9 @@ void NIDAQ::setElements(ScanControl::SCAN_PRESET preset) {
 			presetNr = 0;
 			break;
 		case ScanControl::SCAN_CALIBRATION:
+			// Set voltage of galvo mirrors to zero
+			// Otherwise the laser beam might not hit the calibration samples
+			setVoltage({ 0, 0 });
 			presetNr = 1;
 			break;
 		case ScanControl::SCAN_ODT:
