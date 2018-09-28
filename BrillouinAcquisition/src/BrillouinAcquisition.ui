@@ -180,7 +180,7 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>223</width>
+                <width>219</width>
                 <height>310</height>
                </rect>
               </property>
@@ -764,7 +764,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>236</width>
-                <height>211</height>
+                <height>199</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -824,7 +824,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>230</width>
-                <height>211</height>
+                <height>199</height>
                </rect>
               </property>
               <property name="sizePolicy">
@@ -1079,7 +1079,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>236</width>
-                <height>211</height>
+                <height>199</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -1414,7 +1414,7 @@ QTabBar::tab:!selected {
                  <height>40</height>
                 </size>
                </property>
-               <widget class="QWidget" name="">
+               <widget class="QWidget" name="layoutWidget">
                 <property name="geometry">
                  <rect>
                   <x>8</x>
@@ -1539,7 +1539,7 @@ QTabBar::tab:!selected {
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>221</width>
+                      <width>217</width>
                       <height>480</height>
                      </rect>
                     </property>
@@ -1561,12 +1561,12 @@ QTabBar::tab:!selected {
                      <property name="title">
                       <string>Area of interest</string>
                      </property>
-                     <widget class="QWidget" name="">
+                     <widget class="QWidget" name="layoutWidget">
                       <property name="geometry">
                        <rect>
                         <x>8</x>
                         <y>15</y>
-                        <width>193</width>
+                        <width>191</width>
                         <height>89</height>
                        </rect>
                       </property>
@@ -2028,7 +2028,7 @@ QTabBar::tab:!selected {
                        <string extracomment="Test">Acquisition stopped</string>
                       </property>
                      </widget>
-                     <widget class="QWidget" name="">
+                     <widget class="QWidget" name="layoutWidget">
                       <property name="geometry">
                        <rect>
                         <x>8</x>
@@ -2325,8 +2325,8 @@ border: none;</string>
                     <property name="geometry">
                      <rect>
                       <x>0</x>
-                      <y>0</y>
-                      <width>221</width>
+                      <y>-130</y>
+                      <width>217</width>
                       <height>545</height>
                      </rect>
                     </property>
@@ -2365,9 +2365,9 @@ border: none;</string>
                       <property name="geometry">
                        <rect>
                         <x>152</x>
-                        <y>17</y>
+                        <y>16</y>
                         <width>48</width>
-                        <height>17</height>
+                        <height>18</height>
                        </rect>
                       </property>
                       <property name="text">
@@ -2381,27 +2381,27 @@ border: none;</string>
                       <property name="geometry">
                        <rect>
                         <x>152</x>
-                        <y>39</y>
+                        <y>40</y>
                         <width>48</width>
-                        <height>17</height>
+                        <height>18</height>
                        </rect>
                       </property>
                       <property name="text">
                        <string>Center</string>
                       </property>
                      </widget>
-                     <widget class="QWidget" name="">
+                     <widget class="QWidget" name="layoutWidget">
                       <property name="geometry">
                        <rect>
                         <x>9</x>
                         <y>17</y>
-                        <width>137</width>
-                        <height>64</height>
+                        <width>141</width>
+                        <height>74</height>
                        </rect>
                       </property>
                       <layout class="QFormLayout" name="formLayout_2">
                        <property name="horizontalSpacing">
-                        <number>24</number>
+                        <number>4</number>
                        </property>
                        <item row="0" column="0">
                         <widget class="QLabel" name="alignmentUR_ODT_label">
@@ -2444,6 +2444,18 @@ border: none;</string>
                        </item>
                        <item row="1" column="1">
                         <widget class="QSpinBox" name="alignmentNumber_ODT">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>18</height>
+                          </size>
+                         </property>
                          <property name="minimum">
                           <number>1</number>
                          </property>
@@ -2547,24 +2559,18 @@ border: none;</string>
                        <string>Start</string>
                       </property>
                      </widget>
-                     <widget class="QWidget" name="">
+                     <widget class="QWidget" name="layoutWidget">
                       <property name="geometry">
                        <rect>
                         <x>8</x>
                         <y>16</y>
-                        <width>137</width>
-                        <height>65</height>
+                        <width>141</width>
+                        <height>71</height>
                        </rect>
                       </property>
                       <layout class="QFormLayout" name="formLayout">
                        <property name="horizontalSpacing">
-                        <number>24</number>
-                       </property>
-                       <property name="verticalSpacing">
                         <number>4</number>
-                       </property>
-                       <property name="leftMargin">
-                        <number>0</number>
                        </property>
                        <item row="0" column="0">
                         <widget class="QLabel" name="acquisitionUR_ODT_label">
@@ -2821,7 +2827,7 @@ border: none;</string>
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">
