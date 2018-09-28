@@ -261,6 +261,9 @@ void PointGrey::startAcquisition(CAMERA_SETTINGS settings) {
 
 	setSettings(settings);
 
+	// Wait for camera to really apply settings
+	Sleep(100);
+
 	m_camera.StartCapture();
 	m_isAcquisitionRunning = true;
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
