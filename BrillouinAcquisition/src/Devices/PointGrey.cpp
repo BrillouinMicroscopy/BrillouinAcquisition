@@ -251,10 +251,12 @@ void PointGrey::preparePreview() {
 void PointGrey::stopPreview() {
 	m_camera.StopCapture();
 	m_isPreviewRunning = false;
+	m_stopPreview = false;
 	emit(s_previewRunning(m_isPreviewRunning));
 }
 
 void PointGrey::startAcquisition(CAMERA_SETTINGS settings) {
+	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	// check if currently a preview is running and stop it in case
 	if (m_isPreviewRunning) {
 		stopPreview();
@@ -294,24 +296,23 @@ void PointGrey::acquireImage(unsigned char * buffer) {
 }
 
 void PointGrey::getImageForPreview() {
-	if (!m_stopPreview) {
-
-		//PollForTriggerReady(&m_camera);
-
-		//// Fire the software trigger
-		//FireSoftwareTrigger(&m_camera);
+	std::lock_guard<std::mutex> lockGuard(m_mutex);
+	if (m_isPreviewRunning) {
+		if (m_stopPreview) {
+			stopPreview();
+			return;
+		}
 
 		m_previewBuffer->m_buffer->m_freeBuffers->acquire();
 		acquireImage(m_previewBuffer->m_buffer->getWriteBuffer());
 		m_previewBuffer->m_buffer->m_usedBuffers->release();
 
 		QMetaObject::invokeMethod(this, "getImageForPreview", Qt::QueuedConnection);
-	} else {
-		stopPreview();
 	}
 }
 
 void PointGrey::getImageForAcquisition(unsigned char* buffer) {
+	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	acquireImage(buffer);
 };
 
