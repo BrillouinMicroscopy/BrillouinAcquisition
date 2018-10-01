@@ -1,7 +1,7 @@
 function [Ux, Uy] = PositionToVoltage(x, y, distortion)
 
-    x = x - distortion(1);
-    y = y - distortion(2);
+    x = (x / distortion(8) - distortion(1));
+    y = (y / distortion(9) - distortion(2));
     
     rho = -1*distortion(3);
     

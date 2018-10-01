@@ -15,7 +15,7 @@ function [x, y] = VoltageToPosition(Ux, Uy, distortion)
         x = Ux_rot./R_old .* R_new;
         y = Uy_rot./R_old .* R_new;
     end
-    x = x + distortion(1);
-    y = y + distortion(2);
+    x = distortion(8) * (x + distortion(1));
+    y = distortion(9) * (y + distortion(2));
     
 end

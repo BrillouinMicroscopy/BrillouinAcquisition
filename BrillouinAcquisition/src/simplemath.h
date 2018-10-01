@@ -4,7 +4,7 @@
 #include <vector>
 #include <complex>
 
-struct COEFFICIANTS5 {
+struct COEFFICIENTS5 {
 	double a{ 0 };		// coefficient of fourth order
 	double b{ 0 };		// coefficient of third order
 	double c{ 0 };		// coefficient of second order
@@ -40,7 +40,7 @@ public:
 	}
 
 	template <typename T = double>
-	static std::vector<std::complex<T>> solveQuartic(COEFFICIANTS5 coef) {
+	static std::vector<std::complex<T>> solveQuartic(COEFFICIENTS5 coef) {
 		// shorthands for the variables
 		double a = coef.a;
 		double b = coef.b;
