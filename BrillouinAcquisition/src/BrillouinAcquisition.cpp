@@ -1026,11 +1026,12 @@ void BrillouinAcquisition::onNewImage() {
 
 			auto unpackedBuffer = reinterpret_cast<unsigned short*>(m_andor->m_previewBuffer->m_buffer->getReadBuffer());
 
+			// images are given row by row, starting at the top left
 			int tIndex;
-			for (gsl::index xIndex = 0; xIndex < m_andor->m_previewBuffer->m_bufferSettings.roi.height; ++xIndex) {
-				for (gsl::index yIndex = 0; yIndex < m_andor->m_previewBuffer->m_bufferSettings.roi.width; ++yIndex) {
-					tIndex = xIndex * m_andor->m_previewBuffer->m_bufferSettings.roi.width + yIndex;
-					plotSettings.colorMap->data()->setCell(yIndex, xIndex, unpackedBuffer[tIndex]);
+			for (gsl::index yIndex{ 0 }; yIndex < m_andor->m_previewBuffer->m_bufferSettings.roi.height; ++yIndex) {
+				for (gsl::index xIndex{ 0 }; xIndex < m_andor->m_previewBuffer->m_bufferSettings.roi.width; ++xIndex) {
+					tIndex = yIndex * m_andor->m_previewBuffer->m_bufferSettings.roi.width + xIndex;
+					plotSettings.colorMap->data()->setCell(xIndex, m_andor->m_previewBuffer->m_bufferSettings.roi.height - yIndex - 1, unpackedBuffer[tIndex]);
 				}
 			}
 
@@ -1059,13 +1060,12 @@ void BrillouinAcquisition::onNewBrightfieldImage() {
 			auto unpackedBuffer = m_pointGrey->m_previewBuffer->m_buffer->getReadBuffer();
 
 			int tIndex;
-			for (gsl::index xIndex = 0; xIndex < m_pointGrey->m_previewBuffer->m_bufferSettings.roi.height; ++xIndex) {
-				for (gsl::index yIndex = 0; yIndex < m_pointGrey->m_previewBuffer->m_bufferSettings.roi.width; ++yIndex) {
-					tIndex = xIndex * m_pointGrey->m_previewBuffer->m_bufferSettings.roi.width + yIndex;
-					plotSettings.colorMap->data()->setCell(yIndex, xIndex, unpackedBuffer[tIndex]);
+			for (gsl::index yIndex{ 0 }; yIndex < m_pointGrey->m_previewBuffer->m_bufferSettings.roi.height; ++yIndex) {
+				for (gsl::index xIndex{ 0 }; xIndex < m_pointGrey->m_previewBuffer->m_bufferSettings.roi.width; ++xIndex) {
+					tIndex = yIndex * m_pointGrey->m_previewBuffer->m_bufferSettings.roi.width + xIndex;
+					plotSettings.colorMap->data()->setCell(xIndex, m_pointGrey->m_previewBuffer->m_bufferSettings.roi.height - yIndex - 1, unpackedBuffer[tIndex]);
 				}
 			}
-
 		}
 		m_pointGrey->m_previewBuffer->m_buffer->m_freeBuffers->release();
 		if (plotSettings.autoscale) {

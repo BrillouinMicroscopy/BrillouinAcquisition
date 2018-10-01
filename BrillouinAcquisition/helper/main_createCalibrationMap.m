@@ -82,6 +82,7 @@ for jj = 1:size(voltages.Ux, 2)
             outputSingleScan(session, [voltages.Ux(kk,jj) voltages.Uy(kk,jj)]);
             %% get image from camera and save it
             image = getsnapshot(vid);                                               % actual image from camera
+            image = flipud(image);
             save([path filesep sprintf('image_%03.0f_%03.0f.mat', jj, kk)], 'image');
         end
         
@@ -156,12 +157,14 @@ drawnow;
 %% Find distortion parameters
 distortion_initial = [ ...
     16e-6, ...  % x0
-    8e-6, ...   % y0
-    0.35, ...   % rho
+    -8e-6, ...  % y0
+    -0.35, ...  % rho
     5e-4, ...   % d
     1.1e-4, ... % c
     5.1e-5, ... % b
     2.5e-4, ... % a
+    1, ...      % fliplr
+    -1, ...     % flipud
 ];
 
 model = @(Ux, Uy, distortion) VoltageToPosition(Ux, Uy, distortion);
@@ -215,6 +218,7 @@ for jj = 1:size(voltages_required.Ux, 2)
             outputSingleScan(session, [voltages_required.Ux(kk,jj) voltages_required.Uy(kk,jj)]);
             %% get image from camera and save it
             image = getsnapshot(vid);                                               % actual image from camera
+            image = flipud(image);
             save([path filesep sprintf('controlimage_%03.0f_%03.0f.mat', jj, kk)], 'image');
         end
         
@@ -303,6 +307,8 @@ title(cb, '[nm]', 'interpreter', 'latex');
 %   c
 %   b
 %   a
+%   lr
+%   ud
 % bounds ->
 %   xMin
 %   xMax
@@ -321,12 +327,12 @@ fullFilename = ['../' filename '_' shortdate '.h5'];
 fid = fopen(fullFilename,'w');
 fclose(fid);
 
-% write date
+%% write date
 date.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSXXX';
 fulldate = char(date);
 h5writeatt(fullFilename, '/', 'date', fulldate);
 
-% write translation
+%% write translation
 d = '/translation/';
 
 ds = [d 'x'];
@@ -342,7 +348,7 @@ ds = '/rotation';
 h5create(fullFilename, ds, 1, 'ChunkSize', 1);
 h5write(fullFilename, ds, distortion(3));
 
-% write coefficients
+%% write coefficients
 d = '/coefficients/';
 
 ds = [d 'a'];
@@ -360,6 +366,14 @@ h5write(fullFilename, ds, distortion(5));
 ds = [d 'd'];
 h5create(fullFilename, ds, 1, 'ChunkSize', 1);
 h5write(fullFilename, ds, distortion(4));
+
+ds = [d 'lr'];
+h5create(fullFilename, ds, 1, 'ChunkSize', 1);
+h5write(fullFilename, ds, distortion(8));
+
+ds = [d 'ud'];
+h5create(fullFilename, ds, 1, 'ChunkSize', 1);
+h5write(fullFilename, ds, distortion(9));
 
 % write bounds
 d = '/bounds/';

@@ -5,6 +5,9 @@
 
 VOLTAGE2 NIDAQ::positionToVoltage(POINT2 position) {
 
+	position.x /= m_calibration.fliplr;
+	position.y /= m_calibration.flipud;
+
 	position = position - m_calibration.translation;
 
 	double x_rot = position.x * cos(m_calibration.rho) + position.y * sin(m_calibration.rho);
@@ -20,7 +23,7 @@ VOLTAGE2 NIDAQ::positionToVoltage(POINT2 position) {
 
 	// solve for R_new
 	
-	COEFFICIANTS5 coef = m_calibration.coef;
+	COEFFICIENTS5 coef = m_calibration.coef;
 	coef.e = -1 * R_old;
 	std::vector<std::complex<double>> solutions = simplemath::solveQuartic(coef);
 
@@ -62,6 +65,9 @@ POINT2 NIDAQ::voltageToPosition(VOLTAGE2 voltage) {
 	}
 	
 	position = position + m_calibration.translation;
+
+	position.x *= m_calibration.fliplr;
+	position.y *= m_calibration.flipud;
 
 	return position;
 }
@@ -376,6 +382,8 @@ void NIDAQ::loadVoltagePositionCalibration(std::string filepath) {
 		m_calibration.translation.x = getCalibrationValue(file, "/translation/x");
 		m_calibration.translation.y = getCalibrationValue(file, "/translation/y");
 		m_calibration.rho = getCalibrationValue(file, "/rotation");
+		m_calibration.fliplr = getCalibrationValue(file, "/coefficients/lr");
+		m_calibration.flipud = getCalibrationValue(file, "/coefficients/ud");
 		m_calibration.coef.a = getCalibrationValue(file, "/coefficients/a");
 		m_calibration.coef.b = getCalibrationValue(file, "/coefficients/b");
 		m_calibration.coef.c = getCalibrationValue(file, "/coefficients/c");

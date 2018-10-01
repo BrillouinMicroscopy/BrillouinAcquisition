@@ -47,7 +47,9 @@ private:
 		std::string date{ "" };
 		POINT2 translation{ -3.8008e-6, 1.1829e-6 };	// [m]	translation
 		double rho{ -0.2528 };		// [rad]	rotation
-		COEFFICIANTS5 coef{
+		double fliplr{ 1 };
+		double flipud{ 1 };
+		COEFFICIENTS5 coef{
 			-6.9185e-4, // [1/m³]	coefficient of fourth order
 			6.7076e-4,	// [1/m²]	coefficient of third order
 			-1.1797e-4,	// [1/m]	coefficient of second order
