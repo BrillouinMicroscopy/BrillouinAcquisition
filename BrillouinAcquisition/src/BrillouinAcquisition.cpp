@@ -288,8 +288,8 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 		m_ODT = nullptr;
 	}
 	m_scanControl->deleteLater();
-	delete m_pointGrey;
-	delete m_andor;
+	m_pointGrey->deleteLater();
+	m_andor->deleteLater();
 	//m_cameraThread.exit();
 	//m_cameraThread.wait();
 	//m_microscopeThread.exit();
