@@ -3,10 +3,17 @@
 
 #include "external/h5bm/h5bm.h"
 
-struct StoragePath {
+class StoragePath {
+public:
+	StoragePath() {};
+	StoragePath(const std::string filename, const std::string folder) : filename(filename), folder(folder) {};
+
 	std::string filename = "Brillouin.h5";	// filename
 	std::string folder = ".";
-	std::string fullPath = folder + '/' + filename;
+
+	std::string fullPath() {
+		return folder + '/' + filename;
+	}
 };
 
 class StorageWrapper : public H5BM {
@@ -19,9 +26,9 @@ private:
 public:
 	StorageWrapper(
 		QObject *parent = nullptr,
-		const StoragePath path = {},
+		const std::string fullPath = StoragePath{}.fullPath(),//"./Brillouin.h5",
 		int flags = H5F_ACC_RDONLY
-	) noexcept : H5BM(parent, path.fullPath, flags) {};
+	) noexcept : H5BM(parent, fullPath, flags) {};
 	~StorageWrapper();
 
 	QQueue<IMAGE*> m_payloadQueueBrillouin;

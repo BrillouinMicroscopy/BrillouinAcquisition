@@ -32,12 +32,12 @@ void Acquisition::openFile(StoragePath path, int flag) {
 	m_path = path;
 	
 	emit(s_filenameChanged(m_path.filename));
-	m_storage = std::make_unique <StorageWrapper>(nullptr, m_path, flag);
+	m_storage = std::make_unique <StorageWrapper>(nullptr, m_path.fullPath(), flag);
 }
 
 void Acquisition::openFile() {
-	StoragePath defaultPath = StoragePath{};
-	defaultPath = checkFilename(defaultPath);
+	m_path.filename = StoragePath{}.filename;
+	StoragePath defaultPath = checkFilename(m_path);
 
 	openFile(defaultPath);
 }
@@ -105,11 +105,9 @@ StoragePath Acquisition::checkFilename(StoragePath desiredPath) {
 	std::string rawFilename = oldFilename.substr(0, oldFilename.find_last_of("."));
 	// remove possibly attached number separated by a hyphen
 	rawFilename = rawFilename.substr(0, rawFilename.find_last_of("-"));
-	desiredPath.fullPath = desiredPath.folder + "/" + desiredPath.filename;
 	int count = 0;
-	while (exists(desiredPath.fullPath)) {
+	while (exists(desiredPath.fullPath())) {
 		desiredPath.filename = rawFilename + '-' + std::to_string(count) + oldFilename.substr(oldFilename.find_last_of("."), std::string::npos);
-		desiredPath.fullPath = desiredPath.folder + "/" + desiredPath.filename;
 		count++;
 	}
 	if (desiredPath.filename != oldFilename) {
