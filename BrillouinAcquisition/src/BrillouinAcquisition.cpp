@@ -1221,12 +1221,12 @@ void BrillouinAcquisition::initSettingsDialog() {
 	QVBoxLayout *vLayout = new QVBoxLayout(m_settingsDialog);
 
 	QWidget *daqWidget = new QWidget();
-	daqWidget->setMinimumHeight(100);
-	daqWidget->setMinimumWidth(400);
+	daqWidget->setMinimumHeight(60);
+	daqWidget->setMinimumWidth(250);
 	QGroupBox *box = new QGroupBox(daqWidget);
 	box->setTitle("Scanning device");
-	box->setMinimumHeight(80);
-	box->setMinimumWidth(400);
+	box->setMinimumHeight(50);
+	box->setMinimumWidth(250);
 
 	vLayout->addWidget(daqWidget);
 
@@ -1255,12 +1255,12 @@ void BrillouinAcquisition::initSettingsDialog() {
 	 * Widget for ODT/Fluorescence camera selection
 	 */
 	QWidget *cameraWidget = new QWidget();
-	cameraWidget->setMinimumHeight(100);
-	cameraWidget->setMinimumWidth(400);
+	cameraWidget->setMinimumHeight(60);
+	cameraWidget->setMinimumWidth(250);
 	QGroupBox *camBox = new QGroupBox(cameraWidget);
 	camBox->setTitle("ODT/Fluorescence camera");
-	camBox->setMinimumHeight(80);
-	camBox->setMinimumWidth(400);
+	camBox->setMinimumHeight(50);
+	camBox->setMinimumWidth(250);
 
 	vLayout->addWidget(cameraWidget);
 
@@ -1296,7 +1296,8 @@ void BrillouinAcquisition::initSettingsDialog() {
 
 	QPushButton *okButton = new QPushButton();
 	okButton->setText(tr("OK"));
-	okButton->setMaximumWidth(100);
+	okButton->setMinimumWidth(60);
+	okButton->setMaximumWidth(60);
 	buttonLayout->addWidget(okButton);
 	buttonLayout->setAlignment(okButton, Qt::AlignRight);
 
@@ -1309,7 +1310,8 @@ void BrillouinAcquisition::initSettingsDialog() {
 
 	QPushButton *cancelButton = new QPushButton();
 	cancelButton->setText(tr("Cancel"));
-	cancelButton->setMaximumWidth(100);
+	cancelButton->setMinimumWidth(60);
+	cancelButton->setMaximumWidth(60);
 	buttonLayout->addWidget(cancelButton);
 
 	connection = QWidget::connect(
