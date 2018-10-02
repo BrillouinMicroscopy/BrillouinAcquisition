@@ -49,8 +49,14 @@ void Acquisition::newRepetition(ACQUISITION_MODE mode) {
 	m_storage->newRepetition(mode);
 }
 
-void Acquisition::closeFile() {
+int Acquisition::closeFile() {
+	// if an acquisition is running, do nothing
+	if (m_enabledModes != ACQUISITION_MODE::NONE) {
+		emit(s_enabledModes(m_enabledModes));
+		return -1;
+	}
 	m_storage.reset();
+	return 0;
 }
 
 bool Acquisition::isModeEnabled(ACQUISITION_MODE mode) {

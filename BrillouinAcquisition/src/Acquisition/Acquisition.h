@@ -29,7 +29,7 @@ public slots:
 	void openFile(StoragePath path, int flag = H5F_ACC_RDWR);
 	void openFile();
 	void newRepetition(ACQUISITION_MODE mode);
-	void closeFile();
+	int closeFile();
 	
 	bool isModeEnabled(ACQUISITION_MODE mode);
 
