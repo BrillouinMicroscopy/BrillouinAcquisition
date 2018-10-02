@@ -631,6 +631,10 @@ void BrillouinAcquisition::showBrillouinStatus(ACQUISITION_STATUS status) {
 		ui->BrillouinStart->setText("Start");
 	}
 
+	ui->actionOpen_Acquisition->setDisabled(running);
+	ui->actionNew_Acquisition->setDisabled(running);
+	ui->actionClose_Acquisition->setDisabled(running);
+
 	ui->startX->setDisabled(running);
 	ui->startY->setDisabled(running);
 	ui->startZ->setDisabled(running);
@@ -690,6 +694,10 @@ void BrillouinAcquisition::showODTStatus(ACQUISITION_STATUS status) {
 	} else {
 		ui->acquisitionStartODT->setText("Start");
 	}
+
+	ui->actionOpen_Acquisition->setDisabled(running);
+	ui->actionNew_Acquisition->setDisabled(running);
+	ui->actionClose_Acquisition->setDisabled(running);
 
 	ui->alignmentStartODT->setDisabled(running);
 	ui->acquisitionUR_ODT->setDisabled(running);
