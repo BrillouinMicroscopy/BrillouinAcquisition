@@ -1917,7 +1917,6 @@ void BrillouinAcquisition::on_actionNew_Acquisition_triggered() {
 	}
 
 	m_storagePath = splitFilePath(fullPath);
-	ui->acquisitionFilename->setText(QString::fromStdString(m_storagePath.filename));
 
 	QMetaObject::invokeMethod(m_acquisition, "newFile", Qt::AutoConnection, Q_ARG(StoragePath, m_storagePath));
 }
@@ -1931,7 +1930,6 @@ void BrillouinAcquisition::on_actionOpen_Acquisition_triggered() {
 	}
 
 	m_storagePath = splitFilePath(fullPath);
-	ui->acquisitionFilename->setText(QString::fromStdString(m_storagePath.filename));
 
 	QMetaObject::invokeMethod(m_acquisition, "openFile", Qt::AutoConnection, Q_ARG(StoragePath, m_storagePath));
 }
