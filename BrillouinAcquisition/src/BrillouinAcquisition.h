@@ -278,7 +278,7 @@ private:
 	SETTINGS_DEVICES m_deviceSettings;
 	CAMERA_OPTIONS m_cameraOptions;
 	CAMERA_OPTIONS m_cameraOptionsODT;
-	StoragePath m_storagePath{ "", ".", "." };
+	StoragePath m_storagePath{ "", "." };
 	bool m_previewRunning = false;
 	bool m_brightfieldPreviewRunning = false;
 	ACQUISITION_MODE m_enabledModes = ACQUISITION_MODE::NONE;

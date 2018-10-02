@@ -1874,8 +1874,7 @@ StoragePath BrillouinAcquisition::splitFilePath(QString fullPath) {
 	QFileInfo fileInfo(fullPath);
 	return {
 		fileInfo.fileName().toStdString(),
-		fileInfo.absolutePath().toStdString(),
-		fileInfo.absoluteFilePath().toStdString()
+		fileInfo.absolutePath().toStdString()
 	};
 }
 
@@ -1901,10 +1900,10 @@ void BrillouinAcquisition::on_actionNew_Acquisition_triggered() {
 	StoragePath tmpStorage = m_storagePath;
 
 	if (tmpStorage.filename.length() == 0) {
-		tmpStorage = StoragePath{};
+		tmpStorage.filename = StoragePath{}.filename;
 	}
 
-	QString proposedFileName = QString::fromStdString(tmpStorage.fullPath);
+	QString proposedFileName = QString::fromStdString(tmpStorage.fullPath());
 
 	proposedFileName = checkFilename(proposedFileName);
 
