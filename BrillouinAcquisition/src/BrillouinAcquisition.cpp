@@ -1937,9 +1937,11 @@ void BrillouinAcquisition::on_actionOpen_Acquisition_triggered() {
 }
 
 void BrillouinAcquisition::on_actionClose_Acquisition_triggered() {
-	m_acquisition->closeFile();
-	m_storagePath.filename = "";
-	ui->acquisitionFilename->setText(QString::fromStdString(m_storagePath.filename));
+	int ret = m_acquisition->closeFile();
+	if (ret == 0) {
+		m_storagePath.filename = "";
+		ui->acquisitionFilename->setText(QString::fromStdString(m_storagePath.filename));
+	}
 }
 
 void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradientPreset preset) {
