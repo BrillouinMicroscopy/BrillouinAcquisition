@@ -214,11 +214,48 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	m_icons.ready.addFile(":/BrillouinAcquisition/assets/03ready24px.png", QSize(24, 24));
 	m_icons.ready.addFile(":/BrillouinAcquisition/assets/03ready32px.png", QSize(32, 32));
 
+	m_icons.fluoBlue.addFile(":/BrillouinAcquisition/assets/04fluoBlue10px.png", QSize(10, 10));
+	m_icons.fluoBlue.addFile(":/BrillouinAcquisition/assets/04fluoBlue16px.png", QSize(16, 16));
+	m_icons.fluoBlue.addFile(":/BrillouinAcquisition/assets/04fluoBlue24px.png", QSize(24, 24));
+	m_icons.fluoBlue.addFile(":/BrillouinAcquisition/assets/04fluoBlue32px.png", QSize(32, 32));
+
+	m_icons.fluoGreen.addFile(":/BrillouinAcquisition/assets/05fluoGreen10px.png", QSize(10, 10));
+	m_icons.fluoGreen.addFile(":/BrillouinAcquisition/assets/05fluoGreen16px.png", QSize(16, 16));
+	m_icons.fluoGreen.addFile(":/BrillouinAcquisition/assets/05fluoGreen24px.png", QSize(24, 24));
+	m_icons.fluoGreen.addFile(":/BrillouinAcquisition/assets/05fluoGreen32px.png", QSize(32, 32));
+
+	m_icons.fluoRed.addFile(":/BrillouinAcquisition/assets/06fluoRed10px.png", QSize(10, 10));
+	m_icons.fluoRed.addFile(":/BrillouinAcquisition/assets/06fluoRed16px.png", QSize(16, 16));
+	m_icons.fluoRed.addFile(":/BrillouinAcquisition/assets/06fluoRed24px.png", QSize(24, 24));
+	m_icons.fluoRed.addFile(":/BrillouinAcquisition/assets/06fluoRed32px.png", QSize(32, 32));
+
+	m_icons.fluoBrightfield.addFile(":/BrillouinAcquisition/assets/07fluoBrightfield10px.png", QSize(10, 10));
+	m_icons.fluoBrightfield.addFile(":/BrillouinAcquisition/assets/07fluoBrightfield16px.png", QSize(16, 16));
+	m_icons.fluoBrightfield.addFile(":/BrillouinAcquisition/assets/07fluoBrightfield24px.png", QSize(24, 24));
+	m_icons.fluoBrightfield.addFile(":/BrillouinAcquisition/assets/07fluoBrightfield32px.png", QSize(32, 32));
+
 	ui->settingsWidget->setTabIcon(0, m_icons.disconnected);
 	ui->settingsWidget->setTabIcon(1, m_icons.disconnected);
 	ui->settingsWidget->setTabIcon(2, m_icons.disconnected);
 	ui->settingsWidget->setTabIcon(3, m_icons.disconnected);
 	ui->settingsWidget->setIconSize(QSize(10, 10));
+
+	// Set icons for fluorescence
+	QLabel *fluoBlueIcon = new QLabel(ui->fluoBlueIcon);
+	fluoBlueIcon->setPixmap(m_icons.fluoBlue.pixmap(QSize(15, 15)));
+	fluoBlueIcon->show();
+
+	QLabel *fluoGreenIcon = new QLabel(ui->fluoGreenIcon);
+	fluoGreenIcon->setPixmap(m_icons.fluoGreen.pixmap(QSize(15, 15)));
+	fluoGreenIcon->show();
+
+	QLabel *fluoRedIcon = new QLabel(ui->fluoRedIcon);
+	fluoRedIcon->setPixmap(m_icons.fluoRed.pixmap(QSize(15, 15)));
+	fluoRedIcon->show();
+
+	QLabel *fluoBrightfieldIcon = new QLabel(ui->fluoBrightfieldIcon);
+	fluoBrightfieldIcon->setPixmap(m_icons.fluoBrightfield.pixmap(QSize(15, 15)));
+	fluoBrightfieldIcon->show();
 
 	ui->actionEnable_Cooling->setEnabled(false);
 	ui->autoscalePlot->setChecked(m_BrillouinPlot.autoscale);

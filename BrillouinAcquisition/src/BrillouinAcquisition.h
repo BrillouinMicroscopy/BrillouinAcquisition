@@ -298,6 +298,10 @@ private:
 		QIcon standby;
 		QIcon cooling;
 		QIcon ready;
+		QIcon fluoBlue;
+		QIcon fluoGreen;
+		QIcon fluoRed;
+		QIcon fluoBrightfield;
 	} m_icons;
 };
 
