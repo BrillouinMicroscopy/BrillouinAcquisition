@@ -1352,7 +1352,7 @@ void BrillouinAcquisition::initBeampathButtons() {
 		delete item;
 		delete layout;
 	}
-
+	int maxWidgetsPerRow{ 4 };
 	QMetaObject::Connection connection;
 	QVBoxLayout *verticalLayout = new QVBoxLayout;
 	verticalLayout->setAlignment(Qt::AlignTop);
@@ -1364,14 +1364,15 @@ void BrillouinAcquisition::initBeampathButtons() {
 		QLabel *presetLabel = new QLabel(presetLabelString.c_str());
 		presetLayoutLabel->addWidget(presetLabel);
 		verticalLayout->addLayout(presetLayoutLabel);
-		QHBoxLayout *layout = new QHBoxLayout();
+		QGridLayout *layout = new QGridLayout();
 		layout->setAlignment(Qt::AlignLeft);
 		for (gsl::index ii = 0; ii < m_scanControl->m_availablePresets.size(); ii++) {
 			QPushButton *button = new QPushButton(m_scanControl->m_presetLabels[m_scanControl->m_availablePresets[ii]].c_str());
 			button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 			button->setMinimumWidth(24);
 			button->setMaximumWidth(64);
-			layout->addWidget(button);
+			button->setMinimumHeight(18);
+			layout->addWidget(button, floor(ii/maxWidgetsPerRow), ii%maxWidgetsPerRow, Qt::AlignLeft);
 
 			connection = QObject::connect(button, &QPushButton::clicked, [=] {
 				setPreset((ScanControl::SCAN_PRESET)m_scanControl->m_availablePresets[ii]);
