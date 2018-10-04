@@ -185,6 +185,8 @@ void ODT::startAlignment() {
 		m_algnRunning = true;
 		// move to ODT configuration
 		(*m_NIDAQ)->setElements(ScanControl::SCAN_ODT);
+		// stop querying the element positions, because querying the filter mounts block the thread quite long
+		(*m_NIDAQ)->stopAnnouncingElementPosition();
 		// start the timer
 		if (!m_algnTimer->isActive()) {
 			m_algnTimer->start(1e3 / (m_algnSettings.scanRate * m_algnSettings.numberPoints));
@@ -194,6 +196,8 @@ void ODT::startAlignment() {
 		if (m_algnTimer->isActive()) {
 			m_algnTimer->stop();
 		}
+		// start querying the element positions again
+		(*m_NIDAQ)->startAnnouncingElementPosition();
 		m_acquisition->disableMode(ACQUISITION_MODE::ODT);
 		m_status = ACQUISITION_STATUS::STOPPED;
 		emit(s_acquisitionStatus(m_status));
