@@ -1,0 +1,61 @@
+#ifndef FLUORESCENCE_H
+#define FLUORESCENCE_H
+
+#include "AcquisitionMode.h"
+#include "../../Devices/PointGrey.h"
+#include "../../Devices/NIDAQ.h"
+
+enum class FLUORESCENCE_MODE {
+	BLUE,
+	GREEN,
+	RED,
+	BRIGHTFIELD,
+	MODE_COUNT
+};
+
+struct ChannelSettings {
+	bool enabled{ true };
+	int exposure{ 900 };
+};
+
+struct FLUORESCENCE_SETTINGS {
+	int gain{ 10 };
+	ChannelSettings blue;
+	ChannelSettings green;
+	ChannelSettings red;
+	ChannelSettings brightfield;
+	CAMERA_SETTINGS camera;
+};
+
+class Fluorescence : public AcquisitionMode {
+	Q_OBJECT
+
+public:
+	Fluorescence(QObject *parent, Acquisition *acquisition, PointGrey **pointGrey, NIDAQ **nidaq);
+	~Fluorescence();
+
+public slots:
+	void init() {};
+	void initialize();
+	void startRepetitions();
+	void setGain(int);
+	void setChannel(FLUORESCENCE_MODE, bool);
+	void setExposure(FLUORESCENCE_MODE, int);
+
+private:
+	PointGrey **m_pointGrey;
+	NIDAQ **m_NIDAQ;
+
+	FLUORESCENCE_SETTINGS m_settings;
+	ChannelSettings * getChannelSettings(FLUORESCENCE_MODE mode);
+
+	void abortMode() override;
+
+private slots:
+	void acquire(std::unique_ptr <StorageWrapper> & storage) override;
+
+signals:
+	void s_acqSettingsChanged(FLUORESCENCE_SETTINGS);
+};
+
+#endif //FLUORESCENCE_H

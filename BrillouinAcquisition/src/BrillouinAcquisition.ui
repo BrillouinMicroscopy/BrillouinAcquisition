@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>BrillouinAcquisitionClass</class>
  <widget class="QMainWindow" name="BrillouinAcquisitionClass">
@@ -2713,7 +2713,7 @@ border: none;</string>
                     <height>120</height>
                    </size>
                   </property>
-                  <widget class="QPushButton" name="fluoStart">
+                  <widget class="QPushButton" name="acquisitionStartFluorescence">
                    <property name="enabled">
                     <bool>true</bool>
                    </property>
@@ -2734,7 +2734,7 @@ border: none;</string>
                     <rect>
                      <x>32</x>
                      <y>32</y>
-                     <width>89</width>
+                     <width>101</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -2750,7 +2750,7 @@ border: none;</string>
                     <rect>
                      <x>32</x>
                      <y>56</y>
-                     <width>89</width>
+                     <width>101</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -2763,7 +2763,7 @@ border: none;</string>
                     <rect>
                      <x>32</x>
                      <y>80</y>
-                     <width>89</width>
+                     <width>101</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -2776,7 +2776,7 @@ border: none;</string>
                     <rect>
                      <x>32</x>
                      <y>104</y>
-                     <width>89</width>
+                     <width>101</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -2789,7 +2789,7 @@ border: none;</string>
                     <rect>
                      <x>8</x>
                      <y>8</y>
-                     <width>41</width>
+                     <width>61</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -2800,7 +2800,7 @@ border: none;</string>
                   <widget class="QDoubleSpinBox" name="fluoGain">
                    <property name="geometry">
                     <rect>
-                     <x>64</x>
+                     <x>70</x>
                      <y>8</y>
                      <width>49</width>
                      <height>18</height>

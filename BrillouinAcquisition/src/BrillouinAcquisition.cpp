@@ -192,6 +192,8 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<ODT_SETTING>("ODT_SETTING");
 	qRegisterMetaType<ODT_SETTINGS>("ODT_SETTINGS");
 	qRegisterMetaType<ODTIMAGE*>("ODTIMAGE*");
+	qRegisterMetaType<FLUOIMAGE*>("FLUOIMAGE*");
+	qRegisterMetaType<FLUORESCENCE_SETTINGS>("FLUORESCENCE_SETTINGS");
 	
 	// Set up icons
 	m_icons.disconnected.addFile(":/BrillouinAcquisition/assets/00disconnected10px.png", QSize(10, 10));
@@ -323,6 +325,10 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 	if (m_ODT) {
 		m_ODT->deleteLater();
 		m_ODT = nullptr;
+	}
+	if (m_Fluorescence) {
+		m_Fluorescence->deleteLater();
+		m_Fluorescence = nullptr;
 	}
 	m_scanControl->deleteLater();
 	m_pointGrey->deleteLater();
@@ -614,6 +620,62 @@ void BrillouinAcquisition::on_acquisitionStartODT_clicked() {
 	}
 }
 
+void BrillouinAcquisition::on_acquisitionStartFluorescence_clicked() {
+	if (m_Fluorescence->getStatus() < ACQUISITION_STATUS::STARTED) {
+		QMetaObject::invokeMethod(m_Fluorescence, "startRepetitions", Qt::AutoConnection);
+	} else {
+		m_Fluorescence->m_abort = true;
+	}
+}
+
+void BrillouinAcquisition::on_fluoGain_valueChanged(double gain) {
+	m_Fluorescence->setGain(gain);
+}
+
+void BrillouinAcquisition::on_fluoBlueCheckbox_stateChanged(int enabled) {
+	m_Fluorescence->setChannel(FLUORESCENCE_MODE::BLUE, enabled);
+}
+
+void BrillouinAcquisition::on_fluoGreenCheckbox_stateChanged(int enabled) {
+	m_Fluorescence->setChannel(FLUORESCENCE_MODE::GREEN, enabled);
+}
+
+void BrillouinAcquisition::on_fluoRedCheckbox_stateChanged(int enabled) {
+	m_Fluorescence->setChannel(FLUORESCENCE_MODE::RED, enabled);
+}
+
+void BrillouinAcquisition::on_fluoBrightfieldCheckbox_stateChanged(int enabled) {
+	m_Fluorescence->setChannel(FLUORESCENCE_MODE::BRIGHTFIELD, enabled);
+}
+
+void BrillouinAcquisition::on_fluoBlueExposure_valueChanged(int exposure) {
+	m_Fluorescence->setExposure(FLUORESCENCE_MODE::BLUE, exposure);
+}
+
+void BrillouinAcquisition::on_fluoGreenExposure_valueChanged(int exposure) {
+	m_Fluorescence->setExposure(FLUORESCENCE_MODE::GREEN, exposure);
+}
+
+void BrillouinAcquisition::on_fluoRedExposure_valueChanged(int exposure) {
+	m_Fluorescence->setExposure(FLUORESCENCE_MODE::RED, exposure);
+}
+
+void BrillouinAcquisition::on_fluoBrightfieldExposure_valueChanged(int exposure) {
+	m_Fluorescence->setExposure(FLUORESCENCE_MODE::BRIGHTFIELD, exposure);
+}
+
+void BrillouinAcquisition::updateFluorescenceSettings(FLUORESCENCE_SETTINGS settings) {
+	ui->fluoGain->setValue(settings.gain);
+	ui->fluoBlueCheckbox->setChecked(settings.blue.enabled);
+	ui->fluoGreenCheckbox->setChecked(settings.green.enabled);
+	ui->fluoRedCheckbox->setChecked(settings.red.enabled);
+	ui->fluoBrightfieldCheckbox->setChecked(settings.brightfield.enabled);
+	ui->fluoBlueExposure->setValue(settings.blue.exposure);
+	ui->fluoGreenExposure->setValue(settings.green.exposure);
+	ui->fluoRedExposure->setValue(settings.red.exposure);
+	ui->fluoBrightfieldExposure->setValue(settings.brightfield.exposure);
+}
+
 void BrillouinAcquisition::showEnabledModes(ACQUISITION_MODE modes) {
 	m_enabledModes = modes;
 	/*
@@ -763,6 +825,48 @@ void BrillouinAcquisition::showODTProgress(double progress, int seconds) {
 	string += timeString;
 	string += " remaining.";
 	ui->acquisitionProgress_ODT->setFormat(string);
+}
+
+void BrillouinAcquisition::showFluorescenceStatus(ACQUISITION_STATUS status) {
+	QString string;
+	if (status == ACQUISITION_STATUS::ABORTED) {
+		string = "Acquisition aborted.";
+		ui->fluoProgress->setValue(0);
+	} else if (status == ACQUISITION_STATUS::FINISHED) {
+		string = "Acquisition finished.";
+	} else if (status == ACQUISITION_STATUS::STARTED) {
+		string = "Acquisition started.";
+	}
+	ui->fluoProgress->setFormat(string);
+
+	bool running{ false };
+	if (status == ACQUISITION_STATUS::RUNNING || status == ACQUISITION_STATUS::STARTED) {
+		ui->acquisitionStartFluorescence->setText("Cancel");
+		running = true;
+	} else {
+		ui->acquisitionStartFluorescence->setText("Start");
+	}
+
+	ui->fluoGain->setDisabled(running);
+	ui->fluoBlueCheckbox->setDisabled(running);
+	ui->fluoGreenCheckbox->setDisabled(running);
+	ui->fluoRedCheckbox->setDisabled(running);
+	ui->fluoBrightfieldCheckbox->setDisabled(running);
+	ui->fluoBlueExposure->setDisabled(running);
+	ui->fluoGreenExposure->setDisabled(running);
+	ui->fluoRedExposure->setDisabled(running);
+	ui->fluoBrightfieldExposure->setDisabled(running);
+}
+
+void BrillouinAcquisition::showFluorescenceProgress(double progress, int seconds) {
+	ui->fluoProgress->setValue(progress);
+
+	QString string;
+	QString timeString = formatSeconds(seconds);
+	string.sprintf("%02.1f %% finished, ", progress);
+	string += timeString;
+	string += " remaining.";
+	ui->fluoProgress->setFormat(string);
 }
 
 QString BrillouinAcquisition::formatSeconds(int seconds) {
@@ -1462,15 +1566,21 @@ void BrillouinAcquisition::initScanControl() {
 		case ScanControl::SCAN_DEVICE::ZEISSECU:
 			m_scanControl = new ZeissECU();
 			ui->actionLoad_Voltage_Position_calibration->setVisible(false);
+			ui->acquisitionModeTabs->removeTab(2);
 			ui->acquisitionModeTabs->removeTab(1);
 			if (m_ODT) {
 				m_ODT->deleteLater();
 				m_ODT = nullptr;
 			}
+			if (m_Fluorescence) {
+				m_Fluorescence->deleteLater();
+				m_Fluorescence = nullptr;
+			}
 			break;
 		case ScanControl::SCAN_DEVICE::NIDAQ:
 			m_scanControl = new NIDAQ();
 			m_ODT = new ODT(nullptr, m_acquisition, &m_pointGrey, (NIDAQ**)&m_scanControl);
+			m_Fluorescence = new Fluorescence(nullptr, m_acquisition, &m_pointGrey, (NIDAQ**)&m_scanControl);
 
 			connection = QWidget::connect(
 				m_ODT,
@@ -1509,19 +1619,51 @@ void BrillouinAcquisition::initScanControl() {
 				[this](double progress, int seconds) { showODTProgress(progress, seconds); }
 			);
 
+			connection = QWidget::connect(
+				m_Fluorescence,
+				&Fluorescence::s_acqSettingsChanged,
+				this,
+				[this](FLUORESCENCE_SETTINGS settings) { updateFluorescenceSettings(settings); }
+			);
+
+			// slot to show current acquisition state of Fluorescence mode
+			connection = QWidget::connect(
+				m_Fluorescence,
+				&Fluorescence::s_acquisitionStatus,
+				this,
+				[this](ACQUISITION_STATUS state) { showFluorescenceStatus(state); }
+			);
+
+			// slot to show current repetition progress
+			connection = QWidget::connect(
+				m_Fluorescence,
+				&Fluorescence::s_repetitionProgress,
+				this,
+				[this](double progress, int seconds) { showFluorescenceProgress(progress, seconds); }
+			);
+
 			// start ODT thread
 			m_acquisitionThread.startWorker(m_ODT);
 			ui->acquisitionModeTabs->insertTab(1, ui->ODT, "ODT");
 			m_ODT->initialize();
 			ui->actionLoad_Voltage_Position_calibration->setVisible(true);
+			// start Fluorescence thread
+			m_acquisitionThread.startWorker(m_Fluorescence);
+			ui->acquisitionModeTabs->insertTab(2, ui->Fluorescence, "Fluorescence");
+			m_Fluorescence->initialize();
 			break;
 		default:
 			m_scanControl = new ZeissECU();
 			ui->actionLoad_Voltage_Position_calibration->setVisible(false);
+			ui->acquisitionModeTabs->removeTab(2);
 			ui->acquisitionModeTabs->removeTab(1);
 			if (m_ODT) {
 				m_ODT->deleteLater();
 				m_ODT = nullptr;
+			}
+			if (m_Fluorescence) {
+				m_Fluorescence->deleteLater();
+				m_Fluorescence = nullptr;
 			}
 			break;
 	}

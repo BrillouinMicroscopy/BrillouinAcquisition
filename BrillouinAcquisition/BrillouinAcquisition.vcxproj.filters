@@ -222,6 +222,15 @@
     <ClCompile Include="src\Devices\filtermount.cpp">
       <Filter>Source Files\Devices</Filter>
     </ClCompile>
+    <ClCompile Include="src\Acquisition\AcquisitionModes\Fluorescence.cpp">
+      <Filter>Source Files\Acquisition\AcquisitionModes</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_Fluorescence.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_Fluorescence.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_BrillouinAcquisition.h">
@@ -312,6 +321,9 @@
     </CustomBuild>
     <CustomBuild Include="src\Devices\filtermount.h">
       <Filter>Header Files\Devices</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Acquisition\AcquisitionModes\Fluorescence.h">
+      <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
