@@ -21,7 +21,8 @@ filename = '_positionCalibration';
 camera.imgWidth = 1280;
 camera.imgHeight = 1024;
 camera.pixelSize = 4.8e-6;
-camera.magnification = 57;
+% camera.magnification = 90.4762;  % 100x objective
+camera.magnification = 90.4762*63/100;  %  63x objective
 
 %% Initial settings
 voltages.nrSteps = 21;
