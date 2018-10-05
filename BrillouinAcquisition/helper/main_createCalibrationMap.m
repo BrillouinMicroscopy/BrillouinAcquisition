@@ -183,8 +183,8 @@ distortion(9) = distortion(9) / abs(distortion(9));
 %% Check if found parameters work well
 positions_desired.nrStepsX = 21;
 positions_desired.nrStepsY = 16;
-positions_desired.x_meter = 1e-6*linspace(-50, 50, positions_desired.nrStepsX);
-positions_desired.y_meter = 1e-6*linspace(-40, 40, positions_desired.nrStepsY);
+positions_desired.x_meter = 1e-6*linspace(0.95*bounds.xMin, 0.95*bounds.xMax, positions_desired.nrStepsX);
+positions_desired.y_meter = 1e-6*linspace(0.95*bounds.yMin, 0.95*bounds.yMax, positions_desired.nrStepsY);
 [positions_desired.X_meter, positions_desired.Y_meter] = meshgrid(positions_desired.x_meter, positions_desired.y_meter);
 
 positions_desired.X_pix_centered = positions_desired.X_meter*camera.magnification/camera.pixelSize;
