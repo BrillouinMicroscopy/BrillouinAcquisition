@@ -176,6 +176,10 @@ errorFuncDist = @(distortion) errorFunctionDistortion(model, distortion, voltage
 options = optimset('MaxFunEvals', 1000000, 'MaxIter', 1000000, 'TolFun', 1e-6, 'TolX', 1e-6);
 distortion = fminsearch(errorFuncDist, distortion_initial, options);
 
+% normalize fliplr and flipud to abs(x) = 1
+distortion(8) = distortion(8) / abs(distortion(8));
+distortion(9) = distortion(9) / abs(distortion(9));
+
 %% Check if found parameters work well
 positions_desired.nrStepsX = 21;
 positions_desired.nrStepsY = 16;
