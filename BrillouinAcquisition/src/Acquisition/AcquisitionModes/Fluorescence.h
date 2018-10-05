@@ -22,7 +22,6 @@ struct ChannelSettings {
 };
 
 struct FLUORESCENCE_SETTINGS {
-	int gain{ 10 };
 	ChannelSettings blue{ true, 900, "blue", FLUORESCENCE_MODE::BLUE, ScanControl::SCAN_EPIFLUOBLUE };
 	ChannelSettings green{ true, 900, "Green", FLUORESCENCE_MODE::GREEN, ScanControl::SCAN_EPIFLUOGREEN };
 	ChannelSettings red{ true, 900, "Red", FLUORESCENCE_MODE::RED, ScanControl::SCAN_EPIFLUORED };

@@ -670,7 +670,7 @@ void BrillouinAcquisition::updateFluorescenceSettings(FLUORESCENCE_SETTINGS sett
 		disableStart = false;
 	}
 	ui->acquisitionStartFluorescence->setDisabled(disableStart);
-	ui->fluoGain->setValue(settings.gain);
+	ui->fluoGain->setValue(settings.camera.gain);
 	ui->fluoBlueCheckbox->setChecked(settings.blue.enabled);
 	ui->fluoGreenCheckbox->setChecked(settings.green.enabled);
 	ui->fluoRedCheckbox->setChecked(settings.red.enabled);

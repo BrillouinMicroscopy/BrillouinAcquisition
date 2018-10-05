@@ -8,11 +8,12 @@ Fluorescence::~Fluorescence() {
 }
 
 void Fluorescence::initialize() {
+	m_settings.camera.gain = 10;
 	emit(s_acqSettingsChanged(m_settings));
 }
 
 void Fluorescence::setGain(int gain) {
-	m_settings.gain = gain;
+	m_settings.camera.gain = gain;
 	emit(s_acqSettingsChanged(m_settings));
 }
 
@@ -81,9 +82,6 @@ void Fluorescence::startRepetitions() {
 	m_settings.camera.readout.triggerMode = L"Internal";
 	m_settings.camera.readout.cycleMode = L"Fixed";
 	m_settings.camera.frameCount = 1;
-
-	// read back the applied settings
-	m_settings.camera = (*m_pointGrey)->getSettings();
 
 	m_acquisition->newRepetition(ACQUISITION_MODE::FLUORESCENCE);
 

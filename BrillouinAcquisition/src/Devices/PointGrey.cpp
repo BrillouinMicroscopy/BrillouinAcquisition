@@ -84,6 +84,16 @@ void PointGrey::readSettings() {
 	// general settings
 	m_settings.exposureTime = 1e-3*prop.absValue;	// [s] exposure time
 
+	/*
+	 * Get the camera gain
+	 */
+	FlyCapture2::Property propGain;
+	//Define the property to adjust.
+	propGain.type = FlyCapture2::GAIN;
+	//Get the property.
+	m_camera.GetProperty(&propGain);
+	// store property in settings
+	m_settings.gain = propGain.absValue;	// [dB] camera gain
 
 	// Create a Format7 Configuration
 	FlyCapture2::Format7ImageSettings fmt7ImageSettings;
@@ -136,6 +146,23 @@ void PointGrey::setSettings(CAMERA_SETTINGS settings) {
 	prop.absValue = 1e3*m_settings.exposureTime;
 	//Set the property.
 	m_camera.SetProperty(&prop);
+
+
+	/*
+	 * Set the camera gain
+	 */
+	FlyCapture2::Property propGain;
+	// Define the property to adjust.
+	propGain.type = FlyCapture2::GAIN;
+	// Ensure auto-adjust mode is off.
+	propGain.autoManualMode = false;
+	// Ensure the property is set up to use absolute value control.
+	propGain.absControl = true;
+	//Set the absolute value of gain to 10.5 dB.
+	propGain.absValue = m_settings.gain;
+	//Set the property.
+	m_camera.SetProperty(&propGain);
+
 
 	/*
 	* Set region of interest and pixel format
@@ -238,6 +265,7 @@ void PointGrey::preparePreview() {
 	m_settings.readout.triggerMode = L"Internal";
 	m_settings.readout.cycleMode = L"Fixed";
 	m_settings.frameCount = 10;
+	m_settings.gain = 0;
 
 	setSettings(m_settings);
 
