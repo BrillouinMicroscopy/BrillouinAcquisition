@@ -64,6 +64,11 @@ public:
 		solutions[3] = -b / (4.0 * a) + p4 / 2.0 + sqrt(p5 + p6) / 2.0;
 		return solutions;
 	}
+
+	template <typename T>
+	static int sgn(T val) {
+		return (T(0) < val) - (val < T(0));
+	}
 };
 
 #endif // SIMPLEMATH_H

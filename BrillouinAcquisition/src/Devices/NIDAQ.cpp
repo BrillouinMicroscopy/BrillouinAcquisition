@@ -5,8 +5,8 @@
 
 VOLTAGE2 NIDAQ::positionToVoltage(POINT2 position) {
 
-	position.x /= m_calibration.fliplr;
-	position.y /= m_calibration.flipud;
+	position.x /= simplemath::sgn(m_calibration.fliplr);
+	position.y /= simplemath::sgn(m_calibration.flipud);
 
 	position = position - m_calibration.translation;
 
@@ -66,8 +66,8 @@ POINT2 NIDAQ::voltageToPosition(VOLTAGE2 voltage) {
 	
 	position = position + m_calibration.translation;
 
-	position.x *= m_calibration.fliplr;
-	position.y *= m_calibration.flipud;
+	position.x *= simplemath::sgn(m_calibration.fliplr);
+	position.y *= simplemath::sgn(m_calibration.flipud);
 
 	return position;
 }
