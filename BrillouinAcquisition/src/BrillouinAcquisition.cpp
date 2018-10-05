@@ -722,8 +722,10 @@ void BrillouinAcquisition::showBrillouinStatus(ACQUISITION_STATUS status) {
 		ui->progressBar->setValue(0);
 	} else if (status == ACQUISITION_STATUS::FINISHED) {
 		string = "Acquisition finished.";
+		ui->progressBar->setValue(100);
 	} else if (status == ACQUISITION_STATUS::STARTED) {
 		string = "Acquisition started.";
+		ui->progressBar->setValue(0);
 	}
 	ui->progressBar->setFormat(string);
 
@@ -785,9 +787,11 @@ void BrillouinAcquisition::showODTStatus(ACQUISITION_STATUS status) {
 	}
 	else if (status == ACQUISITION_STATUS::FINISHED) {
 		string = "Acquisition finished.";
+		ui->acquisitionProgress_ODT->setValue(100);
 	}
 	else if (status == ACQUISITION_STATUS::STARTED) {
 		string = "Acquisition started.";
+		ui->acquisitionProgress_ODT->setValue(0);
 	}
 	ui->acquisitionProgress_ODT->setFormat(string);
 
@@ -839,8 +843,10 @@ void BrillouinAcquisition::showFluorescenceStatus(ACQUISITION_STATUS status) {
 		ui->fluoProgress->setValue(0);
 	} else if (status == ACQUISITION_STATUS::FINISHED) {
 		string = "Acquisition finished.";
+		ui->fluoProgress->setValue(100);
 	} else if (status == ACQUISITION_STATUS::STARTED) {
 		string = "Acquisition started.";
+		ui->fluoProgress->setValue(0);
 	}
 	ui->fluoProgress->setFormat(string);
 
