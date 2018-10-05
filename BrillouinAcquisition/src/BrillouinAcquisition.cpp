@@ -665,6 +665,11 @@ void BrillouinAcquisition::on_fluoBrightfieldExposure_valueChanged(int exposure)
 }
 
 void BrillouinAcquisition::updateFluorescenceSettings(FLUORESCENCE_SETTINGS settings) {
+	bool disableStart{ true };
+	if (settings.blue.enabled || settings.red.enabled || settings.green.enabled || settings.brightfield.enabled) {
+		disableStart = false;
+	}
+	ui->acquisitionStartFluorescence->setDisabled(disableStart);
 	ui->fluoGain->setValue(settings.gain);
 	ui->fluoBlueCheckbox->setChecked(settings.blue.enabled);
 	ui->fluoGreenCheckbox->setChecked(settings.green.enabled);

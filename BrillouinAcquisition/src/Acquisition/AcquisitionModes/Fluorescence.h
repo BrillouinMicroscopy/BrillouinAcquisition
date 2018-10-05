@@ -16,14 +16,17 @@ enum class FLUORESCENCE_MODE {
 struct ChannelSettings {
 	bool enabled{ true };
 	int exposure{ 900 };
+	std::string name;
+	FLUORESCENCE_MODE mode;
+	ScanControl::enScanPreset preset;
 };
 
 struct FLUORESCENCE_SETTINGS {
 	int gain{ 10 };
-	ChannelSettings blue;
-	ChannelSettings green;
-	ChannelSettings red;
-	ChannelSettings brightfield;
+	ChannelSettings blue{ true, 900, "blue", FLUORESCENCE_MODE::BLUE, ScanControl::SCAN_EPIFLUOBLUE };
+	ChannelSettings green{ true, 900, "Green", FLUORESCENCE_MODE::GREEN, ScanControl::SCAN_EPIFLUOGREEN };
+	ChannelSettings red{ true, 900, "Red", FLUORESCENCE_MODE::RED, ScanControl::SCAN_EPIFLUORED };
+	ChannelSettings brightfield{ true, 900, "Brightfield", FLUORESCENCE_MODE::BRIGHTFIELD, ScanControl::SCAN_EPIFLUOOFF };
 	CAMERA_SETTINGS camera;
 };
 
@@ -48,6 +51,7 @@ private:
 
 	FLUORESCENCE_SETTINGS m_settings;
 	ChannelSettings * getChannelSettings(FLUORESCENCE_MODE mode);
+	std::vector<ChannelSettings *> getEnabledChannels();
 
 	void abortMode() override;
 
