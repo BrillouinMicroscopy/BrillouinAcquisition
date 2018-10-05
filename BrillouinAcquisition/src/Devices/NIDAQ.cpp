@@ -30,7 +30,7 @@ VOLTAGE2 NIDAQ::positionToVoltage(POINT2 position) {
 	// select real, positive solutions
 	std::vector<double> selected;
 	for (gsl::index i = 0; i < solutions.size(); i++) {
-		if (abs((solutions[i]).imag()) < 1e-16 && solutions[i].real() > 0) {
+		if (abs((solutions[i]).imag()) < 1e-10 && solutions[i].real() > 0) {
 			selected.push_back(solutions[i].real());
 		}
 	};
