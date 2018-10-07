@@ -1027,7 +1027,7 @@ void BrillouinAcquisition::xAxisRangeChanged(const QCPRange &newRange) {
 
 void BrillouinAcquisition::yAxisRangeChanged(const QCPRange &newRange) {
 	ui->customplot->yAxis->setRange(newRange.bounded(1, m_cameraOptions.ROIHeightLimits[1]));
-	m_deviceSettings.camera.roi.top = newRange.lower;
+	m_deviceSettings.camera.roi.top = m_cameraOptions.ROIHeightLimits[1] - newRange.upper + 1;
 	m_deviceSettings.camera.roi.height = newRange.upper - newRange.lower + 1;
 	settingsCameraUpdate(ROI_SOURCE::PLOT);
 }
@@ -1102,7 +1102,9 @@ void BrillouinAcquisition::settingsCameraUpdate(int source) {
 		ui->customplot->xAxis->setRange(QCPRange(m_deviceSettings.camera.roi.left, m_deviceSettings.camera.roi.left + m_deviceSettings.camera.roi.width - 1));
 	}
 	if (source == ROI_SOURCE::BOX || yChanged) {
-		ui->customplot->yAxis->setRange(QCPRange(m_deviceSettings.camera.roi.top, m_deviceSettings.camera.roi.top + m_deviceSettings.camera.roi.height - 1));
+		double l = m_cameraOptions.ROIHeightLimits[1] - m_deviceSettings.camera.roi.top - m_deviceSettings.camera.roi.height + 2;
+		double h = m_cameraOptions.ROIHeightLimits[1] - m_deviceSettings.camera.roi.top + 1;
+		ui->customplot->yAxis->setRange(QCPRange(l, h));
 	}
 	if (source == ROI_SOURCE::BOX || xChanged || yChanged) {
 		ui->customplot->replot();
@@ -1133,7 +1135,8 @@ void BrillouinAcquisition::updatePlotLimits(PLOT_SETTINGS plotSettings, CAMERA_R
 	plotSettings.colorMap->data()->setSize(roi.width, roi.height);
 	plotSettings.colorMap->data()->setRange(
 		QCPRange(roi.left, roi.width + roi.left - 1),
-		QCPRange(roi.top, roi.height + roi.top - 1)
+		QCPRange(	m_cameraOptions.ROIHeightLimits[1] - roi.top - roi.height + 2,
+					m_cameraOptions.ROIHeightLimits[1] - roi.top + 1)
 	);
 }
 
