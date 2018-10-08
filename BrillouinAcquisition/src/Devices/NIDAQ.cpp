@@ -87,11 +87,11 @@ NIDAQ::NIDAQ() noexcept {
 	m_absoluteBounds = m_calibration.bounds;
 
 	m_deviceElements = {
-		{ "Flip Mirror",		2, (int)DEVICE_ELEMENT::CALFLIPMIRROR },
-		{ "Beam Block",			2, (int)DEVICE_ELEMENT::BEAMBLOCK },
-		{ "Moveable Mirror",	2, (int)DEVICE_ELEMENT::MOVEMIRROR },
-		{ "Excitation Filter",	4, (int)DEVICE_ELEMENT::EXFILTER },
-		{ "Emission Filter",	4, (int)DEVICE_ELEMENT::EMFILTER }
+		{ "Flip Mirror",		2, (int)DEVICE_ELEMENT::CALFLIPMIRROR, { "Open", "Reflect" } },
+		{ "Beam Block",			2, (int)DEVICE_ELEMENT::BEAMBLOCK, { "Close", "Open" } },
+		{ "Moveable Mirror",	2, (int)DEVICE_ELEMENT::MOVEMIRROR, { "Reflect", "Open" } },
+		{ "Excitation Filter",	4, (int)DEVICE_ELEMENT::EXFILTER, { "Block", "Blue", "Green", "Red" } },
+		{ "Emission Filter",	4, (int)DEVICE_ELEMENT::EMFILTER, { "Open", "Blue", "Green", "Red" } }
 	};
 }
 

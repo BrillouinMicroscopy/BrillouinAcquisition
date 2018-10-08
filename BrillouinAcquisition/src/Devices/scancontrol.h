@@ -40,10 +40,26 @@ struct BOUNDS {
 	double zMax{  1e3 };	// [µm] maximal z-value
 };
 
-struct DeviceElement {
+class DeviceElement {
+public:
+	DeviceElement() {};
+	DeviceElement(std::string name, int maxOptions, int index) :
+		name(name), maxOptions(maxOptions), index(index), optionNames(checkNames(maxOptions)) {};
+	DeviceElement(std::string name, int maxOptions, int index, std::vector<std::string> optionNames) :
+		name(name), maxOptions(maxOptions), index(index), optionNames(checkNames(maxOptions, optionNames)) {};
+
 	std::string name{ "" };
 	int maxOptions{ 0 };
 	int index{ 0 };
+	std::vector<std::string> optionNames;
+
+	std::vector<std::string> checkNames(int count, std::vector<std::string> names = {}) {
+		//check that the number of names fits the number of options
+		while (names.size() < count) {
+			names.push_back(std::to_string((int)names.size() + 1));
+		}
+		return names;
+	}
 };
 
 class DeviceElements {
