@@ -5,8 +5,7 @@
 #include <vector>
 #include "NIDAQmx.h"
 #include "scancontrol.h"
-#include "..\simplemath.h"
-#include <gsl/gsl>
+
 namespace Thorlabs_TIM {
 	#include <Thorlabs.MotionControl.TCube.InertialMotor.h>
 }
@@ -20,11 +19,6 @@ namespace Thorlabs_KDC {
 
 #include "H5Cpp.h"
 #include "filesystem"
-
-struct ELEMENTPOSITION {
-	Thorlabs_FF::FF_Positions CalFlipMirror{ Thorlabs_FF::FF_Positions::Position1 };	// Brillouin measurement
-	Thorlabs_FF::FF_Positions BeamBlock{ Thorlabs_FF::FF_Positions::Position1 };		// Beam path blocked
-};
 
 struct ACQ_VOLTAGES {
 	int numberSamples{ 0 };
@@ -70,7 +64,6 @@ private:
 
 	VOLTAGE2 m_voltages{ 0, 0 };	// current voltage
 	POINT3 m_position{ 0, 0, 0 };	// current position
-	ELEMENTPOSITION m_elementPositions{ Thorlabs_FF::FF_Positions::Position1, Thorlabs_FF::FF_Positions::Position1 };
 	
 	
 	// TODO: make the following parameters changeable:
@@ -92,12 +85,12 @@ private:
 	FilterMount *m_emFilter = nullptr;
 
 	enum class DEVICE_ELEMENT {
-		CALFLIPMIRROR,
 		BEAMBLOCK,
+		CALFLIPMIRROR,
 		MOVEMIRROR,
 		EXFILTER,
 		EMFILTER,
-		DEVICE_ELEMENT_COUNT
+		COUNT
 	};
 
 public:
@@ -123,7 +116,7 @@ public slots:
 	void disconnectDevice();
 	void setElement(DeviceElement element, int position);
 	void getElement(DeviceElement element);
-	void setElements(ScanControl::SCAN_PRESET preset);
+	void setPreset(SCAN_PRESET preset);
 	void getElements();
 	void setCalFlipMirror(int position);
 	void setBeamBlock(int position);

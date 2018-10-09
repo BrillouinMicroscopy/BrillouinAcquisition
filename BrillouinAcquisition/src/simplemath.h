@@ -69,6 +69,14 @@ public:
 	static int sgn(T val) {
 		return (T(0) < val) - (val < T(0));
 	}
+
+	template<typename T>
+	static bool contains(std::vector<T> & vector, const T& value) {
+		if (std::find(vector.begin(), vector.end(), value) != vector.end()) {
+			return true;
+		}
+		return false;
+	}
 };
 
 #endif // SIMPLEMATH_H

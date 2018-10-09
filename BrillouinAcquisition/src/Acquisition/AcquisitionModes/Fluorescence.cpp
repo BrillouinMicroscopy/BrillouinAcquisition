@@ -121,7 +121,7 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper> & storage) {
 		(*m_pointGrey)->startAcquisition(m_settings.camera);
 
 		// move to Fluorescence configuration
-		(*m_NIDAQ)->setElements(channel->preset);
+		(*m_NIDAQ)->setPreset(channel->preset);
 
 		// read images from camera
 		std::vector<unsigned char> images(bytesPerFrame);

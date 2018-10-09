@@ -10,6 +10,30 @@ void ScanControl::movePosition(POINT3 distance) {
 	setPosition(position);
 }
 
+void ScanControl::checkPresets() {
+	// checks all presets if they are currenty active
+	for (gsl::index ii = 0; ii < m_presets.size(); ii++) {
+		auto preset = m_presets[ii];
+		bool active{ true };
+		// check if an element position does not match the valid positions of a preset
+		for (gsl::index jj = 0; jj < preset.elementPositions.size(); jj++) {
+			if (!preset.elementPositions[jj].empty() && !simplemath::contains(preset.elementPositions[jj], m_elementPositions[jj])) {
+				m_activePresets &= ~preset.index;
+				active = false;
+				break;
+			}
+		}
+		// set the preset active
+		if (active) {
+			m_activePresets |= preset.index;
+		}
+	}
+}
+
+bool ScanControl::isPresetActive(SCAN_PRESET presetType) {
+	return (presetType & m_activePresets);
+}
+
 void ScanControl::announcePosition() {
 	POINT3 point = getPosition();
 	emit(currentPosition(point - m_homePosition));
@@ -67,6 +91,15 @@ void ScanControl::calculateCurrentPositionBounds() {
 	m_currentPositionBounds.zMax = m_absoluteBounds.zMax - currentPosition.z;
 
 	emit(currentPositionBoundsChanged(m_currentPositionBounds));
+}
+
+Preset ScanControl::getPreset(SCAN_PRESET presetType) {
+	for (gsl::index ii = 0; ii < m_presets.size(); ii++) {
+		if (m_presets[ii].index == presetType) {
+			return m_presets[ii];
+		}
+	}
+	return m_presets[0];
 }
 
 void ScanControl::moveHome() {

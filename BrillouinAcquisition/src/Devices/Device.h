@@ -3,6 +3,7 @@
 
 #include <QtCore>
 #include <gsl/gsl>
+#include "..\simplemath.h"
 
 class Device : public QObject {
 	Q_OBJECT

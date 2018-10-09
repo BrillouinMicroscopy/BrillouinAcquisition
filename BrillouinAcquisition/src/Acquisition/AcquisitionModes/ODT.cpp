@@ -114,7 +114,7 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	emit(s_acquisitionStatus(m_status));
 
 	// move to ODT configuration
-	(*m_NIDAQ)->setElements(ScanControl::SCAN_ODT);
+	(*m_NIDAQ)->setPreset(SCAN_ODT);
 
 	// Set first mirror voltage already
 	(*m_NIDAQ)->setVoltage(m_acqSettings.voltages[0]);
@@ -185,7 +185,7 @@ void ODT::startAlignment() {
 		emit(s_acquisitionStatus(m_status));
 		m_algnRunning = true;
 		// move to ODT configuration
-		(*m_NIDAQ)->setElements(ScanControl::SCAN_ODT);
+		(*m_NIDAQ)->setPreset(SCAN_ODT);
 		// stop querying the element positions, because querying the filter mounts block the thread quite long
 		(*m_NIDAQ)->stopAnnouncingElementPosition();
 		// start the timer

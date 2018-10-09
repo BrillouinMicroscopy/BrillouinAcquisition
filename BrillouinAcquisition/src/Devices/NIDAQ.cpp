@@ -73,26 +73,28 @@ POINT2 NIDAQ::voltageToPosition(VOLTAGE2 voltage) {
 }
 
 NIDAQ::NIDAQ() noexcept {
-	m_presets = {
-		{ 1, 2, 1, 1, 1 },	// Brillouin
-		{ 2, 2, 1, 1, 1 },	// Calibration
-		{ 1, 2, 2, 1, 1 },	// ODT
-		{ 1, 2, 2, 1, 1 },	// Fluorescence off
-		{ 1, 2, 2, 2, 2 },	// Fluorescence blue
-		{ 1, 2, 2, 3, 3 },	// Fluorescence green
-		{ 1, 2, 2, 4, 4 },	// Fluorescence red
+
+	m_deviceElements = {
+		{ "Beam Block",			2, (int)DEVICE_ELEMENT::BEAMBLOCK,		{ "Close", "Open" } },
+		{ "Flip Mirror",		2, (int)DEVICE_ELEMENT::CALFLIPMIRROR,	{ "Open", "Reflect" } },
+		{ "Moveable Mirror",	2, (int)DEVICE_ELEMENT::MOVEMIRROR,		{ "Reflect", "Open" } },
+		{ "Excitation Filter",	4, (int)DEVICE_ELEMENT::EXFILTER,		{ "Block", "Blue", "Green", "Red" } },
+		{ "Emission Filter",	4, (int)DEVICE_ELEMENT::EMFILTER,		{ "Open", "Blue", "Green", "Red" } }
 	};
-	m_availablePresets = { 2, 1, 4, 5, 6, 7, 8 };
+
+	m_presets = {
+		{	"Brillouin",	SCAN_BRILLOUIN,		{ {2}, {1}, {1}, {}, {} }		},	// Brillouin
+		{	"Calibration",	SCAN_CALIBRATION,	{ {2}, {2}, {1}, {}, {} }		},	// Brillouin Calibration
+		{	"ODT",			SCAN_ODT,			{ {2}, {}, {2}, {1}, {1} }		},	// ODT
+		{	"Fluo off",		SCAN_EPIFLUOOFF,	{ {}, {}, {}, {1}, {1} }		},	// Fluorescence off
+		{	"Fluo Blue",	SCAN_EPIFLUOBLUE,	{ {}, {}, {}, {2}, {2} }		},	// Fluorescence blue
+		{	"Fluo Green",	SCAN_EPIFLUOGREEN,	{ {}, {}, {}, {3}, {3} }		},	// Fluorescence green
+		{	"Fluo Red",		SCAN_EPIFLUORED,	{ {}, {}, {}, {4}, {4} }		}	// Fluorescence red
+	};
 
 	m_absoluteBounds = m_calibration.bounds;
 
-	m_deviceElements = {
-		{ "Flip Mirror",		2, (int)DEVICE_ELEMENT::CALFLIPMIRROR, { "Open", "Reflect" } },
-		{ "Beam Block",			2, (int)DEVICE_ELEMENT::BEAMBLOCK, { "Close", "Open" } },
-		{ "Moveable Mirror",	2, (int)DEVICE_ELEMENT::MOVEMIRROR, { "Reflect", "Open" } },
-		{ "Excitation Filter",	4, (int)DEVICE_ELEMENT::EXFILTER, { "Block", "Blue", "Green", "Red" } },
-		{ "Emission Filter",	4, (int)DEVICE_ELEMENT::EMFILTER, { "Open", "Blue", "Green", "Red" } }
-	};
+	m_elementPositions = std::vector<int>((int)DEVICE_ELEMENT::COUNT, -1);
 }
 
 NIDAQ::~NIDAQ() {
@@ -226,81 +228,64 @@ void NIDAQ::setElement(DeviceElement element, int position) {
 		default:
 			break;
 	}
-	getElement(element);
-}
-
-void NIDAQ::getElement(DeviceElement element) {
-	int position{ -1 };
-	switch ((DEVICE_ELEMENT)element.index) {
-		case DEVICE_ELEMENT::CALFLIPMIRROR:
-			position = Thorlabs_FF::FF_GetPosition(m_serialNo_FF1);
-			break;
-		case DEVICE_ELEMENT::BEAMBLOCK:
-			position = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
-			break;
-		case DEVICE_ELEMENT::MOVEMIRROR:
-			position = getMirror();
-			//position = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
-			break;
-		case DEVICE_ELEMENT::EXFILTER:
-			position = getExFilter();
-			break;
-		case DEVICE_ELEMENT::EMFILTER:
-			position = getEmFilter();
-			break;
-		default:
-			return;
-	}
+	m_elementPositions[element.index] = position;
+	checkPresets();
 	emit(elementPositionChanged(element, position));
 }
 
-void NIDAQ::setElements(ScanControl::SCAN_PRESET preset) {
-	int presetNr{ 0 };
-	switch (preset) {
-		case ScanControl::SCAN_BRIGHTFIELD:
-		case ScanControl::SCAN_BRILLOUIN:
-			presetNr = 0;
+void NIDAQ::getElement(DeviceElement element) {
+	switch ((DEVICE_ELEMENT)element.index) {
+		case DEVICE_ELEMENT::CALFLIPMIRROR:
+			m_elementPositions[element.index] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF1);
 			break;
-		case ScanControl::SCAN_CALIBRATION:
-			// Set voltage of galvo mirrors to zero
-			// Otherwise the laser beam might not hit the calibration samples
-			setVoltage({ 0, 0 });
-			presetNr = 1;
+		case DEVICE_ELEMENT::BEAMBLOCK:
+			m_elementPositions[element.index] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
 			break;
-		case ScanControl::SCAN_ODT:
-			presetNr = 2;
+		case DEVICE_ELEMENT::MOVEMIRROR:
+			m_elementPositions[element.index] = getMirror();
 			break;
-		case ScanControl::SCAN_EPIFLUOOFF:
-			presetNr = 3;
+		case DEVICE_ELEMENT::EXFILTER:
+			m_elementPositions[element.index] = getExFilter();
 			break;
-		case ScanControl::SCAN_EPIFLUOBLUE:
-			presetNr = 4;
-			break;
-		case ScanControl::SCAN_EPIFLUOGREEN:
-			presetNr = 5;
-			break;
-		case ScanControl::SCAN_EPIFLUORED:
-			presetNr = 6;
+		case DEVICE_ELEMENT::EMFILTER:
+			m_elementPositions[element.index] = getEmFilter();
 			break;
 		default:
 			return;
 	}
-	setCalFlipMirror(m_presets[presetNr][0]);
-	setBeamBlock(m_presets[presetNr][1]);
-	setMirror(m_presets[presetNr][2]);
-	setExFilter(m_presets[presetNr][3]);
-	setEmFilter(m_presets[presetNr][4]);
-	getElements();
+	checkPresets();
+	emit(elementPositionChanged(element, m_elementPositions[element.index]));
+}
+
+void NIDAQ::setPreset(SCAN_PRESET presetType) {
+	auto preset = getPreset(presetType);
+
+	for (gsl::index ii = 0; ii < m_deviceElements.size(); ii++) {
+		// check if element position needs to be changed
+		if (!preset.elementPositions[ii].empty() && !simplemath::contains(preset.elementPositions[ii], m_elementPositions[ii])) {
+			setElement(m_deviceElements[ii], preset.elementPositions[ii][0]);
+			m_elementPositions[ii] = preset.elementPositions[ii][0];
+		}
+	}
+
+	if (presetType == SCAN_CALIBRATION) {
+		// Set voltage of galvo mirrors to zero
+		// Otherwise the laser beam might not hit the calibration samples
+		setVoltage({ 0, 0 });
+	}
+
+	checkPresets();
+	emit(elementPositionsChanged(m_elementPositions));
 }
 
 void NIDAQ::getElements() {
-	std::vector<int> elementPositions(m_deviceElements.deviceCount(), -1);
-	elementPositions[0] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF1);
-	elementPositions[1] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
-	elementPositions[2] = getMirror();
-	elementPositions[3] = getExFilter();
-	elementPositions[4] = getEmFilter();
-	emit(elementPositionsChanged(elementPositions));
+	m_elementPositions[(int)DEVICE_ELEMENT::CALFLIPMIRROR] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF1);
+	m_elementPositions[(int)DEVICE_ELEMENT::BEAMBLOCK] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
+	m_elementPositions[(int)DEVICE_ELEMENT::MOVEMIRROR] = getMirror();
+	m_elementPositions[(int)DEVICE_ELEMENT::EMFILTER] = getExFilter();
+	m_elementPositions[(int)DEVICE_ELEMENT::EXFILTER] = getEmFilter();
+	checkPresets();
+	emit(elementPositionsChanged(m_elementPositions));
 }
 
 void NIDAQ::setCalFlipMirror(int position) {

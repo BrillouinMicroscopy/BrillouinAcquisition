@@ -18,14 +18,14 @@ struct ChannelSettings {
 	int exposure{ 900 };
 	std::string name;
 	FLUORESCENCE_MODE mode;
-	ScanControl::enScanPreset preset;
+	SCAN_PRESET preset;
 };
 
 struct FLUORESCENCE_SETTINGS {
-	ChannelSettings blue{ true, 900, "blue", FLUORESCENCE_MODE::BLUE, ScanControl::SCAN_EPIFLUOBLUE };
-	ChannelSettings green{ true, 900, "Green", FLUORESCENCE_MODE::GREEN, ScanControl::SCAN_EPIFLUOGREEN };
-	ChannelSettings red{ true, 900, "Red", FLUORESCENCE_MODE::RED, ScanControl::SCAN_EPIFLUORED };
-	ChannelSettings brightfield{ true, 900, "Brightfield", FLUORESCENCE_MODE::BRIGHTFIELD, ScanControl::SCAN_EPIFLUOOFF };
+	ChannelSettings blue{ true, 900, "blue", FLUORESCENCE_MODE::BLUE, SCAN_EPIFLUOBLUE };
+	ChannelSettings green{ true, 900, "Green", FLUORESCENCE_MODE::GREEN, SCAN_EPIFLUOGREEN };
+	ChannelSettings red{ true, 900, "Red", FLUORESCENCE_MODE::RED, SCAN_EPIFLUORED };
+	ChannelSettings brightfield{ true, 900, "Brightfield", FLUORESCENCE_MODE::BRIGHTFIELD, SCAN_EPIFLUOOFF };
 	CAMERA_SETTINGS camera;
 };
 
