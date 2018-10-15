@@ -60,7 +60,7 @@ Q_DECLARE_METATYPE(std::vector<int>);
 Q_DECLARE_METATYPE(QSerialPort::SerialPortError);
 Q_DECLARE_METATYPE(IMAGE*);
 Q_DECLARE_METATYPE(CALIBRATION*);
-Q_DECLARE_METATYPE(ScanControl::SCAN_PRESET);
+Q_DECLARE_METATYPE(SCAN_PRESET);
 Q_DECLARE_METATYPE(DeviceElement);
 Q_DECLARE_METATYPE(SensorTemperature);
 Q_DECLARE_METATYPE(POINT3);
@@ -140,7 +140,7 @@ private slots:
 
 	void setColormap(QCPColorGradient *, CustomGradientPreset);
 	void setElement(DeviceElement element, int position);
-	void setPreset(ScanControl::SCAN_PRESET preset);
+	void setPreset(SCAN_PRESET preset);
 	void updatePlotLimits(PLOT_SETTINGS plotSettings, CAMERA_OPTIONS options, CAMERA_ROI roi);
 	void showPreviewRunning(bool);
 	void showBrightfieldPreviewRunning(bool isRunning);

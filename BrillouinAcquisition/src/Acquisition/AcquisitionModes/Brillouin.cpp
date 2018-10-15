@@ -69,7 +69,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	m_settings.camera = m_andor->getSettings();
 	(*m_scanControl)->stopAnnouncingPosition();
 	// set optical elements for brightfield/Brillouin imaging
-	(*m_scanControl)->setElements(ScanControl::SCAN_BRIGHTFIELD);
+	(*m_scanControl)->setPreset(SCAN_BRILLOUIN);
 	Sleep(500);
 
 	// get current stage position
@@ -228,7 +228,7 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper> & storage) {
 	m_andor->setCalibrationExposureTime(m_settings.calibrationExposureTime);
 
 	// move optical elements to position for calibration
-	(*m_scanControl)->setElements(ScanControl::SCAN_CALIBRATION);
+	(*m_scanControl)->setPreset(SCAN_CALIBRATION);
 	Sleep(500);
 
 	double shift = 5.088; // this is the shift for water
@@ -269,7 +269,7 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper> & storage) {
 	nrCalibrations++;
 
 	// revert optical elements to position for brightfield/Brillouin imaging
-	(*m_scanControl)->setElements(ScanControl::SCAN_BRIGHTFIELD);
+	(*m_scanControl)->setPreset(SCAN_BRILLOUIN);
 
 	// reset exposure time
 	m_andor->setCalibrationExposureTime(m_settings.camera.exposureTime);

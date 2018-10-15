@@ -2,6 +2,21 @@
 #define SCANCONTROL_H
 
 #include "Device.h"
+#include "../external/h5bm/TypesafeBitmask.h"
+
+typedef enum enScanPreset {
+	SCAN_NULL = 0x0,
+	SCAN_BRIGHTFIELD = 0x2,
+	SCAN_CALIBRATION = 0x4,
+	SCAN_BRILLOUIN = 0x8,
+	SCAN_EYEPIECE = 0x10,
+	SCAN_ODT = 0x20,
+	SCAN_EPIFLUOOFF = 0x40,
+	SCAN_EPIFLUOBLUE = 0x80,
+	SCAN_EPIFLUOGREEN = 0x100,
+	SCAN_EPIFLUORED = 0x200
+} SCAN_PRESET;
+ENABLE_BITMASK_OPERATORS(SCAN_PRESET)
 
 struct POINT3 {
 	double x{ 0 };
@@ -79,9 +94,19 @@ public:
 		return m_deviceElements;
 	};
 
-	int deviceCount() {
+	int count() {
 		return m_deviceElements.size();
 	};
+};
+
+class Preset {
+public:
+	Preset(std::string name, SCAN_PRESET index, std::vector<std::vector<int>> positions) :
+		name(name), index(index), elementPositions(positions) {};
+
+	std::string name{ "" };
+	SCAN_PRESET index{ SCAN_NULL };
+	std::vector<std::vector<int>> elementPositions;
 };
 
 class ScanControl: public Device {
@@ -101,6 +126,8 @@ protected:
 	BOUNDS m_homePositionBounds;
 	BOUNDS m_currentPositionBounds;
 
+	Preset getPreset(SCAN_PRESET);
+
 public:
 	ScanControl() noexcept {};
 	virtual ~ScanControl() {};
@@ -111,26 +138,11 @@ public:
 	} SCAN_DEVICE;
 	std::vector<std::string> SCAN_DEVICE_NAMES = { "Zeiss ECU", "NI-DAQmx" };
 
-	// pre-defined presets for element positions
-	std::vector<std::string> m_presetLabels = { "Brightfield", "Calibration", "Brillouin", "Eyepiece", "ODT",
-		"Fluo Off", "Fluo Blue", "Fluo Green", "Fluo Red" };
-	typedef enum enScanPreset {
-		SCAN_BRIGHTFIELD,
-		SCAN_CALIBRATION,
-		SCAN_BRILLOUIN,
-		SCAN_EYEPIECE,
-		SCAN_ODT,
-		SCAN_EPIFLUOOFF,
-		SCAN_EPIFLUOBLUE,
-		SCAN_EPIFLUOGREEN,
-		SCAN_EPIFLUORED,
-		SCAN_PRESET_COUNT
-	} SCAN_PRESET;
+	std::vector<DeviceElement> m_deviceElements;
+	std::vector<int> m_elementPositions;
 
-	std::vector<std::vector<int>> m_presets;
-	std::vector<int> m_availablePresets;
-
-	DeviceElements m_deviceElements;
+	std::vector<Preset> m_presets;
+	SCAN_PRESET m_activePresets;
 
 	bool getConnectionStatus();
 
@@ -145,8 +157,10 @@ public:
 public slots:
 	virtual void setElement(DeviceElement, int) = 0;
 	virtual void getElement(DeviceElement) = 0;
-	virtual void setElements(ScanControl::SCAN_PRESET) = 0;
+	virtual void setPreset(SCAN_PRESET) = 0;
 	virtual void getElements() = 0;
+	void checkPresets();
+	bool isPresetActive(SCAN_PRESET);
 	void announcePosition();
 	void startAnnouncingPosition();
 	void stopAnnouncingPosition();

@@ -2,12 +2,21 @@
 #include "ZeissECU.h"
 
 ZeissECU::ZeissECU() noexcept {
-	m_availablePresets = { 0, 1, 2, 3 };
+
+	m_deviceElements = {
+		{ "Objective",	6, (int)DEVICE_ELEMENT::OBJECTIVE },
+		{ "Reflector",	5, (int)DEVICE_ELEMENT::REFLECTOR },
+		{ "Tubelens",	3, (int)DEVICE_ELEMENT::TUBELENS },
+		{ "Baseport",	3, (int)DEVICE_ELEMENT::BASEPORT },
+		{ "Sideport",	3, (int)DEVICE_ELEMENT::SIDEPORT },
+		{ "Mirror",		2, (int)DEVICE_ELEMENT::MIRROR }
+	};
+
 	m_presets = {
-		{ 1, 1, 3, 1, 2, 2 },	// Brightfield
-		{ 1, 1, 3, 1, 3, 2 },	// Calibration
-		{ 1, 1, 3, 1, 2, 1 },	// Brillouin
-		{ 1, 1, 3, 2, 3, 2 },	// Eyepiece
+		{	"Brillouin",	SCAN_BRILLOUIN,		{ {}, {1}, {3}, {1}, {2}, {1, 2} }	},	// Brillouin
+		{	"Calibration",	SCAN_CALIBRATION,	{ {}, {1}, {3}, {1}, {3}, {1, 2} }	},	// Calibration
+		{	"Brightfield",	SCAN_BRIGHTFIELD,	{ {}, {1}, {3}, {1}, {2}, {2} }	},		// Brightfield
+		{	"Eyepiece",		SCAN_EYEPIECE,		{ {}, {1}, {3}, {2}, {3}, {2} }	}		// Eyepiece
 	};
 
 	// bounds of the stage
@@ -20,14 +29,7 @@ ZeissECU::ZeissECU() noexcept {
 		 150000		// [µm] maximal z-value
 	};
 
-	m_deviceElements = {
-		{ "Reflector",	5, (int)DEVICE_ELEMENT::REFLECTOR },
-		{ "Objective",	6, (int)DEVICE_ELEMENT::OBJECTIVE },
-		{ "Tubelens",	3, (int)DEVICE_ELEMENT::TUBELENS },
-		{ "Baseport",	3, (int)DEVICE_ELEMENT::BASEPORT },
-		{ "Sideport",	3, (int)DEVICE_ELEMENT::SIDEPORT },
-		{ "Mirror",		2, (int)DEVICE_ELEMENT::MIRROR }
-	};
+	m_elementPositions = std::vector<int>((int)DEVICE_ELEMENT::COUNT, -1);
 }
 
 ZeissECU::~ZeissECU() {
@@ -101,7 +103,7 @@ void ZeissECU::connectDevice() {
 			m_isCompatible = focus && stand && mcu;
 
 			if (m_isConnected && m_isCompatible) {
-				setElements(SCAN_PRESET::SCAN_BRIGHTFIELD);
+				setPreset(SCAN_BRILLOUIN);
 				getElements();
 				m_homePosition = getPosition();
 				startAnnouncingPosition();
@@ -170,14 +172,18 @@ void ZeissECU::setDevice(com *device) {
 	m_stand->setDevice(device);
 }
 
-void ZeissECU::setElements(ScanControl::SCAN_PRESET preset) {
-	m_stand->setReflector(m_presets[preset][0]);
-	m_stand->setObjective(m_presets[preset][1]);
-	m_stand->setTubelens(m_presets[preset][2]);
-	m_stand->setBaseport(m_presets[preset][3]);
-	m_stand->setSideport(m_presets[preset][4]);
-	m_stand->setMirror(m_presets[preset][5]);
-	emit(elementPositionsChanged(m_presets[preset]));
+void ZeissECU::setPreset(SCAN_PRESET presetType) {
+	auto preset = getPreset(presetType);
+
+	for (gsl::index ii = 0; ii < m_deviceElements.size(); ii++) {
+		// check if element position needs to be changed
+		if (!preset.elementPositions[ii].empty() && !simplemath::contains(preset.elementPositions[ii], m_elementPositions[ii])) {
+			setElement(m_deviceElements[ii], preset.elementPositions[ii][0]);
+			m_elementPositions[ii] = preset.elementPositions[ii][0];
+		}
+	}
+	checkPresets();
+	emit(elementPositionsChanged(m_elementPositions));
 }
 
 void ZeissECU::setElement(DeviceElement element, int position) {
@@ -203,18 +209,20 @@ void ZeissECU::setElement(DeviceElement element, int position) {
 		default:
 			break;
 	}
+	m_elementPositions[element.index] = position;
+	checkPresets();
 	emit(elementPositionChanged(element, position));
 }
 
 void ZeissECU::getElements() {
-	std::vector<int> elementPositions(m_deviceElements.deviceCount(), -1);
-	elementPositions[0] = m_stand->getReflector();
-	elementPositions[1] = m_stand->getObjective();
-	elementPositions[2] = m_stand->getTubelens();
-	elementPositions[3] = m_stand->getBaseport();
-	elementPositions[4] = m_stand->getSideport();
-	elementPositions[5] = m_stand->getMirror();
-	emit(elementPositionsChanged(elementPositions));
+	m_elementPositions[(int)DEVICE_ELEMENT::REFLECTOR] = m_stand->getReflector();
+	m_elementPositions[(int)DEVICE_ELEMENT::OBJECTIVE] = m_stand->getObjective();
+	m_elementPositions[(int)DEVICE_ELEMENT::TUBELENS] = m_stand->getTubelens();
+	m_elementPositions[(int)DEVICE_ELEMENT::BASEPORT] = m_stand->getBaseport();
+	m_elementPositions[(int)DEVICE_ELEMENT::SIDEPORT] = m_stand->getSideport();
+	m_elementPositions[(int)DEVICE_ELEMENT::MIRROR] = m_stand->getMirror();
+	checkPresets();
+	emit(elementPositionsChanged(m_elementPositions));
 };
 
 void ZeissECU::getElement(DeviceElement element) {

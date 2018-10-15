@@ -180,7 +180,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<QSerialPort::SerialPortError>("QSerialPort::SerialPortError");
 	qRegisterMetaType<IMAGE*>("IMAGE*");
 	qRegisterMetaType<CALIBRATION*>("CALIBRATION*");
-	qRegisterMetaType<ScanControl::SCAN_PRESET>("ScanControl::SCAN_PRESET");
+	qRegisterMetaType<SCAN_PRESET>("SCAN_PRESET");
 	qRegisterMetaType<DeviceElement>("DeviceElement");
 	qRegisterMetaType<SensorTemperature>("SensorTemperature");
 	qRegisterMetaType<POINT3>("POINT3");
@@ -379,8 +379,8 @@ void BrillouinAcquisition::on_autoscalePlot_brightfield_stateChanged(int state) 
 	m_ODTPlot.autoscale = (bool)state;
 }
 
-void BrillouinAcquisition::setPreset(ScanControl::SCAN_PRESET preset) {
-	QMetaObject::invokeMethod(m_scanControl, "setElements", Qt::QueuedConnection, Q_ARG(ScanControl::SCAN_PRESET, preset));
+void BrillouinAcquisition::setPreset(SCAN_PRESET preset) {
+	QMetaObject::invokeMethod(m_scanControl, "setPreset", Qt::QueuedConnection, Q_ARG(SCAN_PRESET, preset));
 }
 
 void BrillouinAcquisition::cameraOptionsChanged(CAMERA_OPTIONS options) {
@@ -1513,16 +1513,16 @@ void BrillouinAcquisition::initBeampathButtons() {
 	verticalLayout->setAlignment(Qt::AlignTop);
 	std::string buttonLabel;
 	presetButtons.clear();
-	if (m_scanControl->m_availablePresets.size() > 0) {
+	auto presets = m_scanControl->m_presets;
+	if (presets.size() > 0) {
 		QHBoxLayout *presetLayoutLabel = new QHBoxLayout();
-		std::string presetLabelString = "Presets:";
-		QLabel *presetLabel = new QLabel(presetLabelString.c_str());
+		QLabel *presetLabel = new QLabel("Presets:");
 		presetLayoutLabel->addWidget(presetLabel);
 		verticalLayout->addLayout(presetLayoutLabel);
 		QGridLayout *layout = new QGridLayout();
 		layout->setAlignment(Qt::AlignLeft);
-		for (gsl::index ii = 0; ii < m_scanControl->m_availablePresets.size(); ii++) {
-			QPushButton *button = new QPushButton(m_scanControl->m_presetLabels[m_scanControl->m_availablePresets[ii]].c_str());
+		for (gsl::index ii = 0; ii < presets.size(); ii++) {
+			QPushButton *button = new QPushButton(presets[ii].name.c_str());
 			button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 			button->setMinimumWidth(24);
 			button->setMaximumWidth(64);
@@ -1530,7 +1530,7 @@ void BrillouinAcquisition::initBeampathButtons() {
 			layout->addWidget(button, floor(ii/maxWidgetsPerRow), ii%maxWidgetsPerRow, Qt::AlignLeft);
 
 			connection = QObject::connect(button, &QPushButton::clicked, [=] {
-				setPreset((ScanControl::SCAN_PRESET)m_scanControl->m_availablePresets[ii]);
+				setPreset(presets[ii].index);
 			});
 			presetButtons.push_back(button);
 		}
@@ -1538,8 +1538,8 @@ void BrillouinAcquisition::initBeampathButtons() {
 	}
 	elementButtons.clear();
 
-	auto elements = m_scanControl->m_deviceElements.getDeviceElements();
-	for (gsl::index ii = 0; ii < m_scanControl->m_deviceElements.deviceCount(); ii++) {
+	auto elements = m_scanControl->m_deviceElements;
+	for (gsl::index ii = 0; ii < elements.size(); ii++) {
 		DeviceElement element = elements[ii];
 		QHBoxLayout *layout = new QHBoxLayout();
 
@@ -1558,7 +1558,7 @@ void BrillouinAcquisition::initBeampathButtons() {
 			layout->addWidget(button);
 
 			connection = QObject::connect(button, &QPushButton::clicked, [=] {
-				setElement(m_scanControl->m_deviceElements.getDeviceElements()[ii], jj + 1);
+				setElement(elements[ii], jj + 1);
 			});
 			buttons.push_back(button);
 		}
@@ -1827,11 +1827,18 @@ void BrillouinAcquisition::microscopeElementPositionsChanged(std::vector<int> po
 }
 
 void BrillouinAcquisition::microscopeElementPositionChanged(DeviceElement element, int position) {
+	if (m_deviceElementPositions.size() <= element.index) {
+		m_deviceElementPositions.resize(element.index + 1);
+	}
 	m_deviceElementPositions[element.index] = position;
 	checkElementButtons();
 }
 
 void BrillouinAcquisition::checkElementButtons() {
+	if (elementButtons.size() != m_deviceElementPositions.size()) {
+		return;
+	}
+
 	for (gsl::index ii = 0; ii < elementButtons.size(); ii++) {
 		for (gsl::index jj = 0; jj < elementButtons[ii].size(); jj++) {
 			if (m_deviceElementPositions[ii] == jj + 1) {
@@ -1844,8 +1851,9 @@ void BrillouinAcquisition::checkElementButtons() {
 			elementButtons[ii][jj]->update();
 		}
 	}
-	for (gsl::index ii = 0; ii < m_scanControl->m_availablePresets.size(); ii++) {
-		if (m_scanControl->m_presets[ii] == m_deviceElementPositions) {
+	auto presets = m_scanControl->m_presets;
+	for (gsl::index ii = 0; ii < presets.size(); ii++) {
+		if (m_scanControl->isPresetActive(presets[ii].index)) {
 			presetButtons[ii]->setProperty("class", "active");
 		} else {
 			presetButtons[ii]->setProperty("class", "");

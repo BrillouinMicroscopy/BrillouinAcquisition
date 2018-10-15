@@ -102,13 +102,13 @@ private:
 	Stand *m_stand = nullptr;
 
 	enum class DEVICE_ELEMENT {
-		REFLECTOR,
 		OBJECTIVE,
+		REFLECTOR,
 		TUBELENS,
 		BASEPORT,
 		SIDEPORT,
 		MIRROR,
-		DEVICE_ELEMENT_COUNT
+		COUNT
 	};
 
 public:
@@ -125,7 +125,7 @@ public slots:
 	void disconnectDevice();
 	void errorHandler(QSerialPort::SerialPortError error);
 	void setElement(DeviceElement element, int position);
-	void setElements(ScanControl::SCAN_PRESET preset);
+	void setPreset(SCAN_PRESET preset);
 	void getElements();
 	void getElement(DeviceElement element);
 	// sets the position relative to the home position m_homePosition
