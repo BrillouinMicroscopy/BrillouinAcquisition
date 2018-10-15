@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>BrillouinAcquisitionClass</class>
  <widget class="QMainWindow" name="BrillouinAcquisitionClass">
@@ -560,158 +560,122 @@ QTabBar::tab:!selected {
                 </item>
                </widget>
               </widget>
-              <widget class="QComboBox" name="triggerMode">
-               <property name="geometry">
-                <rect>
-                 <x>104</x>
-                 <y>56</y>
-                 <width>112</width>
-                 <height>18</height>
-                </rect>
-               </property>
-               <item>
-                <property name="text">
-                 <string>Internal</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Software</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>External</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>External Start</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>External Exposure</string>
-                </property>
-               </item>
-              </widget>
-              <widget class="QLabel" name="triggerModeLabel">
-               <property name="geometry">
-                <rect>
-                 <x>8</x>
-                 <y>56</y>
-                 <width>80</width>
-                 <height>18</height>
-                </rect>
-               </property>
-               <property name="text">
-                <string>Trigger mode</string>
-               </property>
-              </widget>
-              <widget class="QLabel" name="exposureTimeLabel">
+              <widget class="QWidget" name="">
                <property name="geometry">
                 <rect>
                  <x>8</x>
                  <y>8</y>
-                 <width>88</width>
-                 <height>18</height>
+                 <width>209</width>
+                 <height>89</height>
                 </rect>
                </property>
-               <property name="text">
-                <string>Exposure time [s]</string>
-               </property>
-              </widget>
-              <widget class="QLabel" name="nrImagesLabel">
-               <property name="geometry">
-                <rect>
-                 <x>8</x>
-                 <y>32</y>
-                 <width>88</width>
-                 <height>18</height>
-                </rect>
-               </property>
-               <property name="text">
-                <string>Number of images</string>
-               </property>
-              </widget>
-              <widget class="QSpinBox" name="frameCount">
-               <property name="geometry">
-                <rect>
-                 <x>104</x>
-                 <y>32</y>
-                 <width>112</width>
-                 <height>18</height>
-                </rect>
-               </property>
-               <property name="minimum">
-                <number>1</number>
-               </property>
-               <property name="value">
-                <number>1</number>
-               </property>
-              </widget>
-              <widget class="QDoubleSpinBox" name="exposureTime">
-               <property name="geometry">
-                <rect>
-                 <x>104</x>
-                 <y>8</y>
-                 <width>112</width>
-                 <height>18</height>
-                </rect>
-               </property>
-               <property name="decimals">
-                <number>3</number>
-               </property>
-               <property name="singleStep">
-                <double>0.100000000000000</double>
-               </property>
-               <property name="value">
-                <double>0.000000000000000</double>
-               </property>
-              </widget>
-              <widget class="QLabel" name="sensorTempLabel">
-               <property name="geometry">
-                <rect>
-                 <x>8</x>
-                 <y>80</y>
-                 <width>89</width>
-                 <height>18</height>
-                </rect>
-               </property>
-               <property name="text">
-                <string>Sensor temperature [°C]</string>
-               </property>
-              </widget>
-              <widget class="QDoubleSpinBox" name="sensorTemp">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="geometry">
-                <rect>
-                 <x>160</x>
-                 <y>80</y>
-                 <width>56</width>
-                 <height>18</height>
-                </rect>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignCenter</set>
-               </property>
-               <property name="buttonSymbols">
-                <enum>QAbstractSpinBox::NoButtons</enum>
-               </property>
-               <property name="decimals">
-                <number>1</number>
-               </property>
-               <property name="minimum">
-                <double>-100.000000000000000</double>
-               </property>
-               <property name="singleStep">
-                <double>0.100000000000000</double>
-               </property>
-               <property name="value">
-                <double>0.100000000000000</double>
-               </property>
+               <layout class="QFormLayout" name="formLayout_5">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="exposureTimeLabel">
+                  <property name="text">
+                   <string>Exposure time [s]</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="nrImagesLabel">
+                  <property name="text">
+                   <string>Number of images</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QSpinBox" name="frameCount">
+                  <property name="minimum">
+                   <number>1</number>
+                  </property>
+                  <property name="value">
+                   <number>1</number>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="triggerModeLabel">
+                  <property name="text">
+                   <string>Trigger mode</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QComboBox" name="triggerMode">
+                  <item>
+                   <property name="text">
+                    <string>Internal</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Software</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>External</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>External Start</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>External Exposure</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QLabel" name="sensorTempLabel">
+                  <property name="text">
+                   <string>Sensor temperature [°C]</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QDoubleSpinBox" name="sensorTemp">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
+                  </property>
+                  <property name="decimals">
+                   <number>1</number>
+                  </property>
+                  <property name="minimum">
+                   <double>-100.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.100000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>0.100000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QDoubleSpinBox" name="exposureTime">
+                  <property name="decimals">
+                   <number>3</number>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.100000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>0.000000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </widget>
              </widget>
             </widget>
@@ -763,8 +727,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>165</width>
-                <height>180</height>
+                <width>236</width>
+                <height>219</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -824,7 +788,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>230</width>
-                <height>180</height>
+                <height>219</height>
                </rect>
               </property>
               <property name="sizePolicy">
@@ -1078,8 +1042,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>165</width>
-                <height>160</height>
+                <width>236</width>
+                <height>219</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -1294,7 +1258,7 @@ QTabBar::tab:!selected {
                 <rect>
                  <x>8</x>
                  <y>8</y>
-                 <width>211</width>
+                 <width>209</width>
                  <height>44</height>
                 </rect>
                </property>
@@ -1302,7 +1266,7 @@ QTabBar::tab:!selected {
                 <item row="0" column="0">
                  <widget class="QLabel" name="exposureTimeODT_Label">
                   <property name="text">
-                   <string>Exposure [s]</string>
+                   <string>Exposure time [s]</string>
                   </property>
                  </widget>
                 </item>
@@ -2346,7 +2310,7 @@ border: none;</string>
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>165</width>
+                      <width>221</width>
                       <height>545</height>
                      </rect>
                     </property>
@@ -3263,7 +3227,6 @@ border: none;</string>
  </customwidgets>
  <tabstops>
   <tabstop>cTScrollArea</tabstop>
-  <tabstop>exposureTime</tabstop>
   <tabstop>frameCount</tabstop>
   <tabstop>triggerMode</tabstop>
   <tabstop>sensorTemp</tabstop>
