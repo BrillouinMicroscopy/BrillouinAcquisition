@@ -1534,22 +1534,24 @@ void BrillouinAcquisition::initBeampathButtons() {
 		verticalLayout->addLayout(layout);
 	}
 	elementButtons.clear();
+
+	auto elements = m_scanControl->m_deviceElements.getDeviceElements();
 	for (gsl::index ii = 0; ii < m_scanControl->m_deviceElements.deviceCount(); ii++) {
+		DeviceElement element = elements[ii];
 		QHBoxLayout *layout = new QHBoxLayout();
 
 		layout->setAlignment(Qt::AlignLeft);
-		QLabel *groupLabel = new QLabel(m_scanControl->m_deviceElements.getDeviceElements()[ii].name.c_str());
+		QLabel *groupLabel = new QLabel(element.name.c_str());
 		groupLabel->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 		groupLabel->setMinimumWidth(40);
 		groupLabel->setMaximumWidth(40);
 		layout->addWidget(groupLabel);
 		std::vector<QPushButton*> buttons;
-		for (gsl::index jj = 0; jj < m_scanControl->m_deviceElements.getDeviceElements()[ii].maxOptions; jj++) {
-			buttonLabel = std::to_string(jj + 1);
-			QPushButton *button = new QPushButton(buttonLabel.c_str());
+		for (gsl::index jj = 0; jj < element.maxOptions; jj++) {
+			QPushButton *button = new QPushButton(element.optionNames[jj].c_str());
 			button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 			button->setMinimumWidth(16);
-			button->setMaximumWidth(24);
+			button->setMaximumWidth(48);
 			layout->addWidget(button);
 
 			connection = QObject::connect(button, &QPushButton::clicked, [=] {
