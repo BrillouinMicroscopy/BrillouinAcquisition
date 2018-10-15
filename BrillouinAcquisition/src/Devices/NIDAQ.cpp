@@ -282,8 +282,8 @@ void NIDAQ::getElements() {
 	m_elementPositions[(int)DEVICE_ELEMENT::CALFLIPMIRROR] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF1);
 	m_elementPositions[(int)DEVICE_ELEMENT::BEAMBLOCK] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
 	m_elementPositions[(int)DEVICE_ELEMENT::MOVEMIRROR] = getMirror();
-	m_elementPositions[(int)DEVICE_ELEMENT::EMFILTER] = getExFilter();
-	m_elementPositions[(int)DEVICE_ELEMENT::EXFILTER] = getEmFilter();
+	m_elementPositions[(int)DEVICE_ELEMENT::EXFILTER] = getExFilter();
+	m_elementPositions[(int)DEVICE_ELEMENT::EMFILTER] = getEmFilter();
 	checkPresets();
 	emit(elementPositionsChanged(m_elementPositions));
 }
