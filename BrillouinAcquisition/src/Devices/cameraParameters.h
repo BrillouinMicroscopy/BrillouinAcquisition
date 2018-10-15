@@ -42,4 +42,9 @@ struct CAMERA_SETTINGS {
 	CAMERA_READOUT readout;					//		readout settings
 };
 
+typedef enum class enCameraSetting {
+	EXPOSURE,
+	GAIN
+} CAMERA_SETTING;
+
 #endif // CAMERAPARAMETERS_H

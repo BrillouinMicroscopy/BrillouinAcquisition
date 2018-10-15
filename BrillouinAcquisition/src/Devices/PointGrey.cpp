@@ -22,8 +22,11 @@ void PointGrey::connectDevice() {
 			m_isConnected = true;
 			
 			readOptions();
-			readSettings();
 
+			// apply default values for exposure and gain
+			m_settings.exposureTime = 0.004;
+			m_settings.gain = 0.0;
+			setSettings(m_settings);
 		}
 	}
 
@@ -256,7 +259,7 @@ void PointGrey::startPreview() {
 }
 
 void PointGrey::preparePreview() {
-	m_settings.exposureTime = 0.004; // [s]
+	// set ROI and readout parameters to default preview values, exposure time and gain will be kept
 	m_settings.roi.left = 0;
 	m_settings.roi.top = 0;
 	m_settings.roi.width = m_options.ROIWidthLimits[1];
@@ -265,7 +268,6 @@ void PointGrey::preparePreview() {
 	m_settings.readout.triggerMode = L"Internal";
 	m_settings.readout.cycleMode = L"Fixed";
 	m_settings.frameCount = 10;
-	m_settings.gain = 0;
 
 	setSettings(m_settings);
 

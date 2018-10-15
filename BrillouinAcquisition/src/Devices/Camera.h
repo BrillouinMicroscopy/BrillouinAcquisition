@@ -31,6 +31,7 @@ public slots:
 	virtual void stopPreview() = 0;
 	virtual void startAcquisition(CAMERA_SETTINGS) = 0;
 	virtual void stopAcquisition() = 0;
+	void setSetting(CAMERA_SETTING, double);
 
 protected:
 	CAMERA_OPTIONS m_options;

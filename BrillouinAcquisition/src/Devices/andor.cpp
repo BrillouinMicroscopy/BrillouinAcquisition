@@ -53,7 +53,6 @@ void Andor::connectDevice() {
 			m_isConnected = true;
 			readOptions();
 			setSettings(m_settings);
-			readSettings();
 			if (!m_tempTimer->isActive()) {
 				m_tempTimer->start(1000);
 			}
