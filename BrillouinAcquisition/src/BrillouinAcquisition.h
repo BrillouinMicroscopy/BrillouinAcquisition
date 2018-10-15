@@ -141,7 +141,7 @@ private slots:
 	void setColormap(QCPColorGradient *, CustomGradientPreset);
 	void setElement(DeviceElement element, int position);
 	void setPreset(ScanControl::SCAN_PRESET preset);
-	void updatePlotLimits(PLOT_SETTINGS plotSettings, CAMERA_ROI roi);
+	void updatePlotLimits(PLOT_SETTINGS plotSettings, CAMERA_OPTIONS options, CAMERA_ROI roi);
 	void showPreviewRunning(bool);
 	void showBrightfieldPreviewRunning(bool isRunning);
 	void startPreview(bool);

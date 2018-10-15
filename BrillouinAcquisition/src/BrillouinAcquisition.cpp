@@ -17,7 +17,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		m_andor,
 		&Andor::s_previewBufferSettingsChanged,
 		this,
-		[this] { updatePlotLimits(m_BrillouinPlot, m_andor->m_previewBuffer->m_bufferSettings.roi); }
+		[this] { updatePlotLimits(m_BrillouinPlot, m_cameraOptions, m_andor->m_previewBuffer->m_bufferSettings.roi); }
 	);
 
 	connection = QWidget::connect(
@@ -1130,13 +1130,13 @@ std::vector<AT_64> BrillouinAcquisition::checkROI(std::vector<AT_64> values, std
 	return values;
 }
 
-void BrillouinAcquisition::updatePlotLimits(PLOT_SETTINGS plotSettings, CAMERA_ROI roi) {
+void BrillouinAcquisition::updatePlotLimits(PLOT_SETTINGS plotSettings,	CAMERA_OPTIONS options, CAMERA_ROI roi) {
 	// set the properties of the colormap to the correct values of the preview buffer
 	plotSettings.colorMap->data()->setSize(roi.width, roi.height);
 	plotSettings.colorMap->data()->setRange(
 		QCPRange(roi.left, roi.width + roi.left - 1),
-		QCPRange(	m_cameraOptions.ROIHeightLimits[1] - roi.top - roi.height + 2,
-					m_cameraOptions.ROIHeightLimits[1] - roi.top + 1)
+		QCPRange(	options.ROIHeightLimits[1] - roi.top - roi.height + 2,
+					options.ROIHeightLimits[1] - roi.top + 1)
 	);
 }
 
@@ -1792,7 +1792,7 @@ void BrillouinAcquisition::initCamera() {
 		m_pointGrey,
 		&PointGrey::s_previewBufferSettingsChanged,
 		this,
-		[this] { updatePlotLimits(m_ODTPlot, m_pointGrey->m_previewBuffer->m_bufferSettings.roi); }
+		[this] { updatePlotLimits(m_ODTPlot, m_cameraOptionsODT, m_pointGrey->m_previewBuffer->m_bufferSettings.roi); }
 	);
 
 	connection = QWidget::connect(
