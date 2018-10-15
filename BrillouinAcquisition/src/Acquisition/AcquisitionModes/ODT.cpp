@@ -91,6 +91,7 @@ void ODT::startRepetitions() {
 	settings.readout.triggerMode = L"External";
 	settings.readout.cycleMode = L"Continuous";
 	settings.frameCount = m_acqSettings.numberPoints;
+	settings.gain = 0;
 
 	(*m_pointGrey)->startAcquisition(settings);
 

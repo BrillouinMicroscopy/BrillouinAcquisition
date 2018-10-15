@@ -22,5 +22,24 @@
         <file>assets/00disconnected16px.png</file>
         <file>assets/00disconnected24px.png</file>
         <file>assets/00disconnected32px.png</file>
+        <file>assets/04fluoBlue10px.png</file>
+        <file>assets/04fluoBlue16px.png</file>
+        <file>assets/04fluoBlue24px.png</file>
+        <file>assets/04fluoBlue32px.png</file>
+        <file>assets/05fluoGreen.svg</file>
+        <file>assets/05fluoGreen10px.png</file>
+        <file>assets/05fluoGreen16px.png</file>
+        <file>assets/05fluoGreen24px.png</file>
+        <file>assets/05fluoGreen32px.png</file>
+        <file>assets/06fluoRed.svg</file>
+        <file>assets/06fluoRed10px.png</file>
+        <file>assets/06fluoRed16px.png</file>
+        <file>assets/06fluoRed24px.png</file>
+        <file>assets/06fluoRed32px.png</file>
+        <file>assets/07fluoBrightfield.svg</file>
+        <file>assets/07fluoBrightfield10px.png</file>
+        <file>assets/07fluoBrightfield16px.png</file>
+        <file>assets/07fluoBrightfield24px.png</file>
+        <file>assets/07fluoBrightfield32px.png</file>
     </qresource>
 </RCC>

@@ -18,6 +18,7 @@
 
 #include"Acquisition/AcquisitionModes/Brillouin.h"
 #include"Acquisition/AcquisitionModes/ODT.h"
+#include"Acquisition/AcquisitionModes/Fluorescence.h"
 
 #include <QtWidgets/QMainWindow>
 #include "ui_BrillouinAcquisition.h"
@@ -71,6 +72,8 @@ Q_DECLARE_METATYPE(ODT_MODE);
 Q_DECLARE_METATYPE(ODT_SETTING);
 Q_DECLARE_METATYPE(ODT_SETTINGS);
 Q_DECLARE_METATYPE(ODTIMAGE*);
+Q_DECLARE_METATYPE(FLUOIMAGE*);
+Q_DECLARE_METATYPE(FLUORESCENCE_SETTINGS*);
 
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
@@ -165,6 +168,8 @@ private slots:
 	void showBrillouinProgress(double progress, int seconds);
 	void showODTStatus(ACQUISITION_STATUS state);
 	void showODTProgress(double progress, int seconds);
+	void showFluorescenceStatus(ACQUISITION_STATUS state);
+	void showFluorescenceProgress(double progress, int seconds);
 
 	// ODT signals
 	void on_alignmentUR_ODT_valueChanged(double);
@@ -176,6 +181,20 @@ private slots:
 	void on_acquisitionNumber_ODT_valueChanged(int);
 	void on_acquisitionRate_ODT_valueChanged(double);
 	void on_acquisitionStartODT_clicked();
+
+	// Fluorescence signals
+	void on_acquisitionStartFluorescence_clicked();
+	void on_fluoGain_valueChanged(double);
+	void on_fluoBlueCheckbox_stateChanged(int);
+	void on_fluoGreenCheckbox_stateChanged(int);
+	void on_fluoRedCheckbox_stateChanged(int);
+	void on_fluoBrightfieldCheckbox_stateChanged(int);
+	void on_fluoBlueExposure_valueChanged(int);
+	void on_fluoGreenExposure_valueChanged(int);
+	void on_fluoRedExposure_valueChanged(int);
+	void on_fluoBrightfieldExposure_valueChanged(int);
+	void updateFluorescenceSettings(FLUORESCENCE_SETTINGS settings);
+
 
 	QString formatSeconds(int seconds);
 
@@ -271,6 +290,7 @@ private:
 	Brillouin *m_Brillouin = new Brillouin(nullptr, m_acquisition, m_andor, &m_scanControl);
 	BRILLOUIN_SETTINGS m_BrillouinSettings;
 	ODT *m_ODT = nullptr;
+	Fluorescence *m_Fluorescence = nullptr;
 
 	PLOT_SETTINGS m_BrillouinPlot;
 	PLOT_SETTINGS m_ODTPlot;
@@ -298,6 +318,10 @@ private:
 		QIcon standby;
 		QIcon cooling;
 		QIcon ready;
+		QIcon fluoBlue;
+		QIcon fluoGreen;
+		QIcon fluoRed;
+		QIcon fluoBrightfield;
 	} m_icons;
 };
 

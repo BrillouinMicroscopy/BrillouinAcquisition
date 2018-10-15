@@ -74,18 +74,24 @@ POINT2 NIDAQ::voltageToPosition(VOLTAGE2 voltage) {
 
 NIDAQ::NIDAQ() noexcept {
 	m_presets = {
-		{ 1, 2, 1 },	// Brillouin
-		{ 2, 2, 1 },	// Calibration
-		{ 1, 2, 2 },	// ODT
+		{ 1, 2, 1, 1, 1 },	// Brillouin
+		{ 2, 2, 1, 1, 1 },	// Calibration
+		{ 1, 2, 2, 1, 1 },	// ODT
+		{ 1, 2, 2, 1, 1 },	// Fluorescence off
+		{ 1, 2, 2, 2, 2 },	// Fluorescence blue
+		{ 1, 2, 2, 3, 3 },	// Fluorescence green
+		{ 1, 2, 2, 4, 4 },	// Fluorescence red
 	};
-	m_availablePresets = { 2, 1, 4 };
+	m_availablePresets = { 2, 1, 4, 5, 6, 7, 8 };
 
 	m_absoluteBounds = m_calibration.bounds;
 
 	m_deviceElements = {
-		{ "Flip Mirror",	2, (int)DEVICE_ELEMENT::CALFLIPMIRROR },
-		{ "Beam Block",		2, (int)DEVICE_ELEMENT::BEAMBLOCK },
-		{ "Moveable Mirror",2, (int)DEVICE_ELEMENT::MOVEMIRROR }
+		{ "Flip Mirror",		2, (int)DEVICE_ELEMENT::CALFLIPMIRROR },
+		{ "Beam Block",			2, (int)DEVICE_ELEMENT::BEAMBLOCK },
+		{ "Moveable Mirror",	2, (int)DEVICE_ELEMENT::MOVEMIRROR },
+		{ "Excitation Filter",	4, (int)DEVICE_ELEMENT::EXFILTER },
+		{ "Emission Filter",	4, (int)DEVICE_ELEMENT::EMFILTER }
 	};
 }
 
@@ -146,6 +152,10 @@ void NIDAQ::connectDevice() {
 		Thorlabs_KDC::CC_Open(m_serialNo_KDC);
 		Thorlabs_KDC::CC_StartPolling(m_serialNo_KDC, 200);
 
+		// Connect filter mounts
+		m_exFilter->connectDevice();
+		m_emFilter->connectDevice();
+
 		startAnnouncingElementPosition();
 		getElements();
 	}
@@ -174,6 +184,10 @@ void NIDAQ::disconnectDevice() {
 		Thorlabs_KDC::CC_StopPolling(m_serialNo_KDC);
 		Thorlabs_KDC::CC_Close(m_serialNo_KDC);
 
+		// Disconnect filter mounts
+		m_exFilter->disconnectDevice();
+		m_emFilter->disconnectDevice();
+
 		m_isConnected = false;
 		m_isCompatible = false;
 	}
@@ -182,6 +196,11 @@ void NIDAQ::disconnectDevice() {
 
 void NIDAQ::init() {
 	calculateHomePositionBounds();
+
+	m_exFilter = new FilterMount("COM3");
+	m_exFilter->init();
+	m_emFilter = new FilterMount("COM6");
+	m_emFilter->init();
 
 	elementPositionTimer = new QTimer();
 	QMetaObject::Connection connection = QWidget::connect(elementPositionTimer, SIGNAL(timeout()), this, SLOT(getElements()));
@@ -197,6 +216,12 @@ void NIDAQ::setElement(DeviceElement element, int position) {
 			break;
 		case DEVICE_ELEMENT::MOVEMIRROR:
 			setMirror(position);
+			break;
+		case DEVICE_ELEMENT::EXFILTER:
+			setExFilter(position);
+			break;
+		case DEVICE_ELEMENT::EMFILTER:
+			setEmFilter(position);
 			break;
 		default:
 			break;
@@ -216,6 +241,12 @@ void NIDAQ::getElement(DeviceElement element) {
 		case DEVICE_ELEMENT::MOVEMIRROR:
 			position = getMirror();
 			//position = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
+			break;
+		case DEVICE_ELEMENT::EXFILTER:
+			position = getExFilter();
+			break;
+		case DEVICE_ELEMENT::EMFILTER:
+			position = getEmFilter();
 			break;
 		default:
 			return;
@@ -239,12 +270,26 @@ void NIDAQ::setElements(ScanControl::SCAN_PRESET preset) {
 		case ScanControl::SCAN_ODT:
 			presetNr = 2;
 			break;
+		case ScanControl::SCAN_EPIFLUOOFF:
+			presetNr = 3;
+			break;
+		case ScanControl::SCAN_EPIFLUOBLUE:
+			presetNr = 4;
+			break;
+		case ScanControl::SCAN_EPIFLUOGREEN:
+			presetNr = 5;
+			break;
+		case ScanControl::SCAN_EPIFLUORED:
+			presetNr = 6;
+			break;
 		default:
 			return;
 	}
 	setCalFlipMirror(m_presets[presetNr][0]);
 	setBeamBlock(m_presets[presetNr][1]);
 	setMirror(m_presets[presetNr][2]);
+	setExFilter(m_presets[presetNr][3]);
+	setEmFilter(m_presets[presetNr][4]);
 	getElements();
 }
 
@@ -253,6 +298,8 @@ void NIDAQ::getElements() {
 	elementPositions[0] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF1);
 	elementPositions[1] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
 	elementPositions[2] = getMirror();
+	elementPositions[3] = getExFilter();
+	elementPositions[4] = getEmFilter();
 	emit(elementPositionsChanged(elementPositions));
 }
 
@@ -299,6 +346,41 @@ int NIDAQ::getMirror() {
 	targetIndex = realPosition * m_gearBoxRatio * m_stepsPerRev / m_pitch;
 	if (abs(currentIndex - targetIndex) < 10) {
 		return 2;
+	}
+	return -1;
+}
+
+void NIDAQ::setExFilter(int position) {
+	setFilter(m_exFilter, position);
+}
+
+void NIDAQ::setEmFilter(int position) {
+	setFilter(m_emFilter, position);
+}
+
+void NIDAQ::setFilter(FilterMount *device, int position) {
+	// calculate the position to set, slots are spaced every 32 mm
+	double pos = 32.0 * (position - 1);
+	device->setPosition(pos);
+}
+
+int NIDAQ::getExFilter() {
+	return getFilter(m_exFilter);
+}
+
+int NIDAQ::getEmFilter() {
+	return getFilter(m_emFilter);
+}
+
+int NIDAQ::getFilter(FilterMount *device) {
+	double pos = device->getPosition();
+	// Somehow the filter mount does not position the filters very accurately.
+	// It can be off by multiple millimeters and the error increases with positions farther away.
+	// E.g. requested 0 -> got 0, 32 -> 31, 64 -> 62, 96 -> 93
+	for (gsl::index position{ 0 }; position < 4; position++) {
+		if (abs(pos - 32.0 * position) < (1.0 + position)) {
+			return (position + 1);
+		}
 	}
 	return -1;
 }

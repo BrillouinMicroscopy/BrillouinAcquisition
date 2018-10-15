@@ -1,25 +1,8 @@
 #ifndef ZEISSECU_H
 #define ZEISSECU_H
 
-#include <QSerialPort>
 #include "scancontrol.h"
-
-class helper {
-public:
-	static std::string dec2hex(int dec, int digits);
-	static int hex2dec(std::string);
-	static std::string parse(std::string answer, std::string prefix);
-};
-
-class com : public QSerialPort {
-protected:
-	std::string m_terminator = "\r";
-public:
-	std::string receive(std::string request);
-	void send(std::string message);
-
-	virtual qint64 writeToDevice(const char *data);
-};
+#include "com.h"
 
 class Element : public QObject {
 	Q_OBJECT

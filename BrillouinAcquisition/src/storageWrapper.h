@@ -33,6 +33,7 @@ public:
 
 	QQueue<IMAGE*> m_payloadQueueBrillouin;
 	QQueue<ODTIMAGE*> m_payloadQueueODT;
+	QQueue<FLUOIMAGE*> m_payloadQueueFluorescence;
 	QQueue<CALIBRATION*> m_calibrationQueue;
 	bool m_abort = false;
 
@@ -47,6 +48,7 @@ public slots:
 
 	void s_enqueuePayload(IMAGE*);
 	void s_enqueuePayload(ODTIMAGE*);
+	void s_enqueuePayload(FLUOIMAGE*);
 	void s_enqueueCalibration(CALIBRATION *cal);
 
 	void s_finishedQueueing();

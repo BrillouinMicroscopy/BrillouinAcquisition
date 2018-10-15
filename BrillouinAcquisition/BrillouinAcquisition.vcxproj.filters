@@ -210,6 +210,27 @@
     <ClCompile Include="src\Acquisition\AcquisitionModes\ODT.cpp">
       <Filter>Source Files\Acquisition\AcquisitionModes</Filter>
     </ClCompile>
+    <ClCompile Include="src\Devices\com.cpp">
+      <Filter>Source Files\Devices</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_filtermount.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_filtermount.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Devices\filtermount.cpp">
+      <Filter>Source Files\Devices</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Acquisition\AcquisitionModes\Fluorescence.cpp">
+      <Filter>Source Files\Acquisition\AcquisitionModes</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_Fluorescence.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_Fluorescence.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_BrillouinAcquisition.h">
@@ -231,6 +252,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Devices\cameraParameters.h">
+      <Filter>Header Files\Devices</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Devices\com.h">
       <Filter>Header Files\Devices</Filter>
     </ClInclude>
   </ItemGroup>
@@ -293,6 +317,12 @@
       <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
     </CustomBuild>
     <CustomBuild Include="src\Acquisition\AcquisitionModes\ODT.h">
+      <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Devices\filtermount.h">
+      <Filter>Header Files\Devices</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Acquisition\AcquisitionModes\Fluorescence.h">
       <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
     </CustomBuild>
   </ItemGroup>

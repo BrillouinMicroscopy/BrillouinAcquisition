@@ -16,6 +16,7 @@ namespace Thorlabs_FF {
 namespace Thorlabs_KDC {
 	#include <Thorlabs.MotionControl.KCube.DCServo.h>
 }
+#include "filtermount.h"
 
 #include "H5Cpp.h"
 #include "filesystem"
@@ -86,10 +87,16 @@ private:
 	double m_gearBoxRatio{ 67 };	// [1]  ratio of the gear box
 	double m_pitch{ 1 };			// [mm] pitch of the lead screw
 
+	// moveable filter mounts
+	FilterMount *m_exFilter = nullptr;
+	FilterMount *m_emFilter = nullptr;
+
 	enum class DEVICE_ELEMENT {
 		CALFLIPMIRROR,
 		BEAMBLOCK,
 		MOVEMIRROR,
+		EXFILTER,
+		EMFILTER,
 		DEVICE_ELEMENT_COUNT
 	};
 
@@ -109,9 +116,6 @@ public:
 
 	// NIDAQ specific function to move position to center of field of view
 	void centerPosition();
-	
-	std::vector<std::string> m_groupLabels = { "Flip Mirror", "Beam Block" };
-	std::vector<int> m_maxOptions = { 2, 2 };
 
 public slots:
 	void init();
@@ -124,6 +128,12 @@ public slots:
 	void setCalFlipMirror(int position);
 	void setBeamBlock(int position);
 	void setMirror(int position);
+	void setEmFilter(int position);
+	void setExFilter(int position);
+	void setFilter(FilterMount * device, int position);
+	int getExFilter();
+	int getEmFilter();
+	int getFilter(FilterMount * device);
 	int getMirror();
 	// sets the position relative to the home position m_homePosition
 	void setPositionRelativeX(double position);

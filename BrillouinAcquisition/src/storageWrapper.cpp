@@ -15,6 +15,10 @@ StorageWrapper::~StorageWrapper() {
 			ODTIMAGE *img = m_payloadQueueODT.dequeue();
 			delete img;
 		}
+		while (!m_payloadQueueFluorescence.isEmpty()) {
+			FLUOIMAGE *img = m_payloadQueueFluorescence.dequeue();
+			delete img;
+		}
 		while (!m_calibrationQueue.isEmpty()) {
 			CALIBRATION *cal = m_calibrationQueue.dequeue();
 			delete cal;
@@ -29,6 +33,11 @@ void StorageWrapper::s_enqueuePayload(IMAGE *img) {
 
 void StorageWrapper::s_enqueuePayload(ODTIMAGE *img) {
 	m_payloadQueueODT.enqueue(img);
+	s_writeQueues();
+}
+
+void StorageWrapper::s_enqueuePayload(FLUOIMAGE *img) {
+	m_payloadQueueFluorescence.enqueue(img);
 	s_writeQueues();
 }
 
@@ -72,6 +81,20 @@ void StorageWrapper::s_writeQueues() {
 			return;
 		}
 		ODTIMAGE *img = m_payloadQueueODT.dequeue();
+		setPayloadData(img);
+		//std::string info = "Image written " + std::to_string(m_writtenImagesNr);
+		//qInfo(logInfo()) << info.c_str();
+		m_writtenImagesNr++;
+		delete img;
+		img = nullptr;
+	}
+
+	while (!m_payloadQueueFluorescence.isEmpty()) {
+		if (m_abort) {
+			m_finished = true;
+			return;
+		}
+		FLUOIMAGE *img = m_payloadQueueFluorescence.dequeue();
 		setPayloadData(img);
 		//std::string info = "Image written " + std::to_string(m_writtenImagesNr);
 		//qInfo(logInfo()) << info.c_str();

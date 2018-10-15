@@ -36,6 +36,7 @@ struct CAMERA_READOUT {
 struct CAMERA_SETTINGS {
 	double exposureTime = 0.5;				// [s]	exposure time
 	AT_64 frameCount = 2;					// [1]	number of images to acquire in one sequence
+	double gain{ 0 };						// [dB] gain of the camera
 	AT_BOOL spuriousNoiseFilter = true;		//		turn on spurious noise filter
 	CAMERA_ROI roi;							//		region of interest
 	CAMERA_READOUT readout;					//		readout settings
