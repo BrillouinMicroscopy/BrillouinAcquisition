@@ -55,6 +55,7 @@ Q_DECLARE_METATYPE(ACQUISITION_MODE);
 Q_DECLARE_METATYPE(ACQUISITION_STATUS);
 Q_DECLARE_METATYPE(BRILLOUIN_SETTINGS);
 Q_DECLARE_METATYPE(CAMERA_SETTINGS);
+Q_DECLARE_METATYPE(CAMERA_SETTING);
 Q_DECLARE_METATYPE(CAMERA_OPTIONS);
 Q_DECLARE_METATYPE(std::vector<int>);
 Q_DECLARE_METATYPE(QSerialPort::SerialPortError);
@@ -181,6 +182,8 @@ private slots:
 	void on_acquisitionNumber_ODT_valueChanged(int);
 	void on_acquisitionRate_ODT_valueChanged(double);
 	void on_acquisitionStartODT_clicked();
+	void on_exposureTimeODT_valueChanged(double);
+	void on_gainODT_valueChanged(double);
 
 	// Fluorescence signals
 	void on_acquisitionStartFluorescence_clicked();

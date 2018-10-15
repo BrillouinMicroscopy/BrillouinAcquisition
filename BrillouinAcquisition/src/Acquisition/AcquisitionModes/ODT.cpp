@@ -81,8 +81,8 @@ void ODT::startRepetitions() {
 	m_abort = false;
 
 	// configure camera for measurement
-	CAMERA_SETTINGS settings;
-	settings.exposureTime = 0.004; // [s]
+	CAMERA_SETTINGS settings = (*m_pointGrey)->getSettings();
+	// set ROI and readout parameters to default ODT values, exposure time and gain will be kept
 	settings.roi.left = 128;
 	settings.roi.top = 0;
 	settings.roi.width = 1024;
@@ -91,7 +91,6 @@ void ODT::startRepetitions() {
 	settings.readout.triggerMode = L"External";
 	settings.readout.cycleMode = L"Continuous";
 	settings.frameCount = m_acqSettings.numberPoints;
-	settings.gain = 0;
 
 	(*m_pointGrey)->startAcquisition(settings);
 

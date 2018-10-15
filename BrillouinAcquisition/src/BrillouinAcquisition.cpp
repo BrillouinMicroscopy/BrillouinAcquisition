@@ -175,6 +175,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<ACQUISITION_STATUS>("ACQUISITION_STATUS");
 	qRegisterMetaType<BRILLOUIN_SETTINGS>("BRILLOUIN_SETTINGS");
 	qRegisterMetaType<CAMERA_SETTINGS>("CAMERA_SETTINGS");
+	qRegisterMetaType<CAMERA_SETTING>("CAMERA_SETTING");
 	qRegisterMetaType<CAMERA_OPTIONS>("CAMERA_OPTIONS");
 	qRegisterMetaType<std::vector<int>>("std::vector<int>");
 	qRegisterMetaType<QSerialPort::SerialPortError>("QSerialPort::SerialPortError");
@@ -425,8 +426,11 @@ void BrillouinAcquisition::cameraODTOptionsChanged(CAMERA_OPTIONS options) {
 	m_ODTPlot.plotHandle->xAxis->setRange(QCPRange(1, options.ROIWidthLimits[1]));
 	m_ODTPlot.plotHandle->yAxis->setRange(QCPRange(1, options.ROIHeightLimits[1]));
 
+	// block signals to not trigger setting a new value
+	ui->exposureTimeODT->blockSignals(true);
 	ui->exposureTimeODT->setMinimum(m_cameraOptionsODT.exposureTimeLimits[0]);
 	ui->exposureTimeODT->setMaximum(m_cameraOptionsODT.exposureTimeLimits[1]);
+	ui->exposureTimeODT->blockSignals(false);
 
 	addListToComboBox(ui->pixelEncodingODT, options.pixelEncodings);
 }
@@ -531,7 +535,12 @@ void BrillouinAcquisition::cameraSettingsChanged(CAMERA_SETTINGS settings) {
 }
 
 void BrillouinAcquisition::cameraODTSettingsChanged(CAMERA_SETTINGS settings) {
+	ui->exposureTimeODT->blockSignals(true);
 	ui->exposureTimeODT->setValue(settings.exposureTime);
+	ui->exposureTimeODT->blockSignals(false);
+	ui->gainODT->blockSignals(true);
+	ui->gainODT->setValue(settings.gain);
+	ui->gainODT->blockSignals(false);
 	//ui->frameCount->setValue(settings.frameCount);
 	ui->ROILeftODT->setValue(settings.roi.left);
 	ui->ROIWidthODT->setValue(settings.roi.width);
@@ -618,6 +627,14 @@ void BrillouinAcquisition::on_acquisitionStartODT_clicked() {
 	} else {
 		m_ODT->m_abort = true;
 	}
+}
+
+void BrillouinAcquisition::on_exposureTimeODT_valueChanged(double exposureTime) {
+	QMetaObject::invokeMethod(m_pointGrey, "setSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::EXPOSURE), Q_ARG(double, exposureTime));
+}
+
+void BrillouinAcquisition::on_gainODT_valueChanged(double gain) {
+	QMetaObject::invokeMethod(m_pointGrey, "setSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::GAIN), Q_ARG(double, gain));
 }
 
 void BrillouinAcquisition::on_acquisitionStartFluorescence_clicked() {
