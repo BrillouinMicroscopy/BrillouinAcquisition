@@ -45,8 +45,6 @@ private:
 
 	void acquireImage(AT_U8* buffer);
 
-	std::mutex m_mutex;
-
 	/*
 	 * Members and functions inherited from base class
 	 */
@@ -66,9 +64,6 @@ public:
 	const std::string getTemperatureStatus();
 	double getSensorTemperature();
 	void setCalibrationExposureTime(double);
-
-	// preview buffer for live acquisition
-	PreviewBuffer<AT_U8>* m_previewBuffer = new PreviewBuffer<AT_U8>;
 
 private slots:
 	void getImageForPreview();

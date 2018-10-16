@@ -195,6 +195,9 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<ODTIMAGE*>("ODTIMAGE*");
 	qRegisterMetaType<FLUOIMAGE*>("FLUOIMAGE*");
 	qRegisterMetaType<FLUORESCENCE_SETTINGS>("FLUORESCENCE_SETTINGS");
+	qRegisterMetaType<PLOT_SETTINGS*>("PLOT_SETTINGS*");
+	qRegisterMetaType<Camera*>("Camera*");
+	qRegisterMetaType<bool*>("bool*");
 	
 	// Set up icons
 	m_icons.disconnected.addFile(":/BrillouinAcquisition/assets/00disconnected10px.png", QSize(10, 10));
@@ -1242,7 +1245,7 @@ void BrillouinAcquisition::startPreview(bool isRunning) {
 	// if preview was not running, start it, else leave it running (don't start it twice)
 	if (!m_previewRunning && isRunning) {
 		m_previewRunning = true;
-		onNewImage();
+		updateImage((Camera*)m_andor, &m_BrillouinPlot, &m_previewRunning);
 	}
 	m_previewRunning = isRunning;
 }
@@ -1251,68 +1254,33 @@ void BrillouinAcquisition::startBrightfieldPreview(bool isRunning) {
 	// if preview was not running, start it, else leave it running (don't start it twice)
 	if (!m_brightfieldPreviewRunning && isRunning) {
 		m_brightfieldPreviewRunning = true;
-		onNewBrightfieldImage();
+		updateImage((Camera*)m_pointGrey, &m_ODTPlot, &m_brightfieldPreviewRunning);
 	}
 	m_brightfieldPreviewRunning = isRunning;
 }
 
-void BrillouinAcquisition::onNewImage() {
-	if (m_previewRunning) {
-		PLOT_SETTINGS *plotSettings = &m_BrillouinPlot;
+void BrillouinAcquisition::updateImage(Camera *camera, PLOT_SETTINGS *plotSettings, bool *running) {
+	if (running) {
 		{
-			std::lock_guard<std::mutex> lockGuard(m_andor->m_previewBuffer->m_mutex);
+			std::lock_guard<std::mutex> lockGuard(camera->m_previewBuffer->m_mutex);
 			// if no image is ready return immediately
-			if (!m_andor->m_previewBuffer->m_buffer->m_usedBuffers->tryAcquire()) {
-				QMetaObject::invokeMethod(this, "onNewImage", Qt::QueuedConnection);
+			if (!camera->m_previewBuffer->m_buffer->m_usedBuffers->tryAcquire()) {
+				QMetaObject::invokeMethod(this, "updateImage", Qt::QueuedConnection, Q_ARG(Camera*, camera), Q_ARG(PLOT_SETTINGS*, plotSettings), Q_ARG(bool*, running));
 				return;
 			}
 
-			auto unpackedBuffer = reinterpret_cast<unsigned short*>(m_andor->m_previewBuffer->m_buffer->getReadBuffer());
+			auto unpackedBuffer = reinterpret_cast<unsigned short*>(camera->m_previewBuffer->m_buffer->getReadBuffer());
 
 			// images are given row by row, starting at the top left
 			int tIndex;
-			for (gsl::index yIndex{ 0 }; yIndex < m_andor->m_previewBuffer->m_bufferSettings.roi.height; ++yIndex) {
-				for (gsl::index xIndex{ 0 }; xIndex < m_andor->m_previewBuffer->m_bufferSettings.roi.width; ++xIndex) {
-					tIndex = yIndex * m_andor->m_previewBuffer->m_bufferSettings.roi.width + xIndex;
-					plotSettings->colorMap->data()->setCell(xIndex, m_andor->m_previewBuffer->m_bufferSettings.roi.height - yIndex - 1, unpackedBuffer[tIndex]);
-				}
-			}
-
-		}
-		m_andor->m_previewBuffer->m_buffer->m_freeBuffers->release();
-		if (plotSettings->autoscale) {
-			plotSettings->colorMap->rescaleDataRange();
-			plotSettings->cLim = plotSettings->colorMap->dataRange();
-			(plotSettings->dataRangeCallback)(plotSettings->cLim);
-		}
-		plotSettings->plotHandle->replot();
-		
-		QMetaObject::invokeMethod(this, "onNewImage", Qt::QueuedConnection);
-	}
-}
-
-void BrillouinAcquisition::onNewBrightfieldImage() {
-	if (m_brightfieldPreviewRunning) {
-		PLOT_SETTINGS *plotSettings = &m_ODTPlot;
-		{
-			std::lock_guard<std::mutex> lockGuard(m_pointGrey->m_previewBuffer->m_mutex);
-			// if no image is ready return immediately
-			if (!m_pointGrey->m_previewBuffer->m_buffer->m_usedBuffers->tryAcquire()) {
-				QMetaObject::invokeMethod(this, "onNewBrightfieldImage", Qt::QueuedConnection);
-				return;
-			}
-
-			auto unpackedBuffer = m_pointGrey->m_previewBuffer->m_buffer->getReadBuffer();
-
-			int tIndex;
-			for (gsl::index yIndex{ 0 }; yIndex < m_pointGrey->m_previewBuffer->m_bufferSettings.roi.height; ++yIndex) {
-				for (gsl::index xIndex{ 0 }; xIndex < m_pointGrey->m_previewBuffer->m_bufferSettings.roi.width; ++xIndex) {
-					tIndex = yIndex * m_pointGrey->m_previewBuffer->m_bufferSettings.roi.width + xIndex;
-					plotSettings->colorMap->data()->setCell(xIndex, m_pointGrey->m_previewBuffer->m_bufferSettings.roi.height - yIndex - 1, unpackedBuffer[tIndex]);
+			for (gsl::index yIndex{ 0 }; yIndex < camera->m_previewBuffer->m_bufferSettings.roi.height; ++yIndex) {
+				for (gsl::index xIndex{ 0 }; xIndex < camera->m_previewBuffer->m_bufferSettings.roi.width; ++xIndex) {
+					tIndex = yIndex * camera->m_previewBuffer->m_bufferSettings.roi.width + xIndex;
+					plotSettings->colorMap->data()->setCell(xIndex, camera->m_previewBuffer->m_bufferSettings.roi.height - yIndex - 1, unpackedBuffer[tIndex]);
 				}
 			}
 		}
-		m_pointGrey->m_previewBuffer->m_buffer->m_freeBuffers->release();
+		camera->m_previewBuffer->m_buffer->m_freeBuffers->release();
 		if (plotSettings->autoscale) {
 			plotSettings->colorMap->rescaleDataRange();
 			plotSettings->cLim = plotSettings->colorMap->dataRange();
@@ -1320,7 +1288,7 @@ void BrillouinAcquisition::onNewBrightfieldImage() {
 		}
 		plotSettings->plotHandle->replot();
 
-		QMetaObject::invokeMethod(this, "onNewBrightfieldImage", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(this, "updateImage", Qt::QueuedConnection, Q_ARG(Camera*, camera), Q_ARG(PLOT_SETTINGS*, plotSettings), Q_ARG(bool*, running));
 	}
 }
 

@@ -25,8 +25,6 @@ private:
 
 	void acquireImage(unsigned char * buffer);
 
-	std::mutex m_mutex;
-
 	/*
 	 * Members and functions inherited from base class
 	 */
@@ -39,9 +37,6 @@ private slots:
 public:
 	PointGrey() noexcept {};
 	~PointGrey();
-
-	// preview buffer for live acquisition
-	PreviewBuffer<unsigned char>* m_previewBuffer = new PreviewBuffer<unsigned char>;
 
 public slots:
 	void init() {};
