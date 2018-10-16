@@ -40,6 +40,8 @@ protected:
 	virtual void readOptions() = 0;
 	virtual void readSettings() = 0;
 
+	std::mutex m_mutex;
+
 signals:
 	void settingsChanged(CAMERA_SETTINGS);
 	void optionsChanged(CAMERA_OPTIONS);

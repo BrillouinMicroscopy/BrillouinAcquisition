@@ -43,9 +43,7 @@ private:
 	void getEnumString(AT_WC* feature, AT_WC* string);
 	void preparePreview();
 
-	void acquireImage(AT_U8* buffer);
-
-	std::mutex m_mutex;
+	void acquireImage(unsigned short* buffer);
 
 	/*
 	 * Members and functions inherited from base class
@@ -68,7 +66,7 @@ public:
 	void setCalibrationExposureTime(double);
 
 	// preview buffer for live acquisition
-	PreviewBuffer<AT_U8>* m_previewBuffer = new PreviewBuffer<AT_U8>;
+	PreviewBuffer<unsigned short>* m_previewBuffer = new PreviewBuffer<unsigned short>;
 
 private slots:
 	void getImageForPreview();
@@ -98,7 +96,7 @@ public slots:
 	/*
 	 * Unify me
 	 */
-	void getImageForAcquisition(AT_U8* buffer);
+	void getImageForAcquisition(unsigned short* buffer);
 
 signals:
 	void cameraCoolingChanged(bool);

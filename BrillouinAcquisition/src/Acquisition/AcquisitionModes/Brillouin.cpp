@@ -156,7 +156,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 				POINT3 newPosition{ positionsX[ll], positionsY[ll], positionsZ[ll] };
 				(*m_scanControl)->setPosition(newPosition);
 
-				std::vector<AT_U8> images(bytesPerFrame * m_settings.camera.frameCount);
+				std::vector<unsigned short> images(bytesPerFrame * m_settings.camera.frameCount);
 
 				for (gsl::index mm = 0; mm < m_settings.camera.frameCount; mm++) {
 					if (m_abort) {
@@ -238,7 +238,7 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper> & storage) {
 	hsize_t dims_cal[3] = { m_settings.nrCalibrationImages, m_settings.camera.roi.height, m_settings.camera.roi.width };
 
 	int bytesPerFrame = m_settings.camera.roi.width * m_settings.camera.roi.height * 2;
-	std::vector<AT_U8> images((int64_t)bytesPerFrame * m_settings.nrCalibrationImages);
+	std::vector<unsigned short> images((int64_t)bytesPerFrame * m_settings.nrCalibrationImages);
 	for (gsl::index mm = 0; mm < m_settings.nrCalibrationImages; mm++) {
 		if (m_abort) {
 			this->abortMode();
