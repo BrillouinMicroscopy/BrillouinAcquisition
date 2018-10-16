@@ -78,16 +78,26 @@ Q_DECLARE_METATYPE(FLUORESCENCE_SETTINGS*);
 
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
-
-		struct PLOT_SETTINGS {
+	
+	struct PLOT_SETTINGS {
 		QCustomPlot *plotHandle{ nullptr };
 		QCPColorMap *colorMap{ nullptr };
 		QCPRange cLim = { 100, 300 };
+		QSpinBox *lowerBox;
+		QSpinBox *upperBox;
+		std::function<void(QCPRange)> dataRangeCallback{ nullptr };
 		bool autoscale{ false };
 		CustomGradientPreset gradient = CustomGradientPreset::gpParula;
 	};
 
 private slots:
+	void on_rangeLower_valueChanged(int);
+	void on_rangeUpper_valueChanged(int);
+	void on_rangeLowerODT_valueChanged(int);
+	void on_rangeUpperODT_valueChanged(int);
+	void updatePlot(PLOT_SETTINGS plotSettings);
+	void updateCLimRange(QSpinBox*, QSpinBox*, QCPRange);
+
 	void showEvent(QShowEvent* event);
 	void on_actionAbout_triggered();
 	void on_camera_singleShot_clicked();
@@ -258,6 +268,7 @@ public:
 	~BrillouinAcquisition();
 
 private:
+
 	Ui::BrillouinAcquisitionClass *ui;
 	ScanControl::SCAN_DEVICE m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSECU;
 	ScanControl::SCAN_DEVICE m_scanControllerTypeTemporary = m_scanControllerType;
@@ -311,7 +322,7 @@ private:
 	TableModel *tableModel = new TableModel(0);
 	ButtonDelegate buttonDelegate;
 
-	std::vector<int> m_deviceElementPositions = {0, 0, 0, 0, 0, 0};
+	std::vector<int> m_deviceElementPositions = { 0, 0, 0, 0, 0, 0 };
 
 	std::vector<std::vector<QPushButton*>> elementButtons;
 	std::vector<QPushButton*> presetButtons;

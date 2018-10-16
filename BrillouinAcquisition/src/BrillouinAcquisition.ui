@@ -560,7 +560,7 @@ QTabBar::tab:!selected {
                 </item>
                </widget>
               </widget>
-              <widget class="QWidget" name="">
+              <widget class="QWidget" name="layoutWidget">
                <property name="geometry">
                 <rect>
                  <x>8</x>
@@ -1253,7 +1253,7 @@ QTabBar::tab:!selected {
                 </item>
                </widget>
               </widget>
-              <widget class="QWidget" name="layoutWidget">
+              <widget class="QWidget" name="layoutWidget1">
                <property name="geometry">
                 <rect>
                  <x>8</x>
@@ -1398,7 +1398,7 @@ QTabBar::tab:!selected {
                  <height>40</height>
                 </size>
                </property>
-               <widget class="QWidget" name="layoutWidget1">
+               <widget class="QWidget" name="layoutWidget2">
                 <property name="geometry">
                  <rect>
                   <x>8</x>
@@ -1545,7 +1545,7 @@ QTabBar::tab:!selected {
                      <property name="title">
                       <string>Area of interest</string>
                      </property>
-                     <widget class="QWidget" name="layoutWidget2">
+                     <widget class="QWidget" name="layoutWidget3">
                       <property name="geometry">
                        <rect>
                         <x>8</x>
@@ -2012,7 +2012,7 @@ QTabBar::tab:!selected {
                        <string extracomment="Test">Acquisition stopped</string>
                       </property>
                      </widget>
-                     <widget class="QWidget" name="layoutWidget3">
+                     <widget class="QWidget" name="layoutWidget4">
                       <property name="geometry">
                        <rect>
                         <x>8</x>
@@ -2374,7 +2374,7 @@ border: none;</string>
                        <string>Center</string>
                       </property>
                      </widget>
-                     <widget class="QWidget" name="layoutWidget4">
+                     <widget class="QWidget" name="layoutWidget5">
                       <property name="geometry">
                        <rect>
                         <x>9</x>
@@ -2543,7 +2543,7 @@ border: none;</string>
                        <string>Start</string>
                       </property>
                      </widget>
-                     <widget class="QWidget" name="layoutWidget5">
+                     <widget class="QWidget" name="layoutWidget6">
                       <property name="geometry">
                        <rect>
                         <x>8</x>
@@ -2997,6 +2997,55 @@ border: none;</string>
            </widget>
           </item>
           <item>
+           <widget class="QLabel" name="rangeLowerODT_label">
+            <property name="text">
+             <string>Lower:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="rangeLowerODT">
+            <property name="minimumSize">
+             <size>
+              <width>45</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximum">
+             <number>70000</number>
+            </property>
+            <property name="singleStep">
+             <number>50</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="rangeUpperODT_label">
+            <property name="text">
+             <string>Upper:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="rangeUpperODT">
+            <property name="minimumSize">
+             <size>
+              <width>45</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximum">
+             <number>70000</number>
+            </property>
+            <property name="singleStep">
+             <number>50</number>
+            </property>
+            <property name="value">
+             <number>0</number>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="camera_singleShot_brightfield">
             <property name="enabled">
              <bool>false</bool>
@@ -3061,6 +3110,55 @@ border: none;</string>
            <widget class="QCheckBox" name="autoscalePlot">
             <property name="text">
              <string>Autoscale</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="rangeLower_label">
+            <property name="text">
+             <string>Lower:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="rangeLower">
+            <property name="minimumSize">
+             <size>
+              <width>45</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximum">
+             <number>70000</number>
+            </property>
+            <property name="singleStep">
+             <number>50</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="rangeUpper_label">
+            <property name="text">
+             <string>Upper:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="rangeUpper">
+            <property name="minimumSize">
+             <size>
+              <width>45</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximum">
+             <number>70000</number>
+            </property>
+            <property name="singleStep">
+             <number>50</number>
+            </property>
+            <property name="value">
+             <number>0</number>
             </property>
            </widget>
           </item>
