@@ -230,8 +230,11 @@ void Andor::preparePreview() {
 
 	setSettings(m_settings);
 
-	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
-	BUFFER_SETTINGS bufferSettings = { 5, pixelNumber * 2, m_settings.roi };
+	AT_64 ImageSizeBytes;
+	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
+	int BufferSize = static_cast<int>(ImageSizeBytes);
+
+	BUFFER_SETTINGS bufferSettings = { 5, BufferSize, m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
@@ -256,8 +259,11 @@ void Andor::startAcquisition(CAMERA_SETTINGS settings) {
 
 	setSettings(settings);
 
-	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
-	BUFFER_SETTINGS bufferSettings = { 4, pixelNumber * 2, m_settings.roi };
+	AT_64 ImageSizeBytes;
+	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
+	int BufferSize = static_cast<int>(ImageSizeBytes);
+
+	BUFFER_SETTINGS bufferSettings = { 4, BufferSize, m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
@@ -281,7 +287,7 @@ void Andor::cleanupAcquisition() {
 	AT_Flush(m_camera);
 }
 
-void Andor::acquireImage(AT_U8* buffer) {
+void Andor::acquireImage(unsigned short* buffer) {
 	// Pass this buffer to the SDK
 	unsigned char* UserBuffer = new unsigned char[m_bufferSize];
 	AT_QueueBuffer(m_camera, UserBuffer, m_bufferSize);
@@ -303,7 +309,7 @@ void Andor::acquireImage(AT_U8* buffer) {
 	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width);
 	AT_GetInt(m_camera, L"AOIStride", &m_imageStride);
 
-	AT_ConvertBuffer(Buffer, buffer, m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding.c_str(), L"Mono16");
+	AT_ConvertBuffer(Buffer, reinterpret_cast<AT_U8*>(buffer), m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding.c_str(), L"Mono16");
 
 	delete[] Buffer;
 }
@@ -324,7 +330,7 @@ void Andor::getImageForPreview() {
 	}
 }
 
-void Andor::getImageForAcquisition(AT_U8* buffer) {
+void Andor::getImageForAcquisition(unsigned short* buffer) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	acquireImage(buffer);
 

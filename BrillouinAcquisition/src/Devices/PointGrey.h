@@ -23,7 +23,7 @@ private:
 
 	void preparePreview();
 
-	void acquireImage(unsigned char * buffer);
+	void acquireImage(unsigned short* buffer);
 
 	/*
 	 * Members and functions inherited from base class
@@ -50,7 +50,7 @@ public slots:
 	void startAcquisition(CAMERA_SETTINGS);
 	void stopAcquisition();
 
-	void getImageForAcquisition(unsigned char* buffer);
+	void getImageForAcquisition(unsigned short* buffer);
 
 signals:
 	void s_previewRunning(bool);

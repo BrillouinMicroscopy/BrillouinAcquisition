@@ -26,7 +26,7 @@ public:
 	CAMERA_SETTINGS getSettings();
 
 	// preview buffer for live acquisition
-	PreviewBuffer<unsigned char>* m_previewBuffer = new PreviewBuffer<unsigned char>;
+	PreviewBuffer<unsigned short>* m_previewBuffer = new PreviewBuffer<unsigned short>;
 
 
 public slots:

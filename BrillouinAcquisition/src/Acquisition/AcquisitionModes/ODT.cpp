@@ -144,7 +144,7 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
 
 		// read images from camera
-		std::vector<unsigned char> images(bytesPerFrame);
+		std::vector<unsigned short> images(bytesPerFrame);
 
 		for (gsl::index mm{ 0 }; mm < 1; mm++) {
 			if (m_abort) {
@@ -158,7 +158,7 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 		}
 
 		// cast the vector to unsigned short
-		std::vector<unsigned char> *images_ = (std::vector<unsigned char> *) &images;
+		std::vector<unsigned short> *images_ = (std::vector<unsigned short> *) &images;
 
 		// store images
 		// asynchronously write image to disk

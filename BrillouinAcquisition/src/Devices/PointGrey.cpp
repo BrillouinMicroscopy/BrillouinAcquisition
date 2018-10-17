@@ -309,7 +309,7 @@ void PointGrey::stopAcquisition() {
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
 }
 
-void PointGrey::acquireImage(unsigned char * buffer) {
+void PointGrey::acquireImage(unsigned short* buffer) {
 	FlyCapture2::Image rawImage;
 	FlyCapture2::Error tmp = m_camera.RetrieveBuffer(&rawImage);
 
@@ -318,7 +318,7 @@ void PointGrey::acquireImage(unsigned char * buffer) {
 	rawImage.Convert(FlyCapture2::PIXEL_FORMAT_RAW8, &convertedImage);
 
 	// Get access to raw data
-	unsigned char* data = static_cast<unsigned char*>(convertedImage.GetData());
+	unsigned short* data = reinterpret_cast<unsigned short*>(convertedImage.GetData());
 
 	// Copy data to preview buffer
 	if (data != NULL) {
@@ -342,7 +342,7 @@ void PointGrey::getImageForPreview() {
 	}
 }
 
-void PointGrey::getImageForAcquisition(unsigned char* buffer) {
+void PointGrey::getImageForAcquisition(unsigned short* buffer) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	acquireImage(buffer);
 };

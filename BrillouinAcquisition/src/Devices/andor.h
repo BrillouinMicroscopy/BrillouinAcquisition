@@ -43,7 +43,7 @@ private:
 	void getEnumString(AT_WC* feature, AT_WC* string);
 	void preparePreview();
 
-	void acquireImage(AT_U8* buffer);
+	void acquireImage(unsigned short* buffer);
 
 	/*
 	 * Members and functions inherited from base class
@@ -93,7 +93,7 @@ public slots:
 	/*
 	 * Unify me
 	 */
-	void getImageForAcquisition(AT_U8* buffer);
+	void getImageForAcquisition(unsigned short* buffer);
 
 signals:
 	void cameraCoolingChanged(bool);

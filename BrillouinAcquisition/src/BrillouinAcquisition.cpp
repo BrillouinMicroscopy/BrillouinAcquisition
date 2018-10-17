@@ -1269,7 +1269,7 @@ void BrillouinAcquisition::updateImage(Camera *camera, PLOT_SETTINGS *plotSettin
 				return;
 			}
 
-			auto unpackedBuffer = reinterpret_cast<unsigned short*>(camera->m_previewBuffer->m_buffer->getReadBuffer());
+			auto unpackedBuffer = camera->m_previewBuffer->m_buffer->getReadBuffer();
 
 			// images are given row by row, starting at the top left
 			int tIndex;
