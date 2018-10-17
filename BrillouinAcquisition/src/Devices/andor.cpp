@@ -230,8 +230,11 @@ void Andor::preparePreview() {
 
 	setSettings(m_settings);
 
-	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
-	BUFFER_SETTINGS bufferSettings = { 5, pixelNumber * 2, m_settings.roi };
+	AT_64 ImageSizeBytes;
+	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
+	int BufferSize = static_cast<int>(ImageSizeBytes);
+
+	BUFFER_SETTINGS bufferSettings = { 5, BufferSize, m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
@@ -256,8 +259,11 @@ void Andor::startAcquisition(CAMERA_SETTINGS settings) {
 
 	setSettings(settings);
 
-	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
-	BUFFER_SETTINGS bufferSettings = { 4, pixelNumber * 2, m_settings.roi };
+	AT_64 ImageSizeBytes;
+	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
+	int BufferSize = static_cast<int>(ImageSizeBytes);
+
+	BUFFER_SETTINGS bufferSettings = { 4, BufferSize, m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
