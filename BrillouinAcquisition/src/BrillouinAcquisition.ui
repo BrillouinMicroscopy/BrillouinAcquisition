@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>958</width>
     <height>651</height>
    </rect>
   </property>
@@ -727,8 +727,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>236</width>
-                <height>219</height>
+                <width>165</width>
+                <height>180</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -788,7 +788,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>230</width>
-                <height>219</height>
+                <height>180</height>
                </rect>
               </property>
               <property name="sizePolicy">
@@ -1042,8 +1042,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>236</width>
-                <height>219</height>
+                <width>165</width>
+                <height>160</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -1522,15 +1522,15 @@ QTabBar::tab:!selected {
                     <property name="geometry">
                      <rect>
                       <x>0</x>
-                      <y>0</y>
+                      <y>-266</y>
                       <width>221</width>
-                      <height>480</height>
+                      <height>570</height>
                      </rect>
                     </property>
                     <property name="minimumSize">
                      <size>
                       <width>0</width>
-                      <height>480</height>
+                      <height>570</height>
                      </size>
                     </property>
                     <widget class="QGroupBox" name="acquisitionAOI">
@@ -1539,7 +1539,7 @@ QTabBar::tab:!selected {
                        <x>8</x>
                        <y>32</y>
                        <width>209</width>
-                       <height>113</height>
+                       <height>201</height>
                       </rect>
                      </property>
                      <property name="title">
@@ -1550,7 +1550,7 @@ QTabBar::tab:!selected {
                        <rect>
                         <x>8</x>
                         <y>15</y>
-                        <width>191</width>
+                        <width>193</width>
                         <height>89</height>
                        </rect>
                       </property>
@@ -1746,12 +1746,308 @@ QTabBar::tab:!selected {
                        </item>
                       </layout>
                      </widget>
+                     <widget class="QWidget" name="layoutWidget3_2">
+                      <property name="geometry">
+                       <rect>
+                        <x>8</x>
+                        <y>120</y>
+                        <width>193</width>
+                        <height>73</height>
+                       </rect>
+                      </property>
+                      <layout class="QGridLayout" name="gridLayout_4" rowstretch="0,0,0,0">
+                       <property name="horizontalSpacing">
+                        <number>10</number>
+                       </property>
+                       <item row="1" column="3">
+                        <widget class="QRadioButton" name="scanDirX2">
+                         <property name="maximumSize">
+                          <size>
+                           <width>10</width>
+                           <height>10</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                         <attribute name="buttonGroup">
+                          <string notr="true">buttonGroup</string>
+                         </attribute>
+                        </widget>
+                       </item>
+                       <item row="3" column="3">
+                        <widget class="QRadioButton" name="scanDirZ2">
+                         <property name="maximumSize">
+                          <size>
+                           <width>10</width>
+                           <height>10</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                         <attribute name="buttonGroup">
+                          <string notr="true">buttonGroup_3</string>
+                         </attribute>
+                        </widget>
+                       </item>
+                       <item row="2" column="2">
+                        <widget class="QRadioButton" name="scanDirY1">
+                         <property name="maximumSize">
+                          <size>
+                           <width>10</width>
+                           <height>10</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                         <attribute name="buttonGroup">
+                          <string notr="true">buttonGroup_2</string>
+                         </attribute>
+                        </widget>
+                       </item>
+                       <item row="2" column="1">
+                        <widget class="QRadioButton" name="scanDirY0">
+                         <property name="maximumSize">
+                          <size>
+                           <width>10</width>
+                           <height>10</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                         <attribute name="buttonGroup">
+                          <string notr="true">buttonGroup_2</string>
+                         </attribute>
+                        </widget>
+                       </item>
+                       <item row="3" column="2">
+                        <widget class="QRadioButton" name="scanDirZ1">
+                         <property name="maximumSize">
+                          <size>
+                           <width>10</width>
+                           <height>10</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                         <attribute name="buttonGroup">
+                          <string notr="true">buttonGroup_3</string>
+                         </attribute>
+                        </widget>
+                       </item>
+                       <item row="1" column="1">
+                        <widget class="QRadioButton" name="scanDirX0">
+                         <property name="maximumSize">
+                          <size>
+                           <width>10</width>
+                           <height>10</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                         <attribute name="buttonGroup">
+                          <string notr="true">buttonGroup</string>
+                         </attribute>
+                        </widget>
+                       </item>
+                       <item row="1" column="2">
+                        <widget class="QRadioButton" name="scanDirX1">
+                         <property name="maximumSize">
+                          <size>
+                           <width>10</width>
+                           <height>10</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                         <attribute name="buttonGroup">
+                          <string notr="true">buttonGroup</string>
+                         </attribute>
+                        </widget>
+                       </item>
+                       <item row="3" column="1">
+                        <widget class="QRadioButton" name="scanDirZ0">
+                         <property name="maximumSize">
+                          <size>
+                           <width>10</width>
+                           <height>10</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                         <attribute name="buttonGroup">
+                          <string notr="true">buttonGroup_3</string>
+                         </attribute>
+                        </widget>
+                       </item>
+                       <item row="1" column="0">
+                        <widget class="QLabel" name="scanDirX_Label">
+                         <property name="minimumSize">
+                          <size>
+                           <width>30</width>
+                           <height>10</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>10</width>
+                           <height>16777215</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string>x</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="3">
+                        <widget class="QRadioButton" name="scanDirY2">
+                         <property name="maximumSize">
+                          <size>
+                           <width>10</width>
+                           <height>10</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                         <attribute name="buttonGroup">
+                          <string notr="true">buttonGroup_2</string>
+                         </attribute>
+                        </widget>
+                       </item>
+                       <item row="2" column="0">
+                        <widget class="QLabel" name="scanDirY_Label">
+                         <property name="minimumSize">
+                          <size>
+                           <width>30</width>
+                           <height>10</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>10</width>
+                           <height>16777215</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string>y</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="1">
+                        <widget class="QLabel" name="scanDir0_Label">
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>0</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string>1</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="3">
+                        <widget class="QLabel" name="scanDir2_Label">
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>0</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string>3</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="2">
+                        <widget class="QLabel" name="scanDir1_Label">
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>0</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string>2</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="3" column="0">
+                        <widget class="QLabel" name="scanDirZ_Label">
+                         <property name="minimumSize">
+                          <size>
+                           <width>30</width>
+                           <height>10</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>10</width>
+                           <height>16777215</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string>z</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="0">
+                        <widget class="QCheckBox" name="scanDirAutoCheckbox">
+                         <property name="text">
+                          <string>Auto</string>
+                         </property>
+                         <property name="checked">
+                          <bool>true</bool>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </widget>
+                     <widget class="QLabel" name="ROITopLabel_2">
+                      <property name="geometry">
+                       <rect>
+                        <x>8</x>
+                        <y>104</y>
+                        <width>193</width>
+                        <height>18</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Select order of scan directions:</string>
+                      </property>
+                     </widget>
                     </widget>
                     <widget class="QGroupBox" name="liveCalibration">
                      <property name="geometry">
                       <rect>
                        <x>8</x>
-                       <y>152</y>
+                       <y>240</y>
                        <width>209</width>
                        <height>137</height>
                       </rect>
@@ -1985,7 +2281,7 @@ QTabBar::tab:!selected {
                      <property name="geometry">
                       <rect>
                        <x>8</x>
-                       <y>368</y>
+                       <y>456</y>
                        <width>209</width>
                        <height>113</height>
                       </rect>
@@ -2140,7 +2436,7 @@ border: none;</string>
                      <property name="geometry">
                       <rect>
                        <x>8</x>
-                       <y>296</y>
+                       <y>384</y>
                        <width>209</width>
                        <height>65</height>
                       </rect>
@@ -2310,7 +2606,7 @@ border: none;</string>
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>221</width>
+                      <width>165</width>
                       <height>545</height>
                      </rect>
                     </property>
@@ -2380,7 +2676,7 @@ border: none;</string>
                         <x>9</x>
                         <y>17</y>
                         <width>141</width>
-                        <height>74</height>
+                        <height>65</height>
                        </rect>
                       </property>
                       <layout class="QFormLayout" name="formLayout_2">
@@ -2549,7 +2845,7 @@ border: none;</string>
                         <x>8</x>
                         <y>16</y>
                         <width>141</width>
-                        <height>71</height>
+                        <height>65</height>
                        </rect>
                       </property>
                       <layout class="QFormLayout" name="formLayout">
@@ -3205,7 +3501,7 @@ border: none;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>958</width>
      <height>18</height>
     </rect>
    </property>
@@ -3400,4 +3696,9 @@ border: none;</string>
   <include location="../BrillouinAcquisition.qrc"/>
  </resources>
  <connections/>
+ <buttongroups>
+  <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup_3"/>
+ </buttongroups>
 </ui>
