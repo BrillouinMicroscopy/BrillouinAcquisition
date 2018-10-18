@@ -122,7 +122,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	
 	int rank_data = 3;
 	hsize_t dims_data[3] = { m_settings.camera.frameCount, m_settings.camera.roi.height, m_settings.camera.roi.width };
-	int bytesPerFrame = m_settings.camera.roi.width * m_settings.camera.roi.height * 2;
+	int bytesPerFrame = m_settings.camera.roi.width * m_settings.camera.roi.height;
 	ll = 0;
 
 	// reset number of calibrations
@@ -237,7 +237,7 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper> & storage) {
 	int rank_cal = 3;
 	hsize_t dims_cal[3] = { m_settings.nrCalibrationImages, m_settings.camera.roi.height, m_settings.camera.roi.width };
 
-	int bytesPerFrame = m_settings.camera.roi.width * m_settings.camera.roi.height * 2;
+	int bytesPerFrame = m_settings.camera.roi.width * m_settings.camera.roi.height;
 	std::vector<unsigned short> images((int64_t)bytesPerFrame * m_settings.nrCalibrationImages);
 	for (gsl::index mm = 0; mm < m_settings.nrCalibrationImages; mm++) {
 		if (m_abort) {
