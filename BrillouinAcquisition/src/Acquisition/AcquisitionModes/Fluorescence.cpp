@@ -117,11 +117,12 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper> & storage) {
 			continue;
 		}
 
-		m_settings.camera.exposureTime = 1e-3*channel->exposure;
-		(*m_pointGrey)->startAcquisition(m_settings.camera);
-
 		// move to Fluorescence configuration
 		(*m_NIDAQ)->setPreset(channel->preset);
+
+		// start image acquisition
+		m_settings.camera.exposureTime = 1e-3*channel->exposure;
+		(*m_pointGrey)->startAcquisition(m_settings.camera);
 
 		// read images from camera
 		std::vector<unsigned char> images(bytesPerFrame);
