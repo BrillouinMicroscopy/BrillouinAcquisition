@@ -132,6 +132,7 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	voltages.mirror = std::vector<float64>(m_acqSettings.numberPoints * samplesPerAngle * numberChannels, 0);
 	for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
 		voltages.trigger[i * samplesPerAngle + 2] = 1;
+		voltages.trigger[i * samplesPerAngle + 3] = 1;
 		std::fill_n(voltages.mirror.begin() + i * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i].Ux);
 		std::fill_n(voltages.mirror.begin() + i * samplesPerAngle + m_acqSettings.numberPoints * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i].Uy);
 	}
