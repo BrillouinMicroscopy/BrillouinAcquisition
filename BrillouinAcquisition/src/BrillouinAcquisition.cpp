@@ -1026,7 +1026,7 @@ void BrillouinAcquisition::initializePlot(PLOT_SETTINGS plotSettings) {
 	plotSettings.colorMap->setColorScale(colorScale); // associate the color map with the color scale
 	colorScale->axis()->setLabel("Intensity");
 
-	static QMetaObject::Connection connection = QWidget::connect<void(QCPColorMap::*)(const QCPRange &)>(
+	QWidget::connect<void(QCPColorMap::*)(const QCPRange &)>(
 		plotSettings.colorMap,
 		&QCPColorMap::dataRangeChanged,
 		this,
