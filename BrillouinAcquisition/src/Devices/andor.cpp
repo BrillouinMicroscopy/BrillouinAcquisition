@@ -287,7 +287,7 @@ void Andor::cleanupAcquisition() {
 	AT_Flush(m_camera);
 }
 
-void Andor::acquireImage(AT_U8* buffer) {
+void Andor::acquireImage(unsigned short* buffer) {
 	// Pass this buffer to the SDK
 	unsigned char* UserBuffer = new unsigned char[m_bufferSize];
 	AT_QueueBuffer(m_camera, UserBuffer, m_bufferSize);
@@ -309,7 +309,7 @@ void Andor::acquireImage(AT_U8* buffer) {
 	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width);
 	AT_GetInt(m_camera, L"AOIStride", &m_imageStride);
 
-	AT_ConvertBuffer(Buffer, buffer, m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding.c_str(), L"Mono16");
+	AT_ConvertBuffer(Buffer, reinterpret_cast<unsigned char*>(buffer), m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding.c_str(), L"Mono16");
 
 	delete[] Buffer;
 }
@@ -330,7 +330,7 @@ void Andor::getImageForPreview() {
 	}
 }
 
-void Andor::getImageForAcquisition(AT_U8* buffer) {
+void Andor::getImageForAcquisition(unsigned short* buffer) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	acquireImage(buffer);
 

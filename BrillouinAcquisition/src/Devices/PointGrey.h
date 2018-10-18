@@ -25,8 +25,6 @@ private:
 
 	void acquireImage(unsigned char * buffer);
 
-	std::mutex m_mutex;
-
 	/*
 	 * Members and functions inherited from base class
 	 */
