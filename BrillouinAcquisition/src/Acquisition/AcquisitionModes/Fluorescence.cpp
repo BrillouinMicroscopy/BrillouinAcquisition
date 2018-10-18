@@ -124,14 +124,14 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper> & storage) {
 		(*m_NIDAQ)->setPreset(channel->preset);
 
 		// read images from camera
-		std::vector<unsigned char> images(bytesPerFrame);
+		std::vector<unsigned short> images(bytesPerFrame);
 
 			// acquire images
 		int64_t pointerPos = 0 * (int64_t)bytesPerFrame;
 		(*m_pointGrey)->getImageForAcquisition(&images[pointerPos]);
 
 		// cast the vector to unsigned short
-		std::vector<unsigned char> *images_ = (std::vector<unsigned char> *) &images;
+		std::vector<unsigned short> *images_ = (std::vector<unsigned short> *) &images;
 
 		// store images
 		// asynchronously write image to disk

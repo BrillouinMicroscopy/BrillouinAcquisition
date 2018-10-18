@@ -74,7 +74,9 @@ Q_DECLARE_METATYPE(ODT_SETTING);
 Q_DECLARE_METATYPE(ODT_SETTINGS);
 Q_DECLARE_METATYPE(ODTIMAGE*);
 Q_DECLARE_METATYPE(FLUOIMAGE*);
-Q_DECLARE_METATYPE(FLUORESCENCE_SETTINGS*);
+Q_DECLARE_METATYPE(FLUORESCENCE_SETTINGS);
+Q_DECLARE_METATYPE(Camera*);
+Q_DECLARE_METATYPE(bool*);
 
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
@@ -130,8 +132,8 @@ private slots:
 	void microscopeElementPositionsChanged(std::vector<int>);
 	void microscopeElementPositionChanged(DeviceElement element, int position);
 	void on_camera_playPause_clicked();
-	void onNewImage();
-	void onNewBrightfieldImage();
+	void updateImage(Camera *camera, PLOT_SETTINGS *plotSettings, bool *running);
+
 	void initializePlot(PLOT_SETTINGS plotSettings);
 
 	void xAxisRangeChangedODT(const QCPRange & newRange);

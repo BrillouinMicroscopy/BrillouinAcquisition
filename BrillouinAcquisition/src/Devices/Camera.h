@@ -25,6 +25,10 @@ public:
 	CAMERA_OPTIONS getOptions();
 	CAMERA_SETTINGS getSettings();
 
+	// preview buffer for live acquisition
+	PreviewBuffer<unsigned short>* m_previewBuffer = new PreviewBuffer<unsigned short>;
+
+
 public slots:
 	virtual void setSettings(CAMERA_SETTINGS) = 0;
 	virtual void startPreview() = 0;
@@ -39,6 +43,8 @@ protected:
 
 	virtual void readOptions() = 0;
 	virtual void readSettings() = 0;
+
+	std::mutex m_mutex;
 
 signals:
 	void settingsChanged(CAMERA_SETTINGS);

@@ -23,9 +23,7 @@ private:
 
 	void preparePreview();
 
-	void acquireImage(unsigned char * buffer);
-
-	std::mutex m_mutex;
+	void acquireImage(unsigned short* buffer);
 
 	/*
 	 * Members and functions inherited from base class
@@ -40,9 +38,6 @@ public:
 	PointGrey() noexcept {};
 	~PointGrey();
 
-	// preview buffer for live acquisition
-	PreviewBuffer<unsigned char>* m_previewBuffer = new PreviewBuffer<unsigned char>;
-
 public slots:
 	void init() {};
 	void connectDevice();
@@ -55,7 +50,7 @@ public slots:
 	void startAcquisition(CAMERA_SETTINGS);
 	void stopAcquisition();
 
-	void getImageForAcquisition(unsigned char* buffer);
+	void getImageForAcquisition(unsigned short* buffer);
 
 signals:
 	void s_previewRunning(bool);
