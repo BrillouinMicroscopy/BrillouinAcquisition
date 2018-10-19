@@ -168,6 +168,16 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		[this](int repNumber, int timeToNext) { showRepProgress(repNumber, timeToNext); }
 	);
 
+	// slot to update the scan order
+	connection = QWidget::connect(
+		m_Brillouin,
+		&Brillouin::s_scanOrderChanged,
+		this,
+		[this](SCAN_ORDER scanOrder) { scanOrderChanged(scanOrder); }
+	);
+
+	m_Brillouin->getScanOrder();
+
 	qRegisterMetaType<std::string>("std::string");
 	qRegisterMetaType<AT_64>("AT_64");
 	qRegisterMetaType<StoragePath>("StoragePath");
@@ -333,6 +343,17 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	ui->parametersWidget->layout()->setAlignment(Qt::AlignTop);
 
 	ui->brightfieldImage->hide();
+
+	// set up scan direction radio button ids
+	ui->buttonGroup->setId(ui->scanDirX0, 0);
+	ui->buttonGroup->setId(ui->scanDirX1, 1);
+	ui->buttonGroup->setId(ui->scanDirX2, 2);
+	ui->buttonGroup_2->setId(ui->scanDirY0, 0);
+	ui->buttonGroup_2->setId(ui->scanDirY1, 1);
+	ui->buttonGroup_2->setId(ui->scanDirY2, 2);
+	ui->buttonGroup_3->setId(ui->scanDirZ0, 0);
+	ui->buttonGroup_3->setId(ui->scanDirZ1, 1);
+	ui->buttonGroup_3->setId(ui->scanDirZ2, 2);
 }
 
 BrillouinAcquisition::~BrillouinAcquisition() {
@@ -2032,14 +2053,17 @@ void BrillouinAcquisition::on_endZ_valueChanged(double value) {
 
 void BrillouinAcquisition::on_stepsX_valueChanged(int value) {
 	m_BrillouinSettings.xSteps = value;
+	m_Brillouin->setStepNumberX(value);
 }
 
 void BrillouinAcquisition::on_stepsY_valueChanged(int value) {
 	m_BrillouinSettings.ySteps = value;
+	m_Brillouin->setStepNumberY(value);
 }
 
 void BrillouinAcquisition::on_stepsZ_valueChanged(int value) {
 	m_BrillouinSettings.zSteps = value;
+	m_Brillouin->setStepNumberZ(value);
 }
 
 void BrillouinAcquisition::on_preCalibration_stateChanged(int state) {
@@ -2139,6 +2163,62 @@ void BrillouinAcquisition::updateSavedPositions() {
 	ui->tableView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 	ui->tableView->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 	ui->tableView->show();
+}
+
+void BrillouinAcquisition::on_scanDirAutoCheckbox_stateChanged(int automatical) {
+	m_Brillouin->setScanOrderAuto((bool)automatical);
+}
+
+void BrillouinAcquisition::on_buttonGroup_buttonClicked(int button) {
+	m_Brillouin->setScanOrderX(button);
+}
+
+void BrillouinAcquisition::on_buttonGroup_2_buttonClicked(int button) {
+	m_Brillouin->setScanOrderY(button);
+}
+
+void BrillouinAcquisition::on_buttonGroup_3_buttonClicked(int button) {
+	m_Brillouin->setScanOrderZ(button);
+}
+
+void BrillouinAcquisition::scanOrderChanged(SCAN_ORDER scanOrder) {
+	if (scanOrder.x == 0) {
+		ui->scanDirX0->setChecked(true);
+	}
+	if (scanOrder.x == 1) {
+		ui->scanDirX1->setChecked(true);
+	}
+	if (scanOrder.x == 2) {
+		ui->scanDirX2->setChecked(true);
+	}
+	if (scanOrder.y == 0) {
+		ui->scanDirY0->setChecked(true);
+	}
+	if (scanOrder.y == 1) {
+		ui->scanDirY1->setChecked(true);
+	}
+	if (scanOrder.y == 2) {
+		ui->scanDirY2->setChecked(true);
+	}
+	if (scanOrder.z == 0) {
+		ui->scanDirZ0->setChecked(true);
+	}
+	if (scanOrder.z == 1) {
+		ui->scanDirZ1->setChecked(true);
+	}
+	if (scanOrder.z == 2) {
+		ui->scanDirZ2->setChecked(true);
+	}
+	// disable radio buttons if order is determined automatically
+	ui->scanDirX0->setDisabled(scanOrder.automatical);
+	ui->scanDirX1->setDisabled(scanOrder.automatical);
+	ui->scanDirX2->setDisabled(scanOrder.automatical);
+	ui->scanDirY0->setDisabled(scanOrder.automatical);
+	ui->scanDirY1->setDisabled(scanOrder.automatical);
+	ui->scanDirY2->setDisabled(scanOrder.automatical);
+	ui->scanDirZ0->setDisabled(scanOrder.automatical);
+	ui->scanDirZ1->setDisabled(scanOrder.automatical);
+	ui->scanDirZ2->setDisabled(scanOrder.automatical);
 }
 
 void BrillouinAcquisition::on_exposureTime_valueChanged(double value) {

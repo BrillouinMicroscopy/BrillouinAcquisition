@@ -268,6 +268,16 @@ private slots:
 	void on_setPositionZ_valueChanged(double);
 	void updateSavedPositions();
 
+	/*
+	 *	Scan direction order related functions
+	 */
+	void on_scanDirAutoCheckbox_stateChanged(int);
+	void on_buttonGroup_buttonClicked(int);
+	void on_buttonGroup_2_buttonClicked(int);
+	void on_buttonGroup_3_buttonClicked(int);
+
+	void scanOrderChanged(SCAN_ORDER scanOrder);
+
 public:
 	BrillouinAcquisition(QWidget *parent = nullptr) noexcept;
 	~BrillouinAcquisition();

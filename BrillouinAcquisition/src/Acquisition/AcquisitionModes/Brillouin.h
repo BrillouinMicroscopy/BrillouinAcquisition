@@ -7,8 +7,14 @@
 #include "../../thread.h"
 #include "../../circularBuffer.h"
 
-struct BRILLOUIN_SETTINGS {
+struct SCAN_ORDER {
+	bool automatical{ true };
+	int x{ 0 };	// first scan in x-direction
+	int y{ 1 };	// then in y-direction
+	int z{ 2 };	// scan in z-direction last
+};
 
+struct BRILLOUIN_SETTINGS {
 	// calibration parameters
 	std::string sample = "Methanol & Water";
 	bool preCalibration = true;				// do pre calibration
@@ -46,10 +52,33 @@ public slots:
 	void init() {};
 	void startRepetitions();
 
+	void setStepNumberX(int);
+	void setStepNumberY(int);
+	void setStepNumberZ(int);
+
 	void setSettings(BRILLOUIN_SETTINGS settings);
+
+	/*
+	 *	Scan direction order related variables and functions
+	 */
+
+	int getScanOrderX();
+	int getScanOrderY();
+	int getScanOrderZ();
+
+	void setScanOrderX(int x);
+	void setScanOrderY(int y);
+	void setScanOrderZ(int z);
+
+	void setScanOrderAuto(bool automatical);
+
+	void determineScanOrder();
+
+	void getScanOrder();
 
 private:
 	BRILLOUIN_SETTINGS m_settings;
+	SCAN_ORDER m_scanOrder;
 	//Thread m_storageThread;
 	Andor *m_andor;
 	ScanControl **m_scanControl;
@@ -69,6 +98,7 @@ signals:
 	void s_positionChanged(POINT3, int);
 	void s_timeToCalibration(int);	// time to next calibration
 	void s_calibrationRunning(bool);	// is calibration running
+	void s_scanOrderChanged(SCAN_ORDER);
 };
 
 #endif //BRILLOUIN_H

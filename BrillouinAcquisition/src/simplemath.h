@@ -77,6 +77,19 @@ public:
 		}
 		return false;
 	}
+
+	// See https://stackoverflow.com/questions/37732275/how-to-get-the-sorted-index-of-a-vector
+	template<typename T>
+	static std::vector<std::size_t> tag_sort_inverse(const std::vector<T>& v) {
+		std::vector<std::size_t> result(v.size());
+		std::iota(std::begin(result), std::end(result), 0);
+		std::sort(std::begin(result), std::end(result),
+			[&v](const auto & lhs, const auto & rhs) {
+				return v[lhs] > v[rhs];
+			}
+		);
+		return result;
+	}
 };
 
 #endif // SIMPLEMATH_H
