@@ -32,6 +32,7 @@ class NIDAQ: public ScanControl {
 private:
 	TaskHandle AOtaskHandle = 0;
 	TaskHandle DOtaskHandle = 0;
+	TaskHandle DOtaskHandle_LED = 0;
 
 	struct TTL {
 		const uInt8 low = 0;
@@ -64,6 +65,7 @@ private:
 
 	VOLTAGE2 m_voltages{ 0, 0 };	// current voltage
 	POINT3 m_position{ 0, 0, 0 };	// current position
+	bool m_LEDon{ false };			// current state of the LED illumination source
 	
 	
 	// TODO: make the following parameters changeable:
@@ -90,6 +92,7 @@ private:
 		MOVEMIRROR,
 		EXFILTER,
 		EMFILTER,
+		LEDLAMP,
 		COUNT
 	};
 
@@ -127,6 +130,8 @@ public slots:
 	int getExFilter();
 	int getEmFilter();
 	int getFilter(FilterMount * device);
+	void setLEDLamp(bool position);
+	int getLEDLamp();
 	int getMirror();
 	// sets the position relative to the home position m_homePosition
 	void setPositionRelativeX(double position);

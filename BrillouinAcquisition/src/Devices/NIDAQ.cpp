@@ -79,17 +79,19 @@ NIDAQ::NIDAQ() noexcept {
 		{ "Flip Mirror",		2, (int)DEVICE_ELEMENT::CALFLIPMIRROR,	{ "Open", "Reflect" } },
 		{ "Moveable Mirror",	2, (int)DEVICE_ELEMENT::MOVEMIRROR,		{ "Reflect", "Open" } },
 		{ "Excitation Filter",	4, (int)DEVICE_ELEMENT::EXFILTER,		{ "Block", "Blue", "Green", "Red" } },
-		{ "Emission Filter",	4, (int)DEVICE_ELEMENT::EMFILTER,		{ "Open", "Blue", "Green", "Red" } }
+		{ "Emission Filter",	4, (int)DEVICE_ELEMENT::EMFILTER,		{ "Open", "Blue", "Green", "Red" } },
+		{ "LED illumination",	2, (int)DEVICE_ELEMENT::LEDLAMP,		{ "Off", "On" } }
 	};
 
 	m_presets = {
-		{	"Brillouin",	SCAN_BRILLOUIN,		{ {2}, {1}, {1}, {}, {} }		},	// Brillouin
-		{	"Calibration",	SCAN_CALIBRATION,	{ {2}, {2}, {1}, {}, {} }		},	// Brillouin Calibration
-		{	"ODT",			SCAN_ODT,			{ {2}, {}, {2}, {1}, {1} }		},	// ODT
-		{	"Fluo off",		SCAN_EPIFLUOOFF,	{ {}, {}, {}, {1}, {1} }		},	// Fluorescence off
-		{	"Fluo Blue",	SCAN_EPIFLUOBLUE,	{ {}, {}, {}, {2}, {2} }		},	// Fluorescence blue
-		{	"Fluo Green",	SCAN_EPIFLUOGREEN,	{ {}, {}, {}, {3}, {3} }		},	// Fluorescence green
-		{	"Fluo Red",		SCAN_EPIFLUORED,	{ {}, {}, {}, {4}, {4} }		}	// Fluorescence red
+		{	"Brillouin",	SCAN_BRILLOUIN,		{ {2}, {1}, {1},  {},  {},  {} }	},	// Brillouin
+		{	"Calibration",	SCAN_CALIBRATION,	{ {2}, {2}, {1},  {},  {},  {} }	},	// Brillouin Calibration
+		{	"ODT",			SCAN_ODT,			{ {2},  {}, {2}, {1}, {1}, {1} }	},	// ODT
+		{	"Brightfield",	SCAN_BRIGHTFIELD,	{  {},  {},  {},  {}, {1}, {2} }	},	// Brightfield
+		{	"Fluo off",		SCAN_EPIFLUOOFF,	{  {},  {},  {}, {1}, {1},  {} }	},	// Fluorescence off
+		{	"Fluo Blue",	SCAN_EPIFLUOBLUE,	{  {},  {},  {}, {2}, {2}, {1} }	},	// Fluorescence blue
+		{	"Fluo Green",	SCAN_EPIFLUOGREEN,	{ {1},  {},  {}, {3}, {3}, {1} }	},	// Fluorescence green
+		{	"Fluo Red",		SCAN_EPIFLUORED,	{  {},  {},  {}, {4}, {4}, {1} }	}	// Fluorescence red
 	};
 
 	m_absoluteBounds = m_calibration.bounds;
@@ -128,6 +130,17 @@ void NIDAQ::connectDevice() {
 		DAQmxWriteDigitalLines(DOtaskHandle, 1, false, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
 
 		DAQmxSetWriteAttribute(DOtaskHandle, DAQmx_Write_RegenMode, DAQmx_Val_DoNotAllowRegen);
+
+		// Create task for digital output to LED lamp
+		DAQmxCreateTask("DO_LED", &DOtaskHandle_LED);
+		// Configure digital output channel
+		DAQmxCreateDOChan(DOtaskHandle_LED, "Dev1/Port0/Line2:2", "DO_LED", DAQmx_Val_ChanForAllLines);
+		// Configure regen mode
+		DAQmxSetWriteAttribute(DOtaskHandle_LED, DAQmx_Write_RegenMode, DAQmx_Val_AllowRegen);
+		// Start digital task
+		DAQmxStartTask(DOtaskHandle_LED);
+		// Set digital line to low
+		DAQmxWriteDigitalLines(DOtaskHandle_LED, 1, false, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
 
 		// Start digital task
 		DAQmxStartTask(DOtaskHandle);
@@ -225,6 +238,9 @@ void NIDAQ::setElement(DeviceElement element, int position) {
 		case DEVICE_ELEMENT::EMFILTER:
 			setEmFilter(position);
 			break;
+		case DEVICE_ELEMENT::LEDLAMP:
+			setLEDLamp(position - 1);
+			break;
 		default:
 			break;
 	}
@@ -249,6 +265,9 @@ void NIDAQ::getElement(DeviceElement element) {
 			break;
 		case DEVICE_ELEMENT::EMFILTER:
 			m_elementPositions[element.index] = getEmFilter();
+			break;
+		case DEVICE_ELEMENT::LEDLAMP:
+			m_elementPositions[element.index] = getLEDLamp() + 1;
 			break;
 		default:
 			return;
@@ -284,6 +303,7 @@ void NIDAQ::getElements() {
 	m_elementPositions[(int)DEVICE_ELEMENT::MOVEMIRROR] = getMirror();
 	m_elementPositions[(int)DEVICE_ELEMENT::EXFILTER] = getExFilter();
 	m_elementPositions[(int)DEVICE_ELEMENT::EMFILTER] = getEmFilter();
+	m_elementPositions[(int)DEVICE_ELEMENT::LEDLAMP] = getLEDLamp() + 1;
 	checkPresets();
 	emit(elementPositionsChanged(m_elementPositions));
 }
@@ -368,6 +388,17 @@ int NIDAQ::getFilter(FilterMount *device) {
 		}
 	}
 	return -1;
+}
+
+void NIDAQ::setLEDLamp(bool position) {
+	m_LEDon = position;
+	// Write digital voltages
+	const uInt8	voltage = (uInt8)m_LEDon;
+	DAQmxWriteDigitalLines(DOtaskHandle_LED, 1, false, 10, DAQmx_Val_GroupByChannel, &voltage, NULL, NULL);
+}
+
+int NIDAQ::getLEDLamp() {
+	return (int)m_LEDon;
 }
 
 void NIDAQ::applyScanPosition() {

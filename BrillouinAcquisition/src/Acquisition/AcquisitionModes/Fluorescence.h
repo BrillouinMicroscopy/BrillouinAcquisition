@@ -25,7 +25,7 @@ struct FLUORESCENCE_SETTINGS {
 	ChannelSettings blue{ true, 900, "blue", FLUORESCENCE_MODE::BLUE, SCAN_EPIFLUOBLUE };
 	ChannelSettings green{ true, 900, "Green", FLUORESCENCE_MODE::GREEN, SCAN_EPIFLUOGREEN };
 	ChannelSettings red{ true, 900, "Red", FLUORESCENCE_MODE::RED, SCAN_EPIFLUORED };
-	ChannelSettings brightfield{ true, 900, "Brightfield", FLUORESCENCE_MODE::BRIGHTFIELD, SCAN_EPIFLUOOFF };
+	ChannelSettings brightfield{ true, 900, "Brightfield", FLUORESCENCE_MODE::BRIGHTFIELD, SCAN_BRIGHTFIELD };
 	CAMERA_SETTINGS camera;
 };
 
