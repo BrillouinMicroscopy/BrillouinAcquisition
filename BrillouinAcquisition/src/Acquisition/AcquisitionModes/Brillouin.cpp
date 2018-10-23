@@ -110,10 +110,8 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	 *	Construct positions vector with correct order of scan directions
 	 */
 
-	// Create position vectors
-	std::vector<double> positionsX(nrPositions);
-	std::vector<double> positionsY(nrPositions);
-	std::vector<double> positionsZ(nrPositions);
+	// Create positions vector
+	std::vector<POINT3> orderedPositions(nrPositions);
 	std::vector<int> indexX(nrPositions, 0);
 	std::vector<int> indexY(nrPositions, 0);
 	std::vector<int> indexZ(nrPositions, 0);
@@ -138,19 +136,17 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 			for (gsl::index kk = 0; kk < directions[0].size(); kk++) {
 
 				// construct indices vector
-				indices[2] = ii;
-				indices[1] = jj;
 				indices[0] = kk;
+				indices[1] = jj;
+				indices[2] = ii;
 				
 				// construct position vector
-				position[2] = directions[2][ii];
-				position[1] = directions[1][jj];
 				position[0] = directions[0][kk];
+				position[1] = directions[1][jj];
+				position[2] = directions[2][ii];
 
 				// calculate stage positions
-				positionsX[ll] = position[indX] + m_startPosition.x;
-				positionsY[ll] = position[indY] + m_startPosition.y;
-				positionsZ[ll] = position[indZ] + m_startPosition.z;
+				orderedPositions[ll] = POINT3{ position[indX], position[indY], position[indZ] } + m_startPosition;
 
 				// fill index vectors
 				indexX[ll] = indices[indX];
@@ -166,8 +162,26 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 		}
 	}
 
+	/*
+	 *	Construct positions vector for H5 file with row-major order: z, x, y
+	 */
+
+	std::vector<double> positionsX(nrPositions);
+	std::vector<double> positionsY(nrPositions);
+	std::vector<double> positionsZ(nrPositions);
+	ll = 0;
+	for (gsl::index ii = 0; ii < m_settings.zSteps; ii++) {
+		for (gsl::index jj = 0; jj < m_settings.xSteps; jj++) {
+			for (gsl::index kk = 0; kk < m_settings.ySteps; kk++) {
+				positionsX[ll] = directions[indX][jj] + m_startPosition.x;
+				positionsY[ll] = directions[indY][kk] + m_startPosition.y;
+				positionsZ[ll] = directions[indZ][ii] + m_startPosition.z;
+				ll++;
+			}
+		}
+	}
+
 	int rank = 3;
-	// For compatibility with MATLAB respect Fortran-style ordering: z, x, y
 	hsize_t *dims = new hsize_t[rank];
 	dims[0] = m_settings.zSteps;
 	dims[1] = m_settings.xSteps;
@@ -211,8 +225,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 		int nextCalibration = 100 * (1e-3 * calibrationTimer.elapsed()) / (60 * m_settings.conCalibrationInterval);
 		emit(s_timeToCalibration(nextCalibration));
 		// move stage to correct position, wait 50 ms for it to finish
-		POINT3 newPosition{ positionsX[ll], positionsY[ll], positionsZ[ll] };
-		(*m_scanControl)->setPosition(newPosition);
+		(*m_scanControl)->setPosition(orderedPositions[ll]);
 
 		std::vector<unsigned short> images(bytesPerFrame * m_settings.camera.frameCount);
 
@@ -221,7 +234,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 				this->abortMode();
 				return;
 			}
-			emit(s_positionChanged( newPosition - m_startPosition, mm + 1));
+			emit(s_positionChanged(orderedPositions[ll] - m_startPosition, mm + 1));
 			// acquire images
 			int64_t pointerPos = (int64_t)bytesPerFrame * mm;
 			m_andor->getImageForAcquisition(&images[pointerPos]);
