@@ -179,7 +179,7 @@ QTabBar::tab:!selected {
               <property name="geometry">
                <rect>
                 <x>0</x>
-                <y>0</y>
+                <y>-91</y>
                 <width>223</width>
                 <height>310</height>
                </rect>
@@ -727,8 +727,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>165</width>
-                <height>180</height>
+                <width>236</width>
+                <height>219</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -788,7 +788,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>230</width>
-                <height>180</height>
+                <height>219</height>
                </rect>
               </property>
               <property name="sizePolicy">
@@ -1042,8 +1042,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>165</width>
-                <height>160</height>
+                <width>236</width>
+                <height>219</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -1522,7 +1522,7 @@ QTabBar::tab:!selected {
                     <property name="geometry">
                      <rect>
                       <x>0</x>
-                      <y>-266</y>
+                      <y>0</y>
                       <width>221</width>
                       <height>570</height>
                      </rect>
@@ -2605,8 +2605,8 @@ border: none;</string>
                     <property name="geometry">
                      <rect>
                       <x>0</x>
-                      <y>0</y>
-                      <width>165</width>
+                      <y>-108</y>
+                      <width>221</width>
                       <height>545</height>
                      </rect>
                     </property>
@@ -3620,7 +3620,9 @@ border: none;</string>
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>settingsWidget</tabstop>
   <tabstop>cTScrollArea</tabstop>
+  <tabstop>exposureTime</tabstop>
   <tabstop>frameCount</tabstop>
   <tabstop>triggerMode</tabstop>
   <tabstop>sensorTemp</tabstop>
@@ -3634,10 +3636,7 @@ border: none;</string>
   <tabstop>pixelEncoding</tabstop>
   <tabstop>cycleMode</tabstop>
   <tabstop>sTScrollArea</tabstop>
-  <tabstop>autoscalePlot</tabstop>
-  <tabstop>settingsWidget</tabstop>
-  <tabstop>camera_singleShot</tabstop>
-  <tabstop>camera_playPause</tabstop>
+  <tabstop>BrillouinStart</tabstop>
   <tabstop>savePosition</tabstop>
   <tabstop>setHome</tabstop>
   <tabstop>moveHome</tabstop>
@@ -3647,14 +3646,14 @@ border: none;</string>
   <tabstop>tableView</tabstop>
   <tabstop>sTScrollArea_2</tabstop>
   <tabstop>sTScrollArea_3</tabstop>
+  <tabstop>acquisitionModeTabs</tabstop>
   <tabstop>exposureTimeODT</tabstop>
+  <tabstop>gainODT</tabstop>
   <tabstop>ROILeftODT</tabstop>
   <tabstop>ROIWidthODT</tabstop>
   <tabstop>ROITopODT</tabstop>
   <tabstop>ROIHeightODT</tabstop>
   <tabstop>pixelEncodingODT</tabstop>
-  <tabstop>acquisitionFilename</tabstop>
-  <tabstop>acquisitionModeTabs</tabstop>
   <tabstop>scrollArea</tabstop>
   <tabstop>startX</tabstop>
   <tabstop>endX</tabstop>
@@ -3665,6 +3664,16 @@ border: none;</string>
   <tabstop>startZ</tabstop>
   <tabstop>endZ</tabstop>
   <tabstop>stepsZ</tabstop>
+  <tabstop>scanDirAutoCheckbox</tabstop>
+  <tabstop>scanDirX0</tabstop>
+  <tabstop>scanDirX1</tabstop>
+  <tabstop>scanDirX2</tabstop>
+  <tabstop>scanDirY0</tabstop>
+  <tabstop>scanDirY1</tabstop>
+  <tabstop>scanDirY2</tabstop>
+  <tabstop>scanDirZ0</tabstop>
+  <tabstop>scanDirZ1</tabstop>
+  <tabstop>scanDirZ2</tabstop>
   <tabstop>preCalibration</tabstop>
   <tabstop>postCalibration</tabstop>
   <tabstop>conCalibration</tabstop>
@@ -3672,33 +3681,52 @@ border: none;</string>
   <tabstop>sampleSelection</tabstop>
   <tabstop>nrCalibrationImages</tabstop>
   <tabstop>calibrationExposureTime</tabstop>
+  <tabstop>repetitionCount</tabstop>
+  <tabstop>repetitionInterval</tabstop>
   <tabstop>positionX</tabstop>
   <tabstop>positionY</tabstop>
   <tabstop>positionZ</tabstop>
   <tabstop>imageNr</tabstop>
-  <tabstop>repetitionCount</tabstop>
-  <tabstop>repetitionInterval</tabstop>
-  <tabstop>BrillouinStart</tabstop>
-  <tabstop>scrollArea_2</tabstop>
-  <tabstop>alignmentUR_ODT</tabstop>
-  <tabstop>alignmentRate_ODT</tabstop>
-  <tabstop>alignmentStartODT</tabstop>
-  <tabstop>alignmentNumber_ODT</tabstop>
-  <tabstop>acquisitionUR_ODT</tabstop>
-  <tabstop>acquisitionRate_ODT</tabstop>
-  <tabstop>acquisitionStartODT</tabstop>
-  <tabstop>acquisitionNumber_ODT</tabstop>
+  <tabstop>acquisitionFilename</tabstop>
   <tabstop>autoscalePlot_brightfield</tabstop>
+  <tabstop>rangeLowerODT</tabstop>
+  <tabstop>rangeUpperODT</tabstop>
   <tabstop>camera_singleShot_brightfield</tabstop>
   <tabstop>camera_playPause_brightfield</tabstop>
+  <tabstop>autoscalePlot</tabstop>
+  <tabstop>rangeLower</tabstop>
+  <tabstop>rangeUpper</tabstop>
+  <tabstop>camera_singleShot</tabstop>
+  <tabstop>camera_playPause</tabstop>
+  <tabstop>scrollArea_2</tabstop>
+  <tabstop>fluoGain</tabstop>
+  <tabstop>acquisitionStartFluorescence</tabstop>
+  <tabstop>fluoBlueCheckbox</tabstop>
+  <tabstop>fluoBlueExposure</tabstop>
+  <tabstop>fluoGreenCheckbox</tabstop>
+  <tabstop>fluoGreenExposure</tabstop>
+  <tabstop>fluoRedCheckbox</tabstop>
+  <tabstop>fluoRedExposure</tabstop>
+  <tabstop>fluoBrightfieldCheckbox</tabstop>
+  <tabstop>fluoBrightfieldExposure</tabstop>
+  <tabstop>scrollArea_3</tabstop>
+  <tabstop>alignmentUR_ODT</tabstop>
+  <tabstop>alignmentNumber_ODT</tabstop>
+  <tabstop>alignmentRate_ODT</tabstop>
+  <tabstop>alignmentStartODT</tabstop>
+  <tabstop>alignmentCenterODT</tabstop>
+  <tabstop>acquisitionUR_ODT</tabstop>
+  <tabstop>acquisitionNumber_ODT</tabstop>
+  <tabstop>acquisitionRate_ODT</tabstop>
+  <tabstop>acquisitionStartODT</tabstop>
  </tabstops>
  <resources>
   <include location="../BrillouinAcquisition.qrc"/>
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup"/>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup_3"/>
+  <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>
