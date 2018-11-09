@@ -13,10 +13,13 @@ ZeissECU::ZeissECU() noexcept {
 	};
 
 	m_presets = {
-		{	"Brillouin",	SCAN_BRILLOUIN,		{ {}, {1}, {3}, {1}, {2}, {1, 2} }	},	// Brillouin
-		{	"Calibration",	SCAN_CALIBRATION,	{ {}, {1}, {3}, {1}, {3}, {1, 2} }	},	// Calibration
-		{	"Brightfield",	SCAN_BRIGHTFIELD,	{ {}, {1}, {3}, {1}, {2}, {2} }	},		// Brightfield
-		{	"Eyepiece",		SCAN_EYEPIECE,		{ {}, {1}, {3}, {2}, {3}, {2} }	}		// Eyepiece
+		{	"Brillouin",	SCAN_BRILLOUIN,		{ {}, {1}, {3}, {1}, {2},  {} }	},	// Brillouin
+		{	"Calibration",	SCAN_CALIBRATION,	{ {}, {1}, {3}, {1}, {3},  {} }	},	// Calibration
+		{	"Brightfield",	SCAN_BRIGHTFIELD,	{ {}, {1}, {3}, {1}, {2}, {2} }	},	// Brightfield
+		{	"Eyepiece",		SCAN_EYEPIECE,		{ {}, {1}, {3}, {2}, {3}, {2} }	},	// Eyepiece
+		{	"Fluo Blue",	SCAN_EPIFLUOBLUE,	{ {}, {3}, {3}, {},  {2},  {} }	},	// Fluorescence blue
+		{	"Fluo Green",	SCAN_EPIFLUOGREEN,	{ {}, {4}, {3}, {},  {2},  {} }	},	// Fluorescence green
+		{	"Fluo Violet",	SCAN_EPIFLUOVIOLET,	{ {}, {2}, {3}, {},  {2},  {} }	}	// Fluorescence violet
 	};
 
 	// bounds of the stage
