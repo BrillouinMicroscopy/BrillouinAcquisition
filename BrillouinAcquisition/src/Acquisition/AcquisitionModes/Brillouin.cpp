@@ -265,6 +265,8 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 
 	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
 
+	(*m_scanControl)->setPreset(SCAN_LASEROFF);
+
 	(*m_scanControl)->setPosition(m_startPosition);
 	emit(s_positionChanged({ 0, 0, 0 }, 0));
 	(*m_scanControl)->startAnnouncingPosition();
