@@ -4,6 +4,7 @@
 ZeissECU::ZeissECU() noexcept {
 
 	m_deviceElements = {
+		{ "Beam Block",	2, (int)DEVICE_ELEMENT::BEAMBLOCK, { "Close", "Open" } },
 		{ "Objective",	6, (int)DEVICE_ELEMENT::OBJECTIVE },
 		{ "Reflector",	5, (int)DEVICE_ELEMENT::REFLECTOR },
 		{ "Tubelens",	3, (int)DEVICE_ELEMENT::TUBELENS },
@@ -13,13 +14,14 @@ ZeissECU::ZeissECU() noexcept {
 	};
 
 	m_presets = {
-		{	"Brillouin",	SCAN_BRILLOUIN,		{ {}, {1}, {3}, {1}, {2},  {} }	},	// Brillouin
-		{	"Calibration",	SCAN_CALIBRATION,	{ {}, {1}, {3}, {1}, {3},  {} }	},	// Calibration
-		{	"Brightfield",	SCAN_BRIGHTFIELD,	{ {}, {1}, {3}, {1}, {2}, {2} }	},	// Brightfield
-		{	"Eyepiece",		SCAN_EYEPIECE,		{ {}, {1}, {3}, {2}, {3}, {2} }	},	// Eyepiece
-		{	"Fluo Blue",	SCAN_EPIFLUOBLUE,	{ {}, {3}, {3}, {},  {2},  {} }	},	// Fluorescence blue
-		{	"Fluo Green",	SCAN_EPIFLUOGREEN,	{ {}, {4}, {3}, {},  {2},  {} }	},	// Fluorescence green
-		{	"Fluo Violet",	SCAN_EPIFLUOVIOLET,	{ {}, {2}, {3}, {},  {2},  {} }	}	// Fluorescence violet
+		{	"Brillouin",	SCAN_BRILLOUIN,		{ {2}, {}, {1}, {3}, {1}, {2},  {} }	},	// Brillouin
+		{	"Calibration",	SCAN_CALIBRATION,	{ {2}, {}, {1}, {3}, {1}, {3},  {} }	},	// Calibration
+		{	"Brightfield",	SCAN_BRIGHTFIELD,	{ {2}, {}, {1}, {3}, {1}, {2}, {2} }	},	// Brightfield
+		{	"Eyepiece",		SCAN_EYEPIECE,		{ {2}, {}, {1}, {3}, {2}, {3}, {2} }	},	// Eyepiece
+		{	"Fluo Blue",	SCAN_EPIFLUOBLUE,	{ {1}, {}, {3}, {3}, {},  {2},  {} }	},	// Fluorescence blue
+		{	"Fluo Green",	SCAN_EPIFLUOGREEN,	{ {1}, {}, {4}, {3}, {},  {2},  {} }	},	// Fluorescence green
+		{	"Fluo Violet",	SCAN_EPIFLUOVIOLET,	{ {1}, {}, {2}, {3}, {},  {2},  {} }	},	// Fluorescence violet
+		{	"Laser off",	SCAN_LASEROFF,		{ {1}, {},  {},  {}, {},   {},  {} }	}	// Laser off
 	};
 
 	// bounds of the stage
@@ -98,6 +100,9 @@ void ZeissECU::connectDevice() {
 			QSerialPort::Parity parity = m_comObject->parity();
 			QSerialPort::StopBits stopBits = m_comObject->stopBits();
 
+			Thorlabs_FF::FF_Open(m_serialNo_FF2);
+			Thorlabs_FF::FF_StartPolling(m_serialNo_FF2, 200);
+
 			// check if connected to compatible device
 			bool focus = m_focus->checkCompatibility();
 			bool stand = m_stand->checkCompatibility();
@@ -129,6 +134,8 @@ void ZeissECU::disconnectDevice() {
 		stopAnnouncingPosition();
 		stopAnnouncingElementPosition();
 		m_comObject->close();
+		Thorlabs_FF::FF_Close(m_serialNo_FF2);
+		Thorlabs_FF::FF_StopPolling(m_serialNo_FF2);
 		m_isConnected = false;
 		m_isCompatible = false;
 	}
@@ -191,6 +198,9 @@ void ZeissECU::setPreset(SCAN_PRESET presetType) {
 
 void ZeissECU::setElement(DeviceElement element, int position) {
 	switch ((DEVICE_ELEMENT)element.index) {
+		case DEVICE_ELEMENT::BEAMBLOCK:
+			setBeamBlock(position);
+			break;
 		case DEVICE_ELEMENT::REFLECTOR:
 			m_stand->setReflector(position);
 			break;
@@ -218,6 +228,7 @@ void ZeissECU::setElement(DeviceElement element, int position) {
 }
 
 void ZeissECU::getElements() {
+	m_elementPositions[(int)DEVICE_ELEMENT::BEAMBLOCK] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
 	m_elementPositions[(int)DEVICE_ELEMENT::REFLECTOR] = m_stand->getReflector();
 	m_elementPositions[(int)DEVICE_ELEMENT::OBJECTIVE] = m_stand->getObjective();
 	m_elementPositions[(int)DEVICE_ELEMENT::TUBELENS] = m_stand->getTubelens();
@@ -226,7 +237,11 @@ void ZeissECU::getElements() {
 	m_elementPositions[(int)DEVICE_ELEMENT::MIRROR] = m_stand->getMirror();
 	checkPresets();
 	emit(elementPositionsChanged(m_elementPositions));
-};
+}
+
+void ZeissECU::setBeamBlock(int position) {
+	Thorlabs_FF::FF_MoveToPosition(m_serialNo_FF2, (Thorlabs_FF::FF_Positions)position);
+}
 
 void ZeissECU::getElement(DeviceElement element) {
 }
