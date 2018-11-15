@@ -12,6 +12,9 @@ namespace Thorlabs_TIM {
 namespace Thorlabs_FF {
 	#include <Thorlabs.MotionControl.FilterFlipper.h>
 }
+namespace Thorlabs_KSC {
+	#include <Thorlabs.MotionControl.KCube.Solenoid.h>
+}
 namespace Thorlabs_KDC {
 	#include <Thorlabs.MotionControl.KCube.DCServo.h>
 }
@@ -74,7 +77,7 @@ private:
 	int m_PiezoIncPerMum{ 50 };
 
 	char const *m_serialNo_FF1 = "37000784";
-	char const *m_serialNo_FF2 = "37000251";
+	char const *m_serialNo_KSC = "68000952";
 	
 	char const *m_serialNo_KDC = "27503225";
 	// see https://www.thorlabs.com/drawings/279d37ef141e2423-056D0D56-F367-26BE-7B83AD99FE5D61F2/Z825B-Manual.pdf, page 9
@@ -127,6 +130,7 @@ public slots:
 	void setEmFilter(int position);
 	void setExFilter(int position);
 	void setFilter(FilterMount * device, int position);
+	int getBeamBlock();
 	int getExFilter();
 	int getEmFilter();
 	int getFilter(FilterMount * device);

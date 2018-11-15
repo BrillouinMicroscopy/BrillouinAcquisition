@@ -19,9 +19,10 @@ NIDAQ::NIDAQ() noexcept {
 		{	"ODT",			SCAN_ODT,			{ {2},  {}, {2}, {1}, {1}, {1} }	},	// ODT
 		{	"Brightfield",	SCAN_BRIGHTFIELD,	{  {},  {},  {},  {}, {1}, {2} }	},	// Brightfield
 		{	"Fluo off",		SCAN_EPIFLUOOFF,	{  {},  {},  {}, {1}, {1},  {} }	},	// Fluorescence off
-		{	"Fluo Blue",	SCAN_EPIFLUOBLUE,	{  {},  {},  {}, {2}, {2}, {1} }	},	// Fluorescence blue
+		{	"Fluo Blue",	SCAN_EPIFLUOBLUE,	{ {1},  {},  {}, {2}, {2}, {1} }	},	// Fluorescence blue
 		{	"Fluo Green",	SCAN_EPIFLUOGREEN,	{ {1},  {},  {}, {3}, {3}, {1} }	},	// Fluorescence green
-		{	"Fluo Red",		SCAN_EPIFLUORED,	{  {},  {},  {}, {4}, {4}, {1} }	}	// Fluorescence red
+		{	"Fluo Red",		SCAN_EPIFLUORED,	{ {1},  {},  {}, {4}, {4}, {1} }	},	// Fluorescence red
+		{	"Laser off",	SCAN_LASEROFF,		{ {1},  {},  {},  {},  {},  {} }	}	// Laser off
 	};
 
 	m_absoluteBounds = m_calibration.bounds;
@@ -91,8 +92,10 @@ void NIDAQ::connectDevice() {
 		}
 		Thorlabs_FF::FF_Open(m_serialNo_FF1);
 		Thorlabs_FF::FF_StartPolling(m_serialNo_FF1, 200);
-		Thorlabs_FF::FF_Open(m_serialNo_FF2);
-		Thorlabs_FF::FF_StartPolling(m_serialNo_FF2, 200);
+
+		Thorlabs_KSC::SC_Open(m_serialNo_KSC);
+		Thorlabs_KSC::SC_StartPolling(m_serialNo_KSC, 200);
+		Thorlabs_KSC::SC_SetOperatingMode(m_serialNo_KSC, Thorlabs_KSC::SC_OperatingModes::SC_Manual);
 
 		Thorlabs_KDC::CC_Open(m_serialNo_KDC);
 		Thorlabs_KDC::CC_StartPolling(m_serialNo_KDC, 200);
@@ -123,8 +126,8 @@ void NIDAQ::disconnectDevice() {
 
 		Thorlabs_FF::FF_Close(m_serialNo_FF1);
 		Thorlabs_FF::FF_StopPolling(m_serialNo_FF1);
-		Thorlabs_FF::FF_Close(m_serialNo_FF2);
-		Thorlabs_FF::FF_StopPolling(m_serialNo_FF2);
+		Thorlabs_KSC::SC_Close(m_serialNo_KSC);
+		Thorlabs_KSC::SC_StopPolling(m_serialNo_KSC);
 
 		Thorlabs_KDC::CC_StopPolling(m_serialNo_KDC);
 		Thorlabs_KDC::CC_Close(m_serialNo_KDC);
@@ -181,11 +184,11 @@ void NIDAQ::setElement(DeviceElement element, int position) {
 
 void NIDAQ::getElement(DeviceElement element) {
 	switch ((DEVICE_ELEMENT)element.index) {
+		case DEVICE_ELEMENT::BEAMBLOCK:
+			m_elementPositions[element.index] = getBeamBlock();
+			break;
 		case DEVICE_ELEMENT::CALFLIPMIRROR:
 			m_elementPositions[element.index] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF1);
-			break;
-		case DEVICE_ELEMENT::BEAMBLOCK:
-			m_elementPositions[element.index] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
 			break;
 		case DEVICE_ELEMENT::MOVEMIRROR:
 			m_elementPositions[element.index] = getMirror();
@@ -228,8 +231,8 @@ void NIDAQ::setPreset(SCAN_PRESET presetType) {
 }
 
 void NIDAQ::getElements() {
+	m_elementPositions[(int)DEVICE_ELEMENT::BEAMBLOCK] = getBeamBlock();
 	m_elementPositions[(int)DEVICE_ELEMENT::CALFLIPMIRROR] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF1);
-	m_elementPositions[(int)DEVICE_ELEMENT::BEAMBLOCK] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
 	m_elementPositions[(int)DEVICE_ELEMENT::MOVEMIRROR] = getMirror();
 	m_elementPositions[(int)DEVICE_ELEMENT::EXFILTER] = getExFilter();
 	m_elementPositions[(int)DEVICE_ELEMENT::EMFILTER] = getEmFilter();
@@ -243,7 +246,22 @@ void NIDAQ::setCalFlipMirror(int position) {
 }
 
 void NIDAQ::setBeamBlock(int position) {
-	Thorlabs_FF::FF_MoveToPosition(m_serialNo_FF2, (Thorlabs_FF::FF_Positions)position);
+	if (position == 1) {
+		position = 2;
+	} else {
+		position = 1;
+	}
+	Thorlabs_KSC::SC_SetOperatingState(m_serialNo_KSC, (Thorlabs_KSC::SC_OperatingStates)position);
+}
+
+int NIDAQ::getBeamBlock() {
+	int position = Thorlabs_KSC::SC_GetSolenoidState(m_serialNo_KSC);
+	if (position == 1) {
+		position = 2;
+	} else {
+		position = 1;
+	}
+	return position;
 }
 
 void NIDAQ::setMirror(int position) {

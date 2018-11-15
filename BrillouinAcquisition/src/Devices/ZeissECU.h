@@ -4,6 +4,10 @@
 #include "scancontrol.h"
 #include "com.h"
 
+namespace Thorlabs_FF {
+	#include <Thorlabs.MotionControl.FilterFlipper.h>
+}
+
 class Element : public QObject {
 	Q_OBJECT
 private:
@@ -101,7 +105,10 @@ private:
 	MCU *m_mcu = nullptr;
 	Stand *m_stand = nullptr;
 
+	char const *m_serialNo_FF2 = "37000251";
+
 	enum class DEVICE_ELEMENT {
+		BEAMBLOCK,
 		OBJECTIVE,
 		REFLECTOR,
 		TUBELENS,
@@ -127,6 +134,7 @@ public slots:
 	void setElement(DeviceElement element, int position);
 	void setPreset(SCAN_PRESET preset);
 	void getElements();
+	void setBeamBlock(int position);
 	void getElement(DeviceElement element);
 	// sets the position relative to the home position m_homePosition
 	void setPositionRelativeX(double position);
