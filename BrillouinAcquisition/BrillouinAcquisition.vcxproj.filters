@@ -231,6 +231,15 @@
     <ClCompile Include="GeneratedFiles\Release\moc_Fluorescence.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_uEyeCam.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_uEyeCam.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Devices\uEyeCam.cpp">
+      <Filter>Source Files\Devices</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_BrillouinAcquisition.h">
@@ -324,6 +333,9 @@
     </CustomBuild>
     <CustomBuild Include="src\Acquisition\AcquisitionModes\Fluorescence.h">
       <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Devices\uEyeCam.h">
+      <Filter>Header Files\Devices</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
