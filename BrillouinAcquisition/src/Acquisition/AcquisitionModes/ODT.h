@@ -29,7 +29,7 @@ class ODT : public AcquisitionMode {
 	Q_OBJECT
 
 public:
-	ODT(QObject *parent, Acquisition *acquisition, PointGrey **pointGrey, NIDAQ **nidaq);
+	ODT(QObject *parent, Acquisition *acquisition, Camera **camera, NIDAQ **nidaq);
 	~ODT();
 	bool m_abortAlignment{ false };
 	bool isAlgnRunning();
@@ -53,7 +53,7 @@ private:
 		CAMERA_SETTINGS()
 	};
 	ODT_SETTINGS m_algnSettings;
-	PointGrey **m_pointGrey;
+	Camera **m_camera;
 	NIDAQ **m_NIDAQ;
 	bool m_algnRunning{ false };			// is alignment currently running
 

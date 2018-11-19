@@ -18,12 +18,12 @@ private:
 	FlyCapture2::BusManager m_busManager;
 	FlyCapture2::PGRGuid m_guid;
 
-	bool PollForTriggerReady(FlyCapture2::Camera * camera);
-	bool FireSoftwareTrigger(FlyCapture2::Camera * camera);
+	bool PollForTriggerReady(FlyCapture2::Camera* camera);
+	bool FireSoftwareTrigger(FlyCapture2::Camera* camera);
 
 	void preparePreview();
 
-	void acquireImage(unsigned char * buffer);
+	void acquireImage(unsigned char* buffer) override;
 
 	/*
 	 * Members and functions inherited from base class
@@ -32,14 +32,11 @@ private:
 	void readSettings();
 
 private slots:
-	void getImageForPreview();
+	void getImageForPreview() override;
 
 public:
 	PointGrey() noexcept {};
 	~PointGrey();
-
-	// preview buffer for live acquisition
-	PreviewBuffer<unsigned char>* m_previewBuffer = new PreviewBuffer<unsigned char>;
 
 public slots:
 	void init() {};
@@ -53,7 +50,7 @@ public slots:
 	void startAcquisition(CAMERA_SETTINGS);
 	void stopAcquisition();
 
-	void getImageForAcquisition(unsigned char* buffer);
+	void getImageForAcquisition(unsigned char* buffer) override;
 
 signals:
 	void s_previewRunning(bool);

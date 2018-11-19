@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "Fluorescence.h"
 
-Fluorescence::Fluorescence(QObject *parent, Acquisition *acquisition, PointGrey **pointGrey, NIDAQ **nidaq)
-	: AcquisitionMode(parent, acquisition), m_pointGrey(pointGrey), m_NIDAQ(nidaq) {}
+Fluorescence::Fluorescence(QObject* parent, Acquisition* acquisition, Camera** camera, NIDAQ** nidaq)
+	: AcquisitionMode(parent, acquisition), m_camera(camera), m_NIDAQ(nidaq) {}
 
 Fluorescence::~Fluorescence() {
 }
@@ -17,7 +17,7 @@ void Fluorescence::setGain(int gain) {
 	emit(s_acqSettingsChanged(m_settings));
 }
 
-ChannelSettings * Fluorescence::getChannelSettings(FLUORESCENCE_MODE mode) {
+ChannelSettings* Fluorescence::getChannelSettings(FLUORESCENCE_MODE mode) {
 	if (mode == FLUORESCENCE_MODE::BLUE) {
 		return &m_settings.blue;
 	} else if (mode == FLUORESCENCE_MODE::GREEN) {
@@ -31,11 +31,11 @@ ChannelSettings * Fluorescence::getChannelSettings(FLUORESCENCE_MODE mode) {
 	}
 }
 
-std::vector<ChannelSettings *> Fluorescence::getEnabledChannels() {
-	std::vector<ChannelSettings *> enabledChannels;
+std::vector<ChannelSettings*> Fluorescence::getEnabledChannels() {
+	std::vector<ChannelSettings*> enabledChannels;
 	for (gsl::index i{ 0 }; i < (int)FLUORESCENCE_MODE::MODE_COUNT; i++) {
 
-		ChannelSettings *channel = getChannelSettings((FLUORESCENCE_MODE)i);
+		ChannelSettings* channel = getChannelSettings((FLUORESCENCE_MODE)i);
 		// Don't acquire this mode if it is not enabled
 		if (!channel->enabled) {
 			continue;
@@ -97,7 +97,7 @@ void Fluorescence::startRepetitions() {
 	m_acquisition->disableMode(ACQUISITION_MODE::FLUORESCENCE);
 }
 
-void Fluorescence::acquire(std::unique_ptr <StorageWrapper> & storage) {
+void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	m_status = ACQUISITION_STATUS::STARTED;
 	emit(s_acquisitionStatus(m_status));
 
@@ -129,29 +129,29 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper> & storage) {
 		// start image acquisition
 		m_settings.camera.exposureTime = 1e-3*channel->exposure;
 		m_settings.camera.gain = channel->gain;
-		(*m_pointGrey)->startAcquisition(m_settings.camera);
+		(*m_camera)->startAcquisition(m_settings.camera);
 
 		// read images from camera
 		std::vector<unsigned char> images(bytesPerFrame);
 
 			// acquire images
 		int64_t pointerPos = 0 * (int64_t)bytesPerFrame;
-		(*m_pointGrey)->getImageForAcquisition(&images[pointerPos]);
+		(*m_camera)->getImageForAcquisition(&images[pointerPos]);
 
 		// cast the vector to unsigned short
-		std::vector<unsigned char> *images_ = (std::vector<unsigned char> *) &images;
+		std::vector<unsigned char>* images_ = (std::vector<unsigned char> *) &images;
 
 		// store images
 		// asynchronously write image to disk
 		// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
 		std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 			.toString(Qt::ISODateWithMs).toStdString();
-		FLUOIMAGE *img = new FLUOIMAGE(imageNumber, rank_data, dims_data, date, channel->name, *images_);
+		FLUOIMAGE* img = new FLUOIMAGE(imageNumber, rank_data, dims_data, date, channel->name, *images_);
 
 		QMetaObject::invokeMethod(storage.get(), "s_enqueuePayload", Qt::AutoConnection, Q_ARG(FLUOIMAGE*, img));
 
 		// configure camera for preview
-		(*m_pointGrey)->stopAcquisition();
+		(*m_camera)->stopAcquisition();
 		imageNumber++;
 		double percentage = 100 * (double)imageNumber / enabledChannels.size();
 		int remaining = 1e-3 * measurementTimer.elapsed() / imageNumber * ((int64_t)enabledChannels.size() - imageNumber);

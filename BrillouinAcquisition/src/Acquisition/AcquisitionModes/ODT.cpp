@@ -2,8 +2,8 @@
 #include "ODT.h"
 #include "../../simplemath.h"
 
-ODT::ODT(QObject *parent, Acquisition *acquisition, PointGrey **pointGrey, NIDAQ **nidaq)
-	: AcquisitionMode(parent, acquisition), m_pointGrey(pointGrey), m_NIDAQ(nidaq) {
+ODT::ODT(QObject* parent, Acquisition* acquisition, Camera** camera, NIDAQ** nidaq)
+	: AcquisitionMode(parent, acquisition), m_camera(camera), m_NIDAQ(nidaq) {
 }
 
 ODT::~ODT() {
@@ -81,7 +81,7 @@ void ODT::startRepetitions() {
 	m_abort = false;
 
 	// configure camera for measurement
-	CAMERA_SETTINGS settings = (*m_pointGrey)->getSettings();
+	CAMERA_SETTINGS settings = (*m_camera)->getSettings();
 	// set ROI and readout parameters to default ODT values, exposure time and gain will be kept
 	settings.roi.left = 128;
 	settings.roi.top = 0;
@@ -92,10 +92,10 @@ void ODT::startRepetitions() {
 	settings.readout.cycleMode = L"Continuous";
 	settings.frameCount = m_acqSettings.numberPoints;
 
-	(*m_pointGrey)->startAcquisition(settings);
+	(*m_camera)->startAcquisition(settings);
 
 	// read back the applied settings
-	m_acqSettings.camera = (*m_pointGrey)->getSettings();
+	m_acqSettings.camera = (*m_camera)->getSettings();
 
 	m_acquisition->newRepetition(ACQUISITION_MODE::ODT);
 
@@ -103,7 +103,7 @@ void ODT::startRepetitions() {
 	acquire(m_acquisition->m_storage);
 
 	// configure camera for preview
-	(*m_pointGrey)->stopAcquisition();
+	(*m_camera)->stopAcquisition();
 
 	m_acquisition->disableMode(ACQUISITION_MODE::ODT);
 }
@@ -155,18 +155,18 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 
 			// acquire images
 			int64_t pointerPos = (int64_t)bytesPerFrame * mm;
-			(*m_pointGrey)->getImageForAcquisition(&images[pointerPos]);
+			(*m_camera)->getImageForAcquisition(&images[pointerPos]);
 		}
 
 		// cast the vector to unsigned short
-		std::vector<unsigned char> *images_ = (std::vector<unsigned char> *) &images;
+		std::vector<unsigned char>* images_ = (std::vector<unsigned char> *) &images;
 
 		// store images
 		// asynchronously write image to disk
 		// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
 		std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 			.toString(Qt::ISODateWithMs).toStdString();
-		ODTIMAGE *img = new ODTIMAGE((int)i, rank_data, dims_data, date, *images_);
+		ODTIMAGE* img = new ODTIMAGE((int)i, rank_data, dims_data, date, *images_);
 
 		QMetaObject::invokeMethod(storage.get(), "s_enqueuePayload", Qt::AutoConnection, Q_ARG(ODTIMAGE*, img));
 	}

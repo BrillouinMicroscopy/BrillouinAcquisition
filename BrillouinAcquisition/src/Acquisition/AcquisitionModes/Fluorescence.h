@@ -34,7 +34,7 @@ class Fluorescence : public AcquisitionMode {
 	Q_OBJECT
 
 public:
-	Fluorescence(QObject *parent, Acquisition *acquisition, PointGrey **pointGrey, NIDAQ **nidaq);
+	Fluorescence(QObject *parent, Acquisition *acquisition, Camera **camera, NIDAQ **nidaq);
 	~Fluorescence();
 
 public slots:
@@ -47,17 +47,17 @@ public slots:
 	void setGain(FLUORESCENCE_MODE mode, int gain);
 
 private:
-	PointGrey **m_pointGrey;
-	NIDAQ **m_NIDAQ;
+	Camera** m_camera;
+	NIDAQ** m_NIDAQ;
 
 	FLUORESCENCE_SETTINGS m_settings;
-	ChannelSettings * getChannelSettings(FLUORESCENCE_MODE mode);
-	std::vector<ChannelSettings *> getEnabledChannels();
+	ChannelSettings* getChannelSettings(FLUORESCENCE_MODE mode);
+	std::vector<ChannelSettings*> getEnabledChannels();
 
 	void abortMode() override;
 
 private slots:
-	void acquire(std::unique_ptr <StorageWrapper> & storage) override;
+	void acquire(std::unique_ptr <StorageWrapper>& storage) override;
 
 signals:
 	void s_acqSettingsChanged(FLUORESCENCE_SETTINGS);

@@ -368,7 +368,7 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 		m_Fluorescence = nullptr;
 	}
 	m_scanControl->deleteLater();
-	m_pointGrey->deleteLater();
+	m_brightfieldCamera->deleteLater();
 	m_andor->deleteLater();
 	//m_cameraThread.exit();
 	//m_cameraThread.wait();
@@ -377,9 +377,9 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 	m_andorThread.exit();
 	m_andorThread.terminate();
 	m_andorThread.wait();
-	m_pointGreyThread.exit();
-	m_pointGreyThread.terminate();
-	m_pointGreyThread.wait();
+	m_brightfieldCameraThread.exit();
+	m_brightfieldCameraThread.terminate();
+	m_brightfieldCameraThread.wait();
 	m_acquisitionThread.exit();
 	m_acquisitionThread.terminate();
 	m_acquisitionThread.wait();
@@ -670,11 +670,11 @@ void BrillouinAcquisition::on_acquisitionStartODT_clicked() {
 }
 
 void BrillouinAcquisition::on_exposureTimeODT_valueChanged(double exposureTime) {
-	QMetaObject::invokeMethod(m_pointGrey, "setSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::EXPOSURE), Q_ARG(double, exposureTime));
+	QMetaObject::invokeMethod(m_brightfieldCamera, "setSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::EXPOSURE), Q_ARG(double, exposureTime));
 }
 
 void BrillouinAcquisition::on_gainODT_valueChanged(double gain) {
-	QMetaObject::invokeMethod(m_pointGrey, "setSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::GAIN), Q_ARG(double, gain));
+	QMetaObject::invokeMethod(m_brightfieldCamera, "setSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::GAIN), Q_ARG(double, gain));
 }
 
 void BrillouinAcquisition::on_acquisitionStartFluorescence_clicked() {
@@ -1313,7 +1313,7 @@ void BrillouinAcquisition::updateImageBrillouin() {
 
 void BrillouinAcquisition::updateImageODT() {
 	if (m_brightfieldPreviewRunning) {
-		updateImage(m_pointGrey->m_previewBuffer, &m_ODTPlot);
+		updateImage(m_brightfieldCamera->m_previewBuffer, &m_ODTPlot);
 
 		QMetaObject::invokeMethod(this, "updateImageODT", Qt::QueuedConnection);
 	}
@@ -1328,15 +1328,13 @@ void BrillouinAcquisition::updateImage(PreviewBuffer<T>* previewBuffer, PLOT_SET
 			return;
 		}
 
-		auto unpackedBuffer = previewBuffer->m_buffer->getReadBuffer();
-
-		// images are given row by row, starting at the top left
-		int tIndex;
-		for (gsl::index yIndex{ 0 }; yIndex < previewBuffer->m_bufferSettings.roi.height; ++yIndex) {
-			for (gsl::index xIndex{ 0 }; xIndex < previewBuffer->m_bufferSettings.roi.width; ++xIndex) {
-				tIndex = yIndex * previewBuffer->m_bufferSettings.roi.width + xIndex;
-				plotSettings->colorMap->data()->setCell(xIndex, previewBuffer->m_bufferSettings.roi.height - yIndex - 1, unpackedBuffer[tIndex]);
-			}
+		if (previewBuffer->m_bufferSettings.bufferType == "unsigned short") {
+			auto unpackedBuffer = reinterpret_cast<unsigned short*>(previewBuffer->m_buffer->getReadBuffer());
+			plotting(previewBuffer, plotSettings, unpackedBuffer);
+		}
+		else if (previewBuffer->m_bufferSettings.bufferType == "unsigned char") {
+			auto unpackedBuffer = previewBuffer->m_buffer->getReadBuffer();
+			plotting(previewBuffer, plotSettings, unpackedBuffer);
 		}
 	}
 	previewBuffer->m_buffer->m_freeBuffers->release();
@@ -1346,6 +1344,18 @@ void BrillouinAcquisition::updateImage(PreviewBuffer<T>* previewBuffer, PLOT_SET
 		(plotSettings->dataRangeCallback)(plotSettings->cLim);
 	}
 	plotSettings->plotHandle->replot();
+}
+
+template <typename T>
+void BrillouinAcquisition::plotting(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, T* unpackedBuffer) {
+	// images are given row by row, starting at the top left
+	int tIndex{ 0 };
+	for (gsl::index yIndex{ 0 }; yIndex < previewBuffer->m_bufferSettings.roi.height; ++yIndex) {
+		for (gsl::index xIndex{ 0 }; xIndex < previewBuffer->m_bufferSettings.roi.width; ++xIndex) {
+			tIndex = yIndex * previewBuffer->m_bufferSettings.roi.width + xIndex;
+			plotSettings->colorMap->data()->setCell(xIndex, previewBuffer->m_bufferSettings.roi.height - yIndex - 1, unpackedBuffer[tIndex]);
+		}
+	}
 }
 
 void BrillouinAcquisition::on_actionConnect_Camera_triggered() {
@@ -1420,10 +1430,10 @@ void BrillouinAcquisition::microscopeConnectionChanged(bool isConnected) {
 }
 
 void BrillouinAcquisition::on_actionConnect_Brightfield_camera_triggered() {
-	if (m_pointGrey->getConnectionStatus()) {
-		QMetaObject::invokeMethod(m_pointGrey, "disconnectDevice", Qt::QueuedConnection);
+	if (m_brightfieldCamera->getConnectionStatus()) {
+		QMetaObject::invokeMethod(m_brightfieldCamera, "disconnectDevice", Qt::QueuedConnection);
 	} else {
-		QMetaObject::invokeMethod(m_pointGrey, "connectDevice", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(m_brightfieldCamera, "connectDevice", Qt::QueuedConnection);
 	}
 }
 
@@ -1443,11 +1453,11 @@ void BrillouinAcquisition::brightfieldCameraConnectionChanged(bool isConnected) 
 }
 
 void BrillouinAcquisition::on_camera_playPause_brightfield_clicked() {
-	if (!m_pointGrey->m_isPreviewRunning) {
-		QMetaObject::invokeMethod(m_pointGrey, "startPreview", Qt::AutoConnection);
+	if (!m_brightfieldCamera->m_isPreviewRunning) {
+		QMetaObject::invokeMethod(m_brightfieldCamera, "startPreview", Qt::AutoConnection);
 	}
 	else {
-		m_pointGrey->m_stopPreview = true;
+		m_brightfieldCamera->m_stopPreview = true;
 	}
 }
 
@@ -1703,8 +1713,8 @@ void BrillouinAcquisition::initScanControl() {
 			break;
 		case ScanControl::SCAN_DEVICE::NIDAQ:
 			m_scanControl = new NIDAQ();
-			m_ODT = new ODT(nullptr, m_acquisition, &m_pointGrey, (NIDAQ**)&m_scanControl);
-			m_Fluorescence = new Fluorescence(nullptr, m_acquisition, &m_pointGrey, (NIDAQ**)&m_scanControl);
+			m_ODT = new ODT(nullptr, m_acquisition, &m_brightfieldCamera, (NIDAQ**)&m_scanControl);
+			m_Fluorescence = new Fluorescence(nullptr, m_acquisition, &m_brightfieldCamera, (NIDAQ**)&m_scanControl);
 
 			connection = QWidget::connect(
 				m_ODT,
@@ -1858,26 +1868,32 @@ void BrillouinAcquisition::initScanControl() {
 
 void BrillouinAcquisition::initCamera() {
 	// deinitialize camera if necessary
-	if (m_pointGrey) {
-		m_pointGrey->deleteLater();
-		m_pointGrey = nullptr;
+	if (m_brightfieldCamera) {
+		m_brightfieldCamera->deleteLater();
+		m_brightfieldCamera = nullptr;
 	}
 
 	// initialize correct camera type
 	switch (m_cameraType) {
 		case CAMERA_DEVICE::NONE:
-			m_pointGrey = nullptr;
+			m_brightfieldCamera = nullptr;
 			ui->actionConnect_Brightfield_camera->setVisible(false);
 			ui->settingsWidget->removeTab(3);
 			break;
 		case CAMERA_DEVICE::POINTGREY:
-			m_pointGrey = new PointGrey();
+			m_brightfieldCamera = new PointGrey();
+			ui->actionConnect_Brightfield_camera->setVisible(true);
+			ui->settingsWidget->addTab(ui->ODTcameraTab, "ODT Camera");
+			ui->settingsWidget->setTabIcon(3, m_icons.disconnected);
+			break;
+		case CAMERA_DEVICE::UEYE:
+			m_brightfieldCamera = new uEyeCam();
 			ui->actionConnect_Brightfield_camera->setVisible(true);
 			ui->settingsWidget->addTab(ui->ODTcameraTab, "ODT Camera");
 			ui->settingsWidget->setTabIcon(3, m_icons.disconnected);
 			break;
 		default:
-			m_pointGrey = nullptr;
+			m_brightfieldCamera = nullptr;
 			ui->actionConnect_Brightfield_camera->setVisible(false);
 			ui->settingsWidget->removeTab(3);
 			break;
@@ -1890,43 +1906,43 @@ void BrillouinAcquisition::initCamera() {
 
 	// reestablish camera connections
 	QMetaObject::Connection connection = QWidget::connect(
-		m_pointGrey,
-		&PointGrey::connectedDevice,
+		m_brightfieldCamera,
+		&Camera::connectedDevice,
 		this,
 		[this](bool isConnected) { brightfieldCameraConnectionChanged(isConnected); }
 	);
 
 	connection = QWidget::connect(
-		m_pointGrey,
-		&PointGrey::s_previewBufferSettingsChanged,
+		m_brightfieldCamera,
+		&Camera::s_previewBufferSettingsChanged,
 		this,
-		[this] { updatePlotLimits(m_ODTPlot, m_cameraOptionsODT, m_pointGrey->m_previewBuffer->m_bufferSettings.roi); }
+		[this] { updatePlotLimits(m_ODTPlot, m_cameraOptionsODT, m_brightfieldCamera->m_previewBuffer->m_bufferSettings.roi); }
 	);
 
 	connection = QWidget::connect(
-		m_pointGrey,
-		&PointGrey::s_previewRunning,
+		m_brightfieldCamera,
+		&Camera::s_previewRunning,
 		this,
 		[this](bool isRunning) { showBrightfieldPreviewRunning(isRunning); }
 	);
 
 	connection = QWidget::connect(
-		m_pointGrey,
-		&PointGrey::settingsChanged,
+		m_brightfieldCamera,
+		&Camera::settingsChanged,
 		this,
 		[this](CAMERA_SETTINGS settings) { cameraODTSettingsChanged(settings); }
 	);
 
 	connection = QWidget::connect(
-		m_pointGrey,
-		&PointGrey::optionsChanged,
+		m_brightfieldCamera,
+		&Camera::optionsChanged,
 		this,
 		[this](CAMERA_OPTIONS options) { cameraODTOptionsChanged(options); }
 	);
 
-	m_pointGreyThread.startWorker(m_pointGrey);
+	m_brightfieldCameraThread.startWorker(m_brightfieldCamera);
 
-	QMetaObject::invokeMethod(m_pointGrey, "connectDevice", Qt::AutoConnection);
+	QMetaObject::invokeMethod(m_brightfieldCamera, "connectDevice", Qt::AutoConnection);
 }
 
 void BrillouinAcquisition::microscopeElementPositionsChanged(std::vector<int> positions) {

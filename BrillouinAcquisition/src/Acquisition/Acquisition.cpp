@@ -74,7 +74,7 @@ bool Acquisition::enableMode(ACQUISITION_MODE mode) {
 	}
 
 	// Check that the requested mode is not already running.
-	if ((bool)(mode & m_enabledModes)) {
+	if ((bool)(mode& m_enabledModes)) {
 		return true;
 	}
 	// Check, that Brillouin and ODT don't run simultaneously.

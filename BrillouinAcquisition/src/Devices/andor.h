@@ -2,6 +2,7 @@
 #define ANDOR_H
 
 #include "Camera.h"
+#include <typeinfo>
 
 #include "atcore.h"
 #include "atutility.h"
@@ -42,7 +43,7 @@ private:
 	void getEnumString(AT_WC* feature, std::wstring* string);
 	void preparePreview();
 
-	void acquireImage(unsigned short* buffer);
+	void acquireImage(unsigned char* buffer) override;
 
 	/*
 	 * Members and functions inherited from base class
@@ -65,10 +66,10 @@ public:
 	void setCalibrationExposureTime(double);
 
 	// preview buffer for live acquisition
-	PreviewBuffer<unsigned short>* m_previewBuffer = new PreviewBuffer<unsigned short>;
+	//PreviewBuffer<unsigned short>* m_previewBuffer = new PreviewBuffer<unsigned short>;
 
 private slots:
-	void getImageForPreview();
+	void getImageForPreview() override;
 	void checkSensorTemperature();
 
 public slots:
@@ -91,11 +92,8 @@ public slots:
 	void stopPreview();
 	void startAcquisition(CAMERA_SETTINGS);
 	void stopAcquisition();
-
-	/*
-	 * Unify me
-	 */
-	void getImageForAcquisition(unsigned short* buffer);
+	
+	void getImageForAcquisition(unsigned char* buffer) override;
 
 signals:
 	void cameraCoolingChanged(bool);

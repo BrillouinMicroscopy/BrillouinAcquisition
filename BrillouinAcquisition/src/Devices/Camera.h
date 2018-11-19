@@ -12,6 +12,9 @@
 class Camera : public Device {
 	Q_OBJECT
 
+protected slots:
+	virtual void getImageForPreview() = 0;
+
 public:
 	Camera() {};
 	~Camera() {};
@@ -25,6 +28,9 @@ public:
 	CAMERA_OPTIONS getOptions();
 	CAMERA_SETTINGS getSettings();
 
+	// preview buffer for live acquisition
+	PreviewBuffer<unsigned char>* m_previewBuffer = new PreviewBuffer<unsigned char>;
+
 public slots:
 	virtual void setSettings(CAMERA_SETTINGS) = 0;
 	virtual void startPreview() = 0;
@@ -32,6 +38,8 @@ public slots:
 	virtual void startAcquisition(CAMERA_SETTINGS) = 0;
 	virtual void stopAcquisition() = 0;
 	void setSetting(CAMERA_SETTING, double);
+
+	virtual void getImageForAcquisition(unsigned char* buffer) = 0;
 
 protected:
 	CAMERA_OPTIONS m_options;
@@ -41,6 +49,8 @@ protected:
 	virtual void readSettings() = 0;
 
 	std::mutex m_mutex;
+
+	virtual void acquireImage(unsigned char* buffer) = 0;
 
 signals:
 	void settingsChanged(CAMERA_SETTINGS);

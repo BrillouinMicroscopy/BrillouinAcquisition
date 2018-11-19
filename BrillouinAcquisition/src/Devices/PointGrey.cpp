@@ -272,7 +272,7 @@ void PointGrey::preparePreview() {
 	setSettings(m_settings);
 
 	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
-	BUFFER_SETTINGS bufferSettings = { 4, pixelNumber, m_settings.roi };
+	BUFFER_SETTINGS bufferSettings = { 4, pixelNumber, "unsigned char", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
@@ -309,7 +309,7 @@ void PointGrey::stopAcquisition() {
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
 }
 
-void PointGrey::acquireImage(unsigned char * buffer) {
+void PointGrey::acquireImage(unsigned char* buffer) {
 	FlyCapture2::Image rawImage;
 	FlyCapture2::Error tmp = m_camera.RetrieveBuffer(&rawImage);
 
@@ -345,9 +345,9 @@ void PointGrey::getImageForPreview() {
 void PointGrey::getImageForAcquisition(unsigned char* buffer) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	acquireImage(buffer);
-};
+}
 
-bool PointGrey::PollForTriggerReady(FlyCapture2::Camera *camera) {
+bool PointGrey::PollForTriggerReady(FlyCapture2::Camera* camera) {
 	const unsigned int k_softwareTrigger = 0x62C;
 	FlyCapture2::Error error;
 	unsigned int regVal = 0;
@@ -363,7 +363,7 @@ bool PointGrey::PollForTriggerReady(FlyCapture2::Camera *camera) {
 	return true;
 }
 
-bool PointGrey::FireSoftwareTrigger(FlyCapture2::Camera *camera) {
+bool PointGrey::FireSoftwareTrigger(FlyCapture2::Camera* camera) {
 	const unsigned int k_softwareTrigger = 0x62C;
 	const unsigned int k_fireVal = 0x80000000;
 	FlyCapture2::Error error;

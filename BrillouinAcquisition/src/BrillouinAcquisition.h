@@ -10,6 +10,7 @@
 #include "Devices/ZeissECU.h"
 #include "Devices/NIDAQ.h"
 #include "Devices/PointGrey.h"
+#include "Devices/uEyeCam.h"
 
 #include "Acquisition/Acquisition.h"
 #include "external/qcustomplot/qcustomplot.h"
@@ -75,7 +76,6 @@ Q_DECLARE_METATYPE(ODT_SETTINGS);
 Q_DECLARE_METATYPE(ODTIMAGE*);
 Q_DECLARE_METATYPE(FLUOIMAGE*);
 Q_DECLARE_METATYPE(FLUORESCENCE_SETTINGS);
-Q_DECLARE_METATYPE(PreviewBuffer<unsigned short>*);
 Q_DECLARE_METATYPE(PreviewBuffer<unsigned char>*);
 Q_DECLARE_METATYPE(bool*);
 
@@ -83,11 +83,11 @@ class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
 	
 	struct PLOT_SETTINGS {
-		QCustomPlot *plotHandle{ nullptr };
-		QCPColorMap *colorMap{ nullptr };
+		QCustomPlot* plotHandle{ nullptr };
+		QCPColorMap* colorMap{ nullptr };
 		QCPRange cLim = { 100, 300 };
-		QSpinBox *lowerBox;
-		QSpinBox *upperBox;
+		QSpinBox* lowerBox;
+		QSpinBox* upperBox;
 		std::function<void(QCPRange)> dataRangeCallback{ nullptr };
 		bool autoscale{ false };
 		CustomGradientPreset gradient = CustomGradientPreset::gpParula;
@@ -139,14 +139,14 @@ private slots:
 
 	void initializePlot(PLOT_SETTINGS plotSettings);
 
-	void xAxisRangeChangedODT(const QCPRange & newRange);
-	void yAxisRangeChangedODT(const QCPRange & newRange);
+	void xAxisRangeChangedODT(const QCPRange& newRange);
+	void yAxisRangeChangedODT(const QCPRange& newRange);
 
 	void plotClick(QMouseEvent* event);
 
 	// set and check camera ROI
-	void xAxisRangeChanged(const QCPRange & newRange);
-	void yAxisRangeChanged(const QCPRange & newRange);
+	void xAxisRangeChanged(const QCPRange& newRange);
+	void yAxisRangeChanged(const QCPRange& newRange);
 	void on_ROILeft_valueChanged(int);
 	void on_ROIWidth_valueChanged(int);
 	void on_ROITop_valueChanged(int);
@@ -154,7 +154,7 @@ private slots:
 	void settingsCameraUpdate(int);
 	std::vector<AT_64> checkROI(std::vector<AT_64>, std::vector<AT_64>);
 
-	void setColormap(QCPColorGradient *, CustomGradientPreset);
+	void setColormap(QCPColorGradient*, CustomGradientPreset);
 	void setElement(DeviceElement element, int position);
 	void setPreset(SCAN_PRESET preset);
 	void updatePlotLimits(PLOT_SETTINGS plotSettings, CAMERA_OPTIONS options, CAMERA_ROI roi);
@@ -165,7 +165,7 @@ private slots:
 	void cameraSettingsChanged(CAMERA_SETTINGS);
 	void cameraODTSettingsChanged(CAMERA_SETTINGS settings);
 	void sensorTemperatureChanged(SensorTemperature);
-	void initializeODTVoltagePlot(QCustomPlot *plot);
+	void initializeODTVoltagePlot(QCustomPlot* plot);
 	void plotODTVoltages(ODT_SETTINGS settings, ODT_MODE mode);
 	void plotODTVoltage(VOLTAGE2 voltage, ODT_MODE mode);
 	void cameraOptionsChanged(CAMERA_OPTIONS);
@@ -288,48 +288,52 @@ public:
 
 private:
 
-	Ui::BrillouinAcquisitionClass *ui;
+	Ui::BrillouinAcquisitionClass* ui;
 	ScanControl::SCAN_DEVICE m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSECU;
 	ScanControl::SCAN_DEVICE m_scanControllerTypeTemporary = m_scanControllerType;
 
 	typedef enum class enCameraDevice {
 		NONE = 0,
-		POINTGREY = 1
+		POINTGREY = 1,
+		UEYE = 2
 	} CAMERA_DEVICE;
-	std::vector<std::string> CAMERA_DEVICE_NAMES = { "None", "PointGrey" };
+	std::vector<std::string> CAMERA_DEVICE_NAMES = { "None", "PointGrey", "uEye" };
 
 	CAMERA_DEVICE m_cameraType = CAMERA_DEVICE::NONE;
 	CAMERA_DEVICE m_cameraTypeTemporary = m_cameraType;
 
 	void initScanControl();
 	void initCamera();
-	QComboBox *m_scanControlDropdown;
-	QComboBox *m_cameraDropdown;
+	QComboBox* m_scanControlDropdown;
+	QComboBox* m_cameraDropdown;
 	std::string m_calibrationFilePath;
 
 	QDialog *m_settingsDialog = nullptr;
 	void checkElementButtons();
 	void addListToComboBox(QComboBox*, std::vector<std::wstring>, bool clear = true);
-	Andor *m_andor = new Andor();
-	ScanControl *m_scanControl = nullptr;
-	PointGrey *m_pointGrey = nullptr;
+	Andor* m_andor = new Andor();
+	ScanControl* m_scanControl = nullptr;
+	Camera* m_brightfieldCamera = nullptr;
 	Acquisition *m_acquisition = new Acquisition(nullptr);
 
 	// Threads
 	Thread m_andorThread;
-	Thread m_pointGreyThread;
+	Thread m_brightfieldCameraThread;
 	Thread m_acquisitionThread;
 
-	Brillouin *m_Brillouin = new Brillouin(nullptr, m_acquisition, m_andor, &m_scanControl);
+	Brillouin* m_Brillouin = new Brillouin(nullptr, m_acquisition, m_andor, &m_scanControl);
 	BRILLOUIN_SETTINGS m_BrillouinSettings;
-	ODT *m_ODT = nullptr;
-	Fluorescence *m_Fluorescence = nullptr;
+	ODT* m_ODT = nullptr;
+	Fluorescence* m_Fluorescence = nullptr;
 
 	PLOT_SETTINGS m_BrillouinPlot;
 	PLOT_SETTINGS m_ODTPlot;
 
 	template <typename T>
-	void updateImage(PreviewBuffer<T>* previewBuffer, PLOT_SETTINGS *plotSettings);
+	void updateImage(PreviewBuffer<T>* previewBuffer, PLOT_SETTINGS* plotSettings);
+
+	template<typename T>
+	void plotting(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, T* unpackedBuffer);
 
 	SETTINGS_DEVICES m_deviceSettings;
 	CAMERA_OPTIONS m_cameraOptions;
