@@ -299,10 +299,12 @@ private:
 	} CAMERA_DEVICE;
 	std::vector<std::string> CAMERA_DEVICE_NAMES = { "None", "PointGrey", "uEye" };
 
-	CAMERA_DEVICE m_cameraType = CAMERA_DEVICE::NONE;
+	CAMERA_DEVICE m_cameraType = CAMERA_DEVICE::UEYE;
 	CAMERA_DEVICE m_cameraTypeTemporary = m_cameraType;
 
 	void initScanControl();
+	void initODT();
+	void initFluorescence();
 	void initCamera();
 	QComboBox* m_scanControlDropdown;
 	QComboBox* m_cameraDropdown;
@@ -342,6 +344,11 @@ private:
 	bool m_previewRunning = false;
 	bool m_brightfieldPreviewRunning = false;
 	ACQUISITION_MODE m_enabledModes = ACQUISITION_MODE::NONE;
+
+	bool m_hasODT{ false };
+	bool m_isTabVisibleODT{ false };
+	bool m_hasFluorescence{ false };
+	bool m_isTabVisibleFluorescence{ false };
 
 	//std::vector<POINT3> m_savedPositions = { {0,0,0}, {100,100,100}, {-200,200,300}, { -10.4,100,100 } };
 

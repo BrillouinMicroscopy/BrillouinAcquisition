@@ -30,6 +30,7 @@ void uEyeCam::connectDevice() {
 		//}
 	}
 
+	m_isConnected = true;
 	emit(connectedDevice(m_isConnected));
 }
 

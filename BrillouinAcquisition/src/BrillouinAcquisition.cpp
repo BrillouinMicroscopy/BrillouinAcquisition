@@ -342,6 +342,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 
 	ui->parametersWidget->layout()->setAlignment(Qt::AlignTop);
 
+	// hide brightfield preview by default
 	ui->brightfieldImage->hide();
 
 	// set up scan direction radio button ids
@@ -1443,8 +1444,7 @@ void BrillouinAcquisition::brightfieldCameraConnectionChanged(bool isConnected) 
 		ui->brightfieldImage->show();
 		ui->camera_playPause_brightfield->setEnabled(true);
 		ui->settingsWidget->setTabIcon(3, m_icons.ready);
-	}
-	else {
+	} else {
 		ui->actionConnect_Brightfield_camera->setText("Connect Brightfield Camera");
 		ui->brightfieldImage->hide();
 		ui->camera_playPause_brightfield->setEnabled(false);
@@ -1455,8 +1455,7 @@ void BrillouinAcquisition::brightfieldCameraConnectionChanged(bool isConnected) 
 void BrillouinAcquisition::on_camera_playPause_brightfield_clicked() {
 	if (!m_brightfieldCamera->m_isPreviewRunning) {
 		QMetaObject::invokeMethod(m_brightfieldCamera, "startPreview", Qt::AutoConnection);
-	}
-	else {
+	} else {
 		m_brightfieldCamera->m_stopPreview = true;
 	}
 }
@@ -1700,107 +1699,23 @@ void BrillouinAcquisition::initScanControl() {
 		case ScanControl::SCAN_DEVICE::ZEISSECU:
 			m_scanControl = new ZeissECU();
 			ui->actionLoad_Voltage_Position_calibration->setVisible(false);
-			ui->acquisitionModeTabs->removeTab(2);
-			ui->acquisitionModeTabs->removeTab(1);
-			if (m_ODT) {
-				m_ODT->deleteLater();
-				m_ODT = nullptr;
-			}
-			if (m_Fluorescence) {
-				m_Fluorescence->deleteLater();
-				m_Fluorescence = nullptr;
-			}
+			m_hasODT = false;
 			break;
 		case ScanControl::SCAN_DEVICE::NIDAQ:
 			m_scanControl = new NIDAQ();
-			m_ODT = new ODT(nullptr, m_acquisition, &m_brightfieldCamera, (NIDAQ**)&m_scanControl);
-			m_Fluorescence = new Fluorescence(nullptr, m_acquisition, &m_brightfieldCamera, (NIDAQ**)&m_scanControl);
-
-			connection = QWidget::connect(
-				m_ODT,
-				&ODT::s_acqSettingsChanged,
-				this,
-				[this](ODT_SETTINGS settings) { plotODTVoltages(settings, ODT_MODE::ACQ); }
-			);
-
-			connection = QWidget::connect(
-				m_ODT,
-				&ODT::s_algnSettingsChanged,
-				this,
-				[this](ODT_SETTINGS settings) { plotODTVoltages(settings, ODT_MODE::ALGN); }
-			);
-
-			connection = QWidget::connect(
-				m_ODT,
-				&ODT::s_mirrorVoltageChanged,
-				this,
-				[this](VOLTAGE2 voltage, ODT_MODE mode) { plotODTVoltage(voltage, mode); }
-			);
-
-			// slot to show current acquisition state
-			connection = QWidget::connect(
-				m_ODT,
-				&ODT::s_acquisitionStatus,
-				this,
-				[this](ACQUISITION_STATUS state) { showODTStatus(state); }
-			);
-
-			// slot to show current repetition progress
-			connection = QWidget::connect(
-				m_ODT,
-				&ODT::s_repetitionProgress,
-				this,
-				[this](double progress, int seconds) { showODTProgress(progress, seconds); }
-			);
-
-			connection = QWidget::connect(
-				m_Fluorescence,
-				&Fluorescence::s_acqSettingsChanged,
-				this,
-				[this](FLUORESCENCE_SETTINGS settings) { updateFluorescenceSettings(settings); }
-			);
-
-			// slot to show current acquisition state of Fluorescence mode
-			connection = QWidget::connect(
-				m_Fluorescence,
-				&Fluorescence::s_acquisitionStatus,
-				this,
-				[this](ACQUISITION_STATUS state) { showFluorescenceStatus(state); }
-			);
-
-			// slot to show current repetition progress
-			connection = QWidget::connect(
-				m_Fluorescence,
-				&Fluorescence::s_repetitionProgress,
-				this,
-				[this](double progress, int seconds) { showFluorescenceProgress(progress, seconds); }
-			);
-
-			// start ODT thread
-			m_acquisitionThread.startWorker(m_ODT);
-			ui->acquisitionModeTabs->insertTab(1, ui->ODT, "ODT");
-			m_ODT->initialize();
+			m_hasODT = true;
 			ui->actionLoad_Voltage_Position_calibration->setVisible(true);
-			// start Fluorescence thread
-			m_acquisitionThread.startWorker(m_Fluorescence);
-			ui->acquisitionModeTabs->insertTab(2, ui->Fluorescence, "Fluorescence");
-			m_Fluorescence->initialize();
 			break;
 		default:
 			m_scanControl = new ZeissECU();
 			ui->actionLoad_Voltage_Position_calibration->setVisible(false);
-			ui->acquisitionModeTabs->removeTab(2);
-			ui->acquisitionModeTabs->removeTab(1);
-			if (m_ODT) {
-				m_ODT->deleteLater();
-				m_ODT = nullptr;
-			}
-			if (m_Fluorescence) {
-				m_Fluorescence->deleteLater();
-				m_Fluorescence = nullptr;
-			}
+			// disable ODT
+			m_hasODT = false;
 			break;
 	}
+
+	// init or de-init ODT
+	initODT();
 
 	// reestablish m_scanControl connections
 	connection = QWidget::connect(
@@ -1866,6 +1781,115 @@ void BrillouinAcquisition::initScanControl() {
 	QMetaObject::invokeMethod(m_scanControl, "connectDevice", Qt::AutoConnection);
 }
 
+void BrillouinAcquisition::initODT() {
+	if (!m_hasODT) {
+		ui->acquisitionModeTabs->removeTab(1);
+		m_isTabVisibleODT = false;
+		if (m_ODT) {
+			m_ODT->deleteLater();
+			m_ODT = nullptr;
+		}
+	} else {
+		m_ODT = new ODT(nullptr, m_acquisition, &m_brightfieldCamera, (NIDAQ**)&m_scanControl);
+		ui->acquisitionModeTabs->insertTab(1, ui->ODT, "ODT");
+		m_isTabVisibleODT = true;
+
+		static QMetaObject::Connection connection;
+		connection = QWidget::connect(
+			m_ODT,
+			&ODT::s_acqSettingsChanged,
+			this,
+			[this](ODT_SETTINGS settings) { plotODTVoltages(settings, ODT_MODE::ACQ); }
+		);
+
+		connection = QWidget::connect(
+			m_ODT,
+			&ODT::s_algnSettingsChanged,
+			this,
+			[this](ODT_SETTINGS settings) { plotODTVoltages(settings, ODT_MODE::ALGN); }
+		);
+
+		connection = QWidget::connect(
+			m_ODT,
+			&ODT::s_mirrorVoltageChanged,
+			this,
+			[this](VOLTAGE2 voltage, ODT_MODE mode) { plotODTVoltage(voltage, mode); }
+		);
+
+		// slot to show current acquisition state
+		connection = QWidget::connect(
+			m_ODT,
+			&ODT::s_acquisitionStatus,
+			this,
+			[this](ACQUISITION_STATUS state) { showODTStatus(state); }
+		);
+
+		// slot to show current repetition progress
+		connection = QWidget::connect(
+			m_ODT,
+			&ODT::s_repetitionProgress,
+			this,
+			[this](double progress, int seconds) { showODTProgress(progress, seconds); }
+		);
+
+		// start ODT thread
+		m_acquisitionThread.startWorker(m_ODT);
+		m_ODT->initialize();
+	}
+}
+
+void BrillouinAcquisition::initFluorescence() {
+	if (!m_hasFluorescence) {
+		if (!m_isTabVisibleODT) {
+			ui->acquisitionModeTabs->removeTab(1);
+		} else {
+			ui->acquisitionModeTabs->removeTab(2);
+		}
+		m_isTabVisibleFluorescence = false;
+		if (m_Fluorescence) {
+			m_Fluorescence->deleteLater();
+			m_Fluorescence = nullptr;
+		}
+	} else {
+		m_Fluorescence = new Fluorescence(nullptr, m_acquisition, &m_brightfieldCamera, (NIDAQ**)&m_scanControl);
+		if (!m_isTabVisibleODT) {
+			ui->acquisitionModeTabs->insertTab(1, ui->Fluorescence, "Fluorescence");
+		} else {
+			ui->acquisitionModeTabs->insertTab(2, ui->Fluorescence, "Fluorescence");
+		}
+		m_isTabVisibleFluorescence = true;
+
+		static QMetaObject::Connection connection;
+		connection = QWidget::connect(
+			m_Fluorescence,
+			&Fluorescence::s_acqSettingsChanged,
+			this,
+			[this](FLUORESCENCE_SETTINGS settings) { updateFluorescenceSettings(settings); }
+		);
+
+		// slot to show current acquisition state of Fluorescence mode
+		connection = QWidget::connect(
+			m_Fluorescence,
+			&Fluorescence::s_acquisitionStatus,
+			this,
+			[this](ACQUISITION_STATUS state) { showFluorescenceStatus(state); }
+		);
+
+		// slot to show current repetition progress
+		connection = QWidget::connect(
+			m_Fluorescence,
+			&Fluorescence::s_repetitionProgress,
+			this,
+			[this](double progress, int seconds) { showFluorescenceProgress(progress, seconds); }
+		);
+
+		// start Fluorescence thread
+		m_acquisitionThread.startWorker(m_Fluorescence);
+		m_Fluorescence->initialize();
+
+	}
+}
+
 void BrillouinAcquisition::initCamera() {
 	// deinitialize camera if necessary
 	if (m_brightfieldCamera) {
@@ -1879,25 +1903,32 @@ void BrillouinAcquisition::initCamera() {
 			m_brightfieldCamera = nullptr;
 			ui->actionConnect_Brightfield_camera->setVisible(false);
 			ui->settingsWidget->removeTab(3);
+			m_hasFluorescence = false;
 			break;
 		case CAMERA_DEVICE::POINTGREY:
 			m_brightfieldCamera = new PointGrey();
 			ui->actionConnect_Brightfield_camera->setVisible(true);
 			ui->settingsWidget->addTab(ui->ODTcameraTab, "ODT Camera");
 			ui->settingsWidget->setTabIcon(3, m_icons.disconnected);
+			m_hasFluorescence = true;
 			break;
 		case CAMERA_DEVICE::UEYE:
 			m_brightfieldCamera = new uEyeCam();
 			ui->actionConnect_Brightfield_camera->setVisible(true);
 			ui->settingsWidget->addTab(ui->ODTcameraTab, "ODT Camera");
 			ui->settingsWidget->setTabIcon(3, m_icons.disconnected);
+			m_hasFluorescence = true;
 			break;
 		default:
 			m_brightfieldCamera = nullptr;
 			ui->actionConnect_Brightfield_camera->setVisible(false);
 			ui->settingsWidget->removeTab(3);
+			m_hasFluorescence = false;
 			break;
 	}
+
+	// init or de-init fluorescence
+	initFluorescence();
 
 	// don't do anything if no camera is connected
 	if (m_cameraType == CAMERA_DEVICE::NONE) {
