@@ -39,7 +39,7 @@ private:
 	int m_bufferSize = -1;
 
 	void cleanupAcquisition();
-	void getEnumString(AT_WC* feature, AT_WC* string);
+	void getEnumString(AT_WC* feature, std::wstring* string);
 	void preparePreview();
 
 	void acquireImage(unsigned short* buffer);
