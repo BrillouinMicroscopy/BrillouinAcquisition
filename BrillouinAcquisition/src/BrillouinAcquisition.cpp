@@ -467,6 +467,19 @@ void BrillouinAcquisition::cameraODTOptionsChanged(CAMERA_OPTIONS options) {
 	m_ODTPlot.plotHandle->xAxis->setRange(QCPRange(1, options.ROIWidthLimits[1]));
 	m_ODTPlot.plotHandle->yAxis->setRange(QCPRange(1, options.ROIHeightLimits[1]));
 
+	ui->ROIHeightODT->setMinimum(options.ROIHeightLimits[0]);
+	ui->ROIHeightODT->setMaximum(options.ROIHeightLimits[1]);
+	ui->ROIHeightODT->setValue(options.ROIHeightLimits[1]);
+	ui->ROITopODT->setMinimum(0);
+	ui->ROITopODT->setMaximum(options.ROIHeightLimits[1]);
+	ui->ROITopODT->setValue(0);
+	ui->ROIWidthODT->setMinimum(options.ROIWidthLimits[0]);
+	ui->ROIWidthODT->setMaximum(options.ROIWidthLimits[1]);
+	ui->ROIWidthODT->setValue(options.ROIWidthLimits[1]);
+	ui->ROILeftODT->setMinimum(0);
+	ui->ROILeftODT->setMaximum(options.ROIWidthLimits[1]);
+	ui->ROILeftODT->setValue(0);
+
 	// block signals to not trigger setting a new value
 	ui->exposureTimeODT->blockSignals(true);
 	ui->exposureTimeODT->setMinimum(m_cameraOptionsODT.exposureTimeLimits[0]);

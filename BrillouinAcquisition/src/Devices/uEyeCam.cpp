@@ -29,6 +29,11 @@ void uEyeCam::connectDevice() {
 			// apply default values for exposure and gain
 			m_settings.exposureTime = 0.1;
 			m_settings.gain = 0.0;
+
+			m_settings.roi.left = 0;
+			m_settings.roi.top = 0;
+			m_settings.roi.width = 3840;
+			m_settings.roi.height = 2748;
 			setSettings(m_settings);
 		}
 	}
@@ -58,81 +63,73 @@ void uEyeCam::disconnectDevice() {
 
 void uEyeCam::readOptions() {
 
-	//FlyCapture2::Format7Info fmt7Info;
-	//bool supported;
-	//fmt7Info.mode = FlyCapture2::MODE_0;
-	//m_camera.GetFormat7Info(&fmt7Info, &supported);
-
-	//m_options.pixelEncodings = { L"Raw8", L"Mono8", L"Mono12", L"Mono16" };
+	m_options.pixelEncodings = { L"Raw8", L"Mono8", L"Mono12", L"Mono16" };
 	////m_options.cycleModes = { L"Continuous", L"Fixed single", L"Fixed multiple" };
 
-	//m_options.exposureTimeLimits[0] = 1e-3;
-	//m_options.exposureTimeLimits[1] = 1;
+	double exposureMin{ 0.0 };
+	int ret = uEye::is_Exposure(m_camera, uEye::IS_EXPOSURE_CMD_GET_EXPOSURE_RANGE_MIN, (void*)&exposureMin, sizeof(exposureMin));
+	double exposureMax{ 0.0 };
+	ret = uEye::is_Exposure(m_camera, uEye::IS_EXPOSURE_CMD_GET_EXPOSURE_RANGE_MAX, (void*)&exposureMax, sizeof(exposureMax));
+	m_options.exposureTimeLimits[0] = 1e-3*exposureMin;
+	m_options.exposureTimeLimits[1] = 1e-3*exposureMax;
 
-	//m_options.ROIWidthLimits[0] = 1;
-	//m_options.ROIWidthLimits[1] = fmt7Info.maxWidth;
-
-	//m_options.ROIHeightLimits[0] = 1;
-	//m_options.ROIHeightLimits[1] = fmt7Info.maxHeight;
+	uEye::IS_SIZE_2D sizeAOImin;
+	ret = uEye::is_AOI(m_camera, IS_AOI_IMAGE_GET_SIZE_MIN, (void*)&sizeAOImin, sizeof(sizeAOImin));
+	uEye::IS_SIZE_2D sizeAOImax;
+	ret = uEye::is_AOI(m_camera, IS_AOI_IMAGE_GET_SIZE_MAX, (void*)&sizeAOImax, sizeof(sizeAOImax));
+	m_options.ROIWidthLimits[0] = sizeAOImin.s32Width;
+	m_options.ROIWidthLimits[1] = sizeAOImax.s32Width;
+	m_options.ROIHeightLimits[0] = sizeAOImin.s32Height;
+	m_options.ROIHeightLimits[1] = sizeAOImax.s32Height;
 
 	emit(optionsChanged(m_options));
 }
 
 void uEyeCam::readSettings() {
 
-	//// Get the camera configuration
-	//FlyCapture2::FC2Config config;
-	//m_camera.GetConfiguration(&config);
+	/*
+	 * Get the exposure time
+	 */
+	double exposureTemp{ 0.0 };
+	int ret = uEye::is_Exposure(m_camera, uEye::IS_EXPOSURE_CMD_GET_EXPOSURE, (void*)&exposureTemp, sizeof(exposureTemp));
+	if (ret == IS_SUCCESS) {
+		m_settings.exposureTime = 1e-3*exposureTemp;	// [s] exposure time
+	}
 
-	///*
-	//* Get the exposure time
-	//*/
-	//FlyCapture2::Property prop;
-	////Define the property to adjust.
-	//prop.type = FlyCapture2::SHUTTER;
-	////Set the property.
-	//m_camera.GetProperty(&prop);
-	//// general settings
-	//m_settings.exposureTime = 1e-3*prop.absValue;	// [s] exposure time
+	/*
+	 * Get the camera gain
+	 */
+	//m_settings.gain;	// [dB] camera gain
 
-	///*
-	// * Get the camera gain
-	// */
-	//FlyCapture2::Property propGain;
-	////Define the property to adjust.
-	//propGain.type = FlyCapture2::GAIN;
-	////Get the property.
-	//m_camera.GetProperty(&propGain);
-	//// store property in settings
-	//m_settings.gain = propGain.absValue;	// [dB] camera gain
+	/*
+	 * Get the region of interest
+	 */
+	uEye::IS_RECT AOI;
+	ret = uEye::is_AOI(m_camera, IS_AOI_IMAGE_GET_AOI, (void*)&AOI, sizeof(AOI));
+	if (ret == IS_SUCCESS) {
+		m_settings.roi.height = AOI.s32Height;
+		m_settings.roi.width = AOI.s32Width;
+		m_settings.roi.left = AOI.s32X;
+		m_settings.roi.top = AOI.s32Y;
+	}
 
-	//// Create a Format7 Configuration
-	//FlyCapture2::Format7ImageSettings fmt7ImageSettings;
-	//unsigned int packetSize;
-	//float speed;
-	//m_camera.GetFormat7Configuration(&fmt7ImageSettings, &packetSize, &speed);
 
-	//// ROI
-	//m_settings.roi.height = fmt7ImageSettings.height;
-	//m_settings.roi.width = fmt7ImageSettings.width;
-	//m_settings.roi.left = fmt7ImageSettings.offsetX;
-	//m_settings.roi.top = fmt7ImageSettings.offsetY;
-
-	//// readout parameters
-	//switch (fmt7ImageSettings.pixelFormat) {
-	//	case FlyCapture2::PIXEL_FORMAT_RAW8 :
-	//		m_settings.readout.pixelEncoding = L"Raw8";
-	//		break;
-	//	case FlyCapture2::PIXEL_FORMAT_MONO8:
-	//		m_settings.readout.pixelEncoding = L"Mono8";
-	//		break;
-	//	case FlyCapture2::PIXEL_FORMAT_MONO12:
-	//		m_settings.readout.pixelEncoding = L"Mono12";
-	//		break;
-	//	case FlyCapture2::PIXEL_FORMAT_MONO16:
-	//		m_settings.readout.pixelEncoding = L"Mono16";
-	//		break;
-	//}
+	// readout parameters
+	int tmp = uEye::is_SetColorMode(m_camera, IS_GET_COLOR_MODE);
+	switch (tmp) {
+		case IS_CM_SENSOR_RAW8:
+			m_settings.readout.pixelEncoding = L"Raw8";
+			break;
+		case IS_CM_MONO8:
+			m_settings.readout.pixelEncoding = L"Mono8";
+			break;
+		case IS_CM_MONO12:
+			m_settings.readout.pixelEncoding = L"Mono12";
+			break;
+		case IS_CM_MONO16:
+			m_settings.readout.pixelEncoding = L"Mono16";
+			break;
+	}
 
 	// emit signal that settings changed
 	emit(settingsChanged(m_settings));
@@ -141,116 +138,52 @@ void uEyeCam::readSettings() {
 void uEyeCam::setSettings(CAMERA_SETTINGS settings) {
 	m_settings = settings;
 
-	///*
-	//* Set the exposure time
-	//*/
-	//FlyCapture2::Property prop;
-	////Define the property to adjust.
-	//prop.type = FlyCapture2::SHUTTER;
-	////Ensure the property is on.
-	//prop.onOff = true;
-	//// Ensure auto - adjust mode is off.
-	//prop.autoManualMode = false;
-	////Ensure the property is set up to use absolute value control.
-	//prop.absControl = true;
-	////Set the absolute value of shutter
-	//prop.absValue = 1e3*m_settings.exposureTime;
-	////Set the property.
-	//m_camera.SetProperty(&prop);
+	/*
+	 * Set the exposure time
+	 */
+	double exposureTemp{ 0.0 };
+	exposureTemp = (double)1e3*m_settings.exposureTime;
+	uEye::is_Exposure(m_camera, uEye::IS_EXPOSURE_CMD_SET_EXPOSURE, (void*)&exposureTemp, sizeof(exposureTemp));
+
+	/*
+	 * Set the camera gain
+	 */
+	//m_settings.gain;
 
 
-	///*
-	// * Set the camera gain
-	// */
-	//FlyCapture2::Property propGain;
-	//// Define the property to adjust.
-	//propGain.type = FlyCapture2::GAIN;
-	//// Ensure auto-adjust mode is off.
-	//propGain.autoManualMode = false;
-	//// Ensure the property is set up to use absolute value control.
-	//propGain.absControl = true;
-	////Set the absolute value of gain to 10.5 dB.
-	//propGain.absValue = m_settings.gain;
-	////Set the property.
-	//m_camera.SetProperty(&propGain);
+	/*
+	 * Set the pixel format
+	 */
+	// Set the pixel format, possible values are: PIXEL_FORMAT_RAW8, PIXEL_FORMAT_MONO8, PIXEL_FORMAT_MONO12, PIXEL_FORMAT_MONO16
+	int pixelFormat{ IS_CM_SENSOR_RAW8 };
+	if (m_settings.readout.pixelEncoding == L"Raw8") {
+		pixelFormat = IS_CM_SENSOR_RAW8;
+	} else if (m_settings.readout.pixelEncoding == L"Mono8") {
+		pixelFormat = IS_CM_MONO8;
+	} else if (m_settings.readout.pixelEncoding == L"Mono12") {
+		pixelFormat = IS_CM_MONO12;
+	} else if (m_settings.readout.pixelEncoding == L"Mono16") {
+		pixelFormat = IS_CM_MONO16;
+	}
+	int ret = uEye::is_SetColorMode(m_camera, pixelFormat);
 
+	/*
+	 * Set the region of interest
+	 */
+	uEye::IS_RECT AOI;
+	// Offset x
+	AOI.s32X = m_settings.roi.left;
+	// Offset y
+	AOI.s32Y = m_settings.roi.top;
+	// Width
+	AOI.s32Width = m_settings.roi.width;
+	// Height
+	AOI.s32Height = m_settings.roi.height;
+	// Apply values
+	ret = uEye::is_AOI(m_camera, IS_AOI_IMAGE_SET_AOI, (void*)&AOI, sizeof(AOI));
 
-	///*
-	//* Set region of interest and pixel format
-	//*/
-	//// Create a Format7 Configuration
-	//FlyCapture2::Format7ImageSettings fmt7ImageSettings;
-	//// Acquisition mode is always "MODE_0" for this application
-	//fmt7ImageSettings.mode = FlyCapture2::MODE_0;
-	//// Set the pixel format, possible values are: PIXEL_FORMAT_RAW8, PIXEL_FORMAT_MONO8, PIXEL_FORMAT_MONO12, PIXEL_FORMAT_MONO16
-	//if (m_settings.readout.pixelEncoding == L"Raw8") {
-	//	fmt7ImageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_RAW8;
-	//} else if (m_settings.readout.pixelEncoding == L"Mono8") {
-	//	fmt7ImageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_MONO8;
-	//} else if (m_settings.readout.pixelEncoding == L"Mono12") {
-	//	fmt7ImageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_MONO12;
-	//} else if (m_settings.readout.pixelEncoding == L"Mono16") {
-	//	fmt7ImageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_MONO16;
-	//}
-
-	//// Offset x
-	//fmt7ImageSettings.offsetX = m_settings.roi.left;
-	//// Offset y
-	//fmt7ImageSettings.offsetY = m_settings.roi.top;
-	//// Width
-	//fmt7ImageSettings.width = m_settings.roi.width;
-	//// Height
-	//fmt7ImageSettings.height = m_settings.roi.height;
-
-	//FlyCapture2::Format7PacketInfo fmt7PacketInfo;
-	//bool valid;
-	//m_camera.ValidateFormat7Settings(&fmt7ImageSettings, &valid, &fmt7PacketInfo);
-	//if (valid) {
-	//	m_camera.SetFormat7Configuration(&fmt7ImageSettings, fmt7PacketInfo.recommendedBytesPerPacket);
-	//}
-
-	///*
-	//* Set trigger mode
-	//*/
-	//FlyCapture2::TriggerMode triggerMode;
-	//m_camera.GetTriggerMode(&triggerMode);
-	//triggerMode.mode = 0;
-	//triggerMode.parameter = 0;
-	//triggerMode.polarity = 0;
-	//if (m_settings.readout.triggerMode == L"Internal") {
-	//	triggerMode.onOff = false;
-	//} else if (m_settings.readout.triggerMode == L"Software") {
-	//	triggerMode.onOff = true;
-	//	triggerMode.source = 7;	// 7 for software trigger
-	//} else if (m_settings.readout.triggerMode == L"External") {
-	//	triggerMode.onOff = true;
-	//	triggerMode.source = 0;	// 0 for external trigger
-	//}
-
-	//m_camera.SetTriggerMode(&triggerMode);
-
-	//// Wait for software trigger ready
-	//if (m_settings.readout.triggerMode == L"Software") {
-	//	PollForTriggerReady(&m_camera);
-	//}
-
-	///*
-	//* Set the buffering mode.
-	//*/
-	//FlyCapture2::FC2Config BufferFrame;
-	//m_camera.GetConfiguration(&BufferFrame);
-	//if (m_settings.readout.cycleMode == L"Fixed") {				// For image preview
-	//	BufferFrame.grabMode = FlyCapture2::DROP_FRAMES;
-	//	BufferFrame.highPerformanceRetrieveBuffer = false;
-	//} else if (m_settings.readout.cycleMode == L"Continuous") {	// For image preview
-	//	BufferFrame.grabMode = FlyCapture2::BUFFER_FRAMES;
-	//	BufferFrame.highPerformanceRetrieveBuffer = true;
-	//}
-	//BufferFrame.numBuffers = m_settings.frameCount;
-	//m_camera.SetConfiguration(&BufferFrame);
-
-	//// Read back the settings
-	//readSettings();
+	// Read back the settings
+	readSettings();
 }
 
 void uEyeCam::startPreview() {
