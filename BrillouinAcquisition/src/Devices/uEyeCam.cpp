@@ -36,6 +36,7 @@ void uEyeCam::connectDevice() {
 			m_settings.roi.height = 2748;
 
 			m_settings.readout.triggerMode = L"Software";
+			m_settings.readout.pixelEncoding = L"Raw8";
 
 			setSettings(m_settings);
 		}
@@ -66,7 +67,7 @@ void uEyeCam::disconnectDevice() {
 
 void uEyeCam::readOptions() {
 
-	m_options.pixelEncodings = { L"Raw8", L"Mono8", L"Mono12", L"Mono16" };
+	m_options.pixelEncodings = { L"Raw8", L"Mono8" };
 	////m_options.cycleModes = { L"Continuous", L"Fixed single", L"Fixed multiple" };
 
 	double exposureMin{ 0.0 };
