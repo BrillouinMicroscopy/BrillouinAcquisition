@@ -8,29 +8,31 @@ uEyeCam::~uEyeCam() {
 
 void uEyeCam::connectDevice() {
 	if (!m_isConnected) {
-		
-		//unsigned int numCameras;
-		//m_busManager.GetNumOfCameras(&numCameras);
 
-		//if (numCameras > 0) {
-		//	// Select camera
+		int nRet = uEye::is_InitCamera(&m_camera, NULL);
+		if (nRet == IS_STARTER_FW_UPLOAD_NEEDED) {
+			// Time for the firmware upload = 25 seconds by default
+			int nUploadTime = 25000;
+			uEye::is_GetDuration(m_camera, uEye::IS_STARTER_FW_UPLOAD, &nUploadTime);
 
-		//	m_busManager.GetCameraFromIndex(0, &m_guid);
+			// Try again to open the camera. This time we allow the automatic upload of the firmware by
+			// specifying "IS_ALLOW_STARTER_FIRMWARE_UPLOAD"
+			m_camera = (uEye::HIDS)(((int)m_camera) | IS_ALLOW_STARTER_FW_UPLOAD);
+			nRet = uEye::is_InitCamera(&m_camera, NULL);
+		}
 
-		//	m_camera.Connect(&m_guid);
+		if (nRet == IS_SUCCESS) {
+			m_isConnected = true;
 
-		//	m_isConnected = true;
-		//	
-		//	readOptions();
+			readOptions();
 
-		//	// apply default values for exposure and gain
-		//	m_settings.exposureTime = 0.004;
-		//	m_settings.gain = 0.0;
-		//	setSettings(m_settings);
-		//}
+			// apply default values for exposure and gain
+			m_settings.exposureTime = 0.1;
+			m_settings.gain = 0.0;
+			setSettings(m_settings);
+		}
 	}
 
-	m_isConnected = true;
 	emit(connectedDevice(m_isConnected));
 }
 
