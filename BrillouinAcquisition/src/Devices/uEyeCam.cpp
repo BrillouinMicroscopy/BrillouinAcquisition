@@ -34,6 +34,9 @@ void uEyeCam::connectDevice() {
 			m_settings.roi.top = 0;
 			m_settings.roi.width = 3840;
 			m_settings.roi.height = 2748;
+
+			m_settings.readout.triggerMode = L"Software";
+
 			setSettings(m_settings);
 		}
 	}
@@ -113,6 +116,22 @@ void uEyeCam::readSettings() {
 		m_settings.roi.top = AOI.s32Y;
 	}
 
+	/*
+	 * Get the currently selected trigger mode
+	 */
+
+	ret = uEye::is_SetExternalTrigger(m_camera, IS_GET_EXTERNALTRIGGER);
+	switch (ret) {
+		case IS_SET_TRIGGER_OFF:
+			m_settings.readout.triggerMode = L"Internal";
+			break;
+		case IS_SET_TRIGGER_SOFTWARE:
+			m_settings.readout.triggerMode = L"Software";
+			break;
+		case IS_SET_TRIGGER_LO_HI:
+			m_settings.readout.triggerMode = L"External";
+			break;
+	}
 
 	// readout parameters
 	int tmp = uEye::is_SetColorMode(m_camera, IS_GET_COLOR_MODE);
@@ -182,6 +201,17 @@ void uEyeCam::setSettings(CAMERA_SETTINGS settings) {
 	// Apply values
 	ret = uEye::is_AOI(m_camera, IS_AOI_IMAGE_SET_AOI, (void*)&AOI, sizeof(AOI));
 
+	/*
+	 * Set trigger mode
+	 */
+	if (m_settings.readout.triggerMode == L"Internal") {
+		ret = uEye::is_SetExternalTrigger(m_camera, IS_SET_TRIGGER_OFF);
+	} else if (m_settings.readout.triggerMode == L"Software") {
+		ret = uEye::is_SetExternalTrigger(m_camera, IS_SET_TRIGGER_SOFTWARE);	// software trigger
+	} else if (m_settings.readout.triggerMode == L"External") {
+		ret = uEye::is_SetExternalTrigger(m_camera, IS_SET_TRIGGER_LO_HI);	// external trigger low high
+	}
+
 	// Read back the settings
 	readSettings();
 }
@@ -207,8 +237,6 @@ void uEyeCam::preparePreview() {
 	m_settings.roi.height = m_options.ROIHeightLimits[1];
 	m_settings.readout.pixelEncoding = L"Raw8";
 	m_settings.readout.triggerMode = L"Internal";
-	m_settings.readout.cycleMode = L"Fixed";
-	m_settings.frameCount = 10;
 
 	setSettings(m_settings);
 
