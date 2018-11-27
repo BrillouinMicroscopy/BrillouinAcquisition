@@ -175,9 +175,9 @@ bool Andor::getSensorCooling() {
 
 const std::string Andor::getTemperatureStatus() {
 	int i_retCode = AT_GetEnumIndex(m_camera, L"TemperatureStatus", &m_temperatureStatusIndex);
-	AT_GetEnumStringByIndex(m_camera, L"TemperatureStatus", m_temperatureStatusIndex, temperatureStatus, 256);
-	std::wstring ws(temperatureStatus);
-	std::string m_temperatureStatus(ws.begin(), ws.end());
+	std::wstring tmp{ L"", 256 };
+	AT_GetEnumStringByIndex(m_camera, L"TemperatureStatus", m_temperatureStatusIndex, &tmp[0], tmp.length());
+	m_temperatureStatus = std::string(tmp.begin(), tmp.end());
 	return m_temperatureStatus;
 }
 
