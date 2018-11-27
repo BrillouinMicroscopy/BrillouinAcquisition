@@ -142,23 +142,26 @@ void Andor::readSettings() {
 	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width);
 	AT_GetInt(m_camera, L"AOILeft", &m_settings.roi.left);
 	AT_GetInt(m_camera, L"AOITop", &m_settings.roi.top);
-	getEnumString(L"AOIBinning", &m_settings.roi.binning[0]);
+	getEnumString(L"AOIBinning", &m_settings.roi.binning);
 
 	// readout parameters
-	getEnumString(L"CycleMode", &m_settings.readout.cycleMode[0]);
-	getEnumString(L"Pixel Encoding", &m_settings.readout.pixelEncoding[0]);
-	getEnumString(L"Pixel Readout Rate", &m_settings.readout.pixelReadoutRate[0]);
-	getEnumString(L"SimplePreAmpGainControl", &m_settings.readout.preAmpGain[0]);
-	getEnumString(L"TriggerMode", &m_settings.readout.triggerMode[0]);
+	getEnumString(L"CycleMode", &m_settings.readout.cycleMode);
+	getEnumString(L"Pixel Encoding", &m_settings.readout.pixelEncoding);
+	getEnumString(L"Pixel Readout Rate", &m_settings.readout.pixelReadoutRate);
+	getEnumString(L"SimplePreAmpGainControl", &m_settings.readout.preAmpGain);
+	getEnumString(L"TriggerMode", &m_settings.readout.triggerMode);
 
 	// emit signal that settings changed
 	emit(settingsChanged(m_settings));
 }
 
-void Andor::getEnumString(AT_WC* feature, AT_WC* string) {
+void Andor::getEnumString(AT_WC* feature, std::wstring* value) {
 	int enumIndex;
 	AT_GetEnumIndex(m_camera, feature, &enumIndex);
-	AT_GetEnumStringByIndex(m_camera, feature, enumIndex, string, 256);
+	AT_WC tmpValue[256];
+	AT_GetEnumStringByIndex(m_camera, feature, enumIndex, tmpValue, 256);
+	std::wstring tmp = std::wstring(tmpValue);
+	value = &tmp;
 }
 
 void Andor::setSensorCooling(bool cooling) {
@@ -175,9 +178,10 @@ bool Andor::getSensorCooling() {
 
 const std::string Andor::getTemperatureStatus() {
 	int i_retCode = AT_GetEnumIndex(m_camera, L"TemperatureStatus", &m_temperatureStatusIndex);
+	AT_WC temperatureStatus[256];
 	AT_GetEnumStringByIndex(m_camera, L"TemperatureStatus", m_temperatureStatusIndex, temperatureStatus, 256);
-	std::wstring ws(temperatureStatus);
-	std::string m_temperatureStatus(ws.begin(), ws.end());
+	std::wstring temperatureStatusString = temperatureStatus;
+	m_temperatureStatus = std::string(temperatureStatusString.begin(), temperatureStatusString.end());
 	return m_temperatureStatus;
 }
 

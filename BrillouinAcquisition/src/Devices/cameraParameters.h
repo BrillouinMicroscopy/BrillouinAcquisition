@@ -22,15 +22,15 @@ struct CAMERA_ROI {
 	AT_64 width = 2048;
 	AT_64 top = 1;
 	AT_64 height = 2048;
-	std::wstring binning{ L"1x1", 256 };
+	std::wstring binning{ L"1x1" };
 };
 
 struct CAMERA_READOUT {
-	std::wstring pixelReadoutRate{ L"100 MHz", 256 };
-	std::wstring pixelEncoding{ L"Mono16", 256 };
-	std::wstring cycleMode{ L"Continuous", 256 };
-	std::wstring triggerMode{ L"Software", 256 };
-	std::wstring preAmpGain{ L"16-bit (low noise & high well capacity)", 256 };
+	std::wstring pixelReadoutRate{ L"100 MHz" };
+	std::wstring pixelEncoding{ L"Mono16" };
+	std::wstring cycleMode{ L"Continuous" };
+	std::wstring triggerMode{ L"Software" };
+	std::wstring preAmpGain{ L"16-bit (low noise & high well capacity)" };
 };
 
 struct CAMERA_SETTINGS {

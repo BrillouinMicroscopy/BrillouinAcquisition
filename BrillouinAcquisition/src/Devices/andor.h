@@ -32,15 +32,14 @@ private:
 	bool m_isCooling{ false };
 
 	int m_temperatureStatusIndex = 0;
-	AT_WC temperatureStatus[256] = {};
-	std::string m_temperatureStatus;
+	std::string m_temperatureStatus{ "" };
 	QTimer *m_tempTimer = nullptr;
 	SensorTemperature m_sensorTemperature;
 	AT_64 m_imageStride = 0;
 	int m_bufferSize = -1;
 
 	void cleanupAcquisition();
-	void getEnumString(AT_WC* feature, AT_WC* string);
+	void getEnumString(AT_WC* feature, std::wstring* string);
 	void preparePreview();
 
 	void acquireImage(unsigned short* buffer);
