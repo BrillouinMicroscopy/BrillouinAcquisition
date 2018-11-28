@@ -13,7 +13,7 @@ class Camera : public Device {
 	Q_OBJECT
 
 protected slots:
-	virtual void getImageForPreview() = 0;
+	virtual void getImageForPreview();
 
 public:
 	Camera() {};

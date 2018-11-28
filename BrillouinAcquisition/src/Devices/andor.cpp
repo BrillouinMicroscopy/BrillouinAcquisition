@@ -318,22 +318,6 @@ void Andor::acquireImage(unsigned char* buffer) {
 	delete[] Buffer;
 }
 
-void Andor::getImageForPreview() {
-	std::lock_guard<std::mutex> lockGuard(m_mutex);
-	if (m_isPreviewRunning) {
-		if (m_stopPreview) {
-			stopPreview();
-			return;
-		}
-
-		m_previewBuffer->m_buffer->m_freeBuffers->acquire();
-		acquireImage(m_previewBuffer->m_buffer->getWriteBuffer());
-		m_previewBuffer->m_buffer->m_usedBuffers->release();
-
-		QMetaObject::invokeMethod(this, "getImageForPreview", Qt::QueuedConnection);
-	}
-}
-
 void Andor::getImageForAcquisition(unsigned char* buffer) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	acquireImage(buffer);

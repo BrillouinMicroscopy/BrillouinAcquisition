@@ -25,9 +25,6 @@ private:
 	void readOptions();
 	void readSettings();
 
-private slots:
-	void getImageForPreview();
-
 public:
 	uEyeCam() noexcept {};
 	~uEyeCam();

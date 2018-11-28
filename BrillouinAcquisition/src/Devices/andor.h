@@ -69,7 +69,6 @@ public:
 	//PreviewBuffer<unsigned short>* m_previewBuffer = new PreviewBuffer<unsigned short>;
 
 private slots:
-	void getImageForPreview() override;
 	void checkSensorTemperature();
 
 public slots:

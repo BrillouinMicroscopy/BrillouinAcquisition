@@ -31,9 +31,6 @@ private:
 	void readOptions();
 	void readSettings();
 
-private slots:
-	void getImageForPreview() override;
-
 public:
 	PointGrey() noexcept {};
 	~PointGrey();
