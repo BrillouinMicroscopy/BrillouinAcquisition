@@ -31,7 +31,13 @@ void Camera::getImageForPreview() {
 			return;
 		}
 
-		m_previewBuffer->m_buffer->m_freeBuffers->acquire();
+		// if no image is ready return immediately
+		if (!m_previewBuffer->m_buffer->m_freeBuffers->tryAcquire()) {
+			Sleep(50);
+
+			QMetaObject::invokeMethod(this, "getImageForPreview", Qt::QueuedConnection);
+			return;
+		}
 		acquireImage(m_previewBuffer->m_buffer->getWriteBuffer());
 		m_previewBuffer->m_buffer->m_usedBuffers->release();
 
