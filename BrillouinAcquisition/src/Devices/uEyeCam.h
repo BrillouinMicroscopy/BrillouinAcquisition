@@ -48,9 +48,6 @@ public slots:
 	void stopAcquisition();
 
 	void getImageForAcquisition(unsigned char* buffer) override;
-
-signals:
-	void s_previewRunning(bool);
 };
 
 #endif // UEYECAM_H
