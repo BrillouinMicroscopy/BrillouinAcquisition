@@ -65,9 +65,6 @@ public:
 	double getSensorTemperature();
 	void setCalibrationExposureTime(double);
 
-	// preview buffer for live acquisition
-	//PreviewBuffer<unsigned short>* m_previewBuffer = new PreviewBuffer<unsigned short>;
-
 private slots:
 	void checkSensorTemperature();
 

@@ -34,6 +34,11 @@ void uEyeCam::connectDevice() {
 			m_settings.roi.top = 0;
 			m_settings.roi.width = 3840;
 			m_settings.roi.height = 2748;
+			
+			m_settings.roi.left = 800;
+			m_settings.roi.top = 400;
+			m_settings.roi.width = 1800;
+			m_settings.roi.height = 2000;
 
 			m_settings.readout.triggerMode = L"Software";
 			m_settings.readout.pixelEncoding = L"Raw8";
@@ -236,21 +241,35 @@ void uEyeCam::preparePreview() {
 	m_settings.roi.top = 0;
 	m_settings.roi.width = m_options.ROIWidthLimits[1];
 	m_settings.roi.height = m_options.ROIHeightLimits[1];
+
+	m_settings.roi.left = 800;
+	m_settings.roi.top = 400;
+	m_settings.roi.width = 1800;
+	m_settings.roi.height = 2000;
+
 	m_settings.readout.pixelEncoding = L"Raw8";
 	m_settings.readout.triggerMode = L"Internal";
 
 	setSettings(m_settings);
 
 	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
-	BUFFER_SETTINGS bufferSettings = { 4, pixelNumber, "unsigned char", m_settings.roi };
+	BUFFER_SETTINGS bufferSettings = { 1, pixelNumber, "unsigned char", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
-	//m_camera.StartCapture();
+	// allocate and add memory
+	int nRet = uEye::is_AllocImageMem(m_camera, m_settings.roi.width, m_settings.roi.height, 8, &m_imageBuffer, &m_imageBufferId);
+
+	if (nRet == IS_SUCCESS) {
+		nRet = uEye::is_AddToSequence(m_camera, m_imageBuffer, m_imageBufferId);
+	}
+
+	uEye::is_CaptureVideo(m_camera, IS_WAIT);
 }
 
 void uEyeCam::stopPreview() {
-	//m_camera.StopCapture();
+	uEye::is_StopLiveVideo(m_camera, IS_FORCE_VIDEO_STOP);
+	int nRet = uEye::is_FreeImageMem(m_camera, m_imageBuffer, m_imageBufferId);
 	m_isPreviewRunning = false;
 	m_stopPreview = false;
 	emit(s_previewRunning(m_isPreviewRunning));
@@ -268,32 +287,29 @@ void uEyeCam::startAcquisition(CAMERA_SETTINGS settings) {
 	// Wait for camera to really apply settings
 	Sleep(500);
 
-	//m_camera.StartCapture();
+	// allocate and add memory
+	int nRet = uEye::is_AllocImageMem(m_camera, m_settings.roi.width, m_settings.roi.height, 8, &m_imageBuffer, &m_imageBufferId);
+
+	if (nRet == IS_SUCCESS) {
+		nRet = uEye::is_AddToSequence(m_camera, m_imageBuffer, m_imageBufferId);
+	}
+
+	uEye::is_CaptureVideo(m_camera, IS_WAIT);
 	m_isAcquisitionRunning = true;
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
 }
 
 void uEyeCam::stopAcquisition() {
-	//m_camera.StopCapture();
+	uEye::is_StopLiveVideo(m_camera, IS_FORCE_VIDEO_STOP);
+	int nRet = uEye::is_FreeImageMem(m_camera, m_imageBuffer, m_imageBufferId);
 	m_isAcquisitionRunning = false;
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
 }
 
 void uEyeCam::acquireImage(unsigned char* buffer) {
-	//FlyCapture2::Image rawImage;
-	//FlyCapture2::Error tmp = m_camera.RetrieveBuffer(&rawImage);
 
-	//// Convert the raw image
-	//FlyCapture2::Image convertedImage;
-	//rawImage.Convert(FlyCapture2::PIXEL_FORMAT_RAW8, &convertedImage);
-
-	//// Get access to raw data
-	//T* data = static_cast<T*>(convertedImage.GetData());
-
-	//// Copy data to preview buffer
-	//if (data != NULL) {
-	//	memcpy(buffer, data, m_settings.roi.width*m_settings.roi.height);
-	//}
+	// Copy data to preview buffer
+	memcpy(buffer, m_imageBuffer, m_settings.roi.width*m_settings.roi.height);
 }
 
 void uEyeCam::getImageForAcquisition(unsigned char* buffer) {

@@ -19,6 +19,9 @@ private:
 
 	void acquireImage(unsigned char* buffer);
 
+	char *m_imageBuffer;
+	int m_imageBufferId;
+
 	/*
 	 * Members and functions inherited from base class
 	 */
@@ -28,9 +31,6 @@ private:
 public:
 	uEyeCam() noexcept {};
 	~uEyeCam();
-
-	// preview buffer for live acquisition
-	PreviewBuffer<unsigned char>* m_previewBuffer = new PreviewBuffer<unsigned char>;
 
 public slots:
 	void init() {};

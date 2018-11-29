@@ -79,11 +79,25 @@ void Fluorescence::startRepetitions() {
 	// reset abort flag
 	m_abort = false;
 
+	std::string cameraType = typeid(**m_camera).name();
+
 	// configure camera for measurement
+	// This needs a proper implementation with user defined values. Probably by a configuration file.
 	m_settings.camera.roi.left = 128;
 	m_settings.camera.roi.top = 0;
 	m_settings.camera.roi.width = 1024;
 	m_settings.camera.roi.height = 1024;
+	if (cameraType == "class uEyeCam") {
+		m_settings.camera.roi.left = 800;
+		m_settings.camera.roi.top = 400;
+		m_settings.camera.roi.width = 1800;
+		m_settings.camera.roi.height = 2000;
+	} else if (cameraType == "class PointGrey") {
+		m_settings.camera.roi.left = 128;
+		m_settings.camera.roi.top = 0;
+		m_settings.camera.roi.width = 1024;
+		m_settings.camera.roi.height = 1024;
+	}
 	m_settings.camera.readout.pixelEncoding = L"Raw8";
 	m_settings.camera.readout.triggerMode = L"Internal";
 	m_settings.camera.readout.cycleMode = L"Fixed";

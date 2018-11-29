@@ -1274,11 +1274,27 @@ std::vector<AT_64> BrillouinAcquisition::checkROI(std::vector<AT_64> values, std
 void BrillouinAcquisition::updatePlotLimits(PLOT_SETTINGS plotSettings,	CAMERA_OPTIONS options, CAMERA_ROI roi) {
 	// set the properties of the colormap to the correct values of the preview buffer
 	plotSettings.colorMap->data()->setSize(roi.width, roi.height);
-	plotSettings.colorMap->data()->setRange(
-		QCPRange(roi.left, roi.width + roi.left - 1),
-		QCPRange(	options.ROIHeightLimits[1] - roi.top - roi.height + 2,
-					options.ROIHeightLimits[1] - roi.top + 1)
+	QCPRange xRange = QCPRange(roi.left, roi.width + roi.left - 1);
+	QCPRange yRange = QCPRange(
+		options.ROIHeightLimits[1] - roi.top - roi.height + 2,
+		options.ROIHeightLimits[1] - roi.top + 1
 	);
+	plotSettings.colorMap->data()->setRange(xRange, yRange);
+
+	QCPRange xRangeCurrent = plotSettings.plotHandle->xAxis->range();
+	QCPRange yRangeCurrent = plotSettings.plotHandle->yAxis->range();
+
+	QCPRange xRangeNew = QCPRange(
+		simplemath::max({ xRangeCurrent.lower, xRange.lower }),
+		simplemath::min({ xRangeCurrent.upper, xRange.upper })
+	);
+	QCPRange yRangeNew = QCPRange(
+		simplemath::max({ yRangeCurrent.lower, yRange.lower }),
+		simplemath::min({ yRangeCurrent.upper, yRange.upper })
+	);
+
+	plotSettings.plotHandle->xAxis->setRange(xRangeNew);
+	plotSettings.plotHandle->yAxis->setRange(yRangeNew);
 }
 
 void BrillouinAcquisition::showPreviewRunning(bool isRunning) {
