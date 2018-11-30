@@ -3012,9 +3012,9 @@ border: none;</string>
                   <widget class="QCheckBox" name="fluoBlueCheckbox">
                    <property name="geometry">
                     <rect>
-                     <x>32</x>
+                     <x>30</x>
                      <y>32</y>
-                     <width>101</width>
+                     <width>65</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -3022,54 +3022,54 @@ border: none;</string>
                     <bool>false</bool>
                    </property>
                    <property name="text">
-                    <string>Acquire for [ms]</string>
+                    <string>Exposure [ms]</string>
                    </property>
                   </widget>
                   <widget class="QCheckBox" name="fluoGreenCheckbox">
                    <property name="geometry">
                     <rect>
-                     <x>32</x>
+                     <x>30</x>
                      <y>56</y>
-                     <width>101</width>
+                     <width>65</width>
                      <height>18</height>
                     </rect>
                    </property>
                    <property name="text">
-                    <string>Acquire for [ms]</string>
+                    <string>Exposure [ms]</string>
                    </property>
                   </widget>
                   <widget class="QCheckBox" name="fluoRedCheckbox">
                    <property name="geometry">
                     <rect>
-                     <x>32</x>
+                     <x>30</x>
                      <y>80</y>
-                     <width>101</width>
+                     <width>65</width>
                      <height>18</height>
                     </rect>
                    </property>
                    <property name="text">
-                    <string>Acquire for [ms]</string>
+                    <string>Exposure [ms]</string>
                    </property>
                   </widget>
                   <widget class="QCheckBox" name="fluoBrightfieldCheckbox">
                    <property name="geometry">
                     <rect>
-                     <x>32</x>
+                     <x>30</x>
                      <y>104</y>
-                     <width>101</width>
+                     <width>65</width>
                      <height>18</height>
                     </rect>
                    </property>
                    <property name="text">
-                    <string>Acquire for [ms]</string>
+                    <string>Exposure [ms]</string>
                    </property>
                   </widget>
-                  <widget class="QLabel" name="fluoGain_Label">
+                  <widget class="QLabel" name="fluoBlueGain_Label">
                    <property name="geometry">
                     <rect>
-                     <x>8</x>
-                     <y>8</y>
-                     <width>61</width>
+                     <x>141</x>
+                     <y>32</y>
+                     <width>33</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -3077,12 +3077,12 @@ border: none;</string>
                     <string>Gain [dB]</string>
                    </property>
                   </widget>
-                  <widget class="QDoubleSpinBox" name="fluoGain">
+                  <widget class="QDoubleSpinBox" name="fluoBlueGain">
                    <property name="geometry">
                     <rect>
-                     <x>70</x>
-                     <y>8</y>
-                     <width>49</width>
+                     <x>176</x>
+                     <y>32</y>
+                     <width>40</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -3099,9 +3099,9 @@ border: none;</string>
                   <widget class="QSpinBox" name="fluoBlueExposure">
                    <property name="geometry">
                     <rect>
-                     <x>152</x>
+                     <x>96</x>
                      <y>32</y>
-                     <width>64</width>
+                     <width>41</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -3121,9 +3121,9 @@ border: none;</string>
                   <widget class="QSpinBox" name="fluoGreenExposure">
                    <property name="geometry">
                     <rect>
-                     <x>152</x>
+                     <x>96</x>
                      <y>56</y>
-                     <width>64</width>
+                     <width>41</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -3143,9 +3143,9 @@ border: none;</string>
                   <widget class="QSpinBox" name="fluoRedExposure">
                    <property name="geometry">
                     <rect>
-                     <x>152</x>
+                     <x>96</x>
                      <y>80</y>
-                     <width>64</width>
+                     <width>41</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -3165,9 +3165,9 @@ border: none;</string>
                   <widget class="QSpinBox" name="fluoBrightfieldExposure">
                    <property name="geometry">
                     <rect>
-                     <x>152</x>
+                     <x>96</x>
                      <y>104</y>
-                     <width>64</width>
+                     <width>41</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -3178,10 +3178,10 @@ border: none;</string>
                     <number>10000</number>
                    </property>
                    <property name="singleStep">
-                    <number>100</number>
+                    <number>1</number>
                    </property>
                    <property name="value">
-                    <number>900</number>
+                    <number>4</number>
                    </property>
                   </widget>
                   <widget class="QWidget" name="fluoBlueIcon" native="true">
@@ -3241,6 +3241,102 @@ border: none;</string>
                    </property>
                    <property name="format">
                     <string extracomment="Test">Acquisition stopped</string>
+                   </property>
+                  </widget>
+                  <widget class="QLabel" name="fluoGreenGain_Label">
+                   <property name="geometry">
+                    <rect>
+                     <x>141</x>
+                     <y>56</y>
+                     <width>33</width>
+                     <height>18</height>
+                    </rect>
+                   </property>
+                   <property name="text">
+                    <string>Gain [dB]</string>
+                   </property>
+                  </widget>
+                  <widget class="QDoubleSpinBox" name="fluoGreenGain">
+                   <property name="geometry">
+                    <rect>
+                     <x>176</x>
+                     <y>56</y>
+                     <width>40</width>
+                     <height>18</height>
+                    </rect>
+                   </property>
+                   <property name="decimals">
+                    <number>1</number>
+                   </property>
+                   <property name="singleStep">
+                    <double>1.000000000000000</double>
+                   </property>
+                   <property name="value">
+                    <double>10.000000000000000</double>
+                   </property>
+                  </widget>
+                  <widget class="QLabel" name="fluoRedGain_Label">
+                   <property name="geometry">
+                    <rect>
+                     <x>141</x>
+                     <y>80</y>
+                     <width>33</width>
+                     <height>18</height>
+                    </rect>
+                   </property>
+                   <property name="text">
+                    <string>Gain [dB]</string>
+                   </property>
+                  </widget>
+                  <widget class="QDoubleSpinBox" name="fluoRedGain">
+                   <property name="geometry">
+                    <rect>
+                     <x>176</x>
+                     <y>80</y>
+                     <width>40</width>
+                     <height>18</height>
+                    </rect>
+                   </property>
+                   <property name="decimals">
+                    <number>1</number>
+                   </property>
+                   <property name="singleStep">
+                    <double>1.000000000000000</double>
+                   </property>
+                   <property name="value">
+                    <double>10.000000000000000</double>
+                   </property>
+                  </widget>
+                  <widget class="QLabel" name="fluoBrightfieldGain_Label">
+                   <property name="geometry">
+                    <rect>
+                     <x>141</x>
+                     <y>104</y>
+                     <width>33</width>
+                     <height>18</height>
+                    </rect>
+                   </property>
+                   <property name="text">
+                    <string>Gain [dB]</string>
+                   </property>
+                  </widget>
+                  <widget class="QDoubleSpinBox" name="fluoBrightfieldGain">
+                   <property name="geometry">
+                    <rect>
+                     <x>176</x>
+                     <y>104</y>
+                     <width>40</width>
+                     <height>18</height>
+                    </rect>
+                   </property>
+                   <property name="decimals">
+                    <number>1</number>
+                   </property>
+                   <property name="singleStep">
+                    <double>1.000000000000000</double>
+                   </property>
+                   <property name="value">
+                    <double>0.000000000000000</double>
                    </property>
                   </widget>
                  </widget>
@@ -3699,16 +3795,19 @@ border: none;</string>
   <tabstop>camera_singleShot</tabstop>
   <tabstop>camera_playPause</tabstop>
   <tabstop>scrollArea_2</tabstop>
-  <tabstop>fluoGain</tabstop>
   <tabstop>acquisitionStartFluorescence</tabstop>
   <tabstop>fluoBlueCheckbox</tabstop>
   <tabstop>fluoBlueExposure</tabstop>
+  <tabstop>fluoBlueGain</tabstop>
   <tabstop>fluoGreenCheckbox</tabstop>
   <tabstop>fluoGreenExposure</tabstop>
+  <tabstop>fluoGreenGain</tabstop>
   <tabstop>fluoRedCheckbox</tabstop>
   <tabstop>fluoRedExposure</tabstop>
+  <tabstop>fluoRedGain</tabstop>
   <tabstop>fluoBrightfieldCheckbox</tabstop>
   <tabstop>fluoBrightfieldExposure</tabstop>
+  <tabstop>fluoBrightfieldGain</tabstop>
   <tabstop>scrollArea_3</tabstop>
   <tabstop>alignmentUR_ODT</tabstop>
   <tabstop>alignmentNumber_ODT</tabstop>
@@ -3726,7 +3825,7 @@ border: none;</string>
  <connections/>
  <buttongroups>
   <buttongroup name="buttonGroup_3"/>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
  </buttongroups>
 </ui>

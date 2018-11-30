@@ -721,13 +721,28 @@ void BrillouinAcquisition::on_fluoBrightfieldExposure_valueChanged(int exposure)
 	m_Fluorescence->setExposure(FLUORESCENCE_MODE::BRIGHTFIELD, exposure);
 }
 
+void BrillouinAcquisition::on_fluoBlueGain_valueChanged(int gain) {
+	m_Fluorescence->setGain(FLUORESCENCE_MODE::BLUE, gain);
+}
+
+void BrillouinAcquisition::on_fluoGreenGain_valueChanged(int gain) {
+	m_Fluorescence->setGain(FLUORESCENCE_MODE::GREEN, gain);
+}
+
+void BrillouinAcquisition::on_fluoRedGain_valueChanged(int gain) {
+	m_Fluorescence->setGain(FLUORESCENCE_MODE::RED, gain);
+}
+
+void BrillouinAcquisition::on_fluoBrightfieldGain_valueChanged(int gain) {
+	m_Fluorescence->setGain(FLUORESCENCE_MODE::BRIGHTFIELD, gain);
+}
+
 void BrillouinAcquisition::updateFluorescenceSettings(FLUORESCENCE_SETTINGS settings) {
 	bool disableStart{ true };
 	if (settings.blue.enabled || settings.red.enabled || settings.green.enabled || settings.brightfield.enabled) {
 		disableStart = false;
 	}
 	ui->acquisitionStartFluorescence->setDisabled(disableStart);
-	ui->fluoGain->setValue(settings.camera.gain);
 	ui->fluoBlueCheckbox->setChecked(settings.blue.enabled);
 	ui->fluoGreenCheckbox->setChecked(settings.green.enabled);
 	ui->fluoRedCheckbox->setChecked(settings.red.enabled);
@@ -736,6 +751,10 @@ void BrillouinAcquisition::updateFluorescenceSettings(FLUORESCENCE_SETTINGS sett
 	ui->fluoGreenExposure->setValue(settings.green.exposure);
 	ui->fluoRedExposure->setValue(settings.red.exposure);
 	ui->fluoBrightfieldExposure->setValue(settings.brightfield.exposure);
+	ui->fluoBlueGain->setValue(settings.blue.gain);
+	ui->fluoGreenGain->setValue(settings.green.gain);
+	ui->fluoRedGain->setValue(settings.red.gain);
+	ui->fluoBrightfieldGain->setValue(settings.brightfield.gain);
 }
 
 void BrillouinAcquisition::showEnabledModes(ACQUISITION_MODE modes) {
@@ -915,7 +934,6 @@ void BrillouinAcquisition::showFluorescenceStatus(ACQUISITION_STATUS status) {
 		ui->acquisitionStartFluorescence->setText("Start");
 	}
 
-	ui->fluoGain->setDisabled(running);
 	ui->fluoBlueCheckbox->setDisabled(running);
 	ui->fluoGreenCheckbox->setDisabled(running);
 	ui->fluoRedCheckbox->setDisabled(running);
@@ -924,6 +942,10 @@ void BrillouinAcquisition::showFluorescenceStatus(ACQUISITION_STATUS status) {
 	ui->fluoGreenExposure->setDisabled(running);
 	ui->fluoRedExposure->setDisabled(running);
 	ui->fluoBrightfieldExposure->setDisabled(running);
+	ui->fluoBlueGain->setDisabled(running);
+	ui->fluoGreenGain->setDisabled(running);
+	ui->fluoRedGain->setDisabled(running);
+	ui->fluoBrightfieldGain->setDisabled(running);
 }
 
 void BrillouinAcquisition::showFluorescenceProgress(double progress, int seconds) {
