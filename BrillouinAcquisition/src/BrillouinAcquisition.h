@@ -101,6 +101,8 @@ private slots:
 	void updatePlot(PLOT_SETTINGS plotSettings);
 	void updateCLimRange(QSpinBox*, QSpinBox*, QCPRange);
 
+	void on_addFocusMarker_brightfield_clicked();
+
 	void showEvent(QShowEvent* event);
 	void on_actionAbout_triggered();
 	void on_camera_singleShot_clicked();
@@ -138,6 +140,8 @@ private slots:
 	void updateImageODT();
 
 	void initializePlot(PLOT_SETTINGS plotSettings);
+
+	void drawFocusMarker();
 
 	void xAxisRangeChangedODT(const QCPRange& newRange);
 	void yAxisRangeChangedODT(const QCPRange& newRange);
@@ -298,6 +302,10 @@ private:
 		UEYE = 2
 	} CAMERA_DEVICE;
 	std::vector<std::string> CAMERA_DEVICE_NAMES = { "None", "PointGrey", "uEye" };
+
+	QCPGraph *m_focusMarker{ nullptr };
+	POINT2 m_focusMarkerPos{ -1, -1 };
+	bool m_selectFocus{ false };
 
 	CAMERA_DEVICE m_cameraType = CAMERA_DEVICE::UEYE;
 	CAMERA_DEVICE m_cameraTypeTemporary = m_cameraType;

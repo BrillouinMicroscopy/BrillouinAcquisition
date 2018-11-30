@@ -313,6 +313,10 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		gpGrayscale
 	};
 
+	// set up laser focus marker
+	ui->addFocusMarker_brightfield->setIcon(m_icons.fluoBlue);
+	ui->addFocusMarker_brightfield->setText("");
+
 	// set up the camera image plot
 	BrillouinAcquisition::initializePlot(m_BrillouinPlot);
 	BrillouinAcquisition::initializePlot(m_ODTPlot);
@@ -393,6 +397,11 @@ void BrillouinAcquisition::plotClick(QMouseEvent* event) {
 
 	double posX = m_ODTPlot.plotHandle->xAxis->pixelToCoord(position.x());
 	double posY = m_ODTPlot.plotHandle->yAxis->pixelToCoord(position.y());
+
+	if (m_selectFocus) {
+		m_focusMarkerPos = { posX, posY };
+		drawFocusMarker();
+	}
 
 	// TODO: Set laser focus to this position
 }
@@ -1112,6 +1121,40 @@ void BrillouinAcquisition::initializePlot(PLOT_SETTINGS plotSettings) {
 
 	// rescale the key (x) and value (y) axes so the whole color map is visible:
 	plotSettings.plotHandle->rescaleAxes();
+}
+
+void BrillouinAcquisition::on_addFocusMarker_brightfield_clicked() {
+	m_selectFocus = !m_selectFocus;
+
+	if (!m_selectFocus) {
+		ui->addFocusMarker_brightfield->setIcon(m_icons.fluoBlue);
+		ui->addFocusMarker_brightfield->setText("");
+	} else {
+		ui->addFocusMarker_brightfield->setIcon(QIcon());
+		ui->addFocusMarker_brightfield->setText("Ok");
+	}
+}
+
+void BrillouinAcquisition::drawFocusMarker() {
+	// Don't draw if outside of image
+	if (m_focusMarkerPos.x < 0 || m_focusMarkerPos.y < 0)	{
+		return;
+	}
+
+	// Add a marker to the plot to indicate the laser focus
+	if (!m_focusMarker) {
+		 m_focusMarker = m_ODTPlot.plotHandle->addGraph();
+	}
+	m_focusMarker->setData(QVector<double>{m_focusMarkerPos.x}, QVector<double>{m_focusMarkerPos.y});
+	QPen pen;
+	pen.setColor(Qt::blue);
+	pen.setWidth(2);
+	QCPScatterStyle scatterStyle;
+	scatterStyle.setShape(QCPScatterStyle::ssCircle);
+	scatterStyle.setPen(pen);
+	scatterStyle.setSize(8);
+	m_focusMarker->setScatterStyle(scatterStyle);
+	m_ODTPlot.plotHandle->replot();
 }
 
 void BrillouinAcquisition::on_rangeLower_valueChanged(int value) {
