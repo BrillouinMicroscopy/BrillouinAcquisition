@@ -16,16 +16,17 @@ enum class FLUORESCENCE_MODE {
 struct ChannelSettings {
 	bool enabled{ true };
 	int exposure{ 900 };
+	int gain{ 10 };
 	std::string name;
 	FLUORESCENCE_MODE mode;
 	SCAN_PRESET preset;
 };
 
 struct FLUORESCENCE_SETTINGS {
-	ChannelSettings blue{ true, 900, "blue", FLUORESCENCE_MODE::BLUE, SCAN_EPIFLUOBLUE };
-	ChannelSettings green{ true, 900, "Green", FLUORESCENCE_MODE::GREEN, SCAN_EPIFLUOGREEN };
-	ChannelSettings red{ true, 900, "Red", FLUORESCENCE_MODE::RED, SCAN_EPIFLUORED };
-	ChannelSettings brightfield{ true, 900, "Brightfield", FLUORESCENCE_MODE::BRIGHTFIELD, SCAN_BRIGHTFIELD };
+	ChannelSettings blue{ true, 900, 10, "blue", FLUORESCENCE_MODE::BLUE, SCAN_EPIFLUOBLUE };
+	ChannelSettings green{ true, 900, 10, "Green", FLUORESCENCE_MODE::GREEN, SCAN_EPIFLUOGREEN };
+	ChannelSettings red{ true, 900, 10, "Red", FLUORESCENCE_MODE::RED, SCAN_EPIFLUORED };
+	ChannelSettings brightfield{ true, 4, 0, "Brightfield", FLUORESCENCE_MODE::BRIGHTFIELD, SCAN_BRIGHTFIELD };
 	CAMERA_SETTINGS camera;
 };
 
@@ -43,6 +44,7 @@ public slots:
 	void setGain(int);
 	void setChannel(FLUORESCENCE_MODE, bool);
 	void setExposure(FLUORESCENCE_MODE, int);
+	void setGain(FLUORESCENCE_MODE mode, int gain);
 
 private:
 	PointGrey **m_pointGrey;

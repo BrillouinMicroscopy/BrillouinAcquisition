@@ -58,6 +58,12 @@ void Fluorescence::setExposure(FLUORESCENCE_MODE mode, int exposure) {
 	emit(s_acqSettingsChanged(m_settings));
 }
 
+void Fluorescence::setGain(FLUORESCENCE_MODE mode, int gain) {
+	ChannelSettings* channel = getChannelSettings(mode);
+	channel->gain = gain;
+	emit(s_acqSettingsChanged(m_settings));
+}
+
 void Fluorescence::startRepetitions() {
 	// don't do anything if no channels are enabled
 	auto enabledChannels = getEnabledChannels();
@@ -122,6 +128,7 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper> & storage) {
 
 		// start image acquisition
 		m_settings.camera.exposureTime = 1e-3*channel->exposure;
+		m_settings.camera.gain = channel->gain;
 		(*m_pointGrey)->startAcquisition(m_settings.camera);
 
 		// read images from camera
