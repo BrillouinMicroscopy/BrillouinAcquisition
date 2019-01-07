@@ -1923,7 +1923,7 @@ void BrillouinAcquisition::initFluorescence() {
 			m_Fluorescence = nullptr;
 		}
 	} else {
-		m_Fluorescence = new Fluorescence(nullptr, m_acquisition, &m_brightfieldCamera, (NIDAQ**)&m_scanControl);
+		m_Fluorescence = new Fluorescence(nullptr, m_acquisition, &m_brightfieldCamera, &m_scanControl);
 		if (!m_isTabVisibleODT) {
 			ui->acquisitionModeTabs->insertTab(1, ui->Fluorescence, "Fluorescence");
 		} else {

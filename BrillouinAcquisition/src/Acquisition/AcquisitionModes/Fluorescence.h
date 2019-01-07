@@ -3,7 +3,7 @@
 
 #include "AcquisitionMode.h"
 #include "../../Devices/PointGrey.h"
-#include "../../Devices/NIDAQ.h"
+#include "../../Devices/scancontrol.h"
 
 enum class FLUORESCENCE_MODE {
 	BLUE,
@@ -34,7 +34,7 @@ class Fluorescence : public AcquisitionMode {
 	Q_OBJECT
 
 public:
-	Fluorescence(QObject *parent, Acquisition *acquisition, Camera **camera, NIDAQ **nidaq);
+	Fluorescence(QObject *parent, Acquisition *acquisition, Camera **camera, ScanControl **scanControl);
 	~Fluorescence();
 
 public slots:
@@ -48,7 +48,7 @@ public slots:
 
 private:
 	Camera** m_camera;
-	NIDAQ** m_NIDAQ;
+	ScanControl** m_scanControl;
 
 	FLUORESCENCE_SETTINGS m_settings;
 	ChannelSettings* getChannelSettings(FLUORESCENCE_MODE mode);

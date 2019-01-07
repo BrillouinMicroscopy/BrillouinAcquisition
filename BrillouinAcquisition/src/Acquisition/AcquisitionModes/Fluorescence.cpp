@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "Fluorescence.h"
 
-Fluorescence::Fluorescence(QObject* parent, Acquisition* acquisition, Camera** camera, NIDAQ** nidaq)
-	: AcquisitionMode(parent, acquisition), m_camera(camera), m_NIDAQ(nidaq) {}
+Fluorescence::Fluorescence(QObject* parent, Acquisition* acquisition, Camera** camera, ScanControl** scanControl)
+	: AcquisitionMode(parent, acquisition), m_camera(camera), m_scanControl(scanControl) {}
 
 Fluorescence::~Fluorescence() {
 }
@@ -138,7 +138,7 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage) {
 		}
 
 		// move to Fluorescence configuration
-		(*m_NIDAQ)->setPreset(channel->preset);
+		(*m_scanControl)->setPreset(channel->preset);
 
 		// start image acquisition
 		m_settings.camera.exposureTime = 1e-3*channel->exposure;
