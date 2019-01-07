@@ -3382,6 +3382,25 @@ border: none;</string>
            </spacer>
           </item>
           <item>
+           <widget class="QPushButton" name="addFocusMarker_brightfield">
+            <property name="minimumSize">
+             <size>
+              <width>30</width>
+              <height>23</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>30</width>
+              <height>23</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>O</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QCheckBox" name="autoscalePlot_brightfield">
             <property name="text">
              <string>Autoscale</string>

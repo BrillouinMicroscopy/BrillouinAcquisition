@@ -9,9 +9,11 @@
 struct BUFFER_SETTINGS {
 	int bufferNumber = 0;
 	int bufferSize = 0;
+	std::string bufferType = "unsigned char";
 	CAMERA_ROI roi;
 	BUFFER_SETTINGS() noexcept {};
-	BUFFER_SETTINGS(int bufferNumber, int bufferSize, CAMERA_ROI roi) : roi(roi), bufferNumber(bufferNumber), bufferSize(bufferSize) {};
+	BUFFER_SETTINGS(int bufferNumber, int bufferSize, std::string bufferType, CAMERA_ROI roi) : roi(roi), bufferNumber(bufferNumber),
+		bufferSize(bufferSize), bufferType(bufferType) {};
 };
 
 template<class T> class PreviewBuffer {

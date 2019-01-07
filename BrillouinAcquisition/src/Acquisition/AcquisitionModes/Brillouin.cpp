@@ -7,7 +7,7 @@
 using namespace std::experimental::filesystem::v1;
 
 
-Brillouin::Brillouin(QObject *parent, Acquisition *acquisition, Andor *andor, ScanControl **scanControl)
+Brillouin::Brillouin(QObject* parent, Acquisition* acquisition, Andor* andor, ScanControl** scanControl)
 	: AcquisitionMode(parent, acquisition), m_andor(andor), m_scanControl(scanControl) {
 }
 
@@ -79,7 +79,7 @@ void Brillouin::setStepNumberZ(int steps) {
 	determineScanOrder();
 }
 
-void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
+void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	m_status = ACQUISITION_STATUS::STARTED;
 	emit(s_acquisitionStatus(m_status));
 	
@@ -182,7 +182,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	}
 
 	int rank = 3;
-	hsize_t *dims = new hsize_t[rank];
+	hsize_t* dims = new hsize_t[rank];
 	dims[0] = m_settings.zSteps;
 	dims[1] = m_settings.xSteps;
 	dims[2] = m_settings.ySteps;
@@ -197,7 +197,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	
 	int rank_data = 3;
 	hsize_t dims_data[3] = { m_settings.camera.frameCount, m_settings.camera.roi.height, m_settings.camera.roi.width };
-	int bytesPerFrame = m_settings.camera.roi.width * m_settings.camera.roi.height;
+	int bytesPerFrame = 2 * m_settings.camera.roi.width * m_settings.camera.roi.height;
 
 	// reset number of calibrations
 	nrCalibrations = 1;
@@ -227,7 +227,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 		// move stage to correct position, wait 50 ms for it to finish
 		(*m_scanControl)->setPosition(orderedPositions[ll]);
 
-		std::vector<unsigned short> images(bytesPerFrame * m_settings.camera.frameCount);
+		std::vector<unsigned char> images(bytesPerFrame * m_settings.camera.frameCount);
 
 		for (gsl::index mm = 0; mm < m_settings.camera.frameCount; mm++) {
 			if (m_abort) {
@@ -241,13 +241,13 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper> & storage) {
 		}
 
 		// cast the vector to unsigned short
-		std::vector<unsigned short> *images_ = (std::vector<unsigned short> *) &images;
+		std::vector<unsigned short>* images_ = (std::vector<unsigned short> *) &images;
 
 		// asynchronously write image to disk
 		// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
 		std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 			.toString(Qt::ISODateWithMs).toStdString();
-		IMAGE *img = new IMAGE(indexX[ll], indexY[ll], indexZ[ll], rank_data, dims_data, date, *images_);
+		IMAGE* img = new IMAGE(indexX[ll], indexY[ll], indexZ[ll], rank_data, dims_data, date, *images_);
 
 		QMetaObject::invokeMethod(storage.get(), "s_enqueuePayload", Qt::AutoConnection, Q_ARG(IMAGE*, img));
 
@@ -289,7 +289,7 @@ void Brillouin::abortMode() {
 	emit(s_timeToCalibration(0));
 }
 
-void Brillouin::calibrate(std::unique_ptr <StorageWrapper> & storage) {
+void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 	// announce calibration start
 	emit(s_calibrationRunning(true));
 
@@ -306,8 +306,8 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper> & storage) {
 	int rank_cal = 3;
 	hsize_t dims_cal[3] = { m_settings.nrCalibrationImages, m_settings.camera.roi.height, m_settings.camera.roi.width };
 
-	int bytesPerFrame = m_settings.camera.roi.width * m_settings.camera.roi.height;
-	std::vector<unsigned short> images((int64_t)bytesPerFrame * m_settings.nrCalibrationImages);
+	int bytesPerFrame = 2 * m_settings.camera.roi.width * m_settings.camera.roi.height;
+	std::vector<unsigned char> images((int64_t)bytesPerFrame * m_settings.nrCalibrationImages);
 	for (gsl::index mm = 0; mm < m_settings.nrCalibrationImages; mm++) {
 		if (m_abort) {
 			this->abortMode();
@@ -318,12 +318,12 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper> & storage) {
 		m_andor->getImageForAcquisition(&images[pointerPos]);
 	}
 	// cast the vector to unsigned short
-	std::vector<unsigned short> *images_ = (std::vector<unsigned short> *) &images;
+	std::vector<unsigned short>* images_ = (std::vector<unsigned short>*) &images;
 
 	// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
 	std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 		.toString(Qt::ISODateWithMs).toStdString();
-	CALIBRATION *cal = new CALIBRATION(
+	CALIBRATION* cal = new CALIBRATION(
 		nrCalibrations,			// index
 		*images_,				// data
 		rank_cal,				// the rank of the calibration data

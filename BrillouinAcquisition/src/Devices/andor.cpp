@@ -238,7 +238,7 @@ void Andor::preparePreview() {
 	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
 	int BufferSize = static_cast<int>(ImageSizeBytes);
 
-	BUFFER_SETTINGS bufferSettings = { 5, BufferSize, m_settings.roi };
+	BUFFER_SETTINGS bufferSettings = { 5, BufferSize, "unsigned short", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
@@ -267,7 +267,7 @@ void Andor::startAcquisition(CAMERA_SETTINGS settings) {
 	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
 	int BufferSize = static_cast<int>(ImageSizeBytes);
 
-	BUFFER_SETTINGS bufferSettings = { 4, BufferSize, m_settings.roi };
+	BUFFER_SETTINGS bufferSettings = { 4, BufferSize, "unsigned short", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
@@ -291,7 +291,7 @@ void Andor::cleanupAcquisition() {
 	AT_Flush(m_camera);
 }
 
-void Andor::acquireImage(unsigned short* buffer) {
+void Andor::acquireImage(unsigned char* buffer) {
 	// Pass this buffer to the SDK
 	unsigned char* UserBuffer = new unsigned char[m_bufferSize];
 	AT_QueueBuffer(m_camera, UserBuffer, m_bufferSize);
@@ -313,28 +313,12 @@ void Andor::acquireImage(unsigned short* buffer) {
 	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width);
 	AT_GetInt(m_camera, L"AOIStride", &m_imageStride);
 
-	AT_ConvertBuffer(Buffer, reinterpret_cast<unsigned char*>(buffer), m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding.c_str(), L"Mono16");
+	AT_ConvertBuffer(Buffer, buffer, m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding.c_str(), L"Mono16");
 
 	delete[] Buffer;
 }
 
-void Andor::getImageForPreview() {
-	std::lock_guard<std::mutex> lockGuard(m_mutex);
-	if (m_isPreviewRunning) {
-		if (m_stopPreview) {
-			stopPreview();
-			return;
-		}
-
-		m_previewBuffer->m_buffer->m_freeBuffers->acquire();
-		acquireImage(m_previewBuffer->m_buffer->getWriteBuffer());
-		m_previewBuffer->m_buffer->m_usedBuffers->release();
-
-		QMetaObject::invokeMethod(this, "getImageForPreview", Qt::QueuedConnection);
-	}
-}
-
-void Andor::getImageForAcquisition(unsigned short* buffer) {
+void Andor::getImageForAcquisition(unsigned char* buffer) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	acquireImage(buffer);
 

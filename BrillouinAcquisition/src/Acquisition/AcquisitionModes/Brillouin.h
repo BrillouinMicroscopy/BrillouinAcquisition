@@ -45,7 +45,7 @@ class Brillouin : public AcquisitionMode {
 	Q_OBJECT
 
 public:
-	Brillouin(QObject *parent, Acquisition *acquisition, Andor *andor, ScanControl **scanControl);
+	Brillouin(QObject* parent, Acquisition* acquisition, Andor* andor, ScanControl** scanControl);
 	~Brillouin();
 
 public slots:
@@ -80,18 +80,18 @@ private:
 	BRILLOUIN_SETTINGS m_settings;
 	SCAN_ORDER m_scanOrder;
 	//Thread m_storageThread;
-	Andor *m_andor;
-	ScanControl **m_scanControl;
+	Andor* m_andor;
+	ScanControl** m_scanControl;
 	bool m_running = false;				// is acquisition currently running
 	POINT3 m_startPosition{ 0, 0, 0 };
 
 	int nrCalibrations = 1;
-	void calibrate(std::unique_ptr <StorageWrapper> & storage);
+	void calibrate(std::unique_ptr <StorageWrapper>& storage);
 
 	void abortMode() override;
 
 private slots:
-	void acquire(std::unique_ptr <StorageWrapper> & storage) override;
+	void acquire(std::unique_ptr <StorageWrapper>& storage) override;
 
 signals:
 	// current position in x, y and z, as well as the current image number
