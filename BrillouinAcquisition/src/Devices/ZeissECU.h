@@ -35,18 +35,19 @@ public:
 
 	int getElementPosition(std::string device);
 	void setElementPosition(std::string device, int position);
-	void setReflector(int position);
+	void setReflector(int position, bool check = false);
 	int getReflector();
-	void setObjective(int position);
+	void setObjective(int position, bool check = false);
 	int getObjective();
-	void setTubelens(int position);
+	void setTubelens(int position, bool check = false);
 	int getTubelens();
-	void setBaseport(int position);
+	void setBaseport(int position, bool check = false);
 	int getBaseport();
-	void setSideport(int position);
+	void setSideport(int position, bool check = false);
 	int getSideport();
-	void setMirror(int position);
+	void setMirror(int position, bool check = false);
 	int getMirror();
+	void blockUntilPositionReached(bool block, std::string elementNr);
 };
 
 class Focus : public Element {

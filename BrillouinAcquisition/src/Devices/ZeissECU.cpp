@@ -202,22 +202,22 @@ void ZeissECU::setElement(DeviceElement element, int position) {
 			setBeamBlock(position);
 			break;
 		case DEVICE_ELEMENT::REFLECTOR:
-			m_stand->setReflector(position);
+			m_stand->setReflector(position, true);
 			break;
 		case DEVICE_ELEMENT::OBJECTIVE:
-			m_stand->setObjective(position);
+			m_stand->setObjective(position, true);
 			break;
 		case DEVICE_ELEMENT::TUBELENS:
-			m_stand->setTubelens(position);
+			m_stand->setTubelens(position, true);
 			break;
 		case DEVICE_ELEMENT::BASEPORT:
-			m_stand->setBaseport(position);
+			m_stand->setBaseport(position, true);
 			break;
 		case DEVICE_ELEMENT::SIDEPORT:
-			m_stand->setSideport(position);
+			m_stand->setSideport(position, true);
 			break;
 		case DEVICE_ELEMENT::MIRROR:
-			m_stand->setMirror(position);
+			m_stand->setMirror(position, true);
 			break;
 		default:
 			break;
@@ -423,39 +423,43 @@ int Stand::getReflector() {
 	return getElementPosition("1");
 }
 
-void Stand::setReflector(int position) {
+void Stand::setReflector(int position, bool block) {
 	if (position > 0 && position < 6) {
 		setElementPosition("1", position);
 	}
+	blockUntilPositionReached(block, "1");
 }
 
 int Stand::getObjective() {
 	return getElementPosition("2");
 }
 
-void Stand::setObjective(int position) {
+void Stand::setObjective(int position, bool block) {
 	if (position > 0 && position < 7) {
 		setElementPosition("2", position);
 	}
+	blockUntilPositionReached(block, "2");
 }
 
 int Stand::getTubelens() {
 	return getElementPosition("36");
 }
 
-void Stand::setTubelens(int position) {
+void Stand::setTubelens(int position, bool block) {
 	if (position > 0 && position < 4) {
 		setElementPosition("36", position);
 	}
+	blockUntilPositionReached(block, "36");
 }
 
 int Stand::getBaseport() {
 	return getElementPosition("38");
 }
 
-void Stand::setBaseport(int position) {
+void Stand::setBaseport(int position, bool block) {
 	if (position > 0 && position < 4) {
 		setElementPosition("38", position);
+		blockUntilPositionReached(block, "38");
 	}
 }
 
@@ -463,18 +467,35 @@ int Stand::getSideport() {
 	return getElementPosition("39");
 }
 
-void Stand::setSideport(int position) {
+void Stand::setSideport(int position, bool block) {
 	if (position > 0 && position < 4) {
 		setElementPosition("39", position);
 	}
+	blockUntilPositionReached(block, "39");
 }
 
 int Stand::getMirror() {
 	return getElementPosition("51");
 }
 
-void Stand::setMirror(int position) {
+void Stand::setMirror(int position, bool block) {
 	if (position > 0 && position < 3) {
 		setElementPosition("51", position);
+	}
+	blockUntilPositionReached(block, "51");
+}
+
+void Stand::blockUntilPositionReached(bool block, std::string elementNr) {
+	// don't return until the position or the timeout is reached
+	if (block) {
+		int count{ 0 };
+		auto pos = getElementPosition(elementNr);
+		// wait for one second max
+		while (!pos && count < 100) {
+			Sleep(10);
+			pos = getElementPosition(elementNr);
+			count++;
+		}
+		//TODO: Emit an error when count==100 (timeout reached)
 	}
 }

@@ -140,10 +140,6 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage) {
 		// move to Fluorescence configuration
 		(*m_scanControl)->setPreset(channel->preset);
 
-		// Make sure, the optical elements have reached their position.
-		// Workaround until direct check is implemented in ScanControl class.
-		Sleep(1000);
-
 		// start image acquisition
 		m_settings.camera.exposureTime = 1e-3*channel->exposure;
 		m_settings.camera.gain = channel->gain;
