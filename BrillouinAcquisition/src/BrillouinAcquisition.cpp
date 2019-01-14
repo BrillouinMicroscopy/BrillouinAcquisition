@@ -205,6 +205,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<ODTIMAGE*>("ODTIMAGE*");
 	qRegisterMetaType<FLUOIMAGE*>("FLUOIMAGE*");
 	qRegisterMetaType<FLUORESCENCE_SETTINGS>("FLUORESCENCE_SETTINGS");
+	qRegisterMetaType<FLUORESCENCE_MODE>("FLUORESCENCE_MODE");
 	qRegisterMetaType<PLOT_SETTINGS*>("PLOT_SETTINGS*");
 	qRegisterMetaType<PreviewBuffer<unsigned short>*>("PreviewBuffer<unsigned short>*");
 	qRegisterMetaType<PreviewBuffer<unsigned char>*>("PreviewBuffer<unsigned char>*");
@@ -706,6 +707,22 @@ void BrillouinAcquisition::on_acquisitionStartFluorescence_clicked() {
 	} else {
 		m_Fluorescence->m_abort = true;
 	}
+}
+
+void BrillouinAcquisition::on_fluoBluePreview_clicked() {
+	QMetaObject::invokeMethod(m_Fluorescence, "startStopPreview", Qt::AutoConnection, Q_ARG(FLUORESCENCE_MODE, FLUORESCENCE_MODE::BLUE));
+}
+
+void BrillouinAcquisition::on_fluoGreenPreview_clicked() {
+	QMetaObject::invokeMethod(m_Fluorescence, "startStopPreview", Qt::AutoConnection, Q_ARG(FLUORESCENCE_MODE, FLUORESCENCE_MODE::GREEN));
+}
+
+void BrillouinAcquisition::on_fluoRedPreview_clicked() {
+	QMetaObject::invokeMethod(m_Fluorescence, "startStopPreview", Qt::AutoConnection, Q_ARG(FLUORESCENCE_MODE, FLUORESCENCE_MODE::RED));
+}
+
+void BrillouinAcquisition::on_fluoBrightfieldPreview_clicked() {
+	QMetaObject::invokeMethod(m_Fluorescence, "startStopPreview", Qt::AutoConnection, Q_ARG(FLUORESCENCE_MODE, FLUORESCENCE_MODE::BRIGHTFIELD));
 }
 
 void BrillouinAcquisition::on_fluoGain_valueChanged(double gain) {
@@ -1358,6 +1375,30 @@ void BrillouinAcquisition::showBrightfieldPreviewRunning(bool isRunning) {
 	startBrightfieldPreview(isRunning);
 }
 
+void BrillouinAcquisition::showFluorescencePreviewRunning(FLUORESCENCE_MODE mode) {
+	// reset all preview buttons
+	ui->fluoBluePreview->setText("Preview");
+	ui->fluoGreenPreview->setText("Preview");
+	ui->fluoRedPreview->setText("Preview");
+	ui->fluoBrightfieldPreview->setText("Preview");
+
+	// show currently running mode
+	switch (mode) {
+	case FLUORESCENCE_MODE::BLUE:
+		ui->fluoBluePreview->setText("Stop");
+		break;
+	case FLUORESCENCE_MODE::GREEN:
+		ui->fluoGreenPreview->setText("Stop");
+		break;
+	case FLUORESCENCE_MODE::RED:
+		ui->fluoRedPreview->setText("Stop");
+		break;
+	case FLUORESCENCE_MODE::BRIGHTFIELD:
+		ui->fluoBrightfieldPreview->setText("Stop");
+		break;
+	}
+}
+
 void BrillouinAcquisition::startPreview(bool isRunning) {
 	// if preview was not running, start it, else leave it running (don't start it twice)
 	if (!m_previewRunning && isRunning) {
@@ -1529,6 +1570,7 @@ void BrillouinAcquisition::on_camera_playPause_brightfield_clicked() {
 		QMetaObject::invokeMethod(m_brightfieldCamera, "startPreview", Qt::AutoConnection);
 	} else {
 		m_brightfieldCamera->m_stopPreview = true;
+		m_Fluorescence->startStopPreview(FLUORESCENCE_MODE::NONE);
 	}
 }
 
@@ -1953,6 +1995,14 @@ void BrillouinAcquisition::initFluorescence() {
 			&Fluorescence::s_repetitionProgress,
 			this,
 			[this](double progress, int seconds) { showFluorescenceProgress(progress, seconds); }
+		);
+
+		// slot to show current repetition progress
+		connection = QWidget::connect(
+			m_Fluorescence,
+			&Fluorescence::s_previewRunning,
+			this,
+			[this](FLUORESCENCE_MODE mode) { showFluorescencePreviewRunning(mode); }
 		);
 
 		// start Fluorescence thread

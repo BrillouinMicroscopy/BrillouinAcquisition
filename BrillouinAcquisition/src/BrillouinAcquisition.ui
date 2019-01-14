@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>958</width>
+    <width>1196</width>
     <height>651</height>
    </rect>
   </property>
@@ -179,8 +179,8 @@ QTabBar::tab:!selected {
               <property name="geometry">
                <rect>
                 <x>0</x>
-                <y>-91</y>
-                <width>223</width>
+                <y>0</y>
+                <width>219</width>
                 <height>310</height>
                </rect>
               </property>
@@ -565,8 +565,8 @@ QTabBar::tab:!selected {
                 <rect>
                  <x>8</x>
                  <y>8</y>
-                 <width>209</width>
-                 <height>89</height>
+                 <width>241</width>
+                 <height>94</height>
                 </rect>
                </property>
                <layout class="QFormLayout" name="formLayout_5">
@@ -727,8 +727,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>236</width>
-                <height>219</height>
+                <width>161</width>
+                <height>180</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -788,7 +788,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>230</width>
-                <height>219</height>
+                <height>180</height>
                </rect>
               </property>
               <property name="sizePolicy">
@@ -1042,8 +1042,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>236</width>
-                <height>219</height>
+                <width>161</width>
+                <height>160</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -1523,7 +1523,7 @@ QTabBar::tab:!selected {
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>221</width>
+                      <width>217</width>
                       <height>570</height>
                      </rect>
                     </property>
@@ -1550,7 +1550,7 @@ QTabBar::tab:!selected {
                        <rect>
                         <x>8</x>
                         <y>15</y>
-                        <width>193</width>
+                        <width>207</width>
                         <height>89</height>
                        </rect>
                       </property>
@@ -2605,8 +2605,8 @@ border: none;</string>
                     <property name="geometry">
                      <rect>
                       <x>0</x>
-                      <y>-108</y>
-                      <width>221</width>
+                      <y>0</y>
+                      <width>161</width>
                       <height>545</height>
                      </rect>
                     </property>
@@ -2676,7 +2676,7 @@ border: none;</string>
                         <x>9</x>
                         <y>17</y>
                         <width>141</width>
-                        <height>65</height>
+                        <height>68</height>
                        </rect>
                       </property>
                       <layout class="QFormLayout" name="formLayout_2">
@@ -2844,8 +2844,8 @@ border: none;</string>
                        <rect>
                         <x>8</x>
                         <y>16</y>
-                        <width>141</width>
-                        <height>65</height>
+                        <width>145</width>
+                        <height>68</height>
                        </rect>
                       </property>
                       <layout class="QFormLayout" name="formLayout">
@@ -2954,7 +2954,7 @@ border: none;</string>
                    <x>0</x>
                    <y>0</y>
                    <width>236</width>
-                   <height>160</height>
+                   <height>249</height>
                   </rect>
                  </property>
                  <property name="minimumSize">
@@ -2984,7 +2984,7 @@ border: none;</string>
                     <x>0</x>
                     <y>0</y>
                     <width>234</width>
-                    <height>158</height>
+                    <height>247</height>
                    </rect>
                   </property>
                   <property name="minimumSize">
@@ -3006,7 +3006,7 @@ border: none;</string>
                     </rect>
                    </property>
                    <property name="text">
-                    <string>Start</string>
+                    <string>Acquire All</string>
                    </property>
                   </widget>
                   <widget class="QCheckBox" name="fluoBlueCheckbox">
@@ -3014,7 +3014,7 @@ border: none;</string>
                     <rect>
                      <x>30</x>
                      <y>32</y>
-                     <width>65</width>
+                     <width>95</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -3022,54 +3022,54 @@ border: none;</string>
                     <bool>false</bool>
                    </property>
                    <property name="text">
-                    <string>Exposure [ms]</string>
+                    <string>Enable Channel</string>
                    </property>
                   </widget>
                   <widget class="QCheckBox" name="fluoGreenCheckbox">
                    <property name="geometry">
                     <rect>
                      <x>30</x>
-                     <y>56</y>
-                     <width>65</width>
+                     <y>80</y>
+                     <width>95</width>
                      <height>18</height>
                     </rect>
                    </property>
                    <property name="text">
-                    <string>Exposure [ms]</string>
+                    <string>Enable Channel</string>
                    </property>
                   </widget>
                   <widget class="QCheckBox" name="fluoRedCheckbox">
                    <property name="geometry">
                     <rect>
                      <x>30</x>
-                     <y>80</y>
-                     <width>65</width>
+                     <y>128</y>
+                     <width>95</width>
                      <height>18</height>
                     </rect>
                    </property>
                    <property name="text">
-                    <string>Exposure [ms]</string>
+                    <string>Enable Channel</string>
                    </property>
                   </widget>
                   <widget class="QCheckBox" name="fluoBrightfieldCheckbox">
                    <property name="geometry">
                     <rect>
                      <x>30</x>
-                     <y>104</y>
-                     <width>65</width>
+                     <y>176</y>
+                     <width>95</width>
                      <height>18</height>
                     </rect>
                    </property>
                    <property name="text">
-                    <string>Exposure [ms]</string>
+                    <string>Enable Channel</string>
                    </property>
                   </widget>
                   <widget class="QLabel" name="fluoBlueGain_Label">
                    <property name="geometry">
                     <rect>
-                     <x>141</x>
-                     <y>32</y>
-                     <width>33</width>
+                     <x>127</x>
+                     <y>56</y>
+                     <width>43</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -3080,9 +3080,9 @@ border: none;</string>
                   <widget class="QDoubleSpinBox" name="fluoBlueGain">
                    <property name="geometry">
                     <rect>
-                     <x>176</x>
-                     <y>32</y>
-                     <width>40</width>
+                     <x>172</x>
+                     <y>56</y>
+                     <width>44</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -3099,8 +3099,8 @@ border: none;</string>
                   <widget class="QSpinBox" name="fluoBlueExposure">
                    <property name="geometry">
                     <rect>
-                     <x>96</x>
-                     <y>32</y>
+                     <x>80</x>
+                     <y>56</y>
                      <width>41</width>
                      <height>18</height>
                     </rect>
@@ -3121,8 +3121,8 @@ border: none;</string>
                   <widget class="QSpinBox" name="fluoGreenExposure">
                    <property name="geometry">
                     <rect>
-                     <x>96</x>
-                     <y>56</y>
+                     <x>80</x>
+                     <y>104</y>
                      <width>41</width>
                      <height>18</height>
                     </rect>
@@ -3143,8 +3143,8 @@ border: none;</string>
                   <widget class="QSpinBox" name="fluoRedExposure">
                    <property name="geometry">
                     <rect>
-                     <x>96</x>
-                     <y>80</y>
+                     <x>80</x>
+                     <y>152</y>
                      <width>41</width>
                      <height>18</height>
                     </rect>
@@ -3165,8 +3165,8 @@ border: none;</string>
                   <widget class="QSpinBox" name="fluoBrightfieldExposure">
                    <property name="geometry">
                     <rect>
-                     <x>96</x>
-                     <y>104</y>
+                     <x>80</x>
+                     <y>200</y>
                      <width>41</width>
                      <height>18</height>
                     </rect>
@@ -3198,7 +3198,7 @@ border: none;</string>
                    <property name="geometry">
                     <rect>
                      <x>8</x>
-                     <y>57</y>
+                     <y>81</y>
                      <width>18</width>
                      <height>18</height>
                     </rect>
@@ -3208,7 +3208,7 @@ border: none;</string>
                    <property name="geometry">
                     <rect>
                      <x>8</x>
-                     <y>81</y>
+                     <y>129</y>
                      <width>18</width>
                      <height>18</height>
                     </rect>
@@ -3218,7 +3218,7 @@ border: none;</string>
                    <property name="geometry">
                     <rect>
                      <x>8</x>
-                     <y>105</y>
+                     <y>177</y>
                      <width>18</width>
                      <height>18</height>
                     </rect>
@@ -3228,7 +3228,7 @@ border: none;</string>
                    <property name="geometry">
                     <rect>
                      <x>7</x>
-                     <y>128</y>
+                     <y>224</y>
                      <width>209</width>
                      <height>18</height>
                     </rect>
@@ -3246,9 +3246,9 @@ border: none;</string>
                   <widget class="QLabel" name="fluoGreenGain_Label">
                    <property name="geometry">
                     <rect>
-                     <x>141</x>
-                     <y>56</y>
-                     <width>33</width>
+                     <x>127</x>
+                     <y>104</y>
+                     <width>43</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -3259,9 +3259,9 @@ border: none;</string>
                   <widget class="QDoubleSpinBox" name="fluoGreenGain">
                    <property name="geometry">
                     <rect>
-                     <x>176</x>
-                     <y>56</y>
-                     <width>40</width>
+                     <x>172</x>
+                     <y>104</y>
+                     <width>44</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -3278,9 +3278,9 @@ border: none;</string>
                   <widget class="QLabel" name="fluoRedGain_Label">
                    <property name="geometry">
                     <rect>
-                     <x>141</x>
-                     <y>80</y>
-                     <width>33</width>
+                     <x>127</x>
+                     <y>152</y>
+                     <width>43</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -3291,9 +3291,9 @@ border: none;</string>
                   <widget class="QDoubleSpinBox" name="fluoRedGain">
                    <property name="geometry">
                     <rect>
-                     <x>176</x>
-                     <y>80</y>
-                     <width>40</width>
+                     <x>172</x>
+                     <y>152</y>
+                     <width>44</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -3310,9 +3310,9 @@ border: none;</string>
                   <widget class="QLabel" name="fluoBrightfieldGain_Label">
                    <property name="geometry">
                     <rect>
-                     <x>141</x>
-                     <y>104</y>
-                     <width>33</width>
+                     <x>127</x>
+                     <y>200</y>
+                     <width>43</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -3323,9 +3323,9 @@ border: none;</string>
                   <widget class="QDoubleSpinBox" name="fluoBrightfieldGain">
                    <property name="geometry">
                     <rect>
-                     <x>176</x>
-                     <y>104</y>
-                     <width>40</width>
+                     <x>172</x>
+                     <y>200</y>
+                     <width>44</width>
                      <height>18</height>
                     </rect>
                    </property>
@@ -3337,6 +3337,186 @@ border: none;</string>
                    </property>
                    <property name="value">
                     <double>0.000000000000000</double>
+                   </property>
+                  </widget>
+                  <widget class="QLabel" name="fluoBlueExposure_Label">
+                   <property name="geometry">
+                    <rect>
+                     <x>8</x>
+                     <y>56</y>
+                     <width>68</width>
+                     <height>18</height>
+                    </rect>
+                   </property>
+                   <property name="text">
+                    <string>Exposure [ms]</string>
+                   </property>
+                  </widget>
+                  <widget class="QPushButton" name="fluoBlueStart">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="geometry">
+                    <rect>
+                     <x>170</x>
+                     <y>32</y>
+                     <width>46</width>
+                     <height>18</height>
+                    </rect>
+                   </property>
+                   <property name="text">
+                    <string>Acquire</string>
+                   </property>
+                  </widget>
+                  <widget class="QPushButton" name="fluoBluePreview">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="geometry">
+                    <rect>
+                     <x>123</x>
+                     <y>32</y>
+                     <width>46</width>
+                     <height>18</height>
+                    </rect>
+                   </property>
+                   <property name="text">
+                    <string>Preview</string>
+                   </property>
+                  </widget>
+                  <widget class="QLabel" name="fluoGreenExposure_Label">
+                   <property name="geometry">
+                    <rect>
+                     <x>8</x>
+                     <y>104</y>
+                     <width>68</width>
+                     <height>18</height>
+                    </rect>
+                   </property>
+                   <property name="text">
+                    <string>Exposure [ms]</string>
+                   </property>
+                  </widget>
+                  <widget class="QLabel" name="fluoRedExposure_Label">
+                   <property name="geometry">
+                    <rect>
+                     <x>8</x>
+                     <y>152</y>
+                     <width>68</width>
+                     <height>18</height>
+                    </rect>
+                   </property>
+                   <property name="text">
+                    <string>Exposure [ms]</string>
+                   </property>
+                  </widget>
+                  <widget class="QLabel" name="fluoBrightfieldExposure_Label">
+                   <property name="geometry">
+                    <rect>
+                     <x>8</x>
+                     <y>200</y>
+                     <width>68</width>
+                     <height>18</height>
+                    </rect>
+                   </property>
+                   <property name="text">
+                    <string>Exposure [ms]</string>
+                   </property>
+                  </widget>
+                  <widget class="QPushButton" name="fluoGreenPreview">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="geometry">
+                    <rect>
+                     <x>123</x>
+                     <y>80</y>
+                     <width>46</width>
+                     <height>18</height>
+                    </rect>
+                   </property>
+                   <property name="text">
+                    <string>Preview</string>
+                   </property>
+                  </widget>
+                  <widget class="QPushButton" name="fluoGreenStart">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="geometry">
+                    <rect>
+                     <x>170</x>
+                     <y>80</y>
+                     <width>46</width>
+                     <height>18</height>
+                    </rect>
+                   </property>
+                   <property name="text">
+                    <string>Acquire</string>
+                   </property>
+                  </widget>
+                  <widget class="QPushButton" name="fluoRedPreview">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="geometry">
+                    <rect>
+                     <x>123</x>
+                     <y>128</y>
+                     <width>46</width>
+                     <height>18</height>
+                    </rect>
+                   </property>
+                   <property name="text">
+                    <string>Preview</string>
+                   </property>
+                  </widget>
+                  <widget class="QPushButton" name="fluoRedStart">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="geometry">
+                    <rect>
+                     <x>170</x>
+                     <y>128</y>
+                     <width>46</width>
+                     <height>18</height>
+                    </rect>
+                   </property>
+                   <property name="text">
+                    <string>Acquire</string>
+                   </property>
+                  </widget>
+                  <widget class="QPushButton" name="fluoBrightfieldPreview">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="geometry">
+                    <rect>
+                     <x>123</x>
+                     <y>176</y>
+                     <width>46</width>
+                     <height>18</height>
+                    </rect>
+                   </property>
+                   <property name="text">
+                    <string>Preview</string>
+                   </property>
+                  </widget>
+                  <widget class="QPushButton" name="fluoBrightfieldStart">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="geometry">
+                    <rect>
+                     <x>170</x>
+                     <y>176</y>
+                     <width>46</width>
+                     <height>18</height>
+                    </rect>
+                   </property>
+                   <property name="text">
+                    <string>Acquire</string>
                    </property>
                   </widget>
                  </widget>
@@ -3616,8 +3796,8 @@ border: none;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>958</width>
-     <height>18</height>
+     <width>1196</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">
@@ -3843,8 +4023,8 @@ border: none;</string>
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_3"/>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_3"/>
  </buttongroups>
 </ui>

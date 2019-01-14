@@ -6,6 +6,7 @@
 #include "../../Devices/scancontrol.h"
 
 enum class FLUORESCENCE_MODE {
+	NONE,
 	BLUE,
 	GREEN,
 	RED,
@@ -45,6 +46,7 @@ public slots:
 	void setChannel(FLUORESCENCE_MODE, bool);
 	void setExposure(FLUORESCENCE_MODE, int);
 	void setGain(FLUORESCENCE_MODE mode, int gain);
+	void startStopPreview(FLUORESCENCE_MODE);
 
 private:
 	Camera** m_camera;
@@ -53,6 +55,8 @@ private:
 	FLUORESCENCE_SETTINGS m_settings;
 	ChannelSettings* getChannelSettings(FLUORESCENCE_MODE mode);
 	std::vector<ChannelSettings*> getEnabledChannels();
+	void configureCamera();
+	FLUORESCENCE_MODE previewChannel{ FLUORESCENCE_MODE::NONE };
 
 	void abortMode() override;
 
@@ -61,6 +65,7 @@ private slots:
 
 signals:
 	void s_acqSettingsChanged(FLUORESCENCE_SETTINGS);
+	void s_previewRunning(FLUORESCENCE_MODE);
 };
 
 #endif //FLUORESCENCE_H

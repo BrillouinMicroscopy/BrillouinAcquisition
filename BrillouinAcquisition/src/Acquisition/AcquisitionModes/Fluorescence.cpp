@@ -36,6 +36,10 @@ std::vector<ChannelSettings*> Fluorescence::getEnabledChannels() {
 	for (gsl::index i{ 0 }; i < (int)FLUORESCENCE_MODE::MODE_COUNT; i++) {
 
 		ChannelSettings* channel = getChannelSettings((FLUORESCENCE_MODE)i);
+
+		if (channel == nullptr) {
+			continue;
+		}
 		// Don't acquire this mode if it is not enabled
 		if (!channel->enabled) {
 			continue;
@@ -44,6 +48,34 @@ std::vector<ChannelSettings*> Fluorescence::getEnabledChannels() {
 		}
 	}
 	return enabledChannels;
+}
+
+void Fluorescence::configureCamera() {
+
+	std::string cameraType = typeid(**m_camera).name();
+
+	// configure camera for measurement
+	// This needs a proper implementation with user defined values. Probably by a configuration file.
+	m_settings.camera.roi.left = 128;
+	m_settings.camera.roi.top = 0;
+	m_settings.camera.roi.width = 1024;
+	m_settings.camera.roi.height = 1024;
+	if (cameraType == "class uEyeCam") {
+		m_settings.camera.roi.left = 800;
+		m_settings.camera.roi.top = 400;
+		m_settings.camera.roi.width = 1800;
+		m_settings.camera.roi.height = 2000;
+	}
+	else if (cameraType == "class PointGrey") {
+		m_settings.camera.roi.left = 128;
+		m_settings.camera.roi.top = 0;
+		m_settings.camera.roi.width = 1024;
+		m_settings.camera.roi.height = 1024;
+	}
+	m_settings.camera.readout.pixelEncoding = L"Raw8";
+	m_settings.camera.readout.triggerMode = L"Internal";
+	m_settings.camera.readout.cycleMode = L"Fixed";
+	m_settings.camera.frameCount = 1;
 }
 
 void Fluorescence::setChannel(FLUORESCENCE_MODE mode, bool enabled) {
@@ -64,6 +96,31 @@ void Fluorescence::setGain(FLUORESCENCE_MODE mode, int gain) {
 	emit(s_acqSettingsChanged(m_settings));
 }
 
+void Fluorescence::startStopPreview(FLUORESCENCE_MODE mode) {
+	if (mode == previewChannel || mode == FLUORESCENCE_MODE::NONE) {
+		// stop preview
+		previewChannel = FLUORESCENCE_MODE::NONE;
+		QMetaObject::invokeMethod((*m_camera), "stopPreview", Qt::AutoConnection);
+	} else {
+		// if preview is already running, stop it first
+		if ((*m_camera)->m_isPreviewRunning) {
+			(*m_camera)->stopPreview();
+		}
+		previewChannel = mode;
+		ChannelSettings* channel = getChannelSettings(mode);
+
+		// move to Fluorescence configuration
+		(*m_scanControl)->setPreset(channel->preset);
+
+		// start image acquisition
+		m_settings.camera.exposureTime = 1e-3*channel->exposure;
+		m_settings.camera.gain = channel->gain;
+		(*m_camera)->setSettings(m_settings.camera);
+		QMetaObject::invokeMethod((*m_camera), "startPreview", Qt::AutoConnection);
+	}
+	emit(s_previewRunning(previewChannel));
+}
+
 void Fluorescence::startRepetitions() {
 	// don't do anything if no channels are enabled
 	auto enabledChannels = getEnabledChannels();
@@ -76,32 +133,16 @@ void Fluorescence::startRepetitions() {
 		return;
 	}
 
+	// stop preview if necessary
+	if (previewChannel != FLUORESCENCE_MODE::NONE) {
+		previewChannel = FLUORESCENCE_MODE::NONE;
+		(*m_camera)->stopPreview();
+	}
+
 	// reset abort flag
 	m_abort = false;
 
-	std::string cameraType = typeid(**m_camera).name();
-
-	// configure camera for measurement
-	// This needs a proper implementation with user defined values. Probably by a configuration file.
-	m_settings.camera.roi.left = 128;
-	m_settings.camera.roi.top = 0;
-	m_settings.camera.roi.width = 1024;
-	m_settings.camera.roi.height = 1024;
-	if (cameraType == "class uEyeCam") {
-		m_settings.camera.roi.left = 800;
-		m_settings.camera.roi.top = 400;
-		m_settings.camera.roi.width = 1800;
-		m_settings.camera.roi.height = 2000;
-	} else if (cameraType == "class PointGrey") {
-		m_settings.camera.roi.left = 128;
-		m_settings.camera.roi.top = 0;
-		m_settings.camera.roi.width = 1024;
-		m_settings.camera.roi.height = 1024;
-	}
-	m_settings.camera.readout.pixelEncoding = L"Raw8";
-	m_settings.camera.readout.triggerMode = L"Internal";
-	m_settings.camera.readout.cycleMode = L"Fixed";
-	m_settings.camera.frameCount = 1;
+	configureCamera();
 
 	m_acquisition->newRepetition(ACQUISITION_MODE::FLUORESCENCE);
 

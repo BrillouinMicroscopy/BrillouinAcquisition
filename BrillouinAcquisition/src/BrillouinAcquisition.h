@@ -76,6 +76,7 @@ Q_DECLARE_METATYPE(ODT_SETTINGS);
 Q_DECLARE_METATYPE(ODTIMAGE*);
 Q_DECLARE_METATYPE(FLUOIMAGE*);
 Q_DECLARE_METATYPE(FLUORESCENCE_SETTINGS);
+Q_DECLARE_METATYPE(FLUORESCENCE_MODE);
 Q_DECLARE_METATYPE(PreviewBuffer<unsigned char>*);
 Q_DECLARE_METATYPE(bool*);
 
@@ -164,6 +165,7 @@ private slots:
 	void updatePlotLimits(PLOT_SETTINGS plotSettings, CAMERA_OPTIONS options, CAMERA_ROI roi);
 	void showPreviewRunning(bool);
 	void showBrightfieldPreviewRunning(bool isRunning);
+	void showFluorescencePreviewRunning(FLUORESCENCE_MODE mode);
 	void startPreview(bool);
 	void startBrightfieldPreview(bool isRunning);
 	void cameraSettingsChanged(CAMERA_SETTINGS);
@@ -206,6 +208,10 @@ private slots:
 
 	// Fluorescence signals
 	void on_acquisitionStartFluorescence_clicked();
+	void on_fluoBluePreview_clicked();
+	void on_fluoGreenPreview_clicked();
+	void on_fluoRedPreview_clicked();
+	void on_fluoBrightfieldPreview_clicked();
 	void on_fluoGain_valueChanged(double);
 	void on_fluoBlueCheckbox_stateChanged(int);
 	void on_fluoGreenCheckbox_stateChanged(int);
