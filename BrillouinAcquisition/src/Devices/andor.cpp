@@ -318,13 +318,15 @@ void Andor::acquireImage(unsigned char* buffer) {
 	delete[] Buffer;
 }
 
-void Andor::getImageForAcquisition(unsigned char* buffer) {
+void Andor::getImageForAcquisition(unsigned char* buffer, bool preview) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	acquireImage(buffer);
 
-	// write image to preview buffer
-	memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.width * m_settings.roi.height * 2);
-	m_previewBuffer->m_buffer->m_usedBuffers->release();
+	if (preview) {
+		// write image to preview buffer
+		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.width * m_settings.roi.height * 2);
+		m_previewBuffer->m_buffer->m_usedBuffers->release();
+	}
 }
 
 void Andor::setCalibrationExposureTime(double exposureTime) {

@@ -305,6 +305,11 @@ void PointGrey::startAcquisition(CAMERA_SETTINGS settings) {
 
 	setSettings(settings);
 
+	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
+	BUFFER_SETTINGS bufferSettings = { 4, pixelNumber, "unsigned char", m_settings.roi };
+	m_previewBuffer->initializeBuffer(bufferSettings);
+	emit(s_previewBufferSettingsChanged());
+
 	// Wait for camera to really apply settings
 	Sleep(500);
 
@@ -336,9 +341,15 @@ void PointGrey::acquireImage(unsigned char* buffer) {
 	}
 }
 
-void PointGrey::getImageForAcquisition(unsigned char* buffer) {
+void PointGrey::getImageForAcquisition(unsigned char* buffer, bool preview) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	acquireImage(buffer);
+
+	if (preview) {
+		// write image to preview buffer
+		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.width * m_settings.roi.height);
+		m_previewBuffer->m_buffer->m_usedBuffers->release();
+	}
 }
 
 bool PointGrey::PollForTriggerReady(FlyCapture2::Camera* camera) {

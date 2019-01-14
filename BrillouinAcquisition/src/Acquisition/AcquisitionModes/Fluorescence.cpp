@@ -191,7 +191,7 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage) {
 
 			// acquire images
 		int64_t pointerPos = 0 * (int64_t)bytesPerFrame;
-		(*m_camera)->getImageForAcquisition(&images[pointerPos]);
+		(*m_camera)->getImageForAcquisition(&images[pointerPos], true);
 
 		// cast the vector to unsigned short
 		std::vector<unsigned char>* images_ = (std::vector<unsigned char> *) &images;

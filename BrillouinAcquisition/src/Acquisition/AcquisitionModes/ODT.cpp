@@ -155,7 +155,7 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 
 			// acquire images
 			int64_t pointerPos = (int64_t)bytesPerFrame * mm;
-			(*m_camera)->getImageForAcquisition(&images[pointerPos]);
+			(*m_camera)->getImageForAcquisition(&images[pointerPos], false);
 		}
 
 		// cast the vector to unsigned short

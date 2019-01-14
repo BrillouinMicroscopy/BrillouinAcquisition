@@ -703,6 +703,7 @@ void BrillouinAcquisition::on_gainODT_valueChanged(double gain) {
 
 void BrillouinAcquisition::on_acquisitionStartFluorescence_clicked() {
 	if (m_Fluorescence->getStatus() < ACQUISITION_STATUS::STARTED) {
+		startBrightfieldPreview(true);
 		QMetaObject::invokeMethod(m_Fluorescence, "startRepetitions", Qt::AutoConnection);
 	} else {
 		m_Fluorescence->m_abort = true;
@@ -973,6 +974,7 @@ void BrillouinAcquisition::showFluorescenceStatus(ACQUISITION_STATUS status) {
 	} else {
 		ui->acquisitionStartFluorescence->setText("Start");
 	}
+	startBrightfieldPreview(running);
 
 	ui->fluoBlueCheckbox->setDisabled(running);
 	ui->fluoGreenCheckbox->setDisabled(running);

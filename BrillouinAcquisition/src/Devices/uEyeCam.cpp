@@ -287,6 +287,11 @@ void uEyeCam::startAcquisition(CAMERA_SETTINGS settings) {
 	// Wait for camera to really apply settings
 	Sleep(500);
 
+	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
+	BUFFER_SETTINGS bufferSettings = { 1, pixelNumber, "unsigned char", m_settings.roi };
+	m_previewBuffer->initializeBuffer(bufferSettings);
+	emit(s_previewBufferSettingsChanged());
+
 	// allocate and add memory
 	int nRet = uEye::is_AllocImageMem(m_camera, m_settings.roi.width, m_settings.roi.height, 8, &m_imageBuffer, &m_imageBufferId);
 
@@ -312,7 +317,13 @@ void uEyeCam::acquireImage(unsigned char* buffer) {
 	memcpy(buffer, m_imageBuffer, m_settings.roi.width*m_settings.roi.height);
 }
 
-void uEyeCam::getImageForAcquisition(unsigned char* buffer) {
+void uEyeCam::getImageForAcquisition(unsigned char* buffer, bool preview) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	acquireImage(buffer);
+
+	if (preview) {
+		// write image to preview buffer
+		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.width * m_settings.roi.height);
+		m_previewBuffer->m_buffer->m_usedBuffers->release();
+	}
 }
