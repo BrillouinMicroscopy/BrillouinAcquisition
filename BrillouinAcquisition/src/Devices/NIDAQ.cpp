@@ -17,7 +17,7 @@ NIDAQ::NIDAQ() noexcept {
 		{	"Brillouin",	SCAN_BRILLOUIN,		{ {2}, {1}, {1},  {},  {},  {} }	},	// Brillouin
 		{	"Calibration",	SCAN_CALIBRATION,	{ {2}, {2}, {1},  {},  {},  {} }	},	// Brillouin Calibration
 		{	"ODT",			SCAN_ODT,			{ {2},  {}, {2}, {1}, {1}, {1} }	},	// ODT
-		{	"Brightfield",	SCAN_BRIGHTFIELD,	{  {},  {},  {},  {}, {1}, {2} }	},	// Brightfield
+		{	"Brightfield",	SCAN_BRIGHTFIELD,	{  {},  {},  {},  {}, {2}, {2} }	},	// Brightfield
 		{	"Fluo off",		SCAN_EPIFLUOOFF,	{  {},  {},  {}, {1}, {1},  {} }	},	// Fluorescence off
 		{	"Fluo Blue",	SCAN_EPIFLUOBLUE,	{ {1},  {},  {}, {2}, {2}, {1} }	},	// Fluorescence blue
 		{	"Fluo Green",	SCAN_EPIFLUOGREEN,	{ {1},  {},  {}, {3}, {3}, {1} }	},	// Fluorescence green
