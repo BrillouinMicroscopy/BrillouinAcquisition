@@ -126,6 +126,16 @@ void PointGrey::readSettings() {
 			break;
 	}
 
+	// read trigger mode
+	FlyCapture2::TriggerMode triggerMode;
+	m_camera.GetTriggerMode(&triggerMode);
+
+	/*
+	* Get the buffering mode.
+	*/
+	FlyCapture2::FC2Config BufferFrame;
+	m_camera.GetConfiguration(&BufferFrame);
+
 	// emit signal that settings changed
 	emit(settingsChanged(m_settings));
 };
