@@ -215,10 +215,10 @@ private slots:
 	void on_fluoGreenExposure_valueChanged(int);
 	void on_fluoRedExposure_valueChanged(int);
 	void on_fluoBrightfieldExposure_valueChanged(int);
-	void on_fluoBlueGain_valueChanged(int gain);
-	void on_fluoGreenGain_valueChanged(int gain);
-	void on_fluoRedGain_valueChanged(int gain);
-	void on_fluoBrightfieldGain_valueChanged(int gain);
+	void on_fluoBlueGain_valueChanged(double gain);
+	void on_fluoGreenGain_valueChanged(double gain);
+	void on_fluoRedGain_valueChanged(double gain);
+	void on_fluoBrightfieldGain_valueChanged(double gain);
 	void updateFluorescenceSettings(FLUORESCENCE_SETTINGS settings);
 
 

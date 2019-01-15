@@ -744,19 +744,19 @@ void BrillouinAcquisition::on_fluoBrightfieldExposure_valueChanged(int exposure)
 	m_Fluorescence->setExposure(FLUORESCENCE_MODE::BRIGHTFIELD, exposure);
 }
 
-void BrillouinAcquisition::on_fluoBlueGain_valueChanged(int gain) {
+void BrillouinAcquisition::on_fluoBlueGain_valueChanged(double gain) {
 	m_Fluorescence->setGain(FLUORESCENCE_MODE::BLUE, gain);
 }
 
-void BrillouinAcquisition::on_fluoGreenGain_valueChanged(int gain) {
+void BrillouinAcquisition::on_fluoGreenGain_valueChanged(double gain) {
 	m_Fluorescence->setGain(FLUORESCENCE_MODE::GREEN, gain);
 }
 
-void BrillouinAcquisition::on_fluoRedGain_valueChanged(int gain) {
+void BrillouinAcquisition::on_fluoRedGain_valueChanged(double gain) {
 	m_Fluorescence->setGain(FLUORESCENCE_MODE::RED, gain);
 }
 
-void BrillouinAcquisition::on_fluoBrightfieldGain_valueChanged(int gain) {
+void BrillouinAcquisition::on_fluoBrightfieldGain_valueChanged(double gain) {
 	m_Fluorescence->setGain(FLUORESCENCE_MODE::BRIGHTFIELD, gain);
 }
 
