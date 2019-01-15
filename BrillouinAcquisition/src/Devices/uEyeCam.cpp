@@ -313,15 +313,17 @@ void uEyeCam::stopAcquisition() {
 
 void uEyeCam::acquireImage(unsigned char* buffer) {
 
-	// Copy data to preview buffer
-	memcpy(buffer, m_imageBuffer, m_settings.roi.width*m_settings.roi.height);
+	// Copy data to provided buffer
+	if (m_imageBuffer != NULL && buffer != nullptr) {
+		memcpy(buffer, m_imageBuffer, m_settings.roi.width*m_settings.roi.height);
+	}
 }
 
 void uEyeCam::getImageForAcquisition(unsigned char* buffer, bool preview) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	acquireImage(buffer);
 
-	if (preview) {
+	if (preview && buffer != nullptr) {
 		// write image to preview buffer
 		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.width * m_settings.roi.height);
 		m_previewBuffer->m_buffer->m_usedBuffers->release();

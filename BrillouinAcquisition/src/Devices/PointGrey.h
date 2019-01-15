@@ -18,8 +18,8 @@ private:
 	FlyCapture2::BusManager m_busManager;
 	FlyCapture2::PGRGuid m_guid;
 
-	bool PollForTriggerReady(FlyCapture2::Camera* camera);
-	bool FireSoftwareTrigger(FlyCapture2::Camera* camera);
+	bool PollForTriggerReady();
+	bool FireSoftwareTrigger();
 
 	void preparePreview();
 

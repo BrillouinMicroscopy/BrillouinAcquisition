@@ -60,15 +60,16 @@ void Fluorescence::configureCamera() {
 		m_settings.camera.roi.top = 400;
 		m_settings.camera.roi.width = 1800;
 		m_settings.camera.roi.height = 2000;
+		m_settings.camera.readout.triggerMode = L"Internal";
 	}
 	else if (cameraType == "class PointGrey") {
 		m_settings.camera.roi.left = 128;
 		m_settings.camera.roi.top = 0;
 		m_settings.camera.roi.width = 1024;
 		m_settings.camera.roi.height = 1024;
+		m_settings.camera.readout.triggerMode = L"Software";
 	}
 	m_settings.camera.readout.pixelEncoding = L"Raw8";
-	m_settings.camera.readout.triggerMode = L"Internal";
 	m_settings.camera.readout.cycleMode = L"Fixed";
 	m_settings.camera.frameCount = 1;
 }
@@ -176,9 +177,31 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage) {
 		// move to Fluorescence configuration
 		(*m_scanControl)->setPreset(channel->preset);
 
-		// start image acquisition
+		/*
+		 * We have to check if the exposure time or gain settings will change.
+		 * If they will, then we have to trash the first image after the change,
+		 * as the settings might not be applied already (valid for trigger mode).
+		 * Might be worse for free running mode.
+		 * See https://www.ptgrey.com/KB/10086
+		 */
+		bool changed{ false };
+		if (((int)1e3*m_settings.camera.exposureTime != channel->exposure) || (m_settings.camera.gain != channel->gain)) {
+			changed = true;
+		}
+
 		m_settings.camera.exposureTime = 1e-3*channel->exposure;
 		m_settings.camera.gain = channel->gain;
+
+		if (changed) {
+			m_settings.camera.frameCount = 2;
+			(*m_camera)->startAcquisition(m_settings.camera);
+			(*m_camera)->getImageForAcquisition(nullptr, false);
+			(*m_camera)->getImageForAcquisition(nullptr, false);
+			(*m_camera)->stopAcquisition();
+		}
+
+		// start image acquisition
+		m_settings.camera.frameCount = 1;
 		(*m_camera)->startAcquisition(m_settings.camera);
 
 		// read images from camera

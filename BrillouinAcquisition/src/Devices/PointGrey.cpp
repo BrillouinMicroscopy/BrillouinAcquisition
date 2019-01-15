@@ -233,7 +233,7 @@ void PointGrey::setSettings(CAMERA_SETTINGS settings) {
 
 	// Wait for software trigger ready
 	if (m_settings.readout.triggerMode == L"Software") {
-		PollForTriggerReady(&m_camera);
+		PollForTriggerReady();
 	}
 
 	/*
@@ -302,16 +302,12 @@ void PointGrey::startAcquisition(CAMERA_SETTINGS settings) {
 	if (m_isPreviewRunning) {
 		stopPreview();
 	}
-	
 	setSettings(settings);
 
 	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
 	BUFFER_SETTINGS bufferSettings = { 4, pixelNumber, "unsigned char", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
-
-	// Wait for camera to really apply settings
-	Sleep(500);
 
 	m_camera.StartCapture();
 	m_isAcquisitionRunning = true;
@@ -335,30 +331,33 @@ void PointGrey::acquireImage(unsigned char* buffer) {
 	// Get access to raw data
 	unsigned char* data = static_cast<unsigned char*>(convertedImage.GetData());
 
-	// Copy data to preview buffer
-	if (data != NULL) {
+	// Copy data to provided buffer
+	if (data != NULL && buffer != nullptr) {
 		memcpy(buffer, data, m_settings.roi.width*m_settings.roi.height);
 	}
 }
 
 void PointGrey::getImageForAcquisition(unsigned char* buffer, bool preview) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
+	if (m_settings.readout.triggerMode == L"Software") {
+		FireSoftwareTrigger();
+	}
 	acquireImage(buffer);
 
-	if (preview) {
+	if (preview && buffer != nullptr) {
 		// write image to preview buffer
 		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.width * m_settings.roi.height);
 		m_previewBuffer->m_buffer->m_usedBuffers->release();
 	}
 }
 
-bool PointGrey::PollForTriggerReady(FlyCapture2::Camera* camera) {
+bool PointGrey::PollForTriggerReady() {
 	const unsigned int k_softwareTrigger = 0x62C;
 	FlyCapture2::Error error;
 	unsigned int regVal = 0;
 
 	do {
-		error = camera->ReadRegister(k_softwareTrigger, &regVal);
+		error = m_camera.ReadRegister(k_softwareTrigger, &regVal);
 		if (error != FlyCapture2::PGRERROR_OK) {
 			return false;
 		}
@@ -368,12 +367,12 @@ bool PointGrey::PollForTriggerReady(FlyCapture2::Camera* camera) {
 	return true;
 }
 
-bool PointGrey::FireSoftwareTrigger(FlyCapture2::Camera* camera) {
+bool PointGrey::FireSoftwareTrigger() {
 	const unsigned int k_softwareTrigger = 0x62C;
 	const unsigned int k_fireVal = 0x80000000;
 	FlyCapture2::Error error;
 
-	error = camera->WriteRegister(k_softwareTrigger, k_fireVal);
+	error = m_camera.WriteRegister(k_softwareTrigger, k_fireVal);
 	if (error != FlyCapture2::PGRERROR_OK) {
 		return false;
 	}
