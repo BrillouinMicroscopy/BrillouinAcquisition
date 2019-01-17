@@ -42,7 +42,6 @@ public slots:
 	void init() {};
 	void initialize();
 	void startRepetitions();
-	void setGain(int);
 	void setChannel(FLUORESCENCE_MODE, bool);
 	void setExposure(FLUORESCENCE_MODE, int);
 	void setGain(FLUORESCENCE_MODE mode, int gain);

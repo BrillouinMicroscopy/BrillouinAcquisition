@@ -212,7 +212,6 @@ private slots:
 	void on_fluoGreenPreview_clicked();
 	void on_fluoRedPreview_clicked();
 	void on_fluoBrightfieldPreview_clicked();
-	void on_fluoGain_valueChanged(double);
 	void on_fluoBlueCheckbox_stateChanged(int);
 	void on_fluoGreenCheckbox_stateChanged(int);
 	void on_fluoRedCheckbox_stateChanged(int);

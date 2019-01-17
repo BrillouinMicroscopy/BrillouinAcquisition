@@ -12,11 +12,6 @@ void Fluorescence::initialize() {
 	emit(s_acqSettingsChanged(m_settings));
 }
 
-void Fluorescence::setGain(int gain) {
-	m_settings.camera.gain = gain;
-	emit(s_acqSettingsChanged(m_settings));
-}
-
 ChannelSettings* Fluorescence::getChannelSettings(FLUORESCENCE_MODE mode) {
 	if (mode == FLUORESCENCE_MODE::BLUE) {
 		return &m_settings.blue;

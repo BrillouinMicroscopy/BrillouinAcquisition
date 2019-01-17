@@ -726,10 +726,6 @@ void BrillouinAcquisition::on_fluoBrightfieldPreview_clicked() {
 	QMetaObject::invokeMethod(m_Fluorescence, "startStopPreview", Qt::AutoConnection, Q_ARG(FLUORESCENCE_MODE, FLUORESCENCE_MODE::BRIGHTFIELD));
 }
 
-void BrillouinAcquisition::on_fluoGain_valueChanged(double gain) {
-	m_Fluorescence->setGain(gain);
-}
-
 void BrillouinAcquisition::on_fluoBlueCheckbox_stateChanged(int enabled) {
 	m_Fluorescence->setChannel(FLUORESCENCE_MODE::BLUE, enabled);
 }

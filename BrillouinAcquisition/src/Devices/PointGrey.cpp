@@ -302,7 +302,7 @@ void PointGrey::startAcquisition(CAMERA_SETTINGS settings) {
 	if (m_isPreviewRunning) {
 		stopPreview();
 	}
-
+	
 	setSettings(settings);
 
 	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
