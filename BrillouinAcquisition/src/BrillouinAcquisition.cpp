@@ -1009,7 +1009,7 @@ void BrillouinAcquisition::showFluorescenceStatus(ACQUISITION_STATUS status) {
 		ui->acquisitionStartFluorescence->setText("Cancel");
 		running = true;
 	} else {
-		ui->acquisitionStartFluorescence->setText("Start");
+		ui->acquisitionStartFluorescence->setText("Acquire All");
 	}
 	startBrightfieldPreview(running);
 
@@ -1017,6 +1017,12 @@ void BrillouinAcquisition::showFluorescenceStatus(ACQUISITION_STATUS status) {
 	ui->fluoGreenStart->setDisabled(running);
 	ui->fluoRedStart->setDisabled(running);
 	ui->fluoBrightfieldStart->setDisabled(running);
+
+	// reset all preview buttons
+	ui->fluoBluePreview->setText("Preview");
+	ui->fluoGreenPreview->setText("Preview");
+	ui->fluoRedPreview->setText("Preview");
+	ui->fluoBrightfieldPreview->setText("Preview");
 
 	ui->fluoBluePreview->setDisabled(running);
 	ui->fluoGreenPreview->setDisabled(running);
