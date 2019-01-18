@@ -1013,6 +1013,16 @@ void BrillouinAcquisition::showFluorescenceStatus(ACQUISITION_STATUS status) {
 	}
 	startBrightfieldPreview(running);
 
+	ui->fluoBlueStart->setDisabled(running);
+	ui->fluoGreenStart->setDisabled(running);
+	ui->fluoRedStart->setDisabled(running);
+	ui->fluoBrightfieldStart->setDisabled(running);
+
+	ui->fluoBluePreview->setDisabled(running);
+	ui->fluoGreenPreview->setDisabled(running);
+	ui->fluoRedPreview->setDisabled(running);
+	ui->fluoBrightfieldPreview->setDisabled(running);
+
 	ui->fluoBlueCheckbox->setDisabled(running);
 	ui->fluoGreenCheckbox->setDisabled(running);
 	ui->fluoRedCheckbox->setDisabled(running);
