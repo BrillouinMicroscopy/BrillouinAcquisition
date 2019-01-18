@@ -118,10 +118,24 @@ void Fluorescence::startStopPreview(FLUORESCENCE_MODE mode) {
 }
 
 void Fluorescence::startRepetitions() {
-	// don't do anything if no channels are enabled
-	auto enabledChannels = getEnabledChannels();
-	if (!enabledChannels.size()) {
-		return;
+	startRepetitions({});
+}
+
+void Fluorescence::startRepetitions(std::vector<FLUORESCENCE_MODE> modes) {
+	std::vector<ChannelSettings *> channels;
+	// If the provided mode vector is empty, acquire the enabled channels.
+	if (!modes.size()) {
+		channels = getEnabledChannels();
+		// If no channels are enabled, return.
+		if (!channels.size()) {
+			return;
+		}
+	// Else, find the channel settings for the given modes.
+	} else {
+		for (auto const& mode : modes) {
+			auto channel = getChannelSettings(mode);
+			channels.push_back(channel);
+		}
 	}
 
 	bool allowed = m_acquisition->enableMode(ACQUISITION_MODE::FLUORESCENCE);
@@ -143,16 +157,27 @@ void Fluorescence::startRepetitions() {
 	m_acquisition->newRepetition(ACQUISITION_MODE::FLUORESCENCE);
 
 	// start repetition
-	acquire(m_acquisition->m_storage);
+	acquire(m_acquisition->m_storage, channels);
 
 	m_acquisition->disableMode(ACQUISITION_MODE::FLUORESCENCE);
 }
 
 void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage) {
+	acquire(storage, {});
+}
+
+void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vector<ChannelSettings *> channels) {
 	m_status = ACQUISITION_STATUS::STARTED;
 	emit(s_acquisitionStatus(m_status));
 
-	auto enabledChannels = getEnabledChannels();
+	// If the provided channel settings vector is empty, acquire the enabled channels.
+	if (!channels.size()) {
+		channels = getEnabledChannels();
+		// If no channels are enabled, return.
+		if (!channels.size()) {
+			return;
+		}
+	}
 
 	QElapsedTimer measurementTimer;
 	measurementTimer.start();
@@ -162,16 +187,11 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	int bytesPerFrame = m_settings.camera.roi.width * m_settings.camera.roi.height;
 	// Loop through the different modes
 	int imageNumber{ 0 };
-	for (auto const& channel : enabledChannels) {
+	for (auto const& channel : channels) {
 		// Abort if requested
 		if (m_abort) {
 			this->abortMode();
 			return;
-		}
-
-		// Don't acquire this mode if it is not enabled
-		if (!channel->enabled) {
-			continue;
 		}
 
 		// move to Fluorescence configuration
@@ -226,8 +246,8 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage) {
 		// configure camera for preview
 		(*m_camera)->stopAcquisition();
 		imageNumber++;
-		double percentage = 100 * (double)imageNumber / enabledChannels.size();
-		int remaining = 1e-3 * measurementTimer.elapsed() / imageNumber * ((int64_t)enabledChannels.size() - imageNumber);
+		double percentage = 100 * (double)imageNumber / channels.size();
+		int remaining = 1e-3 * measurementTimer.elapsed() / imageNumber * ((int64_t)channels.size() - imageNumber);
 		emit(s_repetitionProgress(percentage, remaining));
 	}
 

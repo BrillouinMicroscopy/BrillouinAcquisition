@@ -180,7 +180,7 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>219</width>
+                <width>223</width>
                 <height>310</height>
                </rect>
               </property>
@@ -565,7 +565,7 @@ QTabBar::tab:!selected {
                 <rect>
                  <x>8</x>
                  <y>8</y>
-                 <width>241</width>
+                 <width>209</width>
                  <height>94</height>
                 </rect>
                </property>
@@ -727,7 +727,7 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>161</width>
+                <width>165</width>
                 <height>180</height>
                </rect>
               </property>
@@ -1042,7 +1042,7 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>161</width>
+                <width>165</width>
                 <height>160</height>
                </rect>
               </property>
@@ -1523,7 +1523,7 @@ QTabBar::tab:!selected {
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>217</width>
+                      <width>221</width>
                       <height>570</height>
                      </rect>
                     </property>
@@ -1550,7 +1550,7 @@ QTabBar::tab:!selected {
                        <rect>
                         <x>8</x>
                         <y>15</y>
-                        <width>207</width>
+                        <width>193</width>
                         <height>89</height>
                        </rect>
                       </property>
@@ -2606,7 +2606,7 @@ border: none;</string>
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>161</width>
+                      <width>165</width>
                       <height>545</height>
                      </rect>
                     </property>
@@ -3354,7 +3354,7 @@ border: none;</string>
                   </widget>
                   <widget class="QPushButton" name="fluoBlueStart">
                    <property name="enabled">
-                    <bool>false</bool>
+                    <bool>true</bool>
                    </property>
                    <property name="geometry">
                     <rect>
@@ -3441,7 +3441,7 @@ border: none;</string>
                   </widget>
                   <widget class="QPushButton" name="fluoGreenStart">
                    <property name="enabled">
-                    <bool>false</bool>
+                    <bool>true</bool>
                    </property>
                    <property name="geometry">
                     <rect>
@@ -3473,7 +3473,7 @@ border: none;</string>
                   </widget>
                   <widget class="QPushButton" name="fluoRedStart">
                    <property name="enabled">
-                    <bool>false</bool>
+                    <bool>true</bool>
                    </property>
                    <property name="geometry">
                     <rect>
@@ -3505,7 +3505,7 @@ border: none;</string>
                   </widget>
                   <widget class="QPushButton" name="fluoBrightfieldStart">
                    <property name="enabled">
-                    <bool>false</bool>
+                    <bool>true</bool>
                    </property>
                    <property name="geometry">
                     <rect>
@@ -3797,7 +3797,7 @@ border: none;</string>
      <x>0</x>
      <y>0</y>
      <width>1196</width>
-     <height>21</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">
@@ -4024,7 +4024,7 @@ border: none;</string>
  <connections/>
  <buttongroups>
   <buttongroup name="buttonGroup_2"/>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup_3"/>
+  <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>

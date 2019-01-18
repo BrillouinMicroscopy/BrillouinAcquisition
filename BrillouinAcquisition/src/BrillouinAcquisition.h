@@ -79,6 +79,7 @@ Q_DECLARE_METATYPE(FLUORESCENCE_SETTINGS);
 Q_DECLARE_METATYPE(FLUORESCENCE_MODE);
 Q_DECLARE_METATYPE(PreviewBuffer<unsigned char>*);
 Q_DECLARE_METATYPE(bool*);
+Q_DECLARE_METATYPE(std::vector<FLUORESCENCE_MODE>);
 
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
@@ -206,24 +207,36 @@ private slots:
 	void on_exposureTimeODT_valueChanged(double);
 	void on_gainODT_valueChanged(double);
 
-	// Fluorescence signals
-	void on_acquisitionStartFluorescence_clicked();
+	/*
+	 * Fluorescence slots
+	 */
+	// Acquire slots
+	void on_acquisitionStartFluorescence_clicked();	// Acquire all enabled channels
+	void on_fluoBlueStart_clicked();				// Acquire the blue channel
+	void on_fluoGreenStart_clicked();				// Acquire the green channel
+	void on_fluoRedStart_clicked();					// Acquire the red channel
+	void on_fluoBrightfieldStart_clicked();			// Acquire the brightfield channel
+	// Preview slots
 	void on_fluoBluePreview_clicked();
 	void on_fluoGreenPreview_clicked();
 	void on_fluoRedPreview_clicked();
 	void on_fluoBrightfieldPreview_clicked();
+	// Enable channel slots
 	void on_fluoBlueCheckbox_stateChanged(int);
 	void on_fluoGreenCheckbox_stateChanged(int);
 	void on_fluoRedCheckbox_stateChanged(int);
 	void on_fluoBrightfieldCheckbox_stateChanged(int);
+	// Set exposure time slots
 	void on_fluoBlueExposure_valueChanged(int);
 	void on_fluoGreenExposure_valueChanged(int);
 	void on_fluoRedExposure_valueChanged(int);
 	void on_fluoBrightfieldExposure_valueChanged(int);
+	// Set camera gain slots
 	void on_fluoBlueGain_valueChanged(double gain);
 	void on_fluoGreenGain_valueChanged(double gain);
 	void on_fluoRedGain_valueChanged(double gain);
 	void on_fluoBrightfieldGain_valueChanged(double gain);
+	// Settings changed slot
 	void updateFluorescenceSettings(FLUORESCENCE_SETTINGS settings);
 
 

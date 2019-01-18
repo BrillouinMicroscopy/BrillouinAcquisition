@@ -41,7 +41,8 @@ public:
 public slots:
 	void init() {};
 	void initialize();
-	void startRepetitions();
+	void startRepetitions() override;
+	void startRepetitions(std::vector<FLUORESCENCE_MODE> modes);
 	void setChannel(FLUORESCENCE_MODE, bool);
 	void setExposure(FLUORESCENCE_MODE, int);
 	void setGain(FLUORESCENCE_MODE mode, int gain);
@@ -61,6 +62,7 @@ private:
 
 private slots:
 	void acquire(std::unique_ptr <StorageWrapper>& storage) override;
+	void acquire(std::unique_ptr <StorageWrapper>& storage, std::vector<ChannelSettings *> channels);
 
 signals:
 	void s_acqSettingsChanged(FLUORESCENCE_SETTINGS);

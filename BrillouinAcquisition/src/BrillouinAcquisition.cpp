@@ -210,6 +210,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<PreviewBuffer<unsigned short>*>("PreviewBuffer<unsigned short>*");
 	qRegisterMetaType<PreviewBuffer<unsigned char>*>("PreviewBuffer<unsigned char>*");
 	qRegisterMetaType<bool*>("bool*");
+	qRegisterMetaType<std::vector<FLUORESCENCE_MODE>>("std::vector<FLUORESCENCE_MODE>");
 	
 	// Set up icons
 	m_icons.disconnected.addFile(":/BrillouinAcquisition/assets/00disconnected10px.png", QSize(10, 10));
@@ -706,6 +707,46 @@ void BrillouinAcquisition::on_acquisitionStartFluorescence_clicked() {
 		startBrightfieldPreview(true);
 		QMetaObject::invokeMethod(m_Fluorescence, "startRepetitions", Qt::AutoConnection);
 	} else {
+		m_Fluorescence->m_abort = true;
+	}
+}
+
+void BrillouinAcquisition::on_fluoBlueStart_clicked() {
+	if (m_Fluorescence->getStatus() < ACQUISITION_STATUS::STARTED) {
+		startBrightfieldPreview(true);
+		QMetaObject::invokeMethod(m_Fluorescence, "startRepetitions", Qt::AutoConnection, Q_ARG(std::vector<FLUORESCENCE_MODE>, { FLUORESCENCE_MODE::BLUE }));
+	}
+	else {
+		m_Fluorescence->m_abort = true;
+	}
+}
+
+void BrillouinAcquisition::on_fluoGreenStart_clicked() {
+	if (m_Fluorescence->getStatus() < ACQUISITION_STATUS::STARTED) {
+		startBrightfieldPreview(true);
+		QMetaObject::invokeMethod(m_Fluorescence, "startRepetitions", Qt::AutoConnection, Q_ARG(std::vector<FLUORESCENCE_MODE>, { FLUORESCENCE_MODE::GREEN }));
+	}
+	else {
+		m_Fluorescence->m_abort = true;
+	}
+}
+
+void BrillouinAcquisition::on_fluoRedStart_clicked() {
+	if (m_Fluorescence->getStatus() < ACQUISITION_STATUS::STARTED) {
+		startBrightfieldPreview(true);
+		QMetaObject::invokeMethod(m_Fluorescence, "startRepetitions", Qt::AutoConnection, Q_ARG(std::vector<FLUORESCENCE_MODE>, { FLUORESCENCE_MODE::RED }));
+	}
+	else {
+		m_Fluorescence->m_abort = true;
+	}
+}
+
+void BrillouinAcquisition::on_fluoBrightfieldStart_clicked() {
+	if (m_Fluorescence->getStatus() < ACQUISITION_STATUS::STARTED) {
+		startBrightfieldPreview(true);
+		QMetaObject::invokeMethod(m_Fluorescence, "startRepetitions", Qt::AutoConnection, Q_ARG(std::vector<FLUORESCENCE_MODE>, { FLUORESCENCE_MODE::BRIGHTFIELD }));
+	}
+	else {
 		m_Fluorescence->m_abort = true;
 	}
 }
