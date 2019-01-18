@@ -497,6 +497,15 @@ void BrillouinAcquisition::cameraODTOptionsChanged(CAMERA_OPTIONS options) {
 	ui->exposureTimeODT->setMaximum(m_cameraOptionsODT.exposureTimeLimits[1]);
 	ui->exposureTimeODT->blockSignals(false);
 
+	ui->fluoBlueExposure->setMinimum(1e3*m_cameraOptionsODT.exposureTimeLimits[0]);
+	ui->fluoBlueExposure->setMaximum(1e3*m_cameraOptionsODT.exposureTimeLimits[1]);
+	ui->fluoGreenExposure->setMinimum(1e3*m_cameraOptionsODT.exposureTimeLimits[0]);
+	ui->fluoGreenExposure->setMaximum(1e3*m_cameraOptionsODT.exposureTimeLimits[1]);
+	ui->fluoRedExposure->setMinimum(1e3*m_cameraOptionsODT.exposureTimeLimits[0]);
+	ui->fluoRedExposure->setMaximum(1e3*m_cameraOptionsODT.exposureTimeLimits[1]);
+	ui->fluoBrightfieldExposure->setMinimum(1e3*m_cameraOptionsODT.exposureTimeLimits[0]);
+	ui->fluoBrightfieldExposure->setMaximum(1e3*m_cameraOptionsODT.exposureTimeLimits[1]);
+
 	addListToComboBox(ui->pixelEncodingODT, options.pixelEncodings);
 }
 
