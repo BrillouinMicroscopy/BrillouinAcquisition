@@ -83,12 +83,22 @@ void Fluorescence::setChannel(FLUORESCENCE_MODE mode, bool enabled) {
 void Fluorescence::setExposure(FLUORESCENCE_MODE mode, int exposure) {
 	ChannelSettings* channel = getChannelSettings(mode);
 	channel->exposure = exposure;
+	// Apply the settings immediately if the mode preview is running
+	if (previewChannel == mode) {
+		m_settings.camera.exposureTime = 1e-3*channel->exposure;
+		(*m_camera)->setSettings(m_settings.camera);
+	}
 	emit(s_acqSettingsChanged(m_settings));
 }
 
 void Fluorescence::setGain(FLUORESCENCE_MODE mode, int gain) {
 	ChannelSettings* channel = getChannelSettings(mode);
 	channel->gain = gain;
+	// Apply the settings immediately if the mode preview is running
+	if (previewChannel == mode) {
+		m_settings.camera.gain = channel->gain;
+		(*m_camera)->setSettings(m_settings.camera);
+	}
 	emit(s_acqSettingsChanged(m_settings));
 }
 

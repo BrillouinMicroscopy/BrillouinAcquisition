@@ -475,21 +475,26 @@ void BrillouinAcquisition::cameraODTOptionsChanged(CAMERA_OPTIONS options) {
 	m_cameraOptionsODT.ROIHeightLimits = options.ROIHeightLimits;
 	m_cameraOptionsODT.ROIWidthLimits = options.ROIWidthLimits;
 
-	m_ODTPlot.plotHandle->xAxis->setRange(QCPRange(1, options.ROIWidthLimits[1]));
-	m_ODTPlot.plotHandle->yAxis->setRange(QCPRange(1, options.ROIHeightLimits[1]));
+	// Adjust plotting range only when neither preview nor acquisition are running
+	if (!(m_brightfieldCamera->m_isPreviewRunning || m_brightfieldCamera->m_isAcquisitionRunning)) {
+		m_ODTPlot.plotHandle->xAxis->setRange(QCPRange(1, options.ROIWidthLimits[1]));
+		m_ODTPlot.plotHandle->yAxis->setRange(QCPRange(1, options.ROIHeightLimits[1]));
+
+		ui->ROIHeightODT->setValue(options.ROIHeightLimits[1]);
+		ui->ROITopODT->setValue(0);
+		ui->ROIWidthODT->setValue(options.ROIWidthLimits[1]);
+		ui->ROILeftODT->setValue(0);
+
+	}
 
 	ui->ROIHeightODT->setMinimum(options.ROIHeightLimits[0]);
 	ui->ROIHeightODT->setMaximum(options.ROIHeightLimits[1]);
-	ui->ROIHeightODT->setValue(options.ROIHeightLimits[1]);
 	ui->ROITopODT->setMinimum(0);
 	ui->ROITopODT->setMaximum(options.ROIHeightLimits[1]);
-	ui->ROITopODT->setValue(0);
 	ui->ROIWidthODT->setMinimum(options.ROIWidthLimits[0]);
 	ui->ROIWidthODT->setMaximum(options.ROIWidthLimits[1]);
-	ui->ROIWidthODT->setValue(options.ROIWidthLimits[1]);
 	ui->ROILeftODT->setMinimum(0);
 	ui->ROILeftODT->setMaximum(options.ROIWidthLimits[1]);
-	ui->ROILeftODT->setValue(0);
 
 	// block signals to not trigger setting a new value
 	ui->exposureTimeODT->blockSignals(true);

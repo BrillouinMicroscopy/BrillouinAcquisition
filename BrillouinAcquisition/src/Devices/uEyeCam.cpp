@@ -161,6 +161,15 @@ void uEyeCam::readSettings() {
 }
 
 void uEyeCam::setSettings(CAMERA_SETTINGS settings) {
+	// Don't do anything if an acquisition is running.
+	if (m_isAcquisitionRunning) {
+		return;
+	}
+
+	// If the preview is currently running, stop it and apply the settings.
+	if (m_isPreviewRunning) {
+		uEye::is_StopLiveVideo(m_camera, IS_FORCE_VIDEO_STOP);
+	}
 	m_settings = settings;
 
 	/*
@@ -220,6 +229,14 @@ void uEyeCam::setSettings(CAMERA_SETTINGS settings) {
 
 	// Read back the settings
 	readSettings();
+
+	// Read changed options
+	readOptions();
+
+	// If the preview was running, start it again.
+	if (m_isPreviewRunning) {
+		uEye::is_CaptureVideo(m_camera, IS_WAIT);
+	}
 }
 
 void uEyeCam::startPreview() {
