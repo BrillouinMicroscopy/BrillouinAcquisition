@@ -18,8 +18,8 @@ private:
 	FlyCapture2::BusManager m_busManager;
 	FlyCapture2::PGRGuid m_guid;
 
-	bool PollForTriggerReady(FlyCapture2::Camera* camera);
-	bool FireSoftwareTrigger(FlyCapture2::Camera* camera);
+	bool PollForTriggerReady();
+	bool FireSoftwareTrigger();
 
 	void preparePreview();
 
@@ -47,7 +47,7 @@ public slots:
 	void startAcquisition(CAMERA_SETTINGS);
 	void stopAcquisition();
 
-	void getImageForAcquisition(unsigned char* buffer) override;
+	void getImageForAcquisition(unsigned char* buffer, bool preview = true) override;
 };
 
 #endif // POINTGREY_H

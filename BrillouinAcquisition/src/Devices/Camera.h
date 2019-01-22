@@ -39,7 +39,7 @@ public slots:
 	virtual void stopAcquisition() = 0;
 	void setSetting(CAMERA_SETTING, double);
 
-	virtual void getImageForAcquisition(unsigned char* buffer) = 0;
+	virtual void getImageForAcquisition(unsigned char* buffer, bool preview = true) = 0;
 
 protected:
 	CAMERA_OPTIONS m_options;

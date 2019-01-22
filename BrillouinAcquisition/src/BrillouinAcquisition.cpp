@@ -205,10 +205,12 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<ODTIMAGE*>("ODTIMAGE*");
 	qRegisterMetaType<FLUOIMAGE*>("FLUOIMAGE*");
 	qRegisterMetaType<FLUORESCENCE_SETTINGS>("FLUORESCENCE_SETTINGS");
+	qRegisterMetaType<FLUORESCENCE_MODE>("FLUORESCENCE_MODE");
 	qRegisterMetaType<PLOT_SETTINGS*>("PLOT_SETTINGS*");
 	qRegisterMetaType<PreviewBuffer<unsigned short>*>("PreviewBuffer<unsigned short>*");
 	qRegisterMetaType<PreviewBuffer<unsigned char>*>("PreviewBuffer<unsigned char>*");
 	qRegisterMetaType<bool*>("bool*");
+	qRegisterMetaType<std::vector<FLUORESCENCE_MODE>>("std::vector<FLUORESCENCE_MODE>");
 	
 	// Set up icons
 	m_icons.disconnected.addFile(":/BrillouinAcquisition/assets/00disconnected10px.png", QSize(10, 10));
@@ -473,27 +475,41 @@ void BrillouinAcquisition::cameraODTOptionsChanged(CAMERA_OPTIONS options) {
 	m_cameraOptionsODT.ROIHeightLimits = options.ROIHeightLimits;
 	m_cameraOptionsODT.ROIWidthLimits = options.ROIWidthLimits;
 
-	m_ODTPlot.plotHandle->xAxis->setRange(QCPRange(1, options.ROIWidthLimits[1]));
-	m_ODTPlot.plotHandle->yAxis->setRange(QCPRange(1, options.ROIHeightLimits[1]));
+	// Adjust plotting range only when neither preview nor acquisition are running
+	if (!(m_brightfieldCamera->m_isPreviewRunning || m_brightfieldCamera->m_isAcquisitionRunning)) {
+		m_ODTPlot.plotHandle->xAxis->setRange(QCPRange(1, options.ROIWidthLimits[1]));
+		m_ODTPlot.plotHandle->yAxis->setRange(QCPRange(1, options.ROIHeightLimits[1]));
+
+		ui->ROIHeightODT->setValue(options.ROIHeightLimits[1]);
+		ui->ROITopODT->setValue(0);
+		ui->ROIWidthODT->setValue(options.ROIWidthLimits[1]);
+		ui->ROILeftODT->setValue(0);
+
+	}
 
 	ui->ROIHeightODT->setMinimum(options.ROIHeightLimits[0]);
 	ui->ROIHeightODT->setMaximum(options.ROIHeightLimits[1]);
-	ui->ROIHeightODT->setValue(options.ROIHeightLimits[1]);
 	ui->ROITopODT->setMinimum(0);
 	ui->ROITopODT->setMaximum(options.ROIHeightLimits[1]);
-	ui->ROITopODT->setValue(0);
 	ui->ROIWidthODT->setMinimum(options.ROIWidthLimits[0]);
 	ui->ROIWidthODT->setMaximum(options.ROIWidthLimits[1]);
-	ui->ROIWidthODT->setValue(options.ROIWidthLimits[1]);
 	ui->ROILeftODT->setMinimum(0);
 	ui->ROILeftODT->setMaximum(options.ROIWidthLimits[1]);
-	ui->ROILeftODT->setValue(0);
 
 	// block signals to not trigger setting a new value
 	ui->exposureTimeODT->blockSignals(true);
 	ui->exposureTimeODT->setMinimum(m_cameraOptionsODT.exposureTimeLimits[0]);
 	ui->exposureTimeODT->setMaximum(m_cameraOptionsODT.exposureTimeLimits[1]);
 	ui->exposureTimeODT->blockSignals(false);
+
+	ui->fluoBlueExposure->setMinimum(1e3*m_cameraOptionsODT.exposureTimeLimits[0]);
+	ui->fluoBlueExposure->setMaximum(1e3*m_cameraOptionsODT.exposureTimeLimits[1]);
+	ui->fluoGreenExposure->setMinimum(1e3*m_cameraOptionsODT.exposureTimeLimits[0]);
+	ui->fluoGreenExposure->setMaximum(1e3*m_cameraOptionsODT.exposureTimeLimits[1]);
+	ui->fluoRedExposure->setMinimum(1e3*m_cameraOptionsODT.exposureTimeLimits[0]);
+	ui->fluoRedExposure->setMaximum(1e3*m_cameraOptionsODT.exposureTimeLimits[1]);
+	ui->fluoBrightfieldExposure->setMinimum(1e3*m_cameraOptionsODT.exposureTimeLimits[0]);
+	ui->fluoBrightfieldExposure->setMaximum(1e3*m_cameraOptionsODT.exposureTimeLimits[1]);
 
 	addListToComboBox(ui->pixelEncodingODT, options.pixelEncodings);
 }
@@ -702,14 +718,67 @@ void BrillouinAcquisition::on_gainODT_valueChanged(double gain) {
 
 void BrillouinAcquisition::on_acquisitionStartFluorescence_clicked() {
 	if (m_Fluorescence->getStatus() < ACQUISITION_STATUS::STARTED) {
+		startBrightfieldPreview(true);
 		QMetaObject::invokeMethod(m_Fluorescence, "startRepetitions", Qt::AutoConnection);
 	} else {
 		m_Fluorescence->m_abort = true;
 	}
 }
 
-void BrillouinAcquisition::on_fluoGain_valueChanged(double gain) {
-	m_Fluorescence->setGain(gain);
+void BrillouinAcquisition::on_fluoBlueStart_clicked() {
+	if (m_Fluorescence->getStatus() < ACQUISITION_STATUS::STARTED) {
+		startBrightfieldPreview(true);
+		QMetaObject::invokeMethod(m_Fluorescence, "startRepetitions", Qt::AutoConnection, Q_ARG(std::vector<FLUORESCENCE_MODE>, { FLUORESCENCE_MODE::BLUE }));
+	}
+	else {
+		m_Fluorescence->m_abort = true;
+	}
+}
+
+void BrillouinAcquisition::on_fluoGreenStart_clicked() {
+	if (m_Fluorescence->getStatus() < ACQUISITION_STATUS::STARTED) {
+		startBrightfieldPreview(true);
+		QMetaObject::invokeMethod(m_Fluorescence, "startRepetitions", Qt::AutoConnection, Q_ARG(std::vector<FLUORESCENCE_MODE>, { FLUORESCENCE_MODE::GREEN }));
+	}
+	else {
+		m_Fluorescence->m_abort = true;
+	}
+}
+
+void BrillouinAcquisition::on_fluoRedStart_clicked() {
+	if (m_Fluorescence->getStatus() < ACQUISITION_STATUS::STARTED) {
+		startBrightfieldPreview(true);
+		QMetaObject::invokeMethod(m_Fluorescence, "startRepetitions", Qt::AutoConnection, Q_ARG(std::vector<FLUORESCENCE_MODE>, { FLUORESCENCE_MODE::RED }));
+	}
+	else {
+		m_Fluorescence->m_abort = true;
+	}
+}
+
+void BrillouinAcquisition::on_fluoBrightfieldStart_clicked() {
+	if (m_Fluorescence->getStatus() < ACQUISITION_STATUS::STARTED) {
+		startBrightfieldPreview(true);
+		QMetaObject::invokeMethod(m_Fluorescence, "startRepetitions", Qt::AutoConnection, Q_ARG(std::vector<FLUORESCENCE_MODE>, { FLUORESCENCE_MODE::BRIGHTFIELD }));
+	}
+	else {
+		m_Fluorescence->m_abort = true;
+	}
+}
+
+void BrillouinAcquisition::on_fluoBluePreview_clicked() {
+	QMetaObject::invokeMethod(m_Fluorescence, "startStopPreview", Qt::AutoConnection, Q_ARG(FLUORESCENCE_MODE, FLUORESCENCE_MODE::BLUE));
+}
+
+void BrillouinAcquisition::on_fluoGreenPreview_clicked() {
+	QMetaObject::invokeMethod(m_Fluorescence, "startStopPreview", Qt::AutoConnection, Q_ARG(FLUORESCENCE_MODE, FLUORESCENCE_MODE::GREEN));
+}
+
+void BrillouinAcquisition::on_fluoRedPreview_clicked() {
+	QMetaObject::invokeMethod(m_Fluorescence, "startStopPreview", Qt::AutoConnection, Q_ARG(FLUORESCENCE_MODE, FLUORESCENCE_MODE::RED));
+}
+
+void BrillouinAcquisition::on_fluoBrightfieldPreview_clicked() {
+	QMetaObject::invokeMethod(m_Fluorescence, "startStopPreview", Qt::AutoConnection, Q_ARG(FLUORESCENCE_MODE, FLUORESCENCE_MODE::BRIGHTFIELD));
 }
 
 void BrillouinAcquisition::on_fluoBlueCheckbox_stateChanged(int enabled) {
@@ -954,8 +1023,25 @@ void BrillouinAcquisition::showFluorescenceStatus(ACQUISITION_STATUS status) {
 		ui->acquisitionStartFluorescence->setText("Cancel");
 		running = true;
 	} else {
-		ui->acquisitionStartFluorescence->setText("Start");
+		ui->acquisitionStartFluorescence->setText("Acquire All");
 	}
+	startBrightfieldPreview(running);
+
+	ui->fluoBlueStart->setDisabled(running);
+	ui->fluoGreenStart->setDisabled(running);
+	ui->fluoRedStart->setDisabled(running);
+	ui->fluoBrightfieldStart->setDisabled(running);
+
+	// reset all preview buttons
+	ui->fluoBluePreview->setText("Preview");
+	ui->fluoGreenPreview->setText("Preview");
+	ui->fluoRedPreview->setText("Preview");
+	ui->fluoBrightfieldPreview->setText("Preview");
+
+	ui->fluoBluePreview->setDisabled(running);
+	ui->fluoGreenPreview->setDisabled(running);
+	ui->fluoRedPreview->setDisabled(running);
+	ui->fluoBrightfieldPreview->setDisabled(running);
 
 	ui->fluoBlueCheckbox->setDisabled(running);
 	ui->fluoGreenCheckbox->setDisabled(running);
@@ -1358,6 +1444,30 @@ void BrillouinAcquisition::showBrightfieldPreviewRunning(bool isRunning) {
 	startBrightfieldPreview(isRunning);
 }
 
+void BrillouinAcquisition::showFluorescencePreviewRunning(FLUORESCENCE_MODE mode) {
+	// reset all preview buttons
+	ui->fluoBluePreview->setText("Preview");
+	ui->fluoGreenPreview->setText("Preview");
+	ui->fluoRedPreview->setText("Preview");
+	ui->fluoBrightfieldPreview->setText("Preview");
+
+	// show currently running mode
+	switch (mode) {
+	case FLUORESCENCE_MODE::BLUE:
+		ui->fluoBluePreview->setText("Stop");
+		break;
+	case FLUORESCENCE_MODE::GREEN:
+		ui->fluoGreenPreview->setText("Stop");
+		break;
+	case FLUORESCENCE_MODE::RED:
+		ui->fluoRedPreview->setText("Stop");
+		break;
+	case FLUORESCENCE_MODE::BRIGHTFIELD:
+		ui->fluoBrightfieldPreview->setText("Stop");
+		break;
+	}
+}
+
 void BrillouinAcquisition::startPreview(bool isRunning) {
 	// if preview was not running, start it, else leave it running (don't start it twice)
 	if (!m_previewRunning && isRunning) {
@@ -1529,6 +1639,7 @@ void BrillouinAcquisition::on_camera_playPause_brightfield_clicked() {
 		QMetaObject::invokeMethod(m_brightfieldCamera, "startPreview", Qt::AutoConnection);
 	} else {
 		m_brightfieldCamera->m_stopPreview = true;
+		m_Fluorescence->startStopPreview(FLUORESCENCE_MODE::NONE);
 	}
 }
 
@@ -1953,6 +2064,14 @@ void BrillouinAcquisition::initFluorescence() {
 			&Fluorescence::s_repetitionProgress,
 			this,
 			[this](double progress, int seconds) { showFluorescenceProgress(progress, seconds); }
+		);
+
+		// slot to show current repetition progress
+		connection = QWidget::connect(
+			m_Fluorescence,
+			&Fluorescence::s_previewRunning,
+			this,
+			[this](FLUORESCENCE_MODE mode) { showFluorescencePreviewRunning(mode); }
 		);
 
 		// start Fluorescence thread

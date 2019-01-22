@@ -161,6 +161,15 @@ void uEyeCam::readSettings() {
 }
 
 void uEyeCam::setSettings(CAMERA_SETTINGS settings) {
+	// Don't do anything if an acquisition is running.
+	if (m_isAcquisitionRunning) {
+		return;
+	}
+
+	// If the preview is currently running, stop it and apply the settings.
+	if (m_isPreviewRunning) {
+		uEye::is_StopLiveVideo(m_camera, IS_FORCE_VIDEO_STOP);
+	}
 	m_settings = settings;
 
 	/*
@@ -220,6 +229,14 @@ void uEyeCam::setSettings(CAMERA_SETTINGS settings) {
 
 	// Read back the settings
 	readSettings();
+
+	// Read changed options
+	readOptions();
+
+	// If the preview was running, start it again.
+	if (m_isPreviewRunning) {
+		uEye::is_CaptureVideo(m_camera, IS_WAIT);
+	}
 }
 
 void uEyeCam::startPreview() {
@@ -287,6 +304,11 @@ void uEyeCam::startAcquisition(CAMERA_SETTINGS settings) {
 	// Wait for camera to really apply settings
 	Sleep(500);
 
+	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
+	BUFFER_SETTINGS bufferSettings = { 1, pixelNumber, "unsigned char", m_settings.roi };
+	m_previewBuffer->initializeBuffer(bufferSettings);
+	emit(s_previewBufferSettingsChanged());
+
 	// allocate and add memory
 	int nRet = uEye::is_AllocImageMem(m_camera, m_settings.roi.width, m_settings.roi.height, 8, &m_imageBuffer, &m_imageBufferId);
 
@@ -308,11 +330,19 @@ void uEyeCam::stopAcquisition() {
 
 void uEyeCam::acquireImage(unsigned char* buffer) {
 
-	// Copy data to preview buffer
-	memcpy(buffer, m_imageBuffer, m_settings.roi.width*m_settings.roi.height);
+	// Copy data to provided buffer
+	if (m_imageBuffer != NULL && buffer != nullptr) {
+		memcpy(buffer, m_imageBuffer, m_settings.roi.width*m_settings.roi.height);
+	}
 }
 
-void uEyeCam::getImageForAcquisition(unsigned char* buffer) {
+void uEyeCam::getImageForAcquisition(unsigned char* buffer, bool preview) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	acquireImage(buffer);
+
+	if (preview && buffer != nullptr) {
+		// write image to preview buffer
+		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.width * m_settings.roi.height);
+		m_previewBuffer->m_buffer->m_usedBuffers->release();
+	}
 }

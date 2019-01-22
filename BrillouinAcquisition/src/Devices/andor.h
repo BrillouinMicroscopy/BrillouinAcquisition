@@ -89,7 +89,7 @@ public slots:
 	void startAcquisition(CAMERA_SETTINGS);
 	void stopAcquisition();
 	
-	void getImageForAcquisition(unsigned char* buffer) override;
+	void getImageForAcquisition(unsigned char* buffer, bool preview = true) override;
 
 signals:
 	void cameraCoolingChanged(bool);
