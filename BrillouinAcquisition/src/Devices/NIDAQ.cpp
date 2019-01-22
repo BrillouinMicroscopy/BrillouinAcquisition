@@ -10,19 +10,20 @@ NIDAQ::NIDAQ() noexcept {
 		{ "Moveable Mirror",	2, (int)DEVICE_ELEMENT::MOVEMIRROR,		{ "Reflect", "Open" } },
 		{ "Excitation Filter",	4, (int)DEVICE_ELEMENT::EXFILTER,		{ "Block", "Blue", "Green", "Red" } },
 		{ "Emission Filter",	4, (int)DEVICE_ELEMENT::EMFILTER,		{ "Open", "Blue", "Green", "Red" } },
-		{ "LED illumination",	2, (int)DEVICE_ELEMENT::LEDLAMP,		{ "Off", "On" } }
+		{ "LED illumination",	2, (int)DEVICE_ELEMENT::LEDLAMP,		{ "Off", "On" } },
+		{ "Lower objective",	0, (int)DEVICE_ELEMENT::LOWEROBJECTIVE,	DEVICE_INPUT_TYPE::DOUBLEBOX }
 	};
 
 	m_presets = {
-		{	"Brillouin",	SCAN_BRILLOUIN,		{ {2}, {1}, {1},  {},  {},  {} }	},	// Brillouin
-		{	"Calibration",	SCAN_CALIBRATION,	{ {2}, {2}, {1},  {},  {},  {} }	},	// Brillouin Calibration
-		{	"ODT",			SCAN_ODT,			{ {2},  {}, {2}, {1}, {1}, {1} }	},	// ODT
-		{	"Brightfield",	SCAN_BRIGHTFIELD,	{  {},  {},  {},  {}, {2}, {2} }	},	// Brightfield
-		{	"Fluo off",		SCAN_EPIFLUOOFF,	{  {},  {},  {}, {1}, {1},  {} }	},	// Fluorescence off
-		{	"Fluo Blue",	SCAN_EPIFLUOBLUE,	{ {1},  {},  {}, {2}, {2}, {1} }	},	// Fluorescence blue
-		{	"Fluo Green",	SCAN_EPIFLUOGREEN,	{ {1},  {},  {}, {3}, {3}, {1} }	},	// Fluorescence green
-		{	"Fluo Red",		SCAN_EPIFLUORED,	{ {1},  {},  {}, {4}, {4}, {1} }	},	// Fluorescence red
-		{	"Laser off",	SCAN_LASEROFF,		{ {1},  {},  {},  {},  {},  {} }	}	// Laser off
+		{	"Brillouin",	SCAN_BRILLOUIN,		{ {2}, {1}, {1},  {},  {},  {},  {} }	},	// Brillouin
+		{	"Calibration",	SCAN_CALIBRATION,	{ {2}, {2}, {1},  {},  {},  {},  {} }	},	// Brillouin Calibration
+		{	"ODT",			SCAN_ODT,			{ {2},  {}, {2}, {1}, {1}, {1},  {} }	},	// ODT
+		{	"Brightfield",	SCAN_BRIGHTFIELD,	{  {},  {},  {},  {}, {2}, {2},  {} }	},	// Brightfield
+		{	"Fluo off",		SCAN_EPIFLUOOFF,	{  {},  {},  {}, {1}, {1},  {},  {} }	},	// Fluorescence off
+		{	"Fluo Blue",	SCAN_EPIFLUOBLUE,	{ {1},  {},  {}, {2}, {2}, {1},  {} }	},	// Fluorescence blue
+		{	"Fluo Green",	SCAN_EPIFLUOGREEN,	{ {1},  {},  {}, {3}, {3}, {1},  {} }	},	// Fluorescence green
+		{	"Fluo Red",		SCAN_EPIFLUORED,	{ {1},  {},  {}, {4}, {4}, {1},  {} }	},	// Fluorescence red
+		{	"Laser off",	SCAN_LASEROFF,		{ {1},  {},  {},  {},  {},  {},  {} }	}	// Laser off
 	};
 
 	m_absoluteBounds = m_calibration.bounds;
@@ -176,6 +177,19 @@ void NIDAQ::setElement(DeviceElement element, int position) {
 			break;
 		default:
 			break;
+	}
+	m_elementPositions[element.index] = position;
+	checkPresets();
+	emit(elementPositionChanged(element, position));
+}
+
+void NIDAQ::setElement(DeviceElement element, double position) {
+	switch ((DEVICE_ELEMENT)element.index) {
+	case DEVICE_ELEMENT::LOWEROBJECTIVE:
+		setLowerObjective(position);
+		break;
+	default:
+		break;
 	}
 	m_elementPositions[element.index] = position;
 	checkPresets();
@@ -343,6 +357,10 @@ void NIDAQ::setLEDLamp(bool position) {
 	// Write digital voltages
 	const uInt8	voltage = (uInt8)m_LEDon;
 	DAQmxWriteDigitalLines(DOtaskHandle_LED, 1, false, 10, DAQmx_Val_GroupByChannel, &voltage, NULL, NULL);
+}
+
+void NIDAQ::setLowerObjective(double position) {
+	Thorlabs_TIM::TIM_MoveAbsolute(m_serialNo_TIM, m_channelLowerObjective, m_PiezoIncPerMum * position);
 }
 
 int NIDAQ::getLEDLamp() {

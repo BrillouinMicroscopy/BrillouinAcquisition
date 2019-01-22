@@ -56,18 +56,29 @@ struct BOUNDS {
 	double zMax{  1e3 };	// [µm] maximal z-value
 };
 
+typedef enum enDeviceInput {
+	PUSHBUTTON,
+	INTBOX,
+	DOUBLEBOX
+} DEVICE_INPUT_TYPE;
+
 class DeviceElement {
 public:
 	DeviceElement() {};
 	DeviceElement(std::string name, int maxOptions, int index) :
 		name(name), maxOptions(maxOptions), index(index), optionNames(checkNames(maxOptions)) {};
+	DeviceElement(std::string name, int maxOptions, int index, DEVICE_INPUT_TYPE inputType) :
+		name(name), maxOptions(maxOptions), index(index), optionNames(checkNames(maxOptions)), inputType(inputType) {};
 	DeviceElement(std::string name, int maxOptions, int index, std::vector<std::string> optionNames) :
 		name(name), maxOptions(maxOptions), index(index), optionNames(checkNames(maxOptions, optionNames)) {};
+	DeviceElement(std::string name, int maxOptions, int index, std::vector<std::string> optionNames, DEVICE_INPUT_TYPE inputType) :
+		name(name), maxOptions(maxOptions), index(index), optionNames(checkNames(maxOptions, optionNames)), inputType(inputType) {};
 
 	std::string name{ "" };
 	int maxOptions{ 0 };
 	int index{ 0 };
 	std::vector<std::string> optionNames;
+	DEVICE_INPUT_TYPE inputType{ DEVICE_INPUT_TYPE::PUSHBUTTON }; // possible types are "pushButtons", "intBox" or "doubleBox"
 
 	std::vector<std::string> checkNames(int count, std::vector<std::string> names = {}) {
 		//check that the number of names fits the number of options
@@ -157,6 +168,7 @@ public:
 
 public slots:
 	virtual void setElement(DeviceElement, int) = 0;
+	virtual void setElement(DeviceElement, double) = 0;
 	virtual void getElement(DeviceElement) = 0;
 	virtual void setPreset(SCAN_PRESET) = 0;
 	virtual void getElements() = 0;

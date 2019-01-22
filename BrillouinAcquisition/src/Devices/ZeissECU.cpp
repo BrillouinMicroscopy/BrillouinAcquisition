@@ -227,6 +227,16 @@ void ZeissECU::setElement(DeviceElement element, int position) {
 	emit(elementPositionChanged(element, position));
 }
 
+void ZeissECU::setElement(DeviceElement element, double position) {
+	switch ((DEVICE_ELEMENT)element.index) {
+	default:
+		break;
+	}
+	m_elementPositions[element.index] = position;
+	checkPresets();
+	emit(elementPositionChanged(element, position));
+}
+
 void ZeissECU::getElements() {
 	m_elementPositions[(int)DEVICE_ELEMENT::BEAMBLOCK] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
 	m_elementPositions[(int)DEVICE_ELEMENT::REFLECTOR] = m_stand->getReflector();

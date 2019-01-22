@@ -420,6 +420,10 @@ void BrillouinAcquisition::setElement(DeviceElement element, int position) {
 	QMetaObject::invokeMethod(m_scanControl, "setElement", Qt::QueuedConnection, Q_ARG(DeviceElement, element), Q_ARG(int, position));
 }
 
+void BrillouinAcquisition::setElement(DeviceElement element, double position) {
+	QMetaObject::invokeMethod(m_scanControl, "setElement", Qt::QueuedConnection, Q_ARG(DeviceElement, element), Q_ARG(double, position));
+}
+
 void BrillouinAcquisition::on_autoscalePlot_stateChanged(int state) {
 	m_BrillouinPlot.autoscale = (bool)state;
 	ui->rangeLower->setDisabled(state);
@@ -1849,20 +1853,50 @@ void BrillouinAcquisition::initBeampathButtons() {
 		groupLabel->setMinimumWidth(40);
 		groupLabel->setMaximumWidth(40);
 		layout->addWidget(groupLabel);
-		std::vector<QPushButton*> buttons;
-		for (gsl::index jj = 0; jj < element.maxOptions; jj++) {
-			QPushButton *button = new QPushButton(element.optionNames[jj].c_str());
-			button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-			button->setMinimumWidth(16);
-			button->setMaximumWidth(48);
-			layout->addWidget(button);
+		if (element.inputType == DEVICE_INPUT_TYPE::PUSHBUTTON) {
+			std::vector<QPushButton*> buttons;
+			for (gsl::index jj = 0; jj < element.maxOptions; jj++) {
+				QPushButton *button = new QPushButton(element.optionNames[jj].c_str());
+				button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+				button->setMinimumWidth(16);
+				button->setMaximumWidth(48);
+				layout->addWidget(button);
 
-			connection = QObject::connect(button, &QPushButton::clicked, [=] {
-				setElement(elements[ii], jj + 1);
-			});
-			buttons.push_back(button);
+				connection = QObject::connect(button, &QPushButton::clicked, [=] {
+					setElement(elements[ii], (int)(jj + 1));
+				});
+				buttons.push_back(button);
+			}
+			elementButtons.push_back(buttons);
+		} else if (element.inputType == DEVICE_INPUT_TYPE::INTBOX) {
+			QSpinBox *intBox = new QSpinBox();
+			intBox->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+			intBox->setMinimum(-10000);
+			intBox->setMaximum(10000);
+			intBox->setMinimumWidth(48);
+			intBox->setMaximumWidth(96);
+			layout->addWidget(intBox);
+
+			connection = QObject::connect<void(QSpinBox::*)(const int)>(
+				intBox,
+				&QSpinBox::valueChanged,
+				[=](int value) {setElement(elements[ii], value);}
+			);
+		} else if (element.inputType == DEVICE_INPUT_TYPE::DOUBLEBOX) {
+			QDoubleSpinBox *intBox = new QDoubleSpinBox();
+			intBox->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+			intBox->setMinimum(-10000.0);
+			intBox->setMaximum(10000.0);
+			intBox->setMinimumWidth(48);
+			intBox->setMaximumWidth(96);
+			layout->addWidget(intBox);
+
+			connection = QObject::connect<void(QDoubleSpinBox::*)(const double)>(
+				intBox,
+				&QDoubleSpinBox::valueChanged,
+				[=](double value) {setElement(elements[ii], value); }
+			);
 		}
-		elementButtons.push_back(buttons);
 		verticalLayout->addLayout(layout);
 	}
 	ui->beamPathBox->setLayout(verticalLayout);
