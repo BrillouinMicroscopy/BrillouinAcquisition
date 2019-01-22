@@ -406,6 +406,17 @@ void NIDAQ::setPositionRelativeZ(double positionZ) {
 	setPosition(m_position);
 }
 
+void NIDAQ::setHome() {
+	// Set current z position to zero
+	m_position.z = 0;
+	Thorlabs_TIM::TIM_Home(m_serialNo_TIM, m_channelPosZ);
+
+	m_homePosition = getPosition();
+	announceSavedPositionsNormalized();
+	announcePosition();
+	calculateHomePositionBounds();
+}
+
 void NIDAQ::loadVoltagePositionCalibration(std::string filepath) {
 
 	using namespace std::experimental::filesystem::v1;
