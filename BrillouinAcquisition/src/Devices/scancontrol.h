@@ -113,12 +113,12 @@ public:
 
 class Preset {
 public:
-	Preset(std::string name, SCAN_PRESET index, std::vector<std::vector<int>> positions) :
+	Preset(std::string name, SCAN_PRESET index, std::vector<std::vector<double>> positions) :
 		name(name), index(index), elementPositions(positions) {};
 
 	std::string name{ "" };
 	SCAN_PRESET index{ SCAN_NULL };
-	std::vector<std::vector<int>> elementPositions;
+	std::vector<std::vector<double>> elementPositions;
 };
 
 class ScanControl: public Device {
@@ -151,7 +151,7 @@ public:
 	std::vector<std::string> SCAN_DEVICE_NAMES = { "Zeiss ECU", "NI-DAQmx" };
 
 	std::vector<DeviceElement> m_deviceElements;
-	std::vector<int> m_elementPositions;
+	std::vector<double> m_elementPositions;
 
 	std::vector<Preset> m_presets;
 	SCAN_PRESET m_activePresets;
@@ -167,7 +167,6 @@ public:
 	QTimer *elementPositionTimer = nullptr;
 
 public slots:
-	virtual void setElement(DeviceElement, int) = 0;
 	virtual void setElement(DeviceElement, double) = 0;
 	virtual void getElement(DeviceElement) = 0;
 	virtual void setPreset(SCAN_PRESET) = 0;
@@ -194,8 +193,8 @@ public slots:
 	void announceSavedPositionsNormalized();
 
 signals:
-	void elementPositionsChanged(std::vector<int>);
-	void elementPositionChanged(DeviceElement, int);
+	void elementPositionsChanged(std::vector<double>);
+	void elementPositionChanged(DeviceElement, double);
 	void currentPosition(POINT3);
 	void savedPositionsChanged(std::vector<POINT3>);
 	void homePositionBoundsChanged(BOUNDS);

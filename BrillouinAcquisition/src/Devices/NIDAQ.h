@@ -69,6 +69,7 @@ private:
 	VOLTAGE2 m_voltages{ 0, 0 };	// current voltage
 	POINT3 m_position{ 0, 0, 0 };	// current position
 	bool m_LEDon{ false };			// current state of the LED illumination source
+	double m_positionLowerObjective{ 0 };	// position of the lower objective
 	
 	
 	// TODO: make the following parameters changeable:
@@ -122,7 +123,6 @@ public slots:
 	void init();
 	void connectDevice();
 	void disconnectDevice();
-	void setElement(DeviceElement element, int position);
 	void setElement(DeviceElement element, double position);
 	void getElement(DeviceElement element);
 	void setPreset(SCAN_PRESET preset);
@@ -139,6 +139,7 @@ public slots:
 	int getFilter(FilterMount * device);
 	void setLEDLamp(bool position);
 	void setLowerObjective(double position);
+	double getLowerObjective();
 	int getLEDLamp();
 	int getMirror();
 	// sets the position relative to the home position m_homePosition

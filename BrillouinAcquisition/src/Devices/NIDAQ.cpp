@@ -28,7 +28,7 @@ NIDAQ::NIDAQ() noexcept {
 
 	m_absoluteBounds = m_calibration.bounds;
 
-	m_elementPositions = std::vector<int>((int)DEVICE_ELEMENT::COUNT, -1);
+	m_elementPositions = std::vector<double>((int)DEVICE_ELEMENT::COUNT, -1);
 }
 
 NIDAQ::~NIDAQ() {
@@ -91,6 +91,7 @@ void NIDAQ::connectDevice() {
 			centerPosition();
 			calculateHomePositionBounds();
 			Thorlabs_TIM::TIM_Home(m_serialNo_TIM, m_channelLowerObjective);
+			m_positionLowerObjective = 0;
 		}
 		Thorlabs_FF::FF_Open(m_serialNo_FF1);
 		Thorlabs_FF::FF_StartPolling(m_serialNo_FF1, 200);
@@ -156,41 +157,31 @@ void NIDAQ::init() {
 	QMetaObject::Connection connection = QWidget::connect(elementPositionTimer, SIGNAL(timeout()), this, SLOT(getElements()));
 }
 
-void NIDAQ::setElement(DeviceElement element, int position) {
+void NIDAQ::setElement(DeviceElement element, double position) {
 	switch ((DEVICE_ELEMENT)element.index) {
 		case DEVICE_ELEMENT::CALFLIPMIRROR:
-			setCalFlipMirror(position);
+			setCalFlipMirror((int)position);
 			break;
 		case DEVICE_ELEMENT::BEAMBLOCK:
-			setBeamBlock(position);
+			setBeamBlock((int)position);
 			break;
 		case DEVICE_ELEMENT::MOVEMIRROR:
-			setMirror(position);
+			setMirror((int)position);
 			break;
 		case DEVICE_ELEMENT::EXFILTER:
-			setExFilter(position);
+			setExFilter((int)position);
 			break;
 		case DEVICE_ELEMENT::EMFILTER:
-			setEmFilter(position);
+			setEmFilter((int)position);
 			break;
 		case DEVICE_ELEMENT::LEDLAMP:
-			setLEDLamp(position - 1);
+			setLEDLamp((int)position - 1);
+			break;
+		case DEVICE_ELEMENT::LOWEROBJECTIVE:
+			setLowerObjective(position);
 			break;
 		default:
 			break;
-	}
-	m_elementPositions[element.index] = position;
-	checkPresets();
-	emit(elementPositionChanged(element, position));
-}
-
-void NIDAQ::setElement(DeviceElement element, double position) {
-	switch ((DEVICE_ELEMENT)element.index) {
-	case DEVICE_ELEMENT::LOWEROBJECTIVE:
-		setLowerObjective(position);
-		break;
-	default:
-		break;
 	}
 	m_elementPositions[element.index] = position;
 	checkPresets();
@@ -216,6 +207,9 @@ void NIDAQ::getElement(DeviceElement element) {
 			break;
 		case DEVICE_ELEMENT::LEDLAMP:
 			m_elementPositions[element.index] = getLEDLamp() + 1;
+			break;
+		case DEVICE_ELEMENT::LOWEROBJECTIVE:
+			m_elementPositions[element.index] = getLowerObjective();
 			break;
 		default:
 			return;
@@ -252,6 +246,7 @@ void NIDAQ::getElements() {
 	m_elementPositions[(int)DEVICE_ELEMENT::EXFILTER] = getExFilter();
 	m_elementPositions[(int)DEVICE_ELEMENT::EMFILTER] = getEmFilter();
 	m_elementPositions[(int)DEVICE_ELEMENT::LEDLAMP] = getLEDLamp() + 1;
+	m_elementPositions[(int)DEVICE_ELEMENT::LOWEROBJECTIVE] = getLowerObjective();
 	checkPresets();
 	emit(elementPositionsChanged(m_elementPositions));
 }
@@ -361,7 +356,12 @@ void NIDAQ::setLEDLamp(bool position) {
 }
 
 void NIDAQ::setLowerObjective(double position) {
-	Thorlabs_TIM::TIM_MoveAbsolute(m_serialNo_TIM, m_channelLowerObjective, m_PiezoIncPerMum * position);
+	m_positionLowerObjective = position;
+	Thorlabs_TIM::TIM_MoveAbsolute(m_serialNo_TIM, m_channelLowerObjective, m_PiezoIncPerMum * m_positionLowerObjective);
+}
+
+double NIDAQ::getLowerObjective() {
+	return m_positionLowerObjective;
 }
 
 int NIDAQ::getLEDLamp() {

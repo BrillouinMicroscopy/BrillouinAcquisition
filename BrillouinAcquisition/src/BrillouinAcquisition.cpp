@@ -188,6 +188,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<CAMERA_SETTING>("CAMERA_SETTING");
 	qRegisterMetaType<CAMERA_OPTIONS>("CAMERA_OPTIONS");
 	qRegisterMetaType<std::vector<int>>("std::vector<int>");
+	qRegisterMetaType<std::vector<double>>("std::vector<double>");
 	qRegisterMetaType<QSerialPort::SerialPortError>("QSerialPort::SerialPortError");
 	qRegisterMetaType<IMAGE*>("IMAGE*");
 	qRegisterMetaType<CALIBRATION*>("CALIBRATION*");
@@ -414,10 +415,6 @@ void BrillouinAcquisition::showEvent(QShowEvent* event) {
 	// connect camera and microscope automatically
 	QMetaObject::invokeMethod(m_andor, "connectDevice", Qt::QueuedConnection);
 	QMetaObject::invokeMethod(m_scanControl, "connectDevice", Qt::QueuedConnection);
-}
-
-void BrillouinAcquisition::setElement(DeviceElement element, int position) {
-	QMetaObject::invokeMethod(m_scanControl, "setElement", Qt::QueuedConnection, Q_ARG(DeviceElement, element), Q_ARG(int, position));
 }
 
 void BrillouinAcquisition::setElement(DeviceElement element, double position) {
@@ -1841,6 +1838,8 @@ void BrillouinAcquisition::initBeampathButtons() {
 		verticalLayout->addLayout(layout);
 	}
 	elementButtons.clear();
+	elementIntBox.clear();
+	elementDoubleBox.clear();
 
 	auto elements = m_scanControl->m_deviceElements;
 	for (gsl::index ii = 0; ii < elements.size(); ii++) {
@@ -1863,7 +1862,7 @@ void BrillouinAcquisition::initBeampathButtons() {
 				layout->addWidget(button);
 
 				connection = QObject::connect(button, &QPushButton::clicked, [=] {
-					setElement(elements[ii], (int)(jj + 1));
+					setElement(elements[ii], (double)(jj + 1));
 				});
 				buttons.push_back(button);
 			}
@@ -1880,22 +1879,24 @@ void BrillouinAcquisition::initBeampathButtons() {
 			connection = QObject::connect<void(QSpinBox::*)(const int)>(
 				intBox,
 				&QSpinBox::valueChanged,
-				[=](int value) {setElement(elements[ii], value);}
+				[=](int value) {setElement(elements[ii], (double)value);}
 			);
+			elementIntBox.push_back(intBox);
 		} else if (element.inputType == DEVICE_INPUT_TYPE::DOUBLEBOX) {
-			QDoubleSpinBox *intBox = new QDoubleSpinBox();
-			intBox->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-			intBox->setMinimum(-10000.0);
-			intBox->setMaximum(10000.0);
-			intBox->setMinimumWidth(48);
-			intBox->setMaximumWidth(96);
-			layout->addWidget(intBox);
+			QDoubleSpinBox *doubleBox = new QDoubleSpinBox();
+			doubleBox->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+			doubleBox->setMinimum(-10000.0);
+			doubleBox->setMaximum(10000.0);
+			doubleBox->setMinimumWidth(48);
+			doubleBox->setMaximumWidth(96);
+			layout->addWidget(doubleBox);
 
 			connection = QObject::connect<void(QDoubleSpinBox::*)(const double)>(
-				intBox,
+				doubleBox,
 				&QDoubleSpinBox::valueChanged,
 				[=](double value) {setElement(elements[ii], value); }
 			);
+			elementDoubleBox.push_back(doubleBox);
 		}
 		verticalLayout->addLayout(layout);
 	}
@@ -1947,13 +1948,13 @@ void BrillouinAcquisition::initScanControl() {
 		m_scanControl,
 		&ScanControl::elementPositionsChanged,
 		this,
-		[this](std::vector<int> positions) { microscopeElementPositionsChanged(positions); }
+		[this](std::vector<double> positions) { microscopeElementPositionsChanged(positions); }
 	);
 	connection = QWidget::connect(
 		m_scanControl,
 		&ScanControl::elementPositionChanged,
 		this,
-		[this](DeviceElement element, int position) { microscopeElementPositionChanged(element, position); }
+		[this](DeviceElement element, double position) { microscopeElementPositionChanged(element, position); }
 	);
 	connection = QWidget::connect(
 		m_scanControl,
@@ -2201,12 +2202,12 @@ void BrillouinAcquisition::initCamera() {
 	QMetaObject::invokeMethod(m_brightfieldCamera, "connectDevice", Qt::AutoConnection);
 }
 
-void BrillouinAcquisition::microscopeElementPositionsChanged(std::vector<int> positions) {
+void BrillouinAcquisition::microscopeElementPositionsChanged(std::vector<double> positions) {
 	m_deviceElementPositions = positions;
 	checkElementButtons();
 }
 
-void BrillouinAcquisition::microscopeElementPositionChanged(DeviceElement element, int position) {
+void BrillouinAcquisition::microscopeElementPositionChanged(DeviceElement element, double position) {
 	if (m_deviceElementPositions.size() <= element.index) {
 		m_deviceElementPositions.resize(element.index + 1);
 	}
@@ -2215,20 +2216,33 @@ void BrillouinAcquisition::microscopeElementPositionChanged(DeviceElement elemen
 }
 
 void BrillouinAcquisition::checkElementButtons() {
-	if (elementButtons.size() != m_deviceElementPositions.size()) {
+	if ((elementButtons.size() + elementIntBox.size() + elementDoubleBox.size()) != m_deviceElementPositions.size()) {
 		return;
 	}
 
-	for (gsl::index ii = 0; ii < elementButtons.size(); ii++) {
-		for (gsl::index jj = 0; jj < elementButtons[ii].size(); jj++) {
-			if (m_deviceElementPositions[ii] == jj + 1) {
-				elementButtons[ii][jj]->setProperty("class", "active");
-			} else {
-				elementButtons[ii][jj]->setProperty("class", "");
+	auto elements = m_scanControl->m_deviceElements;
+	int indButton{ 0 };
+	int indIntBox{ 0 };
+	int indDoubleBox{ 0 };
+	for (gsl::index ii = 0; ii < elements.size(); ii++) {
+		if (elements[ii].inputType == DEVICE_INPUT_TYPE::PUSHBUTTON) {
+			for (gsl::index jj = 0; jj < elementButtons[indButton].size(); jj++) {
+				if ((int)m_deviceElementPositions[indButton] == jj + 1) {
+					elementButtons[indButton][jj]->setProperty("class", "active");
+				} else {
+					elementButtons[indButton][jj]->setProperty("class", "");
+				}
+				elementButtons[indButton][jj]->style()->unpolish(elementButtons[indButton][jj]);
+				elementButtons[indButton][jj]->style()->polish(elementButtons[indButton][jj]);
+				elementButtons[indButton][jj]->update();
 			}
-			elementButtons[ii][jj]->style()->unpolish(elementButtons[ii][jj]);
-			elementButtons[ii][jj]->style()->polish(elementButtons[ii][jj]);
-			elementButtons[ii][jj]->update();
+			indButton++;
+		} else if (elements[ii].inputType == DEVICE_INPUT_TYPE::INTBOX) {
+			elementIntBox[indIntBox]->setValue((int)m_deviceElementPositions[ii]);
+			indIntBox++;
+		} else if (elements[ii].inputType == DEVICE_INPUT_TYPE::DOUBLEBOX) {
+			elementDoubleBox[indDoubleBox]->setValue((double)m_deviceElementPositions[ii]);
+			indDoubleBox++;
 		}
 	}
 	auto presets = m_scanControl->m_presets;
