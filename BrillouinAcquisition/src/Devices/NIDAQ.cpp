@@ -90,6 +90,7 @@ void NIDAQ::connectDevice() {
 			m_isCompatible = true;
 			centerPosition();
 			calculateHomePositionBounds();
+			Thorlabs_TIM::TIM_Home(m_serialNo_TIM, m_channelLowerObjective);
 		}
 		Thorlabs_FF::FF_Open(m_serialNo_FF1);
 		Thorlabs_FF::FF_StartPolling(m_serialNo_FF1, 200);
