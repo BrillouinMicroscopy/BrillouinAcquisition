@@ -34,7 +34,7 @@ ZeissECU::ZeissECU() noexcept {
 		 150000		// [µm] maximal z-value
 	};
 
-	m_elementPositions = std::vector<int>((int)DEVICE_ELEMENT::COUNT, -1);
+	m_elementPositions = std::vector<double>((int)DEVICE_ELEMENT::COUNT, -1);
 }
 
 ZeissECU::~ZeissECU() {
@@ -196,28 +196,28 @@ void ZeissECU::setPreset(SCAN_PRESET presetType) {
 	emit(elementPositionsChanged(m_elementPositions));
 }
 
-void ZeissECU::setElement(DeviceElement element, int position) {
+void ZeissECU::setElement(DeviceElement element, double position) {
 	switch ((DEVICE_ELEMENT)element.index) {
 		case DEVICE_ELEMENT::BEAMBLOCK:
-			setBeamBlock(position);
+			setBeamBlock((int)position);
 			break;
 		case DEVICE_ELEMENT::REFLECTOR:
-			m_stand->setReflector(position, true);
+			m_stand->setReflector((int)position, true);
 			break;
 		case DEVICE_ELEMENT::OBJECTIVE:
-			m_stand->setObjective(position, true);
+			m_stand->setObjective((int)position, true);
 			break;
 		case DEVICE_ELEMENT::TUBELENS:
-			m_stand->setTubelens(position, true);
+			m_stand->setTubelens((int)position, true);
 			break;
 		case DEVICE_ELEMENT::BASEPORT:
-			m_stand->setBaseport(position, true);
+			m_stand->setBaseport((int)position, true);
 			break;
 		case DEVICE_ELEMENT::SIDEPORT:
-			m_stand->setSideport(position, true);
+			m_stand->setSideport((int)position, true);
 			break;
 		case DEVICE_ELEMENT::MIRROR:
-			m_stand->setMirror(position, true);
+			m_stand->setMirror((int)position, true);
 			break;
 		default:
 			break;

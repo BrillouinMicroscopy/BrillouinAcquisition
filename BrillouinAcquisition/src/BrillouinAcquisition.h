@@ -59,6 +59,7 @@ Q_DECLARE_METATYPE(CAMERA_SETTINGS);
 Q_DECLARE_METATYPE(CAMERA_SETTING);
 Q_DECLARE_METATYPE(CAMERA_OPTIONS);
 Q_DECLARE_METATYPE(std::vector<int>);
+Q_DECLARE_METATYPE(std::vector<double>);
 Q_DECLARE_METATYPE(QSerialPort::SerialPortError);
 Q_DECLARE_METATYPE(IMAGE*);
 Q_DECLARE_METATYPE(CALIBRATION*);
@@ -134,8 +135,8 @@ private slots:
 	void initBeampathButtons();
 
 	void on_BrillouinStart_clicked();
-	void microscopeElementPositionsChanged(std::vector<int>);
-	void microscopeElementPositionChanged(DeviceElement element, int position);
+	void microscopeElementPositionsChanged(std::vector<double>);
+	void microscopeElementPositionChanged(DeviceElement element, double position);
 	void on_camera_playPause_clicked();
 
 	void updateImageBrillouin();
@@ -161,7 +162,7 @@ private slots:
 	std::vector<AT_64> checkROI(std::vector<AT_64>, std::vector<AT_64>);
 
 	void setColormap(QCPColorGradient*, CustomGradientPreset);
-	void setElement(DeviceElement element, int position);
+	void setElement(DeviceElement element, double position);
 	void setPreset(SCAN_PRESET preset);
 	void updatePlotLimits(PLOT_SETTINGS plotSettings, CAMERA_OPTIONS options, CAMERA_ROI roi);
 	void showPreviewRunning(bool);
@@ -381,9 +382,11 @@ private:
 	TableModel *tableModel = new TableModel(0);
 	ButtonDelegate buttonDelegate;
 
-	std::vector<int> m_deviceElementPositions = { 0, 0, 0, 0, 0, 0 };
+	std::vector<double> m_deviceElementPositions = { 0, 0, 0, 0, 0, 0 };
 
 	std::vector<std::vector<QPushButton*>> elementButtons;
+	std::vector<QSpinBox*> elementIntBox;
+	std::vector<QDoubleSpinBox*> elementDoubleBox;
 	std::vector<QPushButton*> presetButtons;
 
 	struct {

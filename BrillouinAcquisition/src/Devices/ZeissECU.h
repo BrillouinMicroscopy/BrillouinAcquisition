@@ -132,7 +132,7 @@ public slots:
 	void connectDevice();
 	void disconnectDevice();
 	void errorHandler(QSerialPort::SerialPortError error);
-	void setElement(DeviceElement element, int position);
+	void setElement(DeviceElement element, double position);
 	void setPreset(SCAN_PRESET preset);
 	void getElements();
 	void setBeamBlock(int position);

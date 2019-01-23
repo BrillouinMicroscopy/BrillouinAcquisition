@@ -69,11 +69,13 @@ private:
 	VOLTAGE2 m_voltages{ 0, 0 };	// current voltage
 	POINT3 m_position{ 0, 0, 0 };	// current position
 	bool m_LEDon{ false };			// current state of the LED illumination source
+	double m_positionLowerObjective{ 0 };	// position of the lower objective
 	
 	
 	// TODO: make the following parameters changeable:
 	char const *m_serialNo_TIM = "65864438";	// serial number of the TCube Inertial motor controller device (can be found in Kinesis)
 	Thorlabs_TIM::TIM_Channels m_channelPosZ{ Thorlabs_TIM::Channel1 };
+	Thorlabs_TIM::TIM_Channels m_channelLowerObjective{ Thorlabs_TIM::Channel2 };
 	int m_PiezoIncPerMum{ 50 };
 
 	char const *m_serialNo_FF1 = "37000784";
@@ -96,6 +98,7 @@ private:
 		EXFILTER,
 		EMFILTER,
 		LEDLAMP,
+		LOWEROBJECTIVE,
 		COUNT
 	};
 
@@ -120,7 +123,7 @@ public slots:
 	void init();
 	void connectDevice();
 	void disconnectDevice();
-	void setElement(DeviceElement element, int position);
+	void setElement(DeviceElement element, double position);
 	void getElement(DeviceElement element);
 	void setPreset(SCAN_PRESET preset);
 	void getElements();
@@ -135,6 +138,8 @@ public slots:
 	int getEmFilter();
 	int getFilter(FilterMount * device);
 	void setLEDLamp(bool position);
+	void setLowerObjective(double position);
+	double getLowerObjective();
 	int getLEDLamp();
 	int getMirror();
 	// sets the position relative to the home position m_homePosition

@@ -10,24 +10,25 @@ NIDAQ::NIDAQ() noexcept {
 		{ "Moveable Mirror",	2, (int)DEVICE_ELEMENT::MOVEMIRROR,		{ "Reflect", "Open" } },
 		{ "Excitation Filter",	4, (int)DEVICE_ELEMENT::EXFILTER,		{ "Block", "Blue", "Green", "Red" } },
 		{ "Emission Filter",	4, (int)DEVICE_ELEMENT::EMFILTER,		{ "Open", "Blue", "Green", "Red" } },
-		{ "LED illumination",	2, (int)DEVICE_ELEMENT::LEDLAMP,		{ "Off", "On" } }
+		{ "LED illumination",	2, (int)DEVICE_ELEMENT::LEDLAMP,		{ "Off", "On" } },
+		{ "Lower objective",	0, (int)DEVICE_ELEMENT::LOWEROBJECTIVE,	DEVICE_INPUT_TYPE::DOUBLEBOX }
 	};
 
 	m_presets = {
-		{	"Brillouin",	SCAN_BRILLOUIN,		{ {2}, {1}, {1},  {},  {},  {} }	},	// Brillouin
-		{	"Calibration",	SCAN_CALIBRATION,	{ {2}, {2}, {1},  {},  {},  {} }	},	// Brillouin Calibration
-		{	"ODT",			SCAN_ODT,			{ {2},  {}, {2}, {1}, {1}, {1} }	},	// ODT
-		{	"Brightfield",	SCAN_BRIGHTFIELD,	{  {},  {},  {},  {}, {2}, {2} }	},	// Brightfield
-		{	"Fluo off",		SCAN_EPIFLUOOFF,	{  {},  {},  {}, {1}, {1},  {} }	},	// Fluorescence off
-		{	"Fluo Blue",	SCAN_EPIFLUOBLUE,	{ {1},  {},  {}, {2}, {2}, {1} }	},	// Fluorescence blue
-		{	"Fluo Green",	SCAN_EPIFLUOGREEN,	{ {1},  {},  {}, {3}, {3}, {1} }	},	// Fluorescence green
-		{	"Fluo Red",		SCAN_EPIFLUORED,	{ {1},  {},  {}, {4}, {4}, {1} }	},	// Fluorescence red
-		{	"Laser off",	SCAN_LASEROFF,		{ {1},  {},  {},  {},  {},  {} }	}	// Laser off
+		{	"Brillouin",	SCAN_BRILLOUIN,		{ {2}, {1}, {1},  {},  {},  {},  {} }	},	// Brillouin
+		{	"Calibration",	SCAN_CALIBRATION,	{ {2}, {2}, {1},  {},  {},  {},  {} }	},	// Brillouin Calibration
+		{	"ODT",			SCAN_ODT,			{ {2},  {}, {2}, {1}, {1}, {1},  {} }	},	// ODT
+		{	"Brightfield",	SCAN_BRIGHTFIELD,	{  {},  {},  {},  {}, {2}, {2},  {} }	},	// Brightfield
+		{	"Fluo off",		SCAN_EPIFLUOOFF,	{  {},  {},  {}, {1}, {1},  {},  {} }	},	// Fluorescence off
+		{	"Fluo Blue",	SCAN_EPIFLUOBLUE,	{ {1},  {},  {}, {2}, {2}, {1},  {} }	},	// Fluorescence blue
+		{	"Fluo Green",	SCAN_EPIFLUOGREEN,	{ {1},  {},  {}, {3}, {3}, {1},  {} }	},	// Fluorescence green
+		{	"Fluo Red",		SCAN_EPIFLUORED,	{ {1},  {},  {}, {4}, {4}, {1},  {} }	},	// Fluorescence red
+		{	"Laser off",	SCAN_LASEROFF,		{ {1},  {},  {},  {},  {},  {},  {} }	}	// Laser off
 	};
 
 	m_absoluteBounds = m_calibration.bounds;
 
-	m_elementPositions = std::vector<int>((int)DEVICE_ELEMENT::COUNT, -1);
+	m_elementPositions = std::vector<double>((int)DEVICE_ELEMENT::COUNT, -1);
 }
 
 NIDAQ::~NIDAQ() {
@@ -89,6 +90,8 @@ void NIDAQ::connectDevice() {
 			m_isCompatible = true;
 			centerPosition();
 			calculateHomePositionBounds();
+			Thorlabs_TIM::TIM_Home(m_serialNo_TIM, m_channelLowerObjective);
+			m_positionLowerObjective = 0;
 		}
 		Thorlabs_FF::FF_Open(m_serialNo_FF1);
 		Thorlabs_FF::FF_StartPolling(m_serialNo_FF1, 200);
@@ -154,25 +157,28 @@ void NIDAQ::init() {
 	QMetaObject::Connection connection = QWidget::connect(elementPositionTimer, SIGNAL(timeout()), this, SLOT(getElements()));
 }
 
-void NIDAQ::setElement(DeviceElement element, int position) {
+void NIDAQ::setElement(DeviceElement element, double position) {
 	switch ((DEVICE_ELEMENT)element.index) {
 		case DEVICE_ELEMENT::CALFLIPMIRROR:
-			setCalFlipMirror(position);
+			setCalFlipMirror((int)position);
 			break;
 		case DEVICE_ELEMENT::BEAMBLOCK:
-			setBeamBlock(position);
+			setBeamBlock((int)position);
 			break;
 		case DEVICE_ELEMENT::MOVEMIRROR:
-			setMirror(position);
+			setMirror((int)position);
 			break;
 		case DEVICE_ELEMENT::EXFILTER:
-			setExFilter(position);
+			setExFilter((int)position);
 			break;
 		case DEVICE_ELEMENT::EMFILTER:
-			setEmFilter(position);
+			setEmFilter((int)position);
 			break;
 		case DEVICE_ELEMENT::LEDLAMP:
-			setLEDLamp(position - 1);
+			setLEDLamp((int)position - 1);
+			break;
+		case DEVICE_ELEMENT::LOWEROBJECTIVE:
+			setLowerObjective(position);
 			break;
 		default:
 			break;
@@ -201,6 +207,9 @@ void NIDAQ::getElement(DeviceElement element) {
 			break;
 		case DEVICE_ELEMENT::LEDLAMP:
 			m_elementPositions[element.index] = getLEDLamp() + 1;
+			break;
+		case DEVICE_ELEMENT::LOWEROBJECTIVE:
+			m_elementPositions[element.index] = getLowerObjective();
 			break;
 		default:
 			return;
@@ -237,6 +246,7 @@ void NIDAQ::getElements() {
 	m_elementPositions[(int)DEVICE_ELEMENT::EXFILTER] = getExFilter();
 	m_elementPositions[(int)DEVICE_ELEMENT::EMFILTER] = getEmFilter();
 	m_elementPositions[(int)DEVICE_ELEMENT::LEDLAMP] = getLEDLamp() + 1;
+	m_elementPositions[(int)DEVICE_ELEMENT::LOWEROBJECTIVE] = getLowerObjective();
 	checkPresets();
 	emit(elementPositionsChanged(m_elementPositions));
 }
@@ -343,6 +353,15 @@ void NIDAQ::setLEDLamp(bool position) {
 	// Write digital voltages
 	const uInt8	voltage = (uInt8)m_LEDon;
 	DAQmxWriteDigitalLines(DOtaskHandle_LED, 1, false, 10, DAQmx_Val_GroupByChannel, &voltage, NULL, NULL);
+}
+
+void NIDAQ::setLowerObjective(double position) {
+	m_positionLowerObjective = position;
+	Thorlabs_TIM::TIM_MoveAbsolute(m_serialNo_TIM, m_channelLowerObjective, m_PiezoIncPerMum * m_positionLowerObjective);
+}
+
+double NIDAQ::getLowerObjective() {
+	return m_positionLowerObjective;
 }
 
 int NIDAQ::getLEDLamp() {
