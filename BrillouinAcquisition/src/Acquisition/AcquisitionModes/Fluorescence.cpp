@@ -86,7 +86,7 @@ void Fluorescence::setExposure(FLUORESCENCE_MODE mode, int exposure) {
 	// Apply the settings immediately if the mode preview is running
 	if (previewChannel == mode) {
 		m_settings.camera.exposureTime = 1e-3*channel->exposure;
-		(*m_camera)->setSettings(m_settings.camera);
+		QMetaObject::invokeMethod((*m_camera), "setSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::EXPOSURE), Q_ARG(double, 1e-3*channel->exposure));
 	}
 	emit(s_acqSettingsChanged(m_settings));
 }
@@ -97,7 +97,7 @@ void Fluorescence::setGain(FLUORESCENCE_MODE mode, int gain) {
 	// Apply the settings immediately if the mode preview is running
 	if (previewChannel == mode) {
 		m_settings.camera.gain = channel->gain;
-		(*m_camera)->setSettings(m_settings.camera);
+		QMetaObject::invokeMethod((*m_camera), "setSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::GAIN), Q_ARG(double, channel->gain));
 	}
 	emit(s_acqSettingsChanged(m_settings));
 }
