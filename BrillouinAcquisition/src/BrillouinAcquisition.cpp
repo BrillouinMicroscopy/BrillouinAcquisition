@@ -2238,10 +2238,14 @@ void BrillouinAcquisition::checkElementButtons() {
 			}
 			indButton++;
 		} else if (elements[ii].inputType == DEVICE_INPUT_TYPE::INTBOX) {
+			elementIntBox[indIntBox]->blockSignals(true);
 			elementIntBox[indIntBox]->setValue((int)m_deviceElementPositions[ii]);
+			elementIntBox[indIntBox]->blockSignals(false);
 			indIntBox++;
 		} else if (elements[ii].inputType == DEVICE_INPUT_TYPE::DOUBLEBOX) {
+			elementDoubleBox[indDoubleBox]->blockSignals(true);
 			elementDoubleBox[indDoubleBox]->setValue((double)m_deviceElementPositions[ii]);
+			elementDoubleBox[indDoubleBox]->blockSignals(false);
 			indDoubleBox++;
 		}
 	}
