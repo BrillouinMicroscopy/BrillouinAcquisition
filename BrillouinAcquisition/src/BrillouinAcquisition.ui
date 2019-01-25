@@ -727,8 +727,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>165</width>
-                <height>180</height>
+                <width>236</width>
+                <height>219</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -788,7 +788,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>230</width>
-                <height>180</height>
+                <height>219</height>
                </rect>
               </property>
               <property name="sizePolicy">
@@ -1042,8 +1042,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>165</width>
-                <height>160</height>
+                <width>236</width>
+                <height>219</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -2605,22 +2605,22 @@ border: none;</string>
                     <property name="geometry">
                      <rect>
                       <x>0</x>
-                      <y>0</y>
-                      <width>165</width>
-                      <height>545</height>
+                      <y>-48</y>
+                      <width>221</width>
+                      <height>605</height>
                      </rect>
                     </property>
                     <property name="minimumSize">
                      <size>
                       <width>0</width>
-                      <height>545</height>
+                      <height>605</height>
                      </size>
                     </property>
                     <widget class="QGroupBox" name="alignmentODT">
                      <property name="geometry">
                       <rect>
                        <x>8</x>
-                       <y>8</y>
+                       <y>56</y>
                        <width>209</width>
                        <height>257</height>
                       </rect>
@@ -2645,7 +2645,7 @@ border: none;</string>
                       <property name="geometry">
                        <rect>
                         <x>152</x>
-                        <y>16</y>
+                        <y>17</y>
                         <width>48</width>
                         <height>18</height>
                        </rect>
@@ -2661,7 +2661,7 @@ border: none;</string>
                       <property name="geometry">
                        <rect>
                         <x>152</x>
-                        <y>40</y>
+                        <y>39</y>
                         <width>48</width>
                         <height>18</height>
                        </rect>
@@ -2675,7 +2675,7 @@ border: none;</string>
                        <rect>
                         <x>9</x>
                         <y>17</y>
-                        <width>141</width>
+                        <width>137</width>
                         <height>68</height>
                        </rect>
                       </property>
@@ -2786,7 +2786,7 @@ border: none;</string>
                      <property name="geometry">
                       <rect>
                        <x>8</x>
-                       <y>272</y>
+                       <y>320</y>
                        <width>209</width>
                        <height>281</height>
                       </rect>
@@ -2844,7 +2844,7 @@ border: none;</string>
                        <rect>
                         <x>8</x>
                         <y>16</y>
-                        <width>145</width>
+                        <width>137</width>
                         <height>68</height>
                        </rect>
                       </property>
@@ -2938,6 +2938,58 @@ border: none;</string>
                        </item>
                       </layout>
                      </widget>
+                    </widget>
+                    <widget class="QWidget" name="layoutWidget1_2">
+                     <property name="geometry">
+                      <rect>
+                       <x>8</x>
+                       <y>8</y>
+                       <width>209</width>
+                       <height>44</height>
+                      </rect>
+                     </property>
+                     <layout class="QFormLayout" name="formLayout_6">
+                      <item row="0" column="0">
+                       <widget class="QLabel" name="exposureTimeCameraODT_Label">
+                        <property name="text">
+                         <string>Exposure time [s]</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="0" column="1">
+                       <widget class="QDoubleSpinBox" name="exposureTimeCameraODT">
+                        <property name="decimals">
+                         <number>3</number>
+                        </property>
+                        <property name="singleStep">
+                         <double>0.001000000000000</double>
+                        </property>
+                        <property name="value">
+                         <double>0.000000000000000</double>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="1" column="0">
+                       <widget class="QLabel" name="gainCameraODT_Label">
+                        <property name="text">
+                         <string>Gain [dB]</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="1" column="1">
+                       <widget class="QDoubleSpinBox" name="gainCameraODT">
+                        <property name="decimals">
+                         <number>1</number>
+                        </property>
+                        <property name="singleStep">
+                         <double>1.000000000000000</double>
+                        </property>
+                        <property name="value">
+                         <double>0.000000000000000</double>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
                     </widget>
                    </widget>
                   </widget>
@@ -4023,8 +4075,8 @@ border: none;</string>
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup_3"/>
+  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>
