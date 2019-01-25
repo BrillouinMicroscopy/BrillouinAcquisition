@@ -630,6 +630,15 @@ void BrillouinAcquisition::cameraODTSettingsChanged(CAMERA_SETTINGS settings) {
 	ui->pixelEncodingODT->setCurrentText(QString::fromStdWString(settings.readout.pixelEncoding));
 }
 
+void BrillouinAcquisition::updateODTCameraSettings(CAMERA_SETTINGS settings) {
+	ui->exposureTimeCameraODT->blockSignals(true);
+	ui->exposureTimeCameraODT->setValue(settings.exposureTime);
+	ui->exposureTimeCameraODT->blockSignals(false);
+	ui->gainCameraODT->blockSignals(true);
+	ui->gainCameraODT->setValue(settings.gain);
+	ui->gainCameraODT->blockSignals(false);
+}
+
 void BrillouinAcquisition::sensorTemperatureChanged(SensorTemperature sensorTemperature) {
 	ui->sensorTemp->setValue(sensorTemperature.temperature);
 	if (sensorTemperature.status == COOLER_OFF || sensorTemperature.status == FAULT || sensorTemperature.status == DRIFT) {
@@ -715,6 +724,14 @@ void BrillouinAcquisition::on_exposureTimeODT_valueChanged(double exposureTime) 
 
 void BrillouinAcquisition::on_gainODT_valueChanged(double gain) {
 	QMetaObject::invokeMethod(m_brightfieldCamera, "setSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::GAIN), Q_ARG(double, gain));
+}
+
+void BrillouinAcquisition::on_exposureTimeCameraODT_valueChanged(double exposureTime) {
+	QMetaObject::invokeMethod(m_ODT, "setCameraSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::EXPOSURE), Q_ARG(double, exposureTime));
+}
+
+void BrillouinAcquisition::on_gainCameraODT_valueChanged(double gain) {
+	QMetaObject::invokeMethod(m_ODT, "setCameraSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::GAIN), Q_ARG(double, gain));
 }
 
 void BrillouinAcquisition::on_acquisitionStartFluorescence_clicked() {
@@ -2032,6 +2049,13 @@ void BrillouinAcquisition::initODT() {
 			&ODT::s_mirrorVoltageChanged,
 			this,
 			[this](VOLTAGE2 voltage, ODT_MODE mode) { plotODTVoltage(voltage, mode); }
+		);
+
+		connection = QWidget::connect(
+			m_ODT,
+			&ODT::s_cameraSettingsChanged,
+			this,
+			[this](CAMERA_SETTINGS settings) { updateODTCameraSettings(settings); }
 		);
 
 		// slot to show current acquisition state

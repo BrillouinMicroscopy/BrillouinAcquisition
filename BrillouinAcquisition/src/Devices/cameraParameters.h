@@ -34,6 +34,8 @@ struct CAMERA_READOUT {
 };
 
 struct CAMERA_SETTINGS {
+	CAMERA_SETTINGS() {};
+	CAMERA_SETTINGS(double exposureTime, double gain) : exposureTime(exposureTime), gain(gain) {};
 	double exposureTime = 0.5;				// [s]	exposure time
 	AT_64 frameCount = 2;					// [1]	number of images to acquire in one sequence
 	double gain{ 0 };						// [dB] gain of the camera

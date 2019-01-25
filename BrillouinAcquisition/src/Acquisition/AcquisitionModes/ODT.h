@@ -22,7 +22,6 @@ struct ODT_SETTINGS {
 	int numberPoints{ 30 };			// [1]	number of points
 	double scanRate{ 1 };			// [Hz]	scan rate, for alignment: rate for one rotation, for acquisition: rate for one step
 	std::vector<VOLTAGE2> voltages;	// [V]	voltages to apply
-	CAMERA_SETTINGS camera;
 };
 
 class ODT : public AcquisitionMode {
@@ -43,16 +42,17 @@ public slots:
 	void startAlignment();
 	void centerAlignment();
 	void setSettings(ODT_MODE, ODT_SETTING, double);
+	void setCameraSetting(CAMERA_SETTING, double);
 
 private:
 	ODT_SETTINGS m_acqSettings{
 		0.3,
 		150,
 		100,
-		{},
-		CAMERA_SETTINGS()
+		{}
 	};
 	ODT_SETTINGS m_algnSettings;
+	CAMERA_SETTINGS m_cameraSettings{ 0.002, 0 };
 	Camera **m_camera;
 	NIDAQ **m_NIDAQ;
 	bool m_algnRunning{ false };			// is alignment currently running
@@ -72,6 +72,7 @@ private slots:
 signals:
 	void s_acqSettingsChanged(ODT_SETTINGS);				// emit the acquisition voltages
 	void s_algnSettingsChanged(ODT_SETTINGS);				// emit the alignment voltages
+	void s_cameraSettingsChanged(CAMERA_SETTINGS);			// emit the camera settings
 	void s_mirrorVoltageChanged(VOLTAGE2, ODT_MODE);		// emit the mirror voltage
 };
 

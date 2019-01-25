@@ -55,6 +55,24 @@ void ODT::setSettings(ODT_MODE mode, ODT_SETTING settingType, double value) {
 	}
 }
 
+void ODT::setCameraSetting(CAMERA_SETTING type, double value) {
+	switch (type) {
+		case CAMERA_SETTING::EXPOSURE:
+			m_cameraSettings.exposureTime = value;
+			break;
+		case CAMERA_SETTING::GAIN:
+			m_cameraSettings.gain = value;
+			break;
+	}
+	
+	// Apply camera settings immediately if alignment is running
+	if (m_algnRunning) {
+		QMetaObject::invokeMethod((*m_camera), "setSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, type), Q_ARG(double, value));
+	}
+
+	emit(s_cameraSettingsChanged(m_cameraSettings));
+}
+
 void ODT::init() {
 	m_algnTimer = new QTimer();
 	QMetaObject::Connection connection = QWidget::connect(m_algnTimer, SIGNAL(timeout()), this, SLOT(nextAlgnPosition()));
@@ -63,6 +81,7 @@ void ODT::init() {
 void ODT::initialize() {
 	calculateVoltages(ODT_MODE::ALGN);
 	calculateVoltages(ODT_MODE::ACQ);
+	emit(s_cameraSettingsChanged(m_cameraSettings));
 }
 
 void ODT::startRepetitions() {
@@ -91,11 +110,13 @@ void ODT::startRepetitions() {
 	settings.readout.triggerMode = L"External";
 	settings.readout.cycleMode = L"Continuous";
 	settings.frameCount = m_acqSettings.numberPoints;
+	settings.exposureTime = m_cameraSettings.exposureTime;
+	settings.gain = m_cameraSettings.gain;
 
 	(*m_camera)->startAcquisition(settings);
 
 	// read back the applied settings
-	m_acqSettings.camera = (*m_camera)->getSettings();
+	m_cameraSettings = (*m_camera)->getSettings();
 
 	m_acquisition->newRepetition(ACQUISITION_MODE::ODT);
 
@@ -140,8 +161,8 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	(*m_NIDAQ)->setAcquisitionVoltages(voltages);
 
 	int rank_data{ 3 };
-	hsize_t dims_data[3] = { 1, m_acqSettings.camera.roi.height, m_acqSettings.camera.roi.width };
-	int bytesPerFrame = m_acqSettings.camera.roi.width * m_acqSettings.camera.roi.height;
+	hsize_t dims_data[3] = { 1, m_cameraSettings.roi.height, m_cameraSettings.roi.width };
+	int bytesPerFrame = m_cameraSettings.roi.width * m_cameraSettings.roi.height;
 	for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
 
 		// read images from camera
@@ -184,6 +205,13 @@ void ODT::startAlignment() {
 		m_status = ACQUISITION_STATUS::ALIGNING;
 		emit(s_acquisitionStatus(m_status));
 		m_algnRunning = true;
+
+		// configure camera exposure and gain
+		CAMERA_SETTINGS settings = (*m_camera)->getSettings();
+		settings.exposureTime = m_cameraSettings.exposureTime;
+		settings.gain = m_cameraSettings.gain;
+		QMetaObject::invokeMethod((*m_camera), "setSettings", Qt::AutoConnection, Q_ARG(CAMERA_SETTINGS, settings));
+
 		// move to ODT configuration
 		(*m_NIDAQ)->setPreset(SCAN_ODT);
 		// stop querying the element positions, because querying the filter mounts block the thread quite long

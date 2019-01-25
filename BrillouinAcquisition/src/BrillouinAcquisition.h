@@ -172,6 +172,7 @@ private slots:
 	void startBrightfieldPreview(bool isRunning);
 	void cameraSettingsChanged(CAMERA_SETTINGS);
 	void cameraODTSettingsChanged(CAMERA_SETTINGS settings);
+	void updateODTCameraSettings(CAMERA_SETTINGS settings);
 	void sensorTemperatureChanged(SensorTemperature);
 	void initializeODTVoltagePlot(QCustomPlot* plot);
 	void plotODTVoltages(ODT_SETTINGS settings, ODT_MODE mode);
@@ -207,6 +208,9 @@ private slots:
 	void on_acquisitionStartODT_clicked();
 	void on_exposureTimeODT_valueChanged(double);
 	void on_gainODT_valueChanged(double);
+
+	void on_exposureTimeCameraODT_valueChanged(double exposureTime);
+	void on_gainCameraODT_valueChanged(double gain);
 
 	/*
 	 * Fluorescence slots
