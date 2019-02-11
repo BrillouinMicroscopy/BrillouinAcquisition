@@ -18,9 +18,9 @@ ZeissECU::ZeissECU() noexcept {
 		{	"Calibration",	SCAN_CALIBRATION,	{ {2}, {}, {1}, {3}, {1}, {3},  {} }	},	// Calibration
 		{	"Brightfield",	SCAN_BRIGHTFIELD,	{ {2}, {}, {1}, {3}, {1}, {2}, {2} }	},	// Brightfield
 		{	"Eyepiece",		SCAN_EYEPIECE,		{ {2}, {}, {1}, {3}, {2}, {3}, {2} }	},	// Eyepiece
-		{	"Fluo Blue",	SCAN_EPIFLUOBLUE,	{ {1}, {}, {2}, {3}, {},  {2},  {} }	},	// Fluorescence blue
-		{	"Fluo Green",	SCAN_EPIFLUOGREEN,	{ {1}, {}, {3}, {3}, {},  {2},  {} }	},	// Fluorescence green
-		{	"Fluo Red",		SCAN_EPIFLUORED,	{ {1}, {}, {4}, {3}, {},  {2},  {} }	},	// Fluorescence red
+		{	"Fluo Blue",	SCAN_EPIFLUOBLUE,	{ {1}, {}, {2}, {3}, {},  {2}, {1} }	},	// Fluorescence blue
+		{	"Fluo Green",	SCAN_EPIFLUOGREEN,	{ {1}, {}, {3}, {3}, {},  {2}, {1} }	},	// Fluorescence green
+		{	"Fluo Red",		SCAN_EPIFLUORED,	{ {1}, {}, {4}, {3}, {},  {2}, {1} }	},	// Fluorescence red
 		{	"Laser off",	SCAN_LASEROFF,		{ {1}, {},  {},  {}, {},   {},  {} }	}	// Laser off
 	};
 
