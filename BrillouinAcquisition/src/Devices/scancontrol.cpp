@@ -83,6 +83,10 @@ void ScanControl::calculateHomePositionBounds() {
 
 void ScanControl::calculateCurrentPositionBounds() {
 	POINT3 currentPosition = getPosition();
+	calculateCurrentPositionBounds(currentPosition);
+}
+
+void ScanControl::calculateCurrentPositionBounds(POINT3 currentPosition) {
 	m_currentPositionBounds.xMin = m_absoluteBounds.xMin - currentPosition.x;
 	m_currentPositionBounds.xMax = m_absoluteBounds.xMax - currentPosition.x;
 	m_currentPositionBounds.yMin = m_absoluteBounds.yMin - currentPosition.y;

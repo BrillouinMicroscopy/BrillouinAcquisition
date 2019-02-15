@@ -149,7 +149,7 @@ void ZeissECU::setPosition(POINT3 position) {
 	m_mcu->setX(position.x);
 	m_mcu->setY(position.y);
 	m_focus->setZ(position.z);
-	calculateCurrentPositionBounds();
+	calculateCurrentPositionBounds(position);
 }
 
 void ZeissECU::setPositionRelativeX(double positionX) {

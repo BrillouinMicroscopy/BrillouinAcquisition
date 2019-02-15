@@ -133,6 +133,8 @@ protected:
 
 	void calculateHomePositionBounds();
 	void calculateCurrentPositionBounds();
+	void calculateCurrentPositionBounds(POINT3 currentPosition);
+
 
 	BOUNDS m_absoluteBounds;
 	BOUNDS m_homePositionBounds;
