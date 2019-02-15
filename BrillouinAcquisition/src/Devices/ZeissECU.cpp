@@ -263,6 +263,10 @@ void Element::send(std::string message) {
 	m_comObject->send(m_prefix + "P" + message);
 }
 
+void Element::clear() {
+	m_comObject->clear();
+}
+
 void Element::setDevice(com *device) {
 	m_comObject = device;
 }
@@ -299,7 +303,8 @@ void Focus::setZ(double position) {
 	int inc = positive_modulo(position, m_rangeFocus);
 
 	std::string pos = helper::dec2hex(inc, 6);
-	std::string answer = receive("ZD" + pos);
+	send("ZD" + pos);
+	clear();
 }
 
 void Focus::setVelocityZ(double velocity) {

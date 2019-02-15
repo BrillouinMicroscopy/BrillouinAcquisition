@@ -20,6 +20,7 @@ public:
 	~Element();
 	std::string receive(std::string request);
 	void send(std::string message);
+	void clear();
 	void setDevice(com *device);
 	inline int positive_modulo(int i, int n) {
 		return (i % n + n) % n;
