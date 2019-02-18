@@ -23,6 +23,8 @@ private:
 	bool m_observeQueues = false;
 	bool m_finishedQueueing = false;
 
+	QTimer *queueTimer = nullptr;
+
 public:
 	StorageWrapper(
 		QObject *parent = nullptr,
@@ -37,13 +39,15 @@ public:
 	QQueue<CALIBRATION*> m_calibrationQueue;
 	bool m_abort = false;
 
-	void startWritingQueues();
-	void stopWritingQueues();
-
 	int m_writtenImagesNr{ 0 };
 	int m_writtenCalibrationsNr{ 0 };
 
 public slots:
+	void init();
+
+	void startWritingQueues();
+	void stopWritingQueues();
+
 	void s_writeQueues();
 
 	void s_enqueuePayload(IMAGE*);
@@ -55,6 +59,7 @@ public slots:
 
 signals:
 	void finished();
+	void started();
 };
 
 #endif //STORAGEWRAPPER_H

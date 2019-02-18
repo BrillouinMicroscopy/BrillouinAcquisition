@@ -261,6 +261,11 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 		emit(s_repetitionProgress(percentage, remaining));
 	}
 
+	// Here we wait until the storage object indicate it finished to write to the file.
+	QEventLoop loop;
+	connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	loop.exec();
+
 	m_status = ACQUISITION_STATUS::FINISHED;
 	emit(s_acquisitionStatus(m_status));
 }

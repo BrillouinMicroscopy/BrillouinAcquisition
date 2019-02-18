@@ -7,6 +7,7 @@
 #include "../../thread.h"
 #include "../../circularBuffer.h"
 
+
 struct SCAN_ORDER {
 	bool automatical{ true };
 	int x{ 0 };	// first scan in x-direction
@@ -79,7 +80,6 @@ public slots:
 private:
 	BRILLOUIN_SETTINGS m_settings;
 	SCAN_ORDER m_scanOrder;
-	//Thread m_storageThread;
 	Andor* m_andor;
 	ScanControl** m_scanControl;
 	bool m_running = false;				// is acquisition currently running

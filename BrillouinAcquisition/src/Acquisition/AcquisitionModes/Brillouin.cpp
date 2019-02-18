@@ -60,6 +60,7 @@ void Brillouin::startRepetitions() {
 			acquire(m_acquisition->m_storage);
 		}
 	}
+
 	emit(s_totalProgress(m_settings.repetitions.count, -1));
 	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
 }
@@ -193,7 +194,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	delete[] dims;
 
 	// do actual measurement
-	storage->startWritingQueues();
+	QMetaObject::invokeMethod(storage.get(), "startWritingQueues", Qt::AutoConnection);
 	
 	int rank_data = 3;
 	hsize_t dims_data[3] = { m_settings.camera.frameCount, m_settings.camera.roi.height, m_settings.camera.roi.width };
@@ -277,6 +278,11 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	(*m_scanControl)->setPosition(m_startPosition);
 	emit(s_positionChanged({ 0, 0, 0 }, 0));
 	(*m_scanControl)->startAnnouncingPosition();
+
+	// Here we wait until the storage object indicate it finished to write to the file.
+	QEventLoop loop;
+	connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	loop.exec();
 
 	std::string info = "Acquisition finished.";
 	qInfo(logInfo()) << info.c_str();

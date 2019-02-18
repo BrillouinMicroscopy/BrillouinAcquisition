@@ -9,10 +9,16 @@ using namespace std::experimental::filesystem::v1;
 
 Acquisition::Acquisition(QObject *parent)
 	: QObject(parent) {
+	// Create a new thread for backgroud storage
+	m_storageThread = new Thread();
 }
 
 Acquisition::~Acquisition() {
 	m_enabledModes = ACQUISITION_MODE::NONE;
+	// Wait for storage thread to finish writing the queue
+	m_storageThread->exit();
+	m_storageThread->terminate();
+	m_storageThread->wait();
 }
 
 ACQUISITION_MODE Acquisition::getEnabledModes() {
@@ -33,6 +39,12 @@ void Acquisition::openFile(StoragePath path, int flag) {
 	
 	emit(s_filenameChanged(m_path.filename));
 	m_storage = std::make_unique <StorageWrapper>(nullptr, m_path.fullPath(), flag);
+
+	// Move storage object to own thread
+	m_storageThread->startWorker(m_storage.get());
+
+	QWidget::connect(m_storage.get(), SIGNAL(started()), this, SLOT(startedWritingToFile()));
+	QWidget::connect(m_storage.get(), SIGNAL(finished()), this, SLOT(finishedWritingToFile()));
 }
 
 void Acquisition::openFile() {
@@ -49,13 +61,25 @@ void Acquisition::newRepetition(ACQUISITION_MODE mode) {
 	m_storage->newRepetition(mode);
 }
 
+void Acquisition::startedWritingToFile() {
+	m_writingToFile = true;
+}
+
+void Acquisition::finishedWritingToFile() {
+	m_writingToFile = false;
+}
+
 int Acquisition::closeFile() {
 	// if an acquisition is running, do nothing
-	if (m_enabledModes != ACQUISITION_MODE::NONE) {
+	if (m_enabledModes != ACQUISITION_MODE::NONE || m_writingToFile) {
 		emit(s_enabledModes(m_enabledModes));
 		return -1;
 	}
 	if (m_storage) {
+		// Create a reference to the current thread
+		QThread* acquisitionThread = QThread::currentThread();
+		// Move the acquisition class back to the main thread
+		m_storage->moveToThread(acquisitionThread);
 		m_storage.reset();
 	}
 	return 0;
