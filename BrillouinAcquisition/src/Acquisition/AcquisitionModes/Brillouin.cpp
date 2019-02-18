@@ -212,6 +212,10 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	QElapsedTimer calibrationTimer;
 	calibrationTimer.start();
 
+	// move stage to first position, wait 50 ms for it to finish
+	(*m_scanControl)->setPosition(orderedPositions[0]);
+	Sleep(50);
+
 	for (gsl::index ll = 0; ll < nrPositions; ll++) {
 
 		// do live calibration if required and possible at the moment
@@ -224,8 +228,6 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 
 		int nextCalibration = 100 * (1e-3 * calibrationTimer.elapsed()) / (60 * m_settings.conCalibrationInterval);
 		emit(s_timeToCalibration(nextCalibration));
-		// move stage to correct position, wait 50 ms for it to finish
-		(*m_scanControl)->setPosition(orderedPositions[ll]);
 
 		std::vector<unsigned char> images(bytesPerFrame * m_settings.camera.frameCount);
 
@@ -248,6 +250,11 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 		std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 			.toString(Qt::ISODateWithMs).toStdString();
 		IMAGE* img = new IMAGE(indexX[ll], indexY[ll], indexZ[ll], rank_data, dims_data, date, *images_);
+
+		// move stage to next position before saving the images
+		if (ll < (nrPositions - 1)) {
+			(*m_scanControl)->setPosition(orderedPositions[ll + 1]);
+		}
 
 		QMetaObject::invokeMethod(storage.get(), "s_enqueuePayload", Qt::AutoConnection, Q_ARG(IMAGE*, img));
 
