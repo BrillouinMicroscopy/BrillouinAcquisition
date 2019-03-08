@@ -26,6 +26,7 @@ StorageWrapper::~StorageWrapper() {
 	}
 	queueTimer->stop();
 	delete queueTimer;
+	emit(finished());
 }
 
 void StorageWrapper::init() {
@@ -62,13 +63,16 @@ void StorageWrapper::startWritingQueues() {
 
 void StorageWrapper::stopWritingQueues() {
 	m_observeQueues = false;
+	m_finished = true;
 	queueTimer->stop();
+	m_finishedQueueing = true;
+	emit(finished());
 }
 
 void StorageWrapper::s_writeQueues() {
 	while (!m_payloadQueueBrillouin.isEmpty()) {
 		if (m_abort) {
-			m_finished = true;
+			stopWritingQueues();
 			return;
 		}
 		IMAGE *img = m_payloadQueueBrillouin.dequeue();
@@ -82,7 +86,7 @@ void StorageWrapper::s_writeQueues() {
 
 	while (!m_payloadQueueODT.isEmpty()) {
 		if (m_abort) {
-			m_finished = true;
+			stopWritingQueues();
 			return;
 		}
 		ODTIMAGE *img = m_payloadQueueODT.dequeue();
@@ -96,7 +100,7 @@ void StorageWrapper::s_writeQueues() {
 
 	while (!m_payloadQueueFluorescence.isEmpty()) {
 		if (m_abort) {
-			m_finished = true;
+			stopWritingQueues();
 			return;
 		}
 		FLUOIMAGE *img = m_payloadQueueFluorescence.dequeue();
@@ -110,7 +114,7 @@ void StorageWrapper::s_writeQueues() {
 
 	while (!m_calibrationQueue.isEmpty()) {
 		if (m_abort) {
-			m_finished = true;
+			stopWritingQueues();
 			return;
 		}
 		CALIBRATION *cal = m_calibrationQueue.dequeue();

@@ -63,7 +63,8 @@ private:
 
 	void calculateVoltages(ODT_MODE);
 
-	void abortMode() override;
+	void abortMode(std::unique_ptr <StorageWrapper> & storage) override;
+	void abortMode();
 
 private slots:
 	void acquire(std::unique_ptr <StorageWrapper> & storage) override;

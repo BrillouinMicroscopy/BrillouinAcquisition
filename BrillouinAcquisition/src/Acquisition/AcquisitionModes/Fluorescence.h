@@ -58,7 +58,7 @@ private:
 	void configureCamera();
 	FLUORESCENCE_MODE previewChannel{ FLUORESCENCE_MODE::NONE };
 
-	void abortMode() override;
+	void abortMode(std::unique_ptr <StorageWrapper> & storage) override;
 
 private slots:
 	void acquire(std::unique_ptr <StorageWrapper>& storage) override;

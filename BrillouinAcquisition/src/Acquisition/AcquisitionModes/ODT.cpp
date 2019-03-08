@@ -170,7 +170,7 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 
 		for (gsl::index mm{ 0 }; mm < 1; mm++) {
 			if (m_abort) {
-				this->abortMode();
+				this->abortMode(storage);
 				return;
 			}
 
@@ -324,6 +324,17 @@ void ODT::calculateVoltages(ODT_MODE mode) {
 
 		emit(s_acqSettingsChanged(m_acqSettings));
 	}
+}
+
+void ODT::abortMode(std::unique_ptr <StorageWrapper> & storage) {
+	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
+
+	// Here we wait until the storage object indicate it finished to write to the file.
+	QEventLoop loop;
+	connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	loop.exec();
+
+	abortMode();
 }
 
 void ODT::abortMode() {

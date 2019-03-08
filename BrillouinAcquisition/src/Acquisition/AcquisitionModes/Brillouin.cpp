@@ -39,7 +39,7 @@ void Brillouin::startRepetitions() {
 	for (gsl::index repNumber = 0; repNumber < m_settings.repetitions.count; repNumber++) {
 
 		if (m_abort) {
-			this->abortMode();
+			this->abortMode(m_acquisition->m_storage);
 			return;
 		}
 
@@ -234,7 +234,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 
 		for (gsl::index mm = 0; mm < m_settings.camera.frameCount; mm++) {
 			if (m_abort) {
-				this->abortMode();
+				this->abortMode(storage);
 				return;
 			}
 			emit(s_positionChanged(orderedPositions[ll] - m_startPosition, mm + 1));
@@ -292,11 +292,19 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	emit(s_timeToCalibration(0));
 }
 
-void Brillouin::abortMode() {
+void Brillouin::abortMode(std::unique_ptr <StorageWrapper>& storage) {
 	m_andor->stopAcquisition();
 	(*m_scanControl)->setPosition(m_startPosition);
 	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
 	m_status = ACQUISITION_STATUS::ABORTED;
+
+	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
+
+	// Here we wait until the storage object indicate it finished to write to the file.
+	QEventLoop loop;
+	connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	loop.exec();
+
 	emit(s_acquisitionStatus(m_status));
 	emit(s_positionChanged(m_startPosition, 0));
 	emit(s_timeToCalibration(0));
@@ -323,7 +331,7 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 	std::vector<unsigned char> images((int64_t)bytesPerFrame * m_settings.nrCalibrationImages);
 	for (gsl::index mm = 0; mm < m_settings.nrCalibrationImages; mm++) {
 		if (m_abort) {
-			this->abortMode();
+			this->abortMode(storage);
 			return;
 		}
 		// acquire images
