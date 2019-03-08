@@ -55,7 +55,9 @@ int Acquisition::closeFile() {
 		emit(s_enabledModes(m_enabledModes));
 		return -1;
 	}
-	m_storage.reset();
+	if (m_storage) {
+		m_storage.reset();
+	}
 	return 0;
 }
 
