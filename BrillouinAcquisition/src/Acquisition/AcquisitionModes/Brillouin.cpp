@@ -271,8 +271,6 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	// close camera libraries, clear buffers
 	m_andor->stopAcquisition();
 
-	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
-
 	(*m_scanControl)->setPreset(SCAN_LASEROFF);
 
 	(*m_scanControl)->setPosition(m_startPosition);
@@ -282,6 +280,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
 	connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
 	loop.exec();
 
 	std::string info = "Acquisition finished.";
@@ -298,11 +297,10 @@ void Brillouin::abortMode(std::unique_ptr <StorageWrapper>& storage) {
 	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
 	m_status = ACQUISITION_STATUS::ABORTED;
 
-	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
-
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
 	connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
 	loop.exec();
 
 	emit(s_acquisitionStatus(m_status));

@@ -264,6 +264,7 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
 	connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
 	loop.exec();
 
 	m_status = ACQUISITION_STATUS::FINISHED;
@@ -274,11 +275,10 @@ void Fluorescence::abortMode(std::unique_ptr <StorageWrapper> & storage) {
 	m_acquisition->disableMode(ACQUISITION_MODE::FLUORESCENCE);
 	m_status = ACQUISITION_STATUS::ABORTED;
 
-	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
-
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
 	connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
 	loop.exec();
 
 	emit(s_acquisitionStatus(m_status));
