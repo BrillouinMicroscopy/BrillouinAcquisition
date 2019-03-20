@@ -133,6 +133,8 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	m_status = ACQUISITION_STATUS::STARTED;
 	emit(s_acquisitionStatus(m_status));
 
+	QMetaObject::invokeMethod(storage.get(), "startWritingQueues", Qt::AutoConnection);
+
 	// move to ODT configuration
 	(*m_NIDAQ)->setPreset(SCAN_ODT);
 

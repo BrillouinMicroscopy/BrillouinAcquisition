@@ -189,6 +189,8 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 		}
 	}
 
+	QMetaObject::invokeMethod(storage.get(), "startWritingQueues", Qt::AutoConnection);
+
 	QElapsedTimer measurementTimer;
 	measurementTimer.start();
 
