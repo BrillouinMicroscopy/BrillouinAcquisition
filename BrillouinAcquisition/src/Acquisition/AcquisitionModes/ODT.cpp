@@ -133,6 +133,8 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	m_status = ACQUISITION_STATUS::STARTED;
 	emit(s_acquisitionStatus(m_status));
 
+	QMetaObject::invokeMethod(storage.get(), "startWritingQueues", Qt::AutoConnection);
+
 	// move to ODT configuration
 	(*m_NIDAQ)->setPreset(SCAN_ODT);
 
@@ -170,7 +172,7 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 
 		for (gsl::index mm{ 0 }; mm < 1; mm++) {
 			if (m_abort) {
-				this->abortMode();
+				this->abortMode(storage);
 				return;
 			}
 
@@ -191,6 +193,12 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 
 		QMetaObject::invokeMethod(storage.get(), "s_enqueuePayload", Qt::AutoConnection, Q_ARG(ODTIMAGE*, img));
 	}
+
+	// Here we wait until the storage object indicate it finished to write to the file.
+	QEventLoop loop;
+	connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
+	loop.exec();
 
 	m_status = ACQUISITION_STATUS::FINISHED;
 	emit(s_acquisitionStatus(m_status));
@@ -319,6 +327,16 @@ void ODT::calculateVoltages(ODT_MODE mode) {
 
 		emit(s_acqSettingsChanged(m_acqSettings));
 	}
+}
+
+void ODT::abortMode(std::unique_ptr <StorageWrapper> & storage) {
+	// Here we wait until the storage object indicate it finished to write to the file.
+	QEventLoop loop;
+	connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
+	loop.exec();
+
+	abortMode();
 }
 
 void ODT::abortMode() {

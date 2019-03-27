@@ -39,7 +39,7 @@ void Brillouin::startRepetitions() {
 	for (gsl::index repNumber = 0; repNumber < m_settings.repetitions.count; repNumber++) {
 
 		if (m_abort) {
-			this->abortMode();
+			this->abortMode(m_acquisition->m_storage);
 			return;
 		}
 
@@ -60,6 +60,7 @@ void Brillouin::startRepetitions() {
 			acquire(m_acquisition->m_storage);
 		}
 	}
+
 	emit(s_totalProgress(m_settings.repetitions.count, -1));
 	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
 }
@@ -193,7 +194,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	delete[] dims;
 
 	// do actual measurement
-	storage->startWritingQueues();
+	QMetaObject::invokeMethod(storage.get(), "startWritingQueues", Qt::AutoConnection);
 	
 	int rank_data = 3;
 	hsize_t dims_data[3] = { m_settings.camera.frameCount, m_settings.camera.roi.height, m_settings.camera.roi.width };
@@ -212,6 +213,10 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	QElapsedTimer calibrationTimer;
 	calibrationTimer.start();
 
+	// move stage to first position, wait 50 ms for it to finish
+	(*m_scanControl)->setPosition(orderedPositions[0]);
+	Sleep(50);
+
 	for (gsl::index ll = 0; ll < nrPositions; ll++) {
 
 		// do live calibration if required and possible at the moment
@@ -224,14 +229,12 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 
 		int nextCalibration = 100 * (1e-3 * calibrationTimer.elapsed()) / (60 * m_settings.conCalibrationInterval);
 		emit(s_timeToCalibration(nextCalibration));
-		// move stage to correct position, wait 50 ms for it to finish
-		(*m_scanControl)->setPosition(orderedPositions[ll]);
 
 		std::vector<unsigned char> images(bytesPerFrame * m_settings.camera.frameCount);
 
 		for (gsl::index mm = 0; mm < m_settings.camera.frameCount; mm++) {
 			if (m_abort) {
-				this->abortMode();
+				this->abortMode(storage);
 				return;
 			}
 			emit(s_positionChanged(orderedPositions[ll] - m_startPosition, mm + 1));
@@ -249,6 +252,11 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 			.toString(Qt::ISODateWithMs).toStdString();
 		IMAGE* img = new IMAGE(indexX[ll], indexY[ll], indexZ[ll], rank_data, dims_data, date, *images_);
 
+		// move stage to next position before saving the images
+		if (ll < (nrPositions - 1)) {
+			(*m_scanControl)->setPosition(orderedPositions[ll + 1]);
+		}
+
 		QMetaObject::invokeMethod(storage.get(), "s_enqueuePayload", Qt::AutoConnection, Q_ARG(IMAGE*, img));
 
 		double percentage = 100 * (double)(ll+1) / nrPositions;
@@ -263,13 +271,17 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	// close camera libraries, clear buffers
 	m_andor->stopAcquisition();
 
-	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
-
 	(*m_scanControl)->setPreset(SCAN_LASEROFF);
 
 	(*m_scanControl)->setPosition(m_startPosition);
 	emit(s_positionChanged({ 0, 0, 0 }, 0));
 	(*m_scanControl)->startAnnouncingPosition();
+
+	// Here we wait until the storage object indicate it finished to write to the file.
+	QEventLoop loop;
+	connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
+	loop.exec();
 
 	std::string info = "Acquisition finished.";
 	qInfo(logInfo()) << info.c_str();
@@ -279,11 +291,18 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	emit(s_timeToCalibration(0));
 }
 
-void Brillouin::abortMode() {
+void Brillouin::abortMode(std::unique_ptr <StorageWrapper>& storage) {
 	m_andor->stopAcquisition();
 	(*m_scanControl)->setPosition(m_startPosition);
 	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
 	m_status = ACQUISITION_STATUS::ABORTED;
+
+	// Here we wait until the storage object indicate it finished to write to the file.
+	QEventLoop loop;
+	connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
+	loop.exec();
+
 	emit(s_acquisitionStatus(m_status));
 	emit(s_positionChanged(m_startPosition, 0));
 	emit(s_timeToCalibration(0));
@@ -310,7 +329,7 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 	std::vector<unsigned char> images((int64_t)bytesPerFrame * m_settings.nrCalibrationImages);
 	for (gsl::index mm = 0; mm < m_settings.nrCalibrationImages; mm++) {
 		if (m_abort) {
-			this->abortMode();
+			this->abortMode(storage);
 			return;
 		}
 		// acquire images

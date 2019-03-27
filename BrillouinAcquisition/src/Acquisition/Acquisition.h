@@ -29,6 +29,8 @@ public slots:
 	void openFile(StoragePath path, int flag = H5F_ACC_RDWR);
 	void openFile();
 	void newRepetition(ACQUISITION_MODE mode);
+	void startedWritingToFile();
+	void finishedWritingToFile();
 	int closeFile();
 	
 	bool isModeEnabled(ACQUISITION_MODE mode);
@@ -39,6 +41,8 @@ public slots:
 private:
 	StoragePath m_path;
 	ACQUISITION_MODE m_enabledModes = ACQUISITION_MODE::NONE;	// which mode is currently acquiring
+	Thread* m_storageThread;
+	bool m_writingToFile{ false };
 
 private slots:
 	void checkFilename();

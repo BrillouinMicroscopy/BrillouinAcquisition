@@ -7,6 +7,7 @@
 #include "../../thread.h"
 #include "../../circularBuffer.h"
 
+
 struct SCAN_ORDER {
 	bool automatical{ true };
 	int x{ 0 };	// first scan in x-direction
@@ -79,7 +80,6 @@ public slots:
 private:
 	BRILLOUIN_SETTINGS m_settings;
 	SCAN_ORDER m_scanOrder;
-	//Thread m_storageThread;
 	Andor* m_andor;
 	ScanControl** m_scanControl;
 	bool m_running = false;				// is acquisition currently running
@@ -88,7 +88,7 @@ private:
 	int nrCalibrations = 1;
 	void calibrate(std::unique_ptr <StorageWrapper>& storage);
 
-	void abortMode() override;
+	void abortMode(std::unique_ptr <StorageWrapper>& storage) override;
 
 private slots:
 	void acquire(std::unique_ptr <StorageWrapper>& storage) override;

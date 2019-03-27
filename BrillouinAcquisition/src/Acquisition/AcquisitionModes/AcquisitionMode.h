@@ -32,7 +32,7 @@ public slots:
 
 protected:
 	Acquisition *m_acquisition = nullptr;
-	virtual void abortMode() = 0;
+	virtual void abortMode(std::unique_ptr <StorageWrapper> & storage) = 0;
 	ACQUISITION_STATUS m_status{ ACQUISITION_STATUS::DISABLED };
 
 private slots:

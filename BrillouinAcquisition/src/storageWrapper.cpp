@@ -24,26 +24,30 @@ StorageWrapper::~StorageWrapper() {
 			delete cal;
 		}
 	}
+	queueTimer->stop();
+	delete queueTimer;
+	emit(finished());
+}
+
+void StorageWrapper::init() {
+	queueTimer = new QTimer();
+	QWidget::connect(queueTimer, SIGNAL(timeout()), this, SLOT(s_writeQueues()));
 }
 
 void StorageWrapper::s_enqueuePayload(IMAGE *img) {
 	m_payloadQueueBrillouin.enqueue(img);
-	s_writeQueues();
 }
 
 void StorageWrapper::s_enqueuePayload(ODTIMAGE *img) {
 	m_payloadQueueODT.enqueue(img);
-	s_writeQueues();
 }
 
 void StorageWrapper::s_enqueuePayload(FLUOIMAGE *img) {
 	m_payloadQueueFluorescence.enqueue(img);
-	s_writeQueues();
 }
 
 void StorageWrapper::s_enqueueCalibration(CALIBRATION *cal) {
 	m_calibrationQueue.enqueue(cal);
-	s_writeQueues();
 }
 
 void StorageWrapper::s_finishedQueueing() {
@@ -53,17 +57,22 @@ void StorageWrapper::s_finishedQueueing() {
 void StorageWrapper::startWritingQueues() {
 	m_observeQueues = true;
 	m_finishedQueueing = false;
-	s_writeQueues();
+	emit(started());
+	queueTimer->start(50);
 }
 
 void StorageWrapper::stopWritingQueues() {
 	m_observeQueues = false;
+	m_finished = true;
+	queueTimer->stop();
+	m_finishedQueueing = true;
+	emit(finished());
 }
 
 void StorageWrapper::s_writeQueues() {
 	while (!m_payloadQueueBrillouin.isEmpty()) {
 		if (m_abort) {
-			m_finished = true;
+			stopWritingQueues();
 			return;
 		}
 		IMAGE *img = m_payloadQueueBrillouin.dequeue();
@@ -77,7 +86,7 @@ void StorageWrapper::s_writeQueues() {
 
 	while (!m_payloadQueueODT.isEmpty()) {
 		if (m_abort) {
-			m_finished = true;
+			stopWritingQueues();
 			return;
 		}
 		ODTIMAGE *img = m_payloadQueueODT.dequeue();
@@ -91,7 +100,7 @@ void StorageWrapper::s_writeQueues() {
 
 	while (!m_payloadQueueFluorescence.isEmpty()) {
 		if (m_abort) {
-			m_finished = true;
+			stopWritingQueues();
 			return;
 		}
 		FLUOIMAGE *img = m_payloadQueueFluorescence.dequeue();
@@ -105,7 +114,7 @@ void StorageWrapper::s_writeQueues() {
 
 	while (!m_calibrationQueue.isEmpty()) {
 		if (m_abort) {
-			m_finished = true;
+			stopWritingQueues();
 			return;
 		}
 		CALIBRATION *cal = m_calibrationQueue.dequeue();
@@ -115,5 +124,10 @@ void StorageWrapper::s_writeQueues() {
 		m_writtenCalibrationsNr++;
 		delete cal;
 		cal = nullptr;
+	}
+
+	if (m_finishedQueueing) {
+		queueTimer->stop();
+		emit(finished());
 	}
 }
