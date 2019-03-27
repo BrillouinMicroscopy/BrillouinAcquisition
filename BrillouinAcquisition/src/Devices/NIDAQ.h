@@ -102,6 +102,8 @@ private:
 		COUNT
 	};
 
+	POINT2 pixToMicroMeter(POINT2);
+
 public:
 	NIDAQ() noexcept;
 	~NIDAQ();
@@ -112,6 +114,7 @@ public:
 	void applyScanPosition();
 
 	void setPosition(POINT3 position);
+	void setPosition(POINT2 position);
 	POINT3 getPosition();
 
 	void setVoltage(VOLTAGE2 voltage);
@@ -146,6 +149,7 @@ public slots:
 	void setPositionRelativeX(double position);
 	void setPositionRelativeY(double position);
 	void setPositionRelativeZ(double position);
+	void setPositionInPix(POINT2);
 	void setHome();
 	void loadVoltagePositionCalibration(std::string filepath) override;
 	double getCalibrationValue(H5::H5File file, std::string datasetName);

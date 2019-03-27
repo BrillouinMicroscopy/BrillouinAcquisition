@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "ZeissECU.h"
 
+POINT2 ZeissECU::pixToMicroMeter(POINT2) {
+	return POINT2();
+}
+
 ZeissECU::ZeissECU() noexcept {
 
 	m_deviceElements = {
@@ -152,6 +156,12 @@ void ZeissECU::setPosition(POINT3 position) {
 	calculateCurrentPositionBounds();
 }
 
+void ZeissECU::setPosition(POINT2 position) {
+	m_mcu->setX(position.x);
+	m_mcu->setY(position.y);
+	calculateCurrentPositionBounds();
+}
+
 void ZeissECU::setPositionRelativeX(double positionX) {
 	m_mcu->setX(positionX + m_homePosition.x);
 	calculateCurrentPositionBounds();
@@ -165,6 +175,10 @@ void ZeissECU::setPositionRelativeY(double positionY) {
 void ZeissECU::setPositionRelativeZ(double positionZ) {
 	m_focus->setZ(positionZ + m_homePosition.z);
 	calculateCurrentPositionBounds();
+}
+
+void ZeissECU::setPositionInPix(POINT2) {
+	// Does nothing for now, since for the 780 nm setup no spatial calibration is in place yet.
 }
 
 POINT3 ZeissECU::getPosition() {

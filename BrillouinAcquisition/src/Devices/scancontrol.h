@@ -56,6 +56,13 @@ struct BOUNDS {
 	double zMax{  1e3 };	// [µm] maximal z-value
 };
 
+struct CameraProperties {
+	int width{ 1280 };			// [pix] image width
+	int height{ 1024 };			// [pix] image height
+	double pixelSize{ 4.8e-6 };	// [µm]  pixel size
+	double mag = 57;			// [1]   magnification
+};
+
 typedef enum enDeviceInput {
 	PUSHBUTTON,
 	INTBOX,
@@ -139,6 +146,8 @@ protected:
 	BOUNDS m_currentPositionBounds;
 
 	Preset getPreset(SCAN_PRESET);
+	virtual POINT2 pixToMicroMeter(POINT2) = 0;
+	CameraProperties m_cameraProperties;
 
 public:
 	ScanControl() noexcept {};
@@ -159,6 +168,7 @@ public:
 	bool getConnectionStatus();
 
 	virtual void setPosition(POINT3 position) = 0;
+	virtual void setPosition(POINT2 position) = 0;
 	// moves the position relative to current position
 	void movePosition(POINT3 distance);
 	virtual POINT3 getPosition() = 0;
@@ -182,6 +192,7 @@ public slots:
 	virtual void setPositionRelativeX(double position) = 0;
 	virtual void setPositionRelativeY(double position) = 0;
 	virtual void setPositionRelativeZ(double position) = 0;
+	virtual void setPositionInPix(POINT2) = 0;
 	void setHome();
 	void moveHome();
 	void savePosition();

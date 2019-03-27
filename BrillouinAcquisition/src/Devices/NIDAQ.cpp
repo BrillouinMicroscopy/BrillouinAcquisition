@@ -403,6 +403,13 @@ void NIDAQ::setPosition(POINT3 position) {
 	applyScanPosition();
 }
 
+void NIDAQ::setPosition(POINT2 newPosition) {
+	POINT3 position = m_position;
+	position.x = newPosition.x;
+	position.y = newPosition.y;
+	setPosition(position);
+}
+
 void NIDAQ::setVoltage(VOLTAGE2 voltages) {
 	DAQmxStopTask(AOtaskHandle);
 	float64 data[2] = { voltages.Ux, voltages.Uy };
@@ -423,6 +430,12 @@ void NIDAQ::setPositionRelativeY(double positionY) {
 void NIDAQ::setPositionRelativeZ(double positionZ) {
 	m_position.z = positionZ + m_homePosition.z;
 	setPosition(m_position);
+}
+
+void NIDAQ::setPositionInPix(POINT2 positionPix) {
+	POINT2 positionMicroMeter = pixToMicroMeter(positionPix);
+
+	setPosition(positionMicroMeter);
 }
 
 void NIDAQ::setHome() {
@@ -522,6 +535,20 @@ void NIDAQ::centerPosition() {
 	Thorlabs_TIM::TIM_Home(m_serialNo_TIM, m_channelPosZ);
 	// set the scan position
 	applyScanPosition();
+}
+
+/*
+ * Function converts a position in pixel to a position im µm
+ * by taking into account the pixel size and magnification.
+ * The center of the camera image is the point of origin (0,0).
+ */
+POINT2 NIDAQ::pixToMicroMeter(POINT2 positionPix) {
+
+	POINT2 positionMicroMeter;
+	positionMicroMeter.x = 1e6 * (positionPix.x - m_cameraProperties.width / 2) * m_cameraProperties.pixelSize / m_cameraProperties.mag;
+	positionMicroMeter.y = 1e6 * (positionPix.y - m_cameraProperties.height / 2) * m_cameraProperties.pixelSize / m_cameraProperties.mag;
+
+	return positionMicroMeter;
 }
 
 VOLTAGE2 NIDAQ::positionToVoltage(POINT2 position) {

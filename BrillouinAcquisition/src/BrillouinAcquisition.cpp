@@ -196,6 +196,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<DeviceElement>("DeviceElement");
 	qRegisterMetaType<SensorTemperature>("SensorTemperature");
 	qRegisterMetaType<POINT3>("POINT3");
+	qRegisterMetaType<POINT2>("POINT2");
 	qRegisterMetaType<std::vector<POINT3>>("std::vector<POINT3>");
 	qRegisterMetaType<BOUNDS>("BOUNDS");
 	qRegisterMetaType<QMouseEvent*>("QMouseEvent*");
@@ -406,7 +407,10 @@ void BrillouinAcquisition::plotClick(QMouseEvent* event) {
 		drawFocusMarker();
 	}
 
-	// TODO: Set laser focus to this position
+	POINT2 positionInPix{posX, posY};
+
+	// Set laser focus to this position
+	QMetaObject::invokeMethod(m_scanControl, "setPositionInPix", Qt::QueuedConnection, Q_ARG(POINT2, positionInPix));
 }
 
 void BrillouinAcquisition::showEvent(QShowEvent* event) {
