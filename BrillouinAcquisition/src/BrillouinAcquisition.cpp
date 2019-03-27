@@ -407,6 +407,13 @@ void BrillouinAcquisition::plotClick(QMouseEvent* event) {
 		drawFocusMarker();
 	}
 
+	QCPRange xRange = m_ODTPlot.plotHandle->xAxis->range();
+	QCPRange yRange = m_ODTPlot.plotHandle->yAxis->range();
+
+	if (!xRange.contains(posX) || !yRange.contains(posY)) {
+		return;
+	}
+
 	POINT2 positionInPix{posX, posY};
 
 	// Set laser focus to this position
