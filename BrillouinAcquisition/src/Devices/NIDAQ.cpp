@@ -478,6 +478,11 @@ void NIDAQ::loadVoltagePositionCalibration(std::string filepath) {
 		m_calibration.coef.c = getCalibrationValue(file, "/coefficients/c");
 		m_calibration.coef.d = getCalibrationValue(file, "/coefficients/d");
 
+		m_calibration.cameraProperties.width = getCalibrationValue(file, "/camera/width");
+		m_calibration.cameraProperties.height = getCalibrationValue(file, "/camera/height");
+		m_calibration.cameraProperties.pixelSize = getCalibrationValue(file, "/camera/pixelSize");
+		m_calibration.cameraProperties.mag = getCalibrationValue(file, "/camera/magnification");
+
 		m_calibration.bounds.xMin = getCalibrationValue(file, "/bounds/xMin");
 		m_calibration.bounds.xMax = getCalibrationValue(file, "/bounds/xMax");
 		m_calibration.bounds.yMin = getCalibrationValue(file, "/bounds/yMin");
@@ -545,8 +550,8 @@ void NIDAQ::centerPosition() {
 POINT2 NIDAQ::pixToMicroMeter(POINT2 positionPix) {
 
 	POINT2 positionMicroMeter;
-	positionMicroMeter.x = 1e6 * (positionPix.x - m_cameraProperties.width / 2) * m_cameraProperties.pixelSize / m_cameraProperties.mag;
-	positionMicroMeter.y = 1e6 * (positionPix.y - m_cameraProperties.height / 2) * m_cameraProperties.pixelSize / m_cameraProperties.mag;
+	positionMicroMeter.x = 1e6 * (positionPix.x - m_calibration.cameraProperties.width / 2) * m_calibration.cameraProperties.pixelSize / m_calibration.cameraProperties.mag;
+	positionMicroMeter.y = 1e6 * (positionPix.y - m_calibration.cameraProperties.height / 2) * m_calibration.cameraProperties.pixelSize / m_calibration.cameraProperties.mag;
 
 	return positionMicroMeter;
 }

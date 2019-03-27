@@ -63,6 +63,31 @@ struct CameraProperties {
 	double mag = 57;			// [1]   magnification
 };
 
+struct Calibration {
+	std::string date{ "" };
+	POINT2 translation{ -3.8008e-6, 1.1829e-6 };	// [m]	translation
+	double rho{ -0.2528 };		// [rad]	rotation
+	double fliplr{ 1 };
+	double flipud{ 1 };
+	COEFFICIENTS5 coef{
+		-6.9185e-4, // [1/m³]	coefficient of fourth order
+		6.7076e-4,	// [1/m²]	coefficient of third order
+		-1.1797e-4,	// [1/m]	coefficient of second order
+		4.1544e-4,	// [1]		coefficient of first order
+		0			// [m]		offset term
+	};
+	BOUNDS bounds = {
+		-53,	// [µm] minimal x-value
+		 53,	// [µm] maximal x-value
+		-43,	// [µm] minimal y-value
+		 43,	// [µm] maximal y-value
+		 -1000,	// [µm] minimal z-value
+		  1000	// [µm] maximal z-value
+	};
+	CameraProperties cameraProperties;
+	bool valid = false;
+};
+
 typedef enum enDeviceInput {
 	PUSHBUTTON,
 	INTBOX,
@@ -147,7 +172,8 @@ protected:
 
 	Preset getPreset(SCAN_PRESET);
 	virtual POINT2 pixToMicroMeter(POINT2) = 0;
-	CameraProperties m_cameraProperties;
+
+	Calibration m_calibration;
 
 public:
 	ScanControl() noexcept {};

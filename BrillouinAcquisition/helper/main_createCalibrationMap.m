@@ -303,6 +303,11 @@ title(cb, '[nm]', 'interpreter', 'latex');
 % data to write:
 %
 % date
+% camera ->
+%   width
+%   height
+%   pixelSize
+%   magnification
 % translation ->
 %   x
 %   y
@@ -336,6 +341,25 @@ fclose(fid);
 date.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSXXX';
 fulldate = char(date);
 h5writeatt(fullFilename, '/', 'date', fulldate);
+
+%% write camera properties
+d = '/camera/';
+
+ds = [d 'width'];
+h5create(fullFilename, ds, 1, 'ChunkSize', 1);
+h5write(fullFilename, ds, camera.imgWidth);
+
+ds = [d 'height'];
+h5create(fullFilename, ds, 1, 'ChunkSize', 1);
+h5write(fullFilename, ds, camera.imgHeight);
+
+ds = [d 'pixelSize'];
+h5create(fullFilename, ds, 1, 'ChunkSize', 1);
+h5write(fullFilename, ds, camera.pixelSize);
+
+ds = [d 'magnification'];
+h5create(fullFilename, ds, 1, 'ChunkSize', 1);
+h5write(fullFilename, ds, camera.magnification);
 
 %% write translation
 d = '/translation/';
