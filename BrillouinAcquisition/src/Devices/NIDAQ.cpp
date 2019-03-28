@@ -490,6 +490,7 @@ void NIDAQ::loadVoltagePositionCalibration(std::string filepath) {
 		m_absoluteBounds = m_calibration.bounds;
 		m_calibration.valid = true;
 	}
+	emit(calibrationChanged(m_calibration));
 	centerPosition();
 	calculateHomePositionBounds();
 }

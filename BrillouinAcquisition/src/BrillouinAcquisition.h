@@ -82,6 +82,7 @@ Q_DECLARE_METATYPE(FLUORESCENCE_MODE);
 Q_DECLARE_METATYPE(PreviewBuffer<unsigned char>*);
 Q_DECLARE_METATYPE(bool*);
 Q_DECLARE_METATYPE(std::vector<FLUORESCENCE_MODE>);
+Q_DECLARE_METATYPE(SpatialCalibration);
 
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
@@ -187,6 +188,7 @@ private slots:
 	void showCalibrationInterval(int);
 	void showCalibrationRunning(bool);
 	void updateFilename(std::string);
+	void updateCalibration(SpatialCalibration);
 
 
 	void showEnabledModes(ACQUISITION_MODE mode);

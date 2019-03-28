@@ -213,6 +213,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<PreviewBuffer<unsigned char>*>("PreviewBuffer<unsigned char>*");
 	qRegisterMetaType<bool*>("bool*");
 	qRegisterMetaType<std::vector<FLUORESCENCE_MODE>>("std::vector<FLUORESCENCE_MODE>");
+	qRegisterMetaType<SpatialCalibration>("SpatialCalibration");
 	
 	// Set up icons
 	m_icons.disconnected.addFile(":/BrillouinAcquisition/assets/00disconnected10px.png", QSize(10, 10));
@@ -2016,6 +2017,12 @@ void BrillouinAcquisition::initScanControl() {
 	);
 	connection = QWidget::connect(
 		m_scanControl,
+		&ScanControl::calibrationChanged,
+		this,
+		[this](SpatialCalibration spatialCalibration) { updateCalibration(spatialCalibration); }
+	);
+	connection = QWidget::connect(
+		m_scanControl,
 		&ScanControl::currentPositionBoundsChanged,
 		this,
 		[this](BOUNDS bounds) { setCurrentPositionBounds(bounds); }
@@ -2347,6 +2354,13 @@ void BrillouinAcquisition::on_BrillouinStart_clicked() {
 void BrillouinAcquisition::updateFilename(std::string filename) {
 	m_storagePath.filename = filename;
 	updateBrillouinSettings();
+}
+
+void BrillouinAcquisition::updateCalibration(SpatialCalibration calibration) {
+	ui->cameraWidthODT->setValue(calibration.cameraProperties.width);
+	ui->cameraHeightODT->setValue(calibration.cameraProperties.height);
+	ui->cameraMagODT->setValue(calibration.cameraProperties.mag);
+	ui->cameraPixSizeODT->setValue(1e6 * calibration.cameraProperties.pixelSize);
 }
 
 void BrillouinAcquisition::updateBrillouinSettings() {

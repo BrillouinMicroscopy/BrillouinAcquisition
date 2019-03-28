@@ -1042,14 +1042,14 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>236</width>
-                <height>219</height>
+                <width>223</width>
+                <height>250</height>
                </rect>
               </property>
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>160</height>
+                <height>250</height>
                </size>
               </property>
               <widget class="QGroupBox" name="binningROIBoxODT">
@@ -1099,7 +1099,7 @@ QTabBar::tab:!selected {
                <widget class="QLabel" name="ROIWidthODTLabel">
                 <property name="geometry">
                  <rect>
-                  <x>112</x>
+                  <x>104</x>
                   <y>16</y>
                   <width>32</width>
                   <height>18</height>
@@ -1112,7 +1112,7 @@ QTabBar::tab:!selected {
                <widget class="QLabel" name="ROIHeightODTLabel">
                 <property name="geometry">
                  <rect>
-                  <x>112</x>
+                  <x>104</x>
                   <y>40</y>
                   <width>32</width>
                   <height>18</height>
@@ -1305,7 +1305,154 @@ QTabBar::tab:!selected {
                 </item>
                </layout>
               </widget>
+              <widget class="QGroupBox" name="cameraPropsBoxODT">
+               <property name="geometry">
+                <rect>
+                 <x>8</x>
+                 <y>176</y>
+                 <width>209</width>
+                 <height>65</height>
+                </rect>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="title">
+                <string>Camera properties</string>
+               </property>
+               <widget class="QLabel" name="cameraWidthODTLabel">
+                <property name="geometry">
+                 <rect>
+                  <x>8</x>
+                  <y>16</y>
+                  <width>32</width>
+                  <height>18</height>
+                 </rect>
+                </property>
+                <property name="text">
+                 <string>Width</string>
+                </property>
+               </widget>
+               <widget class="QLabel" name="cameraMagODTLabel">
+                <property name="geometry">
+                 <rect>
+                  <x>8</x>
+                  <y>40</y>
+                  <width>32</width>
+                  <height>18</height>
+                 </rect>
+                </property>
+                <property name="text">
+                 <string>Magn.</string>
+                </property>
+               </widget>
+               <widget class="QLabel" name="cameraHeightODTLabel">
+                <property name="geometry">
+                 <rect>
+                  <x>96</x>
+                  <y>16</y>
+                  <width>32</width>
+                  <height>18</height>
+                 </rect>
+                </property>
+                <property name="text">
+                 <string>Height</string>
+                </property>
+               </widget>
+               <widget class="QLabel" name="cameraPixSizeODTLabel">
+                <property name="geometry">
+                 <rect>
+                  <x>96</x>
+                  <y>40</y>
+                  <width>49</width>
+                  <height>18</height>
+                 </rect>
+                </property>
+                <property name="text">
+                 <string>Pix size [µm]</string>
+                </property>
+               </widget>
+               <widget class="QSpinBox" name="cameraWidthODT">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="geometry">
+                 <rect>
+                  <x>40</x>
+                  <y>16</y>
+                  <width>49</width>
+                  <height>18</height>
+                 </rect>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>2048</number>
+                </property>
+                <property name="value">
+                 <number>1280</number>
+                </property>
+               </widget>
+               <widget class="QSpinBox" name="cameraHeightODT">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="geometry">
+                 <rect>
+                  <x>151</x>
+                  <y>16</y>
+                  <width>49</width>
+                  <height>18</height>
+                 </rect>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>2048</number>
+                </property>
+                <property name="value">
+                 <number>1024</number>
+                </property>
              </widget>
+               <widget class="QDoubleSpinBox" name="cameraMagODT">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="geometry">
+                 <rect>
+                  <x>40</x>
+                  <y>40</y>
+                  <width>49</width>
+                  <height>18</height>
+                 </rect>
+                </property>
+                <property name="value">
+                 <double>57.000000000000000</double>
+                </property>
+               </widget>
+               <widget class="QDoubleSpinBox" name="cameraPixSizeODT">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="geometry">
+                 <rect>
+                  <x>151</x>
+                  <y>40</y>
+                  <width>49</width>
+                  <height>18</height>
+                 </rect>
+                </property>
+                <property name="value">
+                 <double>4.800000000000000</double>
+                </property>
+               </widget>
+             </widget>
+            </widget>
             </widget>
            </item>
           </layout>
@@ -2605,8 +2752,8 @@ border: none;</string>
                     <property name="geometry">
                      <rect>
                       <x>0</x>
-                      <y>-48</y>
-                      <width>221</width>
+                      <y>0</y>
+                      <width>165</width>
                       <height>605</height>
                      </rect>
                     </property>
@@ -4001,6 +4148,10 @@ border: none;</string>
   <tabstop>ROITopODT</tabstop>
   <tabstop>ROIHeightODT</tabstop>
   <tabstop>pixelEncodingODT</tabstop>
+  <tabstop>cameraWidthODT</tabstop>
+  <tabstop>cameraHeightODT</tabstop>
+  <tabstop>cameraMagODT</tabstop>
+  <tabstop>cameraPixSizeODT</tabstop>
   <tabstop>scrollArea</tabstop>
   <tabstop>startX</tabstop>
   <tabstop>endX</tabstop>
@@ -4069,6 +4220,17 @@ border: none;</string>
   <tabstop>acquisitionNumber_ODT</tabstop>
   <tabstop>acquisitionRate_ODT</tabstop>
   <tabstop>acquisitionStartODT</tabstop>
+  <tabstop>exposureTimeCameraODT</tabstop>
+  <tabstop>gainCameraODT</tabstop>
+  <tabstop>fluoBlueStart</tabstop>
+  <tabstop>fluoBluePreview</tabstop>
+  <tabstop>fluoGreenPreview</tabstop>
+  <tabstop>fluoGreenStart</tabstop>
+  <tabstop>fluoRedPreview</tabstop>
+  <tabstop>fluoRedStart</tabstop>
+  <tabstop>fluoBrightfieldPreview</tabstop>
+  <tabstop>fluoBrightfieldStart</tabstop>
+  <tabstop>addFocusMarker_brightfield</tabstop>
  </tabstops>
  <resources>
   <include location="../BrillouinAcquisition.qrc"/>
@@ -4076,7 +4238,7 @@ border: none;</string>
  <connections/>
  <buttongroups>
   <buttongroup name="buttonGroup_3"/>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
  </buttongroups>
 </ui>

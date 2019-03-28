@@ -63,7 +63,7 @@ struct CameraProperties {
 	double mag = 57;			// [1]   magnification
 };
 
-struct Calibration {
+struct SpatialCalibration {
 	std::string date{ "" };
 	POINT2 translation{ -3.8008e-6, 1.1829e-6 };	// [m]	translation
 	double rho{ -0.2528 };		// [rad]	rotation
@@ -173,7 +173,7 @@ protected:
 	Preset getPreset(SCAN_PRESET);
 	virtual POINT2 pixToMicroMeter(POINT2) = 0;
 
-	Calibration m_calibration;
+	SpatialCalibration m_calibration;
 
 public:
 	ScanControl() noexcept {};
@@ -236,6 +236,7 @@ signals:
 	void savedPositionsChanged(std::vector<POINT3>);
 	void homePositionBoundsChanged(BOUNDS);
 	void currentPositionBoundsChanged(BOUNDS);
+	void calibrationChanged(SpatialCalibration);
 };
 
 #endif // SCANCONTROL_H
