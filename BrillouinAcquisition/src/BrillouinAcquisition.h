@@ -67,6 +67,7 @@ Q_DECLARE_METATYPE(SCAN_PRESET);
 Q_DECLARE_METATYPE(DeviceElement);
 Q_DECLARE_METATYPE(SensorTemperature);
 Q_DECLARE_METATYPE(POINT3);
+Q_DECLARE_METATYPE(POINT2);
 Q_DECLARE_METATYPE(std::vector<POINT3>);
 Q_DECLARE_METATYPE(BOUNDS);
 Q_DECLARE_METATYPE(QMouseEvent*);
@@ -81,6 +82,7 @@ Q_DECLARE_METATYPE(FLUORESCENCE_MODE);
 Q_DECLARE_METATYPE(PreviewBuffer<unsigned char>*);
 Q_DECLARE_METATYPE(bool*);
 Q_DECLARE_METATYPE(std::vector<FLUORESCENCE_MODE>);
+Q_DECLARE_METATYPE(SpatialCalibration);
 
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
@@ -186,6 +188,7 @@ private slots:
 	void showCalibrationInterval(int);
 	void showCalibrationRunning(bool);
 	void updateFilename(std::string);
+	void updateCalibration(SpatialCalibration);
 
 
 	void showEnabledModes(ACQUISITION_MODE mode);

@@ -41,30 +41,6 @@ private:
 		const uInt8 low = 0;
 		const uInt8 high = 1;
 	} m_TTL;
-	
-	struct Calibration {
-		std::string date{ "" };
-		POINT2 translation{ -3.8008e-6, 1.1829e-6 };	// [m]	translation
-		double rho{ -0.2528 };		// [rad]	rotation
-		double fliplr{ 1 };
-		double flipud{ 1 };
-		COEFFICIENTS5 coef{
-			-6.9185e-4, // [1/m³]	coefficient of fourth order
-			6.7076e-4,	// [1/m²]	coefficient of third order
-			-1.1797e-4,	// [1/m]	coefficient of second order
-			4.1544e-4,	// [1]		coefficient of first order
-			0			// [m]		offset term
-		};
-		BOUNDS bounds = {
-			-53,	// [µm] minimal x-value
-			 53,	// [µm] maximal x-value
-			-43,	// [µm] minimal y-value
-			 43,	// [µm] maximal y-value
-			 -1000,	// [µm] minimal z-value
-			  1000	// [µm] maximal z-value
-		};
-		bool valid = false;
-	} m_calibration;
 
 	VOLTAGE2 m_voltages{ 0, 0 };	// current voltage
 	POINT3 m_position{ 0, 0, 0 };	// current position
@@ -102,6 +78,8 @@ private:
 		COUNT
 	};
 
+	POINT2 pixToMicroMeter(POINT2);
+
 public:
 	NIDAQ() noexcept;
 	~NIDAQ();
@@ -112,6 +90,7 @@ public:
 	void applyScanPosition();
 
 	void setPosition(POINT3 position);
+	void setPosition(POINT2 position);
 	POINT3 getPosition();
 
 	void setVoltage(VOLTAGE2 voltage);
@@ -146,6 +125,7 @@ public slots:
 	void setPositionRelativeX(double position);
 	void setPositionRelativeY(double position);
 	void setPositionRelativeZ(double position);
+	void setPositionInPix(POINT2);
 	void setHome();
 	void loadVoltagePositionCalibration(std::string filepath) override;
 	double getCalibrationValue(H5::H5File file, std::string datasetName);

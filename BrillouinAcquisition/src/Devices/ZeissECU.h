@@ -120,11 +120,14 @@ private:
 		COUNT
 	};
 
+	POINT2 pixToMicroMeter(POINT2);
+
 public:
 	ZeissECU() noexcept;
 	~ZeissECU();
 
 	void setPosition(POINT3 position);
+	void setPosition(POINT2 position);
 	POINT3 getPosition();
 	void setDevice(com *device);
 
@@ -142,6 +145,7 @@ public slots:
 	void setPositionRelativeX(double position);
 	void setPositionRelativeY(double position);
 	void setPositionRelativeZ(double position);
+	void setPositionInPix(POINT2);
 };
 
 #endif // ZEISSECU_H

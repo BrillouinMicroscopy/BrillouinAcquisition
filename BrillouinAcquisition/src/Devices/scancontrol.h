@@ -56,6 +56,38 @@ struct BOUNDS {
 	double zMax{  1e3 };	// [µm] maximal z-value
 };
 
+struct CameraProperties {
+	int width{ 1280 };			// [pix] image width
+	int height{ 1024 };			// [pix] image height
+	double pixelSize{ 4.8e-6 };	// [µm]  pixel size
+	double mag = 57;			// [1]   magnification
+};
+
+struct SpatialCalibration {
+	std::string date{ "" };
+	POINT2 translation{ -3.8008e-6, 1.1829e-6 };	// [m]	translation
+	double rho{ -0.2528 };		// [rad]	rotation
+	double fliplr{ 1 };
+	double flipud{ 1 };
+	COEFFICIENTS5 coef{
+		-6.9185e-4, // [1/m³]	coefficient of fourth order
+		6.7076e-4,	// [1/m²]	coefficient of third order
+		-1.1797e-4,	// [1/m]	coefficient of second order
+		4.1544e-4,	// [1]		coefficient of first order
+		0			// [m]		offset term
+	};
+	BOUNDS bounds = {
+		-53,	// [µm] minimal x-value
+		 53,	// [µm] maximal x-value
+		-43,	// [µm] minimal y-value
+		 43,	// [µm] maximal y-value
+		 -1000,	// [µm] minimal z-value
+		  1000	// [µm] maximal z-value
+	};
+	CameraProperties cameraProperties;
+	bool valid = false;
+};
+
 typedef enum enDeviceInput {
 	PUSHBUTTON,
 	INTBOX,
@@ -141,6 +173,9 @@ protected:
 	BOUNDS m_currentPositionBounds;
 
 	Preset getPreset(SCAN_PRESET);
+	virtual POINT2 pixToMicroMeter(POINT2) = 0;
+
+	SpatialCalibration m_calibration;
 
 public:
 	ScanControl() noexcept {};
@@ -161,6 +196,7 @@ public:
 	bool getConnectionStatus();
 
 	virtual void setPosition(POINT3 position) = 0;
+	virtual void setPosition(POINT2 position) = 0;
 	// moves the position relative to current position
 	void movePosition(POINT3 distance);
 	virtual POINT3 getPosition() = 0;
@@ -184,6 +220,7 @@ public slots:
 	virtual void setPositionRelativeX(double position) = 0;
 	virtual void setPositionRelativeY(double position) = 0;
 	virtual void setPositionRelativeZ(double position) = 0;
+	virtual void setPositionInPix(POINT2) = 0;
 	void setHome();
 	void moveHome();
 	void savePosition();
@@ -201,6 +238,7 @@ signals:
 	void savedPositionsChanged(std::vector<POINT3>);
 	void homePositionBoundsChanged(BOUNDS);
 	void currentPositionBoundsChanged(BOUNDS);
+	void calibrationChanged(SpatialCalibration);
 };
 
 #endif // SCANCONTROL_H
