@@ -100,6 +100,18 @@
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_NIDAQ.obj">
       <Filter>Source Files</Filter>
     </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\com.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_device.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_filtermount.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\filtermount.obj">
+      <Filter>Source Files</Filter>
+    </Object>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

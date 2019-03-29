@@ -10,7 +10,7 @@ namespace BrillouinAcquisitionUnitTest {
 		public:
 			// Tests for mean()
 			TEST_METHOD(TestSolvingQuartic) {
-				COEFFICIANTS5 coef = {5, 4, 3, 2, -14};
+				COEFFICIENTS5 coef = {5, 4, 3, 2, -14};
 				std::vector<std::complex<double>> solutions = simplemath::solveQuartic(coef);
 				std::vector<std::complex<double>> expected = {
 					std::complex<double>(-1.465836978554923, 0.0),

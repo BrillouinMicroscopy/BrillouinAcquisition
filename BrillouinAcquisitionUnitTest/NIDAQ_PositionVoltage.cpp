@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
-#include "..\BrillouinAcquisition\src\NIDAQ.h"
+#include "..\BrillouinAcquisition\src\Devices\NIDAQ.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -15,8 +15,8 @@ namespace BrillouinAcquisitionUnitTest
 			VOLTAGE2 voltage{ 0, 0 };
 			POINT2 answer = nidaq->voltageToPosition(voltage);
 			POINT2 expected{ 0, 0 };
-			Assert::AreEqual(expected.x, answer.x);
-			Assert::AreEqual(expected.y, answer.y);
+			Assert::IsTrue(abs(expected.x - answer.x) < 1e-5);
+			Assert::IsTrue(abs(expected.y - answer.y) < 1e-5);
 		}
 
 		TEST_METHOD(TestVtoV_center) {

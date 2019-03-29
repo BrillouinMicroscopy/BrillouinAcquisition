@@ -2,7 +2,7 @@
 #define SCANCONTROL_H
 
 #include "Device.h"
-#include "../external/h5bm/TypesafeBitmask.h"
+#include "../../external/h5bm/TypesafeBitmask.h"
 
 typedef enum enScanPreset {
 	SCAN_NULL = 0x0,
