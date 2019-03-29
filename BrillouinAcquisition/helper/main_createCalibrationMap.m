@@ -193,6 +193,12 @@ positions_desired.Y_pix_centered = positions_desired.Y_meter*camera.magnificatio
 % find required voltages
 [voltages_required.Ux, voltages_required.Uy] = PositionToVoltage(positions_desired.X_meter, positions_desired.Y_meter, distortion);
 
+%% Try to interpolate
+idxgood=~(isnan(positions.X_meter) | isnan(positions.Y_meter) | isnan(voltages.Ux)); 
+
+voltages_required.Ux = griddata(positions.X_meter(idxgood), positions.Y_meter(idxgood), voltages.Ux(idxgood), positions_desired.X_meter, positions_desired.Y_meter, 'v4');
+voltages_required.Uy = griddata(positions.X_meter(idxgood), positions.Y_meter(idxgood), voltages.Uy(idxgood), positions_desired.X_meter, positions_desired.Y_meter, 'v4');
+
 %% Plot voltages
 subplot(2,4,5);
 for jj = 1:size(voltages_required.Ux, 2)
