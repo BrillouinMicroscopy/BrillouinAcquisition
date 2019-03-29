@@ -47,6 +47,9 @@
     <ClCompile Include="simplemath.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="interpolation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BrillouinAcquisitionUnitTest.h">
@@ -130,5 +133,8 @@
     <QtMoc Include="MockMicroscope.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\BrillouinAcquisition\external\eigen\debug\msvc\eigen.natvis" />
   </ItemGroup>
 </Project>

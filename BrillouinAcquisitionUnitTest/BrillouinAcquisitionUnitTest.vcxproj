@@ -108,6 +108,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BrillouinAcquisitionUnitTest.cpp" />
+    <ClCompile Include="interpolation.cpp" />
     <ClCompile Include="MockMicroscope.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
@@ -151,6 +152,9 @@
     <Object Include="..\BrillouinAcquisition\x64\Debug\scancontrol.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\stdafx.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\ZeissECU.obj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\BrillouinAcquisition\external\eigen\debug\msvc\eigen.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
