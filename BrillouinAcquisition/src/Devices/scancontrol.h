@@ -3,6 +3,7 @@
 
 #include "Device.h"
 #include "../../external/h5bm/TypesafeBitmask.h"
+#include "../interpolation.h"
 
 typedef enum enScanPreset {
 	SCAN_NULL = 0x0,
@@ -76,7 +77,9 @@ struct CameraProperties {
 struct SpatialCalibration {
 	std::string date{ "" };
 	POSITION_MAPS positions;
+	WEIGHTS2<double> positions_weights;
 	VOLTAGE_MAPS voltages;
+	WEIGHTS2<double> voltages_weights;
 	BOUNDS bounds = {
 		-53,	// [µm] minimal x-value
 		 53,	// [µm] maximal x-value

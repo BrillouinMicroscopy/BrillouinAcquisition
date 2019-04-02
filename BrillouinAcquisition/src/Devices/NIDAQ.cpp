@@ -29,6 +29,7 @@ NIDAQ::NIDAQ() noexcept {
 	m_absoluteBounds = m_calibration.bounds;
 
 	m_elementPositions = std::vector<double>((int)DEVICE_ELEMENT::COUNT, -1);
+	calculateCalibrationWeights();
 }
 
 NIDAQ::~NIDAQ() {
@@ -484,10 +485,36 @@ void NIDAQ::loadVoltagePositionCalibration(std::string filepath) {
 		m_calibration.bounds.yMax = getCalibrationValue(file, "/bounds/yMax");
 		m_absoluteBounds = m_calibration.bounds;
 		m_calibration.valid = true;
+
+		calculateCalibrationWeights();
 	}
 	emit(calibrationChanged(m_calibration));
 	centerPosition();
 	calculateHomePositionBounds();
+}
+
+void NIDAQ::calculateCalibrationWeights() {
+	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> x(&m_calibration.positions.x[0], m_calibration.positions.x.size(), 1);
+	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> y(&m_calibration.positions.y[0], m_calibration.positions.y.size(), 1);
+	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> Ux(&m_calibration.voltages.Ux[0], m_calibration.voltages.Ux.size(), 1);
+	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> Uy(&m_calibration.voltages.Uy[0], m_calibration.voltages.Uy.size(), 1);
+
+	Eigen::Array<double, -1, -1> tmp1 = x;
+	Eigen::Array<double, -1, -1> tmp2 = y;
+	Eigen::Array<double, -1, -1> tmp3 = Ux;
+	Eigen::Array<double, -1, -1> tmp4 = Uy;
+
+	/*
+	 * Calculate the position weights
+	 */
+	m_calibration.positions_weights.x = interpolation::biharmonic_spline_calculate_weights(tmp1, tmp2, tmp3);
+	m_calibration.positions_weights.y = interpolation::biharmonic_spline_calculate_weights(tmp1, tmp2, tmp4);
+
+	/*
+	 * Calculate the voltage weights
+	 */
+	m_calibration.voltages_weights.x = interpolation::biharmonic_spline_calculate_weights(tmp3, tmp4, tmp1);
+	m_calibration.voltages_weights.y = interpolation::biharmonic_spline_calculate_weights(tmp3, tmp4, tmp2);
 }
 
 double NIDAQ::getCalibrationValue(H5::H5File file, std::string datasetName) {
@@ -570,48 +597,26 @@ POINT2 NIDAQ::pixToMicroMeter(POINT2 positionPix) {
 
 VOLTAGE2 NIDAQ::positionToVoltage(POINT2 position) {
 
-	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> x(&m_calibration.positions.x[0], m_calibration.positions.x.size(), 1);
-	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> y(&m_calibration.positions.y[0], m_calibration.positions.y.size(), 1);
-	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> Ux(&m_calibration.voltages.Ux[0], m_calibration.voltages.Ux.size(), 1);
-	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> Uy(&m_calibration.voltages.Uy[0], m_calibration.voltages.Uy.size(), 1);
 	Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> xr(1,1);
 	xr(0, 0) = position.x;
 	Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> yr(1,1);
 	yr(0, 0) = position.y;
 
-	Eigen::Array<double, -1, -1> tmp1 = x;
-	Eigen::Array<double, -1, -1> tmp2 = y;
-	Eigen::Array<double, -1, -1> tmp3 = Ux;
-	Eigen::Array<double, -1, -1> tmp4 = Uy;
+	auto Uxr = interpolation::biharmonic_spline_calculate_values(m_calibration.positions_weights.x, xr, yr);
+	auto Uyr = interpolation::biharmonic_spline_calculate_values(m_calibration.positions_weights.y, xr, yr);
 
-	auto Uxr = interpolation::biharmonic_spline(tmp1, tmp2, tmp3, xr, yr);
-	auto Uyr = interpolation::biharmonic_spline(tmp1, tmp2, tmp4, xr, yr);
-
-	VOLTAGE2 voltage{ Uxr(0, 0), Uyr(0, 0) };
-
-	return voltage;
+	return VOLTAGE2{ Uxr(0, 0), Uyr(0, 0) };
 }
 
 POINT2 NIDAQ::voltageToPosition(VOLTAGE2 voltage) {
 
-	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> x(&m_calibration.positions.x[0], m_calibration.positions.x.size(), 1);
-	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> y(&m_calibration.positions.y[0], m_calibration.positions.y.size(), 1);
-	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> Ux(&m_calibration.voltages.Ux[0], m_calibration.voltages.Ux.size(), 1);
-	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> Uy(&m_calibration.voltages.Uy[0], m_calibration.voltages.Uy.size(), 1);
 	Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> Uxr(1, 1);
 	Uxr(0, 0) = voltage.Ux;
 	Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> Uyr(1, 1);
 	Uyr(0, 0) = voltage.Uy;
 
-	Eigen::Array<double, -1, -1> tmp1 = Ux;
-	Eigen::Array<double, -1, -1> tmp2 = Uy;
-	Eigen::Array<double, -1, -1> tmp3 = x;
-	Eigen::Array<double, -1, -1> tmp4 = y;
+	auto xr = interpolation::biharmonic_spline_calculate_values(m_calibration.voltages_weights.x, Uxr, Uyr);
+	auto yr = interpolation::biharmonic_spline_calculate_values(m_calibration.voltages_weights.y, Uxr, Uyr);
 
-	auto xr = interpolation::biharmonic_spline(tmp1, tmp2, tmp3, Uxr, Uyr);
-	auto yr = interpolation::biharmonic_spline(tmp1, tmp2, tmp4, Uxr, Uyr);
-
-	POINT2 position{ xr(0, 0), yr(0, 0) };
-
-	return position;
+	return POINT2{ xr(0, 0), yr(0, 0) };
 }

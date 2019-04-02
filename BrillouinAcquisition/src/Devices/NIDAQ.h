@@ -5,7 +5,6 @@
 #include <vector>
 #include "NIDAQmx.h"
 #include "scancontrol.h"
-#include "../interpolation.h"
 
 namespace Thorlabs_TIM {
 	#include <Thorlabs.MotionControl.TCube.InertialMotor.h>
@@ -80,6 +79,9 @@ private:
 	};
 
 	POINT2 pixToMicroMeter(POINT2);
+	void calculateCalibrationWeights();
+	double getCalibrationValue(H5::H5File file, std::string datasetName);
+	std::vector<double> getCalibrationMap(H5::H5File file, std::string datasetName);
 
 public:
 	NIDAQ() noexcept;
@@ -129,8 +131,6 @@ public slots:
 	void setPositionInPix(POINT2);
 	void setHome();
 	void loadVoltagePositionCalibration(std::string filepath) override;
-	double getCalibrationValue(H5::H5File file, std::string datasetName);
-	std::vector<double> getCalibrationMap(H5::H5File file, std::string datasetName);
 
 	void triggerCamera();
 	void setAcquisitionVoltages(ACQ_VOLTAGES voltages);
