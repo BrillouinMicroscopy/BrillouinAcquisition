@@ -169,12 +169,6 @@ positions_desired.Y_pix_centered = positions_desired.Y_meter*camera.magnificatio
 [voltages_required.Ux, voltages_required.Uy] = PositionToVoltage(positions_desired.X_meter, positions_desired.Y_meter, ...
     positions.X_meter, positions.Y_meter, voltages.Ux, voltages.Uy);
 
-% [Ux, Uy] = PositionToVoltage(0, 0, ...
-%     positions.X_meter, positions.Y_meter, voltages.Ux, voltages.Uy);
-% 
-% [x, y] = VoltageToPosition(Ux, Uy, ...
-%     positions.X_meter, positions.Y_meter, voltages.Ux, voltages.Uy);
-
 %% Plot voltages
 subplot(2,4,5);
 for jj = 1:size(voltages_required.Ux, 2)
@@ -297,11 +291,6 @@ title(cb, '[nm]', 'interpreter', 'latex');
 %   voltages ->
 %       Ux
 %       Uy
-% bounds ->
-%   xMin
-%   xMax
-%   yMin
-%   yMax
 
 % create filename
 date = datetime('now', 'InputFormat', 'uuuu-MM-dd''T''HH:mm:ss.SSSXXX', 'TimeZone', 'UTC');
