@@ -494,27 +494,22 @@ void NIDAQ::loadVoltagePositionCalibration(std::string filepath) {
 }
 
 void NIDAQ::calculateCalibrationWeights() {
-	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> x(&m_calibration.positions.x[0], m_calibration.positions.x.size(), 1);
-	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> y(&m_calibration.positions.y[0], m_calibration.positions.y.size(), 1);
-	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> Ux(&m_calibration.voltages.Ux[0], m_calibration.voltages.Ux.size(), 1);
-	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> Uy(&m_calibration.voltages.Uy[0], m_calibration.voltages.Uy.size(), 1);
-
-	Eigen::Array<double, -1, -1> tmp1 = x;
-	Eigen::Array<double, -1, -1> tmp2 = y;
-	Eigen::Array<double, -1, -1> tmp3 = Ux;
-	Eigen::Array<double, -1, -1> tmp4 = Uy;
+	Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> x = Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>>(&m_calibration.positions.x[0], m_calibration.positions.x.size(), 1);
+	Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> y = Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>>(&m_calibration.positions.y[0], m_calibration.positions.y.size(), 1);
+	Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> Ux = Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>>(&m_calibration.voltages.Ux[0], m_calibration.voltages.Ux.size(), 1);
+	Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> Uy = Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>>(&m_calibration.voltages.Uy[0], m_calibration.voltages.Uy.size(), 1);
 
 	/*
 	 * Calculate the position weights
 	 */
-	m_calibration.positions_weights.x = interpolation::biharmonic_spline_calculate_weights(tmp1, tmp2, tmp3);
-	m_calibration.positions_weights.y = interpolation::biharmonic_spline_calculate_weights(tmp1, tmp2, tmp4);
+	m_calibration.positions_weights.x = interpolation::biharmonic_spline_calculate_weights(x, y, Ux);
+	m_calibration.positions_weights.y = interpolation::biharmonic_spline_calculate_weights(x, y, Uy);
 
 	/*
 	 * Calculate the voltage weights
 	 */
-	m_calibration.voltages_weights.x = interpolation::biharmonic_spline_calculate_weights(tmp3, tmp4, tmp1);
-	m_calibration.voltages_weights.y = interpolation::biharmonic_spline_calculate_weights(tmp3, tmp4, tmp2);
+	m_calibration.voltages_weights.x = interpolation::biharmonic_spline_calculate_weights(Ux, Uy, x);
+	m_calibration.voltages_weights.y = interpolation::biharmonic_spline_calculate_weights(Ux, Uy, y);
 }
 
 double NIDAQ::getCalibrationValue(H5::H5File file, std::string datasetName) {
