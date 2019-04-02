@@ -56,6 +56,16 @@ struct BOUNDS {
 	double zMax{  1e3 };	// [µm] maximal z-value
 };
 
+struct POSITION_MAPS {
+	std::vector<double> x{ 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5 };
+	std::vector<double> y{ 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5 };
+};
+
+struct VOLTAGE_MAPS {
+	std::vector<double> Ux{ -2, -2, -2, -2, -2, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2 };
+	std::vector<double> Uy{ -2, -1, 0, 1, 2, -2, -1, 0, 1, 2, -2, -1, 0, 1, 2, -2, -1, 0, 1, 2, -2, -1, 0, 1, 2 };
+};
+
 struct CameraProperties {
 	int width{ 1280 };			// [pix] image width
 	int height{ 1024 };			// [pix] image height
@@ -65,17 +75,8 @@ struct CameraProperties {
 
 struct SpatialCalibration {
 	std::string date{ "" };
-	POINT2 translation{ -3.8008e-6, 1.1829e-6 };	// [m]	translation
-	double rho{ -0.2528 };		// [rad]	rotation
-	double fliplr{ 1 };
-	double flipud{ 1 };
-	COEFFICIENTS5 coef{
-		-6.9185e-4, // [1/m³]	coefficient of fourth order
-		6.7076e-4,	// [1/m²]	coefficient of third order
-		-1.1797e-4,	// [1/m]	coefficient of second order
-		4.1544e-4,	// [1]		coefficient of first order
-		0			// [m]		offset term
-	};
+	POSITION_MAPS positions;
+	VOLTAGE_MAPS voltages;
 	BOUNDS bounds = {
 		-53,	// [µm] minimal x-value
 		 53,	// [µm] maximal x-value

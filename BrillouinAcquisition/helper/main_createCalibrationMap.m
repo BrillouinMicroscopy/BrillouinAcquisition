@@ -155,32 +155,7 @@ ylabel('$y$ [$\mu$m]', 'interpreter', 'latex');
 title('Evaluated positions');
 drawnow;
 
-%% Find distortion parameters
-distortion_initial = [ ...
-    16e-6, ...  % x0
-    -8e-6, ...  % y0
-    -0.35, ...  % rho
-    5e-4, ...   % d
-    1.1e-4, ... % c
-    5.1e-5, ... % b
-    2.5e-4, ... % a
-    1, ...      % fliplr
-    -1, ...     % flipud
-];
-
-model = @(Ux, Uy, distortion) VoltageToPosition(Ux, Uy, distortion);
-
-% optimize analytical calibration
-errorFuncDist = @(distortion) errorFunctionDistortion(model, distortion, voltages, positions);
-
-options = optimset('MaxFunEvals', 1000000, 'MaxIter', 1000000, 'TolFun', 1e-6, 'TolX', 1e-6);
-distortion = fminsearch(errorFuncDist, distortion_initial, options);
-
-% normalize fliplr and flipud to abs(x) = 1
-distortion(8) = distortion(8) / abs(distortion(8));
-distortion(9) = distortion(9) / abs(distortion(9));
-
-%% Check if found parameters work well
+%% Check if acquired calibration maps work well
 positions_desired.nrStepsX = 21;
 positions_desired.nrStepsY = 16;
 positions_desired.x_meter = 1e-6*linspace(0.95*bounds.xMin, 0.95*bounds.xMax, positions_desired.nrStepsX);
@@ -190,14 +165,15 @@ positions_desired.y_meter = 1e-6*linspace(0.95*bounds.yMin, 0.95*bounds.yMax, po
 positions_desired.X_pix_centered = positions_desired.X_meter*camera.magnification/camera.pixelSize;
 positions_desired.Y_pix_centered = positions_desired.Y_meter*camera.magnification/camera.pixelSize;
 
-% find required voltages
-[voltages_required.Ux, voltages_required.Uy] = PositionToVoltage(positions_desired.X_meter, positions_desired.Y_meter, distortion);
+% Find required voltages
+[voltages_required.Ux, voltages_required.Uy] = PositionToVoltage(positions_desired.X_meter, positions_desired.Y_meter, ...
+    positions.X_meter, positions.Y_meter, voltages.Ux, voltages.Uy);
 
-%% Try to interpolate
-idxgood=~(isnan(positions.X_meter) | isnan(positions.Y_meter) | isnan(voltages.Ux)); 
-
-voltages_required.Ux = griddata(positions.X_meter(idxgood), positions.Y_meter(idxgood), voltages.Ux(idxgood), positions_desired.X_meter, positions_desired.Y_meter, 'v4');
-voltages_required.Uy = griddata(positions.X_meter(idxgood), positions.Y_meter(idxgood), voltages.Uy(idxgood), positions_desired.X_meter, positions_desired.Y_meter, 'v4');
+% [Ux, Uy] = PositionToVoltage(0, 0, ...
+%     positions.X_meter, positions.Y_meter, voltages.Ux, voltages.Uy);
+% 
+% [x, y] = VoltageToPosition(Ux, Uy, ...
+%     positions.X_meter, positions.Y_meter, voltages.Ux, voltages.Uy);
 
 %% Plot voltages
 subplot(2,4,5);
@@ -314,17 +290,13 @@ title(cb, '[nm]', 'interpreter', 'latex');
 %   height
 %   pixelSize
 %   magnification
-% translation ->
-%   x
-%   y
-% rho
-% coefficients ->
-%   d
-%   c
-%   b
-%   a
-%   lr
-%   ud
+% maps ->
+%   positions ->
+%       x
+%       y
+%   voltages ->
+%       Ux
+%       Uy
 % bounds ->
 %   xMin
 %   xMax
@@ -367,50 +339,27 @@ ds = [d 'magnification'];
 h5create(fullFilename, ds, 1, 'ChunkSize', 1);
 h5write(fullFilename, ds, camera.magnification);
 
-%% write translation
-d = '/translation/';
+%% write calibration matrices
+d = '/maps/';
+idxgood=~(isnan(positions.X_meter) | isnan(positions.Y_meter) | isnan(voltages.Ux));
 
-ds = [d 'x'];
-h5create(fullFilename, ds, 1, 'ChunkSize', 1);
-h5write(fullFilename, ds, distortion(1));
+ds = [d 'positions/x'];
+h5create(fullFilename, ds, size(positions.X_meter(idxgood)));
+h5write(fullFilename, ds, positions.X_meter(idxgood));
 
-ds = [d 'y'];
-h5create(fullFilename, ds, 1, 'ChunkSize', 1);
-h5write(fullFilename, ds, distortion(2));
+ds = [d 'positions/y'];
+h5create(fullFilename, ds, size(positions.Y_meter(idxgood)));
+h5write(fullFilename, ds, positions.Y_meter(idxgood));
 
-%% write rotation
-ds = '/rotation';
-h5create(fullFilename, ds, 1, 'ChunkSize', 1);
-h5write(fullFilename, ds, distortion(3));
+ds = [d 'voltages/Ux'];
+h5create(fullFilename, ds, size(voltages.Ux(idxgood)));
+h5write(fullFilename, ds, voltages.Ux(idxgood));
 
-%% write coefficients
-d = '/coefficients/';
+ds = [d 'voltages/Uy'];
+h5create(fullFilename, ds, size(voltages.Uy(idxgood)));
+h5write(fullFilename, ds, voltages.Uy(idxgood));
 
-ds = [d 'a'];
-h5create(fullFilename, ds, 1, 'ChunkSize', 1);
-h5write(fullFilename, ds, distortion(7));
-
-ds = [d 'b'];
-h5create(fullFilename, ds, 1, 'ChunkSize', 1);
-h5write(fullFilename, ds, distortion(6));
-
-ds = [d 'c'];
-h5create(fullFilename, ds, 1, 'ChunkSize', 1);
-h5write(fullFilename, ds, distortion(5));
-
-ds = [d 'd'];
-h5create(fullFilename, ds, 1, 'ChunkSize', 1);
-h5write(fullFilename, ds, distortion(4));
-
-ds = [d 'lr'];
-h5create(fullFilename, ds, 1, 'ChunkSize', 1);
-h5write(fullFilename, ds, distortion(8));
-
-ds = [d 'ud'];
-h5create(fullFilename, ds, 1, 'ChunkSize', 1);
-h5write(fullFilename, ds, distortion(9));
-
-% write bounds
+%% write bounds
 d = '/bounds/';
 
 ds = [d 'xMin'];

@@ -467,16 +467,11 @@ void NIDAQ::loadVoltagePositionCalibration(std::string filepath) {
 		delete[] buf;
 		buf = nullptr;
 
-		// read calibration values
-		m_calibration.translation.x = getCalibrationValue(file, "/translation/x");
-		m_calibration.translation.y = getCalibrationValue(file, "/translation/y");
-		m_calibration.rho = getCalibrationValue(file, "/rotation");
-		m_calibration.fliplr = getCalibrationValue(file, "/coefficients/lr");
-		m_calibration.flipud = getCalibrationValue(file, "/coefficients/ud");
-		m_calibration.coef.a = getCalibrationValue(file, "/coefficients/a");
-		m_calibration.coef.b = getCalibrationValue(file, "/coefficients/b");
-		m_calibration.coef.c = getCalibrationValue(file, "/coefficients/c");
-		m_calibration.coef.d = getCalibrationValue(file, "/coefficients/d");
+		// Read calibration maps
+		m_calibration.positions.x = getCalibrationMap(file, "/maps/positions/x");
+		m_calibration.positions.y = getCalibrationMap(file, "/maps/positions/y");
+		m_calibration.voltages.Ux = getCalibrationMap(file, "/maps/voltages/Ux");
+		m_calibration.voltages.Uy = getCalibrationMap(file, "/maps/voltages/Uy");
 
 		m_calibration.cameraProperties.width = getCalibrationValue(file, "/camera/width");
 		m_calibration.cameraProperties.height = getCalibrationValue(file, "/camera/height");
@@ -508,6 +503,22 @@ double NIDAQ::getCalibrationValue(H5::H5File file, std::string datasetName) {
 	dataset.read(&value, PredType::NATIVE_DOUBLE, memspace, filespace);
 
 	return value;
+}
+
+std::vector<double> NIDAQ::getCalibrationMap(H5::H5File file, std::string datasetName) {
+	using namespace H5;
+	std::vector<double> map;
+
+	DataSet dataset = file.openDataSet(datasetName.c_str());
+	DataSpace filespace = dataset.getSpace();
+	int rank = filespace.getSimpleExtentNdims();
+	hsize_t dims[2];
+	rank = filespace.getSimpleExtentDims(dims);
+	DataSpace memspace(2, dims);
+	map.resize(dims[0] * dims[1]);
+	dataset.read(&map[0], PredType::NATIVE_DOUBLE, memspace, filespace);
+
+	return map;
 }
 
 void NIDAQ::triggerCamera() {
@@ -559,72 +570,48 @@ POINT2 NIDAQ::pixToMicroMeter(POINT2 positionPix) {
 
 VOLTAGE2 NIDAQ::positionToVoltage(POINT2 position) {
 
-	position.x /= simplemath::sgn(m_calibration.fliplr);
-	position.y /= simplemath::sgn(m_calibration.flipud);
+	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> x(&m_calibration.positions.x[0], m_calibration.positions.x.size(), 1);
+	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> y(&m_calibration.positions.y[0], m_calibration.positions.y.size(), 1);
+	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> Ux(&m_calibration.voltages.Ux[0], m_calibration.voltages.Ux.size(), 1);
+	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> Uy(&m_calibration.voltages.Uy[0], m_calibration.voltages.Uy.size(), 1);
+	Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> xr(1,1);
+	xr(0, 0) = position.x;
+	Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> yr(1,1);
+	yr(0, 0) = position.y;
 
-	position = position - m_calibration.translation;
+	Eigen::Array<double, -1, -1> tmp1 = x;
+	Eigen::Array<double, -1, -1> tmp2 = y;
+	Eigen::Array<double, -1, -1> tmp3 = Ux;
+	Eigen::Array<double, -1, -1> tmp4 = Uy;
 
-	double x_rot = position.x * cos(m_calibration.rho) + position.y * sin(m_calibration.rho);
-	double y_rot = position.y * cos(m_calibration.rho) - position.x * sin(m_calibration.rho);
+	auto Uxr = interpolation::biharmonic_spline(tmp1, tmp2, tmp3, xr, yr);
+	auto Uyr = interpolation::biharmonic_spline(tmp1, tmp2, tmp4, xr, yr);
 
-	double R_old = sqrt(pow(position.x, 2) + pow(position.y, 2));
+	VOLTAGE2 voltage{ Uxr(0, 0), Uyr(0, 0) };
 
-	VOLTAGE2 voltage{ 0, 0 };
-	if (R_old == 0) {
-		voltage = { x_rot, y_rot };
-		return voltage;
-	}
-
-	// solve for R_new
-
-	COEFFICIENTS5 coef = m_calibration.coef;
-	coef.e = -1 * R_old;
-	std::vector<std::complex<double>> solutions = simplemath::solveQuartic(coef);
-
-	// select real, positive solutions
-	std::vector<double> selected;
-	for (gsl::index i = 0; i < solutions.size(); i++) {
-		if (abs((solutions[i]).imag()) < 1e-10 && solutions[i].real() > 0) {
-			selected.push_back(solutions[i].real());
-		}
-	};
-
-	double R_new{ 0 };
-	if (selected.empty()) {
-		R_new = NAN;
-	}
-	else if (selected.size() == 1) {
-		R_new = selected[0];
-	}
-	else {
-		R_new = simplemath::min(selected);
-	}
-
-	voltage = { x_rot / R_old * R_new, y_rot / R_old * R_new };
 	return voltage;
 }
 
 POINT2 NIDAQ::voltageToPosition(VOLTAGE2 voltage) {
 
-	double R_old = sqrt(pow(voltage.Ux, 2) + pow(voltage.Uy, 2));
-	double R_new = m_calibration.coef.d * R_old + m_calibration.coef.c * pow(R_old, 2) +
-		m_calibration.coef.b * pow(R_old, 3) + m_calibration.coef.a * pow(R_old, 4);
+	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> x(&m_calibration.positions.x[0], m_calibration.positions.x.size(), 1);
+	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> y(&m_calibration.positions.y[0], m_calibration.positions.y.size(), 1);
+	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> Ux(&m_calibration.voltages.Ux[0], m_calibration.voltages.Ux.size(), 1);
+	Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>> Uy(&m_calibration.voltages.Uy[0], m_calibration.voltages.Uy.size(), 1);
+	Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> Uxr(1, 1);
+	Uxr(0, 0) = voltage.Ux;
+	Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> Uyr(1, 1);
+	Uyr(0, 0) = voltage.Uy;
 
-	double Ux_rot = voltage.Ux * cos(m_calibration.rho) - voltage.Uy * sin(m_calibration.rho);
-	double Uy_rot = voltage.Ux * sin(m_calibration.rho) + voltage.Uy * cos(m_calibration.rho);
+	Eigen::Array<double, -1, -1> tmp1 = Ux;
+	Eigen::Array<double, -1, -1> tmp2 = Uy;
+	Eigen::Array<double, -1, -1> tmp3 = x;
+	Eigen::Array<double, -1, -1> tmp4 = y;
 
-	POINT2 position{ 0, 0 };
-	if (R_old == 0) {
-		position = { Ux_rot, Uy_rot };
-	}
-	else {
-		position = { Ux_rot / R_old * R_new, Uy_rot / R_old * R_new };
-	}
+	auto xr = interpolation::biharmonic_spline(tmp1, tmp2, tmp3, Uxr, Uyr);
+	auto yr = interpolation::biharmonic_spline(tmp1, tmp2, tmp4, Uxr, Uyr);
 
-	position = position + m_calibration.translation;
-
-	position.x *= simplemath::sgn(m_calibration.fliplr);
-	position.y *= simplemath::sgn(m_calibration.flipud);
+	POINT2 position{ xr(0, 0), yr(0, 0) };
 
 	return position;
 }
