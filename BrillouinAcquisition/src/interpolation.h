@@ -98,6 +98,27 @@ public:
 
 		return values;
 	}
+
+	template <typename T = double>
+	static T biharmonic_spline_calculate_values(
+		WEIGHTS<T> weights,
+		T xr,
+		T yr
+	) {
+		// Calculate the value for the requested point
+		Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic> d
+			= (xr + std::complex<T>(0, 1) * yr - weights.xy_vec.array()).abs();
+		Eigen::Matrix<T, 1, Eigen::Dynamic> g = (d.square() * (d.log() - 1)).matrix();
+
+		// Set the value of the Green's function at position zero
+		Eigen::Index minRow, minCol;
+		d.abs().minCoeff(&minRow, &minCol);
+		if (d(minRow, minCol) == 0.0) {
+			g(minRow, minCol) = 0;
+		}
+
+		return g * weights.weights;
+	}
 };
 
 #endif //INTERPOLATION_H

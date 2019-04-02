@@ -597,26 +597,16 @@ POINT2 NIDAQ::pixToMicroMeter(POINT2 positionPix) {
 
 VOLTAGE2 NIDAQ::positionToVoltage(POINT2 position) {
 
-	Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> xr(1,1);
-	xr(0, 0) = position.x;
-	Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> yr(1,1);
-	yr(0, 0) = position.y;
+	auto Uxr = interpolation::biharmonic_spline_calculate_values(m_calibration.positions_weights.x, position.x, position.y);
+	auto Uyr = interpolation::biharmonic_spline_calculate_values(m_calibration.positions_weights.y, position.x, position.y);
 
-	auto Uxr = interpolation::biharmonic_spline_calculate_values(m_calibration.positions_weights.x, xr, yr);
-	auto Uyr = interpolation::biharmonic_spline_calculate_values(m_calibration.positions_weights.y, xr, yr);
-
-	return VOLTAGE2{ Uxr(0, 0), Uyr(0, 0) };
+	return VOLTAGE2{ Uxr, Uyr };
 }
 
 POINT2 NIDAQ::voltageToPosition(VOLTAGE2 voltage) {
 
-	Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> Uxr(1, 1);
-	Uxr(0, 0) = voltage.Ux;
-	Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> Uyr(1, 1);
-	Uyr(0, 0) = voltage.Uy;
+	auto xr = interpolation::biharmonic_spline_calculate_values(m_calibration.voltages_weights.x, voltage.Ux, voltage.Uy);
+	auto yr = interpolation::biharmonic_spline_calculate_values(m_calibration.voltages_weights.y, voltage.Ux, voltage.Uy);
 
-	auto xr = interpolation::biharmonic_spline_calculate_values(m_calibration.voltages_weights.x, Uxr, Uyr);
-	auto yr = interpolation::biharmonic_spline_calculate_values(m_calibration.voltages_weights.y, Uxr, Uyr);
-
-	return POINT2{ xr(0, 0), yr(0, 0) };
+	return POINT2{ xr, yr };
 }
