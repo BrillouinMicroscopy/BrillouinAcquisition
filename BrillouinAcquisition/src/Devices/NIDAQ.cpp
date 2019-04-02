@@ -29,6 +29,7 @@ NIDAQ::NIDAQ() noexcept {
 	m_absoluteBounds = m_calibration.bounds;
 
 	m_elementPositions = std::vector<double>((int)DEVICE_ELEMENT::COUNT, -1);
+	calculateCalibrationBounds();
 	calculateCalibrationWeights();
 }
 
@@ -479,11 +480,8 @@ void NIDAQ::loadVoltagePositionCalibration(std::string filepath) {
 		m_calibration.cameraProperties.pixelSize = getCalibrationValue(file, "/camera/pixelSize");
 		m_calibration.cameraProperties.mag = getCalibrationValue(file, "/camera/magnification");
 
-		m_calibration.bounds.xMin = getCalibrationValue(file, "/bounds/xMin");
-		m_calibration.bounds.xMax = getCalibrationValue(file, "/bounds/xMax");
-		m_calibration.bounds.yMin = getCalibrationValue(file, "/bounds/yMin");
-		m_calibration.bounds.yMax = getCalibrationValue(file, "/bounds/yMax");
-		m_absoluteBounds = m_calibration.bounds;
+		calculateCalibrationBounds();
+
 		m_calibration.valid = true;
 
 		calculateCalibrationWeights();
@@ -491,6 +489,15 @@ void NIDAQ::loadVoltagePositionCalibration(std::string filepath) {
 	emit(calibrationChanged(m_calibration));
 	centerPosition();
 	calculateHomePositionBounds();
+}
+
+void NIDAQ::calculateCalibrationBounds() {
+	double fac = 1e6 * m_calibration.cameraProperties.pixelSize / m_calibration.cameraProperties.mag / 2;
+	m_calibration.bounds.xMin = -1 * fac * m_calibration.cameraProperties.width;
+	m_calibration.bounds.xMax = fac * m_calibration.cameraProperties.width;
+	m_calibration.bounds.yMin = -1 * fac * m_calibration.cameraProperties.height;
+	m_calibration.bounds.yMax = fac * m_calibration.cameraProperties.height;
+	m_absoluteBounds = m_calibration.bounds;
 }
 
 void NIDAQ::calculateCalibrationWeights() {

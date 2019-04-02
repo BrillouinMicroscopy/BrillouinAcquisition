@@ -358,22 +358,3 @@ h5write(fullFilename, ds, voltages.Ux(idxgood));
 ds = [d 'voltages/Uy'];
 h5create(fullFilename, ds, size(voltages.Uy(idxgood)));
 h5write(fullFilename, ds, voltages.Uy(idxgood));
-
-%% write bounds
-d = '/bounds/';
-
-ds = [d 'xMin'];
-h5create(fullFilename, ds, 1, 'ChunkSize', 1);
-h5write(fullFilename, ds, bounds.xMin);
-
-ds = [d 'xMax'];
-h5create(fullFilename, ds, 1, 'ChunkSize', 1);
-h5write(fullFilename, ds, bounds.xMax);
-
-ds = [d 'yMin'];
-h5create(fullFilename, ds, 1, 'ChunkSize', 1);
-h5write(fullFilename, ds, bounds.yMin);
-
-ds = [d 'yMax'];
-h5create(fullFilename, ds, 1, 'ChunkSize', 1);
-h5write(fullFilename, ds, bounds.yMax);
