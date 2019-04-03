@@ -1817,6 +1817,10 @@ void BrillouinAcquisition::selectCameraDevice(int index) {
 	m_cameraTypeTemporary = (CAMERA_DEVICE)index;
 }
 
+void BrillouinAcquisition::on_actionAcquire_Voltage_Position_calibration_triggered() {
+	m_Calibration->startRepetitions();
+}
+
 void BrillouinAcquisition::on_actionLoad_Voltage_Position_calibration_triggered() {
 	m_calibrationFilePath = QFileDialog::getOpenFileName(this, tr("Select Voltage-Position map"),
 		QString::fromStdString(m_calibrationFilePath), tr("Calibration map (*.h5)")).toStdString();
@@ -1945,24 +1949,25 @@ void BrillouinAcquisition::initScanControl() {
 	switch (m_scanControllerType) {
 		case ScanControl::SCAN_DEVICE::ZEISSECU:
 			m_scanControl = new ZeissECU();
-			ui->actionLoad_Voltage_Position_calibration->setVisible(false);
 			m_hasODT = false;
+			m_hasSpatialCalibration = false;
 			break;
 		case ScanControl::SCAN_DEVICE::NIDAQ:
 			m_scanControl = new NIDAQ();
 			m_hasODT = true;
-			ui->actionLoad_Voltage_Position_calibration->setVisible(true);
+			m_hasSpatialCalibration = true;
 			break;
 		default:
 			m_scanControl = new ZeissECU();
-			ui->actionLoad_Voltage_Position_calibration->setVisible(false);
 			// disable ODT
 			m_hasODT = false;
+			m_hasSpatialCalibration = false;
 			break;
 	}
 
 	// init or de-init ODT
 	initODT();
+	initSpatialCalibration();
 
 	// reestablish m_scanControl connections
 	connection = QWidget::connect(
@@ -2095,6 +2100,33 @@ void BrillouinAcquisition::initODT() {
 		// start ODT thread
 		m_acquisitionThread.startWorker(m_ODT);
 		m_ODT->initialize();
+	}
+}
+
+void BrillouinAcquisition::initSpatialCalibration() {
+	if (!m_hasSpatialCalibration) {
+		ui->actionLoad_Voltage_Position_calibration->setVisible(false);
+		ui->actionAcquire_Voltage_Position_calibration->setVisible(false);
+		if (m_Calibration) {
+			m_Calibration->deleteLater();
+			m_Calibration = nullptr;
+		}
+	} else {
+		m_Calibration = new Calibration(nullptr, m_acquisition, &m_brightfieldCamera, (NIDAQ**)&m_scanControl);
+		ui->actionLoad_Voltage_Position_calibration->setVisible(true);
+		ui->actionAcquire_Voltage_Position_calibration->setVisible(true);
+
+		static QMetaObject::Connection connection;
+		connection = QWidget::connect(
+			m_Calibration,
+			&Calibration::s_cameraSettingsChanged,
+			this,
+			[this](CAMERA_SETTINGS settings) { updateODTCameraSettings(settings); }
+		);
+
+		// start Calibration thread
+		m_acquisitionThread.startWorker(m_Calibration);
+		m_Calibration->initialize();
 	}
 }
 

@@ -240,6 +240,12 @@
     <ClCompile Include="src\Devices\uEyeCam.cpp">
       <Filter>Source Files\Devices</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_Calibration.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Acquisition\AcquisitionModes\Calibration.cpp">
+      <Filter>Source Files\Acquisition\AcquisitionModes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_BrillouinAcquisition.h">
@@ -339,6 +345,9 @@
     </CustomBuild>
     <CustomBuild Include="src\Devices\uEyeCam.h">
       <Filter>Header Files\Devices</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Acquisition\AcquisitionModes\Calibration.h">
+      <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

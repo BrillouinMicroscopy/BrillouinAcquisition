@@ -491,6 +491,20 @@ void NIDAQ::loadVoltagePositionCalibration(std::string filepath) {
 	calculateHomePositionBounds();
 }
 
+void NIDAQ::setSpatialCalibration(SpatialCalibration spatialCalibration) {
+	m_calibration = spatialCalibration;
+
+	calculateCalibrationBounds();
+
+	m_calibration.valid = true;
+
+	calculateCalibrationWeights();
+
+	emit(calibrationChanged(m_calibration));
+	centerPosition();
+	calculateHomePositionBounds();
+};
+
 void NIDAQ::calculateCalibrationBounds() {
 	double fac = 1e6 * m_calibration.cameraProperties.pixelSize / m_calibration.cameraProperties.mag / 2;
 	m_calibration.bounds.xMin = -1 * fac * m_calibration.cameraProperties.width;

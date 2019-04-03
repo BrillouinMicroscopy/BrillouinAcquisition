@@ -727,8 +727,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>236</width>
-                <height>219</height>
+                <width>165</width>
+                <height>180</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -788,7 +788,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>230</width>
-                <height>219</height>
+                <height>180</height>
                </rect>
               </property>
               <property name="sizePolicy">
@@ -1042,7 +1042,7 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>223</width>
+                <width>165</width>
                 <height>250</height>
                </rect>
               </property>
@@ -1418,7 +1418,7 @@ QTabBar::tab:!selected {
                 <property name="value">
                  <number>1024</number>
                 </property>
-             </widget>
+               </widget>
                <widget class="QDoubleSpinBox" name="cameraMagODT">
                 <property name="enabled">
                  <bool>false</bool>
@@ -1451,8 +1451,8 @@ QTabBar::tab:!selected {
                  <double>4.800000000000000</double>
                 </property>
                </widget>
+              </widget>
              </widget>
-            </widget>
             </widget>
            </item>
           </layout>
@@ -4013,6 +4013,7 @@ border: none;</string>
     <addaction name="actionEnable_Cooling"/>
     <addaction name="separator"/>
     <addaction name="actionConnect_Stage"/>
+    <addaction name="actionAcquire_Voltage_Position_calibration"/>
     <addaction name="actionLoad_Voltage_Position_calibration"/>
     <addaction name="separator"/>
     <addaction name="actionConnect_Brightfield_camera"/>
@@ -4101,6 +4102,11 @@ border: none;</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+W</string>
+   </property>
+  </action>
+  <action name="actionAcquire_Voltage_Position_calibration">
+   <property name="text">
+    <string>Acquire V-µm calibration</string>
    </property>
   </action>
  </widget>
@@ -4237,8 +4243,8 @@ border: none;</string>
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_3"/>
   <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup_3"/>
  </buttongroups>
 </ui>

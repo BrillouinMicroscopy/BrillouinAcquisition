@@ -231,6 +231,7 @@ public slots:
 	void moveToSavedPosition(int index);
 	void deleteSavedPosition(int index);
 	virtual void loadVoltagePositionCalibration(std::string filepath) {};
+	virtual void setSpatialCalibration(SpatialCalibration spatialCalibration) {};
 
 	std::vector<POINT3> getSavedPositionsNormalized();
 	void announceSavedPositionsNormalized();

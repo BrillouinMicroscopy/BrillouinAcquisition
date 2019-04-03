@@ -131,7 +131,9 @@ public slots:
 	void setPositionRelativeZ(double position);
 	void setPositionInPix(POINT2);
 	void setHome();
+
 	void loadVoltagePositionCalibration(std::string filepath) override;
+	void setSpatialCalibration(SpatialCalibration spatialCalibration) override;
 
 
 	void triggerCamera();

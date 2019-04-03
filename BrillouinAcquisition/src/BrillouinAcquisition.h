@@ -20,6 +20,7 @@
 #include"Acquisition/AcquisitionModes/Brillouin.h"
 #include"Acquisition/AcquisitionModes/ODT.h"
 #include"Acquisition/AcquisitionModes/Fluorescence.h"
+#include"Acquisition/AcquisitionModes/Calibration.h"
 
 #include <QtWidgets/QMainWindow>
 #include "ui_BrillouinAcquisition.h"
@@ -132,6 +133,7 @@ private slots:
 	void initSettingsDialog();
 	void selectScanningDevice(int index);
 	void selectCameraDevice(int index);
+	void on_actionAcquire_Voltage_Position_calibration_triggered();
 	void on_actionLoad_Voltage_Position_calibration_triggered();
 
 	void initBeampathButtons();
@@ -338,6 +340,7 @@ private:
 
 	void initScanControl();
 	void initODT();
+	void initSpatialCalibration();
 	void initFluorescence();
 	void initCamera();
 	QComboBox* m_scanControlDropdown;
@@ -361,6 +364,7 @@ private:
 	BRILLOUIN_SETTINGS m_BrillouinSettings;
 	ODT* m_ODT = nullptr;
 	Fluorescence* m_Fluorescence = nullptr;
+	Calibration* m_Calibration = nullptr;
 
 	PLOT_SETTINGS m_BrillouinPlot;
 	PLOT_SETTINGS m_ODTPlot;
@@ -380,6 +384,7 @@ private:
 	ACQUISITION_MODE m_enabledModes = ACQUISITION_MODE::NONE;
 
 	bool m_hasODT{ false };
+	bool m_hasSpatialCalibration{ false };
 	bool m_isTabVisibleODT{ false };
 	bool m_hasFluorescence{ false };
 	bool m_isTabVisibleFluorescence{ false };
