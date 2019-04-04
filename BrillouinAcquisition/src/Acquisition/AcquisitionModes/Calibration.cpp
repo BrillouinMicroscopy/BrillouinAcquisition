@@ -38,16 +38,14 @@ void Calibration::startRepetitions() {
 	// configure camera for measurement
 	CAMERA_SETTINGS settings = (*m_camera)->getSettings();
 	// set ROI and readout parameters to default Brillouin values, exposure time and gain will be kept
-	settings.roi.left = 128;
+	settings.roi.left = 0;
 	settings.roi.top = 0;
-	settings.roi.width = 1024;
-	settings.roi.height = 1024;
+	settings.roi.width = m_calibration.cameraProperties.width;
+	settings.roi.height = m_calibration.cameraProperties.height;
 	settings.readout.pixelEncoding = L"Raw8";
 	settings.readout.triggerMode = L"External";
 	settings.readout.cycleMode = L"Continuous";
 	settings.frameCount = m_acqSettings.Ux_steps * m_acqSettings.Uy_steps;
-	settings.exposureTime = m_cameraSettings.exposureTime;
-	settings.gain = m_cameraSettings.gain;
 
 	(*m_camera)->startAcquisition(settings);
 
@@ -133,12 +131,14 @@ void Calibration::acquire() {
 		// Extract spot position from camera image
 		auto iterator_max = std::max_element(images.begin(), images.end());
 		auto index = std::distance(images.begin(), iterator_max);
-		if (*iterator_max > 100) {
+		if (*iterator_max > m_minimalIntensity) {
 			int y = floor(index / m_cameraSettings.roi.height);
 			int x = index % m_cameraSettings.roi.height;
 
-			double x_m = 4.8e-6 / 57 * (x - m_cameraSettings.roi.width / 2 - 0.5);
-			double y_m = -4.8e-6 / 57 * (y - m_cameraSettings.roi.height / 2 - 0.5);
+			double x_m = m_calibration.cameraProperties.pixelSize / m_calibration.cameraProperties.mag
+				* (x - m_calibration.cameraProperties.width / 2 - 0.5);
+			double y_m = -1 * m_calibration.cameraProperties.pixelSize / m_calibration.cameraProperties.mag
+				* (y - m_calibration.cameraProperties.height / 2 - 0.5);
 
 			Ux_valid.push_back(m_acqSettings.voltages[i].Ux);
 			Uy_valid.push_back(m_acqSettings.voltages[i].Uy);

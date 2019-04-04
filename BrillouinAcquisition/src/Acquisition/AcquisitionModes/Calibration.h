@@ -41,6 +41,8 @@ private:
 	void abortMode(std::unique_ptr <StorageWrapper> & storage) override;
 	void abortMode();
 
+	double m_minimalIntensity = 100;		// [1] minimum peak intensity for valid peaks
+
 	SpatialCalibration m_calibration;
 
 	double getCalibrationValue(H5::H5File file, std::string datasetName);
