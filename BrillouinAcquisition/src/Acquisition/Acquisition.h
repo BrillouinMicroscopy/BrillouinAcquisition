@@ -32,6 +32,8 @@ public slots:
 	void startedWritingToFile();
 	void finishedWritingToFile();
 	int closeFile();
+
+	std::string getCurrentFolder();
 	
 	bool isModeEnabled(ACQUISITION_MODE mode);
 

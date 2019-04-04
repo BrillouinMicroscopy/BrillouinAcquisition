@@ -85,6 +85,10 @@ int Acquisition::closeFile() {
 	return 0;
 }
 
+std::string Acquisition::getCurrentFolder() {
+	return m_path.folder;
+}
+
 bool Acquisition::isModeEnabled(ACQUISITION_MODE mode) {
 	return (bool)(m_enabledModes & mode);
 }
