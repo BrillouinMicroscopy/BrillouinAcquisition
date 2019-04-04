@@ -282,7 +282,7 @@ void Calibration::save() {
 
 	std::string offse = QString("+%1").arg(offset, 2, 10, QChar('0')).toStdString();
 
-	std::string filepath{ folder + "_positionCalibration_" };
+	std::string filepath{ folder + "/_positionCalibration_" };
 	filepath += shortdate + offse + ".h5";
 
 
