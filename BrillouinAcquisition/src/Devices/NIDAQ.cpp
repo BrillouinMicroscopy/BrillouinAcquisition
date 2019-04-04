@@ -26,11 +26,12 @@ NIDAQ::NIDAQ() noexcept {
 		{	"Laser off",	SCAN_LASEROFF,		{ {1},  {},  {},  {},  {},  {},  {} }	}	// Laser off
 	};
 
+	CalibrationHelper::calculateCalibrationBounds(&m_calibration);
+	CalibrationHelper::calculateCalibrationWeights(&m_calibration);
+
 	m_absoluteBounds = m_calibration.bounds;
 
 	m_elementPositions = std::vector<double>((int)DEVICE_ELEMENT::COUNT, -1);
-	calculateCalibrationBounds();
-	calculateCalibrationWeights();
 }
 
 NIDAQ::~NIDAQ() {
@@ -451,118 +452,16 @@ void NIDAQ::setHome() {
 	calculateHomePositionBounds();
 }
 
-void NIDAQ::loadVoltagePositionCalibration(std::string filepath) {
-
-	using namespace std::experimental::filesystem::v1;
-
-	if (exists(filepath)) {
-		H5::H5File file(&filepath[0], H5F_ACC_RDONLY);
-
-		// read date
-		H5::Group root = file.openGroup("/");
-		H5::Attribute attr = root.openAttribute("date");
-		H5::DataType type = attr.getDataType();
-		hsize_t dateLength = attr.getStorageSize();
-		char *buf = new char[dateLength + 1];
-		attr.read(type, buf);
-		m_calibration.date.assign(buf, dateLength);
-		delete[] buf;
-		buf = nullptr;
-
-		// Read calibration maps
-		m_calibration.positions.x = getCalibrationMap(file, "/maps/positions/x");
-		m_calibration.positions.y = getCalibrationMap(file, "/maps/positions/y");
-		m_calibration.voltages.Ux = getCalibrationMap(file, "/maps/voltages/Ux");
-		m_calibration.voltages.Uy = getCalibrationMap(file, "/maps/voltages/Uy");
-
-		m_calibration.cameraProperties.width = getCalibrationValue(file, "/camera/width");
-		m_calibration.cameraProperties.height = getCalibrationValue(file, "/camera/height");
-		m_calibration.cameraProperties.pixelSize = getCalibrationValue(file, "/camera/pixelSize");
-		m_calibration.cameraProperties.mag = getCalibrationValue(file, "/camera/magnification");
-
-		calculateCalibrationBounds();
-
-		m_calibration.valid = true;
-
-		calculateCalibrationWeights();
-	}
-	emit(calibrationChanged(m_calibration));
-	centerPosition();
-	calculateHomePositionBounds();
-}
-
 void NIDAQ::setSpatialCalibration(SpatialCalibration spatialCalibration) {
 	m_calibration = spatialCalibration;
 
-	calculateCalibrationBounds();
-
-	m_calibration.valid = true;
-
-	calculateCalibrationWeights();
-
-	emit(calibrationChanged(m_calibration));
 	centerPosition();
 	calculateHomePositionBounds();
-};
-
-void NIDAQ::calculateCalibrationBounds() {
-	double fac = 1e6 * m_calibration.cameraProperties.pixelSize / m_calibration.cameraProperties.mag / 2;
-	m_calibration.bounds.xMin = -1 * fac * m_calibration.cameraProperties.width;
-	m_calibration.bounds.xMax = fac * m_calibration.cameraProperties.width;
-	m_calibration.bounds.yMin = -1 * fac * m_calibration.cameraProperties.height;
-	m_calibration.bounds.yMax = fac * m_calibration.cameraProperties.height;
+	
 	m_absoluteBounds = m_calibration.bounds;
-}
 
-void NIDAQ::calculateCalibrationWeights() {
-	Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> x = Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>>(&m_calibration.positions.x[0], m_calibration.positions.x.size(), 1);
-	Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> y = Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>>(&m_calibration.positions.y[0], m_calibration.positions.y.size(), 1);
-	Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> Ux = Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>>(&m_calibration.voltages.Ux[0], m_calibration.voltages.Ux.size(), 1);
-	Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> Uy = Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>>(&m_calibration.voltages.Uy[0], m_calibration.voltages.Uy.size(), 1);
-
-	/*
-	 * Calculate the position weights
-	 */
-	m_calibration.positions_weights.x = interpolation::biharmonic_spline_calculate_weights(x, y, Ux);
-	m_calibration.positions_weights.y = interpolation::biharmonic_spline_calculate_weights(x, y, Uy);
-
-	/*
-	 * Calculate the voltage weights
-	 */
-	m_calibration.voltages_weights.x = interpolation::biharmonic_spline_calculate_weights(Ux, Uy, x);
-	m_calibration.voltages_weights.y = interpolation::biharmonic_spline_calculate_weights(Ux, Uy, y);
-}
-
-double NIDAQ::getCalibrationValue(H5::H5File file, std::string datasetName) {
-	using namespace H5;
-	double value{ 0 };
-
-	DataSet dataset = file.openDataSet(datasetName.c_str());
-	DataSpace filespace = dataset.getSpace();
-	int rank = filespace.getSimpleExtentNdims();
-	hsize_t dims[2];
-	rank = filespace.getSimpleExtentDims(dims);
-	DataSpace memspace(1, dims);
-	dataset.read(&value, PredType::NATIVE_DOUBLE, memspace, filespace);
-
-	return value;
-}
-
-std::vector<double> NIDAQ::getCalibrationMap(H5::H5File file, std::string datasetName) {
-	using namespace H5;
-	std::vector<double> map;
-
-	DataSet dataset = file.openDataSet(datasetName.c_str());
-	DataSpace filespace = dataset.getSpace();
-	int rank = filespace.getSimpleExtentNdims();
-	hsize_t dims[2];
-	rank = filespace.getSimpleExtentDims(dims);
-	DataSpace memspace(2, dims);
-	map.resize(dims[0] * dims[1]);
-	dataset.read(&map[0], PredType::NATIVE_DOUBLE, memspace, filespace);
-
-	return map;
-}
+	emit(calibrationChanged(m_calibration));
+};
 
 void NIDAQ::triggerCamera() {
 	DAQmxWriteDigitalLines(DOtaskHandle, 1, true, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);

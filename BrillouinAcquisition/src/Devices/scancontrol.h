@@ -2,8 +2,8 @@
 #define SCANCONTROL_H
 
 #include "Device.h"
+#include "CalibrationHelper.h"
 #include "../../external/h5bm/TypesafeBitmask.h"
-#include "../interpolation.h"
 
 typedef enum enScanPreset {
 	SCAN_NULL = 0x0,
@@ -46,50 +46,6 @@ struct POINT2 {
 struct VOLTAGE2 {
 	double Ux{ 0 };
 	double Uy{ 0 };
-};
-
-struct BOUNDS {
-	double xMin{ -1e3 };	// [µm] minimal x-value
-	double xMax{  1e3 };	// [µm] maximal x-value
-	double yMin{ -1e3 };	// [µm] minimal y-value
-	double yMax{  1e3 };	// [µm] maximal y-value
-	double zMin{ -1e3 };	// [µm] minimal z-value
-	double zMax{  1e3 };	// [µm] maximal z-value
-};
-
-struct POSITION_MAPS {
-	std::vector<double> x{ 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5 };
-	std::vector<double> y{ 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5 };
-};
-
-struct VOLTAGE_MAPS {
-	std::vector<double> Ux{ -2, -2, -2, -2, -2, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2 };
-	std::vector<double> Uy{ -2, -1, 0, 1, 2, -2, -1, 0, 1, 2, -2, -1, 0, 1, 2, -2, -1, 0, 1, 2, -2, -1, 0, 1, 2 };
-};
-
-struct CameraProperties {
-	int width{ 1280 };			// [pix] image width
-	int height{ 1024 };			// [pix] image height
-	double pixelSize{ 4.8e-6 };	// [µm]  pixel size
-	double mag = 57;			// [1]   magnification
-};
-
-struct SpatialCalibration {
-	std::string date{ "" };
-	POSITION_MAPS positions;
-	WEIGHTS2<double> positions_weights;
-	VOLTAGE_MAPS voltages;
-	WEIGHTS2<double> voltages_weights;
-	BOUNDS bounds = {
-		-53,	// [µm] minimal x-value
-		 53,	// [µm] maximal x-value
-		-43,	// [µm] minimal y-value
-		 43,	// [µm] maximal y-value
-		 -1000,	// [µm] minimal z-value
-		  1000	// [µm] maximal z-value
-	};
-	CameraProperties cameraProperties;
-	bool valid = false;
 };
 
 typedef enum enDeviceInput {
@@ -230,7 +186,6 @@ public slots:
 	void savePosition();
 	void moveToSavedPosition(int index);
 	void deleteSavedPosition(int index);
-	virtual void loadVoltagePositionCalibration(std::string filepath) {};
 	virtual void setSpatialCalibration(SpatialCalibration spatialCalibration) {};
 
 	std::vector<POINT3> getSavedPositionsNormalized();

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Calibration.h"
+#include "../../Devices/CalibrationHelper.h"
 #include "../../simplemath.h"
 
 Calibration::Calibration(QObject* parent, Acquisition* acquisition, Camera** camera, NIDAQ** nidaq)
@@ -147,22 +148,93 @@ void Calibration::acquire() {
 	}
 
 	// Construct spatial calibration object
-	SpatialCalibration spatialCalibration;
-	spatialCalibration.date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
+	m_calibration.date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 		.toString(Qt::ISODateWithMs).toStdString();
-	spatialCalibration.voltages.Ux = Ux_valid;
-	spatialCalibration.voltages.Uy = Uy_valid;
-	spatialCalibration.positions.x = x_valid;
-	spatialCalibration.positions.y = y_valid;
-	spatialCalibration.valid = true;
+	m_calibration.voltages.Ux = Ux_valid;
+	m_calibration.voltages.Uy = Uy_valid;
+	m_calibration.positions.x = x_valid;
+	m_calibration.positions.y = y_valid;
+	m_calibration.valid = true;
 
-	(*m_NIDAQ)->setSpatialCalibration(spatialCalibration);
+	CalibrationHelper::calculateCalibrationBounds(&m_calibration);
+	CalibrationHelper::calculateCalibrationWeights(&m_calibration);
+
+	(*m_NIDAQ)->setSpatialCalibration(m_calibration);
 
 	m_status = ACQUISITION_STATUS::FINISHED;
 	emit(s_acquisitionStatus(m_status));
 }
 
 void Calibration::abortMode(std::unique_ptr <StorageWrapper> & storage) {}
+
+void Calibration::loadVoltagePositionCalibration(std::string filepath) {
+
+	using namespace std::experimental::filesystem::v1;
+
+	if (exists(filepath)) {
+		H5::H5File file(&filepath[0], H5F_ACC_RDONLY);
+
+		// read date
+		H5::Group root = file.openGroup("/");
+		H5::Attribute attr = root.openAttribute("date");
+		H5::DataType type = attr.getDataType();
+		hsize_t dateLength = attr.getStorageSize();
+		char *buf = new char[dateLength + 1];
+		attr.read(type, buf);
+		m_calibration.date.assign(buf, dateLength);
+		delete[] buf;
+		buf = nullptr;
+
+		// Read calibration maps
+		m_calibration.positions.x = getCalibrationMap(file, "/maps/positions/x");
+		m_calibration.positions.y = getCalibrationMap(file, "/maps/positions/y");
+		m_calibration.voltages.Ux = getCalibrationMap(file, "/maps/voltages/Ux");
+		m_calibration.voltages.Uy = getCalibrationMap(file, "/maps/voltages/Uy");
+
+		m_calibration.cameraProperties.width = getCalibrationValue(file, "/camera/width");
+		m_calibration.cameraProperties.height = getCalibrationValue(file, "/camera/height");
+		m_calibration.cameraProperties.pixelSize = getCalibrationValue(file, "/camera/pixelSize");
+		m_calibration.cameraProperties.mag = getCalibrationValue(file, "/camera/magnification");
+
+		CalibrationHelper::calculateCalibrationBounds(&m_calibration);
+		CalibrationHelper::calculateCalibrationWeights(&m_calibration);
+
+		m_calibration.valid = true;
+	}
+
+	(*m_NIDAQ)->setSpatialCalibration(m_calibration);
+}
+
+double Calibration::getCalibrationValue(H5::H5File file, std::string datasetName) {
+	using namespace H5;
+	double value{ 0 };
+
+	DataSet dataset = file.openDataSet(datasetName.c_str());
+	DataSpace filespace = dataset.getSpace();
+	int rank = filespace.getSimpleExtentNdims();
+	hsize_t dims[2];
+	rank = filespace.getSimpleExtentDims(dims);
+	DataSpace memspace(1, dims);
+	dataset.read(&value, PredType::NATIVE_DOUBLE, memspace, filespace);
+
+	return value;
+}
+
+std::vector<double> Calibration::getCalibrationMap(H5::H5File file, std::string datasetName) {
+	using namespace H5;
+	std::vector<double> map;
+
+	DataSet dataset = file.openDataSet(datasetName.c_str());
+	DataSpace filespace = dataset.getSpace();
+	int rank = filespace.getSimpleExtentNdims();
+	hsize_t dims[2];
+	rank = filespace.getSimpleExtentDims(dims);
+	DataSpace memspace(2, dims);
+	map.resize(dims[0] * dims[1]);
+	dataset.read(&map[0], PredType::NATIVE_DOUBLE, memspace, filespace);
+
+	return map;
+}
 
 void Calibration::abortMode() {
 	m_acquisition->disableMode(ACQUISITION_MODE::SPATIALCALIBRATION);

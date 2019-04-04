@@ -79,10 +79,6 @@ private:
 	};
 
 	POINT2 pixToMicroMeter(POINT2);
-	void calculateCalibrationBounds();
-	void calculateCalibrationWeights();
-	double getCalibrationValue(H5::H5File file, std::string datasetName);
-	std::vector<double> getCalibrationMap(H5::H5File file, std::string datasetName);
 
 public:
 	NIDAQ() noexcept;
@@ -132,9 +128,7 @@ public slots:
 	void setPositionInPix(POINT2);
 	void setHome();
 
-	void loadVoltagePositionCalibration(std::string filepath) override;
 	void setSpatialCalibration(SpatialCalibration spatialCalibration) override;
-
 
 	void triggerCamera();
 	void setAcquisitionVoltages(ACQ_VOLTAGES voltages);

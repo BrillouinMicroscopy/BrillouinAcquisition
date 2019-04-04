@@ -275,6 +275,9 @@
     <ClInclude Include="src\interpolation.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Devices\CalibrationHelper.h">
+      <Filter>Header Files\Devices</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="external\h5bm\h5bm.h">
