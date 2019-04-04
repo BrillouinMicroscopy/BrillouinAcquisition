@@ -133,8 +133,8 @@ void Calibration::acquire() {
 		auto iterator_max = std::max_element(images.begin(), images.end());
 		auto index = std::distance(images.begin(), iterator_max);
 		if (*iterator_max > m_minimalIntensity) {
-			int y = floor(index / m_cameraSettings.roi.height);
-			int x = index % m_cameraSettings.roi.height;
+			int y = floor(index / m_cameraSettings.roi.width);
+			int x = index % m_cameraSettings.roi.width;
 
 			double x_m = m_calibration.cameraProperties.pixelSize / m_calibration.cameraProperties.mag
 				* (x - m_calibration.cameraProperties.width / 2 - 0.5);
