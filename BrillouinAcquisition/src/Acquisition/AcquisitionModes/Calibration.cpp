@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "H5Cpp.h"
 #include "Calibration.h"
 #include "../../Devices/CalibrationHelper.h"
 #include "../../simplemath.h"
@@ -159,6 +160,7 @@ void Calibration::acquire() {
 	CalibrationHelper::calculateCalibrationBounds(&m_calibration);
 	CalibrationHelper::calculateCalibrationWeights(&m_calibration);
 
+	save();
 	(*m_NIDAQ)->setSpatialCalibration(m_calibration);
 
 	m_status = ACQUISITION_STATUS::FINISHED;
@@ -167,7 +169,7 @@ void Calibration::acquire() {
 
 void Calibration::abortMode(std::unique_ptr <StorageWrapper> & storage) {}
 
-void Calibration::loadVoltagePositionCalibration(std::string filepath) {
+void Calibration::load(std::string filepath) {
 
 	using namespace std::experimental::filesystem::v1;
 
@@ -186,15 +188,15 @@ void Calibration::loadVoltagePositionCalibration(std::string filepath) {
 		buf = nullptr;
 
 		// Read calibration maps
-		m_calibration.positions.x = getCalibrationMap(file, "/maps/positions/x");
-		m_calibration.positions.y = getCalibrationMap(file, "/maps/positions/y");
-		m_calibration.voltages.Ux = getCalibrationMap(file, "/maps/voltages/Ux");
-		m_calibration.voltages.Uy = getCalibrationMap(file, "/maps/voltages/Uy");
+		m_calibration.positions.x = readCalibrationMap(file, "/maps/positions/x");
+		m_calibration.positions.y = readCalibrationMap(file, "/maps/positions/y");
+		m_calibration.voltages.Ux = readCalibrationMap(file, "/maps/voltages/Ux");
+		m_calibration.voltages.Uy = readCalibrationMap(file, "/maps/voltages/Uy");
 
-		m_calibration.cameraProperties.width = getCalibrationValue(file, "/camera/width");
-		m_calibration.cameraProperties.height = getCalibrationValue(file, "/camera/height");
-		m_calibration.cameraProperties.pixelSize = getCalibrationValue(file, "/camera/pixelSize");
-		m_calibration.cameraProperties.mag = getCalibrationValue(file, "/camera/magnification");
+		m_calibration.cameraProperties.width = readCalibrationValue(file, "/camera/width");
+		m_calibration.cameraProperties.height = readCalibrationValue(file, "/camera/height");
+		m_calibration.cameraProperties.pixelSize = readCalibrationValue(file, "/camera/pixelSize");
+		m_calibration.cameraProperties.mag = readCalibrationValue(file, "/camera/magnification");
 
 		CalibrationHelper::calculateCalibrationBounds(&m_calibration);
 		CalibrationHelper::calculateCalibrationWeights(&m_calibration);
@@ -205,7 +207,7 @@ void Calibration::loadVoltagePositionCalibration(std::string filepath) {
 	(*m_NIDAQ)->setSpatialCalibration(m_calibration);
 }
 
-double Calibration::getCalibrationValue(H5::H5File file, std::string datasetName) {
+double Calibration::readCalibrationValue(H5::H5File file, std::string datasetName) {
 	using namespace H5;
 	double value{ 0 };
 
@@ -220,7 +222,20 @@ double Calibration::getCalibrationValue(H5::H5File file, std::string datasetName
 	return value;
 }
 
-std::vector<double> Calibration::getCalibrationMap(H5::H5File file, std::string datasetName) {
+void Calibration::writeCalibrationValue(H5::Group group, const H5std_string datasetName, double value) {
+	using namespace H5;
+
+	hsize_t dims[2];
+	dims[0] = 1;
+	dims[1] = 1;
+
+	DataSpace dataspace = DataSpace(2, dims);
+	DataSet dataset = group.createDataSet(&datasetName[0], PredType::NATIVE_DOUBLE, dataspace);
+	
+	dataset.write(&value, PredType::NATIVE_DOUBLE);
+}
+
+std::vector<double> Calibration::readCalibrationMap(H5::H5File file, std::string datasetName) {
 	using namespace H5;
 	std::vector<double> map;
 
@@ -234,6 +249,68 @@ std::vector<double> Calibration::getCalibrationMap(H5::H5File file, std::string 
 	dataset.read(&map[0], PredType::NATIVE_DOUBLE, memspace, filespace);
 
 	return map;
+}
+
+void Calibration::writeCalibrationMap(H5::Group group, std::string datasetName, std::vector<double> map) {
+	using namespace H5;
+
+	hsize_t dims[2];
+	dims[0] = 1;
+	dims[1] = map.size();
+
+	DataSpace dataspace = DataSpace(2, dims);
+	DataSet dataset = group.createDataSet(&datasetName[0], PredType::NATIVE_DOUBLE, dataspace);
+
+	dataset.write(&map[0], PredType::NATIVE_DOUBLE);
+
+}
+
+void Calibration::save() {
+	
+	std::string fulldate = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
+		.toString(Qt::ISODateWithMs).toStdString();
+
+	std::string shortdate = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
+		.toString("yyyy-MM-ddTHHmmss").toStdString();
+	QDateTime dt1 = QDateTime::currentDateTime();
+	QDateTime dt2 = dt1.toUTC();
+	dt1.setTimeSpec(Qt::UTC);
+
+	int offset = dt2.secsTo(dt1) / 3600;
+
+	std::string offse = QString("+%1").arg(offset, 2, 10, QChar('0')).toStdString();
+
+	std::string filepath{ "_positionCalibration_" };
+	filepath += shortdate + offse + ".h5";
+
+
+	H5::H5File file(&filepath[0], H5F_ACC_TRUNC);
+
+	// write date
+	// Create the data space for the attribute.
+	H5::DataSpace attr_dataspace = H5::DataSpace(H5S_SCALAR);
+	// Create new string datatype for attribute
+	H5::StrType strdatatype(H5::PredType::C_S1, fulldate.size());
+	H5::Group root = file.openGroup("/");
+	H5::Attribute attr = root.createAttribute("date", strdatatype, attr_dataspace);
+	H5::DataType type = attr.getDataType();
+	attr.write(strdatatype, &fulldate[0]);
+
+	H5::Group group_camera(file.createGroup("/camera"));
+	writeCalibrationValue(group_camera, "width", m_calibration.cameraProperties.width);
+	writeCalibrationValue(group_camera, "height", m_calibration.cameraProperties.height);
+	writeCalibrationValue(group_camera, "pixelSize", m_calibration.cameraProperties.pixelSize);
+	writeCalibrationValue(group_camera, "magnification", m_calibration.cameraProperties.mag);
+
+	H5::Group maps(file.createGroup("/maps"));
+
+	H5::Group group_positions(maps.createGroup("positions"));
+	writeCalibrationMap(group_positions, "x", m_calibration.positions.x);
+	writeCalibrationMap(group_positions, "y", m_calibration.positions.y);
+
+	H5::Group group_voltages(maps.createGroup("voltages"));
+	writeCalibrationMap(group_voltages, "Ux", m_calibration.voltages.Ux);
+	writeCalibrationMap(group_voltages, "Uy", m_calibration.voltages.Uy);
 }
 
 void Calibration::abortMode() {

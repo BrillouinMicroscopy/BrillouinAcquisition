@@ -1824,7 +1824,7 @@ void BrillouinAcquisition::on_actionAcquire_Voltage_Position_calibration_trigger
 void BrillouinAcquisition::on_actionLoad_Voltage_Position_calibration_triggered() {
 	m_calibrationFilePath = QFileDialog::getOpenFileName(this, tr("Select Voltage-Position map"),
 		QString::fromStdString(m_calibrationFilePath), tr("Calibration map (*.h5)")).toStdString();
-	m_Calibration->loadVoltagePositionCalibration(m_calibrationFilePath);
+	m_Calibration->load(m_calibrationFilePath);
 }
 
 void BrillouinAcquisition::initBeampathButtons() {

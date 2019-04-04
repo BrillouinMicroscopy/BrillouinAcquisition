@@ -30,7 +30,7 @@ public slots:
 	void initialize();
 	void startRepetitions();
 	void setCameraSetting(CAMERA_SETTING, double);
-	void loadVoltagePositionCalibration(std::string filepath);
+	void load(std::string filepath);
 
 private:
 	CALIBRATION_SETTINGS m_acqSettings{};
@@ -45,8 +45,12 @@ private:
 
 	SpatialCalibration m_calibration;
 
-	double getCalibrationValue(H5::H5File file, std::string datasetName);
-	std::vector<double> getCalibrationMap(H5::H5File file, std::string datasetName);
+	double readCalibrationValue(H5::H5File file, std::string datasetName);
+	void writeCalibrationValue(H5::Group group, const H5std_string datasetName, double value);
+	std::vector<double> readCalibrationMap(H5::H5File file, std::string datasetName);
+	void writeCalibrationMap(H5::Group group, std::string datasetName, std::vector<double> map);
+
+	void save();
 
 private slots:
 	void acquire(std::unique_ptr <StorageWrapper> & storage) override;
