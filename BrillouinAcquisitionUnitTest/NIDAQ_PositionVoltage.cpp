@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include "..\BrillouinAcquisition\src\Devices\NIDAQ.h"
+#include "..\BrillouinAcquisition\src\Acquisition\AcquisitionModes\Calibration.h"
+#include "..\BrillouinAcquisition\src\Acquisition\Acquisition.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -11,7 +13,10 @@ namespace BrillouinAcquisitionUnitTest
 		
 		TEST_METHOD(TestVtoP_center) {
 			NIDAQ *nidaq = new NIDAQ();
-			nidaq->loadVoltagePositionCalibration("");
+			Acquisition *acquisition = new Acquisition(nullptr);
+			Camera *brightfieldCamera = nullptr;
+			Calibration *calibration = new Calibration(nullptr, acquisition, &brightfieldCamera, (NIDAQ**)&nidaq);
+			calibration->load("");
 			VOLTAGE2 voltage{ 0, 0 };
 			POINT2 answer = nidaq->voltageToPosition(voltage);
 			POINT2 expected{ 3, 3 };
@@ -21,7 +26,10 @@ namespace BrillouinAcquisitionUnitTest
 
 		TEST_METHOD(TestVtoV_center) {
 			NIDAQ *nidaq = new NIDAQ();
-			nidaq->loadVoltagePositionCalibration("");
+			Acquisition *acquisition = new Acquisition(nullptr);
+			Camera *brightfieldCamera = nullptr;
+			Calibration *calibration = new Calibration(nullptr, acquisition, &brightfieldCamera, (NIDAQ**)&nidaq);
+			calibration->load("");
 			VOLTAGE2 voltage{ 0, 0 };
 			POINT2 position = nidaq->voltageToPosition(voltage);
 			VOLTAGE2 voltage2 = nidaq->positionToVoltage(position);

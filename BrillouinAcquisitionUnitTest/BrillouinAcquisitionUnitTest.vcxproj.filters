@@ -115,6 +115,39 @@
     <Object Include="..\BrillouinAcquisition\x64\Debug\filtermount.obj">
       <Filter>Source Files</Filter>
     </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\Camera.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_camera.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\Acquisition.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_Acquisition.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\Calibration.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_Calibration.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\storageWrapper.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_storageWrapper.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\h5bm.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\AcquisitionMode.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_AcquisitionMode.obj">
+      <Filter>Source Files</Filter>
+    </Object>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
