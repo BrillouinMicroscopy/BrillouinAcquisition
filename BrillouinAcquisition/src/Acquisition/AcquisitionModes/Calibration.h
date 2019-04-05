@@ -32,6 +32,11 @@ public slots:
 	void setCameraSetting(CAMERA_SETTING, double);
 	void load(std::string filepath);
 
+	void setWidth(int);
+	void setHeight(int);
+	void setMagnification(double);
+	void setPixelSize(double);
+
 private:
 	CALIBRATION_SETTINGS m_acqSettings{};
 	CAMERA_SETTINGS m_cameraSettings{ 0.002, 0 };
@@ -57,7 +62,8 @@ private slots:
 	void acquire() ;
 
 signals:
-	void s_cameraSettingsChanged(CAMERA_SETTINGS);			// emit the camera settings
+	void s_cameraSettingsChanged(CAMERA_SETTINGS);				// emit the camera settings
+	void calibrationChanged(SpatialCalibration);				// emit the calibration
 };
 
 #endif //CALIBRATION_H

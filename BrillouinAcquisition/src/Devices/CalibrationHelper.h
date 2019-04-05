@@ -25,11 +25,11 @@ struct VOLTAGE_MAPS {
 	std::vector<double> Uy{ -2, -1, 0, 1, 2, -2, -1, 0, 1, 2, -2, -1, 0, 1, 2, -2, -1, 0, 1, 2, -2, -1, 0, 1, 2 };
 };
 
-struct CameraProperties {
+struct MicroscopeProperties {
 	int width{ 1280 };			// [pix] image width
 	int height{ 1024 };			// [pix] image height
 	double pixelSize{ 4.8e-6 };	// [µm]  pixel size
-	double mag = 57;			// [1]   magnification
+	double mag = 58;			// [1]   magnification
 };
 
 struct SpatialCalibration {
@@ -46,7 +46,7 @@ struct SpatialCalibration {
 		 -1000,	// [µm] minimal z-value
 		  1000	// [µm] maximal z-value
 	};
-	CameraProperties cameraProperties;
+	MicroscopeProperties microscopeProperties;
 	bool valid = false;
 };
 
@@ -54,11 +54,11 @@ class CalibrationHelper {
 
 public:
 	static void CalibrationHelper::calculateCalibrationBounds(SpatialCalibration *calibration) {
-		double fac = 1e6 * calibration->cameraProperties.pixelSize / calibration->cameraProperties.mag / 2;
-		calibration->bounds.xMin = -1 * fac * calibration->cameraProperties.width;
-		calibration->bounds.xMax = fac * calibration->cameraProperties.width;
-		calibration->bounds.yMin = -1 * fac * calibration->cameraProperties.height;
-		calibration->bounds.yMax = fac * calibration->cameraProperties.height;
+		double fac = 1e6 * calibration->microscopeProperties.pixelSize / calibration->microscopeProperties.mag / 2;
+		calibration->bounds.xMin = -1 * fac * calibration->microscopeProperties.width;
+		calibration->bounds.xMax = fac * calibration->microscopeProperties.width;
+		calibration->bounds.yMin = -1 * fac * calibration->microscopeProperties.height;
+		calibration->bounds.yMax = fac * calibration->microscopeProperties.height;
 	}
 
 	static void CalibrationHelper::calculateCalibrationWeights(SpatialCalibration *calibration) {

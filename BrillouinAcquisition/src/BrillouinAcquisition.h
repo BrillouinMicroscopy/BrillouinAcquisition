@@ -133,8 +133,14 @@ private slots:
 	void initSettingsDialog();
 	void selectScanningDevice(int index);
 	void selectCameraDevice(int index);
+
 	void on_actionAcquire_Voltage_Position_calibration_triggered();
 	void on_actionLoad_Voltage_Position_calibration_triggered();
+
+	void on_microscopeWidth_valueChanged(int);
+	void on_microscopeHeight_valueChanged(int);
+	void on_microscopeMag_valueChanged(double);
+	void on_microscopePixSize_valueChanged(double);
 
 	void initBeampathButtons();
 

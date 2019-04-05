@@ -198,7 +198,6 @@ signals:
 	void savedPositionsChanged(std::vector<POINT3>);
 	void homePositionBoundsChanged(BOUNDS);
 	void currentPositionBoundsChanged(BOUNDS);
-	void calibrationChanged(SpatialCalibration);
 };
 
 #endif // SCANCONTROL_H

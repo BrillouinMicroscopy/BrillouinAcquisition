@@ -2022,12 +2022,6 @@ void BrillouinAcquisition::initScanControl() {
 	);
 	connection = QWidget::connect(
 		m_scanControl,
-		&ScanControl::calibrationChanged,
-		this,
-		[this](SpatialCalibration spatialCalibration) { updateCalibration(spatialCalibration); }
-	);
-	connection = QWidget::connect(
-		m_scanControl,
 		&ScanControl::currentPositionBoundsChanged,
 		this,
 		[this](BOUNDS bounds) { setCurrentPositionBounds(bounds); }
@@ -2122,6 +2116,13 @@ void BrillouinAcquisition::initSpatialCalibration() {
 			&Calibration::s_cameraSettingsChanged,
 			this,
 			[this](CAMERA_SETTINGS settings) { updateODTCameraSettings(settings); }
+		);
+
+		connection = QWidget::connect(
+			m_Calibration,
+			&Calibration::calibrationChanged,
+			this,
+			[this](SpatialCalibration spatialCalibration) { updateCalibration(spatialCalibration); }
 		);
 
 		// start Calibration thread
@@ -2389,10 +2390,26 @@ void BrillouinAcquisition::updateFilename(std::string filename) {
 }
 
 void BrillouinAcquisition::updateCalibration(SpatialCalibration calibration) {
-	ui->cameraWidthODT->setValue(calibration.cameraProperties.width);
-	ui->cameraHeightODT->setValue(calibration.cameraProperties.height);
-	ui->cameraMagODT->setValue(calibration.cameraProperties.mag);
-	ui->cameraPixSizeODT->setValue(1e6 * calibration.cameraProperties.pixelSize);
+	ui->microscopeWidth->setValue(calibration.microscopeProperties.width);
+	ui->microscopeHeight->setValue(calibration.microscopeProperties.height);
+	ui->microscopeMag->setValue(calibration.microscopeProperties.mag);
+	ui->microscopePixSize->setValue(1e6 * calibration.microscopeProperties.pixelSize);
+}
+
+void BrillouinAcquisition::on_microscopeWidth_valueChanged(int width) {
+	QMetaObject::invokeMethod(m_Calibration, "setWidth", Qt::AutoConnection, Q_ARG(int, width));
+}
+
+void BrillouinAcquisition::on_microscopeHeight_valueChanged(int height) {
+	QMetaObject::invokeMethod(m_Calibration, "setHeight", Qt::AutoConnection, Q_ARG(int, height));
+}
+
+void BrillouinAcquisition::on_microscopeMag_valueChanged(double mag) {
+	QMetaObject::invokeMethod(m_Calibration, "setMagnification", Qt::AutoConnection, Q_ARG(double, mag));
+}
+
+void BrillouinAcquisition::on_microscopePixSize_valueChanged(double pixSize) {
+	QMetaObject::invokeMethod(m_Calibration, "setPixelSize", Qt::AutoConnection, Q_ARG(double, pixSize));
 }
 
 void BrillouinAcquisition::updateBrillouinSettings() {

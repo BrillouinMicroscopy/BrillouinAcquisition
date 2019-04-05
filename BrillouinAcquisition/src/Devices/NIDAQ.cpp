@@ -459,8 +459,6 @@ void NIDAQ::setSpatialCalibration(SpatialCalibration spatialCalibration) {
 	calculateHomePositionBounds();
 	
 	m_absoluteBounds = m_calibration.bounds;
-
-	emit(calibrationChanged(m_calibration));
 };
 
 void NIDAQ::triggerCamera() {
@@ -504,8 +502,8 @@ void NIDAQ::centerPosition() {
 POINT2 NIDAQ::pixToMicroMeter(POINT2 positionPix) {
 
 	POINT2 positionMicroMeter;
-	positionMicroMeter.x = 1e6 * (positionPix.x - m_calibration.cameraProperties.width / 2) * m_calibration.cameraProperties.pixelSize / m_calibration.cameraProperties.mag;
-	positionMicroMeter.y = 1e6 * (positionPix.y - m_calibration.cameraProperties.height / 2) * m_calibration.cameraProperties.pixelSize / m_calibration.cameraProperties.mag;
+	positionMicroMeter.x = 1e6 * (positionPix.x - m_calibration.microscopeProperties.width / 2) * m_calibration.microscopeProperties.pixelSize / m_calibration.microscopeProperties.mag;
+	positionMicroMeter.y = 1e6 * (positionPix.y - m_calibration.microscopeProperties.height / 2) * m_calibration.microscopeProperties.pixelSize / m_calibration.microscopeProperties.mag;
 
 	return positionMicroMeter;
 }

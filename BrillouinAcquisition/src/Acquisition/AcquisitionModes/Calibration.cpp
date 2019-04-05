@@ -25,7 +25,9 @@ void Calibration::setCameraSetting(CAMERA_SETTING type, double value) {
 
 void Calibration::init() {}
 
-void Calibration::initialize() {}
+void Calibration::initialize() {
+	emit(calibrationChanged(m_calibration));
+}
 
 void Calibration::startRepetitions() {
 	bool allowed = m_acquisition->enableMode(ACQUISITION_MODE::SPATIALCALIBRATION);
@@ -41,8 +43,8 @@ void Calibration::startRepetitions() {
 	// set ROI and readout parameters to default Brillouin values, exposure time and gain will be kept
 	settings.roi.left = 0;
 	settings.roi.top = 0;
-	settings.roi.width = m_calibration.cameraProperties.width;
-	settings.roi.height = m_calibration.cameraProperties.height;
+	settings.roi.width = m_calibration.microscopeProperties.width;
+	settings.roi.height = m_calibration.microscopeProperties.height;
 	settings.readout.pixelEncoding = L"Raw8";
 	settings.readout.triggerMode = L"External";
 	settings.readout.cycleMode = L"Continuous";
@@ -136,10 +138,10 @@ void Calibration::acquire() {
 			int y = floor(index / m_cameraSettings.roi.width);
 			int x = index % m_cameraSettings.roi.width;
 
-			double x_m = m_calibration.cameraProperties.pixelSize / m_calibration.cameraProperties.mag
-				* (x - m_calibration.cameraProperties.width / 2 - 0.5);
-			double y_m = -1 * m_calibration.cameraProperties.pixelSize / m_calibration.cameraProperties.mag
-				* (y - m_calibration.cameraProperties.height / 2 - 0.5);
+			double x_m = m_calibration.microscopeProperties.pixelSize / m_calibration.microscopeProperties.mag
+				* (x - m_calibration.microscopeProperties.width / 2 - 0.5);
+			double y_m = -1 * m_calibration.microscopeProperties.pixelSize / m_calibration.microscopeProperties.mag
+				* (y - m_calibration.microscopeProperties.height / 2 - 0.5);
 
 			Ux_valid.push_back(m_acqSettings.voltages[i].Ux);
 			Uy_valid.push_back(m_acqSettings.voltages[i].Uy);
@@ -162,6 +164,8 @@ void Calibration::acquire() {
 
 	save();
 	(*m_NIDAQ)->setSpatialCalibration(m_calibration);
+
+	emit(calibrationChanged(m_calibration));
 
 	m_status = ACQUISITION_STATUS::FINISHED;
 	emit(s_acquisitionStatus(m_status));
@@ -193,18 +197,21 @@ void Calibration::load(std::string filepath) {
 		m_calibration.voltages.Ux = readCalibrationMap(file, "/maps/voltages/Ux");
 		m_calibration.voltages.Uy = readCalibrationMap(file, "/maps/voltages/Uy");
 
-		m_calibration.cameraProperties.width = readCalibrationValue(file, "/camera/width");
-		m_calibration.cameraProperties.height = readCalibrationValue(file, "/camera/height");
-		m_calibration.cameraProperties.pixelSize = readCalibrationValue(file, "/camera/pixelSize");
-		m_calibration.cameraProperties.mag = readCalibrationValue(file, "/camera/magnification");
+		m_calibration.microscopeProperties.width = readCalibrationValue(file, "/camera/width");
+		m_calibration.microscopeProperties.height = readCalibrationValue(file, "/camera/height");
+		m_calibration.microscopeProperties.pixelSize = readCalibrationValue(file, "/camera/pixelSize");
+		m_calibration.microscopeProperties.mag = readCalibrationValue(file, "/camera/magnification");
 
-		CalibrationHelper::calculateCalibrationBounds(&m_calibration);
-		CalibrationHelper::calculateCalibrationWeights(&m_calibration);
 
 		m_calibration.valid = true;
 	}
 
+	CalibrationHelper::calculateCalibrationBounds(&m_calibration);
+	CalibrationHelper::calculateCalibrationWeights(&m_calibration);
+
 	(*m_NIDAQ)->setSpatialCalibration(m_calibration);
+
+	emit(calibrationChanged(m_calibration));
 }
 
 double Calibration::readCalibrationValue(H5::H5File file, std::string datasetName) {
@@ -299,10 +306,10 @@ void Calibration::save() {
 	attr.write(strdatatype, &fulldate[0]);
 
 	H5::Group group_camera(file.createGroup("/camera"));
-	writeCalibrationValue(group_camera, "width", m_calibration.cameraProperties.width);
-	writeCalibrationValue(group_camera, "height", m_calibration.cameraProperties.height);
-	writeCalibrationValue(group_camera, "pixelSize", m_calibration.cameraProperties.pixelSize);
-	writeCalibrationValue(group_camera, "magnification", m_calibration.cameraProperties.mag);
+	writeCalibrationValue(group_camera, "width", m_calibration.microscopeProperties.width);
+	writeCalibrationValue(group_camera, "height", m_calibration.microscopeProperties.height);
+	writeCalibrationValue(group_camera, "pixelSize", m_calibration.microscopeProperties.pixelSize);
+	writeCalibrationValue(group_camera, "magnification", m_calibration.microscopeProperties.mag);
 
 	H5::Group maps(file.createGroup("/maps"));
 
@@ -319,4 +326,24 @@ void Calibration::abortMode() {
 	m_acquisition->disableMode(ACQUISITION_MODE::SPATIALCALIBRATION);
 	m_status = ACQUISITION_STATUS::ABORTED;
 	emit(s_acquisitionStatus(m_status));
+}
+
+void Calibration::setWidth(int width) {
+	m_calibration.microscopeProperties.width = width;
+	m_calibration.valid = false;
+}
+
+void Calibration::setHeight(int height) {
+	m_calibration.microscopeProperties.height = height;
+	m_calibration.valid = false;
+}
+
+void Calibration::setMagnification(double mag) {
+	m_calibration.microscopeProperties.mag = mag;
+	m_calibration.valid = false;
+}
+
+void Calibration::setPixelSize(double pixelSize) {
+	m_calibration.microscopeProperties.pixelSize = pixelSize;
+	m_calibration.valid = false;
 }
