@@ -2,6 +2,7 @@
 #define SIMPLEMATH_H
 
 #include <vector>
+#include <iterator>
 #include <complex>
 
 struct COEFFICIENTS5 {

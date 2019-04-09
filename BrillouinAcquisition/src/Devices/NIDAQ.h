@@ -127,8 +127,8 @@ public slots:
 	void setPositionRelativeZ(double position);
 	void setPositionInPix(POINT2);
 	void setHome();
-	void loadVoltagePositionCalibration(std::string filepath) override;
-	double getCalibrationValue(H5::H5File file, std::string datasetName);
+
+	void setSpatialCalibration(SpatialCalibration spatialCalibration) override;
 
 	void triggerCamera();
 	void setAcquisitionVoltages(ACQ_VOLTAGES voltages);

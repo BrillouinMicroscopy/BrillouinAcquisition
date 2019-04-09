@@ -727,8 +727,8 @@ QTabBar::tab:!selected {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>236</width>
-                <height>219</height>
+                <width>165</width>
+                <height>180</height>
                </rect>
               </property>
               <property name="minimumSize">
@@ -788,7 +788,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>230</width>
-                <height>219</height>
+                <height>180</height>
                </rect>
               </property>
               <property name="sizePolicy">
@@ -1041,7 +1041,7 @@ QTabBar::tab:!selected {
               <property name="geometry">
                <rect>
                 <x>0</x>
-                <y>0</y>
+                <y>-31</y>
                 <width>223</width>
                 <height>250</height>
                </rect>
@@ -1323,7 +1323,7 @@ QTabBar::tab:!selected {
                <property name="title">
                 <string>Camera properties</string>
                </property>
-               <widget class="QLabel" name="cameraWidthODTLabel">
+               <widget class="QLabel" name="microscopeWidthLabel">
                 <property name="geometry">
                  <rect>
                   <x>8</x>
@@ -1336,7 +1336,7 @@ QTabBar::tab:!selected {
                  <string>Width</string>
                 </property>
                </widget>
-               <widget class="QLabel" name="cameraMagODTLabel">
+               <widget class="QLabel" name="microscopeMagLabel">
                 <property name="geometry">
                  <rect>
                   <x>8</x>
@@ -1349,7 +1349,7 @@ QTabBar::tab:!selected {
                  <string>Magn.</string>
                 </property>
                </widget>
-               <widget class="QLabel" name="cameraHeightODTLabel">
+               <widget class="QLabel" name="microscopeHeightLabel">
                 <property name="geometry">
                  <rect>
                   <x>96</x>
@@ -1362,7 +1362,7 @@ QTabBar::tab:!selected {
                  <string>Height</string>
                 </property>
                </widget>
-               <widget class="QLabel" name="cameraPixSizeODTLabel">
+               <widget class="QLabel" name="microscopePixSizeLabel">
                 <property name="geometry">
                  <rect>
                   <x>96</x>
@@ -1375,9 +1375,9 @@ QTabBar::tab:!selected {
                  <string>Pix size [µm]</string>
                 </property>
                </widget>
-               <widget class="QSpinBox" name="cameraWidthODT">
+               <widget class="QSpinBox" name="microscopeWidth">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="geometry">
                  <rect>
@@ -1397,9 +1397,9 @@ QTabBar::tab:!selected {
                  <number>1280</number>
                 </property>
                </widget>
-               <widget class="QSpinBox" name="cameraHeightODT">
+               <widget class="QSpinBox" name="microscopeHeight">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="geometry">
                  <rect>
@@ -1418,10 +1418,10 @@ QTabBar::tab:!selected {
                 <property name="value">
                  <number>1024</number>
                 </property>
-             </widget>
-               <widget class="QDoubleSpinBox" name="cameraMagODT">
+               </widget>
+               <widget class="QDoubleSpinBox" name="microscopeMag">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="geometry">
                  <rect>
@@ -1435,9 +1435,9 @@ QTabBar::tab:!selected {
                  <double>57.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="cameraPixSizeODT">
+               <widget class="QDoubleSpinBox" name="microscopePixSize">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="geometry">
                  <rect>
@@ -1451,8 +1451,8 @@ QTabBar::tab:!selected {
                  <double>4.800000000000000</double>
                 </property>
                </widget>
+              </widget>
              </widget>
-            </widget>
             </widget>
            </item>
           </layout>
@@ -4013,6 +4013,7 @@ border: none;</string>
     <addaction name="actionEnable_Cooling"/>
     <addaction name="separator"/>
     <addaction name="actionConnect_Stage"/>
+    <addaction name="actionAcquire_Voltage_Position_calibration"/>
     <addaction name="actionLoad_Voltage_Position_calibration"/>
     <addaction name="separator"/>
     <addaction name="actionConnect_Brightfield_camera"/>
@@ -4103,6 +4104,11 @@ border: none;</string>
     <string>Ctrl+W</string>
    </property>
   </action>
+  <action name="actionAcquire_Voltage_Position_calibration">
+   <property name="text">
+    <string>Acquire V-µm calibration</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -4148,10 +4154,10 @@ border: none;</string>
   <tabstop>ROITopODT</tabstop>
   <tabstop>ROIHeightODT</tabstop>
   <tabstop>pixelEncodingODT</tabstop>
-  <tabstop>cameraWidthODT</tabstop>
-  <tabstop>cameraHeightODT</tabstop>
-  <tabstop>cameraMagODT</tabstop>
-  <tabstop>cameraPixSizeODT</tabstop>
+  <tabstop>microscopeWidth</tabstop>
+  <tabstop>microscopeHeight</tabstop>
+  <tabstop>microscopeMag</tabstop>
+  <tabstop>microscopePixSize</tabstop>
   <tabstop>scrollArea</tabstop>
   <tabstop>startX</tabstop>
   <tabstop>endX</tabstop>
@@ -4237,8 +4243,8 @@ border: none;</string>
  </resources>
  <connections/>
  <buttongroups>
+  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup_3"/>
   <buttongroup name="buttonGroup"/>
-  <buttongroup name="buttonGroup_2"/>
  </buttongroups>
 </ui>

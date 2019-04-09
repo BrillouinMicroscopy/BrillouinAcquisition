@@ -85,6 +85,10 @@ int Acquisition::closeFile() {
 	return 0;
 }
 
+std::string Acquisition::getCurrentFolder() {
+	return m_path.folder;
+}
+
 bool Acquisition::isModeEnabled(ACQUISITION_MODE mode) {
 	return (bool)(m_enabledModes & mode);
 }
@@ -95,13 +99,17 @@ bool Acquisition::isModeEnabled(ACQUISITION_MODE mode) {
  */
 bool Acquisition::enableMode(ACQUISITION_MODE mode) {
 	// If no acquisition file is open, open one.
-	if (m_storage == nullptr) {
+	if (m_storage == nullptr && mode != ACQUISITION_MODE::SPATIALCALIBRATION) {
 		openFile();
 	}
 
 	// Check that the requested mode is not already running.
 	if ((bool)(mode& m_enabledModes)) {
 		return true;
+	}
+	// Check, that no other mode is enabled when spatial calibration is requested
+	if (mode == ACQUISITION_MODE::SPATIALCALIBRATION && m_enabledModes != ACQUISITION_MODE::NONE) {
+		return false;
 	}
 	// Check, that Brillouin and ODT don't run simultaneously.
 	if (((mode | m_enabledModes) & (ACQUISITION_MODE::BRILLOUIN | ACQUISITION_MODE::ODT))

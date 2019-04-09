@@ -29,7 +29,7 @@
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;BRILLOUINACQUISITIONUNITTEST_LIB;QT_CORE_LIB;QT_WIDGETS_LIB;QT_SERIALPORT_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);C:\Program Files\Thorlabs\Kinesis;C:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSerialPort;C:\Program Files\HDF_Group\HDF5\1.10.5\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);C:\Program Files\Thorlabs\Kinesis;C:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSerialPort;C:\Program Files\HDF_Group\HDF5\1.10.5\include;c:\Program Files\Andor SDK3\;%(AdditionalIncludeDirectories);C:\Program Files\Point Grey Research\FlyCapture2\include</AdditionalIncludeDirectories>
       <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
       <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatWChar_tAsBuiltInType>
@@ -49,7 +49,7 @@
       <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">output</DynamicSource>
       <ExecutionDescription Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc'ing %(Identity)...</ExecutionDescription>
-      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);C:\Program Files\Thorlabs\Kinesis;C:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSerialPort;C:\Program Files\HDF_Group\HDF5\1.10.5\include;%(AdditionalIncludeDirectories)</IncludePath>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);C:\Program Files\Thorlabs\Kinesis;C:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSerialPort;C:\Program Files\HDF_Group\HDF5\1.10.5\include;c:\Program Files\Andor SDK3\;%(AdditionalIncludeDirectories);C:\Program Files\Point Grey Research\FlyCapture2\include</IncludePath>
       <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;BRILLOUINACQUISITIONUNITTEST_LIB;QT_CORE_LIB;QT_WIDGETS_LIB;QT_SERIALPORT_LIB;%(PreprocessorDefinitions)</Define>
       <QTDIR Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)</QTDIR>
       <ForceInclude Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h;../../%(Filename)%(Extension)</ForceInclude>
@@ -82,7 +82,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;_UNICODE;WIN32;WIN64;BRILLOUINACQUISITIONUNITTEST_LIB;QT_CORE_LIB;QT_WIDGETS_LIB;QT_SERIALPORT_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);C:\Program Files\Thorlabs\Kinesis;$(VCInstallDir)UnitTest\include;C:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include;..\BrillouinAcquisition\external\gsl\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSerialPort;C:\Program Files\HDF_Group\HDF5\1.10.5\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);C:\Program Files\Thorlabs\Kinesis;$(VCInstallDir)UnitTest\include;C:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include;..\BrillouinAcquisition\external\gsl\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSerialPort;C:\Program Files\HDF_Group\HDF5\1.10.5\include;c:\Program Files\Andor SDK3\;%(AdditionalIncludeDirectories);C:\Program Files\Point Grey Research\FlyCapture2\include</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -101,13 +101,14 @@
     <QtMoc>
       <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
-      <IncludePath>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);C:\Program Files\Thorlabs\Kinesis;$(VCInstallDir)UnitTest\include;C:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include;..\BrillouinAcquisition\external\gsl\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSerialPort;C:\Program Files\HDF_Group\HDF5\1.10.5\include;%(AdditionalIncludeDirectories)</IncludePath>
+      <IncludePath>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);C:\Program Files\Thorlabs\Kinesis;$(VCInstallDir)UnitTest\include;C:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include;..\BrillouinAcquisition\external\gsl\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSerialPort;C:\Program Files\HDF_Group\HDF5\1.10.5\include;c:\Program Files\Andor SDK3\;%(AdditionalIncludeDirectories);C:\Program Files\Point Grey Research\FlyCapture2\include</IncludePath>
       <Define>UNICODE;_UNICODE;WIN32;WIN64;BRILLOUINACQUISITIONUNITTEST_LIB;QT_CORE_LIB;QT_WIDGETS_LIB;QT_SERIALPORT_LIB;%(PreprocessorDefinitions)</Define>
       <ForceInclude>stdafx.h;../../%(Filename)%(Extension)</ForceInclude>
     </QtMoc>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BrillouinAcquisitionUnitTest.cpp" />
+    <ClCompile Include="interpolation.cpp" />
     <ClCompile Include="MockMicroscope.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
@@ -136,21 +137,35 @@
     <None Include="..\BrillouinAcquisition\x64\Debug\BrillouinAcquisition.pch" />
   </ItemGroup>
   <ItemGroup>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\Acquisition.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\AcquisitionMode.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\Calibration.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\Camera.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\com.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\filtermount.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\h5bm.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\logger.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_Acquisition.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_AcquisitionMode.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_Calibration.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_camera.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_device.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_filtermount.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_h5bm.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_NIDAQ.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_scancontrol.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_storageWrapper.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_thread.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_ZeissECU.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\NIDAQ.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\qrc_BrillouinAcquisition.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\scancontrol.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\stdafx.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\storageWrapper.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\ZeissECU.obj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\BrillouinAcquisition\external\eigen\debug\msvc\eigen.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

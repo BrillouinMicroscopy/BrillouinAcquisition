@@ -141,11 +141,17 @@ copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\swscale-4.dll
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GeneratedFiles\Debug\moc_Calibration.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_Fluorescence.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_uEyeCam.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_Calibration.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_Fluorescence.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -155,6 +161,7 @@ copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\swscale-4.dll
     </ClCompile>
     <ClCompile Include="src\Acquisition\Acquisition.cpp" />
     <ClCompile Include="src\Acquisition\AcquisitionModes\AcquisitionMode.cpp" />
+    <ClCompile Include="src\Acquisition\AcquisitionModes\Calibration.cpp" />
     <ClCompile Include="src\Acquisition\AcquisitionModes\Fluorescence.cpp" />
     <ClCompile Include="src\Devices\andor.cpp" />
     <ClCompile Include="src\Acquisition\AcquisitionModes\Brillouin.cpp" />
@@ -427,6 +434,16 @@ copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\swscale-4.dll
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions)  "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\HDF_Group\HDF5\1.10.5\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I.\external\gsl\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-fstdafx.h" "-f../../src/Acquisition/AcquisitionModes/%(Filename)%(Extension)"</Command>
     </CustomBuild>
+    <CustomBuild Include="src\Acquisition\AcquisitionModes\Calibration.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp" "-fstdafx.h" "-f../../src/Acquisition/AcquisitionModes/%(Filename)%(Extension)"  -DUNICODE -DWIN32 -DWIN64 -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions) "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-I.\external\gsl\include" "-IC:\Program Files\HDF_Group\HDF5\1.10.5\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp" "-fstdafx.h" "-f../../src/Acquisition/AcquisitionModes/%(Filename)%(Extension)"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions) "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\HDF_Group\HDF5\1.10.5\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I.\external\gsl\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport"</Command>
+    </CustomBuild>
     <ClInclude Include="src\circularBuffer.h" />
     <CustomBuild Include="src\previewBuffer.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -482,6 +499,7 @@ copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\swscale-4.dll
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions)  "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\HDF_Group\HDF5\1.10.5\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I.\external\gsl\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-fstdafx.h" "-f../../src/Acquisition/AcquisitionModes/%(Filename)%(Extension)"</Command>
     </CustomBuild>
+    <ClInclude Include="src\Devices\CalibrationHelper.h" />
     <ClInclude Include="src\Devices\cameraParameters.h" />
     <CustomBuild Include="src\Devices\filtermount.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -504,6 +522,7 @@ copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\swscale-4.dll
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions)  "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\HDF_Group\HDF5\1.10.5\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I.\external\gsl\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-fstdafx.h" "-f../../src/Devices/%(Filename)%(Extension)"</Command>
     </CustomBuild>
+    <ClInclude Include="src\interpolation.h" />
     <ClInclude Include="src\simplemath.h" />
     <ClInclude Include="src\logger.h" />
     <CustomBuild Include="external\qcustomplot\qcustomplot.h">
@@ -544,6 +563,9 @@ copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\swscale-4.dll
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\BrillouinAcquisition.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="external\eigen\debug\msvc\eigen.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
