@@ -62,6 +62,9 @@ public:
 	}
 
 	static void CalibrationHelper::calculateCalibrationWeights(SpatialCalibration *calibration) {
+		if (calibration->positions.x.size() == 0) {
+			return;
+		}
 		Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> x = Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>>(&calibration->positions.x[0], calibration->positions.x.size(), 1);
 		Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> y = Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>>(&calibration->positions.y[0], calibration->positions.y.size(), 1);
 		Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic> Ux = Eigen::Map<Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic>>(&calibration->voltages.Ux[0], calibration->voltages.Ux.size(), 1);

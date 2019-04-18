@@ -41,6 +41,9 @@ void Calibration::startRepetitions() {
 	// configure camera for measurement
 	CAMERA_SETTINGS settings = (*m_camera)->getSettings();
 	// set ROI and readout parameters to default Brillouin values, exposure time and gain will be kept
+	if (settings.exposureTime > 0.003) {
+		settings.exposureTime = 0.003;
+	}
 	settings.roi.left = 0;
 	settings.roi.top = 0;
 	settings.roi.width = m_calibration.microscopeProperties.width;
@@ -273,6 +276,10 @@ void Calibration::writeCalibrationMap(H5::Group group, std::string datasetName, 
 }
 
 void Calibration::save() {
+
+	if (m_calibration.positions.x.size() == 0) {
+		return;
+	}
 
 	std::string folder = m_acquisition->getCurrentFolder();
 	

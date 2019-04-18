@@ -105,6 +105,9 @@ public:
 		T xr,
 		T yr
 	) {
+		if (weights.weights.size() == 0) {
+			return 0.0;
+		}
 		// Calculate the value for the requested point
 		Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic> d
 			= (xr + std::complex<T>(0, 1) * yr - weights.xy_vec.array()).abs();
