@@ -313,10 +313,9 @@ void uEyeCam::startAcquisition(CAMERA_SETTINGS settings) {
 	int nRet = uEye::is_AllocImageMem(m_camera, m_settings.roi.width, m_settings.roi.height, 8, &m_imageBuffer, &m_imageBufferId);
 
 	if (nRet == IS_SUCCESS) {
-		nRet = uEye::is_AddToSequence(m_camera, m_imageBuffer, m_imageBufferId);
+		nRet = uEye::is_SetImageMem(m_camera, m_imageBuffer, m_imageBufferId);
 	}
 
-	uEye::is_CaptureVideo(m_camera, IS_WAIT);
 	m_isAcquisitionRunning = true;
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
 }
@@ -338,7 +337,7 @@ void uEyeCam::acquireImage(unsigned char* buffer) {
 
 void uEyeCam::getImageForAcquisition(unsigned char* buffer, bool preview) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
-	acquireImage(buffer);
+	uEye::is_FreezeVideo(m_camera, IS_WAIT);
 
 	if (preview && buffer != nullptr) {
 		// write image to preview buffer
