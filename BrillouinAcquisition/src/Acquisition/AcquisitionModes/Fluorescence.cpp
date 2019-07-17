@@ -60,7 +60,7 @@ void Fluorescence::configureCamera() {
 		m_settings.camera.roi.top = 400;
 		m_settings.camera.roi.width = 1800;
 		m_settings.camera.roi.height = 2000;
-		m_settings.camera.readout.triggerMode = L"Internal";
+		m_settings.camera.readout.triggerMode = L"Software";
 	}
 	else if (cameraType == "class PointGrey") {
 		m_settings.camera.roi.left = 128;
