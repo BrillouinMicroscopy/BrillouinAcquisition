@@ -286,6 +286,7 @@ void uEyeCam::preparePreview() {
 
 void uEyeCam::stopPreview() {
 	uEye::is_StopLiveVideo(m_camera, IS_FORCE_VIDEO_STOP);
+	uEye::is_ClearSequence(m_camera);
 	int nRet = uEye::is_FreeImageMem(m_camera, m_imageBuffer, m_imageBufferId);
 	m_isPreviewRunning = false;
 	m_stopPreview = false;
@@ -321,7 +322,6 @@ void uEyeCam::startAcquisition(CAMERA_SETTINGS settings) {
 }
 
 void uEyeCam::stopAcquisition() {
-	uEye::is_StopLiveVideo(m_camera, IS_FORCE_VIDEO_STOP);
 	int nRet = uEye::is_FreeImageMem(m_camera, m_imageBuffer, m_imageBufferId);
 	m_isAcquisitionRunning = false;
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
