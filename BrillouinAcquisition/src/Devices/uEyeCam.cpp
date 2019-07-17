@@ -338,6 +338,7 @@ void uEyeCam::acquireImage(unsigned char* buffer) {
 void uEyeCam::getImageForAcquisition(unsigned char* buffer, bool preview) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	uEye::is_FreezeVideo(m_camera, IS_WAIT);
+	acquireImage(buffer);
 
 	if (preview && buffer != nullptr) {
 		// write image to preview buffer

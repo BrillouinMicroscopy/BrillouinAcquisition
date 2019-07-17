@@ -245,6 +245,19 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 		// cast the vector to unsigned short
 		std::vector<unsigned char>* images_ = (std::vector<unsigned char> *) &images;
 
+		// Sometimes the uEye camera returns a black image (only zeros), we try to catch this here by
+		// repeating the acquisition a maximum of 5 times
+		unsigned char sum = simplemath::sum(*images_);
+		int i{ 0 };
+		while (sum == 0 && 5 > i++) {
+			(*m_camera)->getImageForAcquisition(&images[pointerPos], true);
+
+			// cast the vector to unsigned short
+			std::vector<unsigned char>* images_ = (std::vector<unsigned char> *) &images;
+			
+			sum = simplemath::sum(*images_);
+		}
+
 		// store images
 		// asynchronously write image to disk
 		// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
