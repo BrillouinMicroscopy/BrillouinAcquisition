@@ -246,6 +246,9 @@
     <ClCompile Include="src\Acquisition\AcquisitionModes\Calibration.cpp">
       <Filter>Source Files\Acquisition\AcquisitionModes</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_Calibration.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_BrillouinAcquisition.h">
