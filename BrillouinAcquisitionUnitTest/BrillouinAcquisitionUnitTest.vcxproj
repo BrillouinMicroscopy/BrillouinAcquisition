@@ -113,6 +113,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="NIDAQ_PositionVoltage.cpp" />
+    <ClCompile Include="phase.cpp" />
     <ClCompile Include="simplemath.cpp" />
     <ClCompile Include="ZeissECUTest.cpp" />
     <ClCompile Include="stdafx.cpp">
