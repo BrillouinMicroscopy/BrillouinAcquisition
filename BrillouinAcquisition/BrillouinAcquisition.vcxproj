@@ -51,7 +51,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\National Instruments\Shared\ExternalCompilerSupport\C\lib64\msvc;$(QTDIR)\lib;C:\Program Files\HDF_Group\HDF5\1.10.5\lib;C:\Program Files\Thorlabs\Kinesis;c:\Program Files\Point Grey Research\FlyCapture2\lib64\vs2015\;c:\Program Files\IDS\uEye\Develop\Lib\;D:\Data\Biotec\Software\00_Programs\BrillouinAcquisition\BrillouinAcquisition\external\fftw;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\National Instruments\Shared\ExternalCompilerSupport\C\lib64\msvc;$(QTDIR)\lib;C:\Program Files\HDF_Group\HDF5\1.10.5\lib;C:\Program Files\Thorlabs\Kinesis;c:\Program Files\Point Grey Research\FlyCapture2\lib64\vs2015\;c:\Program Files\IDS\uEye\Develop\Lib\;.\external\fftw;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>c:\Program Files\Andor SDK3\atcorem.lib;c:\Program Files\Andor SDK3\atutilitym.lib;libfftw3-3.lib;c:\Program Files\Point Grey Research\FlyCapture2\lib64\vs2015\FlyCapture2d_v140.lib;c:\Program Files\IDS\uEye\Develop\Lib\uEye_api_64.lib;qtmaind.lib;szip.lib;zlib.lib;hdf5.lib;hdf5_cpp.lib;NIDAQmx.lib;Thorlabs.MotionControl.TCube.InertialMotor.lib;Thorlabs.MotionControl.FilterFlipper.lib;Thorlabs.MotionControl.KCube.DCServo.lib;Thorlabs.MotionControl.KCube.Solenoid.lib;Qt5Cored.lib;Qt5SerialPortd.lib;Qt5Widgetsd.lib;Qt5Guid.lib;Qt5PrintSupportd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -86,7 +86,7 @@ copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\avutil-55.dll
 copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\swresample-2.dll" "$(TargetDir)"
 copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\avformat-57.dll" "$(TargetDir)"
 copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\swscale-4.dll" "$(TargetDir)"
-copy "external\fftw\libfftw3-3.dll" "$(TargetDir)"</Command>
+copy "$(ProjectDir)external\fftw\libfftw3-3.dll" "$(TargetDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -103,7 +103,7 @@ copy "external\fftw\libfftw3-3.dll" "$(TargetDir)"</Command>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\National Instruments\Shared\ExternalCompilerSupport\C\lib64\msvc;$(QTDIR)\lib;C:\Program Files\HDF_Group\HDF5\1.10.5\lib;C:\Program Files\Thorlabs\Kinesis;c:\Program Files\Point Grey Research\FlyCapture2\lib64\vs2015\;c:\Program Files\IDS\uEye\Develop\Lib\;D:\Data\Biotec\Software\00_Programs\BrillouinAcquisition\BrillouinAcquisition\external\fftw;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\National Instruments\Shared\ExternalCompilerSupport\C\lib64\msvc;$(QTDIR)\lib;C:\Program Files\HDF_Group\HDF5\1.10.5\lib;C:\Program Files\Thorlabs\Kinesis;c:\Program Files\Point Grey Research\FlyCapture2\lib64\vs2015\;c:\Program Files\IDS\uEye\Develop\Lib\;.\external\fftw;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalDependencies>c:\Program Files\Andor SDK3\atcorem.lib;c:\Program Files\Andor SDK3\atutilitym.lib;libfftw3-3.lib;c:\Program Files\Point Grey Research\FlyCapture2\lib64\vs2015\FlyCapture2_v140.lib;c:\Program Files\IDS\uEye\Develop\Lib\uEye_api_64.lib;qtmain.lib;szip.lib;zlib.lib;hdf5.lib;hdf5_cpp.lib;NIDAQmx.lib;Thorlabs.MotionControl.TCube.InertialMotor.lib;Thorlabs.MotionControl.FilterFlipper.lib;Thorlabs.MotionControl.KCube.DCServo.lib;Thorlabs.MotionControl.KCube.Solenoid.lib;Qt5Core.lib;Qt5SerialPort.lib;Qt5Widgets.lib;Qt5Gui.lib;Qt5PrintSupport.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -138,6 +138,7 @@ copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\avutil-55.dll
 copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\swresample-2.dll" "$(TargetDir)"
 copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\avformat-57.dll" "$(TargetDir)"
 copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\swscale-4.dll" "$(TargetDir)"
+copy "$(ProjectDir)external\fftw\libfftw3-3.dll" "$(TargetDir)"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
