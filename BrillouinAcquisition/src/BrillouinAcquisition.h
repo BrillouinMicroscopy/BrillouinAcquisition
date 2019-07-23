@@ -17,10 +17,12 @@
 #include "external/h5bm/h5bm.h"
 #include "tableModel.h"
 
-#include"Acquisition/AcquisitionModes/Brillouin.h"
-#include"Acquisition/AcquisitionModes/ODT.h"
-#include"Acquisition/AcquisitionModes/Fluorescence.h"
-#include"Acquisition/AcquisitionModes/Calibration.h"
+#include "Acquisition/AcquisitionModes/Brillouin.h"
+#include "Acquisition/AcquisitionModes/ODT.h"
+#include "Acquisition/AcquisitionModes/Fluorescence.h"
+#include "Acquisition/AcquisitionModes/Calibration.h"
+
+#include "phase.h"
 
 #include <QtWidgets/QMainWindow>
 #include "ui_BrillouinAcquisition.h"
@@ -49,6 +51,12 @@ enum ROI_SOURCE {
 	BOX,
 	PLOT
 };
+
+typedef enum class displayMode {
+	INTENSITY,
+	SPECTRUM,
+	PHASE
+} DISPLAY_MODE;
 
 Q_DECLARE_METATYPE(std::string);
 Q_DECLARE_METATYPE(AT_64);
@@ -97,6 +105,7 @@ class BrillouinAcquisition : public QMainWindow {
 		std::function<void(QCPRange)> dataRangeCallback{ nullptr };
 		bool autoscale{ false };
 		CustomGradientPreset gradient = CustomGradientPreset::gpParula;
+		DISPLAY_MODE mode{ DISPLAY_MODE::SPECTRUM };
 	};
 
 private slots:
@@ -374,6 +383,8 @@ private:
 
 	PLOT_SETTINGS m_BrillouinPlot;
 	PLOT_SETTINGS m_ODTPlot;
+
+	phase* m_phase = new phase();
 
 	template <typename T>
 	void updateImage(PreviewBuffer<T>* previewBuffer, PLOT_SETTINGS* plotSettings);

@@ -1561,12 +1561,49 @@ void BrillouinAcquisition::updateImage(PreviewBuffer<T>* previewBuffer, PLOT_SET
 
 template <typename T>
 void BrillouinAcquisition::plotting(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, T* unpackedBuffer) {
+	int dim_x = previewBuffer->m_bufferSettings.roi.width;
+	int dim_y = previewBuffer->m_bufferSettings.roi.height;
+	//std::vector<double> x = simplemath::linspace(-30.0, 30.0, dim_x);
+	//std::vector<double> y = simplemath::linspace(-30.0, 30.0, dim_y);
+
+	std::vector<double> inten;
+	inten.resize(dim_x*dim_y);
+	for (int ii{ 0 }; ii < dim_x; ii++) {
+		for (int jj{ 0 }; jj < dim_y; jj++) {
+			//double r = sqrt(pow(x[ii], 2) + pow(y[jj], 2));
+			//inten[ii + jj * dim_x] = sin(10 * r) / (10 * r);
+			inten[ii + jj * dim_x] = unpackedBuffer[ii + jj *dim_x];
+		}
+	}
+	
+	double* buffer = nullptr;
+	std::vector<double> converted;
+	converted.resize(dim_x * dim_y);
+	plotSettings->mode = DISPLAY_MODE::SPECTRUM;
+	switch (plotSettings->mode) {
+	case DISPLAY_MODE::PHASE:
+		// converted.resize(previewBuffer->m_bufferSettings.roi.width * previewBuffer->m_bufferSettings.roi.height);
+		// m_phase->calculatePhase(unpackedBuffer, &converted[0], previewBuffer->m_bufferSettings.roi.height, previewBuffer->m_bufferSettings.roi.width);
+		buffer = &converted[0];
+		break;
+	case DISPLAY_MODE::SPECTRUM:
+		//converted.resize(previewBuffer->m_bufferSettings.roi.width * previewBuffer->m_bufferSettings.roi.height);
+		//m_phase->calculateSpectrum(unpackedBuffer, &converted[0], previewBuffer->m_bufferSettings.roi.height, previewBuffer->m_bufferSettings.roi.width);
+		m_phase->calculateSpectrum(&inten[0], &converted[0], previewBuffer->m_bufferSettings.roi.height, previewBuffer->m_bufferSettings.roi.width);
+		buffer = &converted[0];
+		break;
+	default:
+		buffer = &inten[0];
+		//buffer = unpackedBuffer;
+		break;
+	}
+
 	// images are given row by row, starting at the top left
 	int tIndex{ 0 };
 	for (gsl::index yIndex{ 0 }; yIndex < previewBuffer->m_bufferSettings.roi.height; ++yIndex) {
 		for (gsl::index xIndex{ 0 }; xIndex < previewBuffer->m_bufferSettings.roi.width; ++xIndex) {
 			tIndex = yIndex * previewBuffer->m_bufferSettings.roi.width + xIndex;
-			plotSettings->colorMap->data()->setCell(xIndex, previewBuffer->m_bufferSettings.roi.height - yIndex - 1, unpackedBuffer[tIndex]);
+			plotSettings->colorMap->data()->setCell(xIndex, previewBuffer->m_bufferSettings.roi.height - yIndex - 1, buffer[tIndex]);
 		}
 	}
 }
