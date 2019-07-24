@@ -99,7 +99,7 @@ public:
 			spectrum[i] = sqrt(pow(m_out[i][0], 2) + pow(m_out[i][1], 2)) / (dim_x * dim_y);
 		}
 
-		circshift(spectrum, dim_y, dim_x, { 1, 1 });
+		fftshift(spectrum, dim_y, dim_x);
 	}
 
 	template <typename T = double>
@@ -120,16 +120,41 @@ public:
 	}
 
 	template <typename T = double>
-	static void circshift(T* inputArray, int dim_x, int dim_y, std::vector<int> distance) {
-		size_t xshift = dim_x / 2;
-		size_t yshift = dim_y / 2;
-		if ((dim_x*dim_y) % 2 != 0) {
+	static void fftshift(T* inputArray, int dim_x, int dim_y) {
+		size_t xshift = floor(dim_x / 2.0);
+		size_t yshift = floor(dim_y / 2.0);
+		circshift(inputArray, dim_x, dim_y, xshift, yshift);
+	}
+
+	template <typename T = double>
+	static void ifftshift(T* inputArray, int dim_x, int dim_y) {
+		size_t xshift = ceil(dim_x / 2.0);
+		size_t yshift = ceil(dim_y / 2.0);
+		circshift(inputArray, dim_x, dim_y, xshift, yshift);
+	}
+
+	// Taken (and slightly adjusted to be circshift, not fftshift) from this SO answer
+	// https://stackoverflow.com/questions/5915125/fftshift-ifftshift-c-c-source-code/36186981#36186981
+	template <typename T = double>
+	static void circshift(T* inputArray, int dim_x, int dim_y, int xshift, int yshift) {
+		if ((dim_x*dim_y) % 2 == 0 && dim_x == 2*xshift && dim_y == 2*yshift) {
+			// in and output array are the same and we shift by half the size,
+			// values are exchanged using swap
+			for (size_t x{ 0 }; x < dim_x; x++) {
+				size_t outX = (x + xshift) % dim_x;
+				for (size_t y{ 0 }; y < yshift; y++) {
+					size_t outY = (y + yshift) % dim_y;
+					// row-major order
+					std::swap(inputArray[outX + dim_x * outY], inputArray[x + dim_x * y]);
+				}
+			}
+		} else {
 			// temp output array
 			std::vector<double> out;
 			out.resize(dim_x * dim_y);
-			for (size_t x = 0; x < dim_x; x++) {
+			for (size_t x{ 0 }; x < dim_x; x++) {
 				size_t outX = (x + xshift) % dim_x;
-				for (size_t y = 0; y < dim_y; y++) {
+				for (size_t y{ 0 }; y < dim_y; y++) {
 					size_t outY = (y + yshift) % dim_y;
 					// row-major order
 					out[outX + dim_x * outY] = inputArray[x + dim_x * y];
@@ -137,17 +162,6 @@ public:
 			}
 			// copy out back to data
 			copy(out.begin(), out.end(), &inputArray[0]);
-		} else {
-			// in and output array are the same,
-			// values are exchanged using swap
-			for (size_t x = 0; x < dim_x; x++) {
-				size_t outX = (x + xshift) % dim_x;
-				for (size_t y = 0; y < yshift; y++) {
-					size_t outY = (y + yshift) % dim_y;
-					// row-major order
-					std::swap(inputArray[outX + dim_x * outY], inputArray[x + dim_x * y]);
-				}
-			}
 		}
 	}
 
