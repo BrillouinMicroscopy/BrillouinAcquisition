@@ -777,13 +777,18 @@ void BrillouinAcquisition::on_gainCameraODT_valueChanged(double gain) {
 void BrillouinAcquisition::on_camera_displayMode_currentIndexChanged(const QString & text) {
 	if (text == "Intensity") {
 		m_ODTPlot.mode = DISPLAY_MODE::INTENSITY;
+		m_ODTPlot.gradient = CustomGradientPreset::gpGrayscale;
 	} else if (text == "Spectrum") {
 		m_ODTPlot.mode = DISPLAY_MODE::SPECTRUM;
+		m_ODTPlot.gradient = CustomGradientPreset::gpJet;
 	} else if (text == "Phase") {
 		m_ODTPlot.mode = DISPLAY_MODE::PHASE;
+		m_ODTPlot.gradient = CustomGradientPreset::gpJet;
 	} else {
 		m_ODTPlot.mode = DISPLAY_MODE::INTENSITY;
+		m_ODTPlot.gradient = CustomGradientPreset::gpGrayscale;
 	}
+	applyGradient(m_ODTPlot);
 }
 
 void BrillouinAcquisition::on_acquisitionStartFluorescence_clicked() {
@@ -1256,9 +1261,7 @@ void BrillouinAcquisition::initializePlot(PLOT_SETTINGS plotSettings) {
 	);
 
 	// set the color gradient of the color map to one of the presets:
-	QCPColorGradient gradient = QCPColorGradient();
-	setColormap(&gradient, plotSettings.gradient);
-	plotSettings.colorMap->setGradient(gradient);
+	applyGradient(plotSettings);
 
 	plotSettings.colorMap->setDataRange(plotSettings.cLim);
 
@@ -1277,6 +1280,12 @@ void BrillouinAcquisition::initializePlot(PLOT_SETTINGS plotSettings) {
 
 	// rescale the key (x) and value (y) axes so the whole color map is visible:
 	plotSettings.plotHandle->rescaleAxes();
+}
+
+void BrillouinAcquisition::applyGradient(PLOT_SETTINGS plotSettings) {
+	QCPColorGradient gradient = QCPColorGradient();
+	setColormap(&gradient, plotSettings.gradient);
+	plotSettings.colorMap->setGradient(gradient);
 }
 
 void BrillouinAcquisition::on_addFocusMarker_brightfield_clicked() {
@@ -2799,6 +2808,9 @@ void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradien
 			break;
 		case gpGrayscale:
 			gradient->loadPreset(QCPColorGradient::gpGrayscale);
+			break;
+		case gpJet:
+			gradient->loadPreset(QCPColorGradient::gpJet);
 			break;
 		default:
 			gradient->loadPreset(QCPColorGradient::gpGrayscale);

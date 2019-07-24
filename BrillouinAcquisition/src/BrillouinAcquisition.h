@@ -217,6 +217,8 @@ private slots:
 
 	void on_camera_displayMode_currentIndexChanged(const QString &text);
 
+	void applyGradient(PLOT_SETTINGS plotSettings);
+
 	/*
 	 * Fluorescence slots
 	 */

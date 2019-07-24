@@ -13,7 +13,8 @@ enum CustomGradientPreset {
 	gpGrayscale,
 	gpRed,
 	gpGreen,
-	gpBlue
+	gpBlue,
+	gpJet
 };
 
 typedef enum class displayMode {
