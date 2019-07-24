@@ -215,6 +215,8 @@ private slots:
 	void on_exposureTimeCameraODT_valueChanged(double exposureTime);
 	void on_gainCameraODT_valueChanged(double gain);
 
+	void on_camera_displayMode_currentIndexChanged(const QString &text);
+
 	/*
 	 * Fluorescence slots
 	 */

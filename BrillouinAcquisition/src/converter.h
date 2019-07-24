@@ -31,7 +31,7 @@ struct PLOT_SETTINGS {
 	std::function<void(QCPRange)> dataRangeCallback{ nullptr };
 	bool autoscale{ false };
 	CustomGradientPreset gradient = CustomGradientPreset::gpParula;
-	DISPLAY_MODE mode{ DISPLAY_MODE::SPECTRUM };
+	DISPLAY_MODE mode{ DISPLAY_MODE::INTENSITY };
 };
 
 class converter : public QObject {

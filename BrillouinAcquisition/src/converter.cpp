@@ -37,8 +37,6 @@ void converter::conv(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS*
 	//	}
 	//}
 
-	plotSettings->mode = DISPLAY_MODE::SPECTRUM;
-
 	std::vector<double> converted(unpackedBuffer, unpackedBuffer + dim_x*dim_y);
 	switch (plotSettings->mode) {
 	case DISPLAY_MODE::PHASE:

@@ -774,6 +774,18 @@ void BrillouinAcquisition::on_gainCameraODT_valueChanged(double gain) {
 	QMetaObject::invokeMethod(m_ODT, "setCameraSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::GAIN), Q_ARG(double, gain));
 }
 
+void BrillouinAcquisition::on_camera_displayMode_currentIndexChanged(const QString & text) {
+	if (text == "Intensity") {
+		m_ODTPlot.mode = DISPLAY_MODE::INTENSITY;
+	} else if (text == "Spectrum") {
+		m_ODTPlot.mode = DISPLAY_MODE::SPECTRUM;
+	} else if (text == "Phase") {
+		m_ODTPlot.mode = DISPLAY_MODE::PHASE;
+	} else {
+		m_ODTPlot.mode = DISPLAY_MODE::INTENSITY;
+	}
+}
+
 void BrillouinAcquisition::on_acquisitionStartFluorescence_clicked() {
 	if (m_Fluorescence->getStatus() < ACQUISITION_STATUS::STARTED) {
 		startBrightfieldPreview(true);
