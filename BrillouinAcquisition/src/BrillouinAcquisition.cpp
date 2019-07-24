@@ -298,6 +298,12 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		this,
 		[this](PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<unsigned short> unpackedBuffer) { plot(previewBuffer, plotSettings, unpackedBuffer); }
 	);
+	connection = QWidget::connect<void(converter::*)(PreviewBuffer<unsigned char>*, PLOT_SETTINGS*, std::vector<double>)>(
+		m_converter,
+		&converter::s_converted,
+		this,
+		[this](PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<double> unpackedBuffer) { plot(previewBuffer, plotSettings, unpackedBuffer); }
+	);
 
 	initScanControl();
 	initCamera();
@@ -1584,6 +1590,10 @@ void BrillouinAcquisition::plot(PreviewBuffer<unsigned char>* previewBuffer, PLO
 }
 
 void BrillouinAcquisition::plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<unsigned short> unpackedBuffer) {
+	plotting(previewBuffer, plotSettings, unpackedBuffer);
+}
+
+void BrillouinAcquisition::plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<double> unpackedBuffer) {
 	plotting(previewBuffer, plotSettings, unpackedBuffer);
 }
 

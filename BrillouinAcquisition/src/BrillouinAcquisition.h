@@ -142,6 +142,7 @@ private slots:
 
 	void plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<unsigned char> unpackedBuffer);
 	void plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<unsigned short> unpackedBuffer);
+	void plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<double> unpackedBuffer);
 
 	void initializePlot(PLOT_SETTINGS plotSettings);
 

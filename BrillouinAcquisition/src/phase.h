@@ -80,8 +80,8 @@ public:
 		//getRawPhase(intensity, dim_x, dim_y);
 	}
 
-	template <typename T = double>
-	void calculateSpectrum(T* intensity, T* spectrum, int dim_x, int dim_y) {
+	template <typename T_in = double, typename T_out = double>
+	void calculateSpectrum(T_in* intensity, T_out* spectrum, int dim_x, int dim_y) {
 		// Test whether we have to reinitialize the FFT plan
 		initialize(dim_x, dim_y);
 
