@@ -96,7 +96,7 @@ public:
 
 		// Calculate the absolute value
 		for (int i{ 0 }; i < dim_x * dim_y; i++) {
-			spectrum[i] = sqrt(pow(m_out[i][0], 2) + pow(m_out[i][1], 2)) / (dim_x * dim_y);
+			spectrum[i] = log10(sqrt(pow(m_out[i][0], 2) + pow(m_out[i][1], 2)) / (dim_x * dim_y));
 		}
 
 		fftshift(spectrum, dim_y, dim_x);
