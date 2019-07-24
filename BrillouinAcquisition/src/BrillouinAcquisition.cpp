@@ -211,6 +211,10 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<PLOT_SETTINGS*>("PLOT_SETTINGS*");
 	qRegisterMetaType<PreviewBuffer<unsigned short>*>("PreviewBuffer<unsigned short>*");
 	qRegisterMetaType<PreviewBuffer<unsigned char>*>("PreviewBuffer<unsigned char>*");
+	qRegisterMetaType<unsigned char*>("unsigned char*");
+	qRegisterMetaType<unsigned short*>("unsigned short*");
+	qRegisterMetaType<std::vector<unsigned short>>("std::vector<unsigned short>");
+	qRegisterMetaType<std::vector<unsigned char>>("std::vector<unsigned char>");
 	qRegisterMetaType<bool*>("bool*");
 	qRegisterMetaType<std::vector<FLUORESCENCE_MODE>>("std::vector<FLUORESCENCE_MODE>");
 	qRegisterMetaType<SpatialCalibration>("SpatialCalibration");
@@ -282,6 +286,19 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	ui->actionEnable_Cooling->setEnabled(false);
 	ui->autoscalePlot->setChecked(m_BrillouinPlot.autoscale);
 
+	connection = QWidget::connect<void(converter::*)(PreviewBuffer<unsigned char>*, PLOT_SETTINGS*, std::vector<unsigned char>)>(
+		m_converter,
+		&converter::s_converted,
+		this,
+		[this](PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<unsigned char> unpackedBuffer) { plot(previewBuffer, plotSettings, unpackedBuffer); }
+	);
+	connection = QWidget::connect<void(converter::*)(PreviewBuffer<unsigned char>*, PLOT_SETTINGS*, std::vector<unsigned short>)>(
+		m_converter,
+		&converter::s_converted,
+		this,
+		[this](PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<unsigned short> unpackedBuffer) { plot(previewBuffer, plotSettings, unpackedBuffer); }
+	);
+
 	initScanControl();
 	initCamera();
 	// start andor thread
@@ -290,6 +307,8 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	m_acquisitionThread.startWorker(m_acquisition);
 	// start Brillouin thread
 	m_acquisitionThread.startWorker(m_Brillouin);
+	// start plotting thread
+	m_plottingThread.startWorker(m_converter);
 
 	// set up the QCPColorMap:
 	m_BrillouinPlot = {
@@ -393,6 +412,9 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 	m_acquisitionThread.exit();
 	m_acquisitionThread.terminate();
 	m_acquisitionThread.wait();
+	m_plottingThread.exit();
+	m_plottingThread.terminate();
+	m_plottingThread.wait();
 	qInfo(logInfo()) << "BrillouinAcquisition closed.";
 	delete ui;
 }
@@ -1543,11 +1565,38 @@ void BrillouinAcquisition::updateImage(PreviewBuffer<T>* previewBuffer, PLOT_SET
 
 		if (previewBuffer->m_bufferSettings.bufferType == "unsigned short") {
 			auto unpackedBuffer = reinterpret_cast<unsigned short*>(previewBuffer->m_buffer->getReadBuffer());
-			plotting(previewBuffer, plotSettings, unpackedBuffer);
-		}
-		else if (previewBuffer->m_bufferSettings.bufferType == "unsigned char") {
+			QMetaObject::invokeMethod(m_converter, "convert", Qt::QueuedConnection,
+				Q_ARG(PreviewBuffer<unsigned char>*, previewBuffer),
+				Q_ARG(PLOT_SETTINGS*, plotSettings),
+				Q_ARG(unsigned short*, unpackedBuffer));
+		} else if (previewBuffer->m_bufferSettings.bufferType == "unsigned char") {
 			auto unpackedBuffer = previewBuffer->m_buffer->getReadBuffer();
-			plotting(previewBuffer, plotSettings, unpackedBuffer);
+			QMetaObject::invokeMethod(m_converter, "convert", Qt::QueuedConnection,
+				Q_ARG(PreviewBuffer<unsigned char>*, previewBuffer),
+				Q_ARG(PLOT_SETTINGS*, plotSettings),
+				Q_ARG(unsigned char*, unpackedBuffer));
+		}
+	}
+}
+
+void BrillouinAcquisition::plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<unsigned char> unpackedBuffer) {
+	plotting(previewBuffer, plotSettings, unpackedBuffer);
+}
+
+void BrillouinAcquisition::plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<unsigned short> unpackedBuffer) {
+	plotting(previewBuffer, plotSettings, unpackedBuffer);
+}
+
+template <typename T>
+void BrillouinAcquisition::plotting(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<T> unpackedBuffer) {
+	int dim_x = previewBuffer->m_bufferSettings.roi.width;
+	int dim_y = previewBuffer->m_bufferSettings.roi.height;
+	// images are given row by row, starting at the top left
+	int tIndex{ 0 };
+	for (gsl::index yIndex{ 0 }; yIndex < dim_y; ++yIndex) {
+		for (gsl::index xIndex{ 0 }; xIndex < dim_x; ++xIndex) {
+			tIndex = yIndex * dim_x + xIndex;
+			plotSettings->colorMap->data()->setCell(xIndex, dim_y - yIndex - 1, unpackedBuffer[tIndex]);
 		}
 	}
 	previewBuffer->m_buffer->m_freeBuffers->release();
@@ -1557,51 +1606,6 @@ void BrillouinAcquisition::updateImage(PreviewBuffer<T>* previewBuffer, PLOT_SET
 		(plotSettings->dataRangeCallback)(plotSettings->cLim);
 	}
 	plotSettings->plotHandle->replot();
-}
-
-template <typename T>
-void BrillouinAcquisition::plotting(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, T* unpackedBuffer) {
-	int dim_x = previewBuffer->m_bufferSettings.roi.width;
-	int dim_y = previewBuffer->m_bufferSettings.roi.height;
-	//std::vector<double> x = simplemath::linspace(-30.0, 30.0, dim_x);
-	//std::vector<double> y = simplemath::linspace(-30.0, 30.0, dim_y);
-
-	//std::vector<double> inten;
-	//inten.resize(dim_x*dim_y);
-	//for (int ii{ 0 }; ii < dim_x; ii++) {
-	//	for (int jj{ 0 }; jj < dim_y; jj++) {
-	//		//double r = sqrt(pow(x[ii], 2) + pow(y[jj], 2));
-	//		//inten[ii + jj * dim_x] = sin(10 * r) / (10 * r);
-	//		inten[ii + jj * dim_x] = unpackedBuffer[ii + jj *dim_x];
-	//	}
-	//}
-	
-	T* buffer = nullptr;
-	std::vector<T> converted;
-	converted.resize(dim_x * dim_y);
-	plotSettings->mode = DISPLAY_MODE::SPECTRUM;
-	switch (plotSettings->mode) {
-	case DISPLAY_MODE::PHASE:
-		// m_phase->calculatePhase(unpackedBuffer, &converted[0], dim_y, dim_x);
-		buffer = &converted[0];
-		break;
-	case DISPLAY_MODE::SPECTRUM:
-		m_phase->calculateSpectrum(unpackedBuffer, &converted[0], dim_y, dim_x);
-		buffer = &converted[0];
-		break;
-	default:
-		buffer = unpackedBuffer;
-		break;
-	}
-
-	// images are given row by row, starting at the top left
-	int tIndex{ 0 };
-	for (gsl::index yIndex{ 0 }; yIndex < dim_y; ++yIndex) {
-		for (gsl::index xIndex{ 0 }; xIndex < dim_x; ++xIndex) {
-			tIndex = yIndex * dim_x + xIndex;
-			plotSettings->colorMap->data()->setCell(xIndex, dim_y - yIndex - 1, buffer[tIndex]);
-		}
-	}
 }
 
 void BrillouinAcquisition::on_actionConnect_Camera_triggered() {

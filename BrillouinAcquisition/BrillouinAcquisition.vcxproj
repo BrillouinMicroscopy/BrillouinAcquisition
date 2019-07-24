@@ -146,6 +146,9 @@ copy "$(ProjectDir)external\fftw\libfftw3-3.dll" "$(TargetDir)"
     <ClCompile Include="GeneratedFiles\Debug\moc_Calibration.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_converter.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_Fluorescence.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -153,6 +156,9 @@ copy "$(ProjectDir)external\fftw\libfftw3-3.dll" "$(TargetDir)"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_Calibration.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_converter.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_Fluorescence.cpp">
@@ -295,6 +301,7 @@ copy "$(ProjectDir)external\fftw\libfftw3-3.dll" "$(TargetDir)"
     <ClCompile Include="src\Devices\PointGrey.cpp" />
     <ClCompile Include="external\qcustomplot\qcustomplot.cpp" />
     <ClCompile Include="src\Devices\scancontrol.cpp" />
+    <ClCompile Include="src\converter.cpp" />
     <ClCompile Include="src\tableModel.cpp" />
     <ClCompile Include="src\Devices\ZeissECU.cpp" />
     <ClCompile Include="src\stdafx.cpp">
@@ -525,6 +532,16 @@ copy "$(ProjectDir)external\fftw\libfftw3-3.dll" "$(TargetDir)"
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions)  "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\HDF_Group\HDF5\1.10.5\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I.\external\gsl\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-fstdafx.h" "-f../../src/Devices/%(Filename)%(Extension)"</Command>
     </CustomBuild>
     <ClInclude Include="src\interpolation.h" />
+    <CustomBuild Include="src\converter.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp" "-fstdafx.h" "-f../../src/%(Filename)%(Extension)"  -DUNICODE -DWIN32 -DWIN64 -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions) "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-I.\external\gsl\include" "-IC:\Program Files\HDF_Group\HDF5\1.10.5\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp" "-fstdafx.h" "-f../../src/%(Filename)%(Extension)"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions) "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\HDF_Group\HDF5\1.10.5\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I.\external\gsl\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport"</Command>
+    </CustomBuild>
     <ClInclude Include="src\simplemath.h" />
     <ClInclude Include="src\logger.h" />
     <CustomBuild Include="external\qcustomplot\qcustomplot.h">

@@ -22,7 +22,7 @@
 #include "Acquisition/AcquisitionModes/Fluorescence.h"
 #include "Acquisition/AcquisitionModes/Calibration.h"
 
-#include "phase.h"
+#include "converter.h"
 
 #include <QtWidgets/QMainWindow>
 #include "ui_BrillouinAcquisition.h"
@@ -39,24 +39,10 @@ typedef struct {
 	STAGE_SETTINGS stage;
 } SETTINGS_DEVICES;
 
-enum CustomGradientPreset {
-	gpParula,
-	gpGrayscale,
-	gpRed,
-	gpGreen,
-	gpBlue
-};
-
 enum ROI_SOURCE {
 	BOX,
 	PLOT
 };
-
-typedef enum class displayMode {
-	INTENSITY,
-	SPECTRUM,
-	PHASE
-} DISPLAY_MODE;
 
 Q_DECLARE_METATYPE(std::string);
 Q_DECLARE_METATYPE(AT_64);
@@ -88,7 +74,12 @@ Q_DECLARE_METATYPE(ODTIMAGE*);
 Q_DECLARE_METATYPE(FLUOIMAGE*);
 Q_DECLARE_METATYPE(FLUORESCENCE_SETTINGS);
 Q_DECLARE_METATYPE(FLUORESCENCE_MODE);
+Q_DECLARE_METATYPE(PLOT_SETTINGS*);
 Q_DECLARE_METATYPE(PreviewBuffer<unsigned char>*);
+Q_DECLARE_METATYPE(unsigned char*);
+Q_DECLARE_METATYPE(unsigned short*);
+Q_DECLARE_METATYPE(std::vector<unsigned char>);
+Q_DECLARE_METATYPE(std::vector<unsigned short>);
 Q_DECLARE_METATYPE(bool*);
 Q_DECLARE_METATYPE(std::vector<FLUORESCENCE_MODE>);
 Q_DECLARE_METATYPE(SpatialCalibration);
@@ -96,18 +87,6 @@ Q_DECLARE_METATYPE(SpatialCalibration);
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
 	
-	struct PLOT_SETTINGS {
-		QCustomPlot* plotHandle{ nullptr };
-		QCPColorMap* colorMap{ nullptr };
-		QCPRange cLim = { 100, 300 };
-		QSpinBox* lowerBox;
-		QSpinBox* upperBox;
-		std::function<void(QCPRange)> dataRangeCallback{ nullptr };
-		bool autoscale{ false };
-		CustomGradientPreset gradient = CustomGradientPreset::gpParula;
-		DISPLAY_MODE mode{ DISPLAY_MODE::SPECTRUM };
-	};
-
 private slots:
 	void on_rangeLower_valueChanged(int);
 	void on_rangeUpper_valueChanged(int);
@@ -160,6 +139,9 @@ private slots:
 
 	void updateImageBrillouin();
 	void updateImageODT();
+
+	void plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<unsigned char> unpackedBuffer);
+	void plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<unsigned short> unpackedBuffer);
 
 	void initializePlot(PLOT_SETTINGS plotSettings);
 
@@ -374,6 +356,7 @@ private:
 	Thread m_andorThread;
 	Thread m_brightfieldCameraThread;
 	Thread m_acquisitionThread;
+	Thread m_plottingThread;
 
 	Brillouin* m_Brillouin = new Brillouin(nullptr, m_acquisition, m_andor, &m_scanControl);
 	BRILLOUIN_SETTINGS m_BrillouinSettings;
@@ -384,13 +367,13 @@ private:
 	PLOT_SETTINGS m_BrillouinPlot;
 	PLOT_SETTINGS m_ODTPlot;
 
-	phase* m_phase = new phase();
+	converter* m_converter = new converter();
 
 	template <typename T>
 	void updateImage(PreviewBuffer<T>* previewBuffer, PLOT_SETTINGS* plotSettings);
 
 	template<typename T>
-	void plotting(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, T* unpackedBuffer);
+	void plotting(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<T> unpackedBuffer);
 
 	SETTINGS_DEVICES m_deviceSettings;
 	CAMERA_OPTIONS m_cameraOptions;
