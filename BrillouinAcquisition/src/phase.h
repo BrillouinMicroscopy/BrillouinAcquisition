@@ -120,7 +120,7 @@ public:
 	}
 
 	template <typename T = double>
-	static void circshift(double* inputArray, int dim_x, int dim_y, std::vector<int> distance) {
+	static void circshift(T* inputArray, int dim_x, int dim_y, std::vector<int> distance) {
 		size_t xshift = dim_x / 2;
 		size_t yshift = dim_y / 2;
 		if ((dim_x*dim_y) % 2 != 0) {
