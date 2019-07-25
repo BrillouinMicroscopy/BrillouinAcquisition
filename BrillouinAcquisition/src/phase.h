@@ -21,6 +21,13 @@ private:
 	int m_dim_x{ 0 }, m_dim_y{ 0 };
 	bool m_initialized{ false };
 
+	double m_pixelSize = 4.8 / (90.4762 * 63 / 100);
+	double m_NA{ 1.2 };
+	double m_lambda{ 0.532 };
+
+	double m_maskRadius{ 0 };
+	std::vector<int> m_mask;
+
 	template <typename T = double>
 	bool sizeMatches(T intensity) {
 		return false;
@@ -33,6 +40,10 @@ private:
 		if (m_dim_x != dim_x || m_dim_y != dim_y) {
 			m_dim_x = dim_x;
 			m_dim_y = dim_y;
+
+			m_maskRadius = round(m_dim_x * m_pixelSize * m_NA / m_lambda);
+
+			m_mask = createMask(dim_x, dim_y, m_maskRadius);
 
 			int N = m_dim_x * m_dim_y;
 
@@ -48,6 +59,19 @@ private:
 
 			m_initialized = true;
 		}
+	}
+
+	std::vector<int> createMask(int dim_x, int dim_y, double maskRadius) {
+		std::vector<int> mask(dim_x * dim_y, 0);
+		for (int x{ (int)round(dim_x / 2.0 - m_maskRadius) }; x < round(dim_x / 2.0 + m_maskRadius); x++) {
+			for (int y{ (int)round(dim_y / 2.0 - m_maskRadius) }; y < round(dim_y / 2.0 + m_maskRadius); y++) {
+				if (sqrt(pow((x - dim_x/2.0), 2) + pow(y - dim_y/2.0, 2)) <= m_maskRadius) {
+					mask[y + dim_y * x] = 1;
+				}
+			}
+		}
+
+		return mask;
 	}
 
 	template <typename T_in = double>
