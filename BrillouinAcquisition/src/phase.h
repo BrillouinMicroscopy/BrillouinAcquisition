@@ -50,6 +50,14 @@ private:
 		}
 	}
 
+	template <typename T_in = double>
+	void copyToInput(T_in* intensity, int dim_x, int dim_y) {
+		for (int i{ 0 }; i < dim_x * dim_y; i++) {
+			m_in[i][0] = intensity[i];
+			m_in[i][1] = 0.0;
+		}
+	}
+
 	template <typename T = double>
 	void getRawPhase(T* intensity, T* phase, int dim_x, int dim_y) {
 
@@ -86,10 +94,7 @@ public:
 		initialize(dim_x, dim_y);
 
 		// Initialize the input array
-		for (int i{ 0 }; i < dim_x * dim_y; i++) {
-			m_in[i][0] = intensity[i];
-			m_in[i][1] = 0.0;
-		}
+		copyToInput(intensity, dim_x, dim_y);
 
 		// Calculate the FFT
 		fftw_execute(m_plan);
