@@ -150,18 +150,19 @@ public:
 			}
 		} else {
 			// temp output array
-			std::vector<double> out;
-			out.resize(dim_x * dim_y);
+			int N = dim_x * dim_y;
+			T* out = (T*)malloc(sizeof(T) * N);
 			for (size_t x{ 0 }; x < dim_x; x++) {
 				size_t outX = (x + xshift) % dim_x;
 				for (size_t y{ 0 }; y < dim_y; y++) {
 					size_t outY = (y + yshift) % dim_y;
 					// row-major order
-					out[outX + dim_x * outY] = inputArray[x + dim_x * y];
+					memcpy(&out[outX + dim_x * outY], &inputArray[x + dim_x * y], sizeof(T));
 				}
 			}
 			// copy out back to data
-			copy(out.begin(), out.end(), &inputArray[0]);
+			memcpy(inputArray, out, sizeof(T) * N);
+			free(out);
 		}
 	}
 
