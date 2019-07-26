@@ -272,8 +272,9 @@ void PointGrey::preparePreview() {
 	// set ROI and readout parameters to default preview values, exposure time and gain will be kept
 	m_settings.roi.left = 0;
 	m_settings.roi.top = 0;
-	m_settings.roi.width = m_options.ROIWidthLimits[1];
-	m_settings.roi.height = m_options.ROIHeightLimits[1];
+	// Set the preview to square for now, because there is a bug in circshift for non-square images
+	m_settings.roi.width = 1024; //m_options.ROIWidthLimits[1];
+	m_settings.roi.height = 1024; //m_options.ROIHeightLimits[1];
 	m_settings.readout.pixelEncoding = L"Raw8";
 	m_settings.readout.triggerMode = L"Internal";
 	m_settings.readout.cycleMode = L"Fixed";
