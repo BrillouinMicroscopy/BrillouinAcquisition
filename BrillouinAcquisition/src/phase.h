@@ -8,6 +8,7 @@
 #include <iterator>
 
 #include <math.h>
+#include "simplemath.h"
 
 #include "../external/fftw/fftw3.h"
 
@@ -201,10 +202,10 @@ public:
 
 		// Calculate the absolute value
 		for (int i{ 0 }; i < dim_x * dim_y; i++) {
-			spectrum[i] = log10(sqrt(pow(m_out_FFT[i][0], 2) + pow(m_out_FFT[i][1], 2)) / (dim_x * dim_y));
+			(*spectrum)[i] = log10(sqrt(pow(m_out_FFT[i][0], 2) + pow(m_out_FFT[i][1], 2)) / (dim_x * dim_y));
 		}
 
-		fftshift(spectrum, dim_x, dim_y);
+		fftshift(&(*spectrum)[0], dim_x, dim_y);
 	}
 
 	template <typename T_in = double, typename T_out = double>
@@ -247,9 +248,18 @@ public:
 
 		// Calculate the phase angle
 		for (int i{ 0 }; i < dim_x * dim_y; i++) {
-			phase[i] = atan2(m_out_IFFT[i][1], m_out_IFFT[i][0]);
+			(*phase)[i] = atan2(m_out_IFFT[i][1], m_out_IFFT[i][0]);
 		}
 
+		// Subtract median value
+		auto newPhase = (*phase);
+		auto beg = std::begin(newPhase);
+		auto end = std::end(newPhase);
+		auto median = simplemath::median(beg, end);
+
+		for (int i{ 0 }; i < dim_x * dim_y; i++) {
+			(*phase)[i] -= median;
+		}
 	}
 
 	template <typename T = double>
