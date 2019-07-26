@@ -104,7 +104,8 @@ private:
 		}
 
 		// Calculate inverse Fourier transform of shifted and masked background
-		memcpy(m_in_IFFT, m_out_FFT, m_dim_x * m_dim_y);
+		int N = m_dim_x * m_dim_y;
+		memcpy(m_in_IFFT, m_out_FFT, sizeof(fftw_complex) * N);
 
 		fftw_execute(m_IFFT);
 	}
@@ -145,7 +146,8 @@ public:
 
 		getRawPhase();
 
-		memcpy(m_background, m_out_IFFT, dim_x * dim_y);
+		int N = dim_x * dim_y;
+		memcpy(m_background, m_out_IFFT, , sizeof(fftw_complex) * N);
 	}
 
 	/*
@@ -227,13 +229,14 @@ public:
 		// Calculate the phase difference
 		getRawPhase();
 
+		int N = dim_x * dim_y;
 		if (updateBackground) {
-			memcpy(m_background, m_out_IFFT, dim_x * dim_y);
+			memcpy(m_background, m_out_IFFT, sizeof(fftw_complex) * N);
 		}
 
 		// divide by background
 		double a, b, c, d, e;
-		for (int i{ 0 }; i < dim_x * dim_y; i++) {
+		for (int i{ 0 }; i < N; i++) {
 			a = m_out_IFFT[i][0];
 			b = m_out_IFFT[i][1];
 			c = m_background[i][0];
