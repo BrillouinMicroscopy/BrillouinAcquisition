@@ -182,11 +182,11 @@ public:
 		std::vector<double>::iterator result = std::max_element(itl, itr);
 		int ind = std::distance(std::begin(background), result);
 		
-		m_max_x = floor(ind / dim_y);
-		m_max_x = round(m_max_x - dim_x / 2.0 - 1);
+		m_max_y = floor(ind / dim_y);
+		m_max_x = ind - m_max_y * dim_y;
 
-		m_max_y = ind - m_max_x * dim_y;
-		m_max_x = round(m_max_y - dim_y / 2.0 - 1);
+		m_max_x = round(m_max_x - dim_x / 2.0 - 1);
+		m_max_y = round(m_max_y - dim_y / 2.0 - 1);
 	}
 
 	template <typename T_in = double, typename T_out = double>
