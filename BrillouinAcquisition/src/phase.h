@@ -5,6 +5,7 @@
 #include <iterator>
 #include <complex>
 #include <utility>
+#include <iterator>
 
 #include <math.h>
 
@@ -14,11 +15,10 @@ class phase {
 
 private:
 
-	double *m_backgroundPhase = nullptr;
-	fftw_complex *m_in;
-	fftw_complex *m_out;
-	fftw_plan m_plan;
-	int m_dim_x{ 0 }, m_dim_y{ 0 };
+	fftw_complex *m_background = nullptr;
+	fftw_complex *m_in_FFT, *m_out_FFT, *m_in_IFFT, *m_out_IFFT;
+	fftw_plan m_FFT, m_IFFT;
+	int m_dim_x{ 0 }, m_dim_y{ 0 }, m_max_x{ 0 }, m_max_y{ 0 }, m_dim_background_x{ 0 }, m_dim_background_y{ 0 };
 	bool m_initialized{ false };
 
 	double m_pixelSize = 4.8 / (90.4762 * 63 / 100);
@@ -48,14 +48,26 @@ private:
 			int N = m_dim_x * m_dim_y;
 
 			if (m_initialized) {
-				fftw_destroy_plan(m_plan);
-				fftw_free(m_in);
-				fftw_free(m_out);
+				// FFT variables
+				fftw_free(m_in_FFT);
+				fftw_free(m_out_FFT);
+				fftw_destroy_plan(m_FFT);
+
+				// Inverse FFT variables
+				fftw_free(m_in_IFFT);
+				fftw_free(m_out_IFFT);
+				fftw_destroy_plan(m_IFFT);
+
+				// Background phasors
+				fftw_free(m_background);
 			}
 
-			m_in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N);
-			m_out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N);
-			m_plan = fftw_plan_dft_2d(m_dim_x, m_dim_y, m_in, m_out, FFTW_FORWARD, FFTW_ESTIMATE);
+			m_in_FFT = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N);
+			m_out_FFT = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N);
+			m_in_IFFT = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N);
+			m_out_IFFT = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N);
+			m_FFT = fftw_plan_dft_2d(m_dim_x, m_dim_y, m_in_FFT, m_out_FFT, FFTW_FORWARD, FFTW_ESTIMATE);
+			m_IFFT = fftw_plan_dft_2d(m_dim_x, m_dim_y, m_in_IFFT, m_out_IFFT, FFTW_BACKWARD, FFTW_ESTIMATE);
 
 			m_initialized = true;
 		}
@@ -75,22 +87,26 @@ private:
 	}
 
 	template <typename T_in = double>
-	void copyToInput(T_in* intensity, int dim_x, int dim_y) {
+	void copyToInput(fftw_complex* dest, T_in* intensity, int dim_x, int dim_y) {
 		for (int i{ 0 }; i < dim_x * dim_y; i++) {
-			m_in[i][0] = intensity[i];
-			m_in[i][1] = 0.0;
+			dest[i][0] = intensity[i];
+			dest[i][1] = 0.0;
 		}
 	}
 
 	template <typename T = double>
-	void getRawPhase(T* intensity, T* phase, int dim_x, int dim_y) {
+	void getRawPhase() {
+		// Shift background spectrum to center and mask unwanted regions
+		circshift(m_out_FFT, m_dim_x, m_dim_y, -m_max_x, -m_max_y);
+		for (int jj{ 0 }; jj < m_dim_x * m_dim_y; jj++) {
+			m_out_FFT[jj][0] *= m_mask[jj];
+			m_out_FFT[jj][1] *= m_mask[jj];
+		}
 
-		// Calculate the frequency information (FFT)
-		fftw_execute(m_plan);
+		// Calculate inverse Fourier transform of shifted and masked background
+		memcpy(m_in_IFFT, m_out_FFT, m_dim_x * m_dim_y);
 
-		// Select sample information
-
-		// Calculate the phase (Inverse FFT)
+		fftw_execute(m_IFFT);
 	}
 
 public:
@@ -98,9 +114,17 @@ public:
 	phase() {}
 
 	~phase() {
-		fftw_destroy_plan(m_plan);
-		fftw_free(m_in);
-		fftw_free(m_out);
+		fftw_destroy_plan(m_FFT);
+		fftw_free(m_in_FFT);
+		fftw_free(m_out_FFT);
+
+		fftw_destroy_plan(m_IFFT);
+		fftw_free(m_in_IFFT);
+		fftw_free(m_out_IFFT);
+
+		if (m_background != nullptr) {
+			fftw_free(m_background);
+		}
 	}
 
 	/*
@@ -108,8 +132,59 @@ public:
 	 */
 	template <typename T = double>
 	void setBackground(T intensity, int dim_x, int dim_y) {
+		// Test whether we have to reinitialize the FFT plan
+		initialize(dim_x, dim_y);
 
-		//getRawPhase(intensity, dim_x, dim_y);
+		// Initialize the input array
+		copyToInput(m_in_FFT, intensity, dim_x, dim_y);
+		
+		// Calculate the Fourier transform (FFT)
+		fftw_execute(m_FFT);
+
+		background_findCenter(dim_x, dim_y);
+
+		getRawPhase();
+
+		memcpy(m_background, m_out_IFFT, dim_x * dim_y);
+	}
+
+	/*
+	 * Find the center of the background peak
+	 */
+	void background_findCenter(int dim_x, int dim_y) {
+
+		if (m_dim_background_x != dim_x || m_dim_background_y != dim_y) {
+			if (m_background != nullptr) {
+				fftw_free(m_background);
+			}
+			m_background = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * dim_x * dim_y);
+		}
+
+		m_dim_background_x = dim_x;
+		m_dim_background_y = dim_y;
+
+		// Calculate magnitude of background image to find the indices of the largest element
+		std::vector<double> background;
+		background.resize(dim_x * dim_y);
+		for (int i{ 0 }; i < dim_x * dim_y; i++) {
+			background[i] = pow(m_out_FFT[i][0], 2) + pow(m_out_FFT[i][1], 2);
+		}
+
+		// Find indices of largest element in given range
+		int left = round(dim_y * 0.05) * dim_y;
+		int right = round(dim_y * 0.45) * dim_y;
+		std::vector<double>::iterator itl = std::begin(background);
+		std::vector<double>::iterator itr = std::begin(background);
+		std::advance(itl, left);
+		std::advance(itr, right);
+		std::vector<double>::iterator result = std::max_element(itl, itr);
+		int ind = std::distance(std::begin(background), result);
+		
+		m_max_x = floor(ind / dim_y);
+		m_max_x = round(m_max_x - dim_x / 2.0 - 1);
+
+		m_max_y = ind - m_max_x * dim_y;
+		m_max_x = round(m_max_y - dim_y / 2.0 - 1);
 	}
 
 	template <typename T_in = double, typename T_out = double>
@@ -118,34 +193,61 @@ public:
 		initialize(dim_x, dim_y);
 
 		// Initialize the input array
-		copyToInput(intensity, dim_x, dim_y);
+		copyToInput(m_in_FFT, intensity, dim_x, dim_y);
 
 		// Calculate the FFT
-		fftw_execute(m_plan);
+		fftw_execute(m_FFT);
 
 		// Calculate the absolute value
 		for (int i{ 0 }; i < dim_x * dim_y; i++) {
-			spectrum[i] = log10(sqrt(pow(m_out[i][0], 2) + pow(m_out[i][1], 2)) / (dim_x * dim_y));
+			spectrum[i] = log10(sqrt(pow(m_out_FFT[i][0], 2) + pow(m_out_FFT[i][1], 2)) / (dim_x * dim_y));
 		}
 
 		fftshift(spectrum, dim_y, dim_x);
 	}
 
-	template <typename T = double>
-	void calculatePhase(T* intensity, T* phase, int dim_x, int dim_y) {
+	template <typename T_in = double, typename T_out = double>
+	void calculatePhase(T_in* intensity, T_out* phase, int dim_x, int dim_y) {
+		// Test whether we have to reinitialize the FFT plan
+		initialize(dim_x, dim_y);
+		
+		// Initialize the input array
+		copyToInput(m_in_FFT, intensity, dim_x, dim_y);
+		
+		// Calculate the Fourier transform (FFT)
+		fftw_execute(m_FFT);
 
-		//// If we have no background yet (or the background does not have the correct size),
-		//// we use the intensity image we just got
-		//if (m_backgroundPhase == nullptr || (m_dim_x != dim_x || m_dim_y != dim_y)) {
-		//	setBackground(intensity, dim_x, dim_y);
-		//}
+		// If we have no background yet (or the background does not have the correct size),
+		// we use the intensity image we just got
+		bool updateBackground = m_background == nullptr || (m_dim_background_x != dim_x || m_dim_background_y != dim_y);
+		if (updateBackground) {
+			background_findCenter(dim_x, dim_y);
+		}
 
-		//// Calculate the phase difference
-		//getRawPhase(intensity, phase, dim_x, dim_y);
+		// Calculate the phase difference
+		getRawPhase();
 
-		//for (int i{ 0 }; i < dim_x * dim_y; i++) {
-		//	phase[i] = phase[i] - m_backgroundPhase[i];
-		//}
+		if (updateBackground) {
+			memcpy(m_background, m_out_IFFT, dim_x * dim_y);
+		}
+
+		// divide by background
+		double a, b, c, d, e;
+		for (int i{ 0 }; i < dim_x * dim_y; i++) {
+			a = m_out_IFFT[i][0];
+			b = m_out_IFFT[i][1];
+			c = m_background[i][0];
+			d = m_background[i][1];
+			e = (pow(c, 2) + pow(d, 2));
+			m_out_IFFT[i][0] = (a * c + b * d) / e;
+			m_out_IFFT[i][1] = (b * c - a * d) / e;
+		}
+
+		// Calculate the phase angle
+		for (int i{ 0 }; i < dim_x * dim_y; i++) {
+			phase[i] = atan2(m_out_IFFT[i][1], m_out_IFFT[i][0]);
+		}
+
 	}
 
 	template <typename T = double>
