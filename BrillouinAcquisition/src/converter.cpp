@@ -40,10 +40,10 @@ void converter::conv(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS*
 	std::vector<double> converted(unpackedBuffer, unpackedBuffer + dim_x*dim_y);
 	switch (plotSettings->mode) {
 	case DISPLAY_MODE::PHASE:
-		m_phase->calculatePhase(unpackedBuffer, &converted[0], dim_y, dim_x);
+		m_phase->calculatePhase(unpackedBuffer, &converted[0], dim_x, dim_y);
 		break;
 	case DISPLAY_MODE::SPECTRUM:
-		m_phase->calculateSpectrum(unpackedBuffer, &converted[0], dim_y, dim_x);
+		m_phase->calculateSpectrum(unpackedBuffer, &converted[0], dim_x, dim_y);
 		break;
 	default:
 		break;

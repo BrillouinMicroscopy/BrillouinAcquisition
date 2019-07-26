@@ -66,8 +66,8 @@ private:
 			m_out_FFT = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N);
 			m_in_IFFT = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N);
 			m_out_IFFT = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N);
-			m_FFT = fftw_plan_dft_2d(m_dim_x, m_dim_y, m_in_FFT, m_out_FFT, FFTW_FORWARD, FFTW_ESTIMATE);
-			m_IFFT = fftw_plan_dft_2d(m_dim_x, m_dim_y, m_in_IFFT, m_out_IFFT, FFTW_BACKWARD, FFTW_ESTIMATE);
+			m_FFT = fftw_plan_dft_2d(m_dim_y, m_dim_x, m_in_FFT, m_out_FFT, FFTW_FORWARD, FFTW_ESTIMATE);
+			m_IFFT = fftw_plan_dft_2d(m_dim_y, m_dim_x, m_in_IFFT, m_out_IFFT, FFTW_BACKWARD, FFTW_ESTIMATE);
 
 			m_initialized = true;
 		}
@@ -78,7 +78,7 @@ private:
 		for (int x{ (int)round(dim_x / 2.0 - m_maskRadius) }; x < round(dim_x / 2.0 + m_maskRadius); x++) {
 			for (int y{ (int)round(dim_y / 2.0 - m_maskRadius) }; y < round(dim_y / 2.0 + m_maskRadius); y++) {
 				if (sqrt(pow((x - dim_x/2.0), 2) + pow(y - dim_y/2.0, 2)) <= m_maskRadius) {
-					mask[y + dim_y * x] = 1;
+					mask[x + dim_x * y] = 1;
 				}
 			}
 		}
@@ -181,8 +181,8 @@ public:
 		std::vector<double>::iterator result = std::max_element(itl, itr);
 		int ind = std::distance(std::begin(background), result);
 		
-		m_max_y = floor(ind / dim_y);
-		m_max_x = ind - m_max_y * dim_y;
+		m_max_y = floor(ind / dim_x);
+		m_max_x = ind - m_max_y * dim_x;
 
 		m_max_x = round(m_max_x - dim_x / 2.0 - 1);
 		m_max_y = round(m_max_y - dim_y / 2.0 - 1);
@@ -204,7 +204,7 @@ public:
 			spectrum[i] = log10(sqrt(pow(m_out_FFT[i][0], 2) + pow(m_out_FFT[i][1], 2)) / (dim_x * dim_y));
 		}
 
-		fftshift(spectrum, dim_y, dim_x);
+		fftshift(spectrum, dim_x, dim_y);
 	}
 
 	template <typename T_in = double, typename T_out = double>
