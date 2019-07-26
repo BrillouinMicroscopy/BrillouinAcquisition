@@ -92,10 +92,10 @@ public:
 		return result;
 	}
 
-	// Function to calculate median of a vector
+	// Function to calculate the median value of a vector
 	// See https://stackoverflow.com/questions/1719070/what-is-the-right-approach-when-using-stl-container-for-median-calculation/2579393#2579393
 
-	///Represents the exception for taking the median of an empty list
+	// Exception to throw when vector handed to median function is empty
 	class median_of_empty_list_exception :public std::exception {
 		virtual const char* what() const throw() {
 			return "Attempt to take the median of an empty list of numbers.  "
@@ -103,26 +103,28 @@ public:
 		}
 	};
 
-	///Return the median of a sequence of numbers defined by the random
-	///access iterators begin and end.  The sequence must not be empty
-	///(median is undefined for an empty set).
-	///
-	///The numbers must be convertible to double.
-	template<class RandAccessIter>
-	static double median(RandAccessIter begin, RandAccessIter end)
-		throw(median_of_empty_list_exception) {
-		if (begin == end) { throw median_of_empty_list_exception(); }
+	/* 
+	 * Return the median of a sequence of numbers given by the random
+	 * access iterators begin and end.
+	 *
+	 * The sequence must not be empty (median is undefined for an empty set).
+	 * The numbers must be convertible to double.
+	 */
+	template<class It>
+	static double median(It begin, It end) throw(median_of_empty_list_exception) {
+		if (begin == end) {
+			throw median_of_empty_list_exception();
+		}
 		std::size_t size = end - begin;
 		std::size_t middleIdx = size / 2;
-		RandAccessIter target = begin + middleIdx;
+		It target = begin + middleIdx;
 		std::nth_element(begin, target, end);
 
-		if (size % 2 != 0) { //Odd number of elements
+		if (size % 2 != 0) {	// Odd number of elements
 			return *target;
-		}
-		else {            //Even number of elements
+		} else {				// Even number of elements
 			double a = *target;
-			RandAccessIter targetNeighbor = target - 1;
+			It targetNeighbor = target - 1;
 			std::nth_element(begin, targetNeighbor, end);
 			return (a + *targetNeighbor) / 2.0;
 		}
