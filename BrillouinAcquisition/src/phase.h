@@ -94,7 +94,6 @@ private:
 		}
 	}
 
-	template <typename T = double>
 	void getRawPhase() {
 		// Shift background spectrum to center and mask unwanted regions
 		circshift(m_out_FFT, m_dim_x, m_dim_y, -m_max_x, -m_max_y);
