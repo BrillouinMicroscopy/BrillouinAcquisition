@@ -12,6 +12,10 @@
 
 #include "../external/fftw/fftw3.h"
 
+extern "C" {
+	#include "../external/unwrap/unwrap2D.h"
+}
+
 class phase {
 
 private:
@@ -251,6 +255,16 @@ public:
 			(*phase)[i] = atan2(m_out_IFFT[i][1], m_out_IFFT[i][0]);
 		}
 
+		std::vector<float> phaseFloat;
+		phaseFloat.resize(N);
+		for (int i{ 0 }; i < N; i++) {
+			phaseFloat[i] = (*phase)[i];
+		}
+
+		std::vector<float> phaseFloatUnwrapped = phaseFloat;
+		std::vector<unsigned char> mask(dim_x * dim_y, 1);
+		unwrap2D(&phaseFloat[0], &phaseFloatUnwrapped[0], &mask[0], dim_x, dim_y, false, false);
+
 		// Subtract median value
 		auto newPhase = (*phase);
 		auto beg = std::begin(newPhase);
@@ -258,7 +272,7 @@ public:
 		auto median = simplemath::median(beg, end);
 
 		for (int i{ 0 }; i < dim_x * dim_y; i++) {
-			(*phase)[i] -= median;
+			(*phase)[i] = phaseFloatUnwrapped[i] - median;
 		}
 	}
 

@@ -258,6 +258,9 @@
     <ClCompile Include="src\converter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="external\unwrap\unwrap2D.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_BrillouinAcquisition.h">
@@ -289,6 +292,9 @@
     </ClInclude>
     <ClInclude Include="src\Devices\CalibrationHelper.h">
       <Filter>Header Files\Devices</Filter>
+    </ClInclude>
+    <ClInclude Include="external\unwrap\unwrap2D.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
