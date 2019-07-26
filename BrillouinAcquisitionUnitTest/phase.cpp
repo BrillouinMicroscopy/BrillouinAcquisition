@@ -17,6 +17,13 @@ namespace BrillouinAcquisitionUnitTest {
 				std::vector<double> expected{ 9, 7, 8, 3, 1, 2, 6, 4, 5 };
 				Assert::IsTrue(expected == output);
 			}
+			TEST_METHOD(TestFftshiftNonSquare) {
+				std::vector<double> input{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+				auto output = input;
+				phase::fftshift(&output[0], 4, 3);
+				std::vector<double> expected{11, 12, 9, 10, 3, 4, 1, 2, 7, 8, 5, 6 };
+				Assert::IsTrue(expected == output);
+			}
 
 			TEST_METHOD(TestFftshiftEven) {
 				std::vector<double> input{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
