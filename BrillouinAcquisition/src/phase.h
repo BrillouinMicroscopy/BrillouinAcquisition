@@ -11,10 +11,7 @@
 #include "simplemath.h"
 
 #include "../external/fftw/fftw3.h"
-
-extern "C" {
-	#include "../external/unwrap/unwrap2D.h"
-}
+#include "unwrap2Wrapper.h"
 
 class phase {
 
@@ -32,6 +29,8 @@ private:
 
 	double m_maskRadius{ 0 };
 	std::vector<int> m_mask;
+
+	unwrap2Wrapper *m_unwrapper = new unwrap2Wrapper();
 
 	template <typename T = double>
 	bool sizeMatches(T intensity) {
@@ -130,6 +129,8 @@ public:
 		if (m_background != nullptr) {
 			fftw_free(m_background);
 		}
+
+		delete(m_unwrapper);
 	}
 
 	/*
@@ -257,7 +258,7 @@ public:
 
 		std::vector<double> phaseUnwrapped = (*phase);
 		std::vector<unsigned char> mask(dim_x * dim_y, 1);
-		unwrap2D(&(*phase)[0], &phaseUnwrapped[0], &mask[0], dim_x, dim_y, false, false);
+		m_unwrapper->unwrap2DWrapped(&(*phase)[0], &phaseUnwrapped[0], &mask[0], dim_x, dim_y, false, false);
 
 		// Subtract median value
 		auto newPhase = phaseUnwrapped;

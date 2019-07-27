@@ -261,6 +261,9 @@
     <ClCompile Include="external\unwrap\unwrap2D.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\unwrap2wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_BrillouinAcquisition.h">
@@ -294,6 +297,9 @@
       <Filter>Header Files\Devices</Filter>
     </ClInclude>
     <ClInclude Include="external\unwrap\unwrap2D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\unwrap2Wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

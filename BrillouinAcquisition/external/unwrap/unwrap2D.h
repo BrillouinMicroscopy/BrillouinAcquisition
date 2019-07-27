@@ -115,6 +115,7 @@ void returnImage(PIXELM *pixel, double *unwrapped_image, int image_width, int im
 
 void unwrap2D(double *wrapped_image, double *UnwrappedImage, unsigned char *input_mask,
 	int image_width, int image_height,
-	int wrap_around_x, int wrap_around_y);
+	int wrap_around_x, int wrap_around_y,
+  EDGE *edge, PIXELM *pixel);
 
 #endif UNWRAP_H

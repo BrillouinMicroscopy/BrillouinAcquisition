@@ -633,18 +633,13 @@ void  returnImage(PIXELM *pixel, double *unwrapped_image, int image_width, int i
 //the main function of the unwrapper
 void unwrap2D(double *wrapped_image, double *UnwrappedImage, unsigned char *input_mask,
 	 int image_width, int image_height,
-	 int wrap_around_x, int wrap_around_y)
+	 int wrap_around_x, int wrap_around_y, EDGE *edge, PIXELM *pixel)
 {
   params_t params = {TWOPI, wrap_around_x, wrap_around_y, 0};
   unsigned char *extended_mask;
-  PIXELM *pixel;
-  EDGE *edge;
   int image_size = image_height * image_width;
-  int No_of_Edges_initially = 2 * image_width * image_height;
 
   extended_mask = (unsigned char *) calloc(image_size, sizeof(unsigned char));
-  pixel = (PIXELM *) calloc(image_size, sizeof(PIXELM));
-  edge = (EDGE *) calloc(No_of_Edges_initially, sizeof(EDGE));
 
   extend_mask(input_mask, extended_mask, image_width, image_height, &params);
   initialisePIXELs(wrapped_image, input_mask, extended_mask, pixel, image_width, image_height);
@@ -666,8 +661,5 @@ void unwrap2D(double *wrapped_image, double *UnwrappedImage, unsigned char *inpu
   //passed to this function
   //TODO: replace by (cython?) function to directly write into numpy array ?
   returnImage(pixel, UnwrappedImage, image_width, image_height);
-
-  free(edge);
-  free(pixel);
   free(extended_mask);
 }
