@@ -9,8 +9,8 @@
 //Date 26th August 2007
 //The wrapped phase map is assumed to be of double data type. The resultant unwrapped phase map is also of double type.
 //The mask is of byte data type.
-//When the mask is 1 this means that the pixel is valid
-//When the mask is 0 this means that the pixel is invalid (noisy or corrupted pixel)
+//When the mask is 0 this means that the pixel is valid
+//When the mask is 1 this means that the pixel is invalid (noisy or corrupted pixel)
 //This program takes into consideration the image wrap around problem encountered in MRI imaging.
 
 #include "unwrap2D.h"
@@ -588,7 +588,7 @@ void  maskImage(PIXELM *pixel, unsigned char *input_mask, int image_width, int i
   //find the minimum of the unwrapped phase
   for (i = 0; i < image_size; i++)
     {
-	  if ((pointer_pixel->value < min) && (*IMP == MASK)) {
+	  if ((pointer_pixel->value < min) && (*IMP == NOMASK)) {
 		  min = pointer_pixel->value;
 	  }
 
@@ -602,7 +602,7 @@ void  maskImage(PIXELM *pixel, unsigned char *input_mask, int image_width, int i
   //set the masked pixels to minimum
   for (i = 0; i < image_size; i++)
     {
-      if ((*IMP) == NOMASK)
+      if ((*IMP) == MASK)
 	{
 	  pointer_pixel->value = min;
 	}
