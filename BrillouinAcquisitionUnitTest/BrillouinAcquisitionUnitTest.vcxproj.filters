@@ -163,6 +163,30 @@
     <Object Include="..\BrillouinAcquisition\x64\Debug\unwrap2D.obj">
       <Filter>Source Files</Filter>
     </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\brcut.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\gold.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\grad.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\list.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\maskfat.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\path.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\residues.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\util.obj">
+      <Filter>Source Files</Filter>
+    </Object>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

@@ -39,6 +39,15 @@ public:
 		std::vector<T>::iterator result = std::max_element(std::begin(vector), std::end(vector));
 		return *result;
 	}
+	
+	template <typename T = double>
+		static T absSum(std::vector<T> vector) {
+		T sum = 0;
+		for (int jj(0); jj < vector.size(); jj++) {
+			sum += abs(vector[jj]);
+		}
+		return sum;
+	}
 
 	template <typename T = double>
 	static std::vector<std::complex<T>> solveQuartic(COEFFICIENTS5 coef) {
