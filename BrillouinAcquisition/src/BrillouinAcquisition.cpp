@@ -189,6 +189,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<CAMERA_OPTIONS>("CAMERA_OPTIONS");
 	qRegisterMetaType<std::vector<int>>("std::vector<int>");
 	qRegisterMetaType<std::vector<double>>("std::vector<double>");
+	qRegisterMetaType<std::vector<float>>("std::vector<float>");
 	qRegisterMetaType<QSerialPort::SerialPortError>("QSerialPort::SerialPortError");
 	qRegisterMetaType<IMAGE*>("IMAGE*");
 	qRegisterMetaType<CALIBRATION*>("CALIBRATION*");
@@ -303,6 +304,12 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		&converter::s_converted,
 		this,
 		[this](PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<double> unpackedBuffer) { plot(previewBuffer, plotSettings, unpackedBuffer); }
+	);
+	connection = QWidget::connect<void(converter::*)(PreviewBuffer<unsigned char>*, PLOT_SETTINGS*, std::vector<float>)>(
+		m_converter,
+		&converter::s_converted,
+		this,
+		[this](PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<float> unpackedBuffer) { plot(previewBuffer, plotSettings, unpackedBuffer); }
 	);
 
 	initScanControl();
@@ -1615,6 +1622,10 @@ void BrillouinAcquisition::plot(PreviewBuffer<unsigned char>* previewBuffer, PLO
 }
 
 void BrillouinAcquisition::plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<double> unpackedBuffer) {
+	plotting(previewBuffer, plotSettings, unpackedBuffer);
+}
+
+void BrillouinAcquisition::plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<float> unpackedBuffer) {
 	plotting(previewBuffer, plotSettings, unpackedBuffer);
 }
 

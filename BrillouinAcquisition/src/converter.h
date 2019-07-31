@@ -58,6 +58,7 @@ signals:
 	void s_converted(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<unsigned char> unpackedBuffer);
 	void s_converted(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<unsigned short> unpackedBuffer);
 	void s_converted(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<double> unpackedBuffer);
+	void s_converted(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<float> unpackedBuffer);
 
 };
 

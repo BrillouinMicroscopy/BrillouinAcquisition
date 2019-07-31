@@ -25,7 +25,7 @@ void converter::conv(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS*
 	int dim_x = previewBuffer->m_bufferSettings.roi.width;
 	int dim_y = previewBuffer->m_bufferSettings.roi.height;
 
-	std::vector<double> converted(unpackedBuffer, unpackedBuffer + dim_x*dim_y);
+	std::vector<float> converted(unpackedBuffer, unpackedBuffer + dim_x*dim_y);
 	switch (plotSettings->mode) {
 	case DISPLAY_MODE::PHASE:
 		m_phase->calculatePhase(unpackedBuffer, &converted, dim_x, dim_y);

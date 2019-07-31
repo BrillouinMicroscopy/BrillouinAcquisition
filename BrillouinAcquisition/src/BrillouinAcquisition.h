@@ -55,6 +55,7 @@ Q_DECLARE_METATYPE(CAMERA_SETTING);
 Q_DECLARE_METATYPE(CAMERA_OPTIONS);
 Q_DECLARE_METATYPE(std::vector<int>);
 Q_DECLARE_METATYPE(std::vector<double>);
+Q_DECLARE_METATYPE(std::vector<float>);
 Q_DECLARE_METATYPE(QSerialPort::SerialPortError);
 Q_DECLARE_METATYPE(IMAGE*);
 Q_DECLARE_METATYPE(CALIBRATION*);
@@ -143,6 +144,7 @@ private slots:
 	void plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<unsigned char> unpackedBuffer);
 	void plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<unsigned short> unpackedBuffer);
 	void plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<double> unpackedBuffer);
+	void plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<float> unpackedBuffer);
 
 	void initializePlot(PLOT_SETTINGS plotSettings);
 

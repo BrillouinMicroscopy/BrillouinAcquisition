@@ -256,9 +256,9 @@ public:
 			(*phase)[i] = atan2(m_out_IFFT[i][1], m_out_IFFT[i][0]);
 		}
 
-		std::vector<double> phaseUnwrapped = (*phase);
+		std::vector<float> phaseUnwrapped = (*phase);
 		std::vector<unsigned char> mask(dim_x * dim_y, 0);
-		m_unwrapper->unwrap2DWrapped(&(*phase)[0], &phaseUnwrapped[0], &mask[0], dim_x, dim_y, false, false);
+		m_unwrapper->unwrap2DWrappedFast(&(*phase)[0], &phaseUnwrapped[0], &mask[0], dim_x, dim_y);
 
 		// Subtract median value
 		auto newPhase = phaseUnwrapped;
