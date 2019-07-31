@@ -13,7 +13,7 @@ unwrap2Wrapper::~unwrap2Wrapper() {
 	}
 }
 
-void unwrap2Wrapper::unwrap2DWrapped(double * wrapped_image, double * UnwrappedImage, unsigned char * input_mask, int image_width, int image_height, int wrap_around_x, int wrap_around_y) {
+void unwrap2Wrapper::unwrap2DWrapped(float * wrapped_image, float * UnwrappedImage, unsigned char * input_mask, int image_width, int image_height, int wrap_around_x, int wrap_around_y) {
 	int image_size = image_height * image_width;
 	int No_of_Edges_initially = 2 * image_size;
 	if (m_image_size != image_size) {

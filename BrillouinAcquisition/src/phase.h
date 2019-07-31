@@ -258,7 +258,7 @@ public:
 
 		std::vector<float> phaseUnwrapped = (*phase);
 		std::vector<unsigned char> mask(dim_x * dim_y, 0);
-		m_unwrapper->unwrap2DWrappedFast(&(*phase)[0], &phaseUnwrapped[0], &mask[0], dim_x, dim_y);
+		m_unwrapper->unwrap2DWrapped(&(*phase)[0], &phaseUnwrapped[0], &mask[0], dim_x, dim_y, false, false);
 
 		// Subtract median value
 		auto newPhase = phaseUnwrapped;
@@ -269,6 +269,11 @@ public:
 		for (int i{ 0 }; i < dim_x * dim_y; i++) {
 			(*phase)[i] = phaseUnwrapped[i] - median;
 		}
+
+		auto newPhase2 = (*phase);
+		auto beg2 = std::begin(newPhase2);
+		auto end2 = std::end(newPhase2);
+		auto median2 = simplemath::median(beg2, end2);
 	}
 
 	template <typename T = double>
