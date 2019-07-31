@@ -282,7 +282,7 @@ void PointGrey::preparePreview() {
 	setSettings(m_settings);
 
 	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
-	BUFFER_SETTINGS bufferSettings = { 4, pixelNumber, "unsigned char", m_settings.roi };
+	BUFFER_SETTINGS bufferSettings = { 1, pixelNumber, "unsigned char", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
@@ -305,7 +305,7 @@ void PointGrey::startAcquisition(CAMERA_SETTINGS settings) {
 	setSettings(settings);
 
 	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
-	BUFFER_SETTINGS bufferSettings = { 4, pixelNumber, "unsigned char", m_settings.roi };
+	BUFFER_SETTINGS bufferSettings = { 1, pixelNumber, "unsigned char", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
