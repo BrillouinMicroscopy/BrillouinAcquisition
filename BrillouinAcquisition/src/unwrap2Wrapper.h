@@ -2,9 +2,9 @@
 #define UNWRAPPER_H
 
 #include <gsl/gsl>
-#include "../external/unwrap/unwrap2D.h"
 
 extern "C" {
+	#include "../external/unwrap/unwrap2D.h"
 	#include "../external/unwrap2/residues.h"
 	#include "../external/unwrap2/pi.h"
 	#include "../external/unwrap2/maskfat.h"
@@ -23,7 +23,7 @@ private:
 	int m_image_size{ 0 };
 	int m_No_of_Edges_initially{ 0 };
 	PIXELM *m_pixel = nullptr;
-	std::vector<EDGE> m_edge;
+	EDGE *m_edge = nullptr;
 	
 public:
 	unwrap2Wrapper();

@@ -258,6 +258,9 @@
     <ClCompile Include="src\converter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="external\unwrap\unwrap2D.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\unwrap2wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -283,9 +286,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="external\unwrap2\grad.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="external\unwrap\unwrap2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

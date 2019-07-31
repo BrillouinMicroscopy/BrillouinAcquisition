@@ -17,7 +17,7 @@ namespace BrillouinAcquisitionUnitTest {
 				int dim_y{ 2000 };
 
 				// Create expected phase values
-				std::vector<float> expected(dim_x * dim_y, 0);
+				std::vector<double> expected(dim_x * dim_y, 0);
 				for (int x{ 0 }; x < dim_x; x++) {
 					for (int y{ 0 }; y < dim_y; y++) {
 						expected[x + y * dim_x] = x / 30.0;
@@ -25,7 +25,7 @@ namespace BrillouinAcquisitionUnitTest {
 				}
 
 				// Create phase array wrapped by 2 pi
-				std::vector<float> wrapped = expected;
+				std::vector<double> wrapped = expected;
 				for (int x{ 0 }; x < dim_x; x++) {
 					for (int y{ 0 }; y < dim_y; y++) {
 						wrapped[x + y * dim_x] = std::fmod(wrapped[x + y * dim_x], 2.0 * PI);
@@ -33,7 +33,7 @@ namespace BrillouinAcquisitionUnitTest {
 				}
 
 				// Create ouput array
-				std::vector<float> output;
+				std::vector<double> output;
 				output.resize(dim_x * dim_y);
 
 				std::vector<unsigned char> mask(dim_x * dim_y, 0);
