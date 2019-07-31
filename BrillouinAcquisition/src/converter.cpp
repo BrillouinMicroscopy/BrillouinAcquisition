@@ -20,6 +20,10 @@ void converter::convert(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTIN
 	conv(previewBuffer, plotSettings, unpackedBuffer);
 }
 
+void converter::updateBackground() {
+	m_phase->m_updateBackground = true;
+}
+
 template <typename T>
 void converter::conv(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, T* unpackedBuffer) {
 	int dim_x = previewBuffer->m_bufferSettings.roi.width;

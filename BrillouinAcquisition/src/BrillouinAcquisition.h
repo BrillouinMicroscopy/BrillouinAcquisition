@@ -218,6 +218,7 @@ private slots:
 	void on_gainCameraODT_valueChanged(double gain);
 
 	void on_camera_displayMode_currentIndexChanged(const QString &text);
+	void on_setBackground_clicked();
 
 	void applyGradient(PLOT_SETTINGS plotSettings);
 

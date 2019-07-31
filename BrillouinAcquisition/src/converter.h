@@ -54,6 +54,8 @@ public slots:
 	void convert(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, unsigned char* unpackedBuffer);
 	void convert(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, unsigned short* unpackedBuffer);
 
+	void updateBackground();
+
 signals:
 	void s_converted(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<unsigned char> unpackedBuffer);
 	void s_converted(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<unsigned short> unpackedBuffer);

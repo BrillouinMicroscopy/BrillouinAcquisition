@@ -115,6 +115,8 @@ private:
 
 public:
 
+	bool m_updateBackground{ false };
+
 	phase() {}
 
 	~phase() {
@@ -235,7 +237,8 @@ public:
 		getRawPhase();
 
 		int N = dim_x * dim_y;
-		if (updateBackground) {
+		if (updateBackground || m_updateBackground) {
+			m_updateBackground = false;
 			memcpy(m_background, m_out_IFFT, sizeof(fftw_complex) * N);
 		}
 

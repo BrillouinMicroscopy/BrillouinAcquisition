@@ -798,6 +798,10 @@ void BrillouinAcquisition::on_camera_displayMode_currentIndexChanged(const QStri
 	applyGradient(m_ODTPlot);
 }
 
+void BrillouinAcquisition::on_setBackground_clicked() {
+	QMetaObject::invokeMethod(m_converter, "updateBackground", Qt::AutoConnection);
+}
+
 void BrillouinAcquisition::on_acquisitionStartFluorescence_clicked() {
 	if (m_Fluorescence->getStatus() < ACQUISITION_STATUS::STARTED) {
 		startBrightfieldPreview(true);
