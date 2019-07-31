@@ -38,7 +38,19 @@ namespace BrillouinAcquisitionUnitTest {
 				std::vector<unsigned char> mask(dim_x * dim_y, 0);
 				m_unwrapper->unwrap2DWrapped(&wrapped[0], &output[0], &mask[0], dim_x, dim_y, false, false);
 				
-				Assert::IsTrue(expected == output);
+				// Shift values so the that lowest value is zero
+				auto min = simplemath::min(output);
+				for (int jj{ 0 }; jj < dim_x*dim_y; jj++) {
+					output[jj] -= min;
+				}
+
+				auto diff = output;
+				for (int jj{ 0 }; jj < dim_x*dim_y; jj++) {
+					diff[jj] -= expected[jj];
+				}
+				auto sum = simplemath::absSum(diff);
+				
+				Assert::IsTrue(sum < 1e-6*dim_x*dim_y);
 			}
 	};
 }
