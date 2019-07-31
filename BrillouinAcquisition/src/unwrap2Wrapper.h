@@ -29,7 +29,7 @@ public:
 	unwrap2Wrapper();
 	~unwrap2Wrapper();
 
-	void unwrap2DWrapped(float *wrapped_image, float *UnwrappedImage, unsigned char *input_mask,
+	void unwrap2DWrapped(float *wrapped_image, float *UnwrappedImage,
 		int image_width, int image_height,
 		int wrap_around_x, int wrap_around_y);
 

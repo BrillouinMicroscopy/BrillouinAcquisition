@@ -8,9 +8,6 @@
 //This program was written by Munther Gdeisat, Liverpool John Moores University, United Kingdom.
 //Date 26th August 2007
 //The wrapped phase map is assumed to be of float data type. The resultant unwrapped phase map is also of float type.
-//The mask is of byte data type.
-//When the mask is 0 this means that the pixel is valid
-//When the mask is 1 this means that the pixel is invalid (noisy or corrupted pixel)
 //This program takes into consideration the image wrap around problem encountered in MRI imaging.
 
 #include "unwrap2D.h"
@@ -84,12 +81,10 @@ void quicker_sort(EDGE *left, EDGE *right)
 //--------------------start initialize pixels ----------------------------------
 //initialize pixels. See the explination of the pixel class above.
 //initially every pixel is assumed to belong to a group consisting of only itself
-void  initialisePIXELs(float *wrapped_image, unsigned char *input_mask, unsigned char *extended_mask, PIXELM *pixel, int image_width, int image_height)
+void  initialisePIXELs(float *wrapped_image, PIXELM *pixel, int image_width, int image_height)
 {
   PIXELM *pixel_pointer = pixel;
   float *wrapped_image_pointer = wrapped_image;
-  unsigned char *input_mask_pointer = input_mask;
-  unsigned char *extended_mask_pointer = extended_mask;
   int i, j;
 
   for (i=0; i < image_height; i++)
@@ -100,8 +95,6 @@ void  initialisePIXELs(float *wrapped_image, unsigned char *input_mask, unsigned
 	  pixel_pointer->number_of_pixels_in_group = 1;
 	  pixel_pointer->value = *wrapped_image_pointer;
 	  pixel_pointer->reliability = 9999999.f + rand();
-	  pixel_pointer->input_mask = *input_mask_pointer;
-	  pixel_pointer->extended_mask = *extended_mask_pointer;
 	  pixel_pointer->head = pixel_pointer;
 	  pixel_pointer->last = pixel_pointer;
 	  pixel_pointer->next = NULL;
@@ -109,8 +102,6 @@ void  initialisePIXELs(float *wrapped_image, unsigned char *input_mask, unsigned
 	  pixel_pointer->group = -1;
 	  pixel_pointer++;
 	  wrapped_image_pointer++;
-	  input_mask_pointer++;
-	  extended_mask_pointer++;
 	}
     }
 }
@@ -140,118 +131,6 @@ int find_wrap(float pixelL_value, float pixelR_value)
   return wrap_value;
 }
 
-void extend_mask(unsigned char *input_mask, unsigned char *extended_mask,
-		 int image_width, int image_height,
-		 params_t *params)
-{
-  int i,j;
-  int image_width_plus_one = image_width + 1;
-  int image_width_minus_one = image_width - 1;
-  unsigned char *IMP;	//input mask pointer
-  unsigned char *EMP = extended_mask;	//extended mask pointer
-
-  for (i=0; i < image_height; ++i)
-    {
-      for (j=0; j < image_width; ++j)
-	{
-	  *EMP = MASK;
-	  ++EMP;
-	}
-    }
-  
-  IMP = input_mask    + image_width + 1;
-  EMP = extended_mask + image_width + 1;
-  //extend the mask for the image except borders
-  for (i=1; i < image_height - 1; ++i)
-    {
-      for (j=1; j < image_width - 1; ++j)
-	{
-	  if ( (*IMP) == NOMASK && (*(IMP + 1) == NOMASK) && (*(IMP - 1) == NOMASK) &&
-	       (*(IMP + image_width) == NOMASK) && (*(IMP - image_width) == NOMASK) &&
-	       (*(IMP - image_width_minus_one) == NOMASK) && (*(IMP - image_width_plus_one) == NOMASK) &&
-	       (*(IMP + image_width_minus_one) == NOMASK) && (*(IMP + image_width_plus_one) == NOMASK) )
-	    {
-	      *EMP = NOMASK;
-	    }
-	  ++EMP;
-	  ++IMP;
-	}
-      EMP += 2;
-      IMP += 2;
-    }
-
-  if (params->x_connectivity == 1)
-    {
-      //extend the mask for the right border of the image
-      IMP = input_mask    + 2 * image_width - 1;
-      EMP = extended_mask + 2 * image_width -1;
-      for (i=1; i < image_height - 1; ++ i)
-	{
-	  if ( (*IMP) == NOMASK && (*(IMP - 1) == NOMASK) &&  (*(IMP + 1) == NOMASK) &&
-	       (*(IMP + image_width) == NOMASK) && (*(IMP - image_width) == NOMASK) &&
-	       (*(IMP - image_width - 1) == NOMASK) && (*(IMP - image_width + 1) == NOMASK) &&
-	       (*(IMP + image_width - 1) == NOMASK) && (*(IMP - 2 * image_width + 1) == NOMASK) )
-	    {
-	      *EMP = NOMASK;
-	    }
-	  EMP += image_width;
-	  IMP += image_width;
-	}
-
-      //extend the mask for the left border of the image
-      IMP = input_mask    + image_width;
-      EMP = extended_mask + image_width;
-      for (i=1; i < image_height - 1; ++i)
-	{
-	  if ( (*IMP) == NOMASK && (*(IMP - 1) == NOMASK) && (*(IMP + 1) == NOMASK) &&
-	       (*(IMP + image_width) == NOMASK) && (*(IMP - image_width) == NOMASK) &&
-	       (*(IMP - image_width + 1) == NOMASK) && (*(IMP + image_width + 1) == NOMASK) &&
-	       (*(IMP + image_width - 1) == NOMASK) && (*(IMP + 2 * image_width - 1) == NOMASK) )
-	    {
-	      *EMP = NOMASK;
-	    }
-	  EMP += image_width;
-	  IMP += image_width;
-	}
-    }
-
-  if (params->y_connectivity == 1)
-    {
-      //extend the mask for the top border of the image
-      IMP = input_mask    + 1;
-      EMP = extended_mask + 1;
-      for (i=1; i < image_width - 1; ++i)
-	{
-	  if ( (*IMP) == NOMASK && (*(IMP - 1) == NOMASK) && (*(IMP + 1) == NOMASK) &&
-	       (*(IMP + image_width) == NOMASK) && (*(IMP + image_width * (image_height - 1)) == NOMASK) &&
-	       (*(IMP + image_width + 1) == NOMASK) && (*(IMP + image_width - 1) == NOMASK) &&
-	       (*(IMP + image_width * (image_height - 1) - 1) == NOMASK) && (*(IMP + image_width * (image_height - 1) + 1) == NOMASK) )
-	    {
-	      *EMP = NOMASK;
-	    }
-	  EMP++;
-	  IMP++;
-	}
-
-      //extend the mask for the bottom border of the image
-      IMP = input_mask    + image_width * (image_height - 1) + 1;
-      EMP = extended_mask + image_width * (image_height - 1) + 1;
-      for (i=1; i < image_width - 1; ++i)
-	{
-	  if ( (*IMP) == NOMASK && (*(IMP - 1) == NOMASK) && (*(IMP + 1) == NOMASK) &&
-	       (*(IMP - image_width) == NOMASK) && (*(IMP - image_width - 1) == NOMASK) && (*(IMP - image_width + 1) == NOMASK) &&
-	       (*(IMP - image_width * (image_height - 1)    ) == NOMASK) &&
-	       (*(IMP - image_width * (image_height - 1) - 1) == NOMASK) &&
-	       (*(IMP - image_width * (image_height - 1) + 1) == NOMASK) )
-	    {
-	      *EMP = NOMASK;
-	    }
-	  EMP++;
-	  IMP++;
-	}
-    }
-}
-
 void calculate_reliability(float *wrappedImage, PIXELM *pixel,
 			   int image_width, int image_height,
 			   params_t *params)
@@ -267,16 +146,14 @@ void calculate_reliability(float *wrappedImage, PIXELM *pixel,
     {
       for (j = 1; j < image_width - 1; ++j)
 	{
-	  if (pixel_pointer->extended_mask == NOMASK)
-	    {
-	      H = wrap(*(WIP - 1) - *WIP) - wrap(*WIP - *(WIP + 1));
-	      V = wrap(*(WIP - image_width) - *WIP) - wrap(*WIP - *(WIP + image_width));
-	      D1 = wrap(*(WIP - image_width_plus_one) - *WIP) - wrap(*WIP - *(WIP + image_width_plus_one));
-	      D2 = wrap(*(WIP - image_width_minus_one) - *WIP) - wrap(*WIP - *(WIP + image_width_minus_one));
-	      pixel_pointer->reliability = H*H + V*V + D1*D1 + D2*D2;
-	    }
-	  pixel_pointer++;
-	  WIP++;
+		H = wrap(*(WIP - 1) - *WIP) - wrap(*WIP - *(WIP + 1));
+		V = wrap(*(WIP - image_width) - *WIP) - wrap(*WIP - *(WIP + image_width));
+		D1 = wrap(*(WIP - image_width_plus_one) - *WIP) - wrap(*WIP - *(WIP + image_width_plus_one));
+		D2 = wrap(*(WIP - image_width_minus_one) - *WIP) - wrap(*WIP - *(WIP + image_width_minus_one));
+		pixel_pointer->reliability = H*H + V*V + D1*D1 + D2*D2;
+
+		pixel_pointer++;
+		WIP++;
 	}
       pixel_pointer += 2;
       WIP += 2;
@@ -290,14 +167,12 @@ void calculate_reliability(float *wrappedImage, PIXELM *pixel,
 
       for (i = 1; i < image_height - 1; ++i)
 	{
-	  if (pixel_pointer->extended_mask == NOMASK)
-	    {
-	      H = wrap(*(WIP + image_width - 1) - *WIP) - wrap(*WIP - *(WIP + 1));
-	      V = wrap(*(WIP - image_width) - *WIP) - wrap(*WIP - *(WIP + image_width));
-	      D1 = wrap(*(WIP - 1) - *WIP) - wrap(*WIP - *(WIP + image_width_plus_one));
-	      D2 = wrap(*(WIP - image_width_minus_one) - *WIP) - wrap(*WIP - *(WIP + 2* image_width - 1));
-	      pixel_pointer->reliability = H*H + V*V + D1*D1 + D2*D2;
-	    }
+	  H = wrap(*(WIP + image_width - 1) - *WIP) - wrap(*WIP - *(WIP + 1));
+	  V = wrap(*(WIP - image_width) - *WIP) - wrap(*WIP - *(WIP + image_width));
+	  D1 = wrap(*(WIP - 1) - *WIP) - wrap(*WIP - *(WIP + image_width_plus_one));
+	  D2 = wrap(*(WIP - image_width_minus_one) - *WIP) - wrap(*WIP - *(WIP + 2* image_width - 1));
+	  pixel_pointer->reliability = H*H + V*V + D1*D1 + D2*D2;
+	    
 	  pixel_pointer += image_width;
 	  WIP += image_width;
 	}
@@ -308,14 +183,12 @@ void calculate_reliability(float *wrappedImage, PIXELM *pixel,
 
       for (i = 1; i < image_height - 1; ++i)
 	{
-	  if (pixel_pointer->extended_mask == NOMASK)
-	    {
-	      H = wrap(*(WIP - 1) - *WIP) - wrap(*WIP - *(WIP - image_width_minus_one));
-	      V = wrap(*(WIP - image_width) - *WIP) - wrap(*WIP - *(WIP + image_width));
-	      D1 = wrap(*(WIP - image_width_plus_one) - *WIP) - wrap(*WIP - *(WIP + 1));
-	      D2 = wrap(*(WIP - 2 * image_width - 1) - *WIP) - wrap(*WIP - *(WIP + image_width_minus_one));
-	      pixel_pointer->reliability = H*H + V*V + D1*D1 + D2*D2;
-	    }
+	  H = wrap(*(WIP - 1) - *WIP) - wrap(*WIP - *(WIP - image_width_minus_one));
+	  V = wrap(*(WIP - image_width) - *WIP) - wrap(*WIP - *(WIP + image_width));
+	  D1 = wrap(*(WIP - image_width_plus_one) - *WIP) - wrap(*WIP - *(WIP + 1));
+	  D2 = wrap(*(WIP - 2 * image_width - 1) - *WIP) - wrap(*WIP - *(WIP + image_width_minus_one));
+	  pixel_pointer->reliability = H*H + V*V + D1*D1 + D2*D2;
+
 	  pixel_pointer += image_width;
 	  WIP += image_width;
 	}
@@ -329,14 +202,12 @@ void calculate_reliability(float *wrappedImage, PIXELM *pixel,
 
       for (i = 1; i < image_width - 1; ++i)
 	{
-	  if (pixel_pointer->extended_mask == NOMASK)
-	    {
-	      H =  wrap(*(WIP - 1) - *WIP) - wrap(*WIP - *(WIP + 1));
-	      V =  wrap(*(WIP + image_width*(image_height - 1)) - *WIP) - wrap(*WIP - *(WIP + image_width));
-	      D1 = wrap(*(WIP + image_width*(image_height - 1) - 1) - *WIP) - wrap(*WIP - *(WIP + image_width_plus_one));
-	      D2 = wrap(*(WIP + image_width*(image_height - 1) + 1) - *WIP) - wrap(*WIP - *(WIP + image_width_minus_one));
-	      pixel_pointer->reliability = H*H + V*V + D1*D1 + D2*D2;
-	    }
+	  H =  wrap(*(WIP - 1) - *WIP) - wrap(*WIP - *(WIP + 1));
+	  V =  wrap(*(WIP + image_width*(image_height - 1)) - *WIP) - wrap(*WIP - *(WIP + image_width));
+	  D1 = wrap(*(WIP + image_width*(image_height - 1) - 1) - *WIP) - wrap(*WIP - *(WIP + image_width_plus_one));
+	  D2 = wrap(*(WIP + image_width*(image_height - 1) + 1) - *WIP) - wrap(*WIP - *(WIP + image_width_minus_one));
+	  pixel_pointer->reliability = H*H + V*V + D1*D1 + D2*D2;
+
 	  pixel_pointer++;
 	  WIP++;
 	}
@@ -347,14 +218,12 @@ void calculate_reliability(float *wrappedImage, PIXELM *pixel,
 
       for (i = 1; i < image_width - 1; ++i)
 	{
-	  if (pixel_pointer->extended_mask == NOMASK)
-	    {
-	      H =  wrap(*(WIP - 1) - *WIP) - wrap(*WIP - *(WIP + 1));
-	      V =  wrap(*(WIP - image_width) - *WIP) - wrap(*WIP - *(WIP -(image_height - 1) * (image_width)));
-	      D1 = wrap(*(WIP - image_width_plus_one) - *WIP) - wrap(*WIP - *(WIP - (image_height - 1) * (image_width) + 1));
-	      D2 = wrap(*(WIP - image_width_minus_one) - *WIP) - wrap(*WIP - *(WIP - (image_height - 1) * (image_width) - 1));
-	      pixel_pointer->reliability = H*H + V*V + D1*D1 + D2*D2;
-	    }
+	  H =  wrap(*(WIP - 1) - *WIP) - wrap(*WIP - *(WIP + 1));
+	  V =  wrap(*(WIP - image_width) - *WIP) - wrap(*WIP - *(WIP -(image_height - 1) * (image_width)));
+	  D1 = wrap(*(WIP - image_width_plus_one) - *WIP) - wrap(*WIP - *(WIP - (image_height - 1) * (image_width) + 1));
+	  D2 = wrap(*(WIP - image_width_minus_one) - *WIP) - wrap(*WIP - *(WIP - (image_height - 1) * (image_width) - 1));
+	  pixel_pointer->reliability = H*H + V*V + D1*D1 + D2*D2;
+
 	  pixel_pointer++;
 	  WIP++;
 	}
@@ -378,15 +247,13 @@ void  horizontalEDGEs(PIXELM *pixel, EDGE *edge,
     {
       for (j = 0; j < image_width - 1; j++)
 	{
-	  if (pixel_pointer->input_mask == NOMASK && (pixel_pointer + 1)->input_mask == NOMASK)
-	    {
-	      edge_pointer->pointer_1 = pixel_pointer;
-	      edge_pointer->pointer_2 = (pixel_pointer+1);
-	      edge_pointer->reliab = pixel_pointer->reliability + (pixel_pointer + 1)->reliability;
-	      edge_pointer->increment = find_wrap(pixel_pointer->value, (pixel_pointer + 1)->value);
-	      edge_pointer++;
-	      no_of_edges++;
-	    }
+	  edge_pointer->pointer_1 = pixel_pointer;
+	  edge_pointer->pointer_2 = (pixel_pointer+1);
+	  edge_pointer->reliab = pixel_pointer->reliability + (pixel_pointer + 1)->reliability;
+	  edge_pointer->increment = find_wrap(pixel_pointer->value, (pixel_pointer + 1)->value);
+	  edge_pointer++;
+	  no_of_edges++;
+
 	  pixel_pointer++;
 	}
       pixel_pointer++;
@@ -397,15 +264,12 @@ void  horizontalEDGEs(PIXELM *pixel, EDGE *edge,
       pixel_pointer = pixel + image_width - 1;
       for (i = 0; i < image_height; i++)
 	{
-	  if (pixel_pointer->input_mask == NOMASK && (pixel_pointer - image_width + 1)->input_mask == NOMASK)
-	    {
-	      edge_pointer->pointer_1 = pixel_pointer;
-	      edge_pointer->pointer_2 = (pixel_pointer - image_width + 1);
-	      edge_pointer->reliab = pixel_pointer->reliability + (pixel_pointer - image_width + 1)->reliability;
-	      edge_pointer->increment = find_wrap(pixel_pointer->value, (pixel_pointer  - image_width + 1)->value);
-	      edge_pointer++;
-	      no_of_edges++;
-	    }
+	  edge_pointer->pointer_1 = pixel_pointer;
+	  edge_pointer->pointer_2 = (pixel_pointer - image_width + 1);
+	  edge_pointer->reliab = pixel_pointer->reliability + (pixel_pointer - image_width + 1)->reliability;
+	  edge_pointer->increment = find_wrap(pixel_pointer->value, (pixel_pointer  - image_width + 1)->value);
+	  edge_pointer++;
+	  no_of_edges++;
 	  pixel_pointer+=image_width;
 	}
     }
@@ -428,15 +292,13 @@ void  verticalEDGEs(PIXELM *pixel, EDGE *edge,
     {
       for (j=0; j < image_width; j++)
 	{
-	  if (pixel_pointer->input_mask == NOMASK && (pixel_pointer + image_width)->input_mask == NOMASK)
-	    {
-	      edge_pointer->pointer_1 = pixel_pointer;
-	      edge_pointer->pointer_2 = (pixel_pointer + image_width);
-	      edge_pointer->reliab = pixel_pointer->reliability + (pixel_pointer + image_width)->reliability;
-	      edge_pointer->increment = find_wrap(pixel_pointer->value, (pixel_pointer + image_width)->value);
-	      edge_pointer++;
-	      no_of_edges++;
-	    }
+	  edge_pointer->pointer_1 = pixel_pointer;
+	  edge_pointer->pointer_2 = (pixel_pointer + image_width);
+	  edge_pointer->reliab = pixel_pointer->reliability + (pixel_pointer + image_width)->reliability;
+	  edge_pointer->increment = find_wrap(pixel_pointer->value, (pixel_pointer + image_width)->value);
+	  edge_pointer++;
+	  no_of_edges++;
+
 	  pixel_pointer++;
 	} //j loop
     } // i loop
@@ -447,15 +309,13 @@ void  verticalEDGEs(PIXELM *pixel, EDGE *edge,
       pixel_pointer = pixel + image_width *(image_height - 1);
       for (i = 0; i < image_width; i++)
 	{
-	  if (pixel_pointer->input_mask == NOMASK && (pixel_pointer - image_width *(image_height - 1))->input_mask == NOMASK)
-	    {
-	      edge_pointer->pointer_1 = pixel_pointer;
-	      edge_pointer->pointer_2 = (pixel_pointer - image_width *(image_height - 1));
-	      edge_pointer->reliab = pixel_pointer->reliability + (pixel_pointer - image_width *(image_height - 1))->reliability;
-	      edge_pointer->increment = find_wrap(pixel_pointer->value, (pixel_pointer - image_width *(image_height - 1))->value);
-	      edge_pointer++;
-	      no_of_edges++;
-	    }
+	  edge_pointer->pointer_1 = pixel_pointer;
+	  edge_pointer->pointer_2 = (pixel_pointer - image_width *(image_height - 1));
+	  edge_pointer->reliab = pixel_pointer->reliability + (pixel_pointer - image_width *(image_height - 1))->reliability;
+	  edge_pointer->increment = find_wrap(pixel_pointer->value, (pixel_pointer - image_width *(image_height - 1))->value);
+	  edge_pointer++;
+	  no_of_edges++;
+
 	  pixel_pointer++;
 	}
     }
@@ -576,41 +436,6 @@ void  unwrapImage(PIXELM *pixel, int image_width, int image_height)
     }
 }
 
-//set the masked pixels (mask = 0) to the minimum of the unwrapper phase
-void  maskImage(PIXELM *pixel, unsigned char *input_mask, int image_width, int image_height)
-{
-  PIXELM *pointer_pixel = pixel;
-  unsigned char *IMP = input_mask;	//input mask pointer
-  float min=99999999.f;
-  int i;
-  int image_size = image_width * image_height;
-
-  //find the minimum of the unwrapped phase
-  for (i = 0; i < image_size; i++)
-    {
-	  if ((pointer_pixel->value < min) && (*IMP == NOMASK)) {
-		  min = pointer_pixel->value;
-	  }
-
-      pointer_pixel++;
-      IMP++;
-    }
-
-  pointer_pixel = pixel;
-  IMP = input_mask;
-
-  //set the masked pixels to minimum
-  for (i = 0; i < image_size; i++)
-    {
-      if ((*IMP) == MASK)
-	{
-	  pointer_pixel->value = min;
-	}
-      pointer_pixel++;
-      IMP++;
-    }
-}
-
 //the input to this unwrapper is an array that contains the wrapped
 //phase map.  copy the image on the buffer passed to this unwrapper to
 //over-write the unwrapped phase map on the buffer of the wrapped
@@ -631,18 +456,14 @@ void  returnImage(PIXELM *pixel, float *unwrapped_image, int image_width, int im
 }
 
 //the main function of the unwrapper
-void unwrap2D(float *wrapped_image, float *UnwrappedImage, unsigned char *input_mask,
+void unwrap2D(float *wrapped_image, float *UnwrappedImage,
 	 int image_width, int image_height,
 	 int wrap_around_x, int wrap_around_y, EDGE *edge, PIXELM *pixel)
 {
   params_t params = {TWOPI, wrap_around_x, wrap_around_y, 0};
-  unsigned char *extended_mask;
   int image_size = image_height * image_width;
 
-  extended_mask = (unsigned char *) calloc(image_size, sizeof(unsigned char));
-
-  extend_mask(input_mask, extended_mask, image_width, image_height, &params);
-  initialisePIXELs(wrapped_image, input_mask, extended_mask, pixel, image_width, image_height);
+  initialisePIXELs(wrapped_image, pixel, image_width, image_height);
   calculate_reliability(wrapped_image, pixel, image_width, image_height, &params);
   horizontalEDGEs(pixel, edge, image_width, image_height, &params);
   verticalEDGEs(pixel, edge, image_width, image_height, &params);
@@ -655,11 +476,9 @@ void unwrap2D(float *wrapped_image, float *UnwrappedImage, unsigned char *input_
   gatherPIXELs(edge, &params);
 
   unwrapImage(pixel, image_width, image_height);
-  maskImage(pixel, input_mask, image_width, image_height);
 
   //copy the image from PIXELM structure to the unwrapped phase array
   //passed to this function
   //TODO: replace by (cython?) function to directly write into numpy array ?
   returnImage(pixel, UnwrappedImage, image_width, image_height);
-  free(extended_mask);
 }

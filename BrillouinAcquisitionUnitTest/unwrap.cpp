@@ -37,7 +37,7 @@ namespace BrillouinAcquisitionUnitTest {
 				output.resize(dim_x * dim_y);
 
 				std::vector<unsigned char> mask(dim_x * dim_y, 0);
-				m_unwrapper->unwrap2DWrapped(&wrapped[0], &output[0], &mask[0], dim_x, dim_y, false, false);
+				m_unwrapper->unwrap2DWrapped(&wrapped[0], &output[0], dim_x, dim_y, false, false);
 
 				// Shift values so the that lowest value is zero
 				auto min = simplemath::min(output);
