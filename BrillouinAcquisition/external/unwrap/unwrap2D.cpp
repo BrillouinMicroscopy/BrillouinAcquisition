@@ -14,6 +14,7 @@
 //This program takes into consideration the image wrap around problem encountered in MRI imaging.
 
 #include "unwrap2D.h"
+#include <algorithm>
 
 yes_no find_pivot(EDGE *left, EDGE *right, float *pivot_ptr)
 {
@@ -633,7 +634,7 @@ void  returnImage(PIXELM *pixel, float *unwrapped_image, int image_width, int im
 //the main function of the unwrapper
 void unwrap2D(float *wrapped_image, float *UnwrappedImage, unsigned char *input_mask,
 	 int image_width, int image_height,
-	 int wrap_around_x, int wrap_around_y, EDGE *edge, PIXELM *pixel)
+	 int wrap_around_x, int wrap_around_y, std::vector<EDGE> edge, PIXELM *pixel)
 {
   params_t params = {TWOPI, wrap_around_x, wrap_around_y, 0};
   unsigned char *extended_mask;
@@ -644,15 +645,16 @@ void unwrap2D(float *wrapped_image, float *UnwrappedImage, unsigned char *input_
   extend_mask(input_mask, extended_mask, image_width, image_height, &params);
   initialisePIXELs(wrapped_image, input_mask, extended_mask, pixel, image_width, image_height);
   calculate_reliability(wrapped_image, pixel, image_width, image_height, &params);
-  horizontalEDGEs(pixel, edge, image_width, image_height, &params);
-  verticalEDGEs(pixel, edge, image_width, image_height, &params);
+  horizontalEDGEs(pixel, &edge[0], image_width, image_height, &params);
+  verticalEDGEs(pixel, &edge[0], image_width, image_height, &params);
 
   //sort the EDGEs depending on their reiability. The PIXELs with higher
   //relibility (small value) first
-  quicker_sort(edge, edge + params.no_of_edges - 1);
+  std::sort(edge.begin(), edge.end(), edgeCompare);
+  //quicker_sort(&edge[0], &edge[0] + params.no_of_edges - 1);
 
   //gather PIXELs into groups
-  gatherPIXELs(edge, &params);
+  gatherPIXELs(&edge[0], &params);
 
   unwrapImage(pixel, image_width, image_height);
   maskImage(pixel, input_mask, image_width, image_height);
@@ -662,4 +664,14 @@ void unwrap2D(float *wrapped_image, float *UnwrappedImage, unsigned char *input_
   //TODO: replace by (cython?) function to directly write into numpy array ?
   returnImage(pixel, UnwrappedImage, image_width, image_height);
   free(extended_mask);
+}
+
+bool edgeCompare(EDGE left, EDGE right) {
+	if (left.pointer_1 == NULL || left.pointer_2 == NULL) {
+		return false;
+	}
+	if (right.pointer_1 == NULL || right.pointer_2 == NULL) {
+		return true;
+	}
+	return left.reliab < right.reliab;
 }

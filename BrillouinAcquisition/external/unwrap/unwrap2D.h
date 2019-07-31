@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <vector>
 
 //TODO: remove global variables
 //TODO: make thresholds independent
@@ -116,6 +117,8 @@ void returnImage(PIXELM *pixel, float *unwrapped_image, int image_width, int ima
 void unwrap2D(float *wrapped_image, float *UnwrappedImage, unsigned char *input_mask,
 	int image_width, int image_height,
 	int wrap_around_x, int wrap_around_y,
-  EDGE *edge, PIXELM *pixel);
+  std::vector<EDGE> edge, PIXELM *pixel);
+
+bool edgeCompare(EDGE left, EDGE right);
 
 #endif UNWRAP_H
