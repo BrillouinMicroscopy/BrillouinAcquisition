@@ -288,6 +288,9 @@
     <ClCompile Include="external\unwrap2\grad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\xsample.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_BrillouinAcquisition.h">
@@ -339,6 +342,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="external\unwrap2\util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\xsample.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

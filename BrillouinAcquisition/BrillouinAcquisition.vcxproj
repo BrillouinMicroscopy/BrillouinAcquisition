@@ -346,6 +346,7 @@ copy "$(ProjectDir)external\fftw\libfftw3-3.dll" "$(TargetDir)"
     </ClCompile>
     <ClCompile Include="src\storageWrapper.cpp" />
     <ClCompile Include="src\unwrap2wrapper.cpp" />
+    <ClCompile Include="src\xsample.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\unwrap2\gold.h" />
@@ -354,6 +355,7 @@ copy "$(ProjectDir)external\fftw\libfftw3-3.dll" "$(TargetDir)"
     <ClInclude Include="external\unwrap2\residues.h" />
     <ClInclude Include="external\unwrap2\util.h" />
     <ClInclude Include="src\unwrap2Wrapper.h" />
+    <ClInclude Include="src\xsample.h" />
     <CustomBuild Include="src\tableModel.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>

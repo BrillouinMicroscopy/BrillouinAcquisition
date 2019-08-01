@@ -12,6 +12,7 @@
 
 #include "../external/fftw/fftw3.h"
 #include "unwrap2Wrapper.h"
+#include "xsample.h"
 
 class phase {
 
@@ -31,6 +32,7 @@ private:
 	std::vector<int> m_mask;
 
 	unwrap2Wrapper *m_unwrapper = new unwrap2Wrapper();
+	xsample *m_xsample = new xsample();
 
 	template <typename T = double>
 	bool sizeMatches(T intensity) {
@@ -256,8 +258,15 @@ public:
 			(*phase)[i] = atan2(m_out_IFFT[i][1], m_out_IFFT[i][0]);
 		}
 
-		std::vector<float> phaseUnwrapped = (*phase);
-		m_unwrapper->unwrap2DWrapped(&(*phase)[0], &phaseUnwrapped[0], dim_x, dim_y, false, false);
+		// Downsample the image to speed up unwrapping
+		int dim_x_new = dim_x / 2;
+		int dim_y_new = dim_y / 2;
+		std::vector<float> phase_lowRes;
+		phase_lowRes.resize(dim_x_new * dim_y_new);
+		m_xsample->down(&(*phase)[0], &phase_lowRes[0], dim_x, dim_y, dim_x_new, dim_y_new);
+
+		std::vector<float> phaseUnwrapped = phase_lowRes;
+		m_unwrapper->unwrap2DWrapped(&phase_lowRes[0], &phaseUnwrapped[0], dim_x_new, dim_y_new, false, false);
 
 		// Subtract median value
 		auto newPhase = phaseUnwrapped;
@@ -265,9 +274,12 @@ public:
 		auto end = std::end(newPhase);
 		auto median = simplemath::median(beg, end);
 
-		for (int i{ 0 }; i < dim_x * dim_y; i++) {
-			(*phase)[i] = phaseUnwrapped[i] - median;
+		for (int i{ 0 }; i < dim_x_new * dim_y_new; i++) {
+			phaseUnwrapped[i] = phaseUnwrapped[i] - median;
 		}
+
+		// Upsample the image to match input resolution
+		m_xsample->up(&phaseUnwrapped[0], &(*phase)[0], dim_x_new, dim_y_new, dim_x, dim_y);
 	}
 
 	template <typename T = double>
