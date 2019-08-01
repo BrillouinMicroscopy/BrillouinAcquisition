@@ -61,9 +61,6 @@ private:
 				fftw_free(m_in_IFFT);
 				fftw_free(m_out_IFFT);
 				fftw_destroy_plan(m_IFFT);
-
-				// Background phasors
-				fftw_free(m_background);
 			}
 
 			m_in_FFT = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N);
