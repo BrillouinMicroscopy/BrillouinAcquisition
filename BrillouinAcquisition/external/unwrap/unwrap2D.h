@@ -23,38 +23,35 @@
 static float PI = 3.141592654f;
 static float TWOPI = 6.283185307f;
 
-typedef struct
-{
-  float mod;
-  int x_connectivity;
-  int y_connectivity;
-  int no_of_edges;
+typedef struct {
+	float mod;
+	int x_connectivity;
+	int y_connectivity;
+	int no_of_edges;
 } params_t;
 
 //PIXELM information
-struct PIXELM
-{
-  int increment;		//No. of 2*pi to add to the pixel to unwrap it
-  int number_of_pixels_in_group;//No. of pixel in the pixel group
-  float value;			//value of the pixel
-  float reliability;
-  int group;			//group No.
-  int new_group;
-  struct PIXELM *head;		//pointer to the first pixel in the group in the linked list
-  struct PIXELM *last;		//pointer to the last pixel in the group
-  struct PIXELM *next;		//pointer to the next pixel in the group
+struct PIXELM {
+	int increment;			//No. of 2*pi to add to the pixel to unwrap it
+	int number_of_pixels_in_group;//No. of pixel in the pixel group
+	float value;			//value of the pixel
+	float reliability;
+	int group;				//group No.
+	int new_group;
+	struct PIXELM *head;	//pointer to the first pixel in the group in the linked list
+	struct PIXELM *last;	//pointer to the last pixel in the group
+	struct PIXELM *next;	//pointer to the next pixel in the group
 };
 
 typedef struct PIXELM PIXELM;
 
 //the EDGE is the line that connects two pixels.
 //if we have S pixels, then we have S horizontal edges and S vertical edges
-struct EDGE
-{
-  float reliab;			//reliabilty of the edge and it depends on the two pixels
-  PIXELM *pointer_1;		//pointer to the first pixel
-  PIXELM *pointer_2;		//pointer to the second pixel
-  int increment;		//No. of 2*pi to add to one of the pixels to
+struct EDGE {
+	float reliab;			//reliabilty of the edge and it depends on the two pixels
+	PIXELM *pointer_1;		//pointer to the first pixel
+	PIXELM *pointer_2;		//pointer to the second pixel
+	int increment;			//No. of 2*pi to add to one of the pixels to
 				//unwrap it with respect to the second
 };
 
@@ -101,6 +98,6 @@ void returnImage(PIXELM *pixel, float *unwrapped_image, int image_width, int ima
 void unwrap2D(float *wrapped_image, float *UnwrappedImage,
 	int image_width, int image_height,
 	int wrap_around_x, int wrap_around_y,
-  EDGE *edge, PIXELM *pixel);
+	EDGE *edge, PIXELM *pixel);
 
 #endif UNWRAP_H
