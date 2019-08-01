@@ -229,7 +229,7 @@ public:
 		// If we have no background yet (or the background does not have the correct size),
 		// we use the intensity image we just got
 		bool updateBackground = m_background == nullptr || (m_dim_background_x != dim_x || m_dim_background_y != dim_y);
-		if (updateBackground) {
+		if (updateBackground || m_updateBackground) {
 			background_findCenter(dim_x, dim_y);
 		}
 
