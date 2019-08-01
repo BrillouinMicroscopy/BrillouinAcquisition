@@ -142,17 +142,12 @@
   <ItemGroup>
     <Object Include="..\BrillouinAcquisition\x64\Debug\Acquisition.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\AcquisitionMode.obj" />
-    <Object Include="..\BrillouinAcquisition\x64\Debug\brcut.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\Calibration.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\Camera.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\com.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\filtermount.obj" />
-    <Object Include="..\BrillouinAcquisition\x64\Debug\gold.obj" />
-    <Object Include="..\BrillouinAcquisition\x64\Debug\grad.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\h5bm.obj" />
-    <Object Include="..\BrillouinAcquisition\x64\Debug\list.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\logger.obj" />
-    <Object Include="..\BrillouinAcquisition\x64\Debug\maskfat.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_Acquisition.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_AcquisitionMode.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_Calibration.obj" />
@@ -166,15 +161,12 @@
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_thread.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_ZeissECU.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\NIDAQ.obj" />
-    <Object Include="..\BrillouinAcquisition\x64\Debug\path.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\qrc_BrillouinAcquisition.obj" />
-    <Object Include="..\BrillouinAcquisition\x64\Debug\residues.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\scancontrol.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\stdafx.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\storageWrapper.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\unwrap2D.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\unwrap2wrapper.obj" />
-    <Object Include="..\BrillouinAcquisition\x64\Debug\util.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\ZeissECU.obj" />
   </ItemGroup>
   <ItemGroup>

@@ -264,30 +264,6 @@
     <ClCompile Include="src\unwrap2wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="external\unwrap2\maskfat.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="external\unwrap2\residues.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="external\unwrap2\path.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="external\unwrap2\gold.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="external\unwrap2\util.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="external\unwrap2\brcut.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="external\unwrap2\list.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="external\unwrap2\grad.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\xsample.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -327,21 +303,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\unwrap2Wrapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="external\unwrap2\maskfat.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="external\unwrap2\path.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="external\unwrap2\residues.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="external\unwrap2\gold.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="external\unwrap2\util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\xsample.h">
