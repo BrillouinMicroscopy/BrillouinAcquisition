@@ -241,26 +241,18 @@ public:
 			memcpy(m_background, m_out_IFFT, sizeof(fftw_complex) * N);
 		}
 
-		// divide by background
-		double a, b, c, d, e;
+		// Divide by background and calculate the phase angle
 		for (int i{ 0 }; i < N; i++) {
-			a = m_out_IFFT[i][0];
-			b = m_out_IFFT[i][1];
-			c = m_background[i][0];
-			d = m_background[i][1];
-			e = (pow(c, 2) + pow(d, 2));
-			m_out_IFFT[i][0] = (a * c + b * d) / e;
-			m_out_IFFT[i][1] = (b * c - a * d) / e;
-		}
-
-		// Calculate the phase angle
-		for (int i{ 0 }; i < dim_x * dim_y; i++) {
-			(*phase)[i] = atan2(m_out_IFFT[i][1], m_out_IFFT[i][0]);
+			double a = m_out_IFFT[i][0];
+			double b = m_out_IFFT[i][1];
+			double c = m_background[i][0];
+			double d = m_background[i][1];
+			(*phase)[i] = atan2((b * c - a * d), (a * c + b * d));
 		}
 
 		// Downsample the image to speed up unwrapping
-		int dim_x_new = dim_x / 2;
-		int dim_y_new = dim_y / 2;
+		int dim_x_new{ dim_x / 2 };
+		int dim_y_new{ dim_y / 2 };
 		std::vector<float> phase_lowRes;
 		phase_lowRes.resize(dim_x_new * dim_y_new);
 		m_xsample->resample(&(*phase)[0], &phase_lowRes[0], dim_x, dim_y, dim_x_new, dim_y_new, RESAMPLE_MODE::NEAREST);
@@ -269,13 +261,13 @@ public:
 		m_unwrapper->unwrap2DWrapped(&phase_lowRes[0], &phaseUnwrapped[0], dim_x_new, dim_y_new, false, false);
 
 		// Subtract median value
-		auto newPhase = phaseUnwrapped;
-		auto beg = std::begin(newPhase);
-		auto end = std::end(newPhase);
+		phase_lowRes = phaseUnwrapped;
+		auto beg = std::begin(phase_lowRes);
+		auto end = std::end(phase_lowRes);
 		auto median = simplemath::median(beg, end);
 
 		for (int i{ 0 }; i < dim_x_new * dim_y_new; i++) {
-			phaseUnwrapped[i] = phaseUnwrapped[i] - median;
+			phaseUnwrapped[i] -= median;
 		}
 
 		// Upsample the image to match input resolution
