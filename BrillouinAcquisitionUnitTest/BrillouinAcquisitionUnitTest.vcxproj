@@ -13,7 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CAF19185-58AE-4015-9476-361D73A9B456}</ProjectGuid>
     <Keyword>Qt4VSv1.0</Keyword>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -94,9 +94,9 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(VCInstallDir)UnitTest\lib;C:\Program Files %28x86%29\National Instruments\Shared\ExternalCompilerSupport\C\lib64\msvc;C:\Program Files\HDF_Group\HDF5\1.10.5\lib;C:\Program Files\Thorlabs\Kinesis;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(VCInstallDir)UnitTest\lib;C:\Program Files %28x86%29\National Instruments\Shared\ExternalCompilerSupport\C\lib64\msvc;C:\Program Files\HDF_Group\HDF5\1.10.5\lib;C:\Program Files\Thorlabs\Kinesis;..\BrillouinAcquisition\external\fftw;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>qtmaind.lib;NIDAQmx.lib;Qt5Cored.lib;Qt5Widgetsd.lib;Qt5SerialPortd.lib;szip.lib;zlib.lib;hdf5.lib;hdf5_cpp.lib;Thorlabs.MotionControl.TCube.InertialMotor.lib;Thorlabs.MotionControl.FilterFlipper.lib;Thorlabs.MotionControl.KCube.DCServo.lib;Thorlabs.MotionControl.KCube.Solenoid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qtmaind.lib;libfftw3-3.lib;NIDAQmx.lib;Qt5Cored.lib;Qt5Widgetsd.lib;Qt5SerialPortd.lib;szip.lib;zlib.lib;hdf5.lib;hdf5_cpp.lib;Thorlabs.MotionControl.TCube.InertialMotor.lib;Thorlabs.MotionControl.FilterFlipper.lib;Thorlabs.MotionControl.KCube.DCServo.lib;Thorlabs.MotionControl.KCube.Solenoid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtMoc>
       <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
@@ -113,7 +113,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="NIDAQ_PositionVoltage.cpp" />
+    <ClCompile Include="phase.cpp" />
     <ClCompile Include="simplemath.cpp" />
+    <ClCompile Include="unwrap.cpp" />
+    <ClCompile Include="xsample.cpp" />
     <ClCompile Include="ZeissECUTest.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -128,6 +131,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\BrillouinAcquisition\external\unwrap\unwrap2D.h" />
     <ClInclude Include="BrillouinAcquisitionUnitTest.h" />
     <ClInclude Include="brillouinacquisitionunittest_global.h" />
     <QtMoc Include="MockMicroscope.h" />
@@ -162,6 +166,9 @@
     <Object Include="..\BrillouinAcquisition\x64\Debug\scancontrol.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\stdafx.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\storageWrapper.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\unwrap2D.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\unwrap2wrapper.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\xsample.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\ZeissECU.obj" />
   </ItemGroup>
   <ItemGroup>

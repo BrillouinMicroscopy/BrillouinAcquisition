@@ -17,10 +17,12 @@
 #include "external/h5bm/h5bm.h"
 #include "tableModel.h"
 
-#include"Acquisition/AcquisitionModes/Brillouin.h"
-#include"Acquisition/AcquisitionModes/ODT.h"
-#include"Acquisition/AcquisitionModes/Fluorescence.h"
-#include"Acquisition/AcquisitionModes/Calibration.h"
+#include "Acquisition/AcquisitionModes/Brillouin.h"
+#include "Acquisition/AcquisitionModes/ODT.h"
+#include "Acquisition/AcquisitionModes/Fluorescence.h"
+#include "Acquisition/AcquisitionModes/Calibration.h"
+
+#include "converter.h"
 
 #include <QtWidgets/QMainWindow>
 #include "ui_BrillouinAcquisition.h"
@@ -36,14 +38,6 @@ typedef struct {
 	CAMERA_SETTINGS camera;
 	STAGE_SETTINGS stage;
 } SETTINGS_DEVICES;
-
-enum CustomGradientPreset {
-	gpParula,
-	gpGrayscale,
-	gpRed,
-	gpGreen,
-	gpBlue
-};
 
 enum ROI_SOURCE {
 	BOX,
@@ -61,6 +55,7 @@ Q_DECLARE_METATYPE(CAMERA_SETTING);
 Q_DECLARE_METATYPE(CAMERA_OPTIONS);
 Q_DECLARE_METATYPE(std::vector<int>);
 Q_DECLARE_METATYPE(std::vector<double>);
+Q_DECLARE_METATYPE(std::vector<float>);
 Q_DECLARE_METATYPE(QSerialPort::SerialPortError);
 Q_DECLARE_METATYPE(IMAGE*);
 Q_DECLARE_METATYPE(CALIBRATION*);
@@ -80,7 +75,12 @@ Q_DECLARE_METATYPE(ODTIMAGE*);
 Q_DECLARE_METATYPE(FLUOIMAGE*);
 Q_DECLARE_METATYPE(FLUORESCENCE_SETTINGS);
 Q_DECLARE_METATYPE(FLUORESCENCE_MODE);
+Q_DECLARE_METATYPE(PLOT_SETTINGS*);
 Q_DECLARE_METATYPE(PreviewBuffer<unsigned char>*);
+Q_DECLARE_METATYPE(unsigned char*);
+Q_DECLARE_METATYPE(unsigned short*);
+Q_DECLARE_METATYPE(std::vector<unsigned char>);
+Q_DECLARE_METATYPE(std::vector<unsigned short>);
 Q_DECLARE_METATYPE(bool*);
 Q_DECLARE_METATYPE(std::vector<FLUORESCENCE_MODE>);
 Q_DECLARE_METATYPE(SpatialCalibration);
@@ -88,17 +88,6 @@ Q_DECLARE_METATYPE(SpatialCalibration);
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
 	
-	struct PLOT_SETTINGS {
-		QCustomPlot* plotHandle{ nullptr };
-		QCPColorMap* colorMap{ nullptr };
-		QCPRange cLim = { 100, 300 };
-		QSpinBox* lowerBox;
-		QSpinBox* upperBox;
-		std::function<void(QCPRange)> dataRangeCallback{ nullptr };
-		bool autoscale{ false };
-		CustomGradientPreset gradient = CustomGradientPreset::gpParula;
-	};
-
 private slots:
 	void on_rangeLower_valueChanged(int);
 	void on_rangeUpper_valueChanged(int);
@@ -151,6 +140,11 @@ private slots:
 
 	void updateImageBrillouin();
 	void updateImageODT();
+
+	void plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<unsigned char> unpackedBuffer);
+	void plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<unsigned short> unpackedBuffer);
+	void plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<double> unpackedBuffer);
+	void plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<float> unpackedBuffer);
 
 	void initializePlot(PLOT_SETTINGS plotSettings);
 
@@ -222,6 +216,11 @@ private slots:
 
 	void on_exposureTimeCameraODT_valueChanged(double exposureTime);
 	void on_gainCameraODT_valueChanged(double gain);
+
+	void on_camera_displayMode_currentIndexChanged(const QString &text);
+	void on_setBackground_clicked();
+
+	void applyGradient(PLOT_SETTINGS plotSettings);
 
 	/*
 	 * Fluorescence slots
@@ -365,6 +364,7 @@ private:
 	Thread m_andorThread;
 	Thread m_brightfieldCameraThread;
 	Thread m_acquisitionThread;
+	Thread m_plottingThread;
 
 	Brillouin* m_Brillouin = new Brillouin(nullptr, m_acquisition, m_andor, &m_scanControl);
 	BRILLOUIN_SETTINGS m_BrillouinSettings;
@@ -375,11 +375,13 @@ private:
 	PLOT_SETTINGS m_BrillouinPlot;
 	PLOT_SETTINGS m_ODTPlot;
 
+	converter* m_converter = new converter();
+
 	template <typename T>
 	void updateImage(PreviewBuffer<T>* previewBuffer, PLOT_SETTINGS* plotSettings);
 
 	template<typename T>
-	void plotting(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, T* unpackedBuffer);
+	void plotting(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<T> unpackedBuffer);
 
 	SETTINGS_DEVICES m_deviceSettings;
 	CAMERA_OPTIONS m_cameraOptions;

@@ -39,6 +39,15 @@ public:
 		std::vector<T>::iterator result = std::max_element(std::begin(vector), std::end(vector));
 		return *result;
 	}
+	
+	template <typename T = double>
+		static T absSum(std::vector<T> vector) {
+		T sum = 0;
+		for (int jj(0); jj < vector.size(); jj++) {
+			sum += abs(vector[jj]);
+		}
+		return sum;
+	}
 
 	template <typename T = double>
 	static std::vector<std::complex<T>> solveQuartic(COEFFICIENTS5 coef) {
@@ -90,6 +99,44 @@ public:
 			}
 		);
 		return result;
+	}
+
+	// Function to calculate the median value of a vector
+	// See https://stackoverflow.com/questions/1719070/what-is-the-right-approach-when-using-stl-container-for-median-calculation/2579393#2579393
+
+	// Exception to throw when vector handed to median function is empty
+	class median_of_empty_list_exception :public std::exception {
+		virtual const char* what() const throw() {
+			return "Attempt to take the median of an empty list of numbers.  "
+				"The median of an empty list is undefined.";
+		}
+	};
+
+	/* 
+	 * Return the median of a sequence of numbers given by the random
+	 * access iterators begin and end.
+	 *
+	 * The sequence must not be empty (median is undefined for an empty set).
+	 * The numbers must be convertible to double.
+	 */
+	template<class It>
+	static double median(It begin, It end) throw(median_of_empty_list_exception) {
+		if (begin == end) {
+			throw median_of_empty_list_exception();
+		}
+		std::size_t size = end - begin;
+		std::size_t middleIdx = size / 2;
+		It target = begin + middleIdx;
+		std::nth_element(begin, target, end);
+
+		if (size % 2 != 0) {	// Odd number of elements
+			return *target;
+		} else {				// Even number of elements
+			double a = *target;
+			It targetNeighbor = target - 1;
+			std::nth_element(begin, targetNeighbor, end);
+			return (a + *targetNeighbor) / 2.0;
+		}
 	}
 };
 

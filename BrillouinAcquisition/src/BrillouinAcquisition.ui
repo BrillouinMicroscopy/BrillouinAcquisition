@@ -3761,17 +3761,67 @@ border: none;</string>
            </spacer>
           </item>
           <item>
+           <widget class="QComboBox" name="camera_displayMode">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>17</height>
+             </size>
+            </property>
+            <item>
+             <property name="text">
+              <string>Intensity</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Spectrum</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Phase</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="setBackground">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Set Background</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="addFocusMarker_brightfield">
             <property name="minimumSize">
              <size>
               <width>30</width>
-              <height>23</height>
+              <height>20</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
               <width>30</width>
-              <height>23</height>
+              <height>20</height>
              </size>
             </property>
             <property name="text">

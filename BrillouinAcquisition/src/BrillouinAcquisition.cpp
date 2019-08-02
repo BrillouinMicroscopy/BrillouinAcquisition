@@ -189,6 +189,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<CAMERA_OPTIONS>("CAMERA_OPTIONS");
 	qRegisterMetaType<std::vector<int>>("std::vector<int>");
 	qRegisterMetaType<std::vector<double>>("std::vector<double>");
+	qRegisterMetaType<std::vector<float>>("std::vector<float>");
 	qRegisterMetaType<QSerialPort::SerialPortError>("QSerialPort::SerialPortError");
 	qRegisterMetaType<IMAGE*>("IMAGE*");
 	qRegisterMetaType<CALIBRATION*>("CALIBRATION*");
@@ -211,6 +212,10 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<PLOT_SETTINGS*>("PLOT_SETTINGS*");
 	qRegisterMetaType<PreviewBuffer<unsigned short>*>("PreviewBuffer<unsigned short>*");
 	qRegisterMetaType<PreviewBuffer<unsigned char>*>("PreviewBuffer<unsigned char>*");
+	qRegisterMetaType<unsigned char*>("unsigned char*");
+	qRegisterMetaType<unsigned short*>("unsigned short*");
+	qRegisterMetaType<std::vector<unsigned short>>("std::vector<unsigned short>");
+	qRegisterMetaType<std::vector<unsigned char>>("std::vector<unsigned char>");
 	qRegisterMetaType<bool*>("bool*");
 	qRegisterMetaType<std::vector<FLUORESCENCE_MODE>>("std::vector<FLUORESCENCE_MODE>");
 	qRegisterMetaType<SpatialCalibration>("SpatialCalibration");
@@ -282,6 +287,31 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	ui->actionEnable_Cooling->setEnabled(false);
 	ui->autoscalePlot->setChecked(m_BrillouinPlot.autoscale);
 
+	connection = QWidget::connect<void(converter::*)(PreviewBuffer<unsigned char>*, PLOT_SETTINGS*, std::vector<unsigned char>)>(
+		m_converter,
+		&converter::s_converted,
+		this,
+		[this](PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<unsigned char> unpackedBuffer) { plot(previewBuffer, plotSettings, unpackedBuffer); }
+	);
+	connection = QWidget::connect<void(converter::*)(PreviewBuffer<unsigned char>*, PLOT_SETTINGS*, std::vector<unsigned short>)>(
+		m_converter,
+		&converter::s_converted,
+		this,
+		[this](PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<unsigned short> unpackedBuffer) { plot(previewBuffer, plotSettings, unpackedBuffer); }
+	);
+	connection = QWidget::connect<void(converter::*)(PreviewBuffer<unsigned char>*, PLOT_SETTINGS*, std::vector<double>)>(
+		m_converter,
+		&converter::s_converted,
+		this,
+		[this](PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<double> unpackedBuffer) { plot(previewBuffer, plotSettings, unpackedBuffer); }
+	);
+	connection = QWidget::connect<void(converter::*)(PreviewBuffer<unsigned char>*, PLOT_SETTINGS*, std::vector<float>)>(
+		m_converter,
+		&converter::s_converted,
+		this,
+		[this](PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<float> unpackedBuffer) { plot(previewBuffer, plotSettings, unpackedBuffer); }
+	);
+
 	initScanControl();
 	initCamera();
 	// start andor thread
@@ -290,6 +320,8 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	m_acquisitionThread.startWorker(m_acquisition);
 	// start Brillouin thread
 	m_acquisitionThread.startWorker(m_Brillouin);
+	// start plotting thread
+	m_plottingThread.startWorker(m_converter);
 
 	// set up the QCPColorMap:
 	m_BrillouinPlot = {
@@ -393,6 +425,9 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 	m_acquisitionThread.exit();
 	m_acquisitionThread.terminate();
 	m_acquisitionThread.wait();
+	m_plottingThread.exit();
+	m_plottingThread.terminate();
+	m_plottingThread.wait();
 	qInfo(logInfo()) << "BrillouinAcquisition closed.";
 	delete ui;
 }
@@ -744,6 +779,27 @@ void BrillouinAcquisition::on_exposureTimeCameraODT_valueChanged(double exposure
 
 void BrillouinAcquisition::on_gainCameraODT_valueChanged(double gain) {
 	QMetaObject::invokeMethod(m_ODT, "setCameraSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::GAIN), Q_ARG(double, gain));
+}
+
+void BrillouinAcquisition::on_camera_displayMode_currentIndexChanged(const QString & text) {
+	if (text == "Intensity") {
+		m_ODTPlot.mode = DISPLAY_MODE::INTENSITY;
+		m_ODTPlot.gradient = CustomGradientPreset::gpGrayscale;
+	} else if (text == "Spectrum") {
+		m_ODTPlot.mode = DISPLAY_MODE::SPECTRUM;
+		m_ODTPlot.gradient = CustomGradientPreset::gpJet;
+	} else if (text == "Phase") {
+		m_ODTPlot.mode = DISPLAY_MODE::PHASE;
+		m_ODTPlot.gradient = CustomGradientPreset::gpJet;
+	} else {
+		m_ODTPlot.mode = DISPLAY_MODE::INTENSITY;
+		m_ODTPlot.gradient = CustomGradientPreset::gpGrayscale;
+	}
+	applyGradient(m_ODTPlot);
+}
+
+void BrillouinAcquisition::on_setBackground_clicked() {
+	QMetaObject::invokeMethod(m_converter, "updateBackground", Qt::AutoConnection);
 }
 
 void BrillouinAcquisition::on_acquisitionStartFluorescence_clicked() {
@@ -1216,9 +1272,7 @@ void BrillouinAcquisition::initializePlot(PLOT_SETTINGS plotSettings) {
 	);
 
 	// set the color gradient of the color map to one of the presets:
-	QCPColorGradient gradient = QCPColorGradient();
-	setColormap(&gradient, plotSettings.gradient);
-	plotSettings.colorMap->setGradient(gradient);
+	applyGradient(plotSettings);
 
 	plotSettings.colorMap->setDataRange(plotSettings.cLim);
 
@@ -1237,6 +1291,12 @@ void BrillouinAcquisition::initializePlot(PLOT_SETTINGS plotSettings) {
 
 	// rescale the key (x) and value (y) axes so the whole color map is visible:
 	plotSettings.plotHandle->rescaleAxes();
+}
+
+void BrillouinAcquisition::applyGradient(PLOT_SETTINGS plotSettings) {
+	QCPColorGradient gradient = QCPColorGradient();
+	setColormap(&gradient, plotSettings.gradient);
+	plotSettings.colorMap->setGradient(gradient);
 }
 
 void BrillouinAcquisition::on_addFocusMarker_brightfield_clicked() {
@@ -1543,11 +1603,46 @@ void BrillouinAcquisition::updateImage(PreviewBuffer<T>* previewBuffer, PLOT_SET
 
 		if (previewBuffer->m_bufferSettings.bufferType == "unsigned short") {
 			auto unpackedBuffer = reinterpret_cast<unsigned short*>(previewBuffer->m_buffer->getReadBuffer());
-			plotting(previewBuffer, plotSettings, unpackedBuffer);
-		}
-		else if (previewBuffer->m_bufferSettings.bufferType == "unsigned char") {
+			QMetaObject::invokeMethod(m_converter, "convert", Qt::QueuedConnection,
+				Q_ARG(PreviewBuffer<unsigned char>*, previewBuffer),
+				Q_ARG(PLOT_SETTINGS*, plotSettings),
+				Q_ARG(unsigned short*, unpackedBuffer));
+		} else if (previewBuffer->m_bufferSettings.bufferType == "unsigned char") {
 			auto unpackedBuffer = previewBuffer->m_buffer->getReadBuffer();
-			plotting(previewBuffer, plotSettings, unpackedBuffer);
+			QMetaObject::invokeMethod(m_converter, "convert", Qt::QueuedConnection,
+				Q_ARG(PreviewBuffer<unsigned char>*, previewBuffer),
+				Q_ARG(PLOT_SETTINGS*, plotSettings),
+				Q_ARG(unsigned char*, unpackedBuffer));
+		}
+	}
+}
+
+void BrillouinAcquisition::plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<unsigned char> unpackedBuffer) {
+	plotting(previewBuffer, plotSettings, unpackedBuffer);
+}
+
+void BrillouinAcquisition::plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<unsigned short> unpackedBuffer) {
+	plotting(previewBuffer, plotSettings, unpackedBuffer);
+}
+
+void BrillouinAcquisition::plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<double> unpackedBuffer) {
+	plotting(previewBuffer, plotSettings, unpackedBuffer);
+}
+
+void BrillouinAcquisition::plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<float> unpackedBuffer) {
+	plotting(previewBuffer, plotSettings, unpackedBuffer);
+}
+
+template <typename T>
+void BrillouinAcquisition::plotting(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<T> unpackedBuffer) {
+	int dim_x = previewBuffer->m_bufferSettings.roi.width;
+	int dim_y = previewBuffer->m_bufferSettings.roi.height;
+	// images are given row by row, starting at the top left
+	int tIndex{ 0 };
+	for (gsl::index yIndex{ 0 }; yIndex < dim_y; ++yIndex) {
+		for (gsl::index xIndex{ 0 }; xIndex < dim_x; ++xIndex) {
+			tIndex = yIndex * dim_x + xIndex;
+			plotSettings->colorMap->data()->setCell(xIndex, dim_y - yIndex - 1, unpackedBuffer[tIndex]);
 		}
 	}
 	previewBuffer->m_buffer->m_freeBuffers->release();
@@ -1557,18 +1652,6 @@ void BrillouinAcquisition::updateImage(PreviewBuffer<T>* previewBuffer, PLOT_SET
 		(plotSettings->dataRangeCallback)(plotSettings->cLim);
 	}
 	plotSettings->plotHandle->replot();
-}
-
-template <typename T>
-void BrillouinAcquisition::plotting(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, T* unpackedBuffer) {
-	// images are given row by row, starting at the top left
-	int tIndex{ 0 };
-	for (gsl::index yIndex{ 0 }; yIndex < previewBuffer->m_bufferSettings.roi.height; ++yIndex) {
-		for (gsl::index xIndex{ 0 }; xIndex < previewBuffer->m_bufferSettings.roi.width; ++xIndex) {
-			tIndex = yIndex * previewBuffer->m_bufferSettings.roi.width + xIndex;
-			plotSettings->colorMap->data()->setCell(xIndex, previewBuffer->m_bufferSettings.roi.height - yIndex - 1, unpackedBuffer[tIndex]);
-		}
-	}
 }
 
 void BrillouinAcquisition::on_actionConnect_Camera_triggered() {
@@ -2740,6 +2823,9 @@ void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradien
 			break;
 		case gpGrayscale:
 			gradient->loadPreset(QCPColorGradient::gpGrayscale);
+			break;
+		case gpJet:
+			gradient->loadPreset(QCPColorGradient::gpJet);
 			break;
 		default:
 			gradient->loadPreset(QCPColorGradient::gpGrayscale);

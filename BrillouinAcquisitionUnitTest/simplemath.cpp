@@ -23,5 +23,17 @@ namespace BrillouinAcquisitionUnitTest {
 					Assert::IsTrue(abs(expected[jj].imag() - solutions[jj].imag()) < 1e-12);
 				}
 			}
+
+			TEST_METHOD(TestMedianOdd) {
+				std::vector<double> list{ 1, 2, 3, 4, 5 };
+				auto med = simplemath::median(std::begin(list), std::end(list));
+				Assert::AreEqual(med, 3.0);
+			}
+
+			TEST_METHOD(TestMedianEven) {
+				std::vector<double> list{ 1, 2, 3, 4, 5, 6 };
+				auto med = simplemath::median(std::begin(list), std::end(list));
+				Assert::AreEqual(med, 3.5);
+			}
 	};
 }
