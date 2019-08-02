@@ -116,6 +116,7 @@
     <ClCompile Include="phase.cpp" />
     <ClCompile Include="simplemath.cpp" />
     <ClCompile Include="unwrap.cpp" />
+    <ClCompile Include="xsample.cpp" />
     <ClCompile Include="ZeissECUTest.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -167,6 +168,7 @@
     <Object Include="..\BrillouinAcquisition\x64\Debug\storageWrapper.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\unwrap2D.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\unwrap2wrapper.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\xsample.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\ZeissECU.obj" />
   </ItemGroup>
   <ItemGroup>

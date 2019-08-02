@@ -56,6 +56,9 @@
     <ClCompile Include="unwrap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="xsample.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BrillouinAcquisitionUnitTest.h">
@@ -161,6 +164,9 @@
       <Filter>Source Files</Filter>
     </Object>
     <Object Include="..\BrillouinAcquisition\x64\Debug\unwrap2D.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\xsample.obj">
       <Filter>Source Files</Filter>
     </Object>
   </ItemGroup>

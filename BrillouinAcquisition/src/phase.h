@@ -263,7 +263,7 @@ public:
 		int dim_y_new = dim_y / 2;
 		std::vector<float> phase_lowRes;
 		phase_lowRes.resize(dim_x_new * dim_y_new);
-		m_xsample->down(&(*phase)[0], &phase_lowRes[0], dim_x, dim_y, dim_x_new, dim_y_new);
+		m_xsample->resample(&(*phase)[0], &phase_lowRes[0], dim_x, dim_y, dim_x_new, dim_y_new);
 
 		std::vector<float> phaseUnwrapped = phase_lowRes;
 		m_unwrapper->unwrap2DWrapped(&phase_lowRes[0], &phaseUnwrapped[0], dim_x_new, dim_y_new, false, false);
@@ -279,7 +279,7 @@ public:
 		}
 
 		// Upsample the image to match input resolution
-		m_xsample->up(&phaseUnwrapped[0], &(*phase)[0], dim_x_new, dim_y_new, dim_x, dim_y);
+		m_xsample->resample(&phaseUnwrapped[0], &(*phase)[0], dim_x_new, dim_y_new, dim_x, dim_y);
 	}
 
 	template <typename T = double>
