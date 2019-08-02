@@ -46,8 +46,8 @@ static inline void xsample::resample(T_in in, T_out out,
 
 template<typename T_in, typename T_out>
 static inline void xsample::nearest(T_in in, T_out out, int dim_x, int dim_y, int dim_x_new, int dim_y_new) {
-	for (int x{ 0 }; x < dim_x_new; x++) {
-		for (int y{ 0 }; y < dim_y_new; y++) {
+	for (int y{ 0 }; y < dim_y_new; y++) {
+		for (int x{ 0 }; x < dim_x_new; x++) {
 			double x_old = round(((double)x + 0.5) * dim_x / dim_x_new - 0.5);
 			double y_old = round(((double)y + 0.5) * dim_y / dim_y_new - 0.5);
 
@@ -62,12 +62,12 @@ static inline void xsample::linear(T_in in, T_out out, int dim_x, int dim_y, int
 	double scaling_x = (double)dim_x / dim_x_new;
 	double scaling_y = (double)dim_y / dim_y_new;
 	double pixelArea = scaling_x * scaling_y;
-	for (int x{ 0 }; x < dim_x_new; x++) {
-		double xl = x * scaling_x;
-		double xr = (x + 1) * scaling_x;
-		for (int y{ 0 }; y < dim_y_new; y++) {
-			double yt = y * scaling_y;
-			double yb = (y + 1) * scaling_y;
+	for (int y{ 0 }; y < dim_y_new; y++) {
+		double yt = y * scaling_y;
+		double yb = (y + 1) * scaling_y;
+		for (int x{ 0 }; x < dim_x_new; x++) {
+			double xl = x * scaling_x;
+			double xr = (x + 1) * scaling_x;
 			double pixValue{ 0 };
 			// Average old pixels
 			for (int xd{ (int)floor(xl) }; xd < (int)ceil(xr); xd++) {
