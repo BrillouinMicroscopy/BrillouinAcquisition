@@ -295,10 +295,10 @@ public:
 		if ((dim_x*dim_y) % 2 == 0 && dim_x == 2*xshift && dim_y == 2*yshift) {
 			// in and output array are the same and we shift by half the size,
 			// values are exchanged using swap
-			for (size_t x{ 0 }; x < dim_x; x++) {
-				size_t outX = (x + xshift) % dim_x;
-				for (size_t y{ 0 }; y < yshift; y++) {
-					size_t outY = (y + yshift) % dim_y;
+			for (size_t y{ 0 }; y < yshift; y++) {
+				size_t outY = (y + yshift) % dim_y;
+				for (size_t x{ 0 }; x < dim_x; x++) {
+					size_t outX = (x + xshift) % dim_x;
 					// row-major order
 					std::swap(inputArray[outX + dim_x * outY], inputArray[x + dim_x * y]);
 				}
@@ -307,10 +307,10 @@ public:
 			// temp output array
 			int N = dim_x * dim_y;
 			T* out = (T*)malloc(sizeof(T) * N);
-			for (size_t x{ 0 }; x < dim_x; x++) {
-				size_t outX = (x + xshift) % dim_x;
-				for (size_t y{ 0 }; y < dim_y; y++) {
-					size_t outY = (y + yshift) % dim_y;
+			for (size_t y{ 0 }; y < dim_y; y++) {
+				size_t outY = (y + yshift) % dim_y;
+				for (size_t x{ 0 }; x < dim_x; x++) {
+					size_t outX = (x + xshift) % dim_x;
 					// row-major order
 					memcpy(&out[outX + dim_x * outY], &inputArray[x + dim_x * y], sizeof(T));
 				}
