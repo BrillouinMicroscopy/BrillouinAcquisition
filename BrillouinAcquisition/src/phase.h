@@ -251,8 +251,8 @@ public:
 		}
 
 		// Downsample the image to speed up unwrapping
-		int dim_x_new{ dim_x / 2 };
-		int dim_y_new{ dim_y / 2 };
+		int dim_x_new{ dim_x / 3 };
+		int dim_y_new{ dim_y / 3 };
 		std::vector<float> phase_lowRes;
 		phase_lowRes.resize(dim_x_new * dim_y_new);
 		m_xsample->resample(&(*phase)[0], &phase_lowRes[0], dim_x, dim_y, dim_x_new, dim_y_new, RESAMPLE_MODE::NEAREST);
