@@ -139,6 +139,7 @@ public slots:
 	void setElement(DeviceElement element, double position);
 	void setPreset(SCAN_PRESET preset);
 	void getElements();
+	int getBeamBlock();
 	void setBeamBlock(int position);
 	void getElement(DeviceElement element);
 	// sets the position relative to the home position m_homePosition
