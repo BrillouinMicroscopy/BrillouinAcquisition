@@ -172,6 +172,8 @@ public slots:
 	void checkPresets();
 	bool isPresetActive(SCAN_PRESET);
 	void announcePosition();
+	void startAnnouncing();
+	void stopAnnouncing();
 	void startAnnouncingPosition();
 	void stopAnnouncingPosition();
 	void startAnnouncingElementPosition();

@@ -87,7 +87,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	// prepare camera for image acquisition
 	m_andor->startAcquisition(m_settings.camera);
 	m_settings.camera = m_andor->getSettings();
-	(*m_scanControl)->stopAnnouncingPosition();
+	QMetaObject::invokeMethod((*m_scanControl), "stopAnnouncing", Qt::AutoConnection);
 	// set optical elements for brightfield/Brillouin imaging
 	(*m_scanControl)->setPreset(SCAN_BRILLOUIN);
 	Sleep(500);
@@ -275,7 +275,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 
 	(*m_scanControl)->setPosition(m_startPosition);
 	emit(s_positionChanged({ 0, 0, 0 }, 0));
-	(*m_scanControl)->startAnnouncingPosition();
+	QMetaObject::invokeMethod((*m_scanControl), "startAnnouncing", Qt::AutoConnection);
 
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;

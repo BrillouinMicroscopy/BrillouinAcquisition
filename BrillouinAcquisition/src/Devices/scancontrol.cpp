@@ -39,6 +39,16 @@ void ScanControl::announcePosition() {
 	emit(currentPosition(point - m_homePosition));
 }
 
+void ScanControl::startAnnouncing() {
+	startAnnouncingPosition();
+	startAnnouncingElementPosition();
+}
+
+void ScanControl::stopAnnouncing() {
+	stopAnnouncingPosition();
+	stopAnnouncingElementPosition();
+}
+
 void ScanControl::startAnnouncingPosition() {
 	if (positionTimer) {
 		positionTimer->start(100);
