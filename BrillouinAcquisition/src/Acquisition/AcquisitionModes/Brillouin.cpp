@@ -293,7 +293,13 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 
 void Brillouin::abortMode(std::unique_ptr <StorageWrapper>& storage) {
 	m_andor->stopAcquisition();
+
+	(*m_scanControl)->setPreset(SCAN_LASEROFF);
+
 	(*m_scanControl)->setPosition(m_startPosition);
+
+	QMetaObject::invokeMethod((*m_scanControl), "startAnnouncing", Qt::AutoConnection);
+
 	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
 	m_status = ACQUISITION_STATUS::ABORTED;
 
@@ -304,7 +310,7 @@ void Brillouin::abortMode(std::unique_ptr <StorageWrapper>& storage) {
 	loop.exec();
 
 	emit(s_acquisitionStatus(m_status));
-	emit(s_positionChanged(m_startPosition, 0));
+	emit(s_positionChanged({0 , 0, 0}, 0));
 	emit(s_timeToCalibration(0));
 }
 
