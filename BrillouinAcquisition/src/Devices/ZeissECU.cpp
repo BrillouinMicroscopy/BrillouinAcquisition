@@ -198,6 +198,7 @@ void ZeissECU::setDevice(com *device) {
 
 void ZeissECU::setPreset(SCAN_PRESET presetType) {
 	auto preset = getPreset(presetType);
+	getElements();
 
 	for (gsl::index ii = 0; ii < m_deviceElements.size(); ii++) {
 		// check if element position needs to be changed
