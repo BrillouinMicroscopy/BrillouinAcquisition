@@ -198,6 +198,7 @@ void ZeissECU::setDevice(com *device) {
 
 void ZeissECU::setPreset(SCAN_PRESET presetType) {
 	auto preset = getPreset(presetType);
+	getElements();
 
 	for (gsl::index ii = 0; ii < m_deviceElements.size(); ii++) {
 		// check if element position needs to be changed
@@ -242,7 +243,7 @@ void ZeissECU::setElement(DeviceElement element, double position) {
 }
 
 void ZeissECU::getElements() {
-	m_elementPositions[(int)DEVICE_ELEMENT::BEAMBLOCK] = Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
+	m_elementPositions[(int)DEVICE_ELEMENT::BEAMBLOCK] = getBeamBlock();
 	m_elementPositions[(int)DEVICE_ELEMENT::REFLECTOR] = m_stand->getReflector();
 	m_elementPositions[(int)DEVICE_ELEMENT::OBJECTIVE] = m_stand->getObjective();
 	m_elementPositions[(int)DEVICE_ELEMENT::TUBELENS] = m_stand->getTubelens();
@@ -253,8 +254,16 @@ void ZeissECU::getElements() {
 	emit(elementPositionsChanged(m_elementPositions));
 }
 
+int ZeissECU::getBeamBlock() {
+	return Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
+}
+
 void ZeissECU::setBeamBlock(int position) {
 	Thorlabs_FF::FF_MoveToPosition(m_serialNo_FF2, (Thorlabs_FF::FF_Positions)position);
+	auto i{ 0 };
+	while (getBeamBlock() != position && i++ < 10) {
+		Sleep(100);
+	}
 }
 
 void ZeissECU::getElement(DeviceElement element) {

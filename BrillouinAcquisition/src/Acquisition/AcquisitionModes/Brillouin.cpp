@@ -28,41 +28,70 @@ void Brillouin::startRepetitions() {
 		return;
 	}
 
+	// If the repetition timer is running already, we stop the next repetition
+	if (m_repetitionTimer != nullptr && m_repetitionTimer->isActive()) {
+		m_repetitionTimer->stop();
+		m_startOfLastRepetition.invalidate();
+		finaliseRepetitions(m_currentRepetition, -2);
+		setAcquisitionStatus(ACQUISITION_STATUS::STOPPED);
+		return;
+	}
+
 	m_abort = false;
-	
+
 	std::string info = "Acquisition started.";
 	qInfo(logInfo()) << info.c_str();
 
-	QElapsedTimer startOfLastRepetition;
-	startOfLastRepetition.start();
+	m_currentRepetition = 0;
+	m_startOfLastRepetition.start();
 
-	for (gsl::index repNumber = 0; repNumber < m_settings.repetitions.count; repNumber++) {
+	m_repetitionTimer = new QTimer();
+	QMetaObject::Connection connection = QWidget::connect(m_repetitionTimer, SIGNAL(timeout()), this, SLOT(waitForNextRepetition()));
+	m_repetitionTimer->start(100);
+}
 
-		if (m_abort) {
-			this->abortMode(m_acquisition->m_storage);
-			return;
-		}
+void Brillouin::finaliseRepetitions() {
+	finaliseRepetitions(m_settings.repetitions.count, -1);
+}
 
-		m_acquisition->newRepetition(ACQUISITION_MODE::BRILLOUIN);
+void Brillouin::finaliseRepetitions(int nrFinishedRepetitions, int status) {
+	emit(s_totalProgress(nrFinishedRepetitions, status));
+	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
+}
 
-		if (repNumber == 0) {
-			emit(s_totalProgress(repNumber, -1));
-			acquire(m_acquisition->m_storage);
-		} else {
-			int timeSinceLast = startOfLastRepetition.elapsed()*1e-3;
-			while (timeSinceLast < m_settings.repetitions.interval * 60) {
-				timeSinceLast = startOfLastRepetition.elapsed()*1e-3;
-				emit(s_totalProgress(repNumber, m_settings.repetitions.interval * 60 - timeSinceLast));
-				Sleep(100);
-			}
-			startOfLastRepetition.restart();
-			emit(s_totalProgress(repNumber, -1));
-			acquire(m_acquisition->m_storage);
-		}
+void Brillouin::waitForNextRepetition() {
+
+	if (m_abort) {
+		this->abortMode(m_acquisition->m_storage);
+		return;
 	}
 
-	emit(s_totalProgress(m_settings.repetitions.count, -1));
-	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
+	// Check if we have to start a new repetition or wait more
+	int timeSinceLast = m_startOfLastRepetition.elapsed() * 1e-3;
+	if (m_currentRepetition == 0 || timeSinceLast >= m_settings.repetitions.interval * 60) {
+		m_startOfLastRepetition.restart();
+		m_repetitionTimer->stop();
+		emit(s_totalProgress(m_currentRepetition, -1));
+		m_acquisition->newRepetition(ACQUISITION_MODE::BRILLOUIN);
+		
+		setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
+		acquire(m_acquisition->m_storage);
+		m_currentRepetition++;
+		// Check if this was the last repetition
+		if (m_currentRepetition < m_settings.repetitions.count) {
+			m_repetitionTimer->start(100);
+			setAcquisitionStatus(ACQUISITION_STATUS::WAITFORREPETITION);
+		} else {
+			m_startOfLastRepetition.invalidate();
+			// Cleanup after last repetition
+			finaliseRepetitions();
+			setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
+		}
+	} else {
+		timeSinceLast = m_startOfLastRepetition.elapsed() * 1e-3;
+		emit(s_totalProgress(m_currentRepetition, m_settings.repetitions.interval * 60 - timeSinceLast));
+	}
+
 }
 
 void Brillouin::setStepNumberX(int steps) {
@@ -81,13 +110,11 @@ void Brillouin::setStepNumberZ(int steps) {
 }
 
 void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
-	m_status = ACQUISITION_STATUS::STARTED;
-	emit(s_acquisitionStatus(m_status));
-	
+	setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 	// prepare camera for image acquisition
 	m_andor->startAcquisition(m_settings.camera);
 	m_settings.camera = m_andor->getSettings();
-	(*m_scanControl)->stopAnnouncingPosition();
+	QMetaObject::invokeMethod((*m_scanControl), "stopAnnouncing", Qt::AutoConnection);
 	// set optical elements for brightfield/Brillouin imaging
 	(*m_scanControl)->setPreset(SCAN_BRILLOUIN);
 	Sleep(500);
@@ -275,7 +302,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 
 	(*m_scanControl)->setPosition(m_startPosition);
 	emit(s_positionChanged({ 0, 0, 0 }, 0));
-	(*m_scanControl)->startAnnouncingPosition();
+	QMetaObject::invokeMethod((*m_scanControl), "startAnnouncing", Qt::AutoConnection);
 
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
@@ -286,16 +313,23 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	std::string info = "Acquisition finished.";
 	qInfo(logInfo()) << info.c_str();
 	emit(s_calibrationRunning(false));
-	m_status = ACQUISITION_STATUS::FINISHED;
-	emit(s_acquisitionStatus(m_status));
+	setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
 	emit(s_timeToCalibration(0));
 }
 
 void Brillouin::abortMode(std::unique_ptr <StorageWrapper>& storage) {
+	m_repetitionTimer->stop();
+	m_startOfLastRepetition.invalidate();
+
 	m_andor->stopAcquisition();
+
+	(*m_scanControl)->setPreset(SCAN_LASEROFF);
+
 	(*m_scanControl)->setPosition(m_startPosition);
+
+	QMetaObject::invokeMethod((*m_scanControl), "startAnnouncing", Qt::AutoConnection);
+
 	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
-	m_status = ACQUISITION_STATUS::ABORTED;
 
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
@@ -303,8 +337,8 @@ void Brillouin::abortMode(std::unique_ptr <StorageWrapper>& storage) {
 	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
 	loop.exec();
 
-	emit(s_acquisitionStatus(m_status));
-	emit(s_positionChanged(m_startPosition, 0));
+	setAcquisitionStatus(ACQUISITION_STATUS::ABORTED);
+	emit(s_positionChanged({0 , 0, 0}, 0));
 	emit(s_timeToCalibration(0));
 }
 

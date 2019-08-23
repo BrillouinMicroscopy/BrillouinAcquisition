@@ -70,8 +70,7 @@ void Calibration::startRepetitions() {
 void Calibration::acquire(std::unique_ptr <StorageWrapper> & storage) {}
 
 void Calibration::acquire() {
-	m_status = ACQUISITION_STATUS::STARTED;
-	emit(s_acquisitionStatus(m_status));
+	setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 
 	// move to Brillouin configuration
 	(*m_NIDAQ)->setPreset(SCAN_BRILLOUIN);
@@ -170,8 +169,7 @@ void Calibration::acquire() {
 
 	emit(calibrationChanged(m_calibration));
 
-	m_status = ACQUISITION_STATUS::FINISHED;
-	emit(s_acquisitionStatus(m_status));
+	setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
 }
 
 void Calibration::abortMode(std::unique_ptr <StorageWrapper> & storage) {}
@@ -331,8 +329,7 @@ void Calibration::save() {
 
 void Calibration::abortMode() {
 	m_acquisition->disableMode(ACQUISITION_MODE::SPATIALCALIBRATION);
-	m_status = ACQUISITION_STATUS::ABORTED;
-	emit(s_acquisitionStatus(m_status));
+	setAcquisitionStatus(ACQUISITION_STATUS::ABORTED);
 }
 
 void Calibration::setWidth(int width) {
