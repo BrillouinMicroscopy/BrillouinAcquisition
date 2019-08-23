@@ -177,8 +177,7 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage) {
 }
 
 void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vector<ChannelSettings *> channels) {
-	m_status = ACQUISITION_STATUS::STARTED;
-	emit(s_acquisitionStatus(m_status));
+	setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 
 	// If the provided channel settings vector is empty, acquire the enabled channels.
 	if (!channels.size()) {
@@ -269,13 +268,11 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
 	loop.exec();
 
-	m_status = ACQUISITION_STATUS::FINISHED;
-	emit(s_acquisitionStatus(m_status));
+	setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
 }
 
 void Fluorescence::abortMode(std::unique_ptr <StorageWrapper> & storage) {
 	m_acquisition->disableMode(ACQUISITION_MODE::FLUORESCENCE);
-	m_status = ACQUISITION_STATUS::ABORTED;
 
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
@@ -283,5 +280,5 @@ void Fluorescence::abortMode(std::unique_ptr <StorageWrapper> & storage) {
 	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
 	loop.exec();
 
-	emit(s_acquisitionStatus(m_status));
+	setAcquisitionStatus(ACQUISITION_STATUS::ABORTED);
 }

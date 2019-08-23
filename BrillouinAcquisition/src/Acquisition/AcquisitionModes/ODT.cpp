@@ -130,8 +130,7 @@ void ODT::startRepetitions() {
 }
 
 void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
-	m_status = ACQUISITION_STATUS::STARTED;
-	emit(s_acquisitionStatus(m_status));
+	setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 
 	QMetaObject::invokeMethod(storage.get(), "startWritingQueues", Qt::AutoConnection);
 
@@ -200,8 +199,7 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
 	loop.exec();
 
-	m_status = ACQUISITION_STATUS::FINISHED;
-	emit(s_acquisitionStatus(m_status));
+	setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
 }
 
 void ODT::startAlignment() {
@@ -210,8 +208,7 @@ void ODT::startAlignment() {
 		if (!allowed) {
 			return;
 		}
-		m_status = ACQUISITION_STATUS::ALIGNING;
-		emit(s_acquisitionStatus(m_status));
+		setAcquisitionStatus(ACQUISITION_STATUS::ALIGNING);
 		m_algnRunning = true;
 
 		// configure camera exposure and gain
@@ -236,8 +233,7 @@ void ODT::startAlignment() {
 		// start querying the element positions again
 		(*m_NIDAQ)->startAnnouncingElementPosition();
 		m_acquisition->disableMode(ACQUISITION_MODE::ODT);
-		m_status = ACQUISITION_STATUS::STOPPED;
-		emit(s_acquisitionStatus(m_status));
+		setAcquisitionStatus(ACQUISITION_STATUS::STOPPED);
 	}
 }
 
@@ -346,6 +342,5 @@ void ODT::abortMode() {
 		m_algnTimer->stop();
 	}
 	m_acquisition->disableMode(ACQUISITION_MODE::ODT);
-	m_status = ACQUISITION_STATUS::ABORTED;
-	emit(s_acquisitionStatus(m_status));
+	setAcquisitionStatus(ACQUISITION_STATUS::ABORTED);
 }

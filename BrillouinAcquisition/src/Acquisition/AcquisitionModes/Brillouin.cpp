@@ -33,8 +33,7 @@ void Brillouin::startRepetitions() {
 		m_repetitionTimer->stop();
 		m_startOfLastRepetition.invalidate();
 		finaliseRepetitions();
-		m_status = ACQUISITION_STATUS::STOPPED;
-		emit(s_acquisitionStatus(m_status));
+		setAcquisitionStatus(ACQUISITION_STATUS::STOPPED);
 		return;
 	}
 
@@ -83,8 +82,7 @@ void Brillouin::waitForNextRepetition() {
 	} else {
 		timeSinceLast = m_startOfLastRepetition.elapsed() * 1e-3;
 		emit(s_totalProgress(m_currentRepetition, m_settings.repetitions.interval * 60 - timeSinceLast));
-		m_status = ACQUISITION_STATUS::WAITFORREPETITION;
-		emit(s_acquisitionStatus(m_status));
+		setAcquisitionStatus(ACQUISITION_STATUS::WAITFORREPETITION);
 	}
 
 }
@@ -105,9 +103,7 @@ void Brillouin::setStepNumberZ(int steps) {
 }
 
 void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
-	m_status = ACQUISITION_STATUS::STARTED;
-	emit(s_acquisitionStatus(m_status));
-	
+	setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 	// prepare camera for image acquisition
 	m_andor->startAcquisition(m_settings.camera);
 	m_settings.camera = m_andor->getSettings();
@@ -310,8 +306,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	std::string info = "Acquisition finished.";
 	qInfo(logInfo()) << info.c_str();
 	emit(s_calibrationRunning(false));
-	m_status = ACQUISITION_STATUS::FINISHED;
-	emit(s_acquisitionStatus(m_status));
+	setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
 	emit(s_timeToCalibration(0));
 }
 
@@ -328,7 +323,6 @@ void Brillouin::abortMode(std::unique_ptr <StorageWrapper>& storage) {
 	QMetaObject::invokeMethod((*m_scanControl), "startAnnouncing", Qt::AutoConnection);
 
 	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
-	m_status = ACQUISITION_STATUS::ABORTED;
 
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
@@ -336,7 +330,7 @@ void Brillouin::abortMode(std::unique_ptr <StorageWrapper>& storage) {
 	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
 	loop.exec();
 
-	emit(s_acquisitionStatus(m_status));
+	setAcquisitionStatus(ACQUISITION_STATUS::ABORTED);
 	emit(s_positionChanged({0 , 0, 0}, 0));
 	emit(s_timeToCalibration(0));
 }
