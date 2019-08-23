@@ -971,25 +971,36 @@ void BrillouinAcquisition::showEnabledModes(ACQUISITION_MODE modes) {
 
 void BrillouinAcquisition::showBrillouinStatus(ACQUISITION_STATUS status) {
 	QString string;
-	if (status == ACQUISITION_STATUS::ABORTED) {
-		string = "Acquisition aborted.";
-		ui->progressBar->setValue(0);
-	} else if (status == ACQUISITION_STATUS::FINISHED) {
-		string = "Acquisition finished.";
-		ui->progressBar->setValue(100);
-	} else if (status == ACQUISITION_STATUS::STARTED) {
-		string = "Acquisition started.";
-		ui->progressBar->setValue(0);
+	bool running{ false };
+	switch (status) {
+		case ACQUISITION_STATUS::ABORTED:
+			string = "Acquisition aborted.";
+			ui->progressBar->setValue(0);
+			ui->BrillouinStart->setText("Start");
+			break;
+		case ACQUISITION_STATUS::FINISHED:
+			string = "Acquisition finished.";
+			ui->progressBar->setValue(100);
+			ui->BrillouinStart->setText("Start");
+			break;
+		case ACQUISITION_STATUS::STARTED:
+			string = "Acquisition started.";
+			ui->progressBar->setValue(0);
+		case ACQUISITION_STATUS::RUNNING:
+			ui->BrillouinStart->setText("Cancel");
+			running = true;
+			break;
+		case ACQUISITION_STATUS::WAITFORREPETITION:
+			ui->BrillouinStart->setText("Stop");
+			break;
+		case ACQUISITION_STATUS::STOPPED:
+			ui->BrillouinStart->setText("Start");
+			break;
+		default:
+			ui->BrillouinStart->setText("Start");
+			break;
 	}
 	ui->progressBar->setFormat(string);
-
-	bool running{ false };
-	if (status == ACQUISITION_STATUS::RUNNING || status == ACQUISITION_STATUS::STARTED) {
-		ui->BrillouinStart->setText("Cancel");
-		running = true;
-	} else {
-		ui->BrillouinStart->setText("Start");
-	}
 
 	ui->actionOpen_Acquisition->setDisabled(running);
 	ui->actionNew_Acquisition->setDisabled(running);

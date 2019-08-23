@@ -28,41 +28,65 @@ void Brillouin::startRepetitions() {
 		return;
 	}
 
+	// If the repetition timer is running already, we stop the next repetition
+	if (m_repetitionTimer != nullptr && m_repetitionTimer->isActive()) {
+		m_repetitionTimer->stop();
+		m_startOfLastRepetition.invalidate();
+		finaliseRepetitions();
+		m_status = ACQUISITION_STATUS::STOPPED;
+		emit(s_acquisitionStatus(m_status));
+		return;
+	}
+
 	m_abort = false;
-	
+
 	std::string info = "Acquisition started.";
 	qInfo(logInfo()) << info.c_str();
 
-	QElapsedTimer startOfLastRepetition;
-	startOfLastRepetition.start();
+	m_currentRepetition = 0;
+	m_startOfLastRepetition.start();
 
-	for (gsl::index repNumber = 0; repNumber < m_settings.repetitions.count; repNumber++) {
+	m_repetitionTimer = new QTimer();
+	QMetaObject::Connection connection = QWidget::connect(m_repetitionTimer, SIGNAL(timeout()), this, SLOT(waitForNextRepetition()));
+	m_repetitionTimer->start(100);
+}
 
-		if (m_abort) {
-			this->abortMode(m_acquisition->m_storage);
-			return;
-		}
-
-		m_acquisition->newRepetition(ACQUISITION_MODE::BRILLOUIN);
-
-		if (repNumber == 0) {
-			emit(s_totalProgress(repNumber, -1));
-			acquire(m_acquisition->m_storage);
-		} else {
-			int timeSinceLast = startOfLastRepetition.elapsed()*1e-3;
-			while (timeSinceLast < m_settings.repetitions.interval * 60) {
-				timeSinceLast = startOfLastRepetition.elapsed()*1e-3;
-				emit(s_totalProgress(repNumber, m_settings.repetitions.interval * 60 - timeSinceLast));
-				Sleep(100);
-			}
-			startOfLastRepetition.restart();
-			emit(s_totalProgress(repNumber, -1));
-			acquire(m_acquisition->m_storage);
-		}
-	}
-
+void Brillouin::finaliseRepetitions() {
 	emit(s_totalProgress(m_settings.repetitions.count, -1));
 	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
+}
+
+void Brillouin::waitForNextRepetition() {
+
+	if (m_abort) {
+		this->abortMode(m_acquisition->m_storage);
+		return;
+	}
+
+	// Check if we have to start a new repetition or wait more
+	int timeSinceLast = m_startOfLastRepetition.elapsed() * 1e-3;
+	if (m_currentRepetition == 0 || timeSinceLast >= m_settings.repetitions.interval * 60) {
+		m_startOfLastRepetition.restart();
+		m_repetitionTimer->stop();
+		emit(s_totalProgress(m_currentRepetition, -1));
+		m_acquisition->newRepetition(ACQUISITION_MODE::BRILLOUIN);
+		acquire(m_acquisition->m_storage);
+		m_currentRepetition++;
+		// Check if this was the last repetition
+		if (m_currentRepetition < m_settings.repetitions.count) {
+			m_repetitionTimer->start(100);
+		} else {
+			m_startOfLastRepetition.invalidate();
+			// Cleanup after last repetition
+			finaliseRepetitions();
+		}
+	} else {
+		timeSinceLast = m_startOfLastRepetition.elapsed() * 1e-3;
+		emit(s_totalProgress(m_currentRepetition, m_settings.repetitions.interval * 60 - timeSinceLast));
+		m_status = ACQUISITION_STATUS::WAITFORREPETITION;
+		emit(s_acquisitionStatus(m_status));
+	}
+
 }
 
 void Brillouin::setStepNumberX(int steps) {
@@ -292,6 +316,9 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 }
 
 void Brillouin::abortMode(std::unique_ptr <StorageWrapper>& storage) {
+	m_repetitionTimer->stop();
+	m_startOfLastRepetition.invalidate();
+
 	m_andor->stopAcquisition();
 
 	(*m_scanControl)->setPreset(SCAN_LASEROFF);

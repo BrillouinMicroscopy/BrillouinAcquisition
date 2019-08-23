@@ -53,6 +53,9 @@ public slots:
 	void init() {};
 	void startRepetitions();
 
+	void waitForNextRepetition();
+	void finaliseRepetitions();
+
 	void setStepNumberX(int);
 	void setStepNumberY(int);
 	void setStepNumberZ(int);
@@ -84,6 +87,10 @@ private:
 	ScanControl** m_scanControl;
 	bool m_running = false;				// is acquisition currently running
 	POINT3 m_startPosition{ 0, 0, 0 };
+
+	QTimer *m_repetitionTimer = nullptr;
+	QElapsedTimer m_startOfLastRepetition;
+	int m_currentRepetition{ 0 };
 
 	int nrCalibrations = 1;
 	void calibrate(std::unique_ptr <StorageWrapper>& storage);
