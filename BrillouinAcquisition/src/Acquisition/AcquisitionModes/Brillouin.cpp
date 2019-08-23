@@ -32,7 +32,7 @@ void Brillouin::startRepetitions() {
 	if (m_repetitionTimer != nullptr && m_repetitionTimer->isActive()) {
 		m_repetitionTimer->stop();
 		m_startOfLastRepetition.invalidate();
-		finaliseRepetitions();
+		finaliseRepetitions(m_currentRepetition, -2);
 		setAcquisitionStatus(ACQUISITION_STATUS::STOPPED);
 		return;
 	}
@@ -51,7 +51,11 @@ void Brillouin::startRepetitions() {
 }
 
 void Brillouin::finaliseRepetitions() {
-	emit(s_totalProgress(m_settings.repetitions.count, -1));
+	finaliseRepetitions(m_settings.repetitions.count, -1);
+}
+
+void Brillouin::finaliseRepetitions(int nrFinishedRepetitions, int status) {
+	emit(s_totalProgress(nrFinishedRepetitions, status));
 	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
 }
 
@@ -69,20 +73,23 @@ void Brillouin::waitForNextRepetition() {
 		m_repetitionTimer->stop();
 		emit(s_totalProgress(m_currentRepetition, -1));
 		m_acquisition->newRepetition(ACQUISITION_MODE::BRILLOUIN);
+		
+		setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 		acquire(m_acquisition->m_storage);
 		m_currentRepetition++;
 		// Check if this was the last repetition
 		if (m_currentRepetition < m_settings.repetitions.count) {
 			m_repetitionTimer->start(100);
+			setAcquisitionStatus(ACQUISITION_STATUS::WAITFORREPETITION);
 		} else {
 			m_startOfLastRepetition.invalidate();
 			// Cleanup after last repetition
 			finaliseRepetitions();
+			setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
 		}
 	} else {
 		timeSinceLast = m_startOfLastRepetition.elapsed() * 1e-3;
 		emit(s_totalProgress(m_currentRepetition, m_settings.repetitions.interval * 60 - timeSinceLast));
-		setAcquisitionStatus(ACQUISITION_STATUS::WAITFORREPETITION);
 	}
 
 }

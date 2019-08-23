@@ -992,6 +992,7 @@ void BrillouinAcquisition::showBrillouinStatus(ACQUISITION_STATUS status) {
 			break;
 		case ACQUISITION_STATUS::WAITFORREPETITION:
 			ui->BrillouinStart->setText("Stop");
+			running = true;
 			break;
 		case ACQUISITION_STATUS::STOPPED:
 			ui->BrillouinStart->setText("Start");
@@ -2617,12 +2618,14 @@ void BrillouinAcquisition::showRepProgress(int repNumber, int timeToNext) {
 	QString string;
 	if (timeToNext > 0) {
 		string = formatSeconds(timeToNext) + " to next repetition.";
-	} else {
+	} else if (timeToNext > -2) {
 		if (repNumber < m_BrillouinSettings.repetitions.count) {
 			string.sprintf("Measuring repetition %1.0d of %1.0d.", repNumber + 1, m_BrillouinSettings.repetitions.count);
 		} else {
 			string.sprintf("Finished %1.0d repetitions.", m_BrillouinSettings.repetitions.count);
 		}
+	} else {
+		string.sprintf("Finished %1.0d repetitions.", repNumber);
 	}
 	ui->repetitionProgress->setFormat(string);
 };

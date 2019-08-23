@@ -55,6 +55,7 @@ public slots:
 
 	void waitForNextRepetition();
 	void finaliseRepetitions();
+	void finaliseRepetitions(int, int);
 
 	void setStepNumberX(int);
 	void setStepNumberY(int);
