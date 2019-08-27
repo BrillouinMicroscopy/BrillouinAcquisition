@@ -11,10 +11,10 @@
 struct CALIBRATION_SETTINGS {
 	double Ux_min{ -0.17 };			// [V]	minimum voltage for x-direction
 	double Ux_max{ 0.17 };			// [V]	maximum voltage for x-direction
-	int Ux_steps{ 20 };				// [1]	number of steps in x-direction
+	int Ux_steps{ 10 };				// [1]	number of steps in x-direction
 	double Uy_min{ -0.17 };			// [V]	minimum voltage for y-direction
 	double Uy_max{ 0.17 };			// [V]	maximum voltage for y-direction
-	int Uy_steps{ 20 };				// [1]	number of steps in x-direction
+	int Uy_steps{ 10 };				// [1]	number of steps in x-direction
 	std::vector<VOLTAGE2> voltages;	// [V]	voltages to apply
 };
 
