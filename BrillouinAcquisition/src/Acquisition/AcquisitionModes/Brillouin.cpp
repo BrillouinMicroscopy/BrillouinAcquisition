@@ -251,6 +251,9 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 			if (calibrationTimer.elapsed() > (60e3 * m_settings.conCalibrationInterval)) {
 				calibrate(storage);
 				calibrationTimer.start();
+				// After we calibrated, we move back to the current position
+				(*m_scanControl)->setPosition(orderedPositions[ll]);
+				Sleep(100);
 			}
 		}
 
