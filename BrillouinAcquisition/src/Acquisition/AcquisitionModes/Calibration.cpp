@@ -39,30 +39,24 @@ void Calibration::startRepetitions() {
 	m_abort = false;
 
 	// configure camera for measurement
-	CAMERA_SETTINGS settings = (*m_camera)->getSettings();
-	// set ROI and readout parameters to default Brillouin values, exposure time and gain will be kept
-	if (settings.exposureTime > 0.003) {
-		settings.exposureTime = 0.003;
-	}
-	settings.roi.left = 0;
-	settings.roi.top = 0;
-	settings.roi.width = m_calibration.microscopeProperties.width;
-	settings.roi.height = m_calibration.microscopeProperties.height;
-	settings.readout.pixelEncoding = L"Raw8";
-	settings.readout.triggerMode = L"External";
-	settings.readout.cycleMode = L"Continuous";
-	settings.frameCount = m_acqSettings.Ux_steps * m_acqSettings.Uy_steps;
-
-	(*m_camera)->startAcquisition(settings);
-
-	// read back the applied settings
 	m_cameraSettings = (*m_camera)->getSettings();
+	// set ROI and readout parameters to default Brillouin values, exposure time and gain will be kept
+	if (m_cameraSettings.exposureTime > 0.003) {
+		m_cameraSettings.exposureTime = 0.003;
+	}
+	m_cameraSettings.roi.left = 0;
+	m_cameraSettings.roi.top = 0;
+	m_cameraSettings.roi.width = m_calibration.microscopeProperties.width;
+	m_cameraSettings.roi.height = m_calibration.microscopeProperties.height;
+	m_cameraSettings.readout.pixelEncoding = L"Raw8";
+	m_cameraSettings.readout.triggerMode = L"External";
+	m_cameraSettings.readout.cycleMode = L"Continuous";
+	m_cameraSettings.frameCount = m_acqSettings.Ux_steps * m_acqSettings.Uy_steps;
 
 	// start repetition
 	acquire();
 
 	// configure camera for preview
-	(*m_camera)->stopAcquisition();
 
 	m_acquisition->disableMode(ACQUISITION_MODE::SPATIALCALIBRATION);
 }
@@ -75,6 +69,11 @@ void Calibration::acquire() {
 	// move to Brillouin configuration
 	(*m_NIDAQ)->setPreset(SCAN_BRILLOUIN);
 
+	std::vector<double> Ux_valid;
+	std::vector<double> Uy_valid;
+	std::vector<double> x_valid;
+	std::vector<double> y_valid;
+
 	// Create voltage vector
 	std::vector<double> Ux = simplemath::linspace(m_acqSettings.Ux_min, m_acqSettings.Ux_max, m_acqSettings.Ux_steps);
 	std::vector<double> Uy = simplemath::linspace(m_acqSettings.Uy_min, m_acqSettings.Uy_max, m_acqSettings.Uy_steps);
@@ -85,71 +84,85 @@ void Calibration::acquire() {
 		}
 	}
 
-	// Set first mirror voltage already
-	(*m_NIDAQ)->setVoltage(m_acqSettings.voltages[0]);
-	Sleep(100);
+	// We splite the requested amount of calibration positions into chunks of maximum 100 images,
+	// since the PointGrey camera can't handle more without completely hanging.
+	int nrImages{ 100 };
+	int nrChunks = ceil(m_acqSettings.voltages.size() / double(nrImages));
 
-	std::vector<double> Ux_valid;
-	std::vector<double> Uy_valid;
-	std::vector<double> x_valid;
-	std::vector<double> y_valid;
+	for (gsl::index chunk{ 0 }; chunk < nrChunks; chunk++) {
 
-	ACQ_VOLTAGES voltages;
+		(*m_camera)->startAcquisition(m_cameraSettings);
 
-	/*
-	 * Set the mirror voltage and trigger the camera
-	 */
-	// Construct the analog voltage vector and the trigger vector
-	int samplesPerAngle{ 10 };
-	int numberChannels{ 2 };
-	voltages.numberSamples = m_acqSettings.Ux_steps * m_acqSettings.Uy_steps * samplesPerAngle;
-	voltages.trigger = std::vector<uInt8>(voltages.numberSamples, 0);
-	voltages.mirror = std::vector<float64>(voltages.numberSamples * numberChannels, 0);
-	for (gsl::index i{ 0 }; i < m_acqSettings.Ux_steps * m_acqSettings.Uy_steps; i++) {
-		voltages.trigger[i * samplesPerAngle + 2] = 1;
-		voltages.trigger[i * samplesPerAngle + 3] = 1;
-		std::fill_n(voltages.mirror.begin() + i * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i].Ux);
-		std::fill_n(voltages.mirror.begin() + i * samplesPerAngle + m_acqSettings.Ux_steps * m_acqSettings.Uy_steps * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i].Uy);
-	}
-	// Apply voltages to NIDAQ board
-	(*m_NIDAQ)->setAcquisitionVoltages(voltages);
+		int chunkBegin = chunk * nrImages;
+		int chunkEnd = (chunk + 1) * nrImages - 1;
+		if (chunkEnd > m_acqSettings.voltages.size() - 1) {
+			chunkEnd = m_acqSettings.voltages.size() - 1;
+		}
+		int chunkSize = chunkEnd - chunkBegin + 1;
 
-	int rank_data{ 3 };
-	hsize_t dims_data[3] = { 1, m_cameraSettings.roi.height, m_cameraSettings.roi.width };
-	int bytesPerFrame = m_cameraSettings.roi.width * m_cameraSettings.roi.height;
-	for (gsl::index i{ 0 }; i < m_acqSettings.Ux_steps * m_acqSettings.Uy_steps; i++) {
+		// Set first mirror voltage already
+		(*m_NIDAQ)->setVoltage(m_acqSettings.voltages[chunkBegin]);
+		Sleep(100);
 
-		// read images from camera
-		std::vector<unsigned char> images(bytesPerFrame);
+		ACQ_VOLTAGES voltages;
 
-		for (gsl::index mm{ 0 }; mm < 1; mm++) {
-			if (m_abort) {
-				this->abortMode();
-				return;
+		/*
+			* Set the mirror voltage and trigger the camera
+			*/
+			// Construct the analog voltage vector and the trigger vector
+		int samplesPerAngle{ 10 };
+		int numberChannels{ 2 };
+		voltages.numberSamples = chunkSize * samplesPerAngle;
+		voltages.trigger = std::vector<uInt8>(voltages.numberSamples, 0);
+		voltages.mirror = std::vector<float64>(voltages.numberSamples * numberChannels, 0);
+		for (gsl::index i{ 0 }; i < chunkSize; i++) {
+			voltages.trigger[i * samplesPerAngle + 2] = 1;
+			voltages.trigger[i * samplesPerAngle + 3] = 1;
+			std::fill_n(voltages.mirror.begin() + i * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i + chunkBegin].Ux);
+			std::fill_n(voltages.mirror.begin() + i * samplesPerAngle + chunkSize * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i + chunkBegin].Uy);
+		}
+		// Apply voltages to NIDAQ board
+		(*m_NIDAQ)->setAcquisitionVoltages(voltages);
+
+		int rank_data{ 3 };
+		hsize_t dims_data[3] = { 1, m_cameraSettings.roi.height, m_cameraSettings.roi.width };
+		int bytesPerFrame = m_cameraSettings.roi.width * m_cameraSettings.roi.height;
+		for (gsl::index i{ 0 }; i < chunkSize; i++) {
+
+			// read images from camera
+			std::vector<unsigned char> images(bytesPerFrame);
+
+			for (gsl::index mm{ 0 }; mm < 1; mm++) {
+				if (m_abort) {
+					this->abortMode();
+					return;
+				}
+
+				// acquire images
+				int64_t pointerPos = (int64_t)bytesPerFrame * mm;
+				(*m_camera)->getImageForAcquisition(&images[pointerPos], false);
 			}
 
-			// acquire images
-			int64_t pointerPos = (int64_t)bytesPerFrame * mm;
-			(*m_camera)->getImageForAcquisition(&images[pointerPos], false);
+			// Extract spot position from camera image
+			auto iterator_max = std::max_element(images.begin(), images.end());
+			auto index = std::distance(images.begin(), iterator_max);
+			if (*iterator_max > m_minimalIntensity) {
+				int y = floor(index / m_cameraSettings.roi.width);
+				int x = index % m_cameraSettings.roi.width;
+
+				double x_m = m_calibration.microscopeProperties.pixelSize / m_calibration.microscopeProperties.mag
+					* (x - m_calibration.microscopeProperties.width / 2 - 0.5);
+				double y_m = -1 * m_calibration.microscopeProperties.pixelSize / m_calibration.microscopeProperties.mag
+					* (y - m_calibration.microscopeProperties.height / 2 - 0.5);
+
+				Ux_valid.push_back(m_acqSettings.voltages[i + chunkBegin].Ux);
+				Uy_valid.push_back(m_acqSettings.voltages[i + chunkBegin].Uy);
+				x_valid.push_back(x_m);
+				y_valid.push_back(y_m);
+			}
 		}
 
-		// Extract spot position from camera image
-		auto iterator_max = std::max_element(images.begin(), images.end());
-		auto index = std::distance(images.begin(), iterator_max);
-		if (*iterator_max > m_minimalIntensity) {
-			int y = floor(index / m_cameraSettings.roi.width);
-			int x = index % m_cameraSettings.roi.width;
-
-			double x_m = m_calibration.microscopeProperties.pixelSize / m_calibration.microscopeProperties.mag
-				* (x - m_calibration.microscopeProperties.width / 2 - 0.5);
-			double y_m = -1 * m_calibration.microscopeProperties.pixelSize / m_calibration.microscopeProperties.mag
-				* (y - m_calibration.microscopeProperties.height / 2 - 0.5);
-
-			Ux_valid.push_back(m_acqSettings.voltages[i].Ux);
-			Uy_valid.push_back(m_acqSettings.voltages[i].Uy);
-			x_valid.push_back(x_m);
-			y_valid.push_back(y_m);
-		}
+		(*m_camera)->stopAcquisition();
 	}
 
 	// Construct spatial calibration object
