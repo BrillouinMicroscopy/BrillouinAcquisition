@@ -123,6 +123,9 @@ void ODT::startRepetitions() {
 	// start repetition
 	acquire(m_acquisition->m_storage);
 
+	// Center laser beam after measuremenet
+	centerAlignment();
+
 	// configure camera for preview
 	(*m_camera)->stopAcquisition();
 
