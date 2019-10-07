@@ -20,6 +20,7 @@ public:
 	~Camera() {};
 
 	bool m_isPreviewRunning{ false };
+	bool m_wasPreviewRunning{ false };		// Was the preview running before we started an acquisition?
 	bool m_isAcquisitionRunning{ false };
 
 	bool m_stopPreview{ false };
