@@ -60,7 +60,7 @@ void Fluorescence::configureCamera() {
 		m_settings.camera.roi.top = 400;
 		m_settings.camera.roi.width = 1800;
 		m_settings.camera.roi.height = 2000;
-		m_settings.camera.readout.triggerMode = L"Internal";
+		m_settings.camera.readout.triggerMode = L"Software";
 	}
 	else if (cameraType == "class PointGrey") {
 		m_settings.camera.roi.left = 128;
@@ -244,6 +244,19 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 
 		// cast the vector to unsigned short
 		std::vector<unsigned char>* images_ = (std::vector<unsigned char> *) &images;
+
+		// Sometimes the uEye camera returns a black image (only zeros), we try to catch this here by
+		// repeating the acquisition a maximum of 5 times
+		unsigned char sum = simplemath::sum(*images_);
+		int i{ 0 };
+		while (sum == 0 && 5 > i++) {
+			(*m_camera)->getImageForAcquisition(&images[pointerPos], true);
+
+			// cast the vector to unsigned short
+			std::vector<unsigned char>* images_ = (std::vector<unsigned char> *) &images;
+			
+			sum = simplemath::sum(*images_);
+		}
 
 		// store images
 		// asynchronously write image to disk

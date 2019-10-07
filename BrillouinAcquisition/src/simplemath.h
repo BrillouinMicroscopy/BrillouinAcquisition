@@ -138,6 +138,11 @@ public:
 			return (a + *targetNeighbor) / 2.0;
 		}
 	}
+
+	template<typename T>
+	static T sum(const std::vector<T>& v) {
+		return std::accumulate(v.begin(), v.end(), (T) 0);
+	}
 };
 
 #endif // SIMPLEMATH_H

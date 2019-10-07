@@ -286,6 +286,7 @@ void uEyeCam::preparePreview() {
 
 void uEyeCam::stopPreview() {
 	uEye::is_StopLiveVideo(m_camera, IS_FORCE_VIDEO_STOP);
+	uEye::is_ClearSequence(m_camera);
 	int nRet = uEye::is_FreeImageMem(m_camera, m_imageBuffer, m_imageBufferId);
 	m_isPreviewRunning = false;
 	m_stopPreview = false;
@@ -313,16 +314,14 @@ void uEyeCam::startAcquisition(CAMERA_SETTINGS settings) {
 	int nRet = uEye::is_AllocImageMem(m_camera, m_settings.roi.width, m_settings.roi.height, 8, &m_imageBuffer, &m_imageBufferId);
 
 	if (nRet == IS_SUCCESS) {
-		nRet = uEye::is_AddToSequence(m_camera, m_imageBuffer, m_imageBufferId);
+		nRet = uEye::is_SetImageMem(m_camera, m_imageBuffer, m_imageBufferId);
 	}
 
-	uEye::is_CaptureVideo(m_camera, IS_WAIT);
 	m_isAcquisitionRunning = true;
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
 }
 
 void uEyeCam::stopAcquisition() {
-	uEye::is_StopLiveVideo(m_camera, IS_FORCE_VIDEO_STOP);
 	int nRet = uEye::is_FreeImageMem(m_camera, m_imageBuffer, m_imageBufferId);
 	m_isAcquisitionRunning = false;
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
@@ -338,6 +337,12 @@ void uEyeCam::acquireImage(unsigned char* buffer) {
 
 void uEyeCam::getImageForAcquisition(unsigned char* buffer, bool preview) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
+	// Calculate timeout in multiples of 10 ms to be slightly higher than exposure time
+	int timeout = 500 * m_settings.exposureTime;
+	if (timeout < 4) {
+		timeout = 4;
+	}
+	uEye::is_FreezeVideo(m_camera, timeout);
 	acquireImage(buffer);
 
 	if (preview && buffer != nullptr) {
