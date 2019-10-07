@@ -5,7 +5,7 @@
 #include "simplemath.h"
 #include "filesystem"
 
-using namespace std::experimental::filesystem::v1;
+using namespace std::filesystem;
 
 BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	QMainWindow(parent), ui(new Ui::BrillouinAcquisitionClass) {

@@ -4,7 +4,7 @@
 #include "../logger.h"
 #include "filesystem"
 
-using namespace std::experimental::filesystem::v1;
+using namespace std::filesystem;
 
 
 Acquisition::Acquisition(QObject *parent)
