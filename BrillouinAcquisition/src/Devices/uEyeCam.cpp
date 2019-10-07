@@ -337,7 +337,12 @@ void uEyeCam::acquireImage(unsigned char* buffer) {
 
 void uEyeCam::getImageForAcquisition(unsigned char* buffer, bool preview) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
-	uEye::is_FreezeVideo(m_camera, IS_WAIT);
+	// Calculate timeout in multiples of 10 ms to be slightly higher than exposure time
+	int timeout = 500 * m_settings.exposureTime;
+	if (timeout < 4) {
+		timeout = 4;
+	}
+	uEye::is_FreezeVideo(m_camera, timeout);
 	acquireImage(buffer);
 
 	if (preview && buffer != nullptr) {
