@@ -68,6 +68,7 @@ void Calibration::acquire() {
 
 	// move to Brillouin configuration
 	(*m_NIDAQ)->setPreset(SCAN_BRILLOUIN);
+	(*m_NIDAQ)->setLEDLamp(0);
 
 	std::vector<double> Ux_valid;
 	std::vector<double> Uy_valid;
@@ -179,6 +180,8 @@ void Calibration::acquire() {
 
 	save();
 	(*m_NIDAQ)->setSpatialCalibration(m_calibration);
+
+	(*m_NIDAQ)->setPreset(SCAN_BRILLOUIN);
 
 	emit(calibrationChanged(m_calibration));
 
