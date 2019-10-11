@@ -3,12 +3,10 @@
 
 Andor::~Andor() {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
-	m_tempTimer->stop();
-	if (m_isConnected) {
-		AT_Close(m_camera);
-	}
-	AT_FinaliseLibrary();
 	disconnectDevice();
+	if (m_isInitialised) {
+		AT_FinaliseLibrary();
+	}
 }
 
 bool Andor::initialize() {
