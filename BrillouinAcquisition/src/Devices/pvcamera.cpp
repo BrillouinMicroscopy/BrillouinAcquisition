@@ -4,17 +4,36 @@
 PVCamera::~PVCamera() {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	disconnectDevice();
+	if (m_isInitialised) {
+		PVCam::pl_pvcam_uninit();
+	}
 }
 
 bool PVCamera::initialize() {
 	if (!m_isInitialised) {
+		bool i_retCode = PVCam::pl_pvcam_init();
+		if (i_retCode != PVCam::PV_OK) {
+			//error condition
+			//PrintErrorMessage(PVCam::pl_error_code(), "pl_pvcam_init() error");
+			m_isInitialised = false;
+		} else {
+			PVCam::int16 i_numberOfCameras{ 0 };
+			PVCam::pl_cam_get_total(&i_numberOfCameras);
+			if (i_numberOfCameras > 0) {
+				m_isInitialised = true;
+			} else {
+				emit(noCameraFound());
+				PVCam::pl_pvcam_uninit();
+				m_isInitialised = false;
+			}
+		}
 	}
 	return m_isInitialised;
 }
 
 void PVCamera::init() {
 	// create timers and connect their signals
-	// after moving andor to another thread
+	// after moving camera to another thread
 	m_tempTimer = new QTimer();
 	QMetaObject::Connection connection = QWidget::connect(m_tempTimer, SIGNAL(timeout()), this, SLOT(checkSensorTemperature()));
 }
@@ -23,6 +42,17 @@ void PVCamera::connectDevice() {
 	// initialize library
 	initialize();
 	if (!m_isConnected && m_isInitialised) {
+		char g_Camera0_Name[CAM_NAME_LEN] = "";
+		PVCam::pl_cam_get_name(0, g_Camera0_Name);
+		bool i_retCode = PVCam::pl_cam_open(g_Camera0_Name, &m_camera, PVCam::OPEN_EXCLUSIVE);
+		if (i_retCode == PVCam::PV_OK) {
+			m_isConnected = true;
+			readOptions();
+			setSettings(m_settings);
+			if (!m_tempTimer->isActive()) {
+				m_tempTimer->start(1000);
+			}
+		}
 	}
 	emit(connectedDevice(m_isConnected));
 }
@@ -32,10 +62,10 @@ void PVCamera::disconnectDevice() {
 		if (m_tempTimer->isActive()) {
 			m_tempTimer->stop();
 		}
-		//int i_retCode = AT_Close(m_camera);
-		//if (i_retCode == AT_SUCCESS) {
-		//	m_isConnected = false;
-		//}
+		bool i_retCode = PVCam::pl_cam_close(m_camera);
+		if (i_retCode == PVCam::PV_OK) {
+			m_isConnected = false;
+		}
 	}
 	emit(connectedDevice(m_isConnected));
 }

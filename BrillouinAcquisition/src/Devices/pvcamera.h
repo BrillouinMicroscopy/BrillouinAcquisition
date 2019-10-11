@@ -1,5 +1,5 @@
-#ifndef PVCAM_H
-#define PVCAM_H
+#ifndef PVCAMERA_H
+#define PVCAMERA_H
 
 #include "Camera.h"
 #include <typeinfo>
@@ -13,6 +13,7 @@ class PVCamera : public Camera {
 	Q_OBJECT
 
 private:
+	PVCam::int16 m_camera{ -1 };
 	bool m_isInitialised{ false };
 	bool m_isCooling{ false };
 	QTimer* m_tempTimer = nullptr;
@@ -70,4 +71,4 @@ signals:
 	void noCameraFound();
 };
 
-#endif // PVCAM_H
+#endif // PVCAMERA_H
