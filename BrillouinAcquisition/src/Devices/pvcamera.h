@@ -4,8 +4,10 @@
 #include "Camera.h"
 #include <typeinfo>
 
-#include "master.h"
-#include "pvcam.h"
+namespace PVCam {
+	#include "master.h"
+	#include "pvcam.h"
+}
 
 class PVCamera : public Camera {
 	Q_OBJECT

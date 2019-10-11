@@ -7,20 +7,6 @@
 #include "atcore.h"
 #include "atutility.h"
 
-typedef enum enAndorTemperatureStatus{
-	COOLER_OFF,
-	FAULT,
-	COOLING,
-	DRIFT,
-	NOT_STABILISED,
-	STABILISED
-} ANDOR_TEMPERATURE_STATUS;
-
-typedef struct {
-	double temperature = 0;
-	ANDOR_TEMPERATURE_STATUS status = COOLER_OFF;
-} SensorTemperature;
-
 class Andor : public Camera {
 	Q_OBJECT
 

@@ -7,7 +7,7 @@
 using namespace std::filesystem;
 
 
-Brillouin::Brillouin(QObject* parent, Acquisition* acquisition, Andor* andor, ScanControl** scanControl)
+Brillouin::Brillouin(QObject* parent, Acquisition* acquisition, Camera* andor, ScanControl** scanControl)
 	: AcquisitionMode(parent, acquisition), m_andor(andor), m_scanControl(scanControl) {
 }
 
