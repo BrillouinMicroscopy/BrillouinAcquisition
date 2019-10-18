@@ -19,7 +19,10 @@ typedef enum enCameraTemperatureStatus {
 } CAMERA_TEMPERATURE_STATUS;
 
 typedef struct {
-	double temperature = 0;
+	double temperature{ 0 };
+	double setpoint{ 0 };
+	double minSetpoint{ 0 };
+	double maxSetpoint{ 0 };
 	CAMERA_TEMPERATURE_STATUS status = COOLER_OFF;
 } SensorTemperature;
 

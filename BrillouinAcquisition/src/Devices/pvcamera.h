@@ -17,6 +17,7 @@ private:
 	bool m_isInitialised{ false };
 	bool m_isCooling{ false };
 	QTimer* m_tempTimer = nullptr;
+	SensorTemperature m_sensorTemperature;
 
 	void cleanupAcquisition();
 	void preparePreview();
@@ -65,10 +66,6 @@ public slots:
 	void stopAcquisition();
 	
 	void getImageForAcquisition(unsigned char* buffer, bool preview = true) override;
-
-signals:
-	void cameraCoolingChanged(bool);
-	void noCameraFound();
 };
 
 #endif // PVCAMERA_H

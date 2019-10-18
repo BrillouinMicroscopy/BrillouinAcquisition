@@ -71,6 +71,19 @@ void PVCamera::disconnectDevice() {
 }
 
 void PVCamera::readOptions() {
+	int i_retCode{ 0 };
+	// Read min and max temperature setpoint
+	PVCam::int16 setpointMin{ 0 };
+	i_retCode = PVCam::pl_get_param(m_camera, PARAM_TEMP_SETPOINT, PVCam::ATTR_MIN, (void*)&setpointMin);
+	if (i_retCode == PVCam::PV_OK) {
+		m_sensorTemperature.minSetpoint = setpointMin / 100.0;
+	}
+
+	PVCam::int16 setpointMax{ 0 };
+	PVCam::pl_get_param(m_camera, PARAM_TEMP_SETPOINT, PVCam::ATTR_MAX, (void*)&setpointMax);
+	if (i_retCode == PVCam::PV_OK) {
+		m_sensorTemperature.maxSetpoint = setpointMax / 100.0;
+	}
 
 	//AT_GetFloatMin(m_camera, L"ExposureTime", &m_options.exposureTimeLimits[0]);
 	//AT_GetFloatMax(m_camera, L"ExposureTime", &m_options.exposureTimeLimits[1]);
@@ -152,60 +165,69 @@ void PVCamera::readSettings() {
 }
 
 void PVCamera::setSensorCooling(bool cooling) {
-	//int i_retCode = AT_SetBool(m_camera, L"SensorCooling", (int)cooling);
-	//m_isCooling = cooling;
-	//emit(cameraCoolingChanged(m_isCooling));
+	if (cooling) {
+		//m_sensorTemperature.setpoint = m_sensorTemperature.minSetpoint;
+		// TODO: We set the temperature to -15 °C for now, so we don't stress
+		// the camera to much while developing.
+		m_sensorTemperature.setpoint = -15.0;
+	} else {
+		double setpoint = m_sensorTemperature.maxSetpoint;
+		// We want to set the value no higher than room temperature.
+		if (setpoint > 20) {
+			setpoint = 20;
+		}
+		m_sensorTemperature.setpoint = setpoint;
+	}
+	PVCam::int16 setpoint = 100 * m_sensorTemperature.setpoint;
+	int i_retCode = PVCam::pl_set_param(m_camera, PARAM_TEMP_SETPOINT, (void*)&setpoint);
+	m_isCooling = cooling;
+	emit(cameraCoolingChanged(m_isCooling));
 }
 
 bool PVCamera::getSensorCooling() {
-	//AT_BOOL szValue;
-	//int i_retCode = AT_GetBool(m_camera, L"SensorCooling", &szValue);
-	//return szValue;
-	return false;
+	PVCam::int16 setpoint{ 0 };
+	int i_retCode = PVCam::pl_get_param(m_camera, PARAM_TEMP_SETPOINT, PVCam::ATTR_CURRENT, (void*)&setpoint);
+	// If the setpoint is lower than 0 °C we consider it cooling.
+	if (setpoint / 100.0 < 0.0) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 const std::string PVCamera::getTemperatureStatus() {
-	//int i_retCode = AT_GetEnumIndex(m_camera, L"TemperatureStatus", &m_temperatureStatusIndex);
-	//AT_WC temperatureStatus[256];
-	//AT_GetEnumStringByIndex(m_camera, L"TemperatureStatus", m_temperatureStatusIndex, temperatureStatus, 256);
-	//std::wstring temperatureStatusString = temperatureStatus;
-	//m_temperatureStatus = std::string(temperatureStatusString.begin(), temperatureStatusString.end());
-	//return m_temperatureStatus;
-	return "";
+	// If the setpoint is above 0, we consider it not cooling
+	if (m_sensorTemperature.setpoint >= 0) {
+		return "Cooler Off";
+	}
+	// If sensor temperature and setpoint differ no more than 1 °C
+	// we consider the temperature stabilised.
+	double temp = getSensorTemperature();
+	if (abs(temp - m_sensorTemperature.setpoint) < 1.0) {
+		return "Stabilised";
+	}
+	return "Cooling";
 }
 
 double PVCamera::getSensorTemperature() {
-	//double szValue;
-	//int i_retCode = AT_GetFloat(m_camera, L"SensorTemperature", &szValue);
-	//return szValue;
-	return 0.0;
+	PVCam::int16 temperature;
+	bool i_retCode = PVCam::pl_get_param(m_camera, PARAM_TEMP, PVCam::ATTR_CURRENT, (void*)&temperature);
+	return temperature / 100.0;
 }
 
 void PVCamera::checkSensorTemperature() {
-	//m_sensorTemperature.temperature = getSensorTemperature();
-	//std::string status = getTemperatureStatus();
-	//if (status == "Cooler Off") {
-	//	m_sensorTemperature.status = COOLER_OFF;
-	//}
-	//else if (status == "Fault") {
-	//	m_sensorTemperature.status = FAULT;
-	//}
-	//else if (status == "Cooling") {
-	//	m_sensorTemperature.status = COOLING;
-	//}
-	//else if (status == "Drift") {
-	//	m_sensorTemperature.status = DRIFT;
-	//}
-	//else if (status == "Not Stabilised") {
-	//	m_sensorTemperature.status = NOT_STABILISED;
-	//}
-	//else if (status == "Stabilised") {
-	//	m_sensorTemperature.status = STABILISED;
-	//}
-	//else {
-	//	m_sensorTemperature.status = FAULT;
-	//}
-	//emit(s_sensorTemperatureChanged(m_sensorTemperature));
+	m_sensorTemperature.temperature = getSensorTemperature();
+	std::string status = getTemperatureStatus();
+	if (status == "Cooler Off") {
+		m_sensorTemperature.status = COOLER_OFF;
+	} else if (status == "Cooling") {
+		m_sensorTemperature.status = COOLING;
+	} else if (status == "Stabilised") {
+		m_sensorTemperature.status = STABILISED;
+	} else {
+		m_sensorTemperature.status = FAULT;
+	}
+	emit(s_sensorTemperatureChanged(m_sensorTemperature));
 }
 
 void PVCamera::startPreview() {

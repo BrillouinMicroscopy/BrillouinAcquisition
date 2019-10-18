@@ -76,11 +76,6 @@ public slots:
 	void stopAcquisition();
 	
 	void getImageForAcquisition(unsigned char* buffer, bool preview = true) override;
-
-signals:
-	void cameraCoolingChanged(bool);
-	void noCameraFound();
-	void s_sensorTemperatureChanged(SensorTemperature);
 };
 
 #endif // ANDOR_H
