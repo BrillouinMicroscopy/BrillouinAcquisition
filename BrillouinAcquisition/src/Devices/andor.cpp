@@ -234,7 +234,7 @@ void Andor::preparePreview() {
 
 	AT_64 ImageSizeBytes;
 	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
-	int BufferSize = static_cast<int>(ImageSizeBytes);
+	unsigned int BufferSize = static_cast<int>(ImageSizeBytes);
 
 	BUFFER_SETTINGS bufferSettings = { 5, BufferSize, "unsigned short", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
@@ -263,7 +263,7 @@ void Andor::startAcquisition(CAMERA_SETTINGS settings) {
 
 	AT_64 ImageSizeBytes;
 	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
-	int BufferSize = static_cast<int>(ImageSizeBytes);
+	unsigned int BufferSize = static_cast<int>(ImageSizeBytes);
 
 	BUFFER_SETTINGS bufferSettings = { 4, BufferSize, "unsigned short", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);

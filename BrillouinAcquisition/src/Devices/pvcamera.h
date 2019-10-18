@@ -30,6 +30,11 @@ private:
 	void readOptions();
 	void readSettings();
 
+	PVCam::rgn_type getCamSettings();
+
+	PVCam::uns16 *m_buffer = nullptr;
+	unsigned int m_bufferSize{ 0 };
+
 public:
 	PVCamera() noexcept {};
 	~PVCamera();

@@ -85,16 +85,21 @@ void PVCamera::readOptions() {
 		m_sensorTemperature.maxSetpoint = setpointMax / 100.0;
 	}
 
+	
+	PVCam::int16 ROIHeight{ 0 };
+	PVCam::pl_get_param(m_camera, PARAM_PAR_SIZE, PVCam::ATTR_CURRENT, (void*)&ROIHeight);
+	m_options.ROIHeightLimits[0] = 0;
+	m_options.ROIHeightLimits[1] = ROIHeight;
+
+	PVCam::int16 ROIWidth{ 0 };
+	PVCam::pl_get_param(m_camera, PARAM_SER_SIZE, PVCam::ATTR_CURRENT, (void*)&ROIWidth);
+	m_options.ROIWidthLimits[0] = 0;
+	m_options.ROIWidthLimits[1] = ROIWidth;
+
 	//AT_GetFloatMin(m_camera, L"ExposureTime", &m_options.exposureTimeLimits[0]);
 	//AT_GetFloatMax(m_camera, L"ExposureTime", &m_options.exposureTimeLimits[1]);
 	//AT_GetIntMin(m_camera, L"FrameCount", &m_options.frameCountLimits[0]);
 	//AT_GetIntMax(m_camera, L"FrameCount", &m_options.frameCountLimits[1]);
-
-	//AT_GetIntMin(m_camera, L"AOIHeight", &m_options.ROIHeightLimits[0]);
-	//AT_GetIntMax(m_camera, L"AOIHeight", &m_options.ROIHeightLimits[1]);
-
-	//AT_GetIntMin(m_camera, L"AOIWidth", &m_options.ROIWidthLimits[0]);
-	//AT_GetIntMax(m_camera, L"AOIWidth", &m_options.ROIWidthLimits[1]);
 
 	emit(optionsChanged(m_options));
 }
@@ -138,6 +143,24 @@ void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 
 	// read back the settings
 	readSettings();
+}
+
+PVCam::rgn_type PVCamera::getCamSettings() {
+	PVCam::rgn_type camSettings;
+	camSettings.s1 = m_settings.roi.left - 1;
+	camSettings.s2 = m_settings.roi.width + m_settings.roi.left - 2;
+	camSettings.p1 = m_settings.roi.top - 1;
+	camSettings.p2 = m_settings.roi.height + m_settings.roi.top - 2;
+	int binning{ 1 };
+	if (m_settings.roi.binning == L"4x4") {
+		binning = 4;
+	}
+	else if (m_settings.roi.binning == L"2x2") {
+		binning = 2;
+	}
+	camSettings.sbin = binning;
+	camSettings.pbin = binning;
+	return camSettings;
 }
 
 void PVCamera::readSettings() {
@@ -252,17 +275,29 @@ void PVCamera::preparePreview() {
 
 	setSettings(m_settings);
 
-	//AT_64 ImageSizeBytes;
-	//AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
-	//int BufferSize = static_cast<int>(ImageSizeBytes);
+	PVCam::rgn_type settings = getCamSettings();
 
-	//BUFFER_SETTINGS bufferSettings = { 5, BufferSize, "unsigned short", m_settings.roi };
-	//m_previewBuffer->initializeBuffer(bufferSettings);
-	//emit(s_previewBufferSettingsChanged());
+	int circBufferFrames{ 5 };
+	PVCam::uns32 bufferSize;
+	bool i_retCode = PVCam::pl_exp_setup_cont(m_camera, 1, &settings, PVCam::TIMED_MODE, 1e3 * m_settings.exposureTime,
+		&bufferSize, PVCam::CIRC_NO_OVERWRITE);
+	m_bufferSize = bufferSize;
 
-	//// Start acquisition
-	//AT_Command(m_camera, L"AcquisitionStart");
-	//AT_InitialiseUtilityLibrary();
+	// preview buffer
+	BUFFER_SETTINGS bufferSettings = { circBufferFrames, bufferSize, "unsigned short", m_settings.roi };
+	m_previewBuffer->initializeBuffer(bufferSettings);
+	emit(s_previewBufferSettingsChanged());
+
+	// internal buffer
+	if (m_buffer) {
+		delete[] m_buffer;
+		m_buffer = nullptr;
+	}
+	int bufSize = circBufferFrames * bufferSize / sizeof(PVCam::uns16);
+	m_buffer = new (std::nothrow) PVCam::uns16[bufSize];
+
+	// Start acquisition
+	PVCam::pl_exp_start_cont(m_camera, m_buffer, bufSize);
 }
 
 void PVCamera::stopPreview() {
@@ -304,12 +339,16 @@ void PVCamera::stopAcquisition() {
 }
 
 void PVCamera::cleanupAcquisition() {
-	//AT_FinaliseUtilityLibrary();
-	//AT_Command(m_camera, L"AcquisitionStop");
-	//AT_Flush(m_camera);
+	PVCam::pl_exp_stop_cont(m_camera, PVCam::CCS_CLEAR);
 }
 
 void PVCamera::acquireImage(unsigned char* buffer) {
+	PVCam::uns16* frameAddress;
+	PVCam::pl_exp_get_latest_frame(m_camera, (void**)&frameAddress);
+
+	memcpy(buffer, frameAddress, m_bufferSize);
+
+
 	//// Pass this buffer to the SDK
 	//unsigned char* UserBuffer = new unsigned char[m_bufferSize];
 	//AT_QueueBuffer(m_camera, UserBuffer, m_bufferSize);
