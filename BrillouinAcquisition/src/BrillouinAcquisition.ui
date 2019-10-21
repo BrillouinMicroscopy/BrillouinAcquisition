@@ -642,6 +642,9 @@ QTabBar::tab:!selected {
                   <property name="enabled">
                    <bool>false</bool>
                   </property>
+                  <property name="locale">
+                   <locale language="English" country="UnitedStates"/>
+                  </property>
                   <property name="alignment">
                    <set>Qt::AlignCenter</set>
                   </property>
@@ -664,6 +667,9 @@ QTabBar::tab:!selected {
                 </item>
                 <item row="0" column="1">
                  <widget class="QDoubleSpinBox" name="exposureTime">
+                  <property name="locale">
+                   <locale language="English" country="UnitedStates"/>
+                  </property>
                   <property name="decimals">
                    <number>3</number>
                   </property>
@@ -891,6 +897,9 @@ QTabBar::tab:!selected {
                    </item>
                    <item row="2" column="0">
                     <widget class="QDoubleSpinBox" name="setPositionX">
+                     <property name="locale">
+                      <locale language="English" country="UnitedStates"/>
+                     </property>
                      <property name="decimals">
                       <number>2</number>
                      </property>
@@ -910,6 +919,9 @@ QTabBar::tab:!selected {
                    </item>
                    <item row="2" column="1">
                     <widget class="QDoubleSpinBox" name="setPositionY">
+                     <property name="locale">
+                      <locale language="English" country="UnitedStates"/>
+                     </property>
                      <property name="decimals">
                       <number>2</number>
                      </property>
@@ -929,6 +941,9 @@ QTabBar::tab:!selected {
                    </item>
                    <item row="2" column="2">
                     <widget class="QDoubleSpinBox" name="setPositionZ">
+                     <property name="locale">
+                      <locale language="English" country="UnitedStates"/>
+                     </property>
                      <property name="decimals">
                       <number>3</number>
                      </property>
@@ -1272,6 +1287,9 @@ QTabBar::tab:!selected {
                 </item>
                 <item row="0" column="1">
                  <widget class="QDoubleSpinBox" name="exposureTimeODT">
+                  <property name="locale">
+                   <locale language="English" country="UnitedStates"/>
+                  </property>
                   <property name="decimals">
                    <number>3</number>
                   </property>
@@ -1292,6 +1310,9 @@ QTabBar::tab:!selected {
                 </item>
                 <item row="1" column="1">
                  <widget class="QDoubleSpinBox" name="gainODT">
+                  <property name="locale">
+                   <locale language="English" country="UnitedStates"/>
+                  </property>
                   <property name="decimals">
                    <number>1</number>
                   </property>
@@ -1431,6 +1452,9 @@ QTabBar::tab:!selected {
                   <height>18</height>
                  </rect>
                 </property>
+                <property name="locale">
+                 <locale language="English" country="UnitedStates"/>
+                </property>
                 <property name="value">
                  <double>57.000000000000000</double>
                 </property>
@@ -1446,6 +1470,9 @@ QTabBar::tab:!selected {
                   <width>49</width>
                   <height>18</height>
                  </rect>
+                </property>
+                <property name="locale">
+                 <locale language="English" country="UnitedStates"/>
                 </property>
                 <property name="value">
                  <double>4.800000000000000</double>
@@ -1747,6 +1774,9 @@ QTabBar::tab:!selected {
                        </item>
                        <item row="1" column="1">
                         <widget class="QDoubleSpinBox" name="startX">
+                         <property name="locale">
+                          <locale language="English" country="UnitedStates"/>
+                         </property>
                          <property name="decimals">
                           <number>1</number>
                          </property>
@@ -1763,6 +1793,9 @@ QTabBar::tab:!selected {
                        </item>
                        <item row="1" column="2">
                         <widget class="QDoubleSpinBox" name="endX">
+                         <property name="locale">
+                          <locale language="English" country="UnitedStates"/>
+                         </property>
                          <property name="decimals">
                           <number>1</number>
                          </property>
@@ -1799,6 +1832,9 @@ QTabBar::tab:!selected {
                        </item>
                        <item row="2" column="1">
                         <widget class="QDoubleSpinBox" name="startY">
+                         <property name="locale">
+                          <locale language="English" country="UnitedStates"/>
+                         </property>
                          <property name="decimals">
                           <number>1</number>
                          </property>
@@ -1815,6 +1851,9 @@ QTabBar::tab:!selected {
                        </item>
                        <item row="2" column="2">
                         <widget class="QDoubleSpinBox" name="endY">
+                         <property name="locale">
+                          <locale language="English" country="UnitedStates"/>
+                         </property>
                          <property name="decimals">
                           <number>1</number>
                          </property>
@@ -1851,6 +1890,9 @@ QTabBar::tab:!selected {
                        </item>
                        <item row="3" column="1">
                         <widget class="QDoubleSpinBox" name="startZ">
+                         <property name="locale">
+                          <locale language="English" country="UnitedStates"/>
+                         </property>
                          <property name="decimals">
                           <number>1</number>
                          </property>
@@ -1867,6 +1909,9 @@ QTabBar::tab:!selected {
                        </item>
                        <item row="3" column="2">
                         <widget class="QDoubleSpinBox" name="endZ">
+                         <property name="locale">
+                          <locale language="English" country="UnitedStates"/>
+                         </property>
                          <property name="decimals">
                           <number>1</number>
                          </property>
@@ -2372,6 +2417,9 @@ QTabBar::tab:!selected {
                         <height>18</height>
                        </rect>
                       </property>
+                      <property name="locale">
+                       <locale language="English" country="UnitedStates"/>
+                      </property>
                       <property name="alignment">
                        <set>Qt::AlignCenter</set>
                       </property>
@@ -2393,6 +2441,9 @@ QTabBar::tab:!selected {
                         <width>24</width>
                         <height>18</height>
                        </rect>
+                      </property>
+                      <property name="locale">
+                       <locale language="English" country="UnitedStates"/>
                       </property>
                       <property name="alignment">
                        <set>Qt::AlignCenter</set>
@@ -2504,6 +2555,9 @@ QTabBar::tab:!selected {
                           <string notr="true">background: #E4E4E4;
 border: none;</string>
                          </property>
+                         <property name="locale">
+                          <locale language="English" country="UnitedStates"/>
+                         </property>
                          <property name="text">
                           <string>0</string>
                          </property>
@@ -2521,6 +2575,9 @@ border: none;</string>
                           <string notr="true">background: #E4E4E4;
 border: none;</string>
                          </property>
+                         <property name="locale">
+                          <locale language="English" country="UnitedStates"/>
+                         </property>
                          <property name="text">
                           <string>0</string>
                          </property>
@@ -2537,6 +2594,9 @@ border: none;</string>
                          <property name="styleSheet">
                           <string notr="true">background: #E4E4E4;
 border: none;</string>
+                         </property>
+                         <property name="locale">
+                          <locale language="English" country="UnitedStates"/>
                          </property>
                          <property name="text">
                           <string>0</string>
@@ -2672,6 +2732,9 @@ border: none;</string>
                         <width>32</width>
                         <height>18</height>
                        </rect>
+                      </property>
+                      <property name="locale">
+                       <locale language="English" country="UnitedStates"/>
                       </property>
                       <property name="alignment">
                        <set>Qt::AlignCenter</set>
@@ -2842,6 +2905,9 @@ border: none;</string>
                        </item>
                        <item row="0" column="1">
                         <widget class="QDoubleSpinBox" name="alignmentUR_ODT">
+                         <property name="locale">
+                          <locale language="English" country="UnitedStates"/>
+                         </property>
                          <property name="decimals">
                           <number>2</number>
                          </property>
@@ -2909,6 +2975,9 @@ border: none;</string>
                        </item>
                        <item row="2" column="1">
                         <widget class="QDoubleSpinBox" name="alignmentRate_ODT">
+                         <property name="locale">
+                          <locale language="English" country="UnitedStates"/>
+                         </property>
                          <property name="decimals">
                           <number>1</number>
                          </property>
@@ -3105,6 +3174,9 @@ border: none;</string>
                       </item>
                       <item row="0" column="1">
                        <widget class="QDoubleSpinBox" name="exposureTimeCameraODT">
+                        <property name="locale">
+                         <locale language="English" country="UnitedStates"/>
+                        </property>
                         <property name="decimals">
                          <number>3</number>
                         </property>
@@ -3125,6 +3197,9 @@ border: none;</string>
                       </item>
                       <item row="1" column="1">
                        <widget class="QDoubleSpinBox" name="gainCameraODT">
+                        <property name="locale">
+                         <locale language="English" country="UnitedStates"/>
+                        </property>
                         <property name="decimals">
                          <number>1</number>
                         </property>
@@ -3284,6 +3359,9 @@ border: none;</string>
                      <width>44</width>
                      <height>18</height>
                     </rect>
+                   </property>
+                   <property name="locale">
+                    <locale language="English" country="UnitedStates"/>
                    </property>
                    <property name="decimals">
                     <number>1</number>
@@ -3464,6 +3542,9 @@ border: none;</string>
                      <height>18</height>
                     </rect>
                    </property>
+                   <property name="locale">
+                    <locale language="English" country="UnitedStates"/>
+                   </property>
                    <property name="decimals">
                     <number>1</number>
                    </property>
@@ -3496,6 +3577,9 @@ border: none;</string>
                      <height>18</height>
                     </rect>
                    </property>
+                   <property name="locale">
+                    <locale language="English" country="UnitedStates"/>
+                   </property>
                    <property name="decimals">
                     <number>1</number>
                    </property>
@@ -3527,6 +3611,9 @@ border: none;</string>
                      <width>44</width>
                      <height>18</height>
                     </rect>
+                   </property>
+                   <property name="locale">
+                    <locale language="English" country="UnitedStates"/>
                    </property>
                    <property name="decimals">
                     <number>1</number>
