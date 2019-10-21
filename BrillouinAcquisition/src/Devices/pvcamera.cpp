@@ -277,14 +277,18 @@ void PVCamera::preparePreview() {
 
 	PVCam::rgn_type settings = getCamSettings();
 
-	int circBufferFrames{ 5 };
+	int circBufferFrames{ 6 };
+	// Only even numbers are accepted for the frame count.
+	if (circBufferFrames % 2) {
+		circBufferFrames += 1;
+	}
 	PVCam::uns32 bufferSize;
 	bool i_retCode = PVCam::pl_exp_setup_cont(m_camera, 1, &settings, PVCam::TIMED_MODE, 1e3 * m_settings.exposureTime,
-		&bufferSize, PVCam::CIRC_NO_OVERWRITE);
+		&bufferSize, PVCam::CIRC_OVERWRITE);
 	m_bufferSize = bufferSize;
 
 	// preview buffer
-	BUFFER_SETTINGS bufferSettings = { circBufferFrames, bufferSize, "unsigned short", m_settings.roi };
+	BUFFER_SETTINGS bufferSettings = { circBufferFrames, m_bufferSize, "unsigned short", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
@@ -293,7 +297,7 @@ void PVCamera::preparePreview() {
 		delete[] m_buffer;
 		m_buffer = nullptr;
 	}
-	int bufSize = circBufferFrames * bufferSize / sizeof(PVCam::uns16);
+	int bufSize = circBufferFrames * m_bufferSize / sizeof(PVCam::uns16);
 	m_buffer = new (std::nothrow) PVCam::uns16[bufSize];
 
 	// Start acquisition
@@ -343,9 +347,21 @@ void PVCamera::cleanupAcquisition() {
 }
 
 void PVCamera::acquireImage(unsigned char* buffer) {
+	PVCam::int16 status;
+	PVCam::uns32 byte_cnt;
+	PVCam::uns32 buffer_cnt;
+	while (PVCam::pl_exp_check_cont_status(m_camera, &status, &byte_cnt, &buffer_cnt)
+		&& status != PVCam::FRAME_AVAILABLE && status != PVCam::READOUT_NOT_ACTIVE) {
+		// Waiting for frame exposure and readout
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	}
+
+	if (status == PVCam::READOUT_NOT_ACTIVE) {
+		return;
+	}
+
 	PVCam::uns16* frameAddress;
 	PVCam::pl_exp_get_latest_frame(m_camera, (void**)&frameAddress);
-
 	memcpy(buffer, frameAddress, m_bufferSize);
 
 
