@@ -351,7 +351,7 @@ private:
 	CAMERA_DEVICE m_cameraType = CAMERA_DEVICE::UEYE;
 	CAMERA_DEVICE m_cameraTypeTemporary = m_cameraType;
 
-	CAMERA_BRILLOUIN_DEVICE m_cameraBrillouinType = CAMERA_BRILLOUIN_DEVICE::ANDOR;
+	CAMERA_BRILLOUIN_DEVICE m_cameraBrillouinType = CAMERA_BRILLOUIN_DEVICE::PVCAM;
 	CAMERA_BRILLOUIN_DEVICE m_cameraBrillouinTypeTemporary = m_cameraBrillouinType;
 
 	void initScanControl();
