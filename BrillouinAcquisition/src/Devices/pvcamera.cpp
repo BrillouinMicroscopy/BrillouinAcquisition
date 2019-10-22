@@ -16,12 +16,14 @@ bool PVCamera::initialize() {
 			//error condition
 			//PrintErrorMessage(PVCam::pl_error_code(), "pl_pvcam_init() error");
 			m_isInitialised = false;
-		} else {
+		}
+		else {
 			PVCam::int16 i_numberOfCameras{ 0 };
 			PVCam::pl_cam_get_total(&i_numberOfCameras);
 			if (i_numberOfCameras > 0) {
 				m_isInitialised = true;
-			} else {
+			}
+			else {
 				emit(noCameraFound());
 				PVCam::pl_pvcam_uninit();
 				m_isInitialised = false;
@@ -317,7 +319,8 @@ void PVCamera::setSensorCooling(bool cooling) {
 		// TODO: We set the temperature to -15 �C for now, so we don't stress
 		// the camera to much while developing.
 		m_sensorTemperature.setpoint = -15.0;
-	} else {
+	}
+	else {
 		double setpoint = m_sensorTemperature.maxSetpoint;
 		// We want to set the value no higher than room temperature.
 		if (setpoint > 20) {
@@ -337,7 +340,8 @@ bool PVCamera::getSensorCooling() {
 	// If the setpoint is lower than 0 �C we consider it cooling.
 	if (setpoint / 100.0 < 0.0) {
 		return true;
-	} else {
+	}
+	else {
 		return false;
 	}
 }
@@ -367,11 +371,14 @@ void PVCamera::checkSensorTemperature() {
 	std::string status = getTemperatureStatus();
 	if (status == "Cooler Off") {
 		m_sensorTemperature.status = COOLER_OFF;
-	} else if (status == "Cooling") {
+	}
+	else if (status == "Cooling") {
 		m_sensorTemperature.status = COOLING;
-	} else if (status == "Stabilised") {
+	}
+	else if (status == "Stabilised") {
 		m_sensorTemperature.status = STABILISED;
-	} else {
+	}
+	else {
 		m_sensorTemperature.status = FAULT;
 	}
 	emit(s_sensorTemperatureChanged(m_sensorTemperature));
@@ -510,37 +517,12 @@ int PVCamera::acquireImage(unsigned char* buffer) {
 	if (status == PVCam::READOUT_NOT_ACTIVE) {
 		return 0;
 	}
-	
+
 	PVCam::uns16* frameAddress;
 	PVCam::pl_exp_get_latest_frame(m_camera, (void**)&frameAddress);
 	memcpy(buffer, frameAddress, m_bufferSize);
 
 	return 1;
-
-	//// Pass this buffer to the SDK
-	//unsigned char* UserBuffer = new unsigned char[m_bufferSize];
-	//AT_QueueBuffer(m_camera, UserBuffer, m_bufferSize);
-
-	//// Acquire camera images
-	//AT_Command(m_camera, L"SoftwareTrigger");
-
-	//// Sleep in this thread until data is ready
-	//unsigned char* Buffer;
-	//int ret = AT_WaitBuffer(m_camera, &Buffer, &m_bufferSize, 1500 * m_settings.exposureTime);
-	//// return if AT_WaitBuffer timed out
-	//if (ret == AT_ERR_TIMEDOUT) {
-	//	return;
-	//}
-
-	//// Process the image
-	////Unpack the 12 bit packed data
-	//AT_GetInt(m_camera, L"AOIHeight", &m_settings.roi.height);
-	//AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width);
-	//AT_GetInt(m_camera, L"AOIStride", &m_imageStride);
-
-	//AT_ConvertBuffer(Buffer, buffer, m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding.c_str(), L"Mono16");
-
-	//delete[] Buffer;
 }
 
 void PVCamera::getImageForAcquisition(unsigned char* buffer, bool preview) {
