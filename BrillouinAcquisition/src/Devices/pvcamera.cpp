@@ -52,7 +52,7 @@ void PVCamera::connectDevice() {
 			readOptions();
 			setSettings(m_settings);
 			if (!m_tempTimer->isActive()) {
-				//m_tempTimer->start(1000);
+				m_tempTimer->start(1000);
 			}
 		}
 	}
@@ -397,6 +397,11 @@ void PVCamera::startPreview() {
 }
 
 void PVCamera::preparePreview() {
+	// Disable temperature timer if it is running
+	if (m_tempTimer->isActive()) {
+		m_tempTimer->stop();
+	}
+
 	// always use full camera image for live preview
 	m_settings.roi.width = m_options.ROIWidthLimits[1];
 	m_settings.roi.left = 1;
@@ -464,6 +469,9 @@ void PVCamera::getImageForPreview() {
 
 void PVCamera::stopPreview() {
 	cleanupAcquisition();
+	if (!m_tempTimer->isActive()) {
+		m_tempTimer->start(1000);
+	}
 	m_isPreviewRunning = false;
 	m_stopPreview = false;
 	emit(s_previewRunning(m_isPreviewRunning));
