@@ -190,7 +190,7 @@ void PVCamera::readSettings() {
 void PVCamera::setSensorCooling(bool cooling) {
 	if (cooling) {
 		//m_sensorTemperature.setpoint = m_sensorTemperature.minSetpoint;
-		// TODO: We set the temperature to -15 °C for now, so we don't stress
+		// TODO: We set the temperature to -15 ï¿½C for now, so we don't stress
 		// the camera to much while developing.
 		m_sensorTemperature.setpoint = -15.0;
 	} else {
@@ -210,7 +210,7 @@ void PVCamera::setSensorCooling(bool cooling) {
 bool PVCamera::getSensorCooling() {
 	PVCam::int16 setpoint{ 0 };
 	int i_retCode = PVCam::pl_get_param(m_camera, PARAM_TEMP_SETPOINT, PVCam::ATTR_CURRENT, (void*)&setpoint);
-	// If the setpoint is lower than 0 °C we consider it cooling.
+	// If the setpoint is lower than 0 ï¿½C we consider it cooling.
 	if (setpoint / 100.0 < 0.0) {
 		return true;
 	} else {
@@ -223,7 +223,7 @@ const std::string PVCamera::getTemperatureStatus() {
 	if (m_sensorTemperature.setpoint >= 0) {
 		return "Cooler Off";
 	}
-	// If sensor temperature and setpoint differ no more than 1 °C
+	// If sensor temperature and setpoint differ no more than 1 ï¿½C
 	// we consider the temperature stabilised.
 	double temp = getSensorTemperature();
 	if (abs(temp - m_sensorTemperature.setpoint) < 1.0) {
@@ -346,7 +346,7 @@ void PVCamera::cleanupAcquisition() {
 	PVCam::pl_exp_stop_cont(m_camera, PVCam::CCS_CLEAR);
 }
 
-void PVCamera::acquireImage(unsigned char* buffer) {
+int PVCamera::acquireImage(unsigned char* buffer) {
 	PVCam::int16 status;
 	PVCam::uns32 byte_cnt;
 	PVCam::uns32 buffer_cnt;
@@ -357,13 +357,14 @@ void PVCamera::acquireImage(unsigned char* buffer) {
 	}
 
 	if (status == PVCam::READOUT_NOT_ACTIVE) {
-		return;
+		return 0;
 	}
 
 	PVCam::uns16* frameAddress;
 	PVCam::pl_exp_get_latest_frame(m_camera, (void**)&frameAddress);
 	memcpy(buffer, frameAddress, m_bufferSize);
 
+	return 1;
 
 	//// Pass this buffer to the SDK
 	//unsigned char* UserBuffer = new unsigned char[m_bufferSize];

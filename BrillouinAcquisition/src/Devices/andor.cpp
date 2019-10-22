@@ -289,7 +289,7 @@ void Andor::cleanupAcquisition() {
 	AT_Flush(m_camera);
 }
 
-void Andor::acquireImage(unsigned char* buffer) {
+int Andor::acquireImage(unsigned char* buffer) {
 	// Pass this buffer to the SDK
 	unsigned char* UserBuffer = new unsigned char[m_bufferSize];
 	AT_QueueBuffer(m_camera, UserBuffer, m_bufferSize);
@@ -302,7 +302,7 @@ void Andor::acquireImage(unsigned char* buffer) {
 	int ret = AT_WaitBuffer(m_camera, &Buffer, &m_bufferSize, 1500 * m_settings.exposureTime);
 	// return if AT_WaitBuffer timed out
 	if (ret == AT_ERR_TIMEDOUT) {
-		return;
+		return 0;
 	}
 
 	// Process the image
@@ -314,6 +314,7 @@ void Andor::acquireImage(unsigned char* buffer) {
 	AT_ConvertBuffer(Buffer, buffer, m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding.c_str(), L"Mono16");
 
 	delete[] Buffer;
+	return 1;
 }
 
 void Andor::getImageForAcquisition(unsigned char* buffer, bool preview) {

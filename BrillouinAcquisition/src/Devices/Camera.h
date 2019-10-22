@@ -70,7 +70,7 @@ protected:
 
 	std::mutex m_mutex;
 
-	virtual void acquireImage(unsigned char* buffer) = 0;
+	virtual int acquireImage(unsigned char* buffer) = 0;
 
 signals:
 	void settingsChanged(CAMERA_SETTINGS);

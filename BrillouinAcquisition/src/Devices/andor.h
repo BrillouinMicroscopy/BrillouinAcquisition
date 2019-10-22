@@ -29,7 +29,7 @@ private:
 	void getEnumString(AT_WC* feature, std::wstring* string);
 	void preparePreview();
 
-	void acquireImage(unsigned char* buffer) override;
+	int acquireImage(unsigned char* buffer) override;
 
 	/*
 	 * Members and functions inherited from base class

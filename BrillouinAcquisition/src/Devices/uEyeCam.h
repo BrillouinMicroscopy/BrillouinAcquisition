@@ -17,7 +17,7 @@ private:
 
 	void preparePreview();
 
-	void acquireImage(unsigned char* buffer);
+	int acquireImage(unsigned char* buffer);
 
 	char *m_imageBuffer;
 	int m_imageBufferId;

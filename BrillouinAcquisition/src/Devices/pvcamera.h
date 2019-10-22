@@ -22,7 +22,7 @@ private:
 	void cleanupAcquisition();
 	void preparePreview();
 
-	void acquireImage(unsigned char* buffer) override;
+	int acquireImage(unsigned char* buffer) override;
 
 	/*
 	 * Members and functions inherited from base class
