@@ -7,6 +7,24 @@
 namespace PVCam {
 	#include "master.h"
 	#include "pvcam.h"
+
+	// Name-Value Pair type - an item in enumeration type
+	typedef struct NVP {
+		int32 value;
+		std::string name;
+	} NVP;
+
+	// Name-Value Pair Container type - an enumeration type
+	typedef std::vector<NVP> NVPC;
+
+	typedef struct READOUT_OPTION {
+		NVP port;
+		int16 speedIndex;
+		float readoutFrequency;
+		int16 bitDepth;
+		std::vector<int16> gains;
+	} READOUT_OPTION;
+
 }
 
 class PVCamera : public Camera {
@@ -35,6 +53,9 @@ private:
 	PVCam::uns16 *m_buffer = nullptr;
 	unsigned int m_bufferSize{ 0 };
 
+	 // Vector of camera readout options
+	std::vector<PVCam::READOUT_OPTION> m_SpeedTable;
+
 public:
 	PVCamera() noexcept {};
 	~PVCamera();
@@ -45,6 +66,9 @@ public:
 	const std::string getTemperatureStatus();
 	double getSensorTemperature();
 	void setCalibrationExposureTime(double);
+
+	bool IsParamAvailable(PVCam::uns32 paramID, const char* paramName);
+	bool ReadEnumeration(PVCam::NVPC* nvpc, PVCam::uns32 paramID, const char* paramName);
 
 private slots:
 	void checkSensorTemperature();

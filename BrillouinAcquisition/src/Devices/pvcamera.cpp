@@ -104,6 +104,100 @@ void PVCamera::readOptions() {
 	PVCam::pl_get_param(m_camera, PARAM_EXPOSURE_TIME, PVCam::ATTR_MAX, (void*)&exposureMax);
 	m_options.exposureTimeLimits[1] = 1e-3 * (double)exposureMax;
 
+	PVCam::NVPC ports;
+	ReadEnumeration(&ports, PARAM_READOUT_PORT, "PARAM_READOUT_PORT");
+
+	// Iterate through available ports and their speeds
+	for (size_t pi{ 0 }; pi < ports.size(); pi++) {
+		// Set readout port
+		if (PVCam::PV_OK != PVCam::pl_set_param(m_camera, PARAM_READOUT_PORT,
+			(void*)&ports[pi].value)) {
+			//PrintErrorMessage(pl_error_code(),
+			//	"pl_set_param(PARAM_READOUT_PORT) error");
+			//return false;
+		}
+
+		// Get number of available speeds for this port
+		PVCam::uns32 speedCount;
+		if (PVCam::PV_OK != PVCam::pl_get_param(m_camera, PARAM_SPDTAB_INDEX, PVCam::ATTR_COUNT,
+			(void*)&speedCount)) {
+			//PrintErrorMessage(pl_error_code(),
+			//	"pl_get_param(PARAM_SPDTAB_INDEX) error");
+			//return false;
+		}
+
+		// Iterate through all the speeds
+		for (PVCam::int16 si = 0; si < (PVCam::int16)speedCount; si++) {
+			// Set camera to new speed index
+			if (PVCam::PV_OK != PVCam::pl_set_param(m_camera, PARAM_SPDTAB_INDEX, (void*)&si)) {
+				//PrintErrorMessage(pl_error_code(),
+				//	"pl_set_param(g_hCam, PARAM_SPDTAB_INDEX) error");
+				//return false;
+			}
+
+			// Get pixel time (readout time of one pixel in nanoseconds) for the
+			// current port/speed pair. This can be used to calculate readout
+			// frequency of the port/speed pair.
+			PVCam::uns16 pixTime;
+			if (PVCam::PV_OK != PVCam::pl_get_param(m_camera, PARAM_PIX_TIME, PVCam::ATTR_CURRENT,
+				(void*)&pixTime)) {
+				//PrintErrorMessage(pl_error_code(),
+				//	"pl_get_param(g_hCam, PARAM_PIX_TIME) error");
+				//return false;
+			}
+
+			// Get bit depth of the current readout port/speed pair
+			PVCam::int16 bitDepth;
+			if (PVCam::PV_OK != PVCam::pl_get_param(m_camera, PARAM_BIT_DEPTH, PVCam::ATTR_CURRENT,
+				(void*)&bitDepth)) {
+				//PrintErrorMessage(pl_error_code(),
+				//	"pl_get_param(PARAM_BIT_DEPTH) error");
+				//return false;
+			}
+
+			PVCam::int16 gainMin;
+			if (PVCam::PV_OK != PVCam::pl_get_param(m_camera, PARAM_GAIN_INDEX, PVCam::ATTR_MIN,
+				(void*)&gainMin)) {
+				//PrintErrorMessage(pl_error_code(),
+				//	"pl_get_param(PARAM_GAIN_INDEX) error");
+				//return false;
+			}
+
+			PVCam::int16 gainMax;
+			if (PVCam::PV_OK != PVCam::pl_get_param(m_camera, PARAM_GAIN_INDEX, PVCam::ATTR_MAX,
+				(void*)&gainMax)) {
+				//PrintErrorMessage(pl_error_code(),
+				//	"pl_get_param(PARAM_GAIN_INDEX) error");
+				//return false;
+			}
+
+			PVCam::int16 gainIncrement;
+			if (PVCam::PV_OK != PVCam::pl_get_param(m_camera, PARAM_GAIN_INDEX, PVCam::ATTR_INCREMENT,
+				(void*)&gainIncrement)) {
+				//PrintErrorMessage(pl_error_code(),
+				//	"pl_get_param(PARAM_GAIN_INDEX) error");
+				//return false;
+			}
+
+			// Save the port/speed information to our Speed Table
+			PVCam::READOUT_OPTION ro;
+			ro.port = ports[pi];
+			ro.speedIndex = si;
+			ro.readoutFrequency = 1000 / (float)pixTime;
+			ro.bitDepth = bitDepth;
+			ro.gains.clear();
+
+			PVCam::int16 gainValue = gainMin;
+
+			while (gainValue <= gainMax) {
+				ro.gains.push_back(gainValue);
+				gainValue += gainIncrement;
+			}
+
+			m_SpeedTable.push_back(ro);
+		}
+	}
+
 	//AT_GetIntMin(m_camera, L"FrameCount", &m_options.frameCountLimits[0]);
 	//AT_GetIntMax(m_camera, L"FrameCount", &m_options.frameCountLimits[1]);
 
@@ -112,6 +206,30 @@ void PVCamera::readOptions() {
 
 void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 	m_settings = settings;
+
+	// Set camera to first port
+	if (PVCam::PV_OK != PVCam::pl_set_param(m_camera, PARAM_READOUT_PORT,
+		(void*)&m_SpeedTable[0].port.value)) {
+		//PrintErrorMessage(pl_error_code(), "Readout port could not be set");
+		//return false;
+	}
+	//printf("Setting readout port to %s\n", m_SpeedTable[0].port.name.c_str());
+
+	// Set camera to speed 0
+	if (PVCam::PV_OK != PVCam::pl_set_param(m_camera, PARAM_SPDTAB_INDEX,
+		(void*)&m_SpeedTable[0].speedIndex)) {
+		//PrintErrorMessage(pl_error_code(), "Readout port could not be set");
+		//return false;
+	}
+	//printf("Setting readout speed index to %d\n", m_SpeedTable[0].speedIndex);
+
+	// Set gain index to one (the first one)
+	if (PVCam::PV_OK != PVCam::pl_set_param(m_camera, PARAM_GAIN_INDEX,
+		(void*)&m_SpeedTable[0].gains[0])) {
+		//PrintErrorMessage(pl_error_code(), "Gain index could not be set");
+		//return false;
+	}
+
 
 	//// Set the pixel Encoding
 	//AT_SetEnumeratedString(m_camera, L"Pixel Encoding", m_settings.readout.pixelEncoding.c_str());
@@ -361,7 +479,7 @@ int PVCamera::acquireImage(unsigned char* buffer) {
 		// Waiting for frame exposure and readout
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
-
+	
 	if (status == PVCam::READOUT_NOT_ACTIVE) {
 		return 0;
 	}
@@ -416,4 +534,75 @@ void PVCamera::setCalibrationExposureTime(double exposureTime) {
 	//AT_SetFloat(m_camera, L"ExposureTime", m_settings.exposureTime);
 
 	//AT_Command(m_camera, L"AcquisitionStart");
+}
+
+bool PVCamera::IsParamAvailable(PVCam::uns32 paramID, const char* paramName) {
+	if (paramName == NULL) {
+		return false;
+	}
+
+	PVCam::rs_bool isAvailable;
+	if (PVCam::PV_OK != PVCam::pl_get_param(m_camera, paramID, PVCam::ATTR_AVAIL, (void*)&isAvailable)) {
+		//printf("Error reading ATTR_AVAIL of %s\n", paramName);
+		return false;
+	}
+	if (isAvailable == false) {
+		//printf("Parameter %s is not available\n", paramName);
+		return false;
+	}
+
+	return true;
+}
+
+bool PVCamera::ReadEnumeration(PVCam::NVPC* nvpc, PVCam::uns32 paramID, const char* paramName) {
+	if (nvpc == NULL || paramName == NULL)
+		return false;
+
+	if (!IsParamAvailable(paramID, paramName))
+		return false;
+
+	PVCam::uns32 count;
+	if (PVCam::PV_OK != PVCam::pl_get_param(m_camera, paramID, PVCam::ATTR_COUNT, (void*)&count)) {
+		//const std::string msg =
+		//	"pl_get_param(" + std::string(paramName) + ") error";
+		//PrintErrorMessage(pl_error_code(), msg.c_str());
+		return false;
+	}
+
+	// Actually get the triggering/exposure names
+	for (PVCam::uns32 i{ 0 }; i < count; ++i)
+	{
+		// Ask how long the string is
+		PVCam::uns32 strLength;
+		if (PVCam::PV_OK != PVCam::pl_enum_str_length(m_camera, paramID, i, &strLength))
+		{
+			//const std::string msg =
+			//	"pl_enum_str_length(" + std::string(paramName) + ") error";
+			//PrintErrorMessage(pl_error_code(), msg.c_str());
+			return false;
+		}
+
+		// Allocate the destination string
+		char* name = new (std::nothrow) char[strLength];
+
+		// Actually get the string and value
+		PVCam::int32 value;
+		if (PVCam::PV_OK != PVCam::pl_get_enum_param(m_camera, paramID, i, &value, name, strLength))
+		{
+			//const std::string msg =
+			//	"pl_get_enum_param(" + std::string(paramName) + ") error";
+			//PrintErrorMessage(pl_error_code(), msg.c_str());
+			delete[] name;
+			return false;
+		}
+
+		PVCam::NVP nvp;
+		nvp.value = value;
+		nvp.name = name;
+		nvpc->push_back(nvp);
+
+		delete[] name;
+	}
+
+	return !nvpc->empty();
 }
