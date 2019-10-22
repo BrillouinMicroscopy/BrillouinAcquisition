@@ -96,8 +96,14 @@ void PVCamera::readOptions() {
 	m_options.ROIWidthLimits[0] = 0;
 	m_options.ROIWidthLimits[1] = ROIWidth;
 
-	//AT_GetFloatMin(m_camera, L"ExposureTime", &m_options.exposureTimeLimits[0]);
-	//AT_GetFloatMax(m_camera, L"ExposureTime", &m_options.exposureTimeLimits[1]);
+	PVCam::int16 exposureMin{ 0 };
+	PVCam::pl_get_param(m_camera, PARAM_EXPOSURE_TIME, PVCam::ATTR_MIN, (void*)&exposureMin);
+	m_options.exposureTimeLimits[0] = 1e-3 * (double)exposureMin;
+
+	PVCam::int16 exposureMax{ 0 };
+	PVCam::pl_get_param(m_camera, PARAM_EXPOSURE_TIME, PVCam::ATTR_MAX, (void*)&exposureMax);
+	m_options.exposureTimeLimits[1] = 1e-3 * (double)exposureMax;
+
 	//AT_GetIntMin(m_camera, L"FrameCount", &m_options.frameCountLimits[0]);
 	//AT_GetIntMax(m_camera, L"FrameCount", &m_options.frameCountLimits[1]);
 
