@@ -50,7 +50,7 @@ void PVCamera::connectDevice() {
 			readOptions();
 			setSettings(m_settings);
 			if (!m_tempTimer->isActive()) {
-				m_tempTimer->start(1000);
+				//m_tempTimer->start(1000);
 			}
 		}
 	}
