@@ -165,7 +165,7 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	(*m_NIDAQ)->setAcquisitionVoltages(voltages);
 
 	int rank_data{ 3 };
-	hsize_t dims_data[3] = { 1, m_cameraSettings.roi.height, m_cameraSettings.roi.width };
+	hsize_t dims_data[3] = { 1, (hsize_t)m_cameraSettings.roi.height, (hsize_t)m_cameraSettings.roi.width };
 	int bytesPerFrame = m_cameraSettings.roi.width * m_cameraSettings.roi.height;
 	for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
 

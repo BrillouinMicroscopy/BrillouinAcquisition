@@ -194,7 +194,7 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 	measurementTimer.start();
 
 	int rank_data{ 3 };
-	hsize_t dims_data[3] = { 1, m_settings.camera.roi.height, m_settings.camera.roi.width };
+	hsize_t dims_data[3] = { 1, (hsize_t)m_settings.camera.roi.height, (hsize_t)m_settings.camera.roi.width };
 	int bytesPerFrame = m_settings.camera.roi.width * m_settings.camera.roi.height;
 	// Loop through the different modes
 	int imageNumber{ 0 };

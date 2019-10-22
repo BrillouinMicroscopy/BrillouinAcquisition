@@ -224,7 +224,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	QMetaObject::invokeMethod(storage.get(), "startWritingQueues", Qt::AutoConnection);
 	
 	int rank_data = 3;
-	hsize_t dims_data[3] = { m_settings.camera.frameCount, m_settings.camera.roi.height, m_settings.camera.roi.width };
+	hsize_t dims_data[3] = { (hsize_t)m_settings.camera.frameCount, (hsize_t)m_settings.camera.roi.height, (hsize_t)m_settings.camera.roi.width };
 	int bytesPerFrame = 2 * m_settings.camera.roi.width * m_settings.camera.roi.height;
 
 	// reset number of calibrations
@@ -360,7 +360,7 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 
 	// acquire images
 	int rank_cal = 3;
-	hsize_t dims_cal[3] = { m_settings.nrCalibrationImages, m_settings.camera.roi.height, m_settings.camera.roi.width };
+	hsize_t dims_cal[3] = { (hsize_t)m_settings.nrCalibrationImages, (hsize_t)m_settings.camera.roi.height, (hsize_t)m_settings.camera.roi.width };
 
 	int bytesPerFrame = 2 * m_settings.camera.roi.width * m_settings.camera.roi.height;
 	std::vector<unsigned char> images((int64_t)bytesPerFrame * m_settings.nrCalibrationImages);
