@@ -5,8 +5,8 @@
 #include <typeinfo>
 
 namespace PVCam {
-	#include "master.h"
-	#include "pvcam.h"
+#include "master.h"
+#include "pvcam.h"
 
 	// Name-Value Pair type - an item in enumeration type
 	typedef struct NVP {
@@ -40,6 +40,9 @@ private:
 	void cleanupAcquisition();
 	void preparePreview();
 
+	static void callback(PVCam::FRAME_INFO* pFrameInfo, void* context);
+	void getImageForPreview() override;
+
 	int acquireImage(unsigned char* buffer) override;
 
 	/*
@@ -53,7 +56,7 @@ private:
 	PVCam::uns16 *m_buffer = nullptr;
 	unsigned int m_bufferSize{ 0 };
 
-	 // Vector of camera readout options
+	// Vector of camera readout options
 	std::vector<PVCam::READOUT_OPTION> m_SpeedTable;
 
 public:
@@ -93,7 +96,7 @@ public slots:
 	void stopPreview();
 	void startAcquisition(CAMERA_SETTINGS);
 	void stopAcquisition();
-	
+
 	void getImageForAcquisition(unsigned char* buffer, bool preview = true) override;
 };
 

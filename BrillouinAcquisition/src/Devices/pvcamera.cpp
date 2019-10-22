@@ -85,7 +85,7 @@ void PVCamera::readOptions() {
 		m_sensorTemperature.maxSetpoint = setpointMax / 100.0;
 	}
 
-	
+
 	PVCam::int16 ROIHeight{ 0 };
 	PVCam::pl_get_param(m_camera, PARAM_PAR_SIZE, PVCam::ATTR_CURRENT, (void*)&ROIHeight);
 	m_options.ROIHeightLimits[0] = 0;
@@ -385,7 +385,6 @@ void PVCamera::startPreview() {
 	m_isPreviewRunning = true;
 	m_stopPreview = false;
 	preparePreview();
-	getImageForPreview();
 
 	emit(s_previewRunning(m_isPreviewRunning));
 }
@@ -424,8 +423,36 @@ void PVCamera::preparePreview() {
 	int bufSize = (int)circBufferFrames * m_bufferSize / sizeof(PVCam::uns16);
 	m_buffer = new (std::nothrow) PVCam::uns16[bufSize];
 
+	// Register callback
+	PVCam::pl_cam_register_callback_ex3(m_camera, PVCam::PL_CALLBACK_EOF,
+		(void*)&callback, (void*)this);
+
 	// Start acquisition
 	PVCam::pl_exp_start_cont(m_camera, m_buffer, bufSize);
+}
+
+void PVCamera::callback(PVCam::FRAME_INFO* pFrameInfo, void* context) {
+	PVCamera* self = static_cast<PVCamera*>(context);
+	self->getImageForPreview();
+}
+
+void PVCamera::getImageForPreview() {
+	std::lock_guard<std::mutex> lockGuard(m_mutex);
+	if (m_isPreviewRunning) {
+		if (m_stopPreview) {
+			stopPreview();
+			return;
+		}
+
+		// if no image is ready return immediately
+		if (!m_previewBuffer->m_buffer->m_freeBuffers->tryAcquire()) {
+			Sleep(50);
+			return;
+		}
+
+		acquireImage(m_previewBuffer->m_buffer->getWriteBuffer());
+		m_previewBuffer->m_buffer->m_usedBuffers->release();
+	}
 }
 
 void PVCamera::stopPreview() {
@@ -479,11 +506,11 @@ int PVCamera::acquireImage(unsigned char* buffer) {
 		// Waiting for frame exposure and readout
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
-	
+
 	if (status == PVCam::READOUT_NOT_ACTIVE) {
 		return 0;
 	}
-
+	
 	PVCam::uns16* frameAddress;
 	PVCam::pl_exp_get_latest_frame(m_camera, (void**)&frameAddress);
 	memcpy(buffer, frameAddress, m_bufferSize);
