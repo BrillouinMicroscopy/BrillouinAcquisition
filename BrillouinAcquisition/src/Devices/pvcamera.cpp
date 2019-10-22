@@ -401,7 +401,7 @@ void PVCamera::preparePreview() {
 
 	PVCam::rgn_type settings = getCamSettings();
 
-	int circBufferFrames{ 6 };
+	int circBufferFrames{ 8 };
 	// Only even numbers are accepted for the frame count.
 	if (circBufferFrames % 2) {
 		circBufferFrames += 1;
