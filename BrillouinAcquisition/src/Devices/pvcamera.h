@@ -40,7 +40,16 @@ private:
 	void cleanupAcquisition();
 	void preparePreview();
 
-	static void callback(PVCam::FRAME_INFO* pFrameInfo, void* context);
+	static void previewCallback(PVCam::FRAME_INFO* pFrameInfo, void* context);
+	static void acquisitionCallback(PVCam::FRAME_INFO* pFrameInfo, void* context);
+	PVCam::uns16* m_acquisitionBuffer = nullptr;
+	std::mutex g_EofMutex;
+	std::condition_variable g_EofCond;
+	// New frame flag that helps with spurious wakeups.
+	// For really fast acquisitions is better to replace this flag with some queue
+	// storing new frame address and frame info delayed processing.
+	// Otherwise some frames might be lost.
+	bool g_EofFlag;
 	void getImageForPreview() override;
 
 	int acquireImage(unsigned char* buffer) override;
