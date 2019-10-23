@@ -7,7 +7,7 @@
 using namespace std::filesystem;
 
 
-Brillouin::Brillouin(QObject* parent, Acquisition* acquisition, Camera* andor, ScanControl** scanControl)
+Brillouin::Brillouin(QObject* parent, Acquisition* acquisition, Camera** andor, ScanControl** scanControl)
 	: AcquisitionMode(parent, acquisition), m_andor(andor), m_scanControl(scanControl) {
 }
 
@@ -112,8 +112,8 @@ void Brillouin::setStepNumberZ(int steps) {
 void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 	// prepare camera for image acquisition
-	m_andor->startAcquisition(m_settings.camera);
-	m_settings.camera = m_andor->getSettings();
+	(*m_andor)->startAcquisition(m_settings.camera);
+	m_settings.camera = (*m_andor)->getSettings();
 	QMetaObject::invokeMethod((*m_scanControl), "stopAnnouncing", Qt::AutoConnection);
 	// set optical elements for brightfield/Brillouin imaging
 	(*m_scanControl)->setPreset(SCAN_BRILLOUIN);
@@ -270,7 +270,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 			emit(s_positionChanged(orderedPositions[ll] - m_startPosition, mm + 1));
 			// acquire images
 			int64_t pointerPos = (int64_t)bytesPerFrame * mm;
-			m_andor->getImageForAcquisition(&images[pointerPos]);
+			(*m_andor)->getImageForAcquisition(&images[pointerPos]);
 		}
 
 		// cast the vector to unsigned short
@@ -299,7 +299,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	}
 
 	// close camera libraries, clear buffers
-	m_andor->stopAcquisition();
+	(*m_andor)->stopAcquisition();
 
 	(*m_scanControl)->setPreset(SCAN_LASEROFF);
 
@@ -324,7 +324,7 @@ void Brillouin::abortMode(std::unique_ptr <StorageWrapper>& storage) {
 	m_repetitionTimer->stop();
 	m_startOfLastRepetition.invalidate();
 
-	m_andor->stopAcquisition();
+	(*m_andor)->stopAcquisition();
 
 	(*m_scanControl)->setPreset(SCAN_LASEROFF);
 
@@ -350,7 +350,7 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 	emit(s_calibrationRunning(true));
 
 	// set exposure time for calibration
-	m_andor->setCalibrationExposureTime(m_settings.calibrationExposureTime);
+	(*m_andor)->setCalibrationExposureTime(m_settings.calibrationExposureTime);
 
 	// move optical elements to position for calibration
 	(*m_scanControl)->setPreset(SCAN_CALIBRATION);
@@ -371,7 +371,7 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 		}
 		// acquire images
 		int64_t pointerPos = (int64_t)bytesPerFrame * mm;
-		m_andor->getImageForAcquisition(&images[pointerPos]);
+		(*m_andor)->getImageForAcquisition(&images[pointerPos]);
 	}
 	// cast the vector to unsigned short
 	std::vector<unsigned short>* images_ = (std::vector<unsigned short>*) &images;
@@ -397,7 +397,7 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 	(*m_scanControl)->setPreset(SCAN_BRILLOUIN);
 
 	// reset exposure time
-	m_andor->setCalibrationExposureTime(m_settings.camera.exposureTime);
+	(*m_andor)->setCalibrationExposureTime(m_settings.camera.exposureTime);
 	Sleep(500);
 }
 
