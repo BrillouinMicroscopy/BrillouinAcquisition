@@ -450,7 +450,6 @@ void PVCamera::previewCallback(PVCam::FRAME_INFO* pFrameInfo, void* context) {
 
 void PVCamera::acquisitionCallback(PVCam::FRAME_INFO* pFrameInfo, void* context) {
 	PVCamera* self = static_cast<PVCamera*>(context);
-	//self->getImageForPreview();
 	{
 		std::lock_guard<std::mutex> lock(self->g_EofMutex);
 		self->g_EofFlag = true; // Set flag
@@ -489,7 +488,7 @@ void PVCamera::stopPreview() {
 
 void PVCamera::startAcquisition(CAMERA_SETTINGS settings) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
-	
+
 	// Disable temperature timer if it is running
 	if (m_tempTimer->isActive()) {
 		m_tempTimer->stop();
@@ -502,6 +501,8 @@ void PVCamera::startAcquisition(CAMERA_SETTINGS settings) {
 
 	setSettings(settings);
 	PVCam::rgn_type camSettings = getCamSettings();
+
+	PVCam::pl_cam_register_callback_ex3(m_camera, PVCam::PL_CALLBACK_EOF, (void*)acquisitionCallback, (void*)this);
 
 	PVCam::uns32 bufferSize{ 0 };
 	PVCam::pl_exp_setup_seq(m_camera, 1, 1, &camSettings, PVCam::TIMED_MODE, 1e3 * m_settings.exposureTime, &bufferSize);
@@ -560,14 +561,15 @@ void PVCamera::getImageForAcquisition(unsigned char* buffer, bool preview) {
 		if (!g_EofFlag) {
 			g_EofCond.wait_for(lock, std::chrono::seconds(5), [this]() {
 				return (g_EofFlag);
-			});
+				});
 		}
 		if (!g_EofFlag) {
 			//printf("Camera timed out waiting for a frame\n");
 		}
-		memcpy(buffer, m_acquisitionBuffer, m_bufferSize);
 		g_EofFlag = false; // Reset flag
 	}
+
+	memcpy(buffer, m_acquisitionBuffer, m_bufferSize);
 
 	PVCam::pl_exp_finish_seq(m_camera, m_acquisitionBuffer, 0);
 
