@@ -559,9 +559,11 @@ void PVCamera::getImageForAcquisition(unsigned char* buffer, bool preview) {
 	{
 		std::unique_lock<std::mutex> lock(g_EofMutex);
 		if (!g_EofFlag) {
-			g_EofCond.wait_for(lock, std::chrono::seconds(5), [this]() {
+			int waitTime = (int)(2 * m_settings.exposureTime);
+			waitTime = (waitTime < 5) ? 5 : waitTime;
+			g_EofCond.wait_for(lock, std::chrono::seconds(waitTime), [this]() {
 				return (g_EofFlag);
-				});
+			});
 		}
 		if (!g_EofFlag) {
 			//printf("Camera timed out waiting for a frame\n");
