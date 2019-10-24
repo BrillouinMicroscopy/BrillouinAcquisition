@@ -1,8 +1,6 @@
 #ifndef CAMERAPARAMETERS_H
 #define CAMERAPARAMETERS_H
 
-#include "atcore.h"
-
 // possible parameters
 struct CAMERA_OPTIONS {
 	std::vector<std::wstring> pixelReadoutRates = { L"100 MHz", L"280 MHz" };
@@ -12,16 +10,16 @@ struct CAMERA_OPTIONS {
 	std::vector<std::wstring> preAmpGains = { L"12-bit (low noise)", L"12-bit (high well capacity)", L"16-bit (low noise & high well capacity)" };
 	std::vector<std::wstring> imageBinnings = { L"1x1", L"2x2", L"3x3", L"4x4", L"8x8" };
 	std::vector<double> exposureTimeLimits = { 0.01, 1 };
-	std::vector<AT_64> frameCountLimits = { 1, 100 };
-	std::vector<AT_64> ROIWidthLimits = { 1, 2 };		// minimum and maximum ROI width
-	std::vector<AT_64> ROIHeightLimits = { 1, 2 };		// minimum and maximum ROI height
+	std::vector<long long> frameCountLimits = { 1, 100 };
+	std::vector<long long> ROIWidthLimits = { 1, 2 };		// minimum and maximum ROI width
+	std::vector<long long> ROIHeightLimits = { 1, 2 };		// minimum and maximum ROI height
 };
 
 struct CAMERA_ROI {
-	AT_64 left = 1;
-	AT_64 width = 2048;
-	AT_64 top = 1;
-	AT_64 height = 2048;
+	long long left{ 1 };
+	long long width{ 2048 };
+	long long top{ 1 };
+	long long height{ 2048 };
 	std::wstring binning{ L"1x1" };
 };
 
@@ -36,10 +34,10 @@ struct CAMERA_READOUT {
 struct CAMERA_SETTINGS {
 	CAMERA_SETTINGS() {};
 	CAMERA_SETTINGS(double exposureTime, double gain) : exposureTime(exposureTime), gain(gain) {};
-	double exposureTime = 0.5;				// [s]	exposure time
-	AT_64 frameCount = 2;					// [1]	number of images to acquire in one sequence
+	double exposureTime{ 0.5 };				// [s]	exposure time
+	long long frameCount{ 2 };				// [1]	number of images to acquire in one sequence
 	double gain{ 0 };						// [dB] gain of the camera
-	AT_BOOL spuriousNoiseFilter = true;		//		turn on spurious noise filter
+	bool spuriousNoiseFilter{ true };		//		turn on spurious noise filter
 	CAMERA_ROI roi;							//		region of interest
 	CAMERA_READOUT readout;					//		readout settings
 };
