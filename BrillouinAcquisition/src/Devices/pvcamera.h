@@ -49,7 +49,7 @@ private:
 	// For really fast acquisitions is better to replace this flag with some queue
 	// storing new frame address and frame info delayed processing.
 	// Otherwise some frames might be lost.
-	bool g_EofFlag;
+	bool g_EofFlag{ false };
 	void getImageForPreview() override;
 
 	int acquireImage(unsigned char* buffer) override;
