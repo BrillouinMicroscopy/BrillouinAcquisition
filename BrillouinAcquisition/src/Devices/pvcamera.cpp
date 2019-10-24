@@ -523,12 +523,15 @@ void PVCamera::getImageForAcquisition(unsigned char* buffer, bool preview) {
 }
 
 void PVCamera::setCalibrationExposureTime(double exposureTime) {
-	//m_settings.exposureTime = exposureTime;
-	//AT_Command(m_camera, L"AcquisitionStop");
-	//// Set the exposure time
-	//AT_SetFloat(m_camera, L"ExposureTime", m_settings.exposureTime);
+	PVCam::pl_exp_abort(m_camera, PVCam::CCS_NO_CHANGE);
+	// Set the exposure time
+	m_settings.exposureTime = exposureTime;
+	PVCam::rgn_type camSettings = getCamSettings();
 
-	//AT_Command(m_camera, L"AcquisitionStart");
+	PVCam::pl_cam_register_callback_ex3(m_camera, PVCam::PL_CALLBACK_EOF, (void*)acquisitionCallback, (void*)this);
+
+	PVCam::uns32 bufferSize{ 0 };
+	PVCam::pl_exp_setup_seq(m_camera, 1, 1, &camSettings, PVCam::TIMED_MODE, 1e3 * m_settings.exposureTime, &bufferSize);
 }
 
 bool PVCamera::IsParamAvailable(PVCam::uns32 paramID, const char* paramName) {
