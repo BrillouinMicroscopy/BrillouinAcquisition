@@ -200,9 +200,6 @@ void PVCamera::readOptions() {
 		}
 	}
 
-	//AT_GetIntMin(m_camera, L"FrameCount", &m_options.frameCountLimits[0]);
-	//AT_GetIntMax(m_camera, L"FrameCount", &m_options.frameCountLimits[1]);
-
 	emit(optionsChanged(m_options));
 }
 
@@ -232,41 +229,6 @@ void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 		//return false;
 	}
 
-
-	//// Set the pixel Encoding
-	//AT_SetEnumeratedString(m_camera, L"Pixel Encoding", m_settings.readout.pixelEncoding.c_str());
-
-	//// Set the pixel Readout Rate
-	//AT_SetEnumeratedString(m_camera, L"Pixel Readout Rate", m_settings.readout.pixelReadoutRate.c_str());
-
-	//// Set the exposure time
-	//AT_SetFloat(m_camera, L"ExposureTime", m_settings.exposureTime);
-
-	//// enable spurious noise filter
-	//AT_SetBool(m_camera, L"SpuriousNoiseFilter", m_settings.spuriousNoiseFilter);
-
-	//// Set the AOI
-	//AT_SetInt(m_camera, L"AOIWidth", m_settings.roi.width);
-	//AT_SetInt(m_camera, L"AOILeft", m_settings.roi.left);
-	//AT_SetInt(m_camera, L"AOIHeight", m_settings.roi.height);
-	//AT_SetInt(m_camera, L"AOITop", m_settings.roi.top);
-	//AT_SetEnumeratedString(m_camera, L"AOIBinning", m_settings.roi.binning.c_str());
-	//AT_SetEnumeratedString(m_camera, L"SimplePreAmpGainControl", m_settings.readout.preAmpGain.c_str());
-
-	//AT_SetEnumeratedString(m_camera, L"CycleMode", m_settings.readout.cycleMode.c_str());
-	//AT_SetEnumeratedString(m_camera, L"TriggerMode", m_settings.readout.triggerMode.c_str());
-
-	//// Allocate a buffer
-	//// Get the number of bytes required to store one frame
-	//AT_64 ImageSizeBytes;
-	//AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
-	//m_bufferSize = static_cast<int>(ImageSizeBytes);
-
-	//AT_GetInt(m_camera, L"AOIHeight", &m_settings.roi.height);
-	//AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width);
-	//AT_GetInt(m_camera, L"AOILeft", &m_settings.roi.left);
-	//AT_GetInt(m_camera, L"AOITop", &m_settings.roi.top);
-
 	// read back the settings
 	readSettings();
 }
@@ -290,25 +252,6 @@ PVCam::rgn_type PVCamera::getCamSettings() {
 }
 
 void PVCamera::readSettings() {
-	//// general settings
-	//AT_GetFloat(m_camera, L"ExposureTime", &m_settings.exposureTime);
-	////AT_GetInt(m_camera, L"FrameCount", &m_settings.frameCount);
-	//AT_GetBool(m_camera, L"SpuriousNoiseFilter", (int*)&m_settings.spuriousNoiseFilter);
-
-	//// ROI
-	//AT_GetInt(m_camera, L"AOIHeight", &m_settings.roi.height);
-	//AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width);
-	//AT_GetInt(m_camera, L"AOILeft", &m_settings.roi.left);
-	//AT_GetInt(m_camera, L"AOITop", &m_settings.roi.top);
-	//getEnumString(L"AOIBinning", &m_settings.roi.binning);
-
-	//// readout parameters
-	//getEnumString(L"CycleMode", &m_settings.readout.cycleMode);
-	//getEnumString(L"Pixel Encoding", &m_settings.readout.pixelEncoding);
-	//getEnumString(L"Pixel Readout Rate", &m_settings.readout.pixelReadoutRate);
-	//getEnumString(L"SimplePreAmpGainControl", &m_settings.readout.preAmpGain);
-	//getEnumString(L"TriggerMode", &m_settings.readout.triggerMode);
-
 	// emit signal that settings changed
 	emit(settingsChanged(m_settings));
 }
@@ -351,7 +294,7 @@ const std::string PVCamera::getTemperatureStatus() {
 	if (m_sensorTemperature.setpoint >= 0) {
 		return "Cooler Off";
 	}
-	// If sensor temperature and setpoint differ no more than 1 �C
+	// If sensor temperature and setpoint differ no more than 1 K
 	// we consider the temperature stabilised.
 	double temp = getSensorTemperature();
 	if (abs(temp - m_sensorTemperature.setpoint) < 1.0) {
@@ -565,9 +508,6 @@ void PVCamera::getImageForAcquisition(unsigned char* buffer, bool preview) {
 				return (g_EofFlag);
 			});
 		}
-		if (!g_EofFlag) {
-			//printf("Camera timed out waiting for a frame\n");
-		}
 		g_EofFlag = false; // Reset flag
 	}
 
@@ -625,12 +565,10 @@ bool PVCamera::ReadEnumeration(PVCam::NVPC* nvpc, PVCam::uns32 paramID, const ch
 	}
 
 	// Actually get the triggering/exposure names
-	for (PVCam::uns32 i{ 0 }; i < count; ++i)
-	{
+	for (PVCam::uns32 i{ 0 }; i < count; ++i) {
 		// Ask how long the string is
 		PVCam::uns32 strLength;
-		if (PVCam::PV_OK != PVCam::pl_enum_str_length(m_camera, paramID, i, &strLength))
-		{
+		if (PVCam::PV_OK != PVCam::pl_enum_str_length(m_camera, paramID, i, &strLength)) {
 			//const std::string msg =
 			//	"pl_enum_str_length(" + std::string(paramName) + ") error";
 			//PrintErrorMessage(pl_error_code(), msg.c_str());
@@ -642,8 +580,7 @@ bool PVCamera::ReadEnumeration(PVCam::NVPC* nvpc, PVCam::uns32 paramID, const ch
 
 		// Actually get the string and value
 		PVCam::int32 value;
-		if (PVCam::PV_OK != PVCam::pl_get_enum_param(m_camera, paramID, i, &value, name, strLength))
-		{
+		if (PVCam::PV_OK != PVCam::pl_get_enum_param(m_camera, paramID, i, &value, name, strLength)) {
 			//const std::string msg =
 			//	"pl_get_enum_param(" + std::string(paramName) + ") error";
 			//PrintErrorMessage(pl_error_code(), msg.c_str());
