@@ -1463,7 +1463,7 @@ void BrillouinAcquisition::on_cycleMode_currentIndexChanged(const QString& text)
 
 void BrillouinAcquisition::updatePlotLimits(PLOT_SETTINGS plotSettings,	CAMERA_OPTIONS options, CAMERA_ROI roi) {
 	// set the properties of the colormap to the correct values of the preview buffer
-	plotSettings.colorMap->data()->setSize(roi.width, roi.height);
+	plotSettings.colorMap->data()->setSize(roi.width / roi.binX, roi.height / roi.binY);
 	QCPRange xRange = QCPRange(roi.left, roi.width + roi.left - 1);
 	QCPRange yRange = QCPRange(
 		options.ROIHeightLimits[1] - roi.top - roi.height + 2,
@@ -1606,8 +1606,8 @@ void BrillouinAcquisition::plot(PreviewBuffer<unsigned char>* previewBuffer, PLO
 
 template <typename T>
 void BrillouinAcquisition::plotting(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<T> unpackedBuffer) {
-	int dim_x = previewBuffer->m_bufferSettings.roi.width;
-	int dim_y = previewBuffer->m_bufferSettings.roi.height;
+	int dim_x = previewBuffer->m_bufferSettings.roi.width / previewBuffer->m_bufferSettings.roi.binX;
+	int dim_y = previewBuffer->m_bufferSettings.roi.height / previewBuffer->m_bufferSettings.roi.binY;
 	// images are given row by row, starting at the top left
 	int tIndex{ 0 };
 	for (gsl::index yIndex{ 0 }; yIndex < dim_y; ++yIndex) {

@@ -2,6 +2,9 @@
 #define PVCAMERA_H
 
 #include "Camera.h"
+#include <string>
+#include <codecvt>
+#include <locale>
 #include <typeinfo>
 
 namespace PVCam {

@@ -108,6 +108,21 @@ void Andor::setSettings(CAMERA_SETTINGS settings) {
 	AT_SetInt(m_camera, L"AOILeft", m_settings.roi.left);
 	AT_SetInt(m_camera, L"AOIHeight", m_settings.roi.height);
 	AT_SetInt(m_camera, L"AOITop", m_settings.roi.top);
+	int binning{ 1 };
+	if (m_settings.roi.binning == L"8x8") {
+		binning = 8;
+	} else if (m_settings.roi.binning == L"4x4") {
+		binning = 4;
+	} else if (m_settings.roi.binning == L"2x2") {
+		binning = 2;
+	} else if (m_settings.roi.binning == L"1x1") {
+		binning = 1;
+	} else {
+		// Fallback to 1x1 binning
+		m_settings.roi.binning = L"1x1";
+	}
+	m_settings.roi.binX = binning;
+	m_settings.roi.binY = binning;
 	AT_SetEnumeratedString(m_camera, L"AOIBinning", m_settings.roi.binning.c_str());
 	AT_SetEnumeratedString(m_camera, L"SimplePreAmpGainControl", m_settings.readout.preAmpGain.c_str());
 

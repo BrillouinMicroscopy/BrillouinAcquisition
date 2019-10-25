@@ -106,6 +106,25 @@ void PVCamera::readOptions() {
 	PVCam::pl_get_param(m_camera, PARAM_EXPOSURE_TIME, PVCam::ATTR_MAX, (void*)&exposureMax);
 	m_options.exposureTimeLimits[1] = 1e-3 * (double)exposureMax;
 
+	/*
+	 * Get the possible binning factors
+	 */
+	PVCam::rs_bool isAvailable{ false };
+	PVCam::pl_get_param(m_camera, PARAM_BINNING_PAR, PVCam::ATTR_AVAIL, (void*)&isAvailable);
+	if (isAvailable) {
+		PVCam::NVPC binsSer;
+		ReadEnumeration(&binsSer, PARAM_BINNING_SER, "PARAM_BINNING_SER");
+		PVCam::NVPC binsPar;
+		ReadEnumeration(&binsPar, PARAM_BINNING_PAR, "PARAM_BINNING_PAR");
+		const PVCam::uns32 binCount = (PVCam::uns32)std::min<size_t>(binsSer.size(), binsPar.size());
+		int i{ 0 };
+		m_options.imageBinnings.clear();
+		for (PVCam::uns32 n{ 0 }; n < binCount; n++) {
+			std::wstring string = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(binsSer[n].name);
+			m_options.imageBinnings.push_back(string);
+		}
+	}
+
 	PVCam::NVPC ports;
 	ReadEnumeration(&ports, PARAM_READOUT_PORT, "PARAM_READOUT_PORT");
 
@@ -206,6 +225,22 @@ void PVCamera::readOptions() {
 void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 	m_settings = settings;
 
+	int binning{ 1 };
+	if (m_settings.roi.binning == L"8x8") {
+		binning = 8;
+	} else if (m_settings.roi.binning == L"4x4") {
+		binning = 4;
+	} else if (m_settings.roi.binning == L"2x2") {
+		binning = 2;
+	} else if (m_settings.roi.binning == L"1x1") {
+		binning = 1;
+	} else {
+		// Fallback to 1x1 binning
+		m_settings.roi.binning = L"1x1";
+	}
+	m_settings.roi.binX = binning;
+	m_settings.roi.binY = binning;
+
 	// Set camera to first port
 	if (PVCam::PV_OK != PVCam::pl_set_param(m_camera, PARAM_READOUT_PORT,
 		(void*)&m_SpeedTable[0].port.value)) {
@@ -239,15 +274,8 @@ PVCam::rgn_type PVCamera::getCamSettings() {
 	camSettings.s2 = m_settings.roi.width + m_settings.roi.left - 2;
 	camSettings.p1 = m_settings.roi.top - 1;
 	camSettings.p2 = m_settings.roi.height + m_settings.roi.top - 2;
-	int binning{ 1 };
-	if (m_settings.roi.binning == L"4x4") {
-		binning = 4;
-	}
-	else if (m_settings.roi.binning == L"2x2") {
-		binning = 2;
-	}
-	camSettings.sbin = binning;
-	camSettings.pbin = binning;
+	camSettings.sbin = m_settings.roi.binY;
+	camSettings.pbin = m_settings.roi.binX;
 	return camSettings;
 }
 

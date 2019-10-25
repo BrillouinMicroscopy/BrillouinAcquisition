@@ -20,6 +20,8 @@ struct CAMERA_ROI {
 	long long width{ 2048 };
 	long long top{ 1 };
 	long long height{ 2048 };
+	long long binX{ 1 };
+	long long binY{ 1 };
 	std::wstring binning{ L"1x1" };
 };
 
