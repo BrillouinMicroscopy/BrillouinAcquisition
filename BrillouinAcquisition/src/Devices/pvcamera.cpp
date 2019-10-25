@@ -415,7 +415,7 @@ void PVCamera::startPreview() {
 	}
 	m_isPreviewRunning = true;
 	m_stopPreview = false;
-	preparePreview();
+	QMetaObject::invokeMethod(this, "preparePreview", Qt::QueuedConnection);
 
 	emit(s_previewRunning(m_isPreviewRunning));
 }
@@ -472,15 +472,6 @@ void PVCamera::previewCallback(PVCam::FRAME_INFO* pFrameInfo, void* context) {
 	self->getImageForPreview();
 }
 
-void PVCamera::acquisitionCallback(PVCam::FRAME_INFO* pFrameInfo, void* context) {
-	PVCamera* self = static_cast<PVCamera*>(context);
-	{
-		std::lock_guard<std::mutex> lock(self->g_EofMutex);
-		self->g_EofFlag = true; // Set flag
-	}
-	self->g_EofCond.notify_one();
-}
-
 void PVCamera::getImageForPreview() {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	if (m_isPreviewRunning) {
@@ -501,16 +492,27 @@ void PVCamera::getImageForPreview() {
 }
 
 void PVCamera::stopPreview() {
-	cleanupAcquisition();
-	if (!m_tempTimer->isActive()) {
-		m_tempTimer->start(1000);
-	}
+	QMetaObject::invokeMethod(this, "cleanupPreview", Qt::QueuedConnection);
 	m_isPreviewRunning = false;
 	m_stopPreview = false;
 	emit(s_previewRunning(m_isPreviewRunning));
 }
 
+void PVCamera::cleanupPreview() {
+	PVCam::pl_exp_stop_cont(m_camera, PVCam::CCS_CLEAR);
+	if (!m_tempTimer->isActive()) {
+		m_tempTimer->start(1000);
+	}
+}
+
 void PVCamera::startAcquisition(CAMERA_SETTINGS settings) {
+	QMetaObject::invokeMethod(this, "prepareAcquisition", Qt::QueuedConnection, Q_ARG(CAMERA_SETTINGS, settings));
+	
+	m_isAcquisitionRunning = true;
+	emit(s_acquisitionRunning(m_isAcquisitionRunning));
+}
+
+void PVCamera::prepareAcquisition(CAMERA_SETTINGS settings) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 
 	// Disable temperature timer if it is running
@@ -536,22 +538,28 @@ void PVCamera::startAcquisition(CAMERA_SETTINGS settings) {
 	BUFFER_SETTINGS bufferSettings = { 8, m_bufferSize, "unsigned short", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
+}
 
-	m_isAcquisitionRunning = true;
-	emit(s_acquisitionRunning(m_isAcquisitionRunning));
+void PVCamera::acquisitionCallback(PVCam::FRAME_INFO* pFrameInfo, void* context) {
+	PVCamera* self = static_cast<PVCamera*>(context);
+	{
+		std::lock_guard<std::mutex> lock(self->g_EofMutex);
+		self->g_EofFlag = true; // Set flag
+	}
+	self->g_EofCond.notify_one();
 }
 
 void PVCamera::stopAcquisition() {
-	PVCam::pl_exp_abort(m_camera, PVCam::CCS_NO_CHANGE);
-	if (!m_tempTimer->isActive()) {
-		m_tempTimer->start(1000);
-	}
+	QMetaObject::invokeMethod(this, "cleanupAcquisition", Qt::QueuedConnection);
 	m_isAcquisitionRunning = false;
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
 }
 
 void PVCamera::cleanupAcquisition() {
-	PVCam::pl_exp_stop_cont(m_camera, PVCam::CCS_CLEAR);
+	PVCam::pl_exp_abort(m_camera, PVCam::CCS_NO_CHANGE);
+	if (!m_tempTimer->isActive()) {
+		m_tempTimer->start(1000);
+	}
 }
 
 int PVCamera::acquireImage(unsigned char* buffer) {

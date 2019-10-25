@@ -41,9 +41,6 @@ private:
 	QTimer* m_tempTimer = nullptr;
 	SensorTemperature m_sensorTemperature;
 
-	void cleanupAcquisition();
-	void preparePreview();
-
 	static void previewCallback(PVCam::FRAME_INFO* pFrameInfo, void* context);
 	static void acquisitionCallback(PVCam::FRAME_INFO* pFrameInfo, void* context);
 	PVCam::uns16* m_acquisitionBuffer = nullptr;
@@ -88,6 +85,11 @@ public:
 
 private slots:
 	void checkSensorTemperature();
+	void preparePreview();
+	void cleanupPreview();
+
+	void prepareAcquisition(CAMERA_SETTINGS settings);
+	void cleanupAcquisition();
 
 public slots:
 	/*
