@@ -209,7 +209,7 @@ void PVCamera::readOptions() {
 			ro.bitDepth = bitDepth;
 			std::ostringstream ss;
 			ss << "P" << ro.port.value << "S" << ro.speedIndex
-				<< ": " << ro.readoutFrequency << " MHz, " << ro.bitDepth << " bit";
+				<< ": " << ro.readoutFrequency << " MHz";
 			ro.label = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(ss.str());
 			
 			ro.gains.clear();
@@ -240,10 +240,21 @@ void PVCamera::readOptions() {
 	ss << m_SpeedTable[speedTableIndex].bitDepth << " bit";
 	m_options.pixelEncodings.push_back(std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(ss.str()));
 
+	m_options.preAmpGains.clear();
+	for (gsl::index i{ 0 }; i < m_SpeedTable[speedTableIndex].gains.size(); i++) {
+		m_options.preAmpGains.push_back(std::to_wstring(m_SpeedTable[speedTableIndex].gains[i]));
+	}
+
 	emit(optionsChanged(m_options));
 }
 
 void PVCamera::setSettings(CAMERA_SETTINGS settings) {
+	// We have to update the options when we change port and speed
+	bool updateOptions{ false };
+	if (m_settings.readout.pixelReadoutRate != settings.readout.pixelReadoutRate) {
+		updateOptions = true;
+	}
+
 	m_settings = settings;
 
 	int binning{ 1 };
@@ -271,6 +282,12 @@ void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 	}
 
 	int gainIndex{ 0 };
+	for (gsl::index i{ 0 }; i < m_SpeedTable[speedTableIndex].gains.size(); i++) {
+		if (std::to_wstring(m_SpeedTable[speedTableIndex].gains[i]) == m_settings.readout.preAmpGain) {
+			gainIndex = i;
+			break;
+		}
+	}
 
 	// Set camera to first port
 	if (PVCam::PV_OK != PVCam::pl_set_param(m_camera, PARAM_READOUT_PORT,
@@ -296,7 +313,9 @@ void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 	}
 
 	// read options as they might change with port and speed
-	//readOptions();
+	if (updateOptions) {
+		readOptions();
+	}
 
 	// read back the settings
 	readSettings();

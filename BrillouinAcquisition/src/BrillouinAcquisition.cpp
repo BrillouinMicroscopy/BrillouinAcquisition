@@ -570,12 +570,22 @@ void BrillouinAcquisition::showCalibrationRunning(bool isCalibrating) {
 }
 
 void BrillouinAcquisition::addListToComboBox(QComboBox* box, std::vector<std::wstring> list, bool clear) {
+	// Check whether we have to do anything
+	std::vector< std::wstring > currentList(box->count());
+	for (gsl::index i{ 0 }; i < currentList.size(); i++) {
+		currentList[i] = box->itemText(i).toStdWString();
+	}
+	if (currentList == list) {
+		return;
+	}
+	box->blockSignals(true);
 	if (clear) {
 		box->clear();
 	}
 	std::for_each(list.begin(), list.end(), [box](std::wstring &item) {
 		box->addItem(QString::fromStdWString(item));
 	});
+	box->blockSignals(false);
 };
 
 void BrillouinAcquisition::cameraSettingsChanged(CAMERA_SETTINGS settings) {
@@ -1442,22 +1452,33 @@ std::vector<AT_64> BrillouinAcquisition::checkROI(std::vector<AT_64> values, std
  // Binning
 void BrillouinAcquisition::on_binning_currentIndexChanged(const QString& text) {
 	m_BrillouinSettings.camera.roi.binning = text.toStdWString();
+	applyCameraSettings();
 }
 // Readout parameters
 void BrillouinAcquisition::on_pixelReadoutRate_currentIndexChanged(const QString& text) {
 	m_BrillouinSettings.camera.readout.pixelReadoutRate = text.toStdWString();
+	applyCameraSettings();
 }
 
 void BrillouinAcquisition::on_preAmpGain_currentIndexChanged(const QString& text) {
 	m_BrillouinSettings.camera.readout.preAmpGain = text.toStdWString();
+	applyCameraSettings();
 }
 
 void BrillouinAcquisition::on_pixelEncoding_currentIndexChanged(const QString& text) {
 	m_BrillouinSettings.camera.readout.pixelEncoding = text.toStdWString();
+	applyCameraSettings();
 }
 
 void BrillouinAcquisition::on_cycleMode_currentIndexChanged(const QString& text) {
 	m_BrillouinSettings.camera.readout.cycleMode = text.toStdWString();
+	applyCameraSettings();
+}
+
+void BrillouinAcquisition::applyCameraSettings() {
+	if (!m_andor->m_isPreviewRunning && !m_andor->m_isAcquisitionRunning) {
+		m_andor->setSettings(m_BrillouinSettings.camera);
+	}
 }
 
 

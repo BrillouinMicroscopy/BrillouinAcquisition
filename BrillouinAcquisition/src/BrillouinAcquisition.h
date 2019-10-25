@@ -178,6 +178,8 @@ private slots:
 	void on_pixelEncoding_currentIndexChanged(const QString& text);
 	void on_cycleMode_currentIndexChanged(const QString& text);
 
+	void applyCameraSettings();
+
 	void setColormap(QCPColorGradient*, CustomGradientPreset);
 	void setElement(DeviceElement element, double position);
 	void setPreset(SCAN_PRESET preset);
