@@ -128,6 +128,7 @@ void PVCamera::readOptions() {
 	PVCam::NVPC ports;
 	ReadEnumeration(&ports, PARAM_READOUT_PORT, "PARAM_READOUT_PORT");
 
+	m_SpeedTable.clear();
 	// Iterate through available ports and their speeds
 	for (size_t pi{ 0 }; pi < ports.size(); pi++) {
 		// Set readout port
@@ -227,6 +228,18 @@ void PVCamera::readOptions() {
 		m_options.pixelReadoutRates.push_back(m_SpeedTable[i].label);
 	}
 
+	int speedTableIndex{ 0 };
+	for (gsl::index i{ 0 }; i < m_SpeedTable.size(); i++) {
+		if (m_SpeedTable[i].label == m_settings.readout.pixelReadoutRate) {
+			speedTableIndex = i;
+			break;
+		}
+	}
+	m_options.pixelEncodings.clear();
+	std::ostringstream ss;
+	ss << m_SpeedTable[speedTableIndex].bitDepth << " bit";
+	m_options.pixelEncodings.push_back(std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(ss.str()));
+
 	emit(optionsChanged(m_options));
 }
 
@@ -281,6 +294,9 @@ void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 		//PrintErrorMessage(pl_error_code(), "Gain index could not be set");
 		//return false;
 	}
+
+	// read options as they might change with port and speed
+	//readOptions();
 
 	// read back the settings
 	readSettings();
