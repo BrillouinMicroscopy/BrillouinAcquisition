@@ -1436,6 +1436,31 @@ std::vector<AT_64> BrillouinAcquisition::checkROI(std::vector<AT_64> values, std
 	return values;
 }
 
+/*
+ * Brillouin camera settings
+ */
+ // Binning
+void BrillouinAcquisition::on_binning_currentIndexChanged(const QString& text) {
+	m_BrillouinSettings.camera.roi.binning = text.toStdWString();
+}
+// Readout parameters
+void BrillouinAcquisition::on_pixelReadoutRate_currentIndexChanged(const QString& text) {
+	m_BrillouinSettings.camera.readout.pixelReadoutRate = text.toStdWString();
+}
+
+void BrillouinAcquisition::on_preAmpGain_currentIndexChanged(const QString& text) {
+	m_BrillouinSettings.camera.readout.preAmpGain = text.toStdWString();
+}
+
+void BrillouinAcquisition::on_pixelEncoding_currentIndexChanged(const QString& text) {
+	m_BrillouinSettings.camera.readout.pixelEncoding = text.toStdWString();
+}
+
+void BrillouinAcquisition::on_cycleMode_currentIndexChanged(const QString& text) {
+	m_BrillouinSettings.camera.readout.cycleMode = text.toStdWString();
+}
+
+
 void BrillouinAcquisition::updatePlotLimits(PLOT_SETTINGS plotSettings,	CAMERA_OPTIONS options, CAMERA_ROI roi) {
 	// set the properties of the colormap to the correct values of the preview buffer
 	plotSettings.colorMap->data()->setSize(roi.width, roi.height);

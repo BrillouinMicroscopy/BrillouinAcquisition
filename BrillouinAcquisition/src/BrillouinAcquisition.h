@@ -167,6 +167,17 @@ private slots:
 	void settingsCameraUpdate(int);
 	std::vector<AT_64> checkROI(std::vector<AT_64>, std::vector<AT_64>);
 
+	/*
+	 * Camera settings
+	 */
+	// Binning
+	void on_binning_currentIndexChanged(const QString& text);
+	// Readout parameters
+	void on_pixelReadoutRate_currentIndexChanged(const QString& text);
+	void on_preAmpGain_currentIndexChanged(const QString& text);
+	void on_pixelEncoding_currentIndexChanged(const QString& text);
+	void on_cycleMode_currentIndexChanged(const QString& text);
+
 	void setColormap(QCPColorGradient*, CustomGradientPreset);
 	void setElement(DeviceElement element, double position);
 	void setPreset(SCAN_PRESET preset);
