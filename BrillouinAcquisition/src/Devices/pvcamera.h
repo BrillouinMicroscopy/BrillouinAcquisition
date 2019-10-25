@@ -26,6 +26,7 @@ namespace PVCam {
 		float readoutFrequency;
 		int16 bitDepth;
 		std::vector<int16> gains;
+		std::wstring label;
 	} READOUT_OPTION;
 
 }

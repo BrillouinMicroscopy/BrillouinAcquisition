@@ -206,10 +206,13 @@ void PVCamera::readOptions() {
 			ro.speedIndex = si;
 			ro.readoutFrequency = 1000 / (float)pixTime;
 			ro.bitDepth = bitDepth;
+			std::ostringstream ss;
+			ss << "P" << ro.port.value << "S" << ro.speedIndex
+				<< ": " << ro.readoutFrequency << " MHz, " << ro.bitDepth << " bit";
+			ro.label = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(ss.str());
+			
 			ro.gains.clear();
-
 			PVCam::int16 gainValue = gainMin;
-
 			while (gainValue <= gainMax) {
 				ro.gains.push_back(gainValue);
 				gainValue += gainIncrement;
@@ -217,6 +220,11 @@ void PVCamera::readOptions() {
 
 			m_SpeedTable.push_back(ro);
 		}
+	}
+
+	m_options.pixelReadoutRates.clear();
+	for (gsl::index i{ 0 }; i < m_SpeedTable.size(); i++) {
+		m_options.pixelReadoutRates.push_back(m_SpeedTable[i].label);
 	}
 
 	emit(optionsChanged(m_options));
@@ -241,9 +249,19 @@ void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 	m_settings.roi.binX = binning;
 	m_settings.roi.binY = binning;
 
+	int speedTableIndex{ 0 };
+	for (gsl::index i{ 0 }; i < m_SpeedTable.size(); i++) {
+		if (m_SpeedTable[i].label == m_settings.readout.pixelReadoutRate) {
+			speedTableIndex = i;
+			break;
+		}
+	}
+
+	int gainIndex{ 0 };
+
 	// Set camera to first port
 	if (PVCam::PV_OK != PVCam::pl_set_param(m_camera, PARAM_READOUT_PORT,
-		(void*)&m_SpeedTable[0].port.value)) {
+		(void*)&m_SpeedTable[speedTableIndex].port.value)) {
 		//PrintErrorMessage(pl_error_code(), "Readout port could not be set");
 		//return false;
 	}
@@ -251,7 +269,7 @@ void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 
 	// Set camera to speed 0
 	if (PVCam::PV_OK != PVCam::pl_set_param(m_camera, PARAM_SPDTAB_INDEX,
-		(void*)&m_SpeedTable[0].speedIndex)) {
+		(void*)&m_SpeedTable[speedTableIndex].speedIndex)) {
 		//PrintErrorMessage(pl_error_code(), "Readout port could not be set");
 		//return false;
 	}
@@ -259,7 +277,7 @@ void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 
 	// Set gain index to one (the first one)
 	if (PVCam::PV_OK != PVCam::pl_set_param(m_camera, PARAM_GAIN_INDEX,
-		(void*)&m_SpeedTable[0].gains[0])) {
+		(void*)&m_SpeedTable[speedTableIndex].gains[gainIndex])) {
 		//PrintErrorMessage(pl_error_code(), "Gain index could not be set");
 		//return false;
 	}
