@@ -104,7 +104,7 @@ public slots:
 	void disconnectDevice();
 	void setElement(DeviceElement element, double position);
 	void getElement(DeviceElement element);
-	void setPreset(SCAN_PRESET preset);
+	void setPreset(ScanPreset preset);
 	void getElements();
 	void setCalFlipMirror(int position);
 	void setBeamBlock(int position);

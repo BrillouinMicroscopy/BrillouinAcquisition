@@ -116,7 +116,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	m_settings.camera = (*m_andor)->getSettings();
 	QMetaObject::invokeMethod((*m_scanControl), "stopAnnouncing", Qt::AutoConnection);
 	// set optical elements for brightfield/Brillouin imaging
-	(*m_scanControl)->setPreset(SCAN_BRILLOUIN);
+	(*m_scanControl)->setPreset(ScanPreset::SCAN_BRILLOUIN);
 	Sleep(500);
 
 	// get current stage position
@@ -301,7 +301,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	// close camera libraries, clear buffers
 	(*m_andor)->stopAcquisition();
 
-	(*m_scanControl)->setPreset(SCAN_LASEROFF);
+	(*m_scanControl)->setPreset(ScanPreset::SCAN_LASEROFF);
 
 	(*m_scanControl)->setPosition(m_startPosition);
 	emit(s_positionChanged({ 0, 0, 0 }, 0));
@@ -326,7 +326,7 @@ void Brillouin::abortMode(std::unique_ptr <StorageWrapper>& storage) {
 
 	(*m_andor)->stopAcquisition();
 
-	(*m_scanControl)->setPreset(SCAN_LASEROFF);
+	(*m_scanControl)->setPreset(ScanPreset::SCAN_LASEROFF);
 
 	(*m_scanControl)->setPosition(m_startPosition);
 
@@ -353,7 +353,7 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 	(*m_andor)->setCalibrationExposureTime(m_settings.calibrationExposureTime);
 
 	// move optical elements to position for calibration
-	(*m_scanControl)->setPreset(SCAN_CALIBRATION);
+	(*m_scanControl)->setPreset(ScanPreset::SCAN_CALIBRATION);
 	Sleep(500);
 
 	double shift = 5.088; // this is the shift for water
@@ -394,7 +394,7 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 	nrCalibrations++;
 
 	// revert optical elements to position for brightfield/Brillouin imaging
-	(*m_scanControl)->setPreset(SCAN_BRILLOUIN);
+	(*m_scanControl)->setPreset(ScanPreset::SCAN_BRILLOUIN);
 
 	// reset exposure time
 	(*m_andor)->setCalibrationExposureTime(m_settings.camera.exposureTime);

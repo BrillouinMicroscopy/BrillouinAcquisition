@@ -18,14 +18,14 @@ ZeissECU::ZeissECU() noexcept {
 	};
 
 	m_presets = {
-		{	"Brillouin",	SCAN_BRILLOUIN,		{ {2}, {}, {1}, {3}, {1}, {2},  {} }	},	// Brillouin
-		{	"Calibration",	SCAN_CALIBRATION,	{ {2}, {}, {1}, {3}, {1}, {3},  {} }	},	// Calibration
-		{	"Brightfield",	SCAN_BRIGHTFIELD,	{ {2}, {}, {1}, {3}, {1}, {2}, {2} }	},	// Brightfield
-		{	"Eyepiece",		SCAN_EYEPIECE,		{ {2}, {}, {1}, {3}, {2}, {3}, {2} }	},	// Eyepiece
-		{	"Fluo Blue",	SCAN_EPIFLUOBLUE,	{ {1}, {}, {2}, {3}, {},  {2}, {1} }	},	// Fluorescence blue
-		{	"Fluo Green",	SCAN_EPIFLUOGREEN,	{ {1}, {}, {3}, {3}, {},  {2}, {1} }	},	// Fluorescence green
-		{	"Fluo Red",		SCAN_EPIFLUORED,	{ {1}, {}, {4}, {3}, {},  {2}, {1} }	},	// Fluorescence red
-		{	"Laser off",	SCAN_LASEROFF,		{ {1}, {},  {},  {}, {},   {},  {} }	}	// Laser off
+		{	"Brillouin",	ScanPreset::SCAN_BRILLOUIN,	{ {2}, {}, {1}, {3}, {1}, {2},  {} }	},	// Brillouin
+		{	"Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {2}, {}, {1}, {3}, {1}, {3},  {} }	},	// Calibration
+		{	"Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{ {2}, {}, {1}, {3}, {1}, {2}, {2} }	},	// Brightfield
+		{	"Eyepiece",		ScanPreset::SCAN_EYEPIECE,	{ {2}, {}, {1}, {3}, {2}, {3}, {2} }	},	// Eyepiece
+		{	"Fluo Blue",	ScanPreset::SCAN_EPIFLUOBLUE,	{ {1}, {}, {2}, {3}, {},  {2}, {1} }	},	// Fluorescence blue
+		{	"Fluo Green",	ScanPreset::SCAN_EPIFLUOGREEN,{ {1}, {}, {3}, {3}, {},  {2}, {1} }	},	// Fluorescence green
+		{	"Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {1}, {}, {4}, {3}, {},  {2}, {1} }	},	// Fluorescence red
+		{	"Laser off",	ScanPreset::SCAN_LASEROFF,	{ {1}, {},  {},  {}, {},   {},  {} }	}	// Laser off
 	};
 
 	// bounds of the stage
@@ -115,7 +115,7 @@ void ZeissECU::connectDevice() {
 			m_isCompatible = focus && stand && mcu;
 
 			if (m_isConnected && m_isCompatible) {
-				setPreset(SCAN_BRILLOUIN);
+				setPreset(ScanPreset::SCAN_BRILLOUIN);
 				getElements();
 				m_homePosition = getPosition();
 				startAnnouncingPosition();
@@ -196,7 +196,7 @@ void ZeissECU::setDevice(com *device) {
 	m_stand->setDevice(device);
 }
 
-void ZeissECU::setPreset(SCAN_PRESET presetType) {
+void ZeissECU::setPreset(ScanPreset presetType) {
 	auto preset = getPreset(presetType);
 	getElements();
 

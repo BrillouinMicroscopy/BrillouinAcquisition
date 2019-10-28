@@ -5,20 +5,20 @@
 #include "CalibrationHelper.h"
 #include "../../external/h5bm/TypesafeBitmask.h"
 
-typedef enum enScanPreset {
-	SCAN_NULL = 0x0,
-	SCAN_BRIGHTFIELD = 0x2,
-	SCAN_CALIBRATION = 0x4,
-	SCAN_BRILLOUIN = 0x8,
-	SCAN_EYEPIECE = 0x10,
-	SCAN_ODT = 0x20,
-	SCAN_EPIFLUOOFF = 0x40,
-	SCAN_EPIFLUOBLUE = 0x80,
-	SCAN_EPIFLUOGREEN = 0x100,
-	SCAN_EPIFLUORED = 0x200,
-	SCAN_LASEROFF = 0x800
-} SCAN_PRESET;
-ENABLE_BITMASK_OPERATORS(SCAN_PRESET)
+enum class ScanPreset {
+	SCAN_NULL			= 0x0,
+	SCAN_BRIGHTFIELD	= 0x2,
+	SCAN_CALIBRATION	= 0x4,
+	SCAN_BRILLOUIN		= 0x8,
+	SCAN_EYEPIECE		= 0x10,
+	SCAN_ODT			= 0x20,
+	SCAN_EPIFLUOOFF		= 0x40,
+	SCAN_EPIFLUOBLUE	= 0x80,
+	SCAN_EPIFLUOGREEN	= 0x100,
+	SCAN_EPIFLUORED		= 0x200,
+	SCAN_LASEROFF		= 0x800
+};
+ENABLE_BITMASK_OPERATORS(ScanPreset)
 
 struct POINT3 {
 	double x{ 0 };
@@ -48,7 +48,7 @@ struct VOLTAGE2 {
 	double Uy{ 0 };
 };
 
-typedef enum enDeviceInput {
+typedef enum class enDeviceInput {
 	PUSHBUTTON,
 	INTBOX,
 	DOUBLEBOX
@@ -70,7 +70,7 @@ public:
 	int maxOptions{ 0 };
 	int index{ 0 };
 	std::vector<std::string> optionNames;
-	DEVICE_INPUT_TYPE inputType{ DEVICE_INPUT_TYPE::PUSHBUTTON }; // possible types are "pushButtons", "intBox" or "doubleBox"
+	DEVICE_INPUT_TYPE inputType{ enDeviceInput::PUSHBUTTON }; // possible types are "pushButtons", "intBox" or "doubleBox"
 
 	std::vector<std::string> checkNames(int count, std::vector<std::string> names = {}) {
 		//check that the number of names fits the number of options
@@ -105,11 +105,11 @@ public:
 
 class Preset {
 public:
-	Preset(std::string name, SCAN_PRESET index, std::vector<std::vector<double>> positions) :
+	Preset(std::string name, ScanPreset index, std::vector<std::vector<double>> positions) :
 		name(name), index(index), elementPositions(positions) {};
 
 	std::string name{ "" };
-	SCAN_PRESET index{ SCAN_NULL };
+	ScanPreset index{ ScanPreset::SCAN_NULL };
 	std::vector<std::vector<double>> elementPositions;
 };
 
@@ -132,7 +132,7 @@ protected:
 	BOUNDS m_homePositionBounds;
 	BOUNDS m_currentPositionBounds;
 
-	Preset getPreset(SCAN_PRESET);
+	Preset getPreset(ScanPreset);
 	virtual POINT2 pixToMicroMeter(POINT2) = 0;
 
 	SpatialCalibration m_calibration;
@@ -151,7 +151,7 @@ public:
 	std::vector<double> m_elementPositions;
 
 	std::vector<Preset> m_presets;
-	SCAN_PRESET m_activePresets = SCAN_PRESET::SCAN_NULL;
+	ScanPreset m_activePresets = ScanPreset::SCAN_NULL;
 
 	bool getConnectionStatus();
 
@@ -167,10 +167,10 @@ public:
 public slots:
 	virtual void setElement(DeviceElement, double) = 0;
 	virtual void getElement(DeviceElement) = 0;
-	virtual void setPreset(SCAN_PRESET) = 0;
+	virtual void setPreset(ScanPreset) = 0;
 	virtual void getElements() = 0;
 	void checkPresets();
-	bool isPresetActive(SCAN_PRESET);
+	bool isPresetActive(ScanPreset);
 	void announcePosition();
 	void startAnnouncing();
 	void stopAnnouncing();

@@ -8,7 +8,7 @@
 #include "external/qcustomplot/qcustomplot.h"
 #include "phase.h"
 
-enum CustomGradientPreset {
+enum class CustomGradientPreset {
 	gpParula,
 	gpGrayscale,
 	gpRed,

@@ -129,7 +129,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<QSerialPort::SerialPortError>("QSerialPort::SerialPortError");
 	qRegisterMetaType<IMAGE*>("IMAGE*");
 	qRegisterMetaType<CALIBRATION*>("CALIBRATION*");
-	qRegisterMetaType<SCAN_PRESET>("SCAN_PRESET");
+	qRegisterMetaType<ScanPreset>("ScanPreset");
 	qRegisterMetaType<DeviceElement>("DeviceElement");
 	qRegisterMetaType<SensorTemperature>("SensorTemperature");
 	qRegisterMetaType<POINT3>("POINT3");
@@ -269,7 +269,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 			this->updateCLimRange(ui->rangeLower, ui->rangeUpper, range);
 		},
 		false,
-		gpParula
+		CustomGradientPreset::gpParula
 	};
 
 	m_ODTPlot = {
@@ -282,7 +282,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 			this->updateCLimRange(ui->rangeLowerODT, ui->rangeUpperODT, range);
 		},
 		false,
-		gpGrayscale
+		CustomGradientPreset::gpGrayscale
 	};
 
 	// set up laser focus marker
@@ -414,8 +414,8 @@ void BrillouinAcquisition::on_autoscalePlot_brightfield_stateChanged(int state) 
 	ui->rangeUpperODT->setDisabled(state);
 }
 
-void BrillouinAcquisition::setPreset(SCAN_PRESET preset) {
-	QMetaObject::invokeMethod(m_scanControl, "setPreset", Qt::QueuedConnection, Q_ARG(SCAN_PRESET, preset));
+void BrillouinAcquisition::setPreset(ScanPreset preset) {
+	QMetaObject::invokeMethod(m_scanControl, "setPreset", Qt::QueuedConnection, Q_ARG(ScanPreset, preset));
 }
 
 void BrillouinAcquisition::cameraOptionsChanged(CAMERA_OPTIONS options) {
@@ -632,11 +632,13 @@ void BrillouinAcquisition::updateODTCameraSettings(CAMERA_SETTINGS settings) {
 
 void BrillouinAcquisition::sensorTemperatureChanged(SensorTemperature sensorTemperature) {
 	ui->sensorTemp->setValue(sensorTemperature.temperature);
-	if (sensorTemperature.status == COOLER_OFF || sensorTemperature.status == FAULT || sensorTemperature.status == DRIFT) {
+	if (sensorTemperature.status == enCameraTemperatureStatus::COOLER_OFF ||
+		sensorTemperature.status == enCameraTemperatureStatus::FAULT || sensorTemperature.status == enCameraTemperatureStatus::DRIFT) {
 		ui->settingsWidget->setTabIcon(0, m_icons.standby);
-	} else if (sensorTemperature.status == COOLING || sensorTemperature.status == NOT_STABILISED) {
+	} else if (sensorTemperature.status == enCameraTemperatureStatus::COOLING
+		|| sensorTemperature.status == enCameraTemperatureStatus::NOT_STABILISED) {
 		ui->settingsWidget->setTabIcon(0, m_icons.cooling);
-	} else if (sensorTemperature.status == STABILISED) {
+	} else if (sensorTemperature.status == enCameraTemperatureStatus::STABILISED) {
 		ui->settingsWidget->setTabIcon(0, m_icons.ready);
 	} else {
 		ui->settingsWidget->setTabIcon(0, m_icons.disconnected);
@@ -2929,7 +2931,7 @@ void BrillouinAcquisition::on_actionClose_Acquisition_triggered() {
 void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradientPreset preset) {
 	gradient->clearColorStops();
 	switch (preset) {
-		case gpParula:
+		case CustomGradientPreset::gpParula:
 			gradient->setColorInterpolation(QCPColorGradient::ciRGB);
 			gradient->setColorStopAt(0.00, QColor( 53,  42, 135));
 			gradient->setColorStopAt(0.05, QColor( 53,  62, 175));
@@ -2953,10 +2955,10 @@ void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradien
 			gradient->setColorStopAt(0.95, QColor(245, 227,  30));
 			gradient->setColorStopAt(1.00, QColor(249, 251,  14));
 			break;
-		case gpGrayscale:
+		case CustomGradientPreset::gpGrayscale:
 			gradient->loadPreset(QCPColorGradient::gpGrayscale);
 			break;
-		case gpJet:
+		case CustomGradientPreset::gpJet:
 			gradient->loadPreset(QCPColorGradient::gpJet);
 			break;
 		default:

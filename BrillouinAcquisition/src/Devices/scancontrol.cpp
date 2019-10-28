@@ -30,8 +30,8 @@ void ScanControl::checkPresets() {
 	}
 }
 
-bool ScanControl::isPresetActive(SCAN_PRESET presetType) {
-	return (presetType & m_activePresets);
+bool ScanControl::isPresetActive(ScanPreset presetType) {
+	return ScanPreset::SCAN_NULL != (presetType & m_activePresets);
 }
 
 void ScanControl::announcePosition() {
@@ -107,7 +107,7 @@ void ScanControl::calculateCurrentPositionBounds(POINT3 currentPosition) {
 	emit(currentPositionBoundsChanged(m_currentPositionBounds));
 }
 
-Preset ScanControl::getPreset(SCAN_PRESET presetType) {
+Preset ScanControl::getPreset(ScanPreset presetType) {
 	for (gsl::index ii = 0; ii < m_presets.size(); ii++) {
 		if (m_presets[ii].index == presetType) {
 			return m_presets[ii];

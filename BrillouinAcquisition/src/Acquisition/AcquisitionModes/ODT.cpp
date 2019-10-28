@@ -138,7 +138,7 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	QMetaObject::invokeMethod(storage.get(), "startWritingQueues", Qt::AutoConnection);
 
 	// move to ODT configuration
-	(*m_NIDAQ)->setPreset(SCAN_ODT);
+	(*m_NIDAQ)->setPreset(ScanPreset::SCAN_ODT);
 
 	// Set first mirror voltage already
 	(*m_NIDAQ)->setVoltage(m_acqSettings.voltages[0]);
@@ -221,7 +221,7 @@ void ODT::startAlignment() {
 		QMetaObject::invokeMethod((*m_camera), "setSettings", Qt::AutoConnection, Q_ARG(CAMERA_SETTINGS, settings));
 
 		// move to ODT configuration
-		(*m_NIDAQ)->setPreset(SCAN_ODT);
+		(*m_NIDAQ)->setPreset(ScanPreset::SCAN_ODT);
 		// stop querying the element positions, because querying the filter mounts block the thread quite long
 		(*m_NIDAQ)->stopAnnouncingElementPosition();
 		// start the timer
