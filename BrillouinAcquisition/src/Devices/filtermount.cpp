@@ -49,7 +49,7 @@ void FilterMount::disconnectDevice() {
 }
 
 void FilterMount::home() {
-	m_comObject->receive("0ho0");
+	auto tmp = m_comObject->receive("0ho0");
 }
 
 double FilterMount::getPosition() {
@@ -64,11 +64,11 @@ void FilterMount::setPosition(double position) {
 }
 
 void FilterMount::moveForward() {
-	m_comObject->receive("0fw");
+	auto tmp = m_comObject->receive("0fw");
 }
 
 void FilterMount::moveBackward() {
-	m_comObject->receive("0bw");
+	auto tmp = m_comObject->receive("0bw");
 }
 
 std::string FilterMount::parsePosition(std::string position) {

@@ -669,21 +669,23 @@ bool PVCamera::ReadEnumeration(PVCam::NVPC* nvpc, PVCam::uns32 paramID, const ch
 
 		// Allocate the destination string
 		char* name = new (std::nothrow) char[strLength];
+		if (name) {
 
-		// Actually get the string and value
-		PVCam::int32 value;
-		if (PVCam::PV_OK != PVCam::pl_get_enum_param(m_camera, paramID, i, &value, name, strLength)) {
-			//const std::string msg =
-			//	"pl_get_enum_param(" + std::string(paramName) + ") error";
-			//PrintErrorMessage(pl_error_code(), msg.c_str());
-			delete[] name;
-			return false;
+			// Actually get the string and value
+			PVCam::int32 value;
+			if (PVCam::PV_OK != PVCam::pl_get_enum_param(m_camera, paramID, i, &value, name, strLength)) {
+				//const std::string msg =
+				//	"pl_get_enum_param(" + std::string(paramName) + ") error";
+				//PrintErrorMessage(pl_error_code(), msg.c_str());
+				delete[] name;
+				return false;
+			}
+
+			PVCam::NVP nvp;
+			nvp.value = value;
+			nvp.name = name;
+			nvpc->push_back(nvp);
 		}
-
-		PVCam::NVP nvp;
-		nvp.value = value;
-		nvp.name = name;
-		nvpc->push_back(nvp);
 
 		delete[] name;
 	}

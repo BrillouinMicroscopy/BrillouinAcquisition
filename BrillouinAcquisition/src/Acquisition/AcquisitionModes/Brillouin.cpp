@@ -309,7 +309,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
-	connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	auto connection = QWidget::connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
 	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
 	loop.exec();
 
@@ -336,7 +336,7 @@ void Brillouin::abortMode(std::unique_ptr <StorageWrapper>& storage) {
 
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
-	connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	auto connection = QWidget::connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
 	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
 	loop.exec();
 
