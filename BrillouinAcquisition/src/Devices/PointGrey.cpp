@@ -138,7 +138,7 @@ void PointGrey::readSettings() {
 
 	// emit signal that settings changed
 	emit(settingsChanged(m_settings));
-};
+}
 
 void PointGrey::setSettings(CAMERA_SETTINGS settings) {
 	m_settings = settings;

@@ -441,7 +441,7 @@ int Stand::getElementPosition(std::string device) {
 	} else {
 		return std::stoi(answer);
 	}
-};
+}
 
 void Stand::setElementPosition(std::string device, int position) {
 	send("CR" + device + "," + std::to_string(position));

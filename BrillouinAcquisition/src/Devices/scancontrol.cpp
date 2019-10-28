@@ -53,25 +53,25 @@ void ScanControl::startAnnouncingPosition() {
 	if (positionTimer) {
 		positionTimer->start(100);
 	}
-};
+}
 
 void ScanControl::stopAnnouncingPosition() {
 	if (positionTimer) {
 		positionTimer->stop();
 	}
-};
+}
 
 void ScanControl::startAnnouncingElementPosition() {
 	if (elementPositionTimer) {
 		elementPositionTimer->start(100);
 	}
-};
+}
 
 void ScanControl::stopAnnouncingElementPosition() {
 	if (elementPositionTimer) {
 		elementPositionTimer->stop();
 	}
-};
+}
 
 void ScanControl::setHome() {
 	m_homePosition = getPosition();

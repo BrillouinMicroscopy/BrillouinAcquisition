@@ -586,7 +586,7 @@ void BrillouinAcquisition::addListToComboBox(QComboBox* box, std::vector<std::ws
 		box->addItem(QString::fromStdWString(item));
 	});
 	box->blockSignals(false);
-};
+}
 
 void BrillouinAcquisition::cameraSettingsChanged(CAMERA_SETTINGS settings) {
 	ui->exposureTime->setValue(settings.exposureTime);
@@ -2704,7 +2704,7 @@ void BrillouinAcquisition::on_conCalibration_stateChanged(int state) {
 
 void BrillouinAcquisition::on_sampleSelection_currentIndexChanged(const QString &text) {
 	m_BrillouinSettings.sample = text.toStdString();
-};
+}
 
 void BrillouinAcquisition::on_conCalibrationInterval_valueChanged(double value) {
 	m_BrillouinSettings.conCalibrationInterval = value;
@@ -2712,11 +2712,11 @@ void BrillouinAcquisition::on_conCalibrationInterval_valueChanged(double value) 
 
 void BrillouinAcquisition::on_nrCalibrationImages_valueChanged(int value) {
 	m_BrillouinSettings.nrCalibrationImages = value;
-};
+}
 
 void BrillouinAcquisition::on_calibrationExposureTime_valueChanged(double value) {
 	m_BrillouinSettings.calibrationExposureTime = value;
-};
+}
 
 /*
  * Functions regarding the repetition feature.
@@ -2724,11 +2724,11 @@ void BrillouinAcquisition::on_calibrationExposureTime_valueChanged(double value)
 
 void BrillouinAcquisition::on_repetitionCount_valueChanged(int count) {
 	m_BrillouinSettings.repetitions.count = count;
-};
+}
 
 void BrillouinAcquisition::on_repetitionInterval_valueChanged(double interval) {
 	m_BrillouinSettings.repetitions.interval = interval;
-};
+}
 
 void BrillouinAcquisition::showRepProgress(int repNumber, int timeToNext) {
 	ui->repetitionProgress->setValue(100 * ((double)repNumber + 1) / m_BrillouinSettings.repetitions.count);
@@ -2746,7 +2746,7 @@ void BrillouinAcquisition::showRepProgress(int repNumber, int timeToNext) {
 		string.sprintf("Finished %1.0d repetitions.", repNumber);
 	}
 	ui->repetitionProgress->setFormat(string);
-};
+}
 
 void BrillouinAcquisition::on_savePosition_clicked() {
 	QMetaObject::invokeMethod(m_scanControl, "savePosition", Qt::AutoConnection);
@@ -2848,7 +2848,7 @@ void BrillouinAcquisition::scanOrderChanged(SCAN_ORDER scanOrder) {
 
 void BrillouinAcquisition::on_exposureTime_valueChanged(double value) {
 	m_BrillouinSettings.camera.exposureTime = value;
-};
+}
 
 void BrillouinAcquisition::on_frameCount_valueChanged(int value) {
 	m_BrillouinSettings.camera.frameCount = value;

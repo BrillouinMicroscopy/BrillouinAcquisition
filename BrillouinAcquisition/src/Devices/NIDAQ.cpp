@@ -459,7 +459,7 @@ void NIDAQ::setSpatialCalibration(SpatialCalibration spatialCalibration) {
 	calculateHomePositionBounds();
 	
 	m_absoluteBounds = m_calibration.bounds;
-};
+}
 
 void NIDAQ::triggerCamera() {
 	DAQmxWriteDigitalLines(DOtaskHandle, 1, true, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
