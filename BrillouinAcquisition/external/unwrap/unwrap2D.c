@@ -334,11 +334,11 @@ void gatherPIXELs(EDGE *edge, params_t *params)
 			//merge this pixel with PIXELM 2 group and find the number of 2 pi to add
 			//to or subtract to unwrap it
 			else if ((PIXEL1->next == NULL) && (PIXEL1->head == PIXEL1)) {
-			PIXEL2->head->last->next = PIXEL1;
-			PIXEL2->head->last = PIXEL1;
-			(PIXEL2->head->number_of_pixels_in_group)++;
-			PIXEL1->head = PIXEL2->head;
-			PIXEL1->increment = PIXEL2->increment+pointer_edge->increment;
+				PIXEL2->head->last->next = PIXEL1;
+				PIXEL2->head->last = PIXEL1;
+				(PIXEL2->head->number_of_pixels_in_group)++;
+				PIXEL1->head = PIXEL2->head;
+				PIXEL1->increment = PIXEL2->increment+pointer_edge->increment;
 			}
 
 			//PIXELM 1 and PIXELM 2 both have groups
