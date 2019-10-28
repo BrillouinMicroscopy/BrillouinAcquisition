@@ -13,7 +13,7 @@ namespace PVCam {
 
 	// Name-Value Pair type - an item in enumeration type
 	typedef struct NVP {
-		int32 value;
+		int32 value{ 0 };
 		std::string name;
 	} NVP;
 
@@ -22,9 +22,9 @@ namespace PVCam {
 
 	typedef struct READOUT_OPTION {
 		NVP port;
-		int16 speedIndex;
-		float readoutFrequency;
-		int16 bitDepth;
+		int16 speedIndex{ 0 };
+		float readoutFrequency{ 0 };
+		int16 bitDepth{ 1 };
 		std::vector<int16> gains;
 		std::wstring label;
 	} READOUT_OPTION;

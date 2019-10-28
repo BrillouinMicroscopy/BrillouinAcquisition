@@ -18,9 +18,13 @@ class phase {
 
 private:
 
-	fftw_complex *m_background = nullptr;
-	fftw_complex *m_in_FFT, *m_out_FFT, *m_in_IFFT, *m_out_IFFT;
-	fftw_plan m_FFT, m_IFFT;
+	fftw_complex* m_background{ nullptr };
+	fftw_complex* m_in_FFT{ nullptr };
+	fftw_complex* m_out_FFT{ nullptr };
+	fftw_complex* m_in_IFFT{ nullptr };
+	fftw_complex* m_out_IFFT{ nullptr };
+	fftw_plan m_FFT{ nullptr };
+	fftw_plan m_IFFT{ nullptr };
 	int m_dim_x{ 0 }, m_dim_y{ 0 }, m_max_x{ 0 }, m_max_y{ 0 }, m_dim_background_x{ 0 }, m_dim_background_y{ 0 };
 	bool m_initialized{ false };
 

@@ -151,7 +151,7 @@ public:
 	std::vector<double> m_elementPositions;
 
 	std::vector<Preset> m_presets;
-	SCAN_PRESET m_activePresets;
+	SCAN_PRESET m_activePresets = SCAN_PRESET::SCAN_NULL;
 
 	bool getConnectionStatus();
 
