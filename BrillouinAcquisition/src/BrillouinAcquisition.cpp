@@ -1131,7 +1131,7 @@ QString BrillouinAcquisition::formatSeconds(int seconds) {
 }
 
 void BrillouinAcquisition::plotODTVoltages(ODT_SETTINGS settings, ODT_MODE mode) {
-	QCustomPlot *plot;
+	QCustomPlot *plot = new QCustomPlot();
 	switch (mode) {
 		case ODT_MODE::ALGN:
 			plot = ui->alignmentVoltagesODT;
