@@ -242,7 +242,9 @@ public:
 		int N = dim_x * dim_y;
 		if (updateBackground || m_updateBackground) {
 			m_updateBackground = false;
-			memcpy(m_background, m_out_IFFT, sizeof(fftw_complex) * N);
+			if (m_background) {
+				memcpy(m_background, m_out_IFFT, sizeof(fftw_complex) * N);
+			}
 		}
 
 		// Divide by background and calculate the phase angle
@@ -311,17 +313,19 @@ public:
 			// temp output array
 			int N = dim_x * dim_y;
 			T* out = (T*)malloc(sizeof(T) * N);
-			for (size_t y{ 0 }; y < dim_y; y++) {
-				size_t outY = (y + yshift) % dim_y;
-				for (size_t x{ 0 }; x < dim_x; x++) {
-					size_t outX = (x + xshift) % dim_x;
-					// row-major order
-					memcpy(&out[outX + dim_x * outY], &inputArray[x + dim_x * y], sizeof(T));
+			if (out) {
+				for (size_t y{ 0 }; y < dim_y; y++) {
+					size_t outY = (y + yshift) % dim_y;
+					for (size_t x{ 0 }; x < dim_x; x++) {
+						size_t outX = (x + xshift) % dim_x;
+						// row-major order
+						memcpy(&out[outX + dim_x * outY], &inputArray[x + dim_x * y], sizeof(T));
+					}
 				}
+				// copy out back to data
+				memcpy(inputArray, out, sizeof(T) * N);
+				free(out);
 			}
-			// copy out back to data
-			memcpy(inputArray, out, sizeof(T) * N);
-			free(out);
 		}
 	}
 
