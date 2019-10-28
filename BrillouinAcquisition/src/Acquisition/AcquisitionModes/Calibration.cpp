@@ -51,7 +51,7 @@ void Calibration::startRepetitions() {
 	m_cameraSettings.readout.pixelEncoding = L"Raw8";
 	m_cameraSettings.readout.triggerMode = L"External";
 	m_cameraSettings.readout.cycleMode = L"Continuous";
-	m_cameraSettings.frameCount = m_acqSettings.Ux_steps * m_acqSettings.Uy_steps;
+	m_cameraSettings.frameCount = (long long)m_acqSettings.Ux_steps * m_acqSettings.Uy_steps;
 
 	// start repetition
 	acquire();
@@ -115,12 +115,12 @@ void Calibration::acquire() {
 		int numberChannels{ 2 };
 		voltages.numberSamples = chunkSize * samplesPerAngle;
 		voltages.trigger = std::vector<uInt8>(voltages.numberSamples, 0);
-		voltages.mirror = std::vector<float64>(voltages.numberSamples * numberChannels, 0);
+		voltages.mirror = std::vector<float64>((float64)voltages.numberSamples * numberChannels, 0);
 		for (gsl::index i{ 0 }; i < chunkSize; i++) {
 			voltages.trigger[i * samplesPerAngle + 2] = 1;
 			voltages.trigger[i * samplesPerAngle + 3] = 1;
 			std::fill_n(voltages.mirror.begin() + i * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i + chunkBegin].Ux);
-			std::fill_n(voltages.mirror.begin() + i * samplesPerAngle + chunkSize * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i + chunkBegin].Uy);
+			std::fill_n(voltages.mirror.begin() + i * samplesPerAngle + (size_t)chunkSize * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i + chunkBegin].Uy);
 		}
 		// Apply voltages to NIDAQ board
 		(*m_NIDAQ)->setAcquisitionVoltages(voltages);
@@ -152,9 +152,9 @@ void Calibration::acquire() {
 				int x = index % m_cameraSettings.roi.width;
 
 				double x_m = m_calibration.microscopeProperties.pixelSize / m_calibration.microscopeProperties.mag
-					* (x - m_calibration.microscopeProperties.width / 2 - 0.5);
+					* ((double)x - m_calibration.microscopeProperties.width / 2 - 0.5);
 				double y_m = -1 * m_calibration.microscopeProperties.pixelSize / m_calibration.microscopeProperties.mag
-					* (y - m_calibration.microscopeProperties.height / 2 - 0.5);
+					* ((double)y - m_calibration.microscopeProperties.height / 2 - 0.5);
 
 				Ux_valid.push_back(m_acqSettings.voltages[i + chunkBegin].Ux);
 				Uy_valid.push_back(m_acqSettings.voltages[i + chunkBegin].Uy);

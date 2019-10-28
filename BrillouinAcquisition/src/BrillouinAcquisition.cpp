@@ -2497,7 +2497,7 @@ void BrillouinAcquisition::microscopeElementPositionsChanged(std::vector<double>
 
 void BrillouinAcquisition::microscopeElementPositionChanged(DeviceElement element, double position) {
 	if (m_deviceElementPositions.size() <= element.index) {
-		m_deviceElementPositions.resize(element.index + 1);
+		m_deviceElementPositions.resize((size_t)element.index + 1);
 	}
 	m_deviceElementPositions[element.index] = position;
 	checkElementButtons();

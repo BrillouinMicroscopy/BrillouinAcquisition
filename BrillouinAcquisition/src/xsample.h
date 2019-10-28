@@ -65,23 +65,23 @@ static inline void xsample::linear(T_in in, T_out out, int dim_x, int dim_y, int
 	for (int y{ 0 }; y < dim_y_new; y++) {
 		double yt = y * scaling_y;
 		int ytInt = (int)floor(yt);
-		double yb = (y + 1) * scaling_y;
+		double yb = ((double)y + 1) * scaling_y;
 		int ybInt = (int)ceil(yb);
 		for (int x{ 0 }; x < dim_x_new; x++) {
 			double xl = x * scaling_x;
 			int xlInt = (int)floor(xl);
-			double xr = (x + 1) * scaling_x;
+			double xr = ((double)x + 1) * scaling_x;
 			int xrInt = (int)ceil(xr);
 			double pixValue{ 0 };
 			// Average old pixels
 			for (int xd{ xlInt }; xd < xrInt; xd++) {
 				auto dx1 = (xd > xl) ? xd : xl;
-				auto dx2 = (xd + 1 < xr) ? (xd + 1) : xr;
+				auto dx2 = ((double)xd + 1 < xr) ? ((double)xd + 1) : xr;
 				double weight_x = dx2 - dx1;
 				for (int yd{ ytInt }; yd < ybInt; yd++) {
 
 					auto dy1 = (yd > yt) ? yd : yt;
-					auto dy2 = (yd + 1 < yb) ? (yd + 1) : yb;
+					auto dy2 = ((double)yd + 1 < yb) ? ((double)yd + 1) : yb;
 					double weight_y = dy2 - dy1;
 
 					pixValue += in[xd + dim_x * yd] * weight_x * weight_y;

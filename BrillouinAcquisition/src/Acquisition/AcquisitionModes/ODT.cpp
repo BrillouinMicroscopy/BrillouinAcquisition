@@ -153,13 +153,13 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	int samplesPerAngle{ 10 };
 	int numberChannels{ 2 };
 	voltages.numberSamples = m_acqSettings.numberPoints * samplesPerAngle;
-	voltages.trigger = std::vector<uInt8>(m_acqSettings.numberPoints * samplesPerAngle, 0);
-	voltages.mirror = std::vector<float64>(m_acqSettings.numberPoints * samplesPerAngle * numberChannels, 0);
+	voltages.trigger = std::vector<uInt8>((size_t)m_acqSettings.numberPoints * samplesPerAngle, 0);
+	voltages.mirror = std::vector<float64>((size_t)m_acqSettings.numberPoints * samplesPerAngle * numberChannels, 0);
 	for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
 		voltages.trigger[i * samplesPerAngle + 2] = 1;
 		voltages.trigger[i * samplesPerAngle + 3] = 1;
 		std::fill_n(voltages.mirror.begin() + i * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i].Ux);
-		std::fill_n(voltages.mirror.begin() + i * samplesPerAngle + m_acqSettings.numberPoints * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i].Uy);
+		std::fill_n(voltages.mirror.begin() + i * samplesPerAngle + (size_t)m_acqSettings.numberPoints * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i].Uy);
 	}
 	// Apply voltages to NIDAQ board
 	(*m_NIDAQ)->setAcquisitionVoltages(voltages);
@@ -269,7 +269,7 @@ void ODT::calculateVoltages(ODT_MODE mode) {
 	if (mode == ODT_MODE::ALGN) {
 		double Ux{ 0 };
 		double Uy{ 0 };
-		std::vector<double> theta = simplemath::linspace<double>(0, 360, m_algnSettings.numberPoints + 1);
+		std::vector<double> theta = simplemath::linspace<double>(0, 360, (size_t)m_algnSettings.numberPoints + 1);
 		theta.erase(theta.end() - 1);
 		m_algnSettings.voltages.resize(theta.size());
 		for (gsl::index i{ 0 }; i < theta.size(); i++) {
@@ -312,8 +312,8 @@ void ODT::calculateVoltages(ODT_MODE mode) {
 			m_acqSettings.voltages.push_back({ Ux, Uy });
 		}
 
-		theta = simplemath::linspace<double>(0, 2 * M_PI, m_acqSettings.numberPoints - 2 * n3 + 3);
-		theta = simplemath::linspace<double>(0, theta.end()[-2], m_acqSettings.numberPoints - 2 * n3 + 3);
+		theta = simplemath::linspace<double>(0, 2 * M_PI, m_acqSettings.numberPoints - (size_t)2 * n3 + 3);
+		theta = simplemath::linspace<double>(0, theta.end()[-2], m_acqSettings.numberPoints - (size_t)2 * n3 + 3);
 		for (gsl::index i{ 0 }; i < theta.size(); i++) {
 
 			Ux = -1* m_acqSettings.radialVoltage * cos(theta[i]);

@@ -209,7 +209,7 @@ void NIDAQ::getElement(DeviceElement element) {
 			m_elementPositions[element.index] = getEmFilter();
 			break;
 		case DEVICE_ELEMENT::LEDLAMP:
-			m_elementPositions[element.index] = getLEDLamp() + 1;
+			m_elementPositions[element.index] = (double)getLEDLamp() + 1;
 			break;
 		case DEVICE_ELEMENT::LOWEROBJECTIVE:
 			m_elementPositions[element.index] = getLowerObjective();
@@ -248,7 +248,7 @@ void NIDAQ::getElements() {
 	m_elementPositions[(int)DEVICE_ELEMENT::MOVEMIRROR] = getMirror();
 	m_elementPositions[(int)DEVICE_ELEMENT::EXFILTER] = getExFilter();
 	m_elementPositions[(int)DEVICE_ELEMENT::EMFILTER] = getEmFilter();
-	m_elementPositions[(int)DEVICE_ELEMENT::LEDLAMP] = getLEDLamp() + 1;
+	m_elementPositions[(int)DEVICE_ELEMENT::LEDLAMP] = (double)getLEDLamp() + 1;
 	m_elementPositions[(int)DEVICE_ELEMENT::LOWEROBJECTIVE] = getLowerObjective();
 	checkPresets();
 	emit(elementPositionsChanged(m_elementPositions));
@@ -326,7 +326,7 @@ void NIDAQ::setEmFilter(int position) {
 
 void NIDAQ::setFilter(FilterMount *device, int position) {
 	// calculate the position to set, slots are spaced every 32 mm
-	double pos = 32.0 * (position - 1);
+	double pos = 32.0 * ((double)position - 1);
 	device->setPosition(pos);
 }
 

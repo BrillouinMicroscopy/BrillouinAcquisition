@@ -456,7 +456,7 @@ void PVCamera::preparePreview() {
 		delete[] m_buffer;
 		m_buffer = nullptr;
 	}
-	int bufSize = (int)circBufferFrames * m_bufferSize / sizeof(PVCam::uns16);
+	int bufSize = (size_t)circBufferFrames * m_bufferSize / sizeof(PVCam::uns16);
 	m_buffer = new (std::nothrow) PVCam::uns16[bufSize];
 
 	// Register callback

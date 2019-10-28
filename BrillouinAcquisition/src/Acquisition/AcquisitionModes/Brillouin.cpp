@@ -283,7 +283,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 		IMAGE* img = new IMAGE(indexX[ll], indexY[ll], indexZ[ll], rank_data, dims_data, date, *images_);
 
 		// move stage to next position before saving the images
-		if (ll < (nrPositions - 1)) {
+		if (ll < ((gsl::index)nrPositions - 1)) {
 			(*m_scanControl)->setPosition(orderedPositions[ll + 1]);
 		}
 
