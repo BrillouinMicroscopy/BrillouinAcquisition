@@ -15,15 +15,15 @@ NIDAQ::NIDAQ() noexcept {
 	};
 
 	m_presets = {
-		{	"Brillouin",	SCAN_BRILLOUIN,		{ {2}, {1}, {1},  {},  {},  {},  {} }	},	// Brillouin
-		{	"Calibration",	SCAN_CALIBRATION,	{ {2}, {2}, {1},  {},  {},  {},  {} }	},	// Brillouin Calibration
-		{	"ODT",			SCAN_ODT,			{ {2},  {}, {2}, {1}, {1}, {1},  {} }	},	// ODT
-		{	"Brightfield",	SCAN_BRIGHTFIELD,	{  {},  {},  {},  {}, {2}, {2},  {} }	},	// Brightfield
-		{	"Fluo off",		SCAN_EPIFLUOOFF,	{  {},  {},  {}, {1}, {1},  {},  {} }	},	// Fluorescence off
-		{	"Fluo Blue",	SCAN_EPIFLUOBLUE,	{ {1},  {},  {}, {2}, {2}, {1},  {} }	},	// Fluorescence blue
-		{	"Fluo Green",	SCAN_EPIFLUOGREEN,	{ {1},  {},  {}, {3}, {3}, {1},  {} }	},	// Fluorescence green
-		{	"Fluo Red",		SCAN_EPIFLUORED,	{ {1},  {},  {}, {4}, {4}, {1},  {} }	},	// Fluorescence red
-		{	"Laser off",	SCAN_LASEROFF,		{ {1},  {},  {},  {},  {},  {},  {} }	}	// Laser off
+		{	"Brillouin",	ScanPreset::SCAN_BRILLOUIN,	{ {2}, {1}, {1},  {},  {},  {},  {} }	},	// Brillouin
+		{	"Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {2}, {2}, {1},  {},  {},  {},  {} }	},	// Brillouin Calibration
+		{	"ODT",			ScanPreset::SCAN_ODT,			{ {2},  {}, {2}, {1}, {1}, {1},  {} }	},	// ODT
+		{	"Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{  {},  {},  {},  {}, {2}, {2},  {} }	},	// Brightfield
+		{	"Fluo off",		ScanPreset::SCAN_EPIFLUOOFF,	{  {},  {},  {}, {1}, {1},  {},  {} }	},	// Fluorescence off
+		{	"Fluo Blue",	ScanPreset::SCAN_EPIFLUOBLUE,	{ {1},  {},  {}, {2}, {2}, {1},  {} }	},	// Fluorescence blue
+		{	"Fluo Green",	ScanPreset::SCAN_EPIFLUOGREEN,{ {1},  {},  {}, {3}, {3}, {1},  {} }	},	// Fluorescence green
+		{	"Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {1},  {},  {}, {4}, {4}, {1},  {} }	},	// Fluorescence red
+		{	"Laser off",	ScanPreset::SCAN_LASEROFF,	{ {1},  {},  {},  {},  {},  {},  {} }	}	// Laser off
 	};
 
 	CalibrationHelper::calculateCalibrationBounds(&m_calibration);
@@ -209,7 +209,7 @@ void NIDAQ::getElement(DeviceElement element) {
 			m_elementPositions[element.index] = getEmFilter();
 			break;
 		case DEVICE_ELEMENT::LEDLAMP:
-			m_elementPositions[element.index] = getLEDLamp() + 1;
+			m_elementPositions[element.index] = (double)getLEDLamp() + 1;
 			break;
 		case DEVICE_ELEMENT::LOWEROBJECTIVE:
 			m_elementPositions[element.index] = getLowerObjective();
@@ -221,7 +221,7 @@ void NIDAQ::getElement(DeviceElement element) {
 	emit(elementPositionChanged(element, m_elementPositions[element.index]));
 }
 
-void NIDAQ::setPreset(SCAN_PRESET presetType) {
+void NIDAQ::setPreset(ScanPreset presetType) {
 	auto preset = getPreset(presetType);
 
 	for (gsl::index ii = 0; ii < m_deviceElements.size(); ii++) {
@@ -232,7 +232,7 @@ void NIDAQ::setPreset(SCAN_PRESET presetType) {
 		}
 	}
 
-	if (presetType == SCAN_CALIBRATION) {
+	if (presetType == ScanPreset::SCAN_CALIBRATION) {
 		// Set voltage of galvo mirrors to zero
 		// Otherwise the laser beam might not hit the calibration samples
 		setVoltage({ 0, 0 });
@@ -248,7 +248,7 @@ void NIDAQ::getElements() {
 	m_elementPositions[(int)DEVICE_ELEMENT::MOVEMIRROR] = getMirror();
 	m_elementPositions[(int)DEVICE_ELEMENT::EXFILTER] = getExFilter();
 	m_elementPositions[(int)DEVICE_ELEMENT::EMFILTER] = getEmFilter();
-	m_elementPositions[(int)DEVICE_ELEMENT::LEDLAMP] = getLEDLamp() + 1;
+	m_elementPositions[(int)DEVICE_ELEMENT::LEDLAMP] = (double)getLEDLamp() + 1;
 	m_elementPositions[(int)DEVICE_ELEMENT::LOWEROBJECTIVE] = getLowerObjective();
 	checkPresets();
 	emit(elementPositionsChanged(m_elementPositions));
@@ -326,7 +326,7 @@ void NIDAQ::setEmFilter(int position) {
 
 void NIDAQ::setFilter(FilterMount *device, int position) {
 	// calculate the position to set, slots are spaced every 32 mm
-	double pos = 32.0 * (position - 1);
+	double pos = 32.0 * ((double)position - 1);
 	device->setPosition(pos);
 }
 
@@ -459,7 +459,7 @@ void NIDAQ::setSpatialCalibration(SpatialCalibration spatialCalibration) {
 	calculateHomePositionBounds();
 	
 	m_absoluteBounds = m_calibration.bounds;
-};
+}
 
 void NIDAQ::triggerCamera() {
 	DAQmxWriteDigitalLines(DOtaskHandle, 1, true, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);

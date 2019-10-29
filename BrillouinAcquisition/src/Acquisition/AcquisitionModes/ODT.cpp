@@ -138,7 +138,7 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	QMetaObject::invokeMethod(storage.get(), "startWritingQueues", Qt::AutoConnection);
 
 	// move to ODT configuration
-	(*m_NIDAQ)->setPreset(SCAN_ODT);
+	(*m_NIDAQ)->setPreset(ScanPreset::SCAN_ODT);
 
 	// Set first mirror voltage already
 	(*m_NIDAQ)->setVoltage(m_acqSettings.voltages[0]);
@@ -153,13 +153,13 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	int samplesPerAngle{ 10 };
 	int numberChannels{ 2 };
 	voltages.numberSamples = m_acqSettings.numberPoints * samplesPerAngle;
-	voltages.trigger = std::vector<uInt8>(m_acqSettings.numberPoints * samplesPerAngle, 0);
-	voltages.mirror = std::vector<float64>(m_acqSettings.numberPoints * samplesPerAngle * numberChannels, 0);
+	voltages.trigger = std::vector<uInt8>((size_t)m_acqSettings.numberPoints * samplesPerAngle, 0);
+	voltages.mirror = std::vector<float64>((size_t)m_acqSettings.numberPoints * samplesPerAngle * numberChannels, 0);
 	for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
 		voltages.trigger[i * samplesPerAngle + 2] = 1;
 		voltages.trigger[i * samplesPerAngle + 3] = 1;
 		std::fill_n(voltages.mirror.begin() + i * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i].Ux);
-		std::fill_n(voltages.mirror.begin() + i * samplesPerAngle + m_acqSettings.numberPoints * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i].Uy);
+		std::fill_n(voltages.mirror.begin() + i * samplesPerAngle + (size_t)m_acqSettings.numberPoints * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i].Uy);
 	}
 	// Apply voltages to NIDAQ board
 	(*m_NIDAQ)->setAcquisitionVoltages(voltages);
@@ -198,7 +198,7 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
-	connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	auto connection = QWidget::connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
 	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
 	loop.exec();
 
@@ -221,7 +221,7 @@ void ODT::startAlignment() {
 		QMetaObject::invokeMethod((*m_camera), "setSettings", Qt::AutoConnection, Q_ARG(CAMERA_SETTINGS, settings));
 
 		// move to ODT configuration
-		(*m_NIDAQ)->setPreset(SCAN_ODT);
+		(*m_NIDAQ)->setPreset(ScanPreset::SCAN_ODT);
 		// stop querying the element positions, because querying the filter mounts block the thread quite long
 		(*m_NIDAQ)->stopAnnouncingElementPosition();
 		// start the timer
@@ -269,7 +269,7 @@ void ODT::calculateVoltages(ODT_MODE mode) {
 	if (mode == ODT_MODE::ALGN) {
 		double Ux{ 0 };
 		double Uy{ 0 };
-		std::vector<double> theta = simplemath::linspace<double>(0, 360, m_algnSettings.numberPoints + 1);
+		std::vector<double> theta = simplemath::linspace<double>(0, 360, (size_t)m_algnSettings.numberPoints + 1);
 		theta.erase(theta.end() - 1);
 		m_algnSettings.voltages.resize(theta.size());
 		for (gsl::index i{ 0 }; i < theta.size(); i++) {
@@ -312,8 +312,8 @@ void ODT::calculateVoltages(ODT_MODE mode) {
 			m_acqSettings.voltages.push_back({ Ux, Uy });
 		}
 
-		theta = simplemath::linspace<double>(0, 2 * M_PI, m_acqSettings.numberPoints - 2 * n3 + 3);
-		theta = simplemath::linspace<double>(0, theta.end()[-2], m_acqSettings.numberPoints - 2 * n3 + 3);
+		theta = simplemath::linspace<double>(0, 2 * M_PI, m_acqSettings.numberPoints - (size_t)2 * n3 + 3);
+		theta = simplemath::linspace<double>(0, theta.end()[-2], m_acqSettings.numberPoints - (size_t)2 * n3 + 3);
 		for (gsl::index i{ 0 }; i < theta.size(); i++) {
 
 			Ux = -1* m_acqSettings.radialVoltage * cos(theta[i]);
@@ -331,7 +331,7 @@ void ODT::calculateVoltages(ODT_MODE mode) {
 void ODT::abortMode(std::unique_ptr <StorageWrapper> & storage) {
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
-	connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	auto connection = QWidget::connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
 	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
 	loop.exec();
 

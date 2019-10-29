@@ -394,16 +394,16 @@ void PVCamera::checkSensorTemperature() {
 	m_sensorTemperature.temperature = getSensorTemperature();
 	std::string status = getTemperatureStatus();
 	if (status == "Cooler Off") {
-		m_sensorTemperature.status = COOLER_OFF;
+		m_sensorTemperature.status = enCameraTemperatureStatus::COOLER_OFF;
 	}
 	else if (status == "Cooling") {
-		m_sensorTemperature.status = COOLING;
+		m_sensorTemperature.status = enCameraTemperatureStatus::COOLING;
 	}
 	else if (status == "Stabilised") {
-		m_sensorTemperature.status = STABILISED;
+		m_sensorTemperature.status = enCameraTemperatureStatus::STABILISED;
 	}
 	else {
-		m_sensorTemperature.status = FAULT;
+		m_sensorTemperature.status = enCameraTemperatureStatus::FAULT;
 	}
 	emit(s_sensorTemperatureChanged(m_sensorTemperature));
 }
@@ -456,7 +456,7 @@ void PVCamera::preparePreview() {
 		delete[] m_buffer;
 		m_buffer = nullptr;
 	}
-	int bufSize = (int)circBufferFrames * m_bufferSize / sizeof(PVCam::uns16);
+	int bufSize = (size_t)circBufferFrames * m_bufferSize / sizeof(PVCam::uns16);
 	m_buffer = new (std::nothrow) PVCam::uns16[bufSize];
 
 	// Register callback
@@ -669,21 +669,23 @@ bool PVCamera::ReadEnumeration(PVCam::NVPC* nvpc, PVCam::uns32 paramID, const ch
 
 		// Allocate the destination string
 		char* name = new (std::nothrow) char[strLength];
+		if (name) {
 
-		// Actually get the string and value
-		PVCam::int32 value;
-		if (PVCam::PV_OK != PVCam::pl_get_enum_param(m_camera, paramID, i, &value, name, strLength)) {
-			//const std::string msg =
-			//	"pl_get_enum_param(" + std::string(paramName) + ") error";
-			//PrintErrorMessage(pl_error_code(), msg.c_str());
-			delete[] name;
-			return false;
+			// Actually get the string and value
+			PVCam::int32 value;
+			if (PVCam::PV_OK != PVCam::pl_get_enum_param(m_camera, paramID, i, &value, name, strLength)) {
+				//const std::string msg =
+				//	"pl_get_enum_param(" + std::string(paramName) + ") error";
+				//PrintErrorMessage(pl_error_code(), msg.c_str());
+				delete[] name;
+				return false;
+			}
+
+			PVCam::NVP nvp;
+			nvp.value = value;
+			nvp.name = name;
+			nvpc->push_back(nvp);
 		}
-
-		PVCam::NVP nvp;
-		nvp.value = value;
-		nvp.name = name;
-		nvpc->push_back(nvp);
 
 		delete[] name;
 	}

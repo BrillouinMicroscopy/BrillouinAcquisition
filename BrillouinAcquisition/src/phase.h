@@ -18,9 +18,13 @@ class phase {
 
 private:
 
-	fftw_complex *m_background = nullptr;
-	fftw_complex *m_in_FFT, *m_out_FFT, *m_in_IFFT, *m_out_IFFT;
-	fftw_plan m_FFT, m_IFFT;
+	fftw_complex* m_background{ nullptr };
+	fftw_complex* m_in_FFT{ nullptr };
+	fftw_complex* m_out_FFT{ nullptr };
+	fftw_complex* m_in_IFFT{ nullptr };
+	fftw_complex* m_out_IFFT{ nullptr };
+	fftw_plan m_FFT{ nullptr };
+	fftw_plan m_IFFT{ nullptr };
 	int m_dim_x{ 0 }, m_dim_y{ 0 }, m_max_x{ 0 }, m_max_y{ 0 }, m_dim_background_x{ 0 }, m_dim_background_y{ 0 };
 	bool m_initialized{ false };
 
@@ -77,11 +81,11 @@ private:
 	}
 
 	std::vector<int> createMask(int dim_x, int dim_y, double maskRadius) {
-		std::vector<int> mask(dim_x * dim_y, 0);
+		std::vector<int> mask((size_t)dim_x * dim_y, 0);
 		for (int x{ (int)round(dim_x / 2.0 - m_maskRadius) }; x < round(dim_x / 2.0 + m_maskRadius); x++) {
 			for (int y{ (int)round(dim_y / 2.0 - m_maskRadius) }; y < round(dim_y / 2.0 + m_maskRadius); y++) {
 				if (sqrt(pow((x - dim_x/2.0), 2) + pow(y - dim_y/2.0, 2)) <= m_maskRadius) {
-					mask[x + dim_x * y] = 1;
+					mask[x + (size_t)dim_x * y] = 1;
 				}
 			}
 		}
@@ -173,7 +177,7 @@ public:
 
 		// Calculate magnitude of background image to find the indices of the largest element
 		std::vector<double> background;
-		background.resize(dim_x * dim_y);
+		background.resize((size_t)dim_x * dim_y);
 		for (int i{ 0 }; i < dim_x * dim_y; i++) {
 			background[i] = pow(m_out_FFT[i][0], 2) + pow(m_out_FFT[i][1], 2);
 		}
@@ -208,7 +212,7 @@ public:
 
 		// Calculate the absolute value
 		for (int i{ 0 }; i < dim_x * dim_y; i++) {
-			(*spectrum)[i] = log10(sqrt(pow(m_out_FFT[i][0], 2) + pow(m_out_FFT[i][1], 2)) / (dim_x * dim_y));
+			(*spectrum)[i] = log10(sqrt(pow(m_out_FFT[i][0], 2) + pow(m_out_FFT[i][1], 2)) / ((size_t)dim_x * dim_y));
 		}
 
 		fftshift(&(*spectrum)[0], dim_x, dim_y);
@@ -238,7 +242,9 @@ public:
 		int N = dim_x * dim_y;
 		if (updateBackground || m_updateBackground) {
 			m_updateBackground = false;
-			memcpy(m_background, m_out_IFFT, sizeof(fftw_complex) * N);
+			if (m_background) {
+				memcpy(m_background, m_out_IFFT, sizeof(fftw_complex) * N);
+			}
 		}
 
 		// Divide by background and calculate the phase angle
@@ -254,7 +260,7 @@ public:
 		int dim_x_new{ dim_x / 3 };
 		int dim_y_new{ dim_y / 3 };
 		std::vector<float> phase_lowRes;
-		phase_lowRes.resize(dim_x_new * dim_y_new);
+		phase_lowRes.resize((size_t)dim_x_new * dim_y_new);
 		m_xsample->resample(&(*phase)[0], &phase_lowRes[0], dim_x, dim_y, dim_x_new, dim_y_new, RESAMPLE_MODE::NEAREST);
 
 		std::vector<float> phaseUnwrapped = phase_lowRes;
@@ -307,17 +313,19 @@ public:
 			// temp output array
 			int N = dim_x * dim_y;
 			T* out = (T*)malloc(sizeof(T) * N);
-			for (size_t y{ 0 }; y < dim_y; y++) {
-				size_t outY = (y + yshift) % dim_y;
-				for (size_t x{ 0 }; x < dim_x; x++) {
-					size_t outX = (x + xshift) % dim_x;
-					// row-major order
-					memcpy(&out[outX + dim_x * outY], &inputArray[x + dim_x * y], sizeof(T));
+			if (out) {
+				for (size_t y{ 0 }; y < dim_y; y++) {
+					size_t outY = (y + yshift) % dim_y;
+					for (size_t x{ 0 }; x < dim_x; x++) {
+						size_t outX = (x + xshift) % dim_x;
+						// row-major order
+						memcpy(&out[outX + dim_x * outY], &inputArray[x + dim_x * y], sizeof(T));
+					}
 				}
+				// copy out back to data
+				memcpy(inputArray, out, sizeof(T) * N);
+				free(out);
 			}
-			// copy out back to data
-			memcpy(inputArray, out, sizeof(T) * N);
-			free(out);
 		}
 	}
 

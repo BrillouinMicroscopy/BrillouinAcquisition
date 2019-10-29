@@ -129,7 +129,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<QSerialPort::SerialPortError>("QSerialPort::SerialPortError");
 	qRegisterMetaType<IMAGE*>("IMAGE*");
 	qRegisterMetaType<CALIBRATION*>("CALIBRATION*");
-	qRegisterMetaType<SCAN_PRESET>("SCAN_PRESET");
+	qRegisterMetaType<ScanPreset>("ScanPreset");
 	qRegisterMetaType<DeviceElement>("DeviceElement");
 	qRegisterMetaType<SensorTemperature>("SensorTemperature");
 	qRegisterMetaType<POINT3>("POINT3");
@@ -269,7 +269,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 			this->updateCLimRange(ui->rangeLower, ui->rangeUpper, range);
 		},
 		false,
-		gpParula
+		CustomGradientPreset::gpParula
 	};
 
 	m_ODTPlot = {
@@ -282,7 +282,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 			this->updateCLimRange(ui->rangeLowerODT, ui->rangeUpperODT, range);
 		},
 		false,
-		gpGrayscale
+		CustomGradientPreset::gpGrayscale
 	};
 
 	// set up laser focus marker
@@ -414,8 +414,8 @@ void BrillouinAcquisition::on_autoscalePlot_brightfield_stateChanged(int state) 
 	ui->rangeUpperODT->setDisabled(state);
 }
 
-void BrillouinAcquisition::setPreset(SCAN_PRESET preset) {
-	QMetaObject::invokeMethod(m_scanControl, "setPreset", Qt::QueuedConnection, Q_ARG(SCAN_PRESET, preset));
+void BrillouinAcquisition::setPreset(ScanPreset preset) {
+	QMetaObject::invokeMethod(m_scanControl, "setPreset", Qt::QueuedConnection, Q_ARG(ScanPreset, preset));
 }
 
 void BrillouinAcquisition::cameraOptionsChanged(CAMERA_OPTIONS options) {
@@ -586,7 +586,7 @@ void BrillouinAcquisition::addListToComboBox(QComboBox* box, std::vector<std::ws
 		box->addItem(QString::fromStdWString(item));
 	});
 	box->blockSignals(false);
-};
+}
 
 void BrillouinAcquisition::cameraSettingsChanged(CAMERA_SETTINGS settings) {
 	ui->exposureTime->setValue(settings.exposureTime);
@@ -632,11 +632,13 @@ void BrillouinAcquisition::updateODTCameraSettings(CAMERA_SETTINGS settings) {
 
 void BrillouinAcquisition::sensorTemperatureChanged(SensorTemperature sensorTemperature) {
 	ui->sensorTemp->setValue(sensorTemperature.temperature);
-	if (sensorTemperature.status == COOLER_OFF || sensorTemperature.status == FAULT || sensorTemperature.status == DRIFT) {
+	if (sensorTemperature.status == enCameraTemperatureStatus::COOLER_OFF ||
+		sensorTemperature.status == enCameraTemperatureStatus::FAULT || sensorTemperature.status == enCameraTemperatureStatus::DRIFT) {
 		ui->settingsWidget->setTabIcon(0, m_icons.standby);
-	} else if (sensorTemperature.status == COOLING || sensorTemperature.status == NOT_STABILISED) {
+	} else if (sensorTemperature.status == enCameraTemperatureStatus::COOLING
+		|| sensorTemperature.status == enCameraTemperatureStatus::NOT_STABILISED) {
 		ui->settingsWidget->setTabIcon(0, m_icons.cooling);
-	} else if (sensorTemperature.status == STABILISED) {
+	} else if (sensorTemperature.status == enCameraTemperatureStatus::STABILISED) {
 		ui->settingsWidget->setTabIcon(0, m_icons.ready);
 	} else {
 		ui->settingsWidget->setTabIcon(0, m_icons.disconnected);
@@ -1129,7 +1131,7 @@ QString BrillouinAcquisition::formatSeconds(int seconds) {
 }
 
 void BrillouinAcquisition::plotODTVoltages(ODT_SETTINGS settings, ODT_MODE mode) {
-	QCustomPlot *plot;
+	QCustomPlot *plot = new QCustomPlot();
 	switch (mode) {
 		case ODT_MODE::ALGN:
 			plot = ui->alignmentVoltagesODT;
@@ -1220,7 +1222,7 @@ void BrillouinAcquisition::initializePlot(PLOT_SETTINGS plotSettings) {
 	plotSettings.colorMap->setColorScale(colorScale); // associate the color map with the color scale
 	colorScale->axis()->setLabel("Intensity");
 
-	QWidget::connect<void(QCPColorMap::*)(const QCPRange &)>(
+	auto connection = QWidget::connect<void(QCPColorMap::*)(const QCPRange &)>(
 		plotSettings.colorMap,
 		&QCPColorMap::dataRangeChanged,
 		this,
@@ -2497,7 +2499,7 @@ void BrillouinAcquisition::microscopeElementPositionsChanged(std::vector<double>
 
 void BrillouinAcquisition::microscopeElementPositionChanged(DeviceElement element, double position) {
 	if (m_deviceElementPositions.size() <= element.index) {
-		m_deviceElementPositions.resize(element.index + 1);
+		m_deviceElementPositions.resize((size_t)element.index + 1);
 	}
 	m_deviceElementPositions[element.index] = position;
 	checkElementButtons();
@@ -2704,7 +2706,7 @@ void BrillouinAcquisition::on_conCalibration_stateChanged(int state) {
 
 void BrillouinAcquisition::on_sampleSelection_currentIndexChanged(const QString &text) {
 	m_BrillouinSettings.sample = text.toStdString();
-};
+}
 
 void BrillouinAcquisition::on_conCalibrationInterval_valueChanged(double value) {
 	m_BrillouinSettings.conCalibrationInterval = value;
@@ -2712,11 +2714,11 @@ void BrillouinAcquisition::on_conCalibrationInterval_valueChanged(double value) 
 
 void BrillouinAcquisition::on_nrCalibrationImages_valueChanged(int value) {
 	m_BrillouinSettings.nrCalibrationImages = value;
-};
+}
 
 void BrillouinAcquisition::on_calibrationExposureTime_valueChanged(double value) {
 	m_BrillouinSettings.calibrationExposureTime = value;
-};
+}
 
 /*
  * Functions regarding the repetition feature.
@@ -2724,11 +2726,11 @@ void BrillouinAcquisition::on_calibrationExposureTime_valueChanged(double value)
 
 void BrillouinAcquisition::on_repetitionCount_valueChanged(int count) {
 	m_BrillouinSettings.repetitions.count = count;
-};
+}
 
 void BrillouinAcquisition::on_repetitionInterval_valueChanged(double interval) {
 	m_BrillouinSettings.repetitions.interval = interval;
-};
+}
 
 void BrillouinAcquisition::showRepProgress(int repNumber, int timeToNext) {
 	ui->repetitionProgress->setValue(100 * ((double)repNumber + 1) / m_BrillouinSettings.repetitions.count);
@@ -2746,7 +2748,7 @@ void BrillouinAcquisition::showRepProgress(int repNumber, int timeToNext) {
 		string.sprintf("Finished %1.0d repetitions.", repNumber);
 	}
 	ui->repetitionProgress->setFormat(string);
-};
+}
 
 void BrillouinAcquisition::on_savePosition_clicked() {
 	QMetaObject::invokeMethod(m_scanControl, "savePosition", Qt::AutoConnection);
@@ -2848,7 +2850,7 @@ void BrillouinAcquisition::scanOrderChanged(SCAN_ORDER scanOrder) {
 
 void BrillouinAcquisition::on_exposureTime_valueChanged(double value) {
 	m_BrillouinSettings.camera.exposureTime = value;
-};
+}
 
 void BrillouinAcquisition::on_frameCount_valueChanged(int value) {
 	m_BrillouinSettings.camera.frameCount = value;
@@ -2929,7 +2931,7 @@ void BrillouinAcquisition::on_actionClose_Acquisition_triggered() {
 void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradientPreset preset) {
 	gradient->clearColorStops();
 	switch (preset) {
-		case gpParula:
+		case CustomGradientPreset::gpParula:
 			gradient->setColorInterpolation(QCPColorGradient::ciRGB);
 			gradient->setColorStopAt(0.00, QColor( 53,  42, 135));
 			gradient->setColorStopAt(0.05, QColor( 53,  62, 175));
@@ -2953,10 +2955,10 @@ void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradien
 			gradient->setColorStopAt(0.95, QColor(245, 227,  30));
 			gradient->setColorStopAt(1.00, QColor(249, 251,  14));
 			break;
-		case gpGrayscale:
+		case CustomGradientPreset::gpGrayscale:
 			gradient->loadPreset(QCPColorGradient::gpGrayscale);
 			break;
-		case gpJet:
+		case CustomGradientPreset::gpJet:
 			gradient->loadPreset(QCPColorGradient::gpJet);
 			break;
 		default:

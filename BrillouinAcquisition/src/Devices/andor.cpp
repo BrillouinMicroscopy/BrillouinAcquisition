@@ -208,19 +208,19 @@ void Andor::checkSensorTemperature() {
 	m_sensorTemperature.temperature = getSensorTemperature();
 	std::string status = getTemperatureStatus();
 	if (status == "Cooler Off") {
-		m_sensorTemperature.status = COOLER_OFF;
+		m_sensorTemperature.status = enCameraTemperatureStatus::COOLER_OFF;
 	} else if (status == "Fault") {
-		m_sensorTemperature.status = FAULT;
+		m_sensorTemperature.status = enCameraTemperatureStatus::FAULT;
 	} else if(status == "Cooling") {
-		m_sensorTemperature.status = COOLING;
+		m_sensorTemperature.status = enCameraTemperatureStatus::COOLING;
 	} else if (status == "Drift") {
-		m_sensorTemperature.status = DRIFT;
+		m_sensorTemperature.status = enCameraTemperatureStatus::DRIFT;
 	} else if (status == "Not Stabilised") {
-		m_sensorTemperature.status = NOT_STABILISED;
+		m_sensorTemperature.status = enCameraTemperatureStatus::NOT_STABILISED;
 	} else if (status == "Stabilised") {
-		m_sensorTemperature.status = STABILISED;
+		m_sensorTemperature.status = enCameraTemperatureStatus::STABILISED;
 	} else {
-		m_sensorTemperature.status = FAULT;
+		m_sensorTemperature.status = enCameraTemperatureStatus::FAULT;
 	}
 	emit(s_sensorTemperatureChanged(m_sensorTemperature));
 }

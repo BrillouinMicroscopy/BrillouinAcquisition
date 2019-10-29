@@ -116,7 +116,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	m_settings.camera = (*m_andor)->getSettings();
 	QMetaObject::invokeMethod((*m_scanControl), "stopAnnouncing", Qt::AutoConnection);
 	// set optical elements for brightfield/Brillouin imaging
-	(*m_scanControl)->setPreset(SCAN_BRILLOUIN);
+	(*m_scanControl)->setPreset(ScanPreset::SCAN_BRILLOUIN);
 	Sleep(500);
 
 	// get current stage position
@@ -283,7 +283,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 		IMAGE* img = new IMAGE(indexX[ll], indexY[ll], indexZ[ll], rank_data, dims_data, date, *images_);
 
 		// move stage to next position before saving the images
-		if (ll < (nrPositions - 1)) {
+		if (ll < ((gsl::index)nrPositions - 1)) {
 			(*m_scanControl)->setPosition(orderedPositions[ll + 1]);
 		}
 
@@ -301,7 +301,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	// close camera libraries, clear buffers
 	(*m_andor)->stopAcquisition();
 
-	(*m_scanControl)->setPreset(SCAN_LASEROFF);
+	(*m_scanControl)->setPreset(ScanPreset::SCAN_LASEROFF);
 
 	(*m_scanControl)->setPosition(m_startPosition);
 	emit(s_positionChanged({ 0, 0, 0 }, 0));
@@ -309,7 +309,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
-	connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	auto connection = QWidget::connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
 	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
 	loop.exec();
 
@@ -326,7 +326,7 @@ void Brillouin::abortMode(std::unique_ptr <StorageWrapper>& storage) {
 
 	(*m_andor)->stopAcquisition();
 
-	(*m_scanControl)->setPreset(SCAN_LASEROFF);
+	(*m_scanControl)->setPreset(ScanPreset::SCAN_LASEROFF);
 
 	(*m_scanControl)->setPosition(m_startPosition);
 
@@ -336,7 +336,7 @@ void Brillouin::abortMode(std::unique_ptr <StorageWrapper>& storage) {
 
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
-	connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	auto connection = QWidget::connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
 	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
 	loop.exec();
 
@@ -353,7 +353,7 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 	(*m_andor)->setCalibrationExposureTime(m_settings.calibrationExposureTime);
 
 	// move optical elements to position for calibration
-	(*m_scanControl)->setPreset(SCAN_CALIBRATION);
+	(*m_scanControl)->setPreset(ScanPreset::SCAN_CALIBRATION);
 	Sleep(500);
 
 	double shift = 5.088; // this is the shift for water
@@ -394,7 +394,7 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 	nrCalibrations++;
 
 	// revert optical elements to position for brightfield/Brillouin imaging
-	(*m_scanControl)->setPreset(SCAN_BRILLOUIN);
+	(*m_scanControl)->setPreset(ScanPreset::SCAN_BRILLOUIN);
 
 	// reset exposure time
 	(*m_andor)->setCalibrationExposureTime(m_settings.camera.exposureTime);

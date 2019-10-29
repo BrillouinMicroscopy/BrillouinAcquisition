@@ -16,7 +16,7 @@ yes_no find_pivot(EDGE *left, EDGE *right, float *pivot_ptr) {
 	EDGE a, b, c, *p;
 
 	a = *left;
-	b = *(left + (right - left) /2 );
+	b = *(left + (right - left) / 2 );
 	c = *right;
 	unwrap_o3(a,b,c);
 
@@ -77,8 +77,8 @@ void initialisePIXELs(float *wrapped_image, PIXELM *pixel, int image_width, int 
 	float *wrapped_image_pointer = wrapped_image;
 	int i, j;
 
-	for (i=0; i < image_height; i++) {
-		for (j=0; j < image_width; j++) {
+	for (i = 0; i < image_height; i++) {
+		for (j = 0; j < image_width; j++) {
 			pixel_pointer->increment = 0;
 			pixel_pointer->number_of_pixels_in_group = 1;
 			pixel_pointer->value = *wrapped_image_pointer;
@@ -159,7 +159,7 @@ void calculate_reliability(float *wrappedImage, PIXELM *pixel,
 			H = wrap(*(WIP + image_width - 1) - *WIP) - wrap(*WIP - *(WIP + 1));
 			V = wrap(*(WIP - image_width) - *WIP) - wrap(*WIP - *(WIP + image_width));
 			D1 = wrap(*(WIP - 1) - *WIP) - wrap(*WIP - *(WIP + image_width_plus_one));
-			D2 = wrap(*(WIP - image_width_minus_one) - *WIP) - wrap(*WIP - *(WIP + 2* image_width - 1));
+			D2 = wrap(*(WIP - image_width_minus_one) - *WIP) - wrap(*WIP - *(WIP + (size_t)2 * image_width - 1));
 			pixel_pointer->reliability = H*H + V*V + D1*D1 + D2*D2;
 
 			pixel_pointer += image_width;
@@ -167,14 +167,14 @@ void calculate_reliability(float *wrappedImage, PIXELM *pixel,
 		}
 
 		//calculating the reliability for the right border of the image
-		pixel_pointer = pixel + 2 * image_width - 1;
-		WIP = wrappedImage + 2 * image_width - 1;
+		pixel_pointer = pixel + (size_t)2 * image_width - 1;
+		WIP = wrappedImage + (size_t)2 * image_width - 1;
 
 		for (i = 1; i < image_height - 1; ++i) {
 			H = wrap(*(WIP - 1) - *WIP) - wrap(*WIP - *(WIP - image_width_minus_one));
 			V = wrap(*(WIP - image_width) - *WIP) - wrap(*WIP - *(WIP + image_width));
 			D1 = wrap(*(WIP - image_width_plus_one) - *WIP) - wrap(*WIP - *(WIP + 1));
-			D2 = wrap(*(WIP - 2 * image_width - 1) - *WIP) - wrap(*WIP - *(WIP + image_width_minus_one));
+			D2 = wrap(*(WIP - (size_t)2 * image_width - 1) - *WIP) - wrap(*WIP - *(WIP + image_width_minus_one));
 			pixel_pointer->reliability = H*H + V*V + D1*D1 + D2*D2;
 
 			pixel_pointer += image_width;
@@ -189,9 +189,9 @@ void calculate_reliability(float *wrappedImage, PIXELM *pixel,
 
 		for (i = 1; i < image_width - 1; ++i) {
 			H = wrap(*(WIP - 1) - *WIP) - wrap(*WIP - *(WIP + 1));
-			V = wrap(*(WIP + image_width*(image_height - 1)) - *WIP) - wrap(*WIP - *(WIP + image_width));
-			D1 = wrap(*(WIP + image_width*(image_height - 1) - 1) - *WIP) - wrap(*WIP - *(WIP + image_width_plus_one));
-			D2 = wrap(*(WIP + image_width*(image_height - 1) + 1) - *WIP) - wrap(*WIP - *(WIP + image_width_minus_one));
+			V = wrap(*(WIP + image_width*((size_t)image_height - 1)) - *WIP) - wrap(*WIP - *(WIP + image_width));
+			D1 = wrap(*(WIP + image_width*((size_t)image_height - 1) - 1) - *WIP) - wrap(*WIP - *(WIP + image_width_plus_one));
+			D2 = wrap(*(WIP + image_width*((size_t)image_height - 1) + 1) - *WIP) - wrap(*WIP - *(WIP + image_width_minus_one));
 			pixel_pointer->reliability = H*H + V*V + D1*D1 + D2*D2;
 
 			pixel_pointer++;
@@ -199,14 +199,14 @@ void calculate_reliability(float *wrappedImage, PIXELM *pixel,
 		}
 
 		//calculating the reliability for the bottom border of the image
-		pixel_pointer = pixel + (image_height - 1) * image_width + 1;
-		WIP = wrappedImage + (image_height - 1) * image_width + 1;
+		pixel_pointer = pixel + ((size_t)image_height - 1) * image_width + 1;
+		WIP = wrappedImage + ((size_t)image_height - 1) * image_width + 1;
 
 		for (i = 1; i < image_width - 1; ++i) {
 			H = wrap(*(WIP - 1) - *WIP) - wrap(*WIP - *(WIP + 1));
-			V = wrap(*(WIP - image_width) - *WIP) - wrap(*WIP - *(WIP -(image_height - 1) * (image_width)));
-			D1 = wrap(*(WIP - image_width_plus_one) - *WIP) - wrap(*WIP - *(WIP - (image_height - 1) * (image_width) + 1));
-			D2 = wrap(*(WIP - image_width_minus_one) - *WIP) - wrap(*WIP - *(WIP - (image_height - 1) * (image_width) - 1));
+			V = wrap(*(WIP - image_width) - *WIP) - wrap(*WIP - *(WIP -((size_t)image_height - 1) * (image_width)));
+			D1 = wrap(*(WIP - image_width_plus_one) - *WIP) - wrap(*WIP - *(WIP - ((size_t)image_height - 1) * (image_width) + 1));
+			D2 = wrap(*(WIP - image_width_minus_one) - *WIP) - wrap(*WIP - *(WIP - ((size_t)image_height - 1) * (image_width) - 1));
 			pixel_pointer->reliability = H*H + V*V + D1*D1 + D2*D2;
 
 			pixel_pointer++;
@@ -231,7 +231,7 @@ void horizontalEDGEs(PIXELM *pixel, EDGE *edge,
 	for (i = 0; i < image_height; i++) {
 		for (j = 0; j < image_width - 1; j++) {
 			edge_pointer->pointer_1 = pixel_pointer;
-			edge_pointer->pointer_2 = (pixel_pointer+1);
+			edge_pointer->pointer_2 = (pixel_pointer + 1);
 			edge_pointer->reliab = pixel_pointer->reliability + (pixel_pointer + 1)->reliability;
 			edge_pointer->increment = find_wrap(pixel_pointer->value, (pixel_pointer + 1)->value);
 			edge_pointer++;
@@ -252,7 +252,7 @@ void horizontalEDGEs(PIXELM *pixel, EDGE *edge,
 			edge_pointer->increment = find_wrap(pixel_pointer->value, (pixel_pointer - image_width + 1)->value);
 			edge_pointer++;
 			no_of_edges++;
-			pixel_pointer+=image_width;
+			pixel_pointer += image_width;
 		}
 	}
 	params->no_of_edges = no_of_edges;
@@ -270,8 +270,8 @@ void verticalEDGEs(PIXELM *pixel, EDGE *edge,
 	PIXELM *pixel_pointer = pixel;
 	EDGE *edge_pointer = edge + no_of_edges;
 
-	for (i=0; i < image_height - 1; i++) {
-		for (j=0; j < image_width; j++) {
+	for (i = 0; i < image_height - 1; i++) {
+		for (j = 0; j < image_width; j++) {
 			edge_pointer->pointer_1 = pixel_pointer;
 			edge_pointer->pointer_2 = (pixel_pointer + image_width);
 			edge_pointer->reliab = pixel_pointer->reliability + (pixel_pointer + image_width)->reliability;
@@ -285,12 +285,12 @@ void verticalEDGEs(PIXELM *pixel, EDGE *edge,
 
 	//construct edges that connect at the bottom border of the image
 	if (params->y_connectivity == 1) {
-		pixel_pointer = pixel + image_width *(image_height - 1);
+		pixel_pointer = pixel + image_width * ((size_t)image_height - 1);
 		for (i = 0; i < image_width; i++) {
 			edge_pointer->pointer_1 = pixel_pointer;
-			edge_pointer->pointer_2 = (pixel_pointer - image_width *(image_height - 1));
-			edge_pointer->reliab = pixel_pointer->reliability + (pixel_pointer - image_width *(image_height - 1))->reliability;
-			edge_pointer->increment = find_wrap(pixel_pointer->value, (pixel_pointer - image_width *(image_height - 1))->value);
+			edge_pointer->pointer_2 = (pixel_pointer - image_width * ((size_t)image_height - 1));
+			edge_pointer->reliab = pixel_pointer->reliability + (pixel_pointer - image_width * ((size_t)image_height - 1))->reliability;
+			edge_pointer->increment = find_wrap(pixel_pointer->value, (pixel_pointer - image_width * ((size_t)image_height - 1))->value);
 			edge_pointer++;
 			no_of_edges++;
 
@@ -326,7 +326,7 @@ void gatherPIXELs(EDGE *edge, params_t *params)
 				PIXEL1->head->last->next = PIXEL2;
 				PIXEL1->head->last = PIXEL2;
 				(PIXEL1->head->number_of_pixels_in_group)++;
-				PIXEL2->head=PIXEL1->head;
+				PIXEL2->head = PIXEL1->head;
 				PIXEL2->increment = PIXEL1->increment-pointer_edge->increment;
 			}
 
@@ -334,11 +334,11 @@ void gatherPIXELs(EDGE *edge, params_t *params)
 			//merge this pixel with PIXELM 2 group and find the number of 2 pi to add
 			//to or subtract to unwrap it
 			else if ((PIXEL1->next == NULL) && (PIXEL1->head == PIXEL1)) {
-			PIXEL2->head->last->next = PIXEL1;
-			PIXEL2->head->last = PIXEL1;
-			(PIXEL2->head->number_of_pixels_in_group)++;
-			PIXEL1->head = PIXEL2->head;
-			PIXEL1->increment = PIXEL2->increment+pointer_edge->increment;
+				PIXEL2->head->last->next = PIXEL1;
+				PIXEL2->head->last = PIXEL1;
+				(PIXEL2->head->number_of_pixels_in_group)++;
+				PIXEL1->head = PIXEL2->head;
+				PIXEL1->increment = PIXEL2->increment+pointer_edge->increment;
 			}
 
 			//PIXELM 1 and PIXELM 2 both have groups
@@ -395,7 +395,7 @@ void gatherPIXELs(EDGE *edge, params_t *params)
 void unwrapImage(PIXELM *pixel, int image_width, int image_height) {
 	int i;
 	int image_size = image_width * image_height;
-	PIXELM *pixel_pointer=pixel;
+	PIXELM *pixel_pointer = pixel;
 
 	for (i = 0; i < image_size; i++) {
 		pixel_pointer->value += TWOPI * (float)(pixel_pointer->increment);
@@ -413,7 +413,7 @@ void returnImage(PIXELM *pixel, float *unwrapped_image, int image_width, int ima
 	float *unwrapped_image_pointer = unwrapped_image;
 	PIXELM *pixel_pointer = pixel;
 
-	for (i=0; i < image_size; i++) {
+	for (i = 0; i < image_size; i++) {
 		*unwrapped_image_pointer = pixel_pointer->value;
 		pixel_pointer++;
 		unwrapped_image_pointer++;

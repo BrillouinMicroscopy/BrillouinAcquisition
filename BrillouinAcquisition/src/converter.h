@@ -8,7 +8,7 @@
 #include "external/qcustomplot/qcustomplot.h"
 #include "phase.h"
 
-enum CustomGradientPreset {
+enum class CustomGradientPreset {
 	gpParula,
 	gpGrayscale,
 	gpRed,
@@ -27,8 +27,8 @@ struct PLOT_SETTINGS {
 	QCustomPlot* plotHandle{ nullptr };
 	QCPColorMap* colorMap{ nullptr };
 	QCPRange cLim = { 100, 300 };
-	QSpinBox* lowerBox;
-	QSpinBox* upperBox;
+	QSpinBox* lowerBox{ nullptr };
+	QSpinBox* upperBox{ nullptr };
 	std::function<void(QCPRange)> dataRangeCallback{ nullptr };
 	bool autoscale{ false };
 	CustomGradientPreset gradient = CustomGradientPreset::gpParula;

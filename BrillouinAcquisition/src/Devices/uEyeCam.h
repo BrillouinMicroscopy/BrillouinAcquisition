@@ -19,8 +19,8 @@ private:
 
 	int acquireImage(unsigned char* buffer);
 
-	char *m_imageBuffer;
-	int m_imageBufferId;
+	char *m_imageBuffer = nullptr;
+	int m_imageBufferId{ 0 };
 
 	/*
 	 * Members and functions inherited from base class

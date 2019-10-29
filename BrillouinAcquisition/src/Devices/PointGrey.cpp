@@ -10,14 +10,14 @@ void PointGrey::connectDevice() {
 	if (!m_isConnected) {
 		
 		unsigned int numCameras;
-		m_busManager.GetNumOfCameras(&numCameras);
+		auto i_retCode = m_busManager.GetNumOfCameras(&numCameras);
 
 		if (numCameras > 0) {
 			// Select camera
 
-			m_busManager.GetCameraFromIndex(0, &m_guid);
+			i_retCode = m_busManager.GetCameraFromIndex(0, &m_guid);
 
-			m_camera.Connect(&m_guid);
+			i_retCode = m_camera.Connect(&m_guid);
 
 			m_isConnected = true;
 			
@@ -40,7 +40,7 @@ void PointGrey::disconnectDevice() {
 		}
 
 		// Deinitialize camera
-		m_camera.Disconnect();
+		auto i_retCode = m_camera.Disconnect();
 
 		m_isConnected = false;
 	}
@@ -53,7 +53,7 @@ void PointGrey::readOptions() {
 	FlyCapture2::Format7Info fmt7Info;
 	bool supported;
 	fmt7Info.mode = FlyCapture2::MODE_0;
-	m_camera.GetFormat7Info(&fmt7Info, &supported);
+	auto i_retCode = m_camera.GetFormat7Info(&fmt7Info, &supported);
 
 	m_options.pixelEncodings = { L"Raw8", L"Mono8", L"Mono12", L"Mono16" };
 	//m_options.cycleModes = { L"Continuous", L"Fixed single", L"Fixed multiple" };
@@ -74,7 +74,7 @@ void PointGrey::readSettings() {
 
 	// Get the camera configuration
 	FlyCapture2::FC2Config config;
-	m_camera.GetConfiguration(&config);
+	auto i_retCode = m_camera.GetConfiguration(&config);
 
 	/*
 	* Get the exposure time
@@ -83,7 +83,7 @@ void PointGrey::readSettings() {
 	//Define the property to adjust.
 	prop.type = FlyCapture2::SHUTTER;
 	//Set the property.
-	m_camera.GetProperty(&prop);
+	i_retCode = m_camera.GetProperty(&prop);
 	// general settings
 	m_settings.exposureTime = 1e-3*prop.absValue;	// [s] exposure time
 
@@ -94,7 +94,7 @@ void PointGrey::readSettings() {
 	//Define the property to adjust.
 	propGain.type = FlyCapture2::GAIN;
 	//Get the property.
-	m_camera.GetProperty(&propGain);
+	i_retCode = m_camera.GetProperty(&propGain);
 	// store property in settings
 	m_settings.gain = propGain.absValue;	// [dB] camera gain
 
@@ -102,7 +102,7 @@ void PointGrey::readSettings() {
 	FlyCapture2::Format7ImageSettings fmt7ImageSettings;
 	unsigned int packetSize;
 	float speed;
-	m_camera.GetFormat7Configuration(&fmt7ImageSettings, &packetSize, &speed);
+	i_retCode = m_camera.GetFormat7Configuration(&fmt7ImageSettings, &packetSize, &speed);
 
 	// ROI
 	m_settings.roi.height = fmt7ImageSettings.height;
@@ -128,17 +128,17 @@ void PointGrey::readSettings() {
 
 	// read trigger mode
 	FlyCapture2::TriggerMode triggerMode;
-	m_camera.GetTriggerMode(&triggerMode);
+	i_retCode = m_camera.GetTriggerMode(&triggerMode);
 
 	/*
 	* Get the buffering mode.
 	*/
 	FlyCapture2::FC2Config BufferFrame;
-	m_camera.GetConfiguration(&BufferFrame);
+	i_retCode = m_camera.GetConfiguration(&BufferFrame);
 
 	// emit signal that settings changed
 	emit(settingsChanged(m_settings));
-};
+}
 
 void PointGrey::setSettings(CAMERA_SETTINGS settings) {
 	m_settings = settings;
@@ -158,7 +158,7 @@ void PointGrey::setSettings(CAMERA_SETTINGS settings) {
 	//Set the absolute value of shutter
 	prop.absValue = 1e3*m_settings.exposureTime;
 	//Set the property.
-	m_camera.SetProperty(&prop);
+	auto i_retCode = m_camera.SetProperty(&prop);
 
 
 	/*
@@ -174,7 +174,7 @@ void PointGrey::setSettings(CAMERA_SETTINGS settings) {
 	//Set the absolute value of gain to 10.5 dB.
 	propGain.absValue = m_settings.gain;
 	//Set the property.
-	m_camera.SetProperty(&propGain);
+	i_retCode = m_camera.SetProperty(&propGain);
 
 
 	/*
@@ -206,16 +206,16 @@ void PointGrey::setSettings(CAMERA_SETTINGS settings) {
 
 	FlyCapture2::Format7PacketInfo fmt7PacketInfo;
 	bool valid;
-	m_camera.ValidateFormat7Settings(&fmt7ImageSettings, &valid, &fmt7PacketInfo);
+	i_retCode = m_camera.ValidateFormat7Settings(&fmt7ImageSettings, &valid, &fmt7PacketInfo);
 	if (valid) {
-		m_camera.SetFormat7Configuration(&fmt7ImageSettings, fmt7PacketInfo.recommendedBytesPerPacket);
+		i_retCode = m_camera.SetFormat7Configuration(&fmt7ImageSettings, fmt7PacketInfo.recommendedBytesPerPacket);
 	}
 
 	/*
 	* Set trigger mode
 	*/
 	FlyCapture2::TriggerMode triggerMode;
-	m_camera.GetTriggerMode(&triggerMode);
+	i_retCode = m_camera.GetTriggerMode(&triggerMode);
 	triggerMode.mode = 0;
 	triggerMode.parameter = 0;
 	triggerMode.polarity = 0;
@@ -229,7 +229,7 @@ void PointGrey::setSettings(CAMERA_SETTINGS settings) {
 		triggerMode.source = 0;	// 0 for external trigger
 	}
 
-	m_camera.SetTriggerMode(&triggerMode);
+	i_retCode = m_camera.SetTriggerMode(&triggerMode);
 
 	// Wait for software trigger ready
 	if (m_settings.readout.triggerMode == L"Software") {
@@ -240,7 +240,7 @@ void PointGrey::setSettings(CAMERA_SETTINGS settings) {
 	* Set the buffering mode.
 	*/
 	FlyCapture2::FC2Config BufferFrame;
-	m_camera.GetConfiguration(&BufferFrame);
+	i_retCode = m_camera.GetConfiguration(&BufferFrame);
 	if (m_settings.readout.cycleMode == L"Fixed") {				// For image preview
 		BufferFrame.grabMode = FlyCapture2::DROP_FRAMES;
 		BufferFrame.highPerformanceRetrieveBuffer = false;
@@ -249,7 +249,7 @@ void PointGrey::setSettings(CAMERA_SETTINGS settings) {
 		BufferFrame.highPerformanceRetrieveBuffer = true;
 	}
 	BufferFrame.numBuffers = m_settings.frameCount;
-	m_camera.SetConfiguration(&BufferFrame);
+	i_retCode = m_camera.SetConfiguration(&BufferFrame);
 
 	// Read back the settings
 	readSettings();
@@ -286,11 +286,11 @@ void PointGrey::preparePreview() {
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
-	m_camera.StartCapture();
+	auto i_retCode = m_camera.StartCapture();
 }
 
 void PointGrey::stopPreview() {
-	m_camera.StopCapture();
+	auto i_retCode = m_camera.StopCapture();
 	m_isPreviewRunning = false;
 	m_stopPreview = false;
 	emit(s_previewRunning(m_isPreviewRunning));
@@ -312,13 +312,13 @@ void PointGrey::startAcquisition(CAMERA_SETTINGS settings) {
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
-	m_camera.StartCapture();
+	auto i_retCode = m_camera.StartCapture();
 	m_isAcquisitionRunning = true;
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
 }
 
 void PointGrey::stopAcquisition() {
-	m_camera.StopCapture();
+	auto i_retCode = m_camera.StopCapture();
 	m_isAcquisitionRunning = false;
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
 
@@ -334,7 +334,7 @@ int PointGrey::acquireImage(unsigned char* buffer) {
 
 	// Convert the raw image
 	FlyCapture2::Image convertedImage;
-	rawImage.Convert(FlyCapture2::PIXEL_FORMAT_RAW8, &convertedImage);
+	auto i_retCode = rawImage.Convert(FlyCapture2::PIXEL_FORMAT_RAW8, &convertedImage);
 
 	// Get access to raw data
 	unsigned char* data = static_cast<unsigned char*>(convertedImage.GetData());

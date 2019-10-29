@@ -9,7 +9,7 @@
 #include "cameraParameters.h"
 #include "..\previewBuffer.h"
 
-typedef enum enCameraTemperatureStatus {
+typedef enum class enCameraTemperatureStatus {
 	COOLER_OFF,
 	FAULT,
 	COOLING,
@@ -23,7 +23,7 @@ typedef struct {
 	double setpoint{ 0 };
 	double minSetpoint{ 0 };
 	double maxSetpoint{ 0 };
-	CAMERA_TEMPERATURE_STATUS status = COOLER_OFF;
+	CAMERA_TEMPERATURE_STATUS status = enCameraTemperatureStatus::COOLER_OFF;
 } SensorTemperature;
 
 class Camera : public Device {
