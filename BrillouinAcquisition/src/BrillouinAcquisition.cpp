@@ -248,9 +248,6 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		[this](PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<float> unpackedBuffer) { plot(previewBuffer, plotSettings, unpackedBuffer); }
 	);
 
-	initCameraBrillouin();
-	initScanControl();
-	initCamera();
 	// start acquisition thread
 	m_acquisitionThread.startWorker(m_acquisition);
 	// start Brillouin thread
@@ -303,6 +300,12 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	initializeODTVoltagePlot(ui->alignmentVoltagesODT);
 	initializeODTVoltagePlot(ui->acquisitionVoltagesODT);
 
+	// First read device settings then init devices
+	readSettings();
+	initCameraBrillouin();
+	initScanControl();
+	initCamera();
+
 	updateBrillouinSettings();
 	initSettingsDialog();
 
@@ -334,6 +337,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 }
 
 BrillouinAcquisition::~BrillouinAcquisition() {
+	writeSettings();
 	delete m_acquisition;
 	delete m_Brillouin;
 	if (m_ODT) {
@@ -1131,7 +1135,7 @@ QString BrillouinAcquisition::formatSeconds(int seconds) {
 }
 
 void BrillouinAcquisition::plotODTVoltages(ODT_SETTINGS settings, ODT_MODE mode) {
-	QCustomPlot *plot = new QCustomPlot();
+	QCustomPlot *plot = nullptr;
 	switch (mode) {
 		case ODT_MODE::ALGN:
 			plot = ui->alignmentVoltagesODT;
@@ -1157,6 +1161,8 @@ void BrillouinAcquisition::plotODTVoltages(ODT_SETTINGS settings, ODT_MODE mode)
 			ui->acquisitionNumber_ODT->blockSignals(false);
 			ui->acquisitionRate_ODT->blockSignals(false);
 			break;
+		default:
+			return;
 	}
 
 	std::vector<VOLTAGE2> voltages = settings.voltages;
@@ -1775,6 +1781,7 @@ void BrillouinAcquisition::saveSettings() {
 void BrillouinAcquisition::cancelSettings() {
 	m_scanControllerTypeTemporary = m_scanControllerType;
 	m_cameraTypeTemporary = m_cameraType;
+	m_cameraBrillouinTypeTemporary = m_cameraBrillouinType;
 	m_settingsDialog->hide();
 }
 
@@ -1788,6 +1795,8 @@ void BrillouinAcquisition::initSettingsDialog() {
 	/*
 	 * Widget for Brillouin camera selection
 	 */
+	m_cameraBrillouinTypeTemporary = m_cameraBrillouinType;
+
 	QWidget* cameraBrillouinWidget = new QWidget();
 	cameraBrillouinWidget->setMinimumHeight(60);
 	cameraBrillouinWidget->setMinimumWidth(250);
@@ -1842,7 +1851,7 @@ void BrillouinAcquisition::initSettingsDialog() {
 	m_scanControlDropdown = new QComboBox();
 	layout->addWidget(m_scanControlDropdown);
 	i = 0;
-	for (auto type : m_scanControl->SCAN_DEVICE_NAMES) {
+	for (auto type : ScanControl::SCAN_DEVICE_NAMES) {
 		m_scanControlDropdown->insertItem(i, QString::fromStdString(type));
 		i++;
 	}
@@ -1858,6 +1867,8 @@ void BrillouinAcquisition::initSettingsDialog() {
 	/*
 	 * Widget for ODT/Fluorescence camera selection
 	 */
+	m_cameraTypeTemporary = m_cameraType;
+
 	QWidget *cameraWidget = new QWidget();
 	cameraWidget->setMinimumHeight(60);
 	cameraWidget->setMinimumWidth(250);
@@ -1951,6 +1962,10 @@ void BrillouinAcquisition::on_actionLoad_Voltage_Position_calibration_triggered(
 }
 
 void BrillouinAcquisition::initBeampathButtons() {
+	if (m_scanControl == nullptr) {
+		return;
+	}
+
 	for (auto widget : ui->beamPathBox->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly)) {
 		delete widget;
 	}
@@ -2965,4 +2980,93 @@ void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradien
 			gradient->loadPreset(QCPColorGradient::gpGrayscale);
 			break;
 	}
+}
+
+void BrillouinAcquisition::writeSettings() {
+	QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+		"Guck Lab", "Brillouin Acquisition");
+
+	QString brillouinCamera;
+	switch (m_cameraBrillouinType) {
+		case CAMERA_BRILLOUIN_DEVICE::ANDOR:
+			brillouinCamera = "andor";
+			break;
+		case CAMERA_BRILLOUIN_DEVICE::PVCAM:
+			brillouinCamera = "pvcam";
+			break;
+		default:
+			brillouinCamera = "andor";
+			break;
+	}
+
+	QString brightfieldCamera;
+	switch (m_cameraType) {
+		case CAMERA_DEVICE::UEYE:
+			brightfieldCamera = "ueye";
+			break;
+		case CAMERA_DEVICE::POINTGREY:
+			brightfieldCamera = "pointgrey";
+			break;
+		default:
+			brightfieldCamera = "none";
+			break;
+	}
+
+	QString stage;
+	switch (m_scanControllerType) {
+		case ScanControl::SCAN_DEVICE::ZEISSECU:
+			stage = "zeiss-ecu";
+			break;
+		case ScanControl::SCAN_DEVICE::NIDAQ:
+			stage = "nidaq";
+			break;
+		default:
+			stage = "zeiss-ecu";
+			break;
+	}
+
+	settings.beginGroup("devices");
+	settings.setValue("brillouin-camera", brillouinCamera);
+	settings.setValue("brightfield-camera", brightfieldCamera);
+	settings.setValue("stage", stage);
+	settings.endGroup();
+}
+
+void BrillouinAcquisition::readSettings() {
+	QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+		"Guck Lab", "Brillouin Acquisition");
+
+	settings.beginGroup("devices");
+	QVariant BrillouinCam = settings.value("brillouin-camera");
+	QVariant BrightfieldCam = settings.value("brightfield-camera");
+	QVariant stage = settings.value("stage");
+
+	// Brillouin camera
+	if (BrillouinCam == "andor") {
+		m_cameraBrillouinType = CAMERA_BRILLOUIN_DEVICE::ANDOR;
+	} else if (BrillouinCam == "pvcam") {
+		m_cameraBrillouinType = CAMERA_BRILLOUIN_DEVICE::PVCAM;
+	} else {
+		m_cameraBrillouinType = CAMERA_BRILLOUIN_DEVICE::ANDOR;
+	}
+
+	// Brightfield camera
+	if (BrightfieldCam == "ueye") {
+		m_cameraType = CAMERA_DEVICE::UEYE;
+	} else if (BrightfieldCam == "pointgrey") {
+		m_cameraType = CAMERA_DEVICE::POINTGREY;
+	} else {
+		m_cameraType = CAMERA_DEVICE::NONE;
+	}
+
+	// Scanning stage
+	if (stage == "zeiss-ecu") {
+		m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSECU;
+	} else if (stage == "nidaq") {
+		m_scanControllerType = ScanControl::SCAN_DEVICE::NIDAQ;
+	} else {
+		m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSECU;
+	}
+
+	settings.endGroup();
 }
