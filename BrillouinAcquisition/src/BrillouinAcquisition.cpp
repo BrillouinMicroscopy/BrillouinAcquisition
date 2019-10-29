@@ -1778,6 +1778,7 @@ void BrillouinAcquisition::saveSettings() {
 void BrillouinAcquisition::cancelSettings() {
 	m_scanControllerTypeTemporary = m_scanControllerType;
 	m_cameraTypeTemporary = m_cameraType;
+	m_cameraBrillouinTypeTemporary = m_cameraBrillouinType;
 	m_settingsDialog->hide();
 }
 
@@ -1791,6 +1792,8 @@ void BrillouinAcquisition::initSettingsDialog() {
 	/*
 	 * Widget for Brillouin camera selection
 	 */
+	m_cameraBrillouinTypeTemporary = m_cameraBrillouinType;
+
 	QWidget* cameraBrillouinWidget = new QWidget();
 	cameraBrillouinWidget->setMinimumHeight(60);
 	cameraBrillouinWidget->setMinimumWidth(250);
@@ -1861,6 +1864,8 @@ void BrillouinAcquisition::initSettingsDialog() {
 	/*
 	 * Widget for ODT/Fluorescence camera selection
 	 */
+	m_cameraTypeTemporary = m_cameraType;
+
 	QWidget *cameraWidget = new QWidget();
 	cameraWidget->setMinimumHeight(60);
 	cameraWidget->setMinimumWidth(250);
