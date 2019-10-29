@@ -248,6 +248,8 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		[this](PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<float> unpackedBuffer) { plot(previewBuffer, plotSettings, unpackedBuffer); }
 	);
 
+	// First read device settings then init devices
+	readSettings();
 	initCameraBrillouin();
 	initScanControl();
 	initCamera();
@@ -334,6 +336,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 }
 
 BrillouinAcquisition::~BrillouinAcquisition() {
+	writeSettings();
 	delete m_acquisition;
 	delete m_Brillouin;
 	if (m_ODT) {
@@ -2965,4 +2968,93 @@ void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradien
 			gradient->loadPreset(QCPColorGradient::gpGrayscale);
 			break;
 	}
+}
+
+void BrillouinAcquisition::writeSettings() {
+	QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+		"Guck Lab", "Brillouin Acquisition");
+
+	QString brillouinCamera;
+	switch (m_cameraBrillouinType) {
+		case CAMERA_BRILLOUIN_DEVICE::ANDOR:
+			brillouinCamera = "andor";
+			break;
+		case CAMERA_BRILLOUIN_DEVICE::PVCAM:
+			brillouinCamera = "pvcam";
+			break;
+		default:
+			brillouinCamera = "andor";
+			break;
+	}
+
+	QString brightfieldCamera;
+	switch (m_cameraType) {
+		case CAMERA_DEVICE::UEYE:
+			brightfieldCamera = "ueye";
+			break;
+		case CAMERA_DEVICE::POINTGREY:
+			brightfieldCamera = "pointgrey";
+			break;
+		default:
+			brightfieldCamera = "none";
+			break;
+	}
+
+	QString stage;
+	switch (m_scanControllerType) {
+		case ScanControl::SCAN_DEVICE::ZEISSECU:
+			stage = "zeiss-ecu";
+			break;
+		case ScanControl::SCAN_DEVICE::NIDAQ:
+			stage = "nidaq";
+			break;
+		default:
+			stage = "zeiss-ecu";
+			break;
+	}
+
+	settings.beginGroup("devices");
+	settings.setValue("brillouin-camera", brillouinCamera);
+	settings.setValue("brightfield-camera", brightfieldCamera);
+	settings.setValue("stage", stage);
+	settings.endGroup();
+}
+
+void BrillouinAcquisition::readSettings() {
+	QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+		"Guck Lab", "Brillouin Acquisition");
+
+	settings.beginGroup("devices");
+	QVariant BrillouinCam = settings.value("brillouin-camera");
+	QVariant BrightfieldCam = settings.value("brightfield-camera");
+	QVariant stage = settings.value("stage");
+
+	// Brillouin camera
+	if (BrillouinCam == "andor") {
+		m_cameraBrillouinType = CAMERA_BRILLOUIN_DEVICE::ANDOR;
+	} else if (BrillouinCam == "pvcam") {
+		m_cameraBrillouinType = CAMERA_BRILLOUIN_DEVICE::PVCAM;
+	} else {
+		m_cameraBrillouinType = CAMERA_BRILLOUIN_DEVICE::ANDOR;
+	}
+
+	// Brightfield camera
+	if (BrightfieldCam == "ueye") {
+		m_cameraType = CAMERA_DEVICE::UEYE;
+	} else if (BrightfieldCam == "pointgrey") {
+		m_cameraType = CAMERA_DEVICE::POINTGREY;
+	} else {
+		m_cameraType = CAMERA_DEVICE::NONE;
+	}
+
+	// Scanning stage
+	if (stage == "zeiss-ecu") {
+		m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSECU;
+	} else if (stage == "nidaq") {
+		m_scanControllerType = ScanControl::SCAN_DEVICE::NIDAQ;
+	} else {
+		m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSECU;
+	}
+
+	settings.endGroup();
 }

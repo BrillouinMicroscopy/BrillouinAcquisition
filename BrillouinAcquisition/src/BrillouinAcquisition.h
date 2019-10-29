@@ -334,6 +334,12 @@ private slots:
 
 	void scanOrderChanged(SCAN_ORDER scanOrder);
 
+	/*
+	 * Save and restore application settings
+	 */
+	void writeSettings();
+	void readSettings();
+
 public:
 	BrillouinAcquisition(QWidget *parent = nullptr) noexcept;
 	~BrillouinAcquisition();
