@@ -7,20 +7,6 @@
 #include "atcore.h"
 #include "atutility.h"
 
-typedef enum enAndorTemperatureStatus{
-	COOLER_OFF,
-	FAULT,
-	COOLING,
-	DRIFT,
-	NOT_STABILISED,
-	STABILISED
-} ANDOR_TEMPERATURE_STATUS;
-
-typedef struct {
-	double temperature = 0;
-	ANDOR_TEMPERATURE_STATUS status = COOLER_OFF;
-} SensorTemperature;
-
 class Andor : public Camera {
 	Q_OBJECT
 
@@ -43,7 +29,7 @@ private:
 	void getEnumString(AT_WC* feature, std::wstring* string);
 	void preparePreview();
 
-	void acquireImage(unsigned char* buffer) override;
+	int acquireImage(unsigned char* buffer) override;
 
 	/*
 	 * Members and functions inherited from base class
@@ -90,11 +76,6 @@ public slots:
 	void stopAcquisition();
 	
 	void getImageForAcquisition(unsigned char* buffer, bool preview = true) override;
-
-signals:
-	void cameraCoolingChanged(bool);
-	void noCameraFound();
-	void s_sensorTemperatureChanged(SensorTemperature);
 };
 
 #endif // ANDOR_H

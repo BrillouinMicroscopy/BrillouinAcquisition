@@ -267,6 +267,15 @@
     <ClCompile Include="src\xsample.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Devices\pvcamera.cpp">
+      <Filter>Source Files\Devices</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_pvcamera.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_pvcamera.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_BrillouinAcquisition.h">
@@ -384,6 +393,9 @@
     </CustomBuild>
     <CustomBuild Include="src\converter.h">
       <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Devices\pvcamera.h">
+      <Filter>Header Files\Devices</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

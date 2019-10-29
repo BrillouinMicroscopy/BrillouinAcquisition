@@ -269,7 +269,7 @@ void uEyeCam::preparePreview() {
 
 	setSettings(m_settings);
 
-	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
+	unsigned int pixelNumber = m_settings.roi.width * m_settings.roi.height;
 	BUFFER_SETTINGS bufferSettings = { 1, pixelNumber, "unsigned char", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
@@ -305,7 +305,7 @@ void uEyeCam::startAcquisition(CAMERA_SETTINGS settings) {
 	// Wait for camera to really apply settings
 	Sleep(500);
 
-	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
+	unsigned int pixelNumber = m_settings.roi.width * m_settings.roi.height;
 	BUFFER_SETTINGS bufferSettings = { 1, pixelNumber, "unsigned char", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
@@ -327,12 +327,14 @@ void uEyeCam::stopAcquisition() {
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
 }
 
-void uEyeCam::acquireImage(unsigned char* buffer) {
+int uEyeCam::acquireImage(unsigned char* buffer) {
 
 	// Copy data to provided buffer
 	if (m_imageBuffer != NULL && buffer != nullptr) {
 		memcpy(buffer, m_imageBuffer, m_settings.roi.width*m_settings.roi.height);
+		return 1;
 	}
+	return 0;
 }
 
 void uEyeCam::getImageForAcquisition(unsigned char* buffer, bool preview) {

@@ -11,71 +11,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	QMainWindow(parent), ui(new Ui::BrillouinAcquisitionClass) {
 	ui->setupUi(this);
 
-	// slot camera connection
 	static QMetaObject::Connection connection;
-	connection = QWidget::connect(
-		m_andor,
-		&Andor::s_previewBufferSettingsChanged,
-		this,
-		[this] { updatePlotLimits(m_BrillouinPlot, m_cameraOptions, m_andor->m_previewBuffer->m_bufferSettings.roi); }
-	);
-
-	connection = QWidget::connect(
-		m_andor,
-		&Andor::connectedDevice,
-		this,
-		[this](bool isConnected) { cameraConnectionChanged(isConnected); }
-	);
-
-	connection = QWidget::connect(
-		m_andor,
-		&Andor::noCameraFound,
-		this,
-		[this] { showNoCameraFound(); }
-	);
-
-	connection = QWidget::connect(
-		m_andor,
-		&Andor::cameraCoolingChanged,
-		this,
-		[this](bool isCooling) { cameraCoolingChanged(isCooling); }
-	);
-
-	connection = QWidget::connect(
-		m_andor,
-		&Andor::s_previewRunning,
-		this,
-		[this](bool isRunning) { showPreviewRunning(isRunning); }
-	);
-
-	connection = QWidget::connect(
-		m_andor,
-		&Andor::s_acquisitionRunning,
-		this,
-		[this](bool isRunning) { startPreview(isRunning); }
-	);
-
-	connection = QWidget::connect(
-		m_andor,
-		&Andor::optionsChanged,
-		this,
-		[this](CAMERA_OPTIONS options) { cameraOptionsChanged(options); }
-	);
-
-	connection = QWidget::connect(
-		m_andor,
-		&Andor::settingsChanged,
-		this,
-		[this](CAMERA_SETTINGS settings) { cameraSettingsChanged(settings); }
-	);
-
-	connection = QWidget::connect(
-		m_andor,
-		&Andor::s_sensorTemperatureChanged,
-		this,
-		[this](SensorTemperature sensorTemperature) { sensorTemperatureChanged(sensorTemperature); }
-	);
-
 	// slot to limit the axis of the camera display after user interaction
 	connection = QWidget::connect<void(QCPAxis::*)(const QCPRange &)>(
 		ui->customplot->xAxis,
@@ -312,10 +248,9 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		[this](PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<float> unpackedBuffer) { plot(previewBuffer, plotSettings, unpackedBuffer); }
 	);
 
+	initCameraBrillouin();
 	initScanControl();
 	initCamera();
-	// start andor thread
-	m_andorThread.startWorker(m_andor);
 	// start acquisition thread
 	m_acquisitionThread.startWorker(m_acquisition);
 	// start Brillouin thread
@@ -459,8 +394,7 @@ void BrillouinAcquisition::plotClick(QMouseEvent* event) {
 void BrillouinAcquisition::showEvent(QShowEvent* event) {
 	QWidget::showEvent(event);
 
-	// connect camera and microscope automatically
-	QMetaObject::invokeMethod(m_andor, "connectDevice", Qt::QueuedConnection);
+	// connect microscope automatically
 	QMetaObject::invokeMethod(m_scanControl, "connectDevice", Qt::QueuedConnection);
 }
 
@@ -636,12 +570,22 @@ void BrillouinAcquisition::showCalibrationRunning(bool isCalibrating) {
 }
 
 void BrillouinAcquisition::addListToComboBox(QComboBox* box, std::vector<std::wstring> list, bool clear) {
+	// Check whether we have to do anything
+	std::vector< std::wstring > currentList(box->count());
+	for (gsl::index i{ 0 }; i < currentList.size(); i++) {
+		currentList[i] = box->itemText(i).toStdWString();
+	}
+	if (currentList == list) {
+		return;
+	}
+	box->blockSignals(true);
 	if (clear) {
 		box->clear();
 	}
 	std::for_each(list.begin(), list.end(), [box](std::wstring &item) {
 		box->addItem(QString::fromStdWString(item));
 	});
+	box->blockSignals(false);
 };
 
 void BrillouinAcquisition::cameraSettingsChanged(CAMERA_SETTINGS settings) {
@@ -1502,9 +1446,45 @@ std::vector<AT_64> BrillouinAcquisition::checkROI(std::vector<AT_64> values, std
 	return values;
 }
 
+/*
+ * Brillouin camera settings
+ */
+ // Binning
+void BrillouinAcquisition::on_binning_currentIndexChanged(const QString& text) {
+	m_BrillouinSettings.camera.roi.binning = text.toStdWString();
+	applyCameraSettings();
+}
+// Readout parameters
+void BrillouinAcquisition::on_pixelReadoutRate_currentIndexChanged(const QString& text) {
+	m_BrillouinSettings.camera.readout.pixelReadoutRate = text.toStdWString();
+	applyCameraSettings();
+}
+
+void BrillouinAcquisition::on_preAmpGain_currentIndexChanged(const QString& text) {
+	m_BrillouinSettings.camera.readout.preAmpGain = text.toStdWString();
+	applyCameraSettings();
+}
+
+void BrillouinAcquisition::on_pixelEncoding_currentIndexChanged(const QString& text) {
+	m_BrillouinSettings.camera.readout.pixelEncoding = text.toStdWString();
+	applyCameraSettings();
+}
+
+void BrillouinAcquisition::on_cycleMode_currentIndexChanged(const QString& text) {
+	m_BrillouinSettings.camera.readout.cycleMode = text.toStdWString();
+	applyCameraSettings();
+}
+
+void BrillouinAcquisition::applyCameraSettings() {
+	if (!m_andor->m_isPreviewRunning && !m_andor->m_isAcquisitionRunning) {
+		m_andor->setSettings(m_BrillouinSettings.camera);
+	}
+}
+
+
 void BrillouinAcquisition::updatePlotLimits(PLOT_SETTINGS plotSettings,	CAMERA_OPTIONS options, CAMERA_ROI roi) {
 	// set the properties of the colormap to the correct values of the preview buffer
-	plotSettings.colorMap->data()->setSize(roi.width, roi.height);
+	plotSettings.colorMap->data()->setSize(roi.width / roi.binX, roi.height / roi.binY);
 	QCPRange xRange = QCPRange(roi.left, roi.width + roi.left - 1);
 	QCPRange yRange = QCPRange(
 		options.ROIHeightLimits[1] - roi.top - roi.height + 2,
@@ -1647,8 +1627,8 @@ void BrillouinAcquisition::plot(PreviewBuffer<unsigned char>* previewBuffer, PLO
 
 template <typename T>
 void BrillouinAcquisition::plotting(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<T> unpackedBuffer) {
-	int dim_x = previewBuffer->m_bufferSettings.roi.width;
-	int dim_y = previewBuffer->m_bufferSettings.roi.height;
+	int dim_x = previewBuffer->m_bufferSettings.roi.width / previewBuffer->m_bufferSettings.roi.binX;
+	int dim_y = previewBuffer->m_bufferSettings.roi.height / previewBuffer->m_bufferSettings.roi.binY;
 	// images are given row by row, starting at the top left
 	int tIndex{ 0 };
 	for (gsl::index yIndex{ 0 }; yIndex < dim_y; ++yIndex) {
@@ -1694,7 +1674,7 @@ void BrillouinAcquisition::cameraConnectionChanged(bool isConnected) {
 }
 
 void BrillouinAcquisition::showNoCameraFound() {
-	QMessageBox::critical(this, "Camera not found.", "No camera was found. Switch on the camera and restart the program.");
+	QMessageBox::critical(this, "Selected camera not found.", "The selected camera was not found. Switch on the camera and restart the program or select a different camera.");
 }
 
 void BrillouinAcquisition::on_actionEnable_Cooling_triggered() {
@@ -1783,6 +1763,10 @@ void BrillouinAcquisition::saveSettings() {
 		m_cameraType = m_cameraTypeTemporary;
 		initCamera();
 	}
+	if (m_cameraBrillouinType != m_cameraBrillouinTypeTemporary) {
+		m_cameraBrillouinType = m_cameraBrillouinTypeTemporary;
+		initCameraBrillouin();
+	}
 	m_settingsDialog->hide();
 }
 
@@ -1793,12 +1777,50 @@ void BrillouinAcquisition::cancelSettings() {
 }
 
 void BrillouinAcquisition::initSettingsDialog() {
-	m_scanControllerTypeTemporary = m_scanControllerType;
+
 	m_settingsDialog = new QDialog(this, Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
 	m_settingsDialog->setWindowTitle("Settings");
 	m_settingsDialog->setWindowModality(Qt::ApplicationModal);
 
-	QVBoxLayout *vLayout = new QVBoxLayout(m_settingsDialog);
+	QVBoxLayout* vLayout = new QVBoxLayout(m_settingsDialog);
+	/*
+	 * Widget for Brillouin camera selection
+	 */
+	QWidget* cameraBrillouinWidget = new QWidget();
+	cameraBrillouinWidget->setMinimumHeight(60);
+	cameraBrillouinWidget->setMinimumWidth(250);
+	QGroupBox* camBrillouinBox = new QGroupBox(cameraBrillouinWidget);
+	camBrillouinBox->setTitle("Brillouin camera");
+	camBrillouinBox->setMinimumHeight(50);
+	camBrillouinBox->setMinimumWidth(250);
+
+	vLayout->addWidget(cameraBrillouinWidget);
+
+	QHBoxLayout* camBrillouinLayout = new QHBoxLayout(camBrillouinBox);
+
+	QLabel* camBrillouionLabel = new QLabel("Currently selected camera");
+	camBrillouinLayout->addWidget(camBrillouionLabel);
+
+	m_cameraBrillouinDropdown = new QComboBox();
+	camBrillouinLayout->addWidget(m_cameraBrillouinDropdown);
+	gsl::index i{ 0 };
+	for (auto type : CAMERA_BRILLOUIN_DEVICE_NAMES) {
+		m_cameraBrillouinDropdown->insertItem(i, QString::fromStdString(type));
+		i++;
+	}
+	m_cameraBrillouinDropdown->setCurrentIndex((int)m_cameraBrillouinType);
+
+	static QMetaObject::Connection connection = QWidget::connect<void(QComboBox::*)(int)>(
+		m_cameraBrillouinDropdown,
+		&QComboBox::currentIndexChanged,
+		this,
+		[this](int index) { selectCameraBrillouinDevice(index); }
+	);
+
+	/*
+	 * Widget for scan controller selection
+	 */
+	m_scanControllerTypeTemporary = m_scanControllerType;
 
 	QWidget *daqWidget = new QWidget();
 	daqWidget->setMinimumHeight(60);
@@ -1817,14 +1839,14 @@ void BrillouinAcquisition::initSettingsDialog() {
 
 	m_scanControlDropdown = new QComboBox();
 	layout->addWidget(m_scanControlDropdown);
-	gsl::index i{ 0 };
+	i = 0;
 	for (auto type : m_scanControl->SCAN_DEVICE_NAMES) {
 		m_scanControlDropdown->insertItem(i, QString::fromStdString(type));
 		i++;
 	}
 	m_scanControlDropdown->setCurrentIndex((int)m_scanControllerType);
 
-	static QMetaObject::Connection connection = QWidget::connect<void(QComboBox::*)(int)>(
+	connection = QWidget::connect<void(QComboBox::*)(int)>(
 		m_scanControlDropdown,
 		&QComboBox::currentIndexChanged,
 		this,
@@ -1910,6 +1932,10 @@ void BrillouinAcquisition::selectScanningDevice(int index) {
 
 void BrillouinAcquisition::selectCameraDevice(int index) {
 	m_cameraTypeTemporary = (CAMERA_DEVICE)index;
+}
+
+void BrillouinAcquisition::selectCameraBrillouinDevice(int index) {
+	m_cameraBrillouinTypeTemporary = (CAMERA_BRILLOUIN_DEVICE)index;
 }
 
 void BrillouinAcquisition::on_actionAcquire_Voltage_Position_calibration_triggered() {
@@ -2284,6 +2310,98 @@ void BrillouinAcquisition::initFluorescence() {
 		m_Fluorescence->initialize();
 
 	}
+}
+
+void BrillouinAcquisition::initCameraBrillouin() {
+	// deinitialize camera if necessary
+	if (m_andor) {
+		m_andor->deleteLater();
+		m_andor = nullptr;
+	}
+
+	// initialize correct camera type
+	switch (m_cameraBrillouinType) {
+		case CAMERA_BRILLOUIN_DEVICE::ANDOR:
+			m_andor = new Andor();
+			break;
+		case CAMERA_BRILLOUIN_DEVICE::PVCAM:
+			m_andor = new PVCamera();
+			break;
+		default:
+			m_andor = new Andor();
+			break;
+	}
+
+
+	// slot camera connection
+	static QMetaObject::Connection connection;
+	connection = QWidget::connect(
+		m_andor,
+		&Camera::s_previewBufferSettingsChanged,
+		this,
+		[this] { updatePlotLimits(m_BrillouinPlot, m_cameraOptions, m_andor->m_previewBuffer->m_bufferSettings.roi); }
+	);
+
+	connection = QWidget::connect(
+		m_andor,
+		&Camera::connectedDevice,
+		this,
+		[this](bool isConnected) { cameraConnectionChanged(isConnected); }
+	);
+
+	connection = QWidget::connect(
+		m_andor,
+		&Camera::noCameraFound,
+		this,
+		[this] { showNoCameraFound(); }
+	);
+
+	connection = QWidget::connect(
+		m_andor,
+		&Camera::cameraCoolingChanged,
+		this,
+		[this](bool isCooling) { cameraCoolingChanged(isCooling); }
+	);
+
+	connection = QWidget::connect(
+		m_andor,
+		&Camera::s_previewRunning,
+		this,
+		[this](bool isRunning) { showPreviewRunning(isRunning); }
+	);
+
+	connection = QWidget::connect(
+		m_andor,
+		&Camera::s_acquisitionRunning,
+		this,
+		[this](bool isRunning) { startPreview(isRunning); }
+	);
+
+	connection = QWidget::connect(
+		m_andor,
+		&Camera::optionsChanged,
+		this,
+		[this](CAMERA_OPTIONS options) { cameraOptionsChanged(options); }
+	);
+
+	connection = QWidget::connect(
+		m_andor,
+		&Camera::settingsChanged,
+		this,
+		[this](CAMERA_SETTINGS settings) { cameraSettingsChanged(settings); }
+	);
+
+	connection = QWidget::connect(
+		m_andor,
+		&Camera::s_sensorTemperatureChanged,
+		this,
+		[this](SensorTemperature sensorTemperature) { sensorTemperatureChanged(sensorTemperature); }
+	);
+
+	// start andor thread
+	m_andorThread.startWorker(m_andor);
+
+	QMetaObject::invokeMethod(m_andor, "connectDevice", Qt::AutoConnection);
 }
 
 void BrillouinAcquisition::initCamera() {

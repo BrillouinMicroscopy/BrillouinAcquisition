@@ -9,6 +9,23 @@
 #include "cameraParameters.h"
 #include "..\previewBuffer.h"
 
+typedef enum enCameraTemperatureStatus {
+	COOLER_OFF,
+	FAULT,
+	COOLING,
+	DRIFT,
+	NOT_STABILISED,
+	STABILISED
+} CAMERA_TEMPERATURE_STATUS;
+
+typedef struct {
+	double temperature{ 0 };
+	double setpoint{ 0 };
+	double minSetpoint{ 0 };
+	double maxSetpoint{ 0 };
+	CAMERA_TEMPERATURE_STATUS status = COOLER_OFF;
+} SensorTemperature;
+
 class Camera : public Device {
 	Q_OBJECT
 
@@ -28,6 +45,7 @@ public:
 
 	CAMERA_OPTIONS getOptions();
 	CAMERA_SETTINGS getSettings();
+	virtual bool getSensorCooling() { return false; };
 
 	// preview buffer for live acquisition
 	PreviewBuffer<unsigned char>* m_previewBuffer = new PreviewBuffer<unsigned char>;
@@ -39,6 +57,7 @@ public slots:
 	virtual void startAcquisition(CAMERA_SETTINGS) = 0;
 	virtual void stopAcquisition() = 0;
 	void setSetting(CAMERA_SETTING, double);
+	virtual void setCalibrationExposureTime(double) {};
 
 	virtual void getImageForAcquisition(unsigned char* buffer, bool preview = true) = 0;
 
@@ -51,7 +70,7 @@ protected:
 
 	std::mutex m_mutex;
 
-	virtual void acquireImage(unsigned char* buffer) = 0;
+	virtual int acquireImage(unsigned char* buffer) = 0;
 
 signals:
 	void settingsChanged(CAMERA_SETTINGS);
@@ -59,6 +78,9 @@ signals:
 	void s_previewBufferSettingsChanged();
 	void s_previewRunning(bool);
 	void s_acquisitionRunning(bool);
+	void cameraCoolingChanged(bool);
+	void noCameraFound();
+	void s_sensorTemperatureChanged(SensorTemperature);
 };
 
 #endif //CAMERA_H

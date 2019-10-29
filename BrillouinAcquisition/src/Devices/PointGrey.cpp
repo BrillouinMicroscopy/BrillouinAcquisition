@@ -281,7 +281,7 @@ void PointGrey::preparePreview() {
 
 	setSettings(m_settings);
 
-	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
+	unsigned int pixelNumber = m_settings.roi.width * m_settings.roi.height;
 	BUFFER_SETTINGS bufferSettings = { 1, pixelNumber, "unsigned char", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
@@ -307,7 +307,7 @@ void PointGrey::startAcquisition(CAMERA_SETTINGS settings) {
 	}
 	setSettings(settings);
 
-	int pixelNumber = m_settings.roi.width * m_settings.roi.height;
+	unsigned int pixelNumber = m_settings.roi.width * m_settings.roi.height;
 	BUFFER_SETTINGS bufferSettings = { 1, pixelNumber, "unsigned char", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
@@ -328,7 +328,7 @@ void PointGrey::stopAcquisition() {
 	}
 }
 
-void PointGrey::acquireImage(unsigned char* buffer) {
+int PointGrey::acquireImage(unsigned char* buffer) {
 	FlyCapture2::Image rawImage;
 	FlyCapture2::Error tmp = m_camera.RetrieveBuffer(&rawImage);
 
@@ -342,7 +342,9 @@ void PointGrey::acquireImage(unsigned char* buffer) {
 	// Copy data to provided buffer
 	if (data != NULL && buffer != nullptr) {
 		memcpy(buffer, data, m_settings.roi.width*m_settings.roi.height);
+		return 1;
 	}
+	return 0;
 }
 
 void PointGrey::getImageForAcquisition(unsigned char* buffer, bool preview) {

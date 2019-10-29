@@ -6,6 +6,7 @@
 #include "thread.h"
 
 #include "Devices/andor.h"
+#include "Devices/pvcamera.h"
 #include "Devices/scancontrol.h"
 #include "Devices/ZeissECU.h"
 #include "Devices/NIDAQ.h"
@@ -122,6 +123,7 @@ private slots:
 	void initSettingsDialog();
 	void selectScanningDevice(int index);
 	void selectCameraDevice(int index);
+	void selectCameraBrillouinDevice(int index);
 
 	void on_actionAcquire_Voltage_Position_calibration_triggered();
 	void on_actionLoad_Voltage_Position_calibration_triggered();
@@ -164,6 +166,19 @@ private slots:
 	void on_ROIHeight_valueChanged(int);
 	void settingsCameraUpdate(int);
 	std::vector<AT_64> checkROI(std::vector<AT_64>, std::vector<AT_64>);
+
+	/*
+	 * Camera settings
+	 */
+	// Binning
+	void on_binning_currentIndexChanged(const QString& text);
+	// Readout parameters
+	void on_pixelReadoutRate_currentIndexChanged(const QString& text);
+	void on_preAmpGain_currentIndexChanged(const QString& text);
+	void on_pixelEncoding_currentIndexChanged(const QString& text);
+	void on_cycleMode_currentIndexChanged(const QString& text);
+
+	void applyCameraSettings();
 
 	void setColormap(QCPColorGradient*, CustomGradientPreset);
 	void setElement(DeviceElement element, double position);
@@ -336,6 +351,12 @@ private:
 	} CAMERA_DEVICE;
 	std::vector<std::string> CAMERA_DEVICE_NAMES = { "None", "PointGrey", "uEye" };
 
+	typedef enum class enCameraBrillouinDevice {
+		ANDOR = 0,
+		PVCAM = 1
+	} CAMERA_BRILLOUIN_DEVICE;
+	std::vector<std::string> CAMERA_BRILLOUIN_DEVICE_NAMES = { "Andor", "PVCam" };
+
 	QCPGraph *m_focusMarker{ nullptr };
 	POINT2 m_focusMarkerPos{ -1, -1 };
 	bool m_selectFocus{ false };
@@ -343,19 +364,24 @@ private:
 	CAMERA_DEVICE m_cameraType = CAMERA_DEVICE::UEYE;
 	CAMERA_DEVICE m_cameraTypeTemporary = m_cameraType;
 
+	CAMERA_BRILLOUIN_DEVICE m_cameraBrillouinType = CAMERA_BRILLOUIN_DEVICE::PVCAM;
+	CAMERA_BRILLOUIN_DEVICE m_cameraBrillouinTypeTemporary = m_cameraBrillouinType;
+
 	void initScanControl();
 	void initODT();
 	void initSpatialCalibration();
 	void initFluorescence();
 	void initCamera();
+	void initCameraBrillouin();
 	QComboBox* m_scanControlDropdown;
 	QComboBox* m_cameraDropdown;
+	QComboBox* m_cameraBrillouinDropdown;
 	std::string m_calibrationFilePath;
 
 	QDialog *m_settingsDialog = nullptr;
 	void checkElementButtons();
 	void addListToComboBox(QComboBox*, std::vector<std::wstring>, bool clear = true);
-	Andor* m_andor = new Andor();
+	Camera* m_andor = nullptr;
 	ScanControl* m_scanControl = nullptr;
 	Camera* m_brightfieldCamera = nullptr;
 	Acquisition *m_acquisition = new Acquisition(nullptr);
@@ -366,7 +392,7 @@ private:
 	Thread m_acquisitionThread;
 	Thread m_plottingThread;
 
-	Brillouin* m_Brillouin = new Brillouin(nullptr, m_acquisition, m_andor, &m_scanControl);
+	Brillouin* m_Brillouin = new Brillouin(nullptr, m_acquisition, &m_andor, &m_scanControl);
 	BRILLOUIN_SETTINGS m_BrillouinSettings;
 	ODT* m_ODT = nullptr;
 	Fluorescence* m_Fluorescence = nullptr;

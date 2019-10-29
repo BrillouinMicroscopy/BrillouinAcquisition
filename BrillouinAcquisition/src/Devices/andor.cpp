@@ -108,6 +108,21 @@ void Andor::setSettings(CAMERA_SETTINGS settings) {
 	AT_SetInt(m_camera, L"AOILeft", m_settings.roi.left);
 	AT_SetInt(m_camera, L"AOIHeight", m_settings.roi.height);
 	AT_SetInt(m_camera, L"AOITop", m_settings.roi.top);
+	int binning{ 1 };
+	if (m_settings.roi.binning == L"8x8") {
+		binning = 8;
+	} else if (m_settings.roi.binning == L"4x4") {
+		binning = 4;
+	} else if (m_settings.roi.binning == L"2x2") {
+		binning = 2;
+	} else if (m_settings.roi.binning == L"1x1") {
+		binning = 1;
+	} else {
+		// Fallback to 1x1 binning
+		m_settings.roi.binning = L"1x1";
+	}
+	m_settings.roi.binX = binning;
+	m_settings.roi.binY = binning;
 	AT_SetEnumeratedString(m_camera, L"AOIBinning", m_settings.roi.binning.c_str());
 	AT_SetEnumeratedString(m_camera, L"SimplePreAmpGainControl", m_settings.readout.preAmpGain.c_str());
 
@@ -234,7 +249,7 @@ void Andor::preparePreview() {
 
 	AT_64 ImageSizeBytes;
 	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
-	int BufferSize = static_cast<int>(ImageSizeBytes);
+	unsigned int BufferSize = static_cast<int>(ImageSizeBytes);
 
 	BUFFER_SETTINGS bufferSettings = { 5, BufferSize, "unsigned short", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
@@ -263,7 +278,7 @@ void Andor::startAcquisition(CAMERA_SETTINGS settings) {
 
 	AT_64 ImageSizeBytes;
 	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
-	int BufferSize = static_cast<int>(ImageSizeBytes);
+	unsigned int BufferSize = static_cast<int>(ImageSizeBytes);
 
 	BUFFER_SETTINGS bufferSettings = { 4, BufferSize, "unsigned short", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
@@ -289,7 +304,7 @@ void Andor::cleanupAcquisition() {
 	AT_Flush(m_camera);
 }
 
-void Andor::acquireImage(unsigned char* buffer) {
+int Andor::acquireImage(unsigned char* buffer) {
 	// Pass this buffer to the SDK
 	unsigned char* UserBuffer = new unsigned char[m_bufferSize];
 	AT_QueueBuffer(m_camera, UserBuffer, m_bufferSize);
@@ -302,7 +317,7 @@ void Andor::acquireImage(unsigned char* buffer) {
 	int ret = AT_WaitBuffer(m_camera, &Buffer, &m_bufferSize, 1500 * m_settings.exposureTime);
 	// return if AT_WaitBuffer timed out
 	if (ret == AT_ERR_TIMEDOUT) {
-		return;
+		return 0;
 	}
 
 	// Process the image
@@ -314,6 +329,7 @@ void Andor::acquireImage(unsigned char* buffer) {
 	AT_ConvertBuffer(Buffer, buffer, m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding.c_str(), L"Mono16");
 
 	delete[] Buffer;
+	return 1;
 }
 
 void Andor::getImageForAcquisition(unsigned char* buffer, bool preview) {
