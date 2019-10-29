@@ -145,7 +145,7 @@ public:
 		ZEISSECU = 0,
 		NIDAQ = 1
 	} SCAN_DEVICE;
-	std::vector<std::string> SCAN_DEVICE_NAMES = { "Zeiss ECU", "NI-DAQmx" };
+	inline static std::vector<std::string> SCAN_DEVICE_NAMES = { "Zeiss ECU", "NI-DAQmx" };
 
 	std::vector<DeviceElement> m_deviceElements;
 	std::vector<double> m_elementPositions;

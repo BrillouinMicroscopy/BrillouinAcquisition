@@ -248,11 +248,6 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		[this](PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<float> unpackedBuffer) { plot(previewBuffer, plotSettings, unpackedBuffer); }
 	);
 
-	// First read device settings then init devices
-	readSettings();
-	initCameraBrillouin();
-	initScanControl();
-	initCamera();
 	// start acquisition thread
 	m_acquisitionThread.startWorker(m_acquisition);
 	// start Brillouin thread
@@ -304,6 +299,12 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 
 	initializeODTVoltagePlot(ui->alignmentVoltagesODT);
 	initializeODTVoltagePlot(ui->acquisitionVoltagesODT);
+
+	// First read device settings then init devices
+	readSettings();
+	initCameraBrillouin();
+	initScanControl();
+	initCamera();
 
 	updateBrillouinSettings();
 	initSettingsDialog();
@@ -1134,7 +1135,7 @@ QString BrillouinAcquisition::formatSeconds(int seconds) {
 }
 
 void BrillouinAcquisition::plotODTVoltages(ODT_SETTINGS settings, ODT_MODE mode) {
-	QCustomPlot *plot = new QCustomPlot();
+	QCustomPlot *plot = nullptr;
 	switch (mode) {
 		case ODT_MODE::ALGN:
 			plot = ui->alignmentVoltagesODT;
@@ -1160,6 +1161,8 @@ void BrillouinAcquisition::plotODTVoltages(ODT_SETTINGS settings, ODT_MODE mode)
 			ui->acquisitionNumber_ODT->blockSignals(false);
 			ui->acquisitionRate_ODT->blockSignals(false);
 			break;
+		default:
+			return;
 	}
 
 	std::vector<VOLTAGE2> voltages = settings.voltages;
@@ -1848,7 +1851,7 @@ void BrillouinAcquisition::initSettingsDialog() {
 	m_scanControlDropdown = new QComboBox();
 	layout->addWidget(m_scanControlDropdown);
 	i = 0;
-	for (auto type : m_scanControl->SCAN_DEVICE_NAMES) {
+	for (auto type : ScanControl::SCAN_DEVICE_NAMES) {
 		m_scanControlDropdown->insertItem(i, QString::fromStdString(type));
 		i++;
 	}
@@ -1959,6 +1962,10 @@ void BrillouinAcquisition::on_actionLoad_Voltage_Position_calibration_triggered(
 }
 
 void BrillouinAcquisition::initBeampathButtons() {
+	if (m_scanControl == nullptr) {
+		return;
+	}
+
 	for (auto widget : ui->beamPathBox->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly)) {
 		delete widget;
 	}
