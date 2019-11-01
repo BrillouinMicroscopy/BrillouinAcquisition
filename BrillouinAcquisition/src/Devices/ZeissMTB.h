@@ -15,7 +15,6 @@ private:
 
 	Focus *m_focus = nullptr;
 	MCU *m_mcu = nullptr;
-	Stand *m_stand = nullptr;
 
 	/*
 	 * Zeiss MTB handles
@@ -28,8 +27,22 @@ private:
 	CComBSTR m_ID = _T("");
 	// MTB interface pointer to a device
 	IMTBDevicePtr m_Stand = nullptr;
-	// MTB interface pointer to a lamp
+	// MTB interface pointer to the halogen lamp
 	IMTBContinualPtr m_Lamp = nullptr;
+	// MTB interface pointer to the halogen lamp mirror
+	IMTBChangerPtr m_Mirror = nullptr;
+	// MTB interface pointer to the objective
+	IMTBChangerPtr m_Objective = nullptr;
+	// MTB interface pointer to the reflector
+	IMTBChangerPtr m_Reflector = nullptr;
+	// MTB interface pointer to the tubelens
+	IMTBChangerPtr m_Tubelens = nullptr;
+	// MTB interface pointer to the baseport
+	IMTBChangerPtr m_Baseport = nullptr;
+	// MTB interface pointer to the sideport
+	IMTBChangerPtr m_Sideport = nullptr;
+	// MTB interface pointer to the RL shutter
+	IMTBChangerPtr m_RLShutter = nullptr;
 
 
 	bool m_isMTBConnected{ false };
@@ -43,6 +56,7 @@ private:
 		TUBELENS,
 		BASEPORT,
 		SIDEPORT,
+		RLSHUTTER,
 		MIRROR,
 		LAMP,
 		COUNT
@@ -57,7 +71,6 @@ public:
 	void setPosition(POINT3 position);
 	void setPosition(POINT2 position);
 	POINT3 getPosition();
-	void setDevice(com *device);
 
 public slots:
 	void init();
@@ -69,8 +82,22 @@ public slots:
 	void getElements();
 	int getBeamBlock();
 	void setBeamBlock(int position);
-	void setLamp(int value, bool check = false);
+	int getReflector();
+	void setReflector(int value, bool check = false);
+	int getObjective();
+	void setObjective(int value, bool check = false);
+	int getTubelens();
+	void setTubelens(int value, bool check = false);
+	int getBaseport();
+	void setBaseport(int value, bool check = false);
+	int getSideport();
+	void setSideport(int value, bool check = false);
+	int getRLShutter();
+	void setRLShutter(int value, bool check = false);
+	int getMirror();
+	void setMirror(int value, bool check = false);
 	double getLamp();
+	void setLamp(int value, bool check = false);
 	void getElement(DeviceElement element);
 	// sets the position relative to the home position m_homePosition
 	void setPositionRelativeX(double position);
