@@ -243,15 +243,20 @@ void ZeissECU::setElement(DeviceElement element, double position) {
 }
 
 void ZeissECU::getElements() {
-	m_elementPositions[(int)DEVICE_ELEMENT::BEAMBLOCK] = getBeamBlock();
-	m_elementPositions[(int)DEVICE_ELEMENT::REFLECTOR] = m_stand->getReflector();
-	m_elementPositions[(int)DEVICE_ELEMENT::OBJECTIVE] = m_stand->getObjective();
-	m_elementPositions[(int)DEVICE_ELEMENT::TUBELENS] = m_stand->getTubelens();
-	m_elementPositions[(int)DEVICE_ELEMENT::BASEPORT] = m_stand->getBaseport();
-	m_elementPositions[(int)DEVICE_ELEMENT::SIDEPORT] = m_stand->getSideport();
-	m_elementPositions[(int)DEVICE_ELEMENT::MIRROR] = m_stand->getMirror();
-	checkPresets();
-	emit(elementPositionsChanged(m_elementPositions));
+	m_elementPositionsTmp = m_elementPositions;
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::BEAMBLOCK] = getBeamBlock();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::REFLECTOR] = m_stand->getReflector();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::OBJECTIVE] = m_stand->getObjective();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::TUBELENS] = m_stand->getTubelens();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::BASEPORT] = m_stand->getBaseport();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::SIDEPORT] = m_stand->getSideport();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::MIRROR] = m_stand->getMirror();
+	// We only emit changed positions
+	if (m_elementPositionsTmp != m_elementPositions) {
+		m_elementPositions = m_elementPositionsTmp;
+		checkPresets();
+		emit(elementPositionsChanged(m_elementPositions));
+	}
 }
 
 int ZeissECU::getBeamBlock() {

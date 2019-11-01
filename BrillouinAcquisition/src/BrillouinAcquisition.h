@@ -9,6 +9,7 @@
 #include "Devices/pvcamera.h"
 #include "Devices/scancontrol.h"
 #include "Devices/ZeissECU.h"
+#include "Devices/ZeissMTB.h"
 #include "Devices/NIDAQ.h"
 #include "Devices/PointGrey.h"
 #include "Devices/uEyeCam.h"
@@ -439,6 +440,7 @@ private:
 	std::vector<std::vector<QPushButton*>> elementButtons;
 	std::vector<QSpinBox*> elementIntBox;
 	std::vector<QDoubleSpinBox*> elementDoubleBox;
+	std::vector<QSlider*> elementSlider;
 	std::vector<QPushButton*> presetButtons;
 
 	struct {

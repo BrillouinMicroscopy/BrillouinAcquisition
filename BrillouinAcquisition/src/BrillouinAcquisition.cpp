@@ -2011,6 +2011,7 @@ void BrillouinAcquisition::initBeampathButtons() {
 	elementButtons.clear();
 	elementIntBox.clear();
 	elementDoubleBox.clear();
+	elementSlider.clear();
 
 	auto elements = m_scanControl->m_deviceElements;
 	for (gsl::index ii = 0; ii < elements.size(); ii++) {
@@ -2068,6 +2069,24 @@ void BrillouinAcquisition::initBeampathButtons() {
 				[=](double value) {setElement(elements[ii], value); }
 			);
 			elementDoubleBox.push_back(doubleBox);
+		} else if (element.inputType == DEVICE_INPUT_TYPE::SLIDER) {
+			QSlider* slider = new QSlider();
+			slider->setTracking(false);
+			slider->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+			slider->setMinimum(0);
+			slider->setMaximum(100);
+			slider->setSingleStep(1.0);
+			slider->setPageStep(5.0);
+			slider->setOrientation(Qt::Horizontal);
+			slider->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+			layout->addWidget(slider);
+
+			connection = QObject::connect<void(QSlider::*)(const int)>(
+				slider,
+				&QSlider::valueChanged,
+				[=](int value) { setElement(elements[ii], value); }
+			);
+			elementSlider.push_back(slider);
 		}
 		verticalLayout->addLayout(layout);
 	}
@@ -2094,6 +2113,11 @@ void BrillouinAcquisition::initScanControl() {
 			m_scanControl = new NIDAQ();
 			m_hasODT = true;
 			m_hasSpatialCalibration = true;
+			break;
+		case ScanControl::SCAN_DEVICE::ZEISSMTB:
+			m_scanControl = new ZeissMTB();
+			m_hasODT = false;
+			m_hasSpatialCalibration = false;
 			break;
 		default:
 			m_scanControl = new ZeissECU();
@@ -2521,7 +2545,7 @@ void BrillouinAcquisition::microscopeElementPositionChanged(DeviceElement elemen
 }
 
 void BrillouinAcquisition::checkElementButtons() {
-	if ((elementButtons.size() + elementIntBox.size() + elementDoubleBox.size()) != m_deviceElementPositions.size()) {
+	if ((elementButtons.size() + elementIntBox.size() + elementDoubleBox.size() + elementSlider.size()) != m_deviceElementPositions.size()) {
 		return;
 	}
 
@@ -2529,6 +2553,7 @@ void BrillouinAcquisition::checkElementButtons() {
 	int indButton{ 0 };
 	int indIntBox{ 0 };
 	int indDoubleBox{ 0 };
+	int indSlider{ 0 };
 	for (gsl::index ii = 0; ii < elements.size(); ii++) {
 		if (elements[ii].inputType == DEVICE_INPUT_TYPE::PUSHBUTTON) {
 			for (gsl::index jj = 0; jj < elementButtons[indButton].size(); jj++) {
@@ -2552,6 +2577,11 @@ void BrillouinAcquisition::checkElementButtons() {
 			elementDoubleBox[indDoubleBox]->setValue((double)m_deviceElementPositions[ii]);
 			elementDoubleBox[indDoubleBox]->blockSignals(false);
 			indDoubleBox++;
+		} else if (elements[ii].inputType == DEVICE_INPUT_TYPE::SLIDER) {
+			elementSlider[indSlider]->blockSignals(true);
+			elementSlider[indSlider]->setValue((double)m_deviceElementPositions[ii]);
+			elementSlider[indSlider]->blockSignals(false);
+			indSlider++;
 		}
 	}
 	auto presets = m_scanControl->m_presets;
@@ -3020,6 +3050,9 @@ void BrillouinAcquisition::writeSettings() {
 		case ScanControl::SCAN_DEVICE::NIDAQ:
 			stage = "nidaq";
 			break;
+		case ScanControl::SCAN_DEVICE::ZEISSMTB:
+			stage = "zeiss-mtb";
+			break;
 		default:
 			stage = "zeiss-ecu";
 			break;
@@ -3064,6 +3097,8 @@ void BrillouinAcquisition::readSettings() {
 		m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSECU;
 	} else if (stage == "nidaq") {
 		m_scanControllerType = ScanControl::SCAN_DEVICE::NIDAQ;
+	} else if (stage == "zeiss-mtb") {
+		m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSMTB;
 	} else {
 		m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSECU;
 	}
