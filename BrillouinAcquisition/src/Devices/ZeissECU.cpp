@@ -271,7 +271,8 @@ void ZeissECU::setBeamBlock(int position) {
 	}
 }
 
-void ZeissECU::getElement(DeviceElement element) {
+int ZeissECU::getElement(DeviceElement element) {
+	return -1;
 }
 
 /*

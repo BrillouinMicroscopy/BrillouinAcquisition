@@ -191,7 +191,7 @@ void NIDAQ::setElement(DeviceElement element, double position) {
 	emit(elementPositionChanged(element, position));
 }
 
-void NIDAQ::getElement(DeviceElement element) {
+int NIDAQ::getElement(DeviceElement element) {
 	switch ((DEVICE_ELEMENT)element.index) {
 		case DEVICE_ELEMENT::BEAMBLOCK:
 			m_elementPositions[element.index] = getBeamBlock();
@@ -215,10 +215,11 @@ void NIDAQ::getElement(DeviceElement element) {
 			m_elementPositions[element.index] = getLowerObjective();
 			break;
 		default:
-			return;
+			return -1;
 	}
 	checkPresets();
 	emit(elementPositionChanged(element, m_elementPositions[element.index]));
+	return m_elementPositions[element.index];
 }
 
 void NIDAQ::setPreset(ScanPreset presetType) {

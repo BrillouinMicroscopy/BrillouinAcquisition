@@ -219,6 +219,10 @@ void ZeissMTB::setPreset(ScanPreset presetType) {
 	emit(elementPositionsChanged(m_elementPositions));
 }
 
+int ZeissMTB::getElement(DeviceElement element) {
+	return -1;
+}
+
 void ZeissMTB::setElement(DeviceElement element, double position) {
 	switch ((DEVICE_ELEMENT)element.index) {
 		case DEVICE_ELEMENT::BEAMBLOCK:
@@ -256,6 +260,20 @@ void ZeissMTB::setElement(DeviceElement element, double position) {
 	emit(elementPositionChanged(element, position));
 }
 
+int ZeissMTB::getElement(IMTBChangerPtr element) {
+	if (!element) {
+		return -1;
+	}
+	return element->GetPosition();
+}
+
+bool ZeissMTB::setElement(IMTBChangerPtr element, int position) {
+	if (!element) {
+		return false;
+	}
+	return element->SetPosition(position, MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+}
+
 void ZeissMTB::getElements() {
 	m_elementPositionsTmp = m_elementPositions;
 	m_elementPositionsTmp[(int)DEVICE_ELEMENT::BEAMBLOCK] = getBeamBlock();
@@ -287,77 +305,80 @@ void ZeissMTB::setBeamBlock(int position) {
 	}
 }
 
-void ZeissMTB::getElement(DeviceElement element) {
-}
-
 int ZeissMTB::getReflector() {
-	return m_Reflector->GetPosition();
+	return getElement(m_Reflector);
 }
 
 void ZeissMTB::setReflector(int position, bool block) {
 	// Set the position
-	auto success = m_Reflector->SetPosition(position, MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+	auto success = setElement(m_Reflector, position);
 }
 
 int ZeissMTB::getObjective() {
-	return m_Objective->GetPosition();
+	return getElement(m_Objective);
 }
 
 void ZeissMTB::setObjective(int position, bool block) {
 	// Set the position
-	auto success = m_Objective->SetPosition(position, MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+	auto success = setElement(m_Objective, position);
 }
 
 int ZeissMTB::getTubelens() {
-	return m_Tubelens->GetPosition();
+	return getElement(m_Tubelens);
 }
 
 void ZeissMTB::setTubelens(int position, bool block) {
 	// Set the position
-	auto success = m_Tubelens->SetPosition(position, MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+	auto success = setElement(m_Tubelens, position);
 }
 
 int ZeissMTB::getBaseport() {
-	return m_Baseport->GetPosition();
+	return getElement(m_Baseport);
 }
 
 void ZeissMTB::setBaseport(int position, bool block) {
 	// Set the position
-	auto success = m_Baseport->SetPosition(position, MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+	auto success = setElement(m_Baseport, position);
 }
 
 int ZeissMTB::getSideport() {
-	return m_Sideport->GetPosition();
+	return getElement(m_Sideport);
 }
 
 void ZeissMTB::setSideport(int position, bool block) {
 	// Set the position
-	auto success = m_Sideport->SetPosition(position, MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+	auto success = setElement(m_Sideport, position);
 }
 
 int ZeissMTB::getRLShutter() {
-	return m_RLShutter->GetPosition();
+	return getElement(m_RLShutter);
 }
 
 void ZeissMTB::setRLShutter(int position, bool block) {
 	// Set the position
-	auto success = m_RLShutter->SetPosition(position, MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+	auto success = setElement(m_RLShutter, position);
 }
 
 int ZeissMTB::getMirror() {
-	return m_Mirror->GetPosition();
+	return getElement(m_Mirror);
 }
 
 void ZeissMTB::setMirror(int position, bool block) {
 	// Set the position
-	auto success = m_Mirror->SetPosition(position, MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+	auto success = setElement(m_Mirror, position);
 }
 
 double ZeissMTB::getLamp() {
+	if (!m_Lamp) {
+		return 0.0;
+	}
 	return m_Lamp->GetPosition("%");
 }
 
 void ZeissMTB::setLamp(int voltage, bool block) {
+	if (!m_Lamp) {
+		return;
+	}
 	if (voltage > 100) voltage = 100;
 	if (voltage < 0) voltage = 0;
 	// Set the voltage

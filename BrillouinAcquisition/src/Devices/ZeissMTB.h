@@ -77,7 +77,10 @@ public slots:
 	void connectDevice();
 	void disconnectDevice();
 	void errorHandler(QSerialPort::SerialPortError error);
+	int getElement(DeviceElement element);
 	void setElement(DeviceElement element, double position);
+	int getElement(IMTBChangerPtr element);
+	bool setElement(IMTBChangerPtr element, int position);
 	void setPreset(ScanPreset preset);
 	void getElements();
 	int getBeamBlock();
@@ -98,7 +101,6 @@ public slots:
 	void setMirror(int value, bool check = false);
 	double getLamp();
 	void setLamp(int value, bool check = false);
-	void getElement(DeviceElement element);
 	// sets the position relative to the home position m_homePosition
 	void setPositionRelativeX(double position);
 	void setPositionRelativeY(double position);

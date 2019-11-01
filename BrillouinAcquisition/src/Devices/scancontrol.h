@@ -169,7 +169,7 @@ public:
 
 public slots:
 	virtual void setElement(DeviceElement, double) = 0;
-	virtual void getElement(DeviceElement) = 0;
+	virtual int getElement(DeviceElement) = 0;
 	virtual void setPreset(ScanPreset) = 0;
 	virtual void getElements() = 0;
 	void checkPresets();
