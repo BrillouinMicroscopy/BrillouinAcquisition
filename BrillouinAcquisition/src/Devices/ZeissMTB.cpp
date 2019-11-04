@@ -51,16 +51,9 @@ ZeissMTB::~ZeissMTB() {
 	 * Clean up Zeiss MTB handles
 	 */
 	CoUninitialize();
-
-	delete m_mcu;
-	delete m_comObject;
 }
 
 void ZeissMTB::init() {
-	m_comObject = new com();
-
-	m_mcu = new MCU(m_comObject);
-
 	/*
 	 * Initialize Zeiss MTB handles
 	 */
@@ -71,15 +64,8 @@ void ZeissMTB::init() {
 	} catch (_com_error e) {
 	}
 
-	QMetaObject::Connection connection = QWidget::connect(
-		m_comObject,
-		SIGNAL(errorOccurred(QSerialPort::SerialPortError)),
-		this,
-		SLOT(errorHandler(QSerialPort::SerialPortError))
-	);
-
 	positionTimer = new QTimer();
-	connection = QWidget::connect(positionTimer, SIGNAL(timeout()), this, SLOT(announcePosition()));
+	QMetaObject::Connection connection = QWidget::connect(positionTimer, SIGNAL(timeout()), this, SLOT(announcePosition()));
 
 	elementPositionTimer = new QTimer();
 	connection = QWidget::connect(elementPositionTimer, SIGNAL(timeout()), this, SLOT(getElements()));
@@ -123,6 +109,13 @@ void ZeissMTB::connectDevice() {
 				// Objective focus
 				m_ObjectiveFocus = (IMTBContinualPtr)m_Focus->GetComponent("MTBFocus");
 			}
+			m_MCU = (IUnknown*)(m_Root->GetDevice(2));	// Stand handle
+			if (m_MCU) {
+				// Stage axis x
+				m_stageX = (IMTBContinualPtr)m_MCU->GetComponent("MTBStageAxisX");
+				// Stage axis y
+				m_stageY = (IMTBContinualPtr)m_MCU->GetComponent("MTBStageAxisY");
+			}
 
 			Thorlabs_FF::FF_Open(m_serialNo_FF2);
 			Thorlabs_FF::FF_StartPolling(m_serialNo_FF2, 200);
@@ -165,13 +158,12 @@ void ZeissMTB::disconnectDevice() {
 	emit(connectedDevice(m_isConnected));
 }
 
-void ZeissMTB::errorHandler(QSerialPort::SerialPortError error) {
-}
-
 void ZeissMTB::setPosition(POINT3 position) {
 	bool success{ false };
-	m_mcu->setX(position.x);
-	m_mcu->setY(position.y);
+	if (m_MCU) {
+		success = m_stageX->SetPosition(position.x, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		success = m_stageY->SetPosition(position.y, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+	}
 	if (m_ObjectiveFocus) {
 		success = m_ObjectiveFocus->SetPosition(position.z, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 	}
@@ -179,18 +171,27 @@ void ZeissMTB::setPosition(POINT3 position) {
 }
 
 void ZeissMTB::setPosition(POINT2 position) {
-	m_mcu->setX(position.x);
-	m_mcu->setY(position.y);
+	bool success{ false };
+	if (m_MCU) {
+		success = m_stageX->SetPosition(position.x, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		success = m_stageY->SetPosition(position.y, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+	}
 	calculateCurrentPositionBounds();
 }
 
 void ZeissMTB::setPositionRelativeX(double positionX) {
-	m_mcu->setX(positionX + m_homePosition.x);
+	bool success{ false };
+	if (m_MCU) {
+		success = m_stageX->SetPosition(positionX + m_homePosition.x, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+	}
 	calculateCurrentPositionBounds();
 }
 
 void ZeissMTB::setPositionRelativeY(double positionY) {
-	m_mcu->setY(positionY + m_homePosition.y);
+	bool success{ false };
+	if (m_MCU) {
+		success = m_stageY->SetPosition(positionY + m_homePosition.y, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+	}
 	calculateCurrentPositionBounds();
 }
 
@@ -207,9 +208,13 @@ void ZeissMTB::setPositionInPix(POINT2) {
 }
 
 POINT3 ZeissMTB::getPosition() {
-	double x = m_mcu->getX();
-	double y = m_mcu->getY();
+	double x{ 0 };
+	double y{ 0 };
 	double z{ 0 };
+	if (m_MCU) {
+		x = m_stageX->GetPosition("µm");
+		y = m_stageY->GetPosition("µm");
+	}
 	if (m_ObjectiveFocus) {
 		z = m_ObjectiveFocus->GetPosition("µm");
 	}

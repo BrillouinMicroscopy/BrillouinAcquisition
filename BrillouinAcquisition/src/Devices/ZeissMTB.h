@@ -3,7 +3,11 @@
 
 #include <atlutil.h>
 #include "scancontrol.h"
-#include "ZeissECU.h"
+
+namespace Thorlabs_FF {
+	#include <Thorlabs.MotionControl.FilterFlipper.h>
+}
+
 #import "MTBApi.tlb" named_guids
 using namespace MTBApi;
 
@@ -11,11 +15,6 @@ class ZeissMTB: public ScanControl {
 	Q_OBJECT
 
 private:
-	com * m_comObject = nullptr;
-
-	Focus *m_focus = nullptr;
-	MCU *m_mcu = nullptr;
-
 	/*
 	 * Zeiss MTB handles
 	 */
@@ -47,7 +46,12 @@ private:
 	IMTBDevicePtr m_Focus = nullptr;
 	// MTB interface pointer to the focus
 	IMTBContinualPtr m_ObjectiveFocus = nullptr;
-
+	// MTB interface pointer to a device
+	IMTBDevicePtr m_MCU = nullptr;
+	// MTB interface pointer to the stage axis x
+	IMTBContinualPtr m_stageX = nullptr;
+	// MTB interface pointer to the stage axis y
+	IMTBContinualPtr m_stageY = nullptr;
 
 	bool m_isMTBConnected{ false };
 
@@ -80,7 +84,6 @@ public slots:
 	void init();
 	void connectDevice();
 	void disconnectDevice();
-	void errorHandler(QSerialPort::SerialPortError error);
 	int getElement(DeviceElement element);
 	void setElement(DeviceElement element, double position);
 	int getElement(IMTBChangerPtr element);
