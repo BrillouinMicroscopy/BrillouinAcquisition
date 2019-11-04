@@ -52,7 +52,6 @@ ZeissMTB::~ZeissMTB() {
 	 */
 	CoUninitialize();
 
-	delete m_focus;
 	delete m_mcu;
 	delete m_comObject;
 }
@@ -60,7 +59,6 @@ ZeissMTB::~ZeissMTB() {
 void ZeissMTB::init() {
 	m_comObject = new com();
 
-	m_focus = new Focus(m_comObject);
 	m_mcu = new MCU(m_comObject);
 
 	/*
@@ -120,6 +118,11 @@ void ZeissMTB::connectDevice() {
 				// Transmission halogen lamp
 				m_Lamp = (IMTBContinualPtr)m_Stand->GetComponent("MTBTLHalogenLamp");
 			}
+			m_Focus = (IUnknown*)(m_Root->GetDevice(1));	// Stand handle
+			if (m_Focus) {
+				// Objective focus
+				m_ObjectiveFocus = (IMTBContinualPtr)m_Focus->GetComponent("MTBFocus");
+			}
 
 			Thorlabs_FF::FF_Open(m_serialNo_FF2);
 			Thorlabs_FF::FF_StartPolling(m_serialNo_FF2, 200);
@@ -166,9 +169,12 @@ void ZeissMTB::errorHandler(QSerialPort::SerialPortError error) {
 }
 
 void ZeissMTB::setPosition(POINT3 position) {
+	bool success{ false };
 	m_mcu->setX(position.x);
 	m_mcu->setY(position.y);
-	m_focus->setZ(position.z);
+	if (m_ObjectiveFocus) {
+		success = m_ObjectiveFocus->SetPosition(position.z, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+	}
 	calculateCurrentPositionBounds(position);
 }
 
@@ -189,7 +195,10 @@ void ZeissMTB::setPositionRelativeY(double positionY) {
 }
 
 void ZeissMTB::setPositionRelativeZ(double positionZ) {
-	m_focus->setZ(positionZ + m_homePosition.z);
+	bool success{ false };
+	if (m_ObjectiveFocus) {
+		success = m_ObjectiveFocus->SetPosition(positionZ + m_homePosition.z, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+	}
 	calculateCurrentPositionBounds();
 }
 
@@ -200,7 +209,10 @@ void ZeissMTB::setPositionInPix(POINT2) {
 POINT3 ZeissMTB::getPosition() {
 	double x = m_mcu->getX();
 	double y = m_mcu->getY();
-	double z = m_focus->getZ();
+	double z{ 0 };
+	if (m_ObjectiveFocus) {
+		z = m_ObjectiveFocus->GetPosition("µm");
+	}
 	return POINT3{ x, y, z };
 }
 

@@ -43,6 +43,10 @@ private:
 	IMTBChangerPtr m_Sideport = nullptr;
 	// MTB interface pointer to the RL shutter
 	IMTBChangerPtr m_RLShutter = nullptr;
+	// MTB interface pointer to a device
+	IMTBDevicePtr m_Focus = nullptr;
+	// MTB interface pointer to the focus
+	IMTBContinualPtr m_ObjectiveFocus = nullptr;
 
 
 	bool m_isMTBConnected{ false };
