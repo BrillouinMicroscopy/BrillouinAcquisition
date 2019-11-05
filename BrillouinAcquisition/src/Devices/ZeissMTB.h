@@ -24,8 +24,6 @@ private:
 	IMTBRootPtr m_Root = nullptr;
 	// my ID received from MTB
 	CComBSTR m_ID = _T("");
-	// MTB interface pointer to a device
-	IMTBDevicePtr m_Stand = nullptr;
 	// MTB interface pointer to the halogen lamp
 	IMTBContinualPtr m_Lamp = nullptr;
 	// MTB interface pointer to the halogen lamp mirror
@@ -42,12 +40,8 @@ private:
 	IMTBChangerPtr m_Sideport = nullptr;
 	// MTB interface pointer to the RL shutter
 	IMTBChangerPtr m_RLShutter = nullptr;
-	// MTB interface pointer to a device
-	IMTBDevicePtr m_Focus = nullptr;
 	// MTB interface pointer to the focus
 	IMTBContinualPtr m_ObjectiveFocus = nullptr;
-	// MTB interface pointer to a device
-	IMTBDevicePtr m_MCU = nullptr;
 	// MTB interface pointer to the stage axis x
 	IMTBContinualPtr m_stageX = nullptr;
 	// MTB interface pointer to the stage axis y

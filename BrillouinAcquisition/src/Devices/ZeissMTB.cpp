@@ -85,36 +85,29 @@ void ZeissMTB::connectDevice() {
 			/*
 			 * Get the device handles
 			 */
-			m_Stand = (IUnknown*)(m_Root->GetDevice(0));	// Stand handle
-			if (m_Stand) {	// Try to get element handles
+			if (m_Root) {	// Try to get element handles
 				// Objective
-				m_Objective = (IMTBChangerPtr)m_Stand->GetComponent("MTBObjectiveChanger");
+				m_Objective = (IMTBChangerPtr)m_Root->GetComponent("MTBObjectiveChanger");
 				// Reflector
-				m_Reflector = (IMTBChangerPtr)m_Stand->GetComponent("MTBReflectorChanger");
+				m_Reflector = (IMTBChangerPtr)m_Root->GetComponent("MTBReflectorChanger");
 				// Tubelens
-				m_Tubelens = (IMTBChangerPtr)m_Stand->GetComponent("MTBOptovarChanger");
+				m_Tubelens = (IMTBChangerPtr)m_Root->GetComponent("MTBOptovarChanger");
 				// Baseport
-				m_Baseport = (IMTBChangerPtr)m_Stand->GetComponent("MTBBaseportChanger");
+				m_Baseport = (IMTBChangerPtr)m_Root->GetComponent("MTBBaseportChanger");
 				// Sideport
-				m_Sideport = (IMTBChangerPtr)m_Stand->GetComponent("MTBSideportChanger");
+				m_Sideport = (IMTBChangerPtr)m_Root->GetComponent("MTBSideportChanger");
 				// Reflected light shutter
-				m_RLShutter = (IMTBChangerPtr)m_Stand->GetComponent("MTBRLShutter");
+				m_RLShutter = (IMTBChangerPtr)m_Root->GetComponent("MTBRLShutter");
 				// Transmission halogen lamp mirror
-				m_Mirror = (IMTBChangerPtr)m_Stand->GetComponent("MTBTLLampChanger");
+				m_Mirror = (IMTBChangerPtr)m_Root->GetComponent("MTBTLLampChanger");
 				// Transmission halogen lamp
-				m_Lamp = (IMTBContinualPtr)m_Stand->GetComponent("MTBTLHalogenLamp");
-			}
-			m_Focus = (IUnknown*)(m_Root->GetDevice(1));	// Stand handle
-			if (m_Focus) {
+				m_Lamp = (IMTBContinualPtr)m_Root->GetComponent("MTBTLHalogenLamp");
 				// Objective focus
-				m_ObjectiveFocus = (IMTBContinualPtr)m_Focus->GetComponent("MTBFocus");
-			}
-			m_MCU = (IUnknown*)(m_Root->GetDevice(2));	// Stand handle
-			if (m_MCU) {
+				m_ObjectiveFocus = (IMTBContinualPtr)m_Root->GetComponent("MTBFocus");
 				// Stage axis x
-				m_stageX = (IMTBContinualPtr)m_MCU->GetComponent("MTBStageAxisX");
+				m_stageX = (IMTBContinualPtr)m_Root->GetComponent("MTBStageAxisX");
 				// Stage axis y
-				m_stageY = (IMTBContinualPtr)m_MCU->GetComponent("MTBStageAxisY");
+				m_stageY = (IMTBContinualPtr)m_Root->GetComponent("MTBStageAxisY");
 			}
 
 			Thorlabs_FF::FF_Open(m_serialNo_FF2);
@@ -160,7 +153,7 @@ void ZeissMTB::disconnectDevice() {
 
 void ZeissMTB::setPosition(POINT3 position) {
 	bool success{ false };
-	if (m_MCU) {
+	if (m_stageX && m_stageY) {
 		success = m_stageX->SetPosition(position.x, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 		success = m_stageY->SetPosition(position.y, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 	}
@@ -172,7 +165,7 @@ void ZeissMTB::setPosition(POINT3 position) {
 
 void ZeissMTB::setPosition(POINT2 position) {
 	bool success{ false };
-	if (m_MCU) {
+	if (m_stageX && m_stageY) {
 		success = m_stageX->SetPosition(position.x, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 		success = m_stageY->SetPosition(position.y, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 	}
@@ -181,7 +174,7 @@ void ZeissMTB::setPosition(POINT2 position) {
 
 void ZeissMTB::setPositionRelativeX(double positionX) {
 	bool success{ false };
-	if (m_MCU) {
+	if (m_stageX) {
 		success = m_stageX->SetPosition(positionX + m_homePosition.x, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 	}
 	calculateCurrentPositionBounds();
@@ -189,7 +182,7 @@ void ZeissMTB::setPositionRelativeX(double positionX) {
 
 void ZeissMTB::setPositionRelativeY(double positionY) {
 	bool success{ false };
-	if (m_MCU) {
+	if (m_stageY) {
 		success = m_stageY->SetPosition(positionY + m_homePosition.y, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 	}
 	calculateCurrentPositionBounds();
@@ -211,7 +204,7 @@ POINT3 ZeissMTB::getPosition() {
 	double x{ 0 };
 	double y{ 0 };
 	double z{ 0 };
-	if (m_MCU) {
+	if (m_stageX && m_stageY) {
 		x = m_stageX->GetPosition("µm");
 		y = m_stageY->GetPosition("µm");
 	}
