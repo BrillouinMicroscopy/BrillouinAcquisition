@@ -145,9 +145,10 @@ public:
 	typedef enum class enScanDevice {
 		ZEISSECU = 0,
 		NIDAQ = 1,
-		ZEISSMTB = 2
+		ZEISSMTB = 2,
+		ZEISSMTBERLANGEN = 3
 	} SCAN_DEVICE;
-	inline static std::vector<std::string> SCAN_DEVICE_NAMES = { "Zeiss ECU", "NI-DAQmx", "Zeiss MTB" };
+	inline static std::vector<std::string> SCAN_DEVICE_NAMES = { "Zeiss ECU", "NI-DAQmx", "Zeiss MTB", "Zeiss MTB Erlangen" };
 
 	std::vector<DeviceElement> m_deviceElements;
 	std::vector<double> m_elementPositions;

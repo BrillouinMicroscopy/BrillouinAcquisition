@@ -2143,6 +2143,11 @@ void BrillouinAcquisition::initScanControl() {
 			m_hasODT = false;
 			m_hasSpatialCalibration = false;
 			break;
+		case ScanControl::SCAN_DEVICE::ZEISSMTBERLANGEN:
+			m_scanControl = new ZeissMTB_Erlangen();
+			m_hasODT = false;
+			m_hasSpatialCalibration = false;
+			break;
 		default:
 			m_scanControl = new ZeissECU();
 			// disable ODT
@@ -3077,6 +3082,9 @@ void BrillouinAcquisition::writeSettings() {
 		case ScanControl::SCAN_DEVICE::ZEISSMTB:
 			stage = "zeiss-mtb";
 			break;
+		case ScanControl::SCAN_DEVICE::ZEISSMTBERLANGEN:
+			stage = "zeiss-mtb-erlangen";
+			break;
 		default:
 			stage = "zeiss-ecu";
 			break;
@@ -3123,6 +3131,8 @@ void BrillouinAcquisition::readSettings() {
 		m_scanControllerType = ScanControl::SCAN_DEVICE::NIDAQ;
 	} else if (stage == "zeiss-mtb") {
 		m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSMTB;
+	} else if (stage == "zeiss-mtb-erlangen") {
+		m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSMTBERLANGEN;
 	} else {
 		m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSECU;
 	}
