@@ -51,7 +51,8 @@ struct VOLTAGE2 {
 typedef enum class enDeviceInput {
 	PUSHBUTTON,
 	INTBOX,
-	DOUBLEBOX
+	DOUBLEBOX,
+	SLIDER
 } DEVICE_INPUT_TYPE;
 
 class DeviceElement {
@@ -143,12 +144,14 @@ public:
 
 	typedef enum class enScanDevice {
 		ZEISSECU = 0,
-		NIDAQ = 1
+		NIDAQ = 1,
+		ZEISSMTB = 2
 	} SCAN_DEVICE;
-	inline static std::vector<std::string> SCAN_DEVICE_NAMES = { "Zeiss ECU", "NI-DAQmx" };
+	inline static std::vector<std::string> SCAN_DEVICE_NAMES = { "Zeiss ECU", "NI-DAQmx", "Zeiss MTB" };
 
 	std::vector<DeviceElement> m_deviceElements;
 	std::vector<double> m_elementPositions;
+	std::vector<double> m_elementPositionsTmp = m_elementPositions;
 
 	std::vector<Preset> m_presets;
 	ScanPreset m_activePresets = ScanPreset::SCAN_NULL;
@@ -166,7 +169,7 @@ public:
 
 public slots:
 	virtual void setElement(DeviceElement, double) = 0;
-	virtual void getElement(DeviceElement) = 0;
+	virtual int getElement(DeviceElement) = 0;
 	virtual void setPreset(ScanPreset) = 0;
 	virtual void getElements() = 0;
 	void checkPresets();

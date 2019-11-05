@@ -103,7 +103,7 @@ public slots:
 	void connectDevice();
 	void disconnectDevice();
 	void setElement(DeviceElement element, double position);
-	void getElement(DeviceElement element);
+	int getElement(DeviceElement element);
 	void setPreset(ScanPreset preset);
 	void getElements();
 	void setCalFlipMirror(int position);
