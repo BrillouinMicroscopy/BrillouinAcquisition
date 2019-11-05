@@ -1986,11 +1986,21 @@ void BrillouinAcquisition::initBeampathButtons() {
 	std::string buttonLabel;
 	presetButtons.clear();
 	auto presets = m_scanControl->m_presets;
+	QWidget* presetWidget = new QWidget();
+	int rows{ 0 };
 	if (presets.size() > 0) {
-		QHBoxLayout *presetLayoutLabel = new QHBoxLayout();
+		// Create preset Widget and set vertical layout
+		verticalLayout->addWidget(presetWidget);
+		QVBoxLayout* presetWidgetLayout = new QVBoxLayout(presetWidget);
+		presetWidgetLayout->setMargin(0);
+
+		// Horizontal layout for preset label
+		QHBoxLayout * presetLabelLayout = new QHBoxLayout();
 		QLabel *presetLabel = new QLabel("Presets:");
-		presetLayoutLabel->addWidget(presetLabel);
-		verticalLayout->addLayout(presetLayoutLabel);
+		presetLabelLayout->addWidget(presetLabel);
+		presetWidgetLayout->addLayout(presetLabelLayout);
+
+		// Grid layout for preset buttons
 		QGridLayout *layout = new QGridLayout();
 		layout->setAlignment(Qt::AlignLeft);
 		for (gsl::index ii = 0; ii < presets.size(); ii++) {
@@ -1999,21 +2009,33 @@ void BrillouinAcquisition::initBeampathButtons() {
 			button->setMinimumWidth(24);
 			button->setMaximumWidth(64);
 			button->setMinimumHeight(18);
-			layout->addWidget(button, floor(ii/maxWidgetsPerRow), ii%maxWidgetsPerRow, Qt::AlignLeft);
+			layout->addWidget(button, 1 + floor(ii/maxWidgetsPerRow), ii%maxWidgetsPerRow, Qt::AlignLeft);
 
 			connection = QObject::connect(button, &QPushButton::clicked, [=] {
 				setPreset(presets[ii].index);
 			});
 			presetButtons.push_back(button);
 		}
-		verticalLayout->addLayout(layout);
+		int presetRows = (1 + ceil(presets.size() / (double)maxWidgetsPerRow));
+		rows += presetRows;
+		int height = presetRows * 20;
+		presetWidget->setMinimumHeight(height);
+		presetWidgetLayout->addLayout(layout);
 	}
+
+	QWidget *elementButtonWidget = new QWidget();
+	elementButtonWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+	verticalLayout->addWidget(elementButtonWidget);
+	QVBoxLayout* elementButtonWidgetLayout = new QVBoxLayout(elementButtonWidget);
+	elementButtonWidgetLayout->setMargin(0);
+
 	elementButtons.clear();
 	elementIntBox.clear();
 	elementDoubleBox.clear();
 	elementSlider.clear();
-
 	auto elements = m_scanControl->m_deviceElements;
+	rows += elements.size();
+	elementButtonWidget->setMinimumHeight(elements.size() * 20);
 	for (gsl::index ii = 0; ii < elements.size(); ii++) {
 		DeviceElement element = elements[ii];
 		QHBoxLayout *layout = new QHBoxLayout();
@@ -2088,10 +2110,12 @@ void BrillouinAcquisition::initBeampathButtons() {
 			);
 			elementSlider.push_back(slider);
 		}
-		verticalLayout->addLayout(layout);
+		elementButtonWidgetLayout->addLayout(layout);
 	}
+
 	ui->beamPathBox->setLayout(verticalLayout);
 	ui->beamPathBox->show();
+	ui->beamPathBox->setMinimumHeight(rows * 20 + 15);
 }
 
 void BrillouinAcquisition::initScanControl() {
