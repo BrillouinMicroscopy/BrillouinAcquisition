@@ -15,10 +15,11 @@ ZeissMTB_Erlangen::ZeissMTB_Erlangen() noexcept {
 	};
 
 	m_presets = {
-		{ "Brillouin",		ScanPreset::SCAN_BRILLOUIN,		{ {}, {1}, {1}, {1} } },	// Brillouin
-		{ "Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {}, {1}, {1}, {1} } },	// Calibration
-		{ "Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{ {}, {1}, {1}, {1} } },	// Brightfield
-		{ "Eyepiece",		ScanPreset::SCAN_EYEPIECE,		{ {}, {1}, {1}, {1} } },	// Eyepiece
+		{ "Brillouin",		ScanPreset::SCAN_BRILLOUIN,		{ {}, {4}, {2}, {1} } },	// Brillouin
+		{ "Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {}, {4}, {2}, {1} } },	// Calibration
+		{ "ODT",			ScanPreset::SCAN_ODT,			{ {}, {4}, {2}, {1} } },	// ODT
+		{ "Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{ {}, {4}, {2}, {1} } },	// Brightfield
+		{ "Eyepiece",		ScanPreset::SCAN_EYEPIECE,		{ {}, {4}, {1}, {1} } },	// Eyepiece
 		{ "Fluo Blue",		ScanPreset::SCAN_EPIFLUOBLUE,	{ {}, {3},  {}, {2} } },	// Fluorescence blue
 		{ "Fluo Green",		ScanPreset::SCAN_EPIFLUOGREEN,	{ {}, {1},  {}, {2} } },	// Fluorescence green
 		{ "Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {}, {2},  {}, {2} } }		// Fluorescence red
