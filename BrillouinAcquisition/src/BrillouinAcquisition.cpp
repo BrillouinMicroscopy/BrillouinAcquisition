@@ -2143,6 +2143,11 @@ void BrillouinAcquisition::initScanControl() {
 			m_hasODT = false;
 			m_hasSpatialCalibration = false;
 			break;
+		case ScanControl::SCAN_DEVICE::ZEISSMTBERLANGEN:
+			m_scanControl = new ZeissMTB_Erlangen();
+			m_hasODT = true;
+			m_hasSpatialCalibration = false;
+			break;
 		default:
 			m_scanControl = new ZeissECU();
 			// disable ODT
@@ -2228,7 +2233,7 @@ void BrillouinAcquisition::initODT() {
 			m_ODT = nullptr;
 		}
 	} else {
-		m_ODT = new ODT(nullptr, m_acquisition, &m_brightfieldCamera, (NIDAQ**)&m_scanControl);
+		m_ODT = new ODT(nullptr, m_acquisition, &m_brightfieldCamera, (ODTControl**)&m_scanControl);
 		ui->acquisitionModeTabs->insertTab(1, ui->ODT, "ODT");
 		m_isTabVisibleODT = true;
 
@@ -2292,7 +2297,7 @@ void BrillouinAcquisition::initSpatialCalibration() {
 			m_Calibration = nullptr;
 		}
 	} else {
-		m_Calibration = new Calibration(nullptr, m_acquisition, &m_brightfieldCamera, (NIDAQ**)&m_scanControl);
+		m_Calibration = new Calibration(nullptr, m_acquisition, &m_brightfieldCamera, (ODTControl**)&m_scanControl);
 		ui->actionLoad_Voltage_Position_calibration->setVisible(true);
 		ui->actionAcquire_Voltage_Position_calibration->setVisible(true);
 
@@ -3077,6 +3082,9 @@ void BrillouinAcquisition::writeSettings() {
 		case ScanControl::SCAN_DEVICE::ZEISSMTB:
 			stage = "zeiss-mtb";
 			break;
+		case ScanControl::SCAN_DEVICE::ZEISSMTBERLANGEN:
+			stage = "zeiss-mtb-erlangen";
+			break;
 		default:
 			stage = "zeiss-ecu";
 			break;
@@ -3123,6 +3131,8 @@ void BrillouinAcquisition::readSettings() {
 		m_scanControllerType = ScanControl::SCAN_DEVICE::NIDAQ;
 	} else if (stage == "zeiss-mtb") {
 		m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSMTB;
+	} else if (stage == "zeiss-mtb-erlangen") {
+		m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSMTBERLANGEN;
 	} else {
 		m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSECU;
 	}

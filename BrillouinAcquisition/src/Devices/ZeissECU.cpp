@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "ZeissECU.h"
 
-POINT2 ZeissECU::pixToMicroMeter(POINT2) {
-	return POINT2();
-}
+/*
+ * Public definitions
+ */
 
 ZeissECU::ZeissECU() noexcept {
 
@@ -18,14 +18,14 @@ ZeissECU::ZeissECU() noexcept {
 	};
 
 	m_presets = {
-		{	"Brillouin",	ScanPreset::SCAN_BRILLOUIN,	{ {2}, {}, {1}, {3}, {1}, {2},  {} }	},	// Brillouin
+		{	"Brillouin",	ScanPreset::SCAN_BRILLOUIN,		{ {2}, {}, {1}, {3}, {1}, {2},  {} }	},	// Brillouin
 		{	"Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {2}, {}, {1}, {3}, {1}, {3},  {} }	},	// Calibration
 		{	"Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{ {2}, {}, {1}, {3}, {1}, {2}, {2} }	},	// Brightfield
-		{	"Eyepiece",		ScanPreset::SCAN_EYEPIECE,	{ {2}, {}, {1}, {3}, {2}, {3}, {2} }	},	// Eyepiece
+		{	"Eyepiece",		ScanPreset::SCAN_EYEPIECE,		{ {2}, {}, {1}, {3}, {2}, {3}, {2} }	},	// Eyepiece
 		{	"Fluo Blue",	ScanPreset::SCAN_EPIFLUOBLUE,	{ {1}, {}, {2}, {3}, {},  {2}, {1} }	},	// Fluorescence blue
-		{	"Fluo Green",	ScanPreset::SCAN_EPIFLUOGREEN,{ {1}, {}, {3}, {3}, {},  {2}, {1} }	},	// Fluorescence green
+		{	"Fluo Green",	ScanPreset::SCAN_EPIFLUOGREEN,	{ {1}, {}, {3}, {3}, {},  {2}, {1} }	},	// Fluorescence green
 		{	"Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {1}, {}, {4}, {3}, {},  {2}, {1} }	},	// Fluorescence red
-		{	"Laser off",	ScanPreset::SCAN_LASEROFF,	{ {1}, {},  {},  {}, {},   {},  {} }	}	// Laser off
+		{	"Laser off",	ScanPreset::SCAN_LASEROFF,		{ {1}, {},  {},  {}, {},   {},  {} }	}	// Laser off
 	};
 
 	// bounds of the stage
@@ -50,6 +50,38 @@ ZeissECU::~ZeissECU() {
 	delete m_stand;
 	delete m_comObject;
 }
+
+void ZeissECU::setPosition(POINT2 position) {
+	m_mcu->setX(position.x);
+	m_mcu->setY(position.y);
+	calculateCurrentPositionBounds();
+}
+
+void ZeissECU::setPosition(POINT3 position) {
+	m_mcu->setX(position.x);
+	m_mcu->setY(position.y);
+	m_focus->setZ(position.z);
+	calculateCurrentPositionBounds(position);
+}
+
+POINT3 ZeissECU::getPosition() {
+	double x = m_mcu->getX();
+	double y = m_mcu->getY();
+	double z = m_focus->getZ();
+	return POINT3{ x, y, z };
+}
+
+void ZeissECU::setDevice(com* device) {
+	delete m_comObject;
+	m_comObject = device;
+	m_focus->setDevice(device);
+	m_mcu->setDevice(device);
+	m_stand->setDevice(device);
+}
+
+/*
+ * Public slots
+ */
 
 void ZeissECU::init() {
 	m_comObject = new com();
@@ -146,20 +178,71 @@ void ZeissECU::disconnectDevice() {
 	emit(connectedDevice(m_isConnected && m_isCompatible));
 }
 
-void ZeissECU::errorHandler(QSerialPort::SerialPortError error) {
+void ZeissECU::setElement(DeviceElement element, double position) {
+	switch ((DEVICE_ELEMENT)element.index) {
+	case DEVICE_ELEMENT::BEAMBLOCK:
+		setBeamBlock((int)position);
+		break;
+	case DEVICE_ELEMENT::REFLECTOR:
+		m_stand->setReflector((int)position, true);
+		break;
+	case DEVICE_ELEMENT::OBJECTIVE:
+		m_stand->setObjective((int)position, true);
+		break;
+	case DEVICE_ELEMENT::TUBELENS:
+		m_stand->setTubelens((int)position, true);
+		break;
+	case DEVICE_ELEMENT::BASEPORT:
+		m_stand->setBaseport((int)position, true);
+		break;
+	case DEVICE_ELEMENT::SIDEPORT:
+		m_stand->setSideport((int)position, true);
+		break;
+	case DEVICE_ELEMENT::MIRROR:
+		m_stand->setMirror((int)position, true);
+		break;
+	default:
+		break;
+	}
+	m_elementPositions[element.index] = position;
+	checkPresets();
+	emit(elementPositionChanged(element, position));
 }
 
-void ZeissECU::setPosition(POINT3 position) {
-	m_mcu->setX(position.x);
-	m_mcu->setY(position.y);
-	m_focus->setZ(position.z);
-	calculateCurrentPositionBounds(position);
+int ZeissECU::getElement(DeviceElement element) {
+	return -1;
 }
 
-void ZeissECU::setPosition(POINT2 position) {
-	m_mcu->setX(position.x);
-	m_mcu->setY(position.y);
-	calculateCurrentPositionBounds();
+void ZeissECU::getElements() {
+	m_elementPositionsTmp = m_elementPositions;
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::BEAMBLOCK] = getBeamBlock();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::REFLECTOR] = m_stand->getReflector();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::OBJECTIVE] = m_stand->getObjective();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::TUBELENS] = m_stand->getTubelens();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::BASEPORT] = m_stand->getBaseport();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::SIDEPORT] = m_stand->getSideport();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::MIRROR] = m_stand->getMirror();
+	// We only emit changed positions
+	if (m_elementPositionsTmp != m_elementPositions) {
+		m_elementPositions = m_elementPositionsTmp;
+		checkPresets();
+		emit(elementPositionsChanged(m_elementPositions));
+	}
+}
+
+void ZeissECU::setPreset(ScanPreset presetType) {
+	auto preset = getPreset(presetType);
+	getElements();
+
+	for (gsl::index ii = 0; ii < m_deviceElements.size(); ii++) {
+		// check if element position needs to be changed
+		if (!preset.elementPositions[ii].empty() && !simplemath::contains(preset.elementPositions[ii], m_elementPositions[ii])) {
+			setElement(m_deviceElements[ii], preset.elementPositions[ii][0]);
+			m_elementPositions[ii] = preset.elementPositions[ii][0];
+		}
+	}
+	checkPresets();
+	emit(elementPositionsChanged(m_elementPositions));
 }
 
 void ZeissECU::setPositionRelativeX(double positionX) {
@@ -181,86 +264,15 @@ void ZeissECU::setPositionInPix(POINT2) {
 	// Does nothing for now, since for the 780 nm setup no spatial calibration is in place yet.
 }
 
-POINT3 ZeissECU::getPosition() {
-	double x = m_mcu->getX();
-	double y = m_mcu->getY();
-	double z = m_focus->getZ();
-	return POINT3{ x, y, z };
+/*
+ * Private definitions
+ */
+
+POINT2 ZeissECU::pixToMicroMeter(POINT2) {
+	return POINT2();
 }
 
-void ZeissECU::setDevice(com *device) {
-	delete m_comObject;
-	m_comObject = device;
-	m_focus->setDevice(device);
-	m_mcu->setDevice(device);
-	m_stand->setDevice(device);
-}
-
-void ZeissECU::setPreset(ScanPreset presetType) {
-	auto preset = getPreset(presetType);
-	getElements();
-
-	for (gsl::index ii = 0; ii < m_deviceElements.size(); ii++) {
-		// check if element position needs to be changed
-		if (!preset.elementPositions[ii].empty() && !simplemath::contains(preset.elementPositions[ii], m_elementPositions[ii])) {
-			setElement(m_deviceElements[ii], preset.elementPositions[ii][0]);
-			m_elementPositions[ii] = preset.elementPositions[ii][0];
-		}
-	}
-	checkPresets();
-	emit(elementPositionsChanged(m_elementPositions));
-}
-
-void ZeissECU::setElement(DeviceElement element, double position) {
-	switch ((DEVICE_ELEMENT)element.index) {
-		case DEVICE_ELEMENT::BEAMBLOCK:
-			setBeamBlock((int)position);
-			break;
-		case DEVICE_ELEMENT::REFLECTOR:
-			m_stand->setReflector((int)position, true);
-			break;
-		case DEVICE_ELEMENT::OBJECTIVE:
-			m_stand->setObjective((int)position, true);
-			break;
-		case DEVICE_ELEMENT::TUBELENS:
-			m_stand->setTubelens((int)position, true);
-			break;
-		case DEVICE_ELEMENT::BASEPORT:
-			m_stand->setBaseport((int)position, true);
-			break;
-		case DEVICE_ELEMENT::SIDEPORT:
-			m_stand->setSideport((int)position, true);
-			break;
-		case DEVICE_ELEMENT::MIRROR:
-			m_stand->setMirror((int)position, true);
-			break;
-		default:
-			break;
-	}
-	m_elementPositions[element.index] = position;
-	checkPresets();
-	emit(elementPositionChanged(element, position));
-}
-
-void ZeissECU::getElements() {
-	m_elementPositionsTmp = m_elementPositions;
-	m_elementPositionsTmp[(int)DEVICE_ELEMENT::BEAMBLOCK] = getBeamBlock();
-	m_elementPositionsTmp[(int)DEVICE_ELEMENT::REFLECTOR] = m_stand->getReflector();
-	m_elementPositionsTmp[(int)DEVICE_ELEMENT::OBJECTIVE] = m_stand->getObjective();
-	m_elementPositionsTmp[(int)DEVICE_ELEMENT::TUBELENS] = m_stand->getTubelens();
-	m_elementPositionsTmp[(int)DEVICE_ELEMENT::BASEPORT] = m_stand->getBaseport();
-	m_elementPositionsTmp[(int)DEVICE_ELEMENT::SIDEPORT] = m_stand->getSideport();
-	m_elementPositionsTmp[(int)DEVICE_ELEMENT::MIRROR] = m_stand->getMirror();
-	// We only emit changed positions
-	if (m_elementPositionsTmp != m_elementPositions) {
-		m_elementPositions = m_elementPositionsTmp;
-		checkPresets();
-		emit(elementPositionsChanged(m_elementPositions));
-	}
-}
-
-int ZeissECU::getBeamBlock() {
-	return Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
+void ZeissECU::errorHandler(QSerialPort::SerialPortError error) {
 }
 
 void ZeissECU::setBeamBlock(int position) {
@@ -271,17 +283,30 @@ void ZeissECU::setBeamBlock(int position) {
 	}
 }
 
-int ZeissECU::getElement(DeviceElement element) {
-	return -1;
+int ZeissECU::getBeamBlock() {
+	return Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
 }
 
 /*
-* Functions of the parent class for all elements
-*
-*/
+ * Functions of the parent class for all elements
+ */
 
-Element::~Element() {
+/*
+ * Public definitions
+ */
+
+void Element::setDevice(com* device) {
+	m_comObject = device;
 }
+
+bool Element::checkCompatibility() {
+	std::string version = requestVersion();
+	return std::find(m_versions.begin(), m_versions.end(), version) != m_versions.end();
+}
+
+/*
+ * Protected definitions
+ */
 
 std::string Element::receive(std::string request) {
 	std::string answer = m_comObject->receive(m_prefix + "P" + request);
@@ -296,24 +321,135 @@ void Element::clear() {
 	m_comObject->clear();
 }
 
-void Element::setDevice(com *device) {
-	m_comObject = device;
-}
-
 std::string Element::requestVersion() {
 	std::string answer = m_comObject->receive(m_prefix + "P" + "Tv");
 	return helper::parse(answer, m_prefix);
 }
 
-bool Element::checkCompatibility() {
-	std::string version = requestVersion();
-	return std::find(m_versions.begin(), m_versions.end(), version) != m_versions.end();
+
+/*
+ * Functions regarding the stand of the microscope
+ */
+
+/*
+ * Public definitions
+ */
+
+void Stand::setReflector(int position, bool block) {
+	if (position > 0 && position < 6) {
+		setElementPosition("1", position);
+	}
+	blockUntilPositionReached(block, "1");
+}
+
+int Stand::getReflector() {
+	return getElementPosition("1");
+}
+
+void Stand::setObjective(int position, bool block) {
+	if (position > 0 && position < 7) {
+		setElementPosition("2", position);
+	}
+	blockUntilPositionReached(block, "2");
+}
+
+int Stand::getObjective() {
+	return getElementPosition("2");
+}
+
+void Stand::setTubelens(int position, bool block) {
+	if (position > 0 && position < 4) {
+		setElementPosition("36", position);
+	}
+	blockUntilPositionReached(block, "36");
+}
+
+int Stand::getTubelens() {
+	return getElementPosition("36");
+}
+
+void Stand::setBaseport(int position, bool block) {
+	if (position > 0 && position < 4) {
+		setElementPosition("38", position);
+		blockUntilPositionReached(block, "38");
+	}
+}
+
+int Stand::getBaseport() {
+	return getElementPosition("38");
+}
+
+void Stand::setSideport(int position, bool block) {
+	if (position > 0 && position < 4) {
+		setElementPosition("39", position);
+	}
+	blockUntilPositionReached(block, "39");
+}
+
+int Stand::getSideport() {
+	return getElementPosition("39");
+}
+
+void Stand::setMirror(int position, bool block) {
+	if (position > 0 && position < 3) {
+		setElementPosition("51", position);
+	}
+	blockUntilPositionReached(block, "51");
+}
+
+int Stand::getMirror() {
+	return getElementPosition("51");
 }
 
 /*
-* Functions regarding the objective focus
-*
-*/
+ * Private definitions
+ */
+
+void Stand::setElementPosition(std::string device, int position) {
+	send("CR" + device + "," + std::to_string(position));
+}
+
+int Stand::getElementPosition(std::string device) {
+	std::string answer = receive("Cr" + device + ",1");
+	if (answer.empty()) {
+		return -1;
+	}
+	else {
+		return std::stoi(answer);
+	}
+}
+
+void Stand::blockUntilPositionReached(bool block, std::string elementNr) {
+	// don't return until the position or the timeout is reached
+	if (block) {
+		int count{ 0 };
+		auto pos = getElementPosition(elementNr);
+		// wait for one second max
+		while (!pos && count < 100) {
+			Sleep(10);
+			pos = getElementPosition(elementNr);
+			count++;
+		}
+		//TODO: Emit an error when count==100 (timeout reached)
+	}
+}
+
+/*
+ * Functions regarding the objective focus
+ */
+
+/*
+ * Public definitions
+ */
+
+void Focus::setZ(double position) {
+	position = round(position / m_umperinc);
+	int inc = positive_modulo(position, m_rangeFocus);
+
+	std::string pos = helper::dec2hex(inc, 6);
+	send("ZD" + pos);
+	clear();
+}
 
 double Focus::getZ() {
 	std::string position = "0x" + receive("Zp");
@@ -325,15 +461,6 @@ double Focus::getZ() {
 		pos -= m_rangeFocus;
 	}
 	return pos * m_umperinc;
-}
-
-void Focus::setZ(double position) {
-	position = round(position / m_umperinc);
-	int inc = positive_modulo(position, m_rangeFocus);
-
-	std::string pos = helper::dec2hex(inc, 6);
-	send("ZD" + pos);
-	clear();
 }
 
 void Focus::setVelocityZ(double velocity) {
@@ -374,33 +501,11 @@ void Focus::move2Work() {
 
 /*
  * Functions regarding the stage of the microscope
- *
  */
 
-double MCU::getPosition(std::string axis) {
-	std::string position = receive(axis + "p");
-	int pos = helper::hex2dec(position);
-	// The actual travel range of the stage is significantly smaller than the theoretically possible maximum increment value (FFFFFF or 16777215).
-	// When the microscope starts, it sets it home position to (0, 0, 0). Values in the negative range are then adressed as (16777215 - positionInInc).
-	// Hence, we consider all values > 16777215/2 to actually be negative and wrap them accordingly (similar to what positive_modulo(...,...) for the setPosition() functions does).
-	if (pos > m_rangeFocus /2) {
-		pos -= m_rangeFocus;
-	}
-	return pos * m_umperinc;
-}
-
-void MCU::setPosition(std::string axis, double position) {
-	position = round(position / m_umperinc);
-	int inc = positive_modulo(position, m_rangeFocus);
-
-	std::string pos = helper::dec2hex(inc, 6);
-	send(axis + "T" + pos);
-}
-
-void MCU::setVelocity(std::string axis, int velocity) {
-	std::string vel = helper::dec2hex(velocity, 6);
-	send(axis + "V" + vel);
-}
+/*
+ * Public definitions
+ */
 
 double MCU::getX() {
 	return getPosition("X");
@@ -434,102 +539,31 @@ void MCU::stopY() {
 	send("YS");
 }
 
-
 /*
- * Functions regarding the stand of the microscope
- *
+ * Private definitions
  */
 
-int Stand::getElementPosition(std::string device) {
-	std::string answer = receive("Cr" + device + ",1");
-	if (answer.empty()) {
-		return -1;
-	} else {
-		return std::stoi(answer);
+void MCU::setPosition(std::string axis, double position) {
+	position = round(position / m_umperinc);
+	int inc = positive_modulo(position, m_rangeFocus);
+
+	std::string pos = helper::dec2hex(inc, 6);
+	send(axis + "T" + pos);
+}
+
+double MCU::getPosition(std::string axis) {
+	std::string position = receive(axis + "p");
+	int pos = helper::hex2dec(position);
+	// The actual travel range of the stage is significantly smaller than the theoretically possible maximum increment value (FFFFFF or 16777215).
+	// When the microscope starts, it sets it home position to (0, 0, 0). Values in the negative range are then adressed as (16777215 - positionInInc).
+	// Hence, we consider all values > 16777215/2 to actually be negative and wrap them accordingly (similar to what positive_modulo(...,...) for the setPosition() functions does).
+	if (pos > m_rangeFocus / 2) {
+		pos -= m_rangeFocus;
 	}
+	return pos * m_umperinc;
 }
 
-void Stand::setElementPosition(std::string device, int position) {
-	send("CR" + device + "," + std::to_string(position));
-}
-
-int Stand::getReflector() {
-	return getElementPosition("1");
-}
-
-void Stand::setReflector(int position, bool block) {
-	if (position > 0 && position < 6) {
-		setElementPosition("1", position);
-	}
-	blockUntilPositionReached(block, "1");
-}
-
-int Stand::getObjective() {
-	return getElementPosition("2");
-}
-
-void Stand::setObjective(int position, bool block) {
-	if (position > 0 && position < 7) {
-		setElementPosition("2", position);
-	}
-	blockUntilPositionReached(block, "2");
-}
-
-int Stand::getTubelens() {
-	return getElementPosition("36");
-}
-
-void Stand::setTubelens(int position, bool block) {
-	if (position > 0 && position < 4) {
-		setElementPosition("36", position);
-	}
-	blockUntilPositionReached(block, "36");
-}
-
-int Stand::getBaseport() {
-	return getElementPosition("38");
-}
-
-void Stand::setBaseport(int position, bool block) {
-	if (position > 0 && position < 4) {
-		setElementPosition("38", position);
-		blockUntilPositionReached(block, "38");
-	}
-}
-
-int Stand::getSideport() {
-	return getElementPosition("39");
-}
-
-void Stand::setSideport(int position, bool block) {
-	if (position > 0 && position < 4) {
-		setElementPosition("39", position);
-	}
-	blockUntilPositionReached(block, "39");
-}
-
-int Stand::getMirror() {
-	return getElementPosition("51");
-}
-
-void Stand::setMirror(int position, bool block) {
-	if (position > 0 && position < 3) {
-		setElementPosition("51", position);
-	}
-	blockUntilPositionReached(block, "51");
-}
-
-void Stand::blockUntilPositionReached(bool block, std::string elementNr) {
-	// don't return until the position or the timeout is reached
-	if (block) {
-		int count{ 0 };
-		auto pos = getElementPosition(elementNr);
-		// wait for one second max
-		while (!pos && count < 100) {
-			Sleep(10);
-			pos = getElementPosition(elementNr);
-			count++;
-		}
-		//TODO: Emit an error when count==100 (timeout reached)
-	}
+void MCU::setVelocity(std::string axis, int velocity) {
+	std::string vel = helper::dec2hex(velocity, 6);
+	send(axis + "V" + vel);
 }

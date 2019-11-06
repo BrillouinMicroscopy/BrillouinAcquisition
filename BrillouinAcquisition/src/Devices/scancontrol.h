@@ -43,11 +43,6 @@ struct POINT2 {
 	}
 };
 
-struct VOLTAGE2 {
-	double Ux{ 0 };
-	double Uy{ 0 };
-};
-
 typedef enum class enDeviceInput {
 	PUSHBUTTON,
 	INTBOX,
@@ -83,8 +78,6 @@ public:
 };
 
 class DeviceElements {
-private:
-	std::vector<DeviceElement> m_deviceElements;
 
 public:
 	DeviceElements() {};
@@ -102,6 +95,9 @@ public:
 	int count() {
 		return m_deviceElements.size();
 	};
+
+private:
+	std::vector<DeviceElement> m_deviceElements;
 };
 
 class Preset {
@@ -117,37 +113,25 @@ public:
 class ScanControl: public Device {
 	Q_OBJECT
 
-protected:
-	bool m_isConnected = false;
-	bool m_isCompatible = false;
-	POINT3 m_homePosition = { 0, 0, 0 };
-
-	std::vector<POINT3> m_savedPositions;
-
-	void calculateHomePositionBounds();
-	void calculateCurrentPositionBounds();
-	void calculateCurrentPositionBounds(POINT3 currentPosition);
-
-
-	BOUNDS m_absoluteBounds;
-	BOUNDS m_homePositionBounds;
-	BOUNDS m_currentPositionBounds;
-
-	Preset getPreset(ScanPreset);
-	virtual POINT2 pixToMicroMeter(POINT2) = 0;
-
-	SpatialCalibration m_calibration;
-
 public:
 	ScanControl() noexcept {};
 	virtual ~ScanControl() {};
 
+	bool getConnectionStatus();
+
+	virtual void setPosition(POINT2 position) = 0;
+	virtual void setPosition(POINT3 position) = 0;
+	// moves the position relative to current position
+	void movePosition(POINT3 distance);
+	virtual POINT3 getPosition() = 0;
+
 	typedef enum class enScanDevice {
 		ZEISSECU = 0,
 		NIDAQ = 1,
-		ZEISSMTB = 2
+		ZEISSMTB = 2,
+		ZEISSMTBERLANGEN = 3
 	} SCAN_DEVICE;
-	inline static std::vector<std::string> SCAN_DEVICE_NAMES = { "Zeiss ECU", "NI-DAQmx", "Zeiss MTB" };
+	inline static std::vector<std::string> SCAN_DEVICE_NAMES = { "Zeiss ECU", "NI-DAQmx", "Zeiss MTB", "Zeiss MTB Erlangen" };
 
 	std::vector<DeviceElement> m_deviceElements;
 	std::vector<double> m_elementPositions;
@@ -156,22 +140,21 @@ public:
 	std::vector<Preset> m_presets;
 	ScanPreset m_activePresets = ScanPreset::SCAN_NULL;
 
-	bool getConnectionStatus();
-
-	virtual void setPosition(POINT3 position) = 0;
-	virtual void setPosition(POINT2 position) = 0;
-	// moves the position relative to current position
-	void movePosition(POINT3 distance);
-	virtual POINT3 getPosition() = 0;
-
-	QTimer *positionTimer = nullptr;
-	QTimer *elementPositionTimer = nullptr;
-
 public slots:
+	virtual void init() = 0;
+	virtual void connectDevice() = 0;
+	virtual void disconnectDevice() = 0;
 	virtual void setElement(DeviceElement, double) = 0;
 	virtual int getElement(DeviceElement) = 0;
-	virtual void setPreset(ScanPreset) = 0;
 	virtual void getElements() = 0;
+	virtual void setPreset(ScanPreset) = 0;
+	// sets the position relative to the home position m_homePosition
+	virtual void setPositionRelativeX(double position) = 0;
+	virtual void setPositionRelativeY(double position) = 0;
+	virtual void setPositionRelativeZ(double position) = 0;
+	virtual void setPositionInPix(POINT2) = 0;
+
+	Preset getPreset(ScanPreset);
 	void checkPresets();
 	bool isPresetActive(ScanPreset);
 	void announcePosition();
@@ -181,11 +164,6 @@ public slots:
 	void stopAnnouncingPosition();
 	void startAnnouncingElementPosition();
 	void stopAnnouncingElementPosition();
-	// sets the position relative to the home position m_homePosition
-	virtual void setPositionRelativeX(double position) = 0;
-	virtual void setPositionRelativeY(double position) = 0;
-	virtual void setPositionRelativeZ(double position) = 0;
-	virtual void setPositionInPix(POINT2) = 0;
 	void setHome();
 	void moveHome();
 	void savePosition();
@@ -195,6 +173,28 @@ public slots:
 
 	std::vector<POINT3> getSavedPositionsNormalized();
 	void announceSavedPositionsNormalized();
+
+protected:
+	virtual POINT2 pixToMicroMeter(POINT2) = 0;
+
+	void calculateHomePositionBounds();
+	void calculateCurrentPositionBounds();
+	void calculateCurrentPositionBounds(POINT3 currentPosition);
+
+	bool m_isConnected{ false };
+	bool m_isCompatible{ false };
+	POINT3 m_homePosition{ 0, 0, 0 };
+
+	std::vector<POINT3> m_savedPositions;
+
+	QTimer* positionTimer{ nullptr };
+	QTimer* elementPositionTimer{ nullptr };
+
+	BOUNDS m_absoluteBounds;
+	BOUNDS m_homePositionBounds;
+	BOUNDS m_currentPositionBounds;
+
+	SpatialCalibration m_calibration;
 
 signals:
 	void elementPositionsChanged(std::vector<double>);

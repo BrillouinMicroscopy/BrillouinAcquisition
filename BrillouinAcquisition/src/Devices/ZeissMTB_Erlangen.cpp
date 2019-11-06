@@ -1,33 +1,28 @@
 #include "stdafx.h"
-#include "ZeissMTB.h"
+#include "ZeissMTB_Erlangen.h"
 
 /*
  * Public definitions
  */
 
-ZeissMTB::ZeissMTB() noexcept {
+ZeissMTB_Erlangen::ZeissMTB_Erlangen() noexcept {
 
 	m_deviceElements = {
-		{ "Beam Block",	2, (int)DEVICE_ELEMENT::BEAMBLOCK, { "Close", "Open" } },
 		{ "Objective",	6, (int)DEVICE_ELEMENT::OBJECTIVE },
-		{ "Reflector",	5, (int)DEVICE_ELEMENT::REFLECTOR },
-		{ "Tubelens",	3, (int)DEVICE_ELEMENT::TUBELENS },
-		{ "Baseport",	3, (int)DEVICE_ELEMENT::BASEPORT },
-		{ "Sideport",	3, (int)DEVICE_ELEMENT::SIDEPORT },
-		{ "RL Shutter",	2, (int)DEVICE_ELEMENT::RLSHUTTER, { "Close", "Open" } },
-		{ "Mirror",		2, (int)DEVICE_ELEMENT::MIRROR },
-		{ "Hal. Lamp",	0, (int)DEVICE_ELEMENT::LAMP, DEVICE_INPUT_TYPE::SLIDER }
+		{ "Reflector",	6, (int)DEVICE_ELEMENT::REFLECTOR, { "Green", "Red", "Blue" } },
+		{ "Sideport",	3, (int)DEVICE_ELEMENT::SIDEPORT, { "Eyepiece", "Left", "Right" } },
+		{ "RL Shutter",	2, (int)DEVICE_ELEMENT::RLSHUTTER, { "Close", "Open" } }
 	};
 
 	m_presets = {
-		{ "Brillouin",		ScanPreset::SCAN_BRILLOUIN,		{ {2}, {}, {1}, {3}, {1}, {2}, {1},  {}, {} } },	// Brillouin
-		{ "Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {2}, {}, {1}, {3}, {1}, {3}, {1},  {}, {} } },	// Calibration
-		{ "Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{ {2}, {}, {1}, {3}, {1}, {2}, {1}, {2}, {} } },	// Brightfield
-		{ "Eyepiece",		ScanPreset::SCAN_EYEPIECE,		{ {2}, {}, {1}, {3}, {2}, {3}, {1}, {2}, {} } },	// Eyepiece
-		{ "Fluo Blue",		ScanPreset::SCAN_EPIFLUOBLUE,	{ {1}, {}, {2}, {3},  {}, {2}, {2}, {1}, {} } },	// Fluorescence blue
-		{ "Fluo Green",		ScanPreset::SCAN_EPIFLUOGREEN,	{ {1}, {}, {3}, {3},  {}, {2}, {2}, {1}, {} } },	// Fluorescence green
-		{ "Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {1}, {}, {4}, {3},  {}, {2}, {2}, {1}, {} } },	// Fluorescence red
-		{ "Laser off",		ScanPreset::SCAN_LASEROFF,		{ {1}, {},  {},  {},  {},  {}, {1},  {}, {} } }		// Laser off
+		{ "Brillouin",		ScanPreset::SCAN_BRILLOUIN,		{ {}, {4}, {2}, {1} } },	// Brillouin
+		{ "Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {}, {4}, {2}, {1} } },	// Calibration
+		{ "ODT",			ScanPreset::SCAN_ODT,			{ {}, {4}, {2}, {1} } },	// ODT
+		{ "Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{ {}, {4}, {2}, {1} } },	// Brightfield
+		{ "Eyepiece",		ScanPreset::SCAN_EYEPIECE,		{ {}, {4}, {1}, {1} } },	// Eyepiece
+		{ "Fluo Blue",		ScanPreset::SCAN_EPIFLUOBLUE,	{ {}, {3},  {}, {2} } },	// Fluorescence blue
+		{ "Fluo Green",		ScanPreset::SCAN_EPIFLUOGREEN,	{ {}, {1},  {}, {2} } },	// Fluorescence green
+		{ "Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {}, {2},  {}, {2} } }		// Fluorescence red
 	};
 
 	// bounds of the stage
@@ -43,7 +38,7 @@ ZeissMTB::ZeissMTB() noexcept {
 	m_elementPositions = std::vector<double>((int)DEVICE_ELEMENT::COUNT, -1);
 }
 
-ZeissMTB::~ZeissMTB() {
+ZeissMTB_Erlangen::~ZeissMTB_Erlangen() {
 	positionTimer->stop();
 	elementPositionTimer->stop();
 	disconnectDevice();
@@ -53,7 +48,7 @@ ZeissMTB::~ZeissMTB() {
 	CoUninitialize();
 }
 
-void ZeissMTB::setPosition(POINT2 position) {
+void ZeissMTB_Erlangen::setPosition(POINT2 position) {
 	bool success{ false };
 	if (m_stageX && m_stageY) {
 		success = m_stageX->SetPosition(position.x, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
@@ -62,7 +57,7 @@ void ZeissMTB::setPosition(POINT2 position) {
 	calculateCurrentPositionBounds();
 }
 
-void ZeissMTB::setPosition(POINT3 position) {
+void ZeissMTB_Erlangen::setPosition(POINT3 position) {
 	bool success{ false };
 	if (m_stageX && m_stageY) {
 		success = m_stageX->SetPosition(position.x, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
@@ -74,7 +69,7 @@ void ZeissMTB::setPosition(POINT3 position) {
 	calculateCurrentPositionBounds(position);
 }
 
-POINT3 ZeissMTB::getPosition() {
+POINT3 ZeissMTB_Erlangen::getPosition() {
 	double x{ 0 };
 	double y{ 0 };
 	double z{ 0 };
@@ -92,7 +87,7 @@ POINT3 ZeissMTB::getPosition() {
  * Public slots
  */
 
-void ZeissMTB::init() {
+void ZeissMTB_Erlangen::init() {
 	/*
 	 * Initialize Zeiss MTB handles
 	 */
@@ -100,8 +95,7 @@ void ZeissMTB::init() {
 	try {
 		// create an instance of the connection class which can connect to the server
 		m_MTBConnection = IMTBConnectionPtr(CLSID_MTBConnection);
-	}
-	catch (_com_error e) {
+	} catch (_com_error e) {
 	}
 
 	positionTimer = new QTimer();
@@ -112,8 +106,11 @@ void ZeissMTB::init() {
 	calculateHomePositionBounds();
 }
 
-void ZeissMTB::connectDevice() {
+void ZeissMTB_Erlangen::connectDevice() {
 	if (!m_isConnected) {
+		// Connect NIDAQ board
+		ODTControl::connectDevice();
+
 		try {
 			/*
 			 * Connect to Zeiss MTB Server
@@ -130,18 +127,12 @@ void ZeissMTB::connectDevice() {
 				m_Objective = (IMTBChangerPtr)m_Root->GetComponent("MTBObjectiveChanger");
 				// Reflector
 				m_Reflector = (IMTBChangerPtr)m_Root->GetComponent("MTBReflectorChanger");
-				// Tubelens
-				m_Tubelens = (IMTBChangerPtr)m_Root->GetComponent("MTBOptovarChanger");
-				// Baseport
-				m_Baseport = (IMTBChangerPtr)m_Root->GetComponent("MTBBaseportChanger");
 				// Sideport
 				m_Sideport = (IMTBChangerPtr)m_Root->GetComponent("MTBSideportChanger");
 				// Reflected light shutter
 				m_RLShutter = (IMTBChangerPtr)m_Root->GetComponent("MTBRLShutter");
-				// Transmission halogen lamp mirror
-				m_Mirror = (IMTBChangerPtr)m_Root->GetComponent("MTBTLLampChanger");
-				// Transmission halogen lamp
-				m_Lamp = (IMTBContinualPtr)m_Root->GetComponent("MTBTLHalogenLamp");
+				// Reflected light / transmitted light switch
+				m_RLTLSwitch = (IMTBChangerPtr)m_Root->GetComponent("MTBRLTLSwitch");
 				// Objective focus
 				m_ObjectiveFocus = (IMTBContinualPtr)m_Root->GetComponent("MTBFocus");
 				// Stage axis x
@@ -149,9 +140,6 @@ void ZeissMTB::connectDevice() {
 				// Stage axis y
 				m_stageY = (IMTBContinualPtr)m_Root->GetComponent("MTBStageAxisY");
 			}
-
-			Thorlabs_FF::FF_Open(m_serialNo_FF2);
-			Thorlabs_FF::FF_StartPolling(m_serialNo_FF2, 200);
 
 			if (m_isConnected) {
 				setPreset(ScanPreset::SCAN_BRILLOUIN);
@@ -170,18 +158,18 @@ void ZeissMTB::connectDevice() {
 	emit(connectedDevice(m_isConnected));
 }
 
-void ZeissMTB::disconnectDevice() {
+void ZeissMTB_Erlangen::disconnectDevice() {
 	if (m_isConnected) {
 		stopAnnouncingPosition();
 		stopAnnouncingElementPosition();
-		Thorlabs_FF::FF_Close(m_serialNo_FF2);
-		Thorlabs_FF::FF_StopPolling(m_serialNo_FF2);
+		ODTControl::disconnectDevice();
 
 		if (m_MTBConnection != NULL && m_ID != "") {
 			// logout from MTB
 			try {
 				m_MTBConnection->Logout((BSTR)m_ID);
-			} catch (_com_error e) {
+			}
+			catch (_com_error e) {
 			}
 
 			m_MTBConnection->Close();
@@ -191,34 +179,19 @@ void ZeissMTB::disconnectDevice() {
 	emit(connectedDevice(m_isConnected));
 }
 
-void ZeissMTB::setElement(DeviceElement element, double position) {
+void ZeissMTB_Erlangen::setElement(DeviceElement element, double position) {
 	switch ((DEVICE_ELEMENT)element.index) {
-	case DEVICE_ELEMENT::BEAMBLOCK:
-		setBeamBlock((int)position);
-		break;
 	case DEVICE_ELEMENT::REFLECTOR:
 		setReflector((int)position, true);
 		break;
 	case DEVICE_ELEMENT::OBJECTIVE:
 		setObjective((int)position, true);
 		break;
-	case DEVICE_ELEMENT::TUBELENS:
-		setTubelens((int)position, true);
-		break;
-	case DEVICE_ELEMENT::BASEPORT:
-		setBaseport((int)position, true);
-		break;
 	case DEVICE_ELEMENT::SIDEPORT:
 		setSideport((int)position, true);
 		break;
 	case DEVICE_ELEMENT::RLSHUTTER:
 		setRLShutter((int)position, true);
-		break;
-	case DEVICE_ELEMENT::MIRROR:
-		setMirror((int)position, true);
-		break;
-	case DEVICE_ELEMENT::LAMP:
-		setLamp(position, true);
 		break;
 	default:
 		break;
@@ -228,21 +201,16 @@ void ZeissMTB::setElement(DeviceElement element, double position) {
 	emit(elementPositionChanged(element, position));
 }
 
-int ZeissMTB::getElement(DeviceElement element) {
+int ZeissMTB_Erlangen::getElement(DeviceElement element) {
 	return -1;
 }
 
-void ZeissMTB::getElements() {
+void ZeissMTB_Erlangen::getElements() {
 	m_elementPositionsTmp = m_elementPositions;
-	m_elementPositionsTmp[(int)DEVICE_ELEMENT::BEAMBLOCK] = getBeamBlock();
 	m_elementPositionsTmp[(int)DEVICE_ELEMENT::REFLECTOR] = getReflector();
 	m_elementPositionsTmp[(int)DEVICE_ELEMENT::OBJECTIVE] = getObjective();
-	m_elementPositionsTmp[(int)DEVICE_ELEMENT::TUBELENS] = getTubelens();
-	m_elementPositionsTmp[(int)DEVICE_ELEMENT::BASEPORT] = getBaseport();
 	m_elementPositionsTmp[(int)DEVICE_ELEMENT::SIDEPORT] = getSideport();
 	m_elementPositionsTmp[(int)DEVICE_ELEMENT::RLSHUTTER] = getRLShutter();
-	m_elementPositionsTmp[(int)DEVICE_ELEMENT::MIRROR] = getMirror();
-	m_elementPositionsTmp[(int)DEVICE_ELEMENT::LAMP] = getLamp();
 	// We only emit changed positions
 	if (m_elementPositionsTmp != m_elementPositions) {
 		m_elementPositions = m_elementPositionsTmp;
@@ -251,7 +219,7 @@ void ZeissMTB::getElements() {
 	}
 }
 
-void ZeissMTB::setPreset(ScanPreset presetType) {
+void ZeissMTB_Erlangen::setPreset(ScanPreset presetType) {
 	auto preset = getPreset(presetType);
 	getElements();
 
@@ -266,7 +234,7 @@ void ZeissMTB::setPreset(ScanPreset presetType) {
 	emit(elementPositionsChanged(m_elementPositions));
 }
 
-void ZeissMTB::setPositionRelativeX(double positionX) {
+void ZeissMTB_Erlangen::setPositionRelativeX(double positionX) {
 	bool success{ false };
 	if (m_stageX) {
 		success = m_stageX->SetPosition(positionX + m_homePosition.x, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
@@ -274,7 +242,7 @@ void ZeissMTB::setPositionRelativeX(double positionX) {
 	calculateCurrentPositionBounds();
 }
 
-void ZeissMTB::setPositionRelativeY(double positionY) {
+void ZeissMTB_Erlangen::setPositionRelativeY(double positionY) {
 	bool success{ false };
 	if (m_stageY) {
 		success = m_stageY->SetPosition(positionY + m_homePosition.y, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
@@ -282,7 +250,7 @@ void ZeissMTB::setPositionRelativeY(double positionY) {
 	calculateCurrentPositionBounds();
 }
 
-void ZeissMTB::setPositionRelativeZ(double positionZ) {
+void ZeissMTB_Erlangen::setPositionRelativeZ(double positionZ) {
 	bool success{ false };
 	if (m_ObjectiveFocus) {
 		success = m_ObjectiveFocus->SetPosition(positionZ + m_homePosition.z, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
@@ -290,7 +258,7 @@ void ZeissMTB::setPositionRelativeZ(double positionZ) {
 	calculateCurrentPositionBounds();
 }
 
-void ZeissMTB::setPositionInPix(POINT2) {
+void ZeissMTB_Erlangen::setPositionInPix(POINT2) {
 	// Does nothing for now, since for the 780 nm setup no spatial calibration is in place yet.
 }
 
@@ -298,112 +266,56 @@ void ZeissMTB::setPositionInPix(POINT2) {
  * Private definitions
  */
 
-POINT2 ZeissMTB::pixToMicroMeter(POINT2) {
+POINT2 ZeissMTB_Erlangen::pixToMicroMeter(POINT2) {
 	return POINT2();
 }
 
-bool ZeissMTB::setElement(IMTBChangerPtr element, int position) {
+bool ZeissMTB_Erlangen::setElement(IMTBChangerPtr element, int position) {
 	if (!element) {
 		return false;
 	}
 	return element->SetPosition(position, MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 }
 
-int ZeissMTB::getElement(IMTBChangerPtr element) {
+int ZeissMTB_Erlangen::getElement(IMTBChangerPtr element) {
 	if (!element) {
 		return -1;
 	}
 	return element->GetPosition();
 }
 
-void ZeissMTB::setBeamBlock(int position) {
-	Thorlabs_FF::FF_MoveToPosition(m_serialNo_FF2, (Thorlabs_FF::FF_Positions)position);
-	auto i{ 0 };
-	while (getBeamBlock() != position && i++ < 10) {
-		Sleep(100);
-	}
-}
-
-int ZeissMTB::getBeamBlock() {
-	return Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
-}
-
-void ZeissMTB::setReflector(int position, bool block) {
+void ZeissMTB_Erlangen::setReflector(int position, bool block) {
 	// Set the position
 	auto success = setElement(m_Reflector, position);
 }
 
-int ZeissMTB::getReflector() {
+int ZeissMTB_Erlangen::getReflector() {
 	return getElement(m_Reflector);
 }
 
-void ZeissMTB::setObjective(int position, bool block) {
+void ZeissMTB_Erlangen::setObjective(int position, bool block) {
 	// Set the position
 	auto success = setElement(m_Objective, position);
 }
 
-int ZeissMTB::getObjective() {
-	return getElement(m_Objective);
-}
-
-void ZeissMTB::setTubelens(int position, bool block) {
-	// Set the position
-	auto success = setElement(m_Tubelens, position);
-}
-
-int ZeissMTB::getTubelens() {
-	return getElement(m_Tubelens);
-}
-
-void ZeissMTB::setBaseport(int position, bool block) {
-	// Set the position
-	auto success = setElement(m_Baseport, position);
-}
-
-int ZeissMTB::getBaseport() {
-	return getElement(m_Baseport);
-}
-
-void ZeissMTB::setSideport(int position, bool block) {
+void ZeissMTB_Erlangen::setSideport(int position, bool block) {
 	// Set the position
 	auto success = setElement(m_Sideport, position);
 }
 
-int ZeissMTB::getSideport() {
+int ZeissMTB_Erlangen::getObjective() {
+	return getElement(m_Objective);
+}
+
+int ZeissMTB_Erlangen::getSideport() {
 	return getElement(m_Sideport);
 }
 
-void ZeissMTB::setRLShutter(int position, bool block) {
+void ZeissMTB_Erlangen::setRLShutter(int position, bool block) {
 	// Set the position
 	auto success = setElement(m_RLShutter, position);
 }
 
-int ZeissMTB::getRLShutter() {
+int ZeissMTB_Erlangen::getRLShutter() {
 	return getElement(m_RLShutter);
-}
-
-void ZeissMTB::setMirror(int position, bool block) {
-	// Set the position
-	auto success = setElement(m_Mirror, position);
-}
-
-int ZeissMTB::getMirror() {
-	return getElement(m_Mirror);
-}
-
-void ZeissMTB::setLamp(int voltage, bool block) {
-	if (!m_Lamp) {
-		return;
-	}
-	if (voltage > 100) voltage = 100;
-	if (voltage < 0) voltage = 0;
-	// Set the voltage
-	auto success = m_Lamp->SetPosition(voltage, "%", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
-}
-
-double ZeissMTB::getLamp() {
-	if (!m_Lamp) {
-		return 0.0;
-	}
-	return m_Lamp->GetPosition("%");
 }

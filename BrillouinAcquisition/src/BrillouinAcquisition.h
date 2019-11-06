@@ -10,6 +10,7 @@
 #include "Devices/scancontrol.h"
 #include "Devices/ZeissECU.h"
 #include "Devices/ZeissMTB.h"
+#include "Devices/ZeissMTB_Erlangen.h"
 #include "Devices/NIDAQ.h"
 #include "Devices/PointGrey.h"
 #include "Devices/uEyeCam.h"

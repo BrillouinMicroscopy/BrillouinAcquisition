@@ -279,6 +279,30 @@
     <ClCompile Include="src\Devices\ZeissMTB.cpp">
       <Filter>Source Files\Devices</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ZeissMTB.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ZeissMTB.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ZeissMTB_Erlangen.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ZeissMTB_Erlangen.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Devices\ZeissMTB_Erlangen.cpp">
+      <Filter>Source Files\Devices</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ODTControl.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ODTControl.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Devices\ODTControl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_BrillouinAcquisition.h">
@@ -401,6 +425,12 @@
       <Filter>Header Files\Devices</Filter>
     </CustomBuild>
     <CustomBuild Include="src\Devices\ZeissMTB.h">
+      <Filter>Header Files\Devices</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Devices\ZeissMTB_Erlangen.h">
+      <Filter>Header Files\Devices</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Devices\ODTControl.h">
       <Filter>Header Files\Devices</Filter>
     </CustomBuild>
   </ItemGroup>
