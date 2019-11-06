@@ -4,8 +4,8 @@
 #include "../../Devices/CalibrationHelper.h"
 #include "../../simplemath.h"
 
-Calibration::Calibration(QObject* parent, Acquisition* acquisition, Camera** camera, NIDAQ** nidaq)
-	: AcquisitionMode(parent, acquisition), m_camera(camera), m_NIDAQ(nidaq) {
+Calibration::Calibration(QObject* parent, Acquisition* acquisition, Camera** camera, ODTControl** ODTControl)
+	: AcquisitionMode(parent, acquisition), m_camera(camera), m_ODTControl(ODTControl) {
 }
 
 Calibration::~Calibration() {}
@@ -67,8 +67,8 @@ void Calibration::acquire() {
 	setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 
 	// move to Brillouin configuration
-	(*m_NIDAQ)->setPreset(ScanPreset::SCAN_BRILLOUIN);
-	(*m_NIDAQ)->setLEDLamp(0);
+	(*m_ODTControl)->setPreset(ScanPreset::SCAN_BRILLOUIN);
+	(*m_ODTControl)->setLEDLamp(false);
 
 	std::vector<double> Ux_valid;
 	std::vector<double> Uy_valid;
@@ -102,7 +102,7 @@ void Calibration::acquire() {
 		int chunkSize = chunkEnd - chunkBegin + 1;
 
 		// Set first mirror voltage already
-		(*m_NIDAQ)->setVoltage(m_acqSettings.voltages[chunkBegin]);
+		(*m_ODTControl)->setVoltage(m_acqSettings.voltages[chunkBegin]);
 		Sleep(100);
 
 		ACQ_VOLTAGES voltages;
@@ -123,7 +123,7 @@ void Calibration::acquire() {
 			std::fill_n(voltages.mirror.begin() + i * samplesPerAngle + (size_t)chunkSize * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i + chunkBegin].Uy);
 		}
 		// Apply voltages to NIDAQ board
-		(*m_NIDAQ)->setAcquisitionVoltages(voltages);
+		(*m_ODTControl)->setAcquisitionVoltages(voltages);
 
 		int rank_data{ 3 };
 		hsize_t dims_data[3] = { 1, (hsize_t)m_cameraSettings.roi.height, (hsize_t)m_cameraSettings.roi.width };
@@ -179,9 +179,9 @@ void Calibration::acquire() {
 	CalibrationHelper::calculateCalibrationWeights(&m_calibration);
 
 	save();
-	(*m_NIDAQ)->setSpatialCalibration(m_calibration);
+	(*m_ODTControl)->setSpatialCalibration(m_calibration);
 
-	(*m_NIDAQ)->setPreset(ScanPreset::SCAN_BRILLOUIN);
+	(*m_ODTControl)->setPreset(ScanPreset::SCAN_BRILLOUIN);
 
 	emit(calibrationChanged(m_calibration));
 
@@ -226,7 +226,7 @@ void Calibration::load(std::string filepath) {
 	CalibrationHelper::calculateCalibrationBounds(&m_calibration);
 	CalibrationHelper::calculateCalibrationWeights(&m_calibration);
 
-	(*m_NIDAQ)->setSpatialCalibration(m_calibration);
+	(*m_ODTControl)->setSpatialCalibration(m_calibration);
 
 	emit(calibrationChanged(m_calibration));
 }

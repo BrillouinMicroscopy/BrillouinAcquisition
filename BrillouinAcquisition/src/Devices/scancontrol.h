@@ -43,11 +43,6 @@ struct POINT2 {
 	}
 };
 
-struct VOLTAGE2 {
-	double Ux{ 0 };
-	double Uy{ 0 };
-};
-
 typedef enum class enDeviceInput {
 	PUSHBUTTON,
 	INTBOX,

@@ -2145,7 +2145,7 @@ void BrillouinAcquisition::initScanControl() {
 			break;
 		case ScanControl::SCAN_DEVICE::ZEISSMTBERLANGEN:
 			m_scanControl = new ZeissMTB_Erlangen();
-			m_hasODT = false;
+			m_hasODT = true;
 			m_hasSpatialCalibration = false;
 			break;
 		default:
@@ -2233,7 +2233,7 @@ void BrillouinAcquisition::initODT() {
 			m_ODT = nullptr;
 		}
 	} else {
-		m_ODT = new ODT(nullptr, m_acquisition, &m_brightfieldCamera, (NIDAQ**)&m_scanControl);
+		m_ODT = new ODT(nullptr, m_acquisition, &m_brightfieldCamera, (ODTControl**)&m_scanControl);
 		ui->acquisitionModeTabs->insertTab(1, ui->ODT, "ODT");
 		m_isTabVisibleODT = true;
 
@@ -2297,7 +2297,7 @@ void BrillouinAcquisition::initSpatialCalibration() {
 			m_Calibration = nullptr;
 		}
 	} else {
-		m_Calibration = new Calibration(nullptr, m_acquisition, &m_brightfieldCamera, (NIDAQ**)&m_scanControl);
+		m_Calibration = new Calibration(nullptr, m_acquisition, &m_brightfieldCamera, (ODTControl**)&m_scanControl);
 		ui->actionLoad_Voltage_Position_calibration->setVisible(true);
 		ui->actionAcquire_Voltage_Position_calibration->setVisible(true);
 

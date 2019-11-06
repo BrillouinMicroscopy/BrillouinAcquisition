@@ -6,7 +6,7 @@
 
 #include "AcquisitionMode.h"
 #include "../../Devices/PointGrey.h"
-#include "../../Devices/NIDAQ.h"
+#include "../../Devices/ODTControl.h"
 
 struct CALIBRATION_SETTINGS {
 	double Ux_min{ -0.17 };			// [V]	minimum voltage for x-direction
@@ -22,7 +22,7 @@ class Calibration : public AcquisitionMode {
 	Q_OBJECT
 
 public:
-	Calibration(QObject *parent, Acquisition* acquisition, Camera **camera, NIDAQ **nidaq);
+	Calibration(QObject *parent, Acquisition* acquisition, Camera **camera, ODTControl **ODTControl);
 	~Calibration();
 
 public slots:
@@ -41,7 +41,7 @@ private:
 	CALIBRATION_SETTINGS m_acqSettings{};
 	CAMERA_SETTINGS m_cameraSettings{ 0.002, 0 };
 	Camera **m_camera;
-	NIDAQ **m_NIDAQ;
+	ODTControl **m_ODTControl;
 
 	void abortMode(std::unique_ptr <StorageWrapper> & storage) override;
 	void abortMode();

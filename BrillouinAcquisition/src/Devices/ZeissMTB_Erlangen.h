@@ -2,12 +2,12 @@
 #define ZEISSMTB_ERLANGEN_H
 
 #include <atlutil.h>
-#include "scancontrol.h"
+#include "ODTControl.h"
 
 #import "MTBApi.tlb" named_guids
 using namespace MTBApi;
 
-class ZeissMTB_Erlangen: public ScanControl {
+class ZeissMTB_Erlangen: public ODTControl {
 	Q_OBJECT
 
 private:
@@ -57,6 +57,8 @@ public:
 	void setPosition(POINT2 position);
 	POINT3 getPosition();
 
+	void setVoltage(VOLTAGE2 voltage);
+
 public slots:
 	void init();
 	void connectDevice();
@@ -80,6 +82,8 @@ public slots:
 	void setPositionRelativeY(double position);
 	void setPositionRelativeZ(double position);
 	void setPositionInPix(POINT2);
+	void setLEDLamp(bool enabled);
+	void setAcquisitionVoltages(ACQ_VOLTAGES voltages);
 };
 
 #endif // ZEISSMTB_ERLANGEN_H

@@ -3,7 +3,7 @@
 
 #include "AcquisitionMode.h"
 #include "../../Devices/PointGrey.h"
-#include "../../Devices/NIDAQ.h"
+#include "../../Devices/ODTControl.h"
 #include "../../circularBuffer.h"
 
 enum class ODT_SETTING {
@@ -28,7 +28,7 @@ class ODT : public AcquisitionMode {
 	Q_OBJECT
 
 public:
-	ODT(QObject *parent, Acquisition *acquisition, Camera **camera, NIDAQ **nidaq);
+	ODT(QObject *parent, Acquisition *acquisition, Camera **camera, ODTControl **ODTControl);
 	~ODT();
 	bool m_abortAlignment{ false };
 	bool isAlgnRunning();
@@ -54,7 +54,7 @@ private:
 	ODT_SETTINGS m_algnSettings;
 	CAMERA_SETTINGS m_cameraSettings{ 0.002, 0 };
 	Camera **m_camera;
-	NIDAQ **m_NIDAQ;
+	ODTControl **m_ODTControl;
 	bool m_algnRunning{ false };			// is alignment currently running
 
 	int m_algnPositionIndex{ 0 };

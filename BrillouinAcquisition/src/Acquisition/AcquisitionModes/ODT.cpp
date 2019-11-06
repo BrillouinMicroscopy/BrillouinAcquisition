@@ -2,8 +2,8 @@
 #include "ODT.h"
 #include "../../simplemath.h"
 
-ODT::ODT(QObject* parent, Acquisition* acquisition, Camera** camera, NIDAQ** nidaq)
-	: AcquisitionMode(parent, acquisition), m_camera(camera), m_NIDAQ(nidaq) {
+ODT::ODT(QObject* parent, Acquisition* acquisition, Camera** camera, ODTControl** ODTControl)
+	: AcquisitionMode(parent, acquisition), m_camera(camera), m_ODTControl(ODTControl) {
 }
 
 ODT::~ODT() {
@@ -138,10 +138,10 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	QMetaObject::invokeMethod(storage.get(), "startWritingQueues", Qt::AutoConnection);
 
 	// move to ODT configuration
-	(*m_NIDAQ)->setPreset(ScanPreset::SCAN_ODT);
+	(*m_ODTControl)->setPreset(ScanPreset::SCAN_ODT);
 
 	// Set first mirror voltage already
-	(*m_NIDAQ)->setVoltage(m_acqSettings.voltages[0]);
+	(*m_ODTControl)->setVoltage(m_acqSettings.voltages[0]);
 	Sleep(100);
 
 	ACQ_VOLTAGES voltages;
@@ -162,7 +162,7 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 		std::fill_n(voltages.mirror.begin() + i * samplesPerAngle + (size_t)m_acqSettings.numberPoints * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i].Uy);
 	}
 	// Apply voltages to NIDAQ board
-	(*m_NIDAQ)->setAcquisitionVoltages(voltages);
+	(*m_ODTControl)->setAcquisitionVoltages(voltages);
 
 	int rank_data{ 3 };
 	hsize_t dims_data[3] = { 1, (hsize_t)m_cameraSettings.roi.height, (hsize_t)m_cameraSettings.roi.width };
@@ -221,9 +221,9 @@ void ODT::startAlignment() {
 		QMetaObject::invokeMethod((*m_camera), "setSettings", Qt::AutoConnection, Q_ARG(CAMERA_SETTINGS, settings));
 
 		// move to ODT configuration
-		(*m_NIDAQ)->setPreset(ScanPreset::SCAN_ODT);
+		(*m_ODTControl)->setPreset(ScanPreset::SCAN_ODT);
 		// stop querying the element positions, because querying the filter mounts block the thread quite long
-		(*m_NIDAQ)->stopAnnouncingElementPosition();
+		(*m_ODTControl)->stopAnnouncingElementPosition();
 		// start the timer
 		if (!m_algnTimer->isActive()) {
 			m_algnTimer->start(1e3 / (m_algnSettings.scanRate * m_algnSettings.numberPoints));
@@ -234,7 +234,7 @@ void ODT::startAlignment() {
 			m_algnTimer->stop();
 		}
 		// start querying the element positions again
-		(*m_NIDAQ)->startAnnouncingElementPosition();
+		(*m_ODTControl)->startAnnouncingElementPosition();
 		m_acquisition->disableMode(ACQUISITION_MODE::ODT);
 		setAcquisitionStatus(ACQUISITION_STATUS::STOPPED);
 	}
@@ -242,7 +242,7 @@ void ODT::startAlignment() {
 
 void ODT::centerAlignment() {
 	if (!m_algnRunning && (m_status < ACQUISITION_STATUS::RUNNING)) {
-		(*m_NIDAQ)->setVoltage({ 0, 0 });
+		(*m_ODTControl)->setVoltage({ 0, 0 });
 
 		// announce mirror voltage
 		emit(s_mirrorVoltageChanged({ 0, 0 }, ODT_MODE::ALGN));
@@ -259,7 +259,7 @@ void ODT::nextAlgnPosition() {
 	}
 	VOLTAGE2 voltage = m_algnSettings.voltages[m_algnPositionIndex];
 	// set new voltage to galvo mirrors
-	(*m_NIDAQ)->setVoltage(voltage);
+	(*m_ODTControl)->setVoltage(voltage);
 
 	// announce mirror voltage
 	emit(s_mirrorVoltageChanged(voltage, ODT_MODE::ALGN));

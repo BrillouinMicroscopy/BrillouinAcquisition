@@ -26,12 +26,12 @@ ZeissMTB_Erlangen::ZeissMTB_Erlangen() noexcept {
 
 	// bounds of the stage
 	m_absoluteBounds = {
-		-150000,	// [µm] minimal x-value
-		 150000,	// [µm] maximal x-value
-		-150000,	// [µm] minimal y-value
-		 150000,	// [µm] maximal y-value
-		-150000,	// [µm] minimal z-value
-		 150000		// [µm] maximal z-value
+		-150000,	// [ï¿½m] minimal x-value
+		 150000,	// [ï¿½m] maximal x-value
+		-150000,	// [ï¿½m] minimal y-value
+		 150000,	// [ï¿½m] maximal y-value
+		-150000,	// [ï¿½m] minimal z-value
+		 150000		// [ï¿½m] maximal z-value
 	};
 
 	m_elementPositions = std::vector<double>((int)DEVICE_ELEMENT::COUNT, -1);
@@ -138,11 +138,11 @@ void ZeissMTB_Erlangen::disconnectDevice() {
 void ZeissMTB_Erlangen::setPosition(POINT3 position) {
 	bool success{ false };
 	if (m_stageX && m_stageY) {
-		success = m_stageX->SetPosition(position.x, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
-		success = m_stageY->SetPosition(position.y, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		success = m_stageX->SetPosition(position.x, "ï¿½m", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		success = m_stageY->SetPosition(position.y, "ï¿½m", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 	}
 	if (m_ObjectiveFocus) {
-		success = m_ObjectiveFocus->SetPosition(position.z, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		success = m_ObjectiveFocus->SetPosition(position.z, "ï¿½m", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 	}
 	calculateCurrentPositionBounds(position);
 }
@@ -150,8 +150,8 @@ void ZeissMTB_Erlangen::setPosition(POINT3 position) {
 void ZeissMTB_Erlangen::setPosition(POINT2 position) {
 	bool success{ false };
 	if (m_stageX && m_stageY) {
-		success = m_stageX->SetPosition(position.x, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
-		success = m_stageY->SetPosition(position.y, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		success = m_stageX->SetPosition(position.x, "ï¿½m", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		success = m_stageY->SetPosition(position.y, "ï¿½m", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 	}
 	calculateCurrentPositionBounds();
 }
@@ -159,7 +159,7 @@ void ZeissMTB_Erlangen::setPosition(POINT2 position) {
 void ZeissMTB_Erlangen::setPositionRelativeX(double positionX) {
 	bool success{ false };
 	if (m_stageX) {
-		success = m_stageX->SetPosition(positionX + m_homePosition.x, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		success = m_stageX->SetPosition(positionX + m_homePosition.x, "ï¿½m", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 	}
 	calculateCurrentPositionBounds();
 }
@@ -167,7 +167,7 @@ void ZeissMTB_Erlangen::setPositionRelativeX(double positionX) {
 void ZeissMTB_Erlangen::setPositionRelativeY(double positionY) {
 	bool success{ false };
 	if (m_stageY) {
-		success = m_stageY->SetPosition(positionY + m_homePosition.y, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		success = m_stageY->SetPosition(positionY + m_homePosition.y, "ï¿½m", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 	}
 	calculateCurrentPositionBounds();
 }
@@ -175,7 +175,7 @@ void ZeissMTB_Erlangen::setPositionRelativeY(double positionY) {
 void ZeissMTB_Erlangen::setPositionRelativeZ(double positionZ) {
 	bool success{ false };
 	if (m_ObjectiveFocus) {
-		success = m_ObjectiveFocus->SetPosition(positionZ + m_homePosition.z, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		success = m_ObjectiveFocus->SetPosition(positionZ + m_homePosition.z, "ï¿½m", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 	}
 	calculateCurrentPositionBounds();
 }
@@ -184,18 +184,27 @@ void ZeissMTB_Erlangen::setPositionInPix(POINT2) {
 	// Does nothing for now, since for the 780 nm setup no spatial calibration is in place yet.
 }
 
+void ZeissMTB_Erlangen::setLEDLamp(bool enabled) {
+}
+
+void ZeissMTB_Erlangen::setAcquisitionVoltages(ACQ_VOLTAGES voltages) {
+}
+
 POINT3 ZeissMTB_Erlangen::getPosition() {
 	double x{ 0 };
 	double y{ 0 };
 	double z{ 0 };
 	if (m_stageX && m_stageY) {
-		x = m_stageX->GetPosition("µm");
-		y = m_stageY->GetPosition("µm");
+		x = m_stageX->GetPosition("ï¿½m");
+		y = m_stageY->GetPosition("ï¿½m");
 	}
 	if (m_ObjectiveFocus) {
-		z = m_ObjectiveFocus->GetPosition("µm");
+		z = m_ObjectiveFocus->GetPosition("ï¿½m");
 	}
 	return POINT3{ x, y, z };
+}
+
+void ZeissMTB_Erlangen::setVoltage(VOLTAGE2 voltage) {
 }
 
 void ZeissMTB_Erlangen::setPreset(ScanPreset presetType) {
