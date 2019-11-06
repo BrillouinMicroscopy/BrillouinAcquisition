@@ -3080,6 +3080,9 @@ border: none;</string>
                        </item>
                        <item row="0" column="1">
                         <widget class="QDoubleSpinBox" name="acquisitionUR_ODT">
+                         <property name="locale">
+                          <locale language="English" country="UnitedStates"/>
+                         </property>
                          <property name="decimals">
                           <number>2</number>
                          </property>
@@ -3135,6 +3138,9 @@ border: none;</string>
                        </item>
                        <item row="2" column="1">
                         <widget class="QDoubleSpinBox" name="acquisitionRate_ODT">
+                         <property name="locale">
+                          <locale language="English" country="UnitedStates"/>
+                         </property>
                          <property name="decimals">
                           <number>1</number>
                          </property>
