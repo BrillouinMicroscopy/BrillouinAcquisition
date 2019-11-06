@@ -16,8 +16,8 @@ struct ACQ_VOLTAGES {
 };
 
 struct TTL {
-	const uInt8 low = 0;
-	const uInt8 high = 1;
+	const uInt8 low{ 0 };
+	const uInt8 high{ 1 };
 };
 
 struct VOLTAGE2 {
@@ -28,17 +28,6 @@ struct VOLTAGE2 {
 class ODTControl: public ScanControl {
 	Q_OBJECT
 
-protected:
-	TaskHandle AOtaskHandle = 0;
-	TaskHandle DOtaskHandle = 0;
-	TaskHandle DOtaskHandle_LED = 0;
-
-	TTL m_TTL;
-
-	VOLTAGE2 m_voltages{ 0, 0 };	// current voltage
-	POINT3 m_position{ 0, 0, 0 };	// current position
-
-
 public:
 	ODTControl() noexcept;
 	~ODTControl();
@@ -48,6 +37,16 @@ public:
 public slots:
 	virtual void setLEDLamp(bool enabled) = 0;
 	virtual void setAcquisitionVoltages(ACQ_VOLTAGES voltages) = 0;
+
+protected:
+	TaskHandle AOtaskHandle{ 0 };
+	TaskHandle DOtaskHandle{ 0 };
+	TaskHandle DOtaskHandle_LED{ 0 };
+
+	TTL m_TTL;
+
+	VOLTAGE2 m_voltages{ 0, 0 };	// current voltage
+	POINT3 m_position{ 0, 0, 0 };	// current position
 };
 
 #endif // ODTCONTROL_H

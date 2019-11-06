@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "scancontrol.h"
 
+/*
+ * Public definitions
+ */
+
 bool ScanControl::getConnectionStatus() {
 	return m_isConnected + m_isCompatible;
 }
@@ -8,6 +12,19 @@ bool ScanControl::getConnectionStatus() {
 void ScanControl::movePosition(POINT3 distance) {
 	POINT3 position = getPosition() + distance;
 	setPosition(position);
+}
+
+/*
+ * Public slots
+ */
+
+Preset ScanControl::getPreset(ScanPreset presetType) {
+	for (gsl::index ii = 0; ii < m_presets.size(); ii++) {
+		if (m_presets[ii].index == presetType) {
+			return m_presets[ii];
+		}
+	}
+	return m_presets[0];
 }
 
 void ScanControl::checkPresets() {
@@ -80,42 +97,6 @@ void ScanControl::setHome() {
 	calculateHomePositionBounds();
 }
 
-void ScanControl::calculateHomePositionBounds() {
-	m_homePositionBounds.xMin = m_absoluteBounds.xMin - m_homePosition.x;
-	m_homePositionBounds.xMax = m_absoluteBounds.xMax - m_homePosition.x;
-	m_homePositionBounds.yMin = m_absoluteBounds.yMin - m_homePosition.y;
-	m_homePositionBounds.yMax = m_absoluteBounds.yMax - m_homePosition.y;
-	m_homePositionBounds.zMin = m_absoluteBounds.zMin - m_homePosition.z;
-	m_homePositionBounds.zMax = m_absoluteBounds.zMax - m_homePosition.z;
-
-	emit(homePositionBoundsChanged(m_homePositionBounds));
-}
-
-void ScanControl::calculateCurrentPositionBounds() {
-	POINT3 currentPosition = getPosition();
-	calculateCurrentPositionBounds(currentPosition);
-}
-
-void ScanControl::calculateCurrentPositionBounds(POINT3 currentPosition) {
-	m_currentPositionBounds.xMin = m_absoluteBounds.xMin - currentPosition.x;
-	m_currentPositionBounds.xMax = m_absoluteBounds.xMax - currentPosition.x;
-	m_currentPositionBounds.yMin = m_absoluteBounds.yMin - currentPosition.y;
-	m_currentPositionBounds.yMax = m_absoluteBounds.yMax - currentPosition.y;
-	m_currentPositionBounds.zMin = m_absoluteBounds.zMin - currentPosition.z;
-	m_currentPositionBounds.zMax = m_absoluteBounds.zMax - currentPosition.z;
-
-	emit(currentPositionBoundsChanged(m_currentPositionBounds));
-}
-
-Preset ScanControl::getPreset(ScanPreset presetType) {
-	for (gsl::index ii = 0; ii < m_presets.size(); ii++) {
-		if (m_presets[ii].index == presetType) {
-			return m_presets[ii];
-		}
-	}
-	return m_presets[0];
-}
-
 void ScanControl::moveHome() {
 	setPosition(m_homePosition);
 }
@@ -152,4 +133,35 @@ std::vector<POINT3> ScanControl::getSavedPositionsNormalized() {
 void ScanControl::announceSavedPositionsNormalized() {
 	std::vector<POINT3> savedPositionsNormalized = getSavedPositionsNormalized();
 	emit(savedPositionsChanged(savedPositionsNormalized));
+}
+
+/*
+ * Protected definitions
+ */
+
+void ScanControl::calculateHomePositionBounds() {
+	m_homePositionBounds.xMin = m_absoluteBounds.xMin - m_homePosition.x;
+	m_homePositionBounds.xMax = m_absoluteBounds.xMax - m_homePosition.x;
+	m_homePositionBounds.yMin = m_absoluteBounds.yMin - m_homePosition.y;
+	m_homePositionBounds.yMax = m_absoluteBounds.yMax - m_homePosition.y;
+	m_homePositionBounds.zMin = m_absoluteBounds.zMin - m_homePosition.z;
+	m_homePositionBounds.zMax = m_absoluteBounds.zMax - m_homePosition.z;
+
+	emit(homePositionBoundsChanged(m_homePositionBounds));
+}
+
+void ScanControl::calculateCurrentPositionBounds() {
+	POINT3 currentPosition = getPosition();
+	calculateCurrentPositionBounds(currentPosition);
+}
+
+void ScanControl::calculateCurrentPositionBounds(POINT3 currentPosition) {
+	m_currentPositionBounds.xMin = m_absoluteBounds.xMin - currentPosition.x;
+	m_currentPositionBounds.xMax = m_absoluteBounds.xMax - currentPosition.x;
+	m_currentPositionBounds.yMin = m_absoluteBounds.yMin - currentPosition.y;
+	m_currentPositionBounds.yMax = m_absoluteBounds.yMax - currentPosition.y;
+	m_currentPositionBounds.zMin = m_absoluteBounds.zMin - currentPosition.z;
+	m_currentPositionBounds.zMax = m_absoluteBounds.zMax - currentPosition.z;
+
+	emit(currentPositionBoundsChanged(m_currentPositionBounds));
 }

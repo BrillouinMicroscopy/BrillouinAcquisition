@@ -10,23 +10,27 @@ namespace Thorlabs_FF {
 
 class Element : public QObject {
 	Q_OBJECT
-private:
-	std::string m_prefix;		// prefix of the element for serial communication
-	com *m_comObject;
-	std::vector<std::string> m_versions;
 
 public:
 	Element(com *comObject, std::string prefix, std::vector<std::string> versions) : m_comObject(comObject), m_prefix(prefix), m_versions(versions) {};
-	~Element();
+	~Element() {};
+	void setDevice(com* device);
+	bool checkCompatibility();
+
+protected:
 	std::string receive(std::string request);
 	void send(std::string message);
 	void clear();
-	void setDevice(com *device);
+	std::string requestVersion();
+
 	inline int positive_modulo(int i, int n) {
 		return (i % n + n) % n;
 	}
-	std::string requestVersion();
-	bool checkCompatibility();
+
+private:
+	std::string m_prefix;		// prefix of the element for serial communication
+	com* m_comObject;
+	std::vector<std::string> m_versions;
 };
 
 class Stand : public Element {
@@ -34,8 +38,6 @@ class Stand : public Element {
 public:
 	Stand(com *comObject) : Element(comObject, "H", { "AV_V3_17" }) {};
 
-	int getElementPosition(std::string device);
-	void setElementPosition(std::string device, int position);
 	void setReflector(int position, bool check = false);
 	int getReflector();
 	void setObjective(int position, bool check = false);
@@ -48,18 +50,20 @@ public:
 	int getSideport();
 	void setMirror(int position, bool check = false);
 	int getMirror();
+
+private:
+	void setElementPosition(std::string device, int position);
+	int getElementPosition(std::string device);
 	void blockUntilPositionReached(bool block, std::string elementNr);
 };
 
 class Focus : public Element {
-private:
-	double m_umperinc = 0.025;		// [µm per increment] constant for converting µm to increments of focus z-position
-	int m_rangeFocus = 16777215;	// number of focus increments
 
 public:
 	Focus(com *comObject) : Element(comObject, "F", { "ZM_V2_04" }) {};
-	double getZ();
+
 	void setZ(double position);
+	double getZ();
 
 	void setVelocityZ(double velocity);
 
@@ -70,44 +74,82 @@ public:
 	int getStatusKey();
 	void move2Load();
 	void move2Work();
+
+private:
+	double m_umperinc{ 0.025 };		// [µm per increment] constant for converting µm to increments of focus z-position
+	int m_rangeFocus{ 16777215 };	// number of focus increments
 };
 
 class MCU : public Element {
-private:
-	double m_umperinc = 0.25;		// [µm per increment] constant for converting µm to increments of x- and y-position
-	int m_rangeFocus = 16777215;	// number of focus increments
-
-	double getPosition(std::string axis);
-	void setPosition(std::string axis, double position);
-
-	void setVelocity(std::string axis, int velocity);
 
 public:
 	MCU(com *comObject) : Element(comObject, "N", { "MC V2.08" }) {};
-	double getX();
-	void setX(double position);
 
-	double getY();
+	void setX(double position);
+	double getX();
+
 	void setY(double position);
+	double getY();
 
 	void setVelocityX(int velocity);
 	void setVelocityY(int velocity);
 
 	void stopX();
 	void stopY();
+
+private:
+	void setPosition(std::string axis, double position);
+	double getPosition(std::string axis);
+
+	void setVelocity(std::string axis, int velocity);
+
+	double m_umperinc{ 0.25 };		// [µm per increment] constant for converting µm to increments of x- and y-position
+	int m_rangeFocus{ 16777215 };	// number of focus increments
 };
 
 class ZeissECU: public ScanControl {
 	Q_OBJECT
 
+public:
+	ZeissECU() noexcept;
+	~ZeissECU();
+
+	void setPosition(POINT3 position) override;
+	void setPosition(POINT2 position) override;
+	POINT3 getPosition() override;
+
+	void setDevice(com *device);
+
+public slots:
+	void init() override;
+	void connectDevice() override;
+	void disconnectDevice() override;
+	void setElement(DeviceElement element, double position) override;
+	int getElement(DeviceElement element) override;
+	void getElements() override;
+	void setPreset(ScanPreset preset) override;
+
+	// sets the position relative to the home position m_homePosition
+	void setPositionRelativeX(double position) override;
+	void setPositionRelativeY(double position) override;
+	void setPositionRelativeZ(double position) override;
+	void setPositionInPix(POINT2) override;
+
 private:
-	com * m_comObject = nullptr;
+	POINT2 pixToMicroMeter(POINT2) override;
 
-	Focus *m_focus = nullptr;
-	MCU *m_mcu = nullptr;
-	Stand *m_stand = nullptr;
+	void setBeamBlock(int position);
+	int getBeamBlock();
 
-	char const *m_serialNo_FF2 = "37000251";
+	void errorHandler(QSerialPort::SerialPortError error);
+
+	com* m_comObject{ nullptr };
+
+	Focus* m_focus{ nullptr };
+	MCU* m_mcu{ nullptr };
+	Stand* m_stand{ nullptr };
+
+	char const* m_serialNo_FF2{ "37000251" };
 
 	enum class DEVICE_ELEMENT {
 		BEAMBLOCK,
@@ -119,34 +161,6 @@ private:
 		MIRROR,
 		COUNT
 	};
-
-	POINT2 pixToMicroMeter(POINT2);
-
-public:
-	ZeissECU() noexcept;
-	~ZeissECU();
-
-	void setPosition(POINT3 position);
-	void setPosition(POINT2 position);
-	POINT3 getPosition();
-	void setDevice(com *device);
-
-public slots:
-	void init();
-	void connectDevice();
-	void disconnectDevice();
-	void errorHandler(QSerialPort::SerialPortError error);
-	void setElement(DeviceElement element, double position);
-	void setPreset(ScanPreset preset);
-	void getElements();
-	int getBeamBlock();
-	void setBeamBlock(int position);
-	int getElement(DeviceElement element);
-	// sets the position relative to the home position m_homePosition
-	void setPositionRelativeX(double position);
-	void setPositionRelativeY(double position);
-	void setPositionRelativeZ(double position);
-	void setPositionInPix(POINT2);
 };
 
 #endif // ZEISSECU_H
