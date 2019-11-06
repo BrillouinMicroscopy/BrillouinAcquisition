@@ -9,8 +9,8 @@ ZeissMTB_Erlangen::ZeissMTB_Erlangen() noexcept {
 
 	m_deviceElements = {
 		{ "Objective",	6, (int)DEVICE_ELEMENT::OBJECTIVE },
-		{ "Reflector",	6, (int)DEVICE_ELEMENT::REFLECTOR },
-		{ "Sideport",	3, (int)DEVICE_ELEMENT::SIDEPORT },
+		{ "Reflector",	6, (int)DEVICE_ELEMENT::REFLECTOR, { "Green", "Red", "Blue" } },
+		{ "Sideport",	3, (int)DEVICE_ELEMENT::SIDEPORT, { "Eyepiece", "Left", "Right" } },
 		{ "RL Shutter",	2, (int)DEVICE_ELEMENT::RLSHUTTER, { "Close", "Open" } }
 	};
 
@@ -18,10 +18,10 @@ ZeissMTB_Erlangen::ZeissMTB_Erlangen() noexcept {
 		{ "Brillouin",		ScanPreset::SCAN_BRILLOUIN,		{ {}, {1}, {1}, {1} } },	// Brillouin
 		{ "Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {}, {1}, {1}, {1} } },	// Calibration
 		{ "Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{ {}, {1}, {1}, {1} } },	// Brightfield
-		{ "Eyepiece",		ScanPreset::SCAN_EYEPIECE,		{ {}, {1}, {2}, {1} } },	// Eyepiece
-		{ "Fluo Blue",		ScanPreset::SCAN_EPIFLUOBLUE,	{ {}, {2},  {}, {2} } },	// Fluorescence blue
-		{ "Fluo Green",		ScanPreset::SCAN_EPIFLUOGREEN,	{ {}, {3},  {}, {2} } },	// Fluorescence green
-		{ "Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {}, {4},  {}, {2} } }		// Fluorescence red
+		{ "Eyepiece",		ScanPreset::SCAN_EYEPIECE,		{ {}, {1}, {1}, {1} } },	// Eyepiece
+		{ "Fluo Blue",		ScanPreset::SCAN_EPIFLUOBLUE,	{ {}, {3},  {}, {2} } },	// Fluorescence blue
+		{ "Fluo Green",		ScanPreset::SCAN_EPIFLUOGREEN,	{ {}, {1},  {}, {2} } },	// Fluorescence green
+		{ "Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {}, {2},  {}, {2} } }		// Fluorescence red
 	};
 
 	// bounds of the stage
