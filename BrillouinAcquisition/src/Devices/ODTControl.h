@@ -29,14 +29,19 @@ class ODTControl: public ScanControl {
 	Q_OBJECT
 
 public:
-	ODTControl() noexcept;
-	~ODTControl();
+	ODTControl() noexcept {};
+	~ODTControl() {};
 
-	virtual void setVoltage(VOLTAGE2 voltage) = 0;
+	void setVoltage(VOLTAGE2 voltages);
 
 public slots:
-	virtual void setLEDLamp(bool enabled) = 0;
-	virtual void setAcquisitionVoltages(ACQ_VOLTAGES voltages) = 0;
+	void connectDevice();
+	void disconnectDevice();
+
+	void setLEDLamp(bool enabled);
+	int getLEDLamp();
+
+	void setAcquisitionVoltages(ACQ_VOLTAGES voltages);
 
 protected:
 	TaskHandle AOtaskHandle{ 0 };
@@ -47,6 +52,9 @@ protected:
 
 	VOLTAGE2 m_voltages{ 0, 0 };	// current voltage
 	POINT3 m_position{ 0, 0, 0 };	// current position
+
+private:
+	bool m_LEDon{ false };			// current state of the LED illumination source
 };
 
 #endif // ODTCONTROL_H

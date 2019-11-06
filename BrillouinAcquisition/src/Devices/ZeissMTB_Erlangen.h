@@ -18,8 +18,6 @@ public:
 	void setPosition(POINT3 position) override;
 	POINT3 getPosition() override;
 
-	void setVoltage(VOLTAGE2 voltage) override;
-
 public slots:
 	void init() override;
 	void connectDevice() override;
@@ -34,9 +32,6 @@ public slots:
 	void setPositionRelativeY(double position) override;
 	void setPositionRelativeZ(double position) override;
 	void setPositionInPix(POINT2) override;
-
-	void setLEDLamp(bool enabled) override;
-	void setAcquisitionVoltages(ACQ_VOLTAGES voltages) override;
 
 private:
 	POINT2 pixToMicroMeter(POINT2) override;

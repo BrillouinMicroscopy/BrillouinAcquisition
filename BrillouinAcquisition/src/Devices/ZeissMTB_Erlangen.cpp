@@ -82,9 +82,6 @@ POINT3 ZeissMTB_Erlangen::getPosition() {
 	return POINT3{ x, y, z };
 }
 
-void ZeissMTB_Erlangen::setVoltage(VOLTAGE2 voltage) {
-}
-
 /*
  * Public slots
  */
@@ -110,6 +107,9 @@ void ZeissMTB_Erlangen::init() {
 
 void ZeissMTB_Erlangen::connectDevice() {
 	if (!m_isConnected) {
+		// Connect NIDAQ board
+		ODTControl::connectDevice();
+
 		try {
 			/*
 			 * Connect to Zeiss MTB Server
@@ -161,6 +161,7 @@ void ZeissMTB_Erlangen::disconnectDevice() {
 	if (m_isConnected) {
 		stopAnnouncingPosition();
 		stopAnnouncingElementPosition();
+		ODTControl::disconnectDevice();
 
 		if (m_MTBConnection != NULL && m_ID != "") {
 			// logout from MTB
@@ -258,12 +259,6 @@ void ZeissMTB_Erlangen::setPositionRelativeZ(double positionZ) {
 
 void ZeissMTB_Erlangen::setPositionInPix(POINT2) {
 	// Does nothing for now, since for the 780 nm setup no spatial calibration is in place yet.
-}
-
-void ZeissMTB_Erlangen::setLEDLamp(bool enabled) {
-}
-
-void ZeissMTB_Erlangen::setAcquisitionVoltages(ACQ_VOLTAGES voltages) {
 }
 
 /*

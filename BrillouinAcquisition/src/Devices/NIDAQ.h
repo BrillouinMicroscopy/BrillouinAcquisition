@@ -3,7 +3,6 @@
 
 #include <QSerialPort>
 #include <vector>
-#include "NIDAQmx.h"
 #include "ODTControl.h"
 
 namespace Thorlabs_TIM {
@@ -34,8 +33,6 @@ public:
 	void setPosition(POINT3 position) override;
 	POINT3 getPosition() override;
 
-	void setVoltage(VOLTAGE2 voltage) override;
-
 public slots:
 	void init() override;
 	void connectDevice() override;
@@ -52,19 +49,17 @@ public slots:
 	void setPositionInPix(POINT2) override;
 
 	void setSpatialCalibration(SpatialCalibration spatialCalibration) override;
-	
-	void setAcquisitionVoltages(ACQ_VOLTAGES voltages) override;
 
 	void setHome();
 
 private:
 	POINT2 pixToMicroMeter(POINT2) override;
 
-	VOLTAGE2 positionToVoltage(POINT2 position);
-	POINT2 voltageToPosition(VOLTAGE2 position);
-
 	void applyScanPosition();
 	void centerPosition();
+
+	VOLTAGE2 positionToVoltage(POINT2 position);
+	POINT2 voltageToPosition(VOLTAGE2 position);
 
 	void setFilter(FilterMount* device, int position);
 	int getFilter(FilterMount* device);
@@ -81,14 +76,7 @@ private:
 	int getExFilter();
 	void setLowerObjective(double position);
 	double getLowerObjective();
-	void setLEDLamp(bool position);
-	int getLEDLamp();
 
-	void triggerCamera();
-
-	VOLTAGE2 m_voltages{ 0, 0 };	// current voltage
-	POINT3 m_position{ 0, 0, 0 };	// current position
-	bool m_LEDon{ false };			// current state of the LED illumination source
 	double m_positionLowerObjective{ 0 };	// position of the lower objective
 	
 	// TODO: make the following parameters changeable:

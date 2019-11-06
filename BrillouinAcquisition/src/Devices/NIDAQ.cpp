@@ -77,12 +77,6 @@ POINT3 NIDAQ::getPosition() {
 	return m_position;
 }
 
-void NIDAQ::setVoltage(VOLTAGE2 voltages) {
-	DAQmxStopTask(AOtaskHandle);
-	float64 data[2] = { voltages.Ux, voltages.Uy };
-	DAQmxWriteAnalogF64(AOtaskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
-}
-
 /*
  * Public slots
  */
@@ -101,48 +95,8 @@ void NIDAQ::init() {
 
 void NIDAQ::connectDevice() {
 	if (!m_isConnected) {
-		// Create task for analog output
-		DAQmxCreateTask("AO", &AOtaskHandle);
-		// Configure analog output channels
-		DAQmxCreateAOVoltageChan(AOtaskHandle, "Dev1/ao0:1", "AO", -1.0, 1.0, DAQmx_Val_Volts, "");
-		// Configure sample rate to 1000 Hz
-		DAQmxCfgSampClkTiming(AOtaskHandle, "", 1000.0, DAQmx_Val_Rising, DAQmx_Val_ContSamps, 1000);
-
-		// Set analog output to zero
-		float64 data[2] = { 0, 0 };
-		DAQmxWriteAnalogF64(AOtaskHandle, 1, false, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
-
-		DAQmxSetWriteAttribute(AOtaskHandle, DAQmx_Write_RegenMode, DAQmx_Val_DoNotAllowRegen);
-
-		// Create task for digital output
-		DAQmxCreateTask("DO", &DOtaskHandle);
-		// Configure digital output channel
-		DAQmxCreateDOChan(DOtaskHandle, "Dev1/Port0/Line0:0", "DO", DAQmx_Val_ChanForAllLines);
-		// Configure sample rate to 1000 Hz
-		DAQmxCfgSampClkTiming(DOtaskHandle, "/Dev1/ao/SampleClock", 1000.0, DAQmx_Val_Rising, DAQmx_Val_ContSamps, 1000);
-
-		// Set digital line to low
-		DAQmxWriteDigitalLines(DOtaskHandle, 1, false, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
-
-		DAQmxSetWriteAttribute(DOtaskHandle, DAQmx_Write_RegenMode, DAQmx_Val_DoNotAllowRegen);
-
-		// Create task for digital output to LED lamp
-		DAQmxCreateTask("DO_LED", &DOtaskHandle_LED);
-		// Configure digital output channel
-		DAQmxCreateDOChan(DOtaskHandle_LED, "Dev1/Port0/Line2:2", "DO_LED", DAQmx_Val_ChanForAllLines);
-		// Configure regen mode
-		DAQmxSetWriteAttribute(DOtaskHandle_LED, DAQmx_Write_RegenMode, DAQmx_Val_AllowRegen);
-		// Start digital task
-		DAQmxStartTask(DOtaskHandle_LED);
-		// Set digital line to low
-		DAQmxWriteDigitalLines(DOtaskHandle_LED, 1, false, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
-
-		// Start digital task
-		DAQmxStartTask(DOtaskHandle);
-
-		// Start analog task after digital task since AO is the master
-		DAQmxStartTask(AOtaskHandle);
-
+		// Connect NIDAQ board
+		ODTControl::connectDevice();
 
 		// Connect to T-Cube Piezo Inertial Controller
 		int ret = Thorlabs_TIM::TIM_Open(m_serialNo_TIM);
@@ -179,11 +133,7 @@ void NIDAQ::connectDevice() {
 void NIDAQ::disconnectDevice() {
 	if (m_isConnected) {
 		stopAnnouncingElementPosition();
-		// Stop and clear DAQ tasks
-		DAQmxStopTask(AOtaskHandle);
-		DAQmxClearTask(AOtaskHandle);
-		DAQmxStopTask(DOtaskHandle);
-		DAQmxClearTask(DOtaskHandle);
+		ODTControl::disconnectDevice();
 
 		// Disconnect from T-Cube Piezo Inertial Controller
 		Thorlabs_TIM::TIM_StopPolling(m_serialNo_TIM);
@@ -333,21 +283,6 @@ void NIDAQ::setSpatialCalibration(SpatialCalibration spatialCalibration) {
 	m_absoluteBounds = m_calibration.bounds;
 }
 
-void NIDAQ::setAcquisitionVoltages(ACQ_VOLTAGES voltages) {
-	// Stop DAQ tasks
-	DAQmxStopTask(AOtaskHandle);
-	DAQmxStopTask(DOtaskHandle);
-
-	// Write analog voltages
-	DAQmxWriteAnalogF64(AOtaskHandle, voltages.numberSamples, false, 10.0, DAQmx_Val_GroupByChannel, &voltages.mirror[0], NULL, NULL);
-	// Write digital voltages
-	DAQmxWriteDigitalLines(DOtaskHandle, voltages.numberSamples, false, 10, DAQmx_Val_GroupByChannel, &voltages.trigger[0], NULL, NULL);
-
-	// Start DAQ tasks
-	DAQmxStartTask(DOtaskHandle);
-	DAQmxStartTask(AOtaskHandle);
-}
-
 void NIDAQ::setHome() {
 	// Set current z position to zero
 	m_position.z = 0;
@@ -374,22 +309,6 @@ POINT2 NIDAQ::pixToMicroMeter(POINT2 positionPix) {
 	return positionMicroMeter;
 }
 
-VOLTAGE2 NIDAQ::positionToVoltage(POINT2 position) {
-
-	auto Uxr = interpolation::biharmonic_spline_calculate_values(m_calibration.positions_weights.x, position.x, position.y);
-	auto Uyr = interpolation::biharmonic_spline_calculate_values(m_calibration.positions_weights.y, position.x, position.y);
-
-	return VOLTAGE2{ Uxr, Uyr };
-}
-
-POINT2 NIDAQ::voltageToPosition(VOLTAGE2 voltage) {
-
-	auto xr = interpolation::biharmonic_spline_calculate_values(m_calibration.voltages_weights.x, voltage.Ux, voltage.Uy);
-	auto yr = interpolation::biharmonic_spline_calculate_values(m_calibration.voltages_weights.y, voltage.Ux, voltage.Uy);
-
-	return POINT2{ xr, yr };
-}
-
 void NIDAQ::applyScanPosition() {
 	DAQmxStopTask(AOtaskHandle);
 	// set the x- and y-position
@@ -408,6 +327,22 @@ void NIDAQ::centerPosition() {
 	Thorlabs_TIM::TIM_Home(m_serialNo_TIM, m_channelPosZ);
 	// set the scan position
 	applyScanPosition();
+}
+
+VOLTAGE2 NIDAQ::positionToVoltage(POINT2 position) {
+
+	auto Uxr = interpolation::biharmonic_spline_calculate_values(m_calibration.positions_weights.x, position.x, position.y);
+	auto Uyr = interpolation::biharmonic_spline_calculate_values(m_calibration.positions_weights.y, position.x, position.y);
+
+	return VOLTAGE2{ Uxr, Uyr };
+}
+
+POINT2 NIDAQ::voltageToPosition(VOLTAGE2 voltage) {
+
+	auto xr = interpolation::biharmonic_spline_calculate_values(m_calibration.voltages_weights.x, voltage.Ux, voltage.Uy);
+	auto yr = interpolation::biharmonic_spline_calculate_values(m_calibration.voltages_weights.y, voltage.Ux, voltage.Uy);
+
+	return POINT2{ xr, yr };
 }
 
 void NIDAQ::setFilter(FilterMount* device, int position) {
@@ -518,21 +453,4 @@ void NIDAQ::setLowerObjective(double position) {
 
 double NIDAQ::getLowerObjective() {
 	return m_positionLowerObjective;
-}
-
-void NIDAQ::setLEDLamp(bool position) {
-	m_LEDon = position;
-	// Write digital voltages
-	const uInt8	voltage = (uInt8)m_LEDon;
-	DAQmxWriteDigitalLines(DOtaskHandle_LED, 1, false, 10, DAQmx_Val_GroupByChannel, &voltage, NULL, NULL);
-}
-
-int NIDAQ::getLEDLamp() {
-	return (int)m_LEDon;
-}
-
-void NIDAQ::triggerCamera() {
-	DAQmxWriteDigitalLines(DOtaskHandle, 1, true, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
-	DAQmxWriteDigitalLines(DOtaskHandle, 1, true, 10, DAQmx_Val_GroupByChannel, &m_TTL.high, NULL, NULL);
-	DAQmxWriteDigitalLines(DOtaskHandle, 1, true, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
 }
