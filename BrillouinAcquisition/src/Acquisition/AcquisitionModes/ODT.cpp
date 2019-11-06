@@ -167,33 +167,32 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	int rank_data{ 3 };
 	hsize_t dims_data[3] = { 1, (hsize_t)m_cameraSettings.roi.height, (hsize_t)m_cameraSettings.roi.width };
 	int bytesPerFrame = m_cameraSettings.roi.width * m_cameraSettings.roi.height;
-	for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
+	if (bytesPerFrame) {
+		for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
 
-		// read images from camera
-		std::vector<unsigned char> images(bytesPerFrame);
+			// read images from camera
+			std::vector<unsigned char> images(bytesPerFrame);
 
-		for (gsl::index mm{ 0 }; mm < 1; mm++) {
 			if (m_abort) {
 				this->abortMode(storage);
 				return;
 			}
 
 			// acquire images
-			int64_t pointerPos = (int64_t)bytesPerFrame * mm;
-			(*m_camera)->getImageForAcquisition(&images[pointerPos], false);
+			(*m_camera)->getImageForAcquisition(&images[0], false);
+
+			// cast the vector to unsigned short
+			std::vector<unsigned char>* images_ = (std::vector<unsigned char>*) & images;
+
+			// store images
+			// asynchronously write image to disk
+			// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
+			std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
+				.toString(Qt::ISODateWithMs).toStdString();
+			ODTIMAGE* img = new ODTIMAGE((int)i, rank_data, dims_data, date, *images_);
+
+			QMetaObject::invokeMethod(storage.get(), "s_enqueuePayload", Qt::AutoConnection, Q_ARG(ODTIMAGE*, img));
 		}
-
-		// cast the vector to unsigned short
-		std::vector<unsigned char>* images_ = (std::vector<unsigned char> *) &images;
-
-		// store images
-		// asynchronously write image to disk
-		// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
-		std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
-			.toString(Qt::ISODateWithMs).toStdString();
-		ODTIMAGE* img = new ODTIMAGE((int)i, rank_data, dims_data, date, *images_);
-
-		QMetaObject::invokeMethod(storage.get(), "s_enqueuePayload", Qt::AutoConnection, Q_ARG(ODTIMAGE*, img));
 	}
 
 	// Here we wait until the storage object indicate it finished to write to the file.
