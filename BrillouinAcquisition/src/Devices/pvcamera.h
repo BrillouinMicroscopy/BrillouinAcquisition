@@ -8,8 +8,8 @@
 #include <typeinfo>
 
 namespace PVCam {
-	#include "master.h"
-	#include "pvcam.h"
+#include "master.h"
+#include "pvcam.h"
 }
 
 class PVCamera : public Camera {
@@ -42,9 +42,6 @@ private:
 	void readSettings() override;
 
 	bool initialize();
-
-	void preparePreview();
-	void cleanupAcquisition();
 
 	const std::string getTemperatureStatus();
 	double getSensorTemperature();
@@ -99,10 +96,13 @@ private:
 private slots:
 	void getImageForPreview() override;
 
-	void checkSensorTemperature();
-
+	void preparePreview();
 	void cleanupPreview();
+
 	void prepareAcquisition(CAMERA_SETTINGS settings);
+	void cleanupAcquisition();
+
+	void checkSensorTemperature();
 };
 
 #endif // PVCAMERA_H

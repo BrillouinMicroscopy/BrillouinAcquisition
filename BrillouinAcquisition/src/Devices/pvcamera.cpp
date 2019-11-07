@@ -468,60 +468,6 @@ bool PVCamera::initialize() {
 	return m_isInitialised;
 }
 
-void PVCamera::preparePreview() {
-	// Disable temperature timer if it is running
-	if (m_tempTimer->isActive()) {
-		m_tempTimer->stop();
-	}
-
-	// always use full camera image for live preview
-	m_settings.roi.width = m_options.ROIWidthLimits[1];
-	m_settings.roi.left = 1;
-	m_settings.roi.height = m_options.ROIHeightLimits[1];
-	m_settings.roi.top = 1;
-
-	setSettings(m_settings);
-
-	PVCam::rgn_type settings = getCamSettings();
-
-	int circBufferFrames{ 8 };
-	// Only even numbers are accepted for the frame count.
-	if (circBufferFrames % 2) {
-		circBufferFrames += 1;
-	}
-	PVCam::uns32 bufferSize;
-	bool i_retCode = PVCam::pl_exp_setup_cont(m_camera, 1, &settings, PVCam::TIMED_MODE, 1e3 * m_settings.exposureTime,
-		&bufferSize, PVCam::CIRC_OVERWRITE);
-	m_bufferSize = bufferSize;
-
-	// preview buffer
-	BUFFER_SETTINGS bufferSettings = { circBufferFrames, m_bufferSize, "unsigned short", m_settings.roi };
-	m_previewBuffer->initializeBuffer(bufferSettings);
-	emit(s_previewBufferSettingsChanged());
-
-	// internal buffer
-	if (m_buffer) {
-		delete[] m_buffer;
-		m_buffer = nullptr;
-	}
-	int bufSize = (size_t)circBufferFrames * m_bufferSize / sizeof(PVCam::uns16);
-	m_buffer = new (std::nothrow) PVCam::uns16[bufSize];
-
-	// Register callback
-	PVCam::pl_cam_register_callback_ex3(m_camera, PVCam::PL_CALLBACK_EOF,
-		(void*)&previewCallback, (void*)this);
-
-	// Start acquisition
-	PVCam::pl_exp_start_cont(m_camera, m_buffer, bufSize);
-}
-
-void PVCamera::cleanupAcquisition() {
-	PVCam::pl_exp_abort(m_camera, PVCam::CCS_NO_CHANGE);
-	if (!m_tempTimer->isActive()) {
-		m_tempTimer->start(1000);
-	}
-}
-
 const std::string PVCamera::getTemperatureStatus() {
 	// If the setpoint is above 0, we consider it not cooling
 	if (m_sensorTemperature.setpoint >= 0) {
@@ -660,22 +606,51 @@ void PVCamera::getImageForPreview() {
 	}
 }
 
-void PVCamera::checkSensorTemperature() {
-	m_sensorTemperature.temperature = getSensorTemperature();
-	std::string status = getTemperatureStatus();
-	if (status == "Cooler Off") {
-		m_sensorTemperature.status = enCameraTemperatureStatus::COOLER_OFF;
+void PVCamera::preparePreview() {
+	// Disable temperature timer if it is running
+	if (m_tempTimer->isActive()) {
+		m_tempTimer->stop();
 	}
-	else if (status == "Cooling") {
-		m_sensorTemperature.status = enCameraTemperatureStatus::COOLING;
+
+	// always use full camera image for live preview
+	m_settings.roi.width = m_options.ROIWidthLimits[1];
+	m_settings.roi.left = 1;
+	m_settings.roi.height = m_options.ROIHeightLimits[1];
+	m_settings.roi.top = 1;
+
+	setSettings(m_settings);
+
+	PVCam::rgn_type settings = getCamSettings();
+
+	int circBufferFrames{ 8 };
+	// Only even numbers are accepted for the frame count.
+	if (circBufferFrames % 2) {
+		circBufferFrames += 1;
 	}
-	else if (status == "Stabilised") {
-		m_sensorTemperature.status = enCameraTemperatureStatus::STABILISED;
+	PVCam::uns32 bufferSize;
+	bool i_retCode = PVCam::pl_exp_setup_cont(m_camera, 1, &settings, PVCam::TIMED_MODE, 1e3 * m_settings.exposureTime,
+		&bufferSize, PVCam::CIRC_OVERWRITE);
+	m_bufferSize = bufferSize;
+
+	// preview buffer
+	BUFFER_SETTINGS bufferSettings = { circBufferFrames, m_bufferSize, "unsigned short", m_settings.roi };
+	m_previewBuffer->initializeBuffer(bufferSettings);
+	emit(s_previewBufferSettingsChanged());
+
+	// internal buffer
+	if (m_buffer) {
+		delete[] m_buffer;
+		m_buffer = nullptr;
 	}
-	else {
-		m_sensorTemperature.status = enCameraTemperatureStatus::FAULT;
-	}
-	emit(s_sensorTemperatureChanged(m_sensorTemperature));
+	int bufSize = (size_t)circBufferFrames * m_bufferSize / sizeof(PVCam::uns16);
+	m_buffer = new (std::nothrow) PVCam::uns16[bufSize];
+
+	// Register callback
+	PVCam::pl_cam_register_callback_ex3(m_camera, PVCam::PL_CALLBACK_EOF,
+		(void*)&previewCallback, (void*)this);
+
+	// Start acquisition
+	PVCam::pl_exp_start_cont(m_camera, m_buffer, bufSize);
 }
 
 void PVCamera::cleanupPreview() {
@@ -711,4 +686,29 @@ void PVCamera::prepareAcquisition(CAMERA_SETTINGS settings) {
 	BUFFER_SETTINGS bufferSettings = { 8, m_bufferSize, "unsigned short", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
+}
+
+void PVCamera::cleanupAcquisition() {
+	PVCam::pl_exp_abort(m_camera, PVCam::CCS_NO_CHANGE);
+	if (!m_tempTimer->isActive()) {
+		m_tempTimer->start(1000);
+	}
+}
+
+void PVCamera::checkSensorTemperature() {
+	m_sensorTemperature.temperature = getSensorTemperature();
+	std::string status = getTemperatureStatus();
+	if (status == "Cooler Off") {
+		m_sensorTemperature.status = enCameraTemperatureStatus::COOLER_OFF;
+	}
+	else if (status == "Cooling") {
+		m_sensorTemperature.status = enCameraTemperatureStatus::COOLING;
+	}
+	else if (status == "Stabilised") {
+		m_sensorTemperature.status = enCameraTemperatureStatus::STABILISED;
+	}
+	else {
+		m_sensorTemperature.status = enCameraTemperatureStatus::FAULT;
+	}
+	emit(s_sensorTemperatureChanged(m_sensorTemperature));
 }
