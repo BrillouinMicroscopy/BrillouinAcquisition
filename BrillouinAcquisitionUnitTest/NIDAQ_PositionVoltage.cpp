@@ -15,7 +15,7 @@ namespace BrillouinAcquisitionUnitTest
 			NIDAQ *nidaq = new NIDAQ();
 			Acquisition *acquisition = new Acquisition(nullptr);
 			Camera *brightfieldCamera = nullptr;
-			Calibration *calibration = new Calibration(nullptr, acquisition, &brightfieldCamera, (NIDAQ**)&nidaq);
+			Calibration *calibration = new Calibration(nullptr, acquisition, &brightfieldCamera, (ODTControl**)&nidaq);
 			calibration->load("");
 			VOLTAGE2 voltage{ 0, 0 };
 			POINT2 answer = nidaq->voltageToPosition(voltage);
@@ -28,7 +28,7 @@ namespace BrillouinAcquisitionUnitTest
 			NIDAQ *nidaq = new NIDAQ();
 			Acquisition *acquisition = new Acquisition(nullptr);
 			Camera *brightfieldCamera = nullptr;
-			Calibration *calibration = new Calibration(nullptr, acquisition, &brightfieldCamera, (NIDAQ**)&nidaq);
+			Calibration *calibration = new Calibration(nullptr, acquisition, &brightfieldCamera, (ODTControl**)&nidaq);
 			calibration->load("");
 			VOLTAGE2 voltage{ 0, 0 };
 			POINT2 position = nidaq->voltageToPosition(voltage);
