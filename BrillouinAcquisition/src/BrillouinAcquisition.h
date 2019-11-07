@@ -189,6 +189,7 @@ private:
 	std::vector<QSpinBox*> elementIntBox;
 	std::vector<QDoubleSpinBox*> elementDoubleBox;
 	std::vector<QSlider*> elementSlider;
+	std::vector<QSpinBox*> elementSliderInput;
 	std::vector<QPushButton*> presetButtons;
 
 	struct {

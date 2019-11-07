@@ -2033,10 +2033,11 @@ void BrillouinAcquisition::initBeampathButtons() {
 	elementIntBox.clear();
 	elementDoubleBox.clear();
 	elementSlider.clear();
+	elementSliderInput.clear();
 	auto elements = m_scanControl->m_deviceElements;
 	rows += elements.size();
 	elementButtonWidget->setMinimumHeight(elements.size() * 20);
-	for (gsl::index ii = 0; ii < elements.size(); ii++) {
+	for (gsl::index ii{ 0 }; ii < elements.size(); ii++) {
 		DeviceElement element = elements[ii];
 		QHBoxLayout *layout = new QHBoxLayout();
 
@@ -2103,12 +2104,39 @@ void BrillouinAcquisition::initBeampathButtons() {
 			slider->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 			layout->addWidget(slider);
 
+			QSpinBox* intBox = new QSpinBox();
+			intBox->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+			intBox->setMinimumWidth(48);
+			intBox->setMaximumWidth(96);
+			intBox->setMinimum(0);
+			intBox->setMaximum(100);
+			intBox->setSingleStep(1.0);
+			layout->addWidget(intBox);
+
 			connection = QObject::connect<void(QSlider::*)(const int)>(
 				slider,
 				&QSlider::valueChanged,
-				[=](int value) { setElement(elements[ii], value); }
+				[=](int value) {
+					setElement(elements[ii], value);
+					intBox->blockSignals(true);
+					intBox->setValue(value);
+					intBox->blockSignals(false);
+				}
 			);
+
+			connection = QObject::connect<void(QSpinBox::*)(const int)>(
+				intBox,
+				&QSpinBox::valueChanged,
+				[=](int value) {
+					setElement(elements[ii], (double)value);
+					slider->blockSignals(true);
+					slider->setValue(value);
+					slider->blockSignals(false);
+				}
+			);
+
 			elementSlider.push_back(slider);
+			elementSliderInput.push_back(intBox);
 		}
 		elementButtonWidgetLayout->addLayout(layout);
 	}
@@ -2610,6 +2638,10 @@ void BrillouinAcquisition::checkElementButtons() {
 			elementSlider[indSlider]->blockSignals(true);
 			elementSlider[indSlider]->setValue((double)m_deviceElementPositions[ii]);
 			elementSlider[indSlider]->blockSignals(false);
+
+			elementSliderInput[indSlider]->blockSignals(true);
+			elementSliderInput[indSlider]->setValue((double)m_deviceElementPositions[ii]);
+			elementSliderInput[indSlider]->blockSignals(false);
 			indSlider++;
 		}
 	}
