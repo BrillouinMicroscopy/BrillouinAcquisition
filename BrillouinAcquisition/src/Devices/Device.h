@@ -14,13 +14,13 @@ public:
 
 	bool getConnectionStatus();
 
-protected:
-	bool m_isConnected{ false };
-
 public slots:
 	virtual void init() = 0;
 	virtual void connectDevice() = 0;
 	virtual void disconnectDevice() = 0;
+
+protected:
+	bool m_isConnected{ false };
 
 signals:
 	void connectedDevice(bool);

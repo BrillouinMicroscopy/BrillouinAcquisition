@@ -29,23 +29,18 @@ typedef struct {
 class Camera : public Device {
 	Q_OBJECT
 
-protected slots:
-	virtual void getImageForPreview();
-
 public:
 	Camera() {};
 	~Camera() {};
 
+	CAMERA_OPTIONS getOptions();
+	CAMERA_SETTINGS getSettings();
+
 	bool m_isPreviewRunning{ false };
-	bool m_wasPreviewRunning{ false };		// Was the preview running before we started an acquisition?
 	bool m_isAcquisitionRunning{ false };
 
 	bool m_stopPreview{ false };
 	bool m_stopAcquisition{ false };
-
-	CAMERA_OPTIONS getOptions();
-	CAMERA_SETTINGS getSettings();
-	virtual bool getSensorCooling() { return false; };
 
 	// preview buffer for live acquisition
 	PreviewBuffer<unsigned char>* m_previewBuffer = new PreviewBuffer<unsigned char>;
@@ -56,21 +51,29 @@ public slots:
 	virtual void stopPreview() = 0;
 	virtual void startAcquisition(CAMERA_SETTINGS) = 0;
 	virtual void stopAcquisition() = 0;
-	void setSetting(CAMERA_SETTING, double);
-	virtual void setCalibrationExposureTime(double) {};
-
 	virtual void getImageForAcquisition(unsigned char* buffer, bool preview = true) = 0;
 
+	virtual void setCalibrationExposureTime(double) {};
+	virtual void setSensorCooling(bool cooling) {};
+	virtual bool getSensorCooling() { return false; };
+
+	void setSetting(CAMERA_SETTING, double);
+
 protected:
-	CAMERA_OPTIONS m_options;
-	CAMERA_SETTINGS m_settings;
+	virtual int acquireImage(unsigned char* buffer) = 0;
 
 	virtual void readOptions() = 0;
 	virtual void readSettings() = 0;
 
+	CAMERA_OPTIONS m_options;
+	CAMERA_SETTINGS m_settings;
+
 	std::mutex m_mutex;
 
-	virtual int acquireImage(unsigned char* buffer) = 0;
+	bool m_wasPreviewRunning{ false };		// Was the preview running before we started an acquisition?
+
+protected slots:
+	virtual void getImageForPreview();
 
 signals:
 	void settingsChanged(CAMERA_SETTINGS);

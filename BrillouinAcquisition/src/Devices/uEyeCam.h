@@ -2,6 +2,7 @@
 #define UEYECAM_H
 
 #include "Camera.h"
+
 namespace uEye {
 	#include "uEye.h"
 }
@@ -9,42 +10,34 @@ namespace uEye {
 class uEyeCam : public Camera {
 	Q_OBJECT
 
-private:
-	/*
-	 * Members and functions specific to uEye class
-	 */
-	uEye::HCAM m_camera = (uEye::HCAM)0;
-
-	void preparePreview();
-
-	int acquireImage(unsigned char* buffer);
-
-	char *m_imageBuffer = nullptr;
-	int m_imageBufferId{ 0 };
-
-	/*
-	 * Members and functions inherited from base class
-	 */
-	void readOptions();
-	void readSettings();
-
 public:
 	uEyeCam() noexcept {};
 	~uEyeCam();
 
 public slots:
-	void init() {};
-	void connectDevice();
-	void disconnectDevice();
+	void init() override {};
+	void connectDevice() override;
+	void disconnectDevice() override;
 
-	void setSettings(CAMERA_SETTINGS);
-
-	void startPreview();
-	void stopPreview();
-	void startAcquisition(CAMERA_SETTINGS);
-	void stopAcquisition();
-
+	void setSettings(CAMERA_SETTINGS) override;
+	void startPreview() override;
+	void stopPreview() override;
+	void startAcquisition(CAMERA_SETTINGS) override;
+	void stopAcquisition() override;
 	void getImageForAcquisition(unsigned char* buffer, bool preview = true) override;
+
+private:
+	int acquireImage(unsigned char* buffer) override;
+
+	void readOptions() override;
+	void readSettings() override;
+
+	void preparePreview();
+
+	uEye::HCAM m_camera{ (uEye::HCAM)0 };
+
+	char* m_imageBuffer{ nullptr };
+	int m_imageBufferId{ 0 };
 };
 
 #endif // UEYECAM_H

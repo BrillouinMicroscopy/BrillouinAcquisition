@@ -10,72 +10,55 @@
 class Andor : public Camera {
 	Q_OBJECT
 
+public:
+	Andor() noexcept {};
+	~Andor();
+
+public slots:
+	void init() override;
+	void connectDevice() override;
+	void disconnectDevice() override;
+
+	void setSettings(CAMERA_SETTINGS) override;
+	void startPreview() override;
+	void stopPreview() override;
+	void startAcquisition(CAMERA_SETTINGS) override;
+	void stopAcquisition() override;
+	void getImageForAcquisition(unsigned char* buffer, bool preview = true) override;
+
+	void setCalibrationExposureTime(double) override;
+	void setSensorCooling(bool cooling) override;
+	bool getSensorCooling() override;
+
 private:
-	/*
-	 * Members and functions specific to Andor class
-	 */
+	int acquireImage(unsigned char* buffer) override;
+
+	void readOptions() override;
+	void readSettings() override;
+
+	bool initialize();
+
+	void preparePreview();
+	void cleanupAcquisition();
+
+	const std::string getTemperatureStatus();
+	double getSensorTemperature();
+
+	void getEnumString(AT_WC* feature, std::wstring* string);
+
 	AT_H m_camera{ -1 };
 	bool m_isInitialised{ false };
 	bool m_isCooling{ false };
 
-	int m_temperatureStatusIndex = 0;
+	int m_temperatureStatusIndex{ 0 };
 	std::string m_temperatureStatus{ "" };
-	QTimer *m_tempTimer = nullptr;
+	QTimer* m_tempTimer{ nullptr };
 	SensorTemperature m_sensorTemperature;
-	AT_64 m_imageStride = 0;
-	int m_bufferSize = -1;
-
-	void cleanupAcquisition();
-	void getEnumString(AT_WC* feature, std::wstring* string);
-	void preparePreview();
-
-	int acquireImage(unsigned char* buffer) override;
-
-	/*
-	 * Members and functions inherited from base class
-	 */
-	void readOptions();
-	void readSettings();
-
-public:
-	Andor() noexcept {};
-	~Andor();
-	bool initialize();
-
-	/*
-	 * Members and functions specific to Andor class
-	 */
-	// setters/getters for sensor cooling
-	bool getSensorCooling();
-	const std::string getTemperatureStatus();
-	double getSensorTemperature();
-	void setCalibrationExposureTime(double);
+	AT_64 m_imageStride{ 0 };
+	int m_bufferSize{ -1 };
 
 private slots:
 	void checkSensorTemperature();
-
-public slots:
-	/*
-	* Members and functions specific to Andor class
-	*/
-	// setters/getters for sensor cooling
-	void setSensorCooling(bool cooling);
-
-	/*
-	* Members and functions inherited from base class
-	*/
-	void init();
-	void connectDevice();
-	void disconnectDevice();
-
-	void setSettings(CAMERA_SETTINGS);
-
-	void startPreview();
-	void stopPreview();
-	void startAcquisition(CAMERA_SETTINGS);
-	void stopAcquisition();
-	
-	void getImageForAcquisition(unsigned char* buffer, bool preview = true) override;
 };
 
 #endif // ANDOR_H

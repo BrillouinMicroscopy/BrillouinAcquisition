@@ -8,12 +8,53 @@
 #include <typeinfo>
 
 namespace PVCam {
-#include "master.h"
-#include "pvcam.h"
+	#include "master.h"
+	#include "pvcam.h"
+}
+
+class PVCamera : public Camera {
+	Q_OBJECT
+
+public:
+	PVCamera() noexcept {};
+	~PVCamera();
+
+public slots:
+	void init() override;
+	void connectDevice() override;
+	void disconnectDevice() override;
+
+	void setSettings(CAMERA_SETTINGS) override;
+	void startPreview() override;
+	void stopPreview() override;
+	void startAcquisition(CAMERA_SETTINGS) override;
+	void stopAcquisition() override;
+	void getImageForAcquisition(unsigned char* buffer, bool preview = true) override;
+
+	void setCalibrationExposureTime(double) override;
+	void setSensorCooling(bool cooling) override;
+	bool getSensorCooling() override;
+
+private:
+	int acquireImage(unsigned char* buffer) override;
+
+	void readOptions() override;
+	void readSettings() override;
+
+	bool initialize();
+
+	void preparePreview();
+	void cleanupAcquisition();
+
+	const std::string getTemperatureStatus();
+	double getSensorTemperature();
+
+	static void previewCallback(PVCam::FRAME_INFO* pFrameInfo, void* context);
+	static void acquisitionCallback(PVCam::FRAME_INFO* pFrameInfo, void* context);
 
 	// Name-Value Pair type - an item in enumeration type
 	typedef struct NVP {
-		int32 value{ 0 };
+		PVCam::int32 value{ 0 };
 		std::string name;
 	} NVP;
 
@@ -22,28 +63,25 @@ namespace PVCam {
 
 	typedef struct READOUT_OPTION {
 		NVP port;
-		int16 speedIndex{ 0 };
+		PVCam::int16 speedIndex{ 0 };
 		float readoutFrequency{ 0 };
-		int16 bitDepth{ 1 };
-		std::vector<int16> gains;
+		PVCam::int16 bitDepth{ 1 };
+		std::vector<PVCam::int16> gains;
 		std::wstring label;
 	} READOUT_OPTION;
 
-}
+	bool IsParamAvailable(PVCam::uns32 paramID, const char* paramName);
+	bool ReadEnumeration(NVPC* nvpc, PVCam::uns32 paramID, const char* paramName);
 
-class PVCamera : public Camera {
-	Q_OBJECT
+	PVCam::rgn_type getCamSettings();
 
-private:
 	PVCam::int16 m_camera{ -1 };
 	bool m_isInitialised{ false };
 	bool m_isCooling{ false };
-	QTimer* m_tempTimer = nullptr;
+	QTimer* m_tempTimer{ nullptr };
 	SensorTemperature m_sensorTemperature;
 
-	static void previewCallback(PVCam::FRAME_INFO* pFrameInfo, void* context);
-	static void acquisitionCallback(PVCam::FRAME_INFO* pFrameInfo, void* context);
-	PVCam::uns16* m_acquisitionBuffer = nullptr;
+	PVCam::uns16* m_acquisitionBuffer{ nullptr };
 	std::mutex g_EofMutex;
 	std::condition_variable g_EofCond;
 	// New frame flag that helps with spurious wakeups.
@@ -51,68 +89,20 @@ private:
 	// storing new frame address and frame info delayed processing.
 	// Otherwise some frames might be lost.
 	bool g_EofFlag{ false };
-	void getImageForPreview() override;
 
-	int acquireImage(unsigned char* buffer) override;
-
-	/*
-	 * Members and functions inherited from base class
-	 */
-	void readOptions();
-	void readSettings();
-
-	PVCam::rgn_type getCamSettings();
-
-	PVCam::uns16 *m_buffer = nullptr;
+	PVCam::uns16* m_buffer{ nullptr };
 	unsigned int m_bufferSize{ 0 };
 
 	// Vector of camera readout options
-	std::vector<PVCam::READOUT_OPTION> m_SpeedTable;
-
-public:
-	PVCamera() noexcept {};
-	~PVCamera();
-	bool initialize();
-
-	// setters/getters for sensor cooling
-	bool getSensorCooling();
-	const std::string getTemperatureStatus();
-	double getSensorTemperature();
-	void setCalibrationExposureTime(double);
-
-	bool IsParamAvailable(PVCam::uns32 paramID, const char* paramName);
-	bool ReadEnumeration(PVCam::NVPC* nvpc, PVCam::uns32 paramID, const char* paramName);
+	std::vector<READOUT_OPTION> m_SpeedTable;
 
 private slots:
+	void getImageForPreview() override;
+
 	void checkSensorTemperature();
-	void preparePreview();
+
 	void cleanupPreview();
-
 	void prepareAcquisition(CAMERA_SETTINGS settings);
-	void cleanupAcquisition();
-
-public slots:
-	/*
-	* Members and functions specific to Andor class
-	*/
-	// setters/getters for sensor cooling
-	void setSensorCooling(bool cooling);
-
-	/*
-	* Members and functions inherited from base class
-	*/
-	void init();
-	void connectDevice();
-	void disconnectDevice();
-
-	void setSettings(CAMERA_SETTINGS);
-
-	void startPreview();
-	void stopPreview();
-	void startAcquisition(CAMERA_SETTINGS);
-	void stopAcquisition();
-
-	void getImageForAcquisition(unsigned char* buffer, bool preview = true) override;
 };
 
 #endif // PVCAMERA_H

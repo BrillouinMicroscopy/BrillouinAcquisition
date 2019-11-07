@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "Camera.h"
 
+/*
+ * Public definitions
+ */
+
 CAMERA_OPTIONS Camera::getOptions() {
 	return m_options;
 }
@@ -8,6 +12,10 @@ CAMERA_OPTIONS Camera::getOptions() {
 CAMERA_SETTINGS Camera::getSettings() {
 	return m_settings;
 }
+
+/*
+ * Public slots
+ */
 
 void Camera::setSetting(CAMERA_SETTING setting, double value) {
 	switch (setting) {
@@ -22,6 +30,10 @@ void Camera::setSetting(CAMERA_SETTING setting, double value) {
 	}
 	setSettings(m_settings);
 }
+
+/*
+ * Protected slots
+ */
 
 void Camera::getImageForPreview() {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);

@@ -10,15 +10,17 @@
 #include <gsl/gsl>
 
 class com : public QSerialPort {
-protected:
-	std::string m_terminator = "\r";
 public:
 	com() {};
 	com(std::string terminator) : m_terminator(terminator) {};
+
+	virtual qint64 writeToDevice(const char* data);
+
 	std::string receive(std::string request);
 	void send(std::string message);
 
-	virtual qint64 writeToDevice(const char *data);
+protected:
+	std::string m_terminator{ "\r" };
 };
 
 class helper {
