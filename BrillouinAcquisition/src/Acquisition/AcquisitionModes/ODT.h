@@ -30,21 +30,30 @@ class ODT : public AcquisitionMode {
 public:
 	ODT(QObject *parent, Acquisition *acquisition, Camera **camera, ODTControl **ODTControl);
 	~ODT();
-	bool m_abortAlignment{ false };
+
 	bool isAlgnRunning();
 	void setAlgnSettings(ODT_SETTINGS);
 	void setSettings(ODT_SETTINGS);
 
+	bool m_abortAlignment{ false };
+
 public slots:
-	void init();
+	void startRepetitions() override;
+
+	void init() override;
+
 	void initialize();
-	void startRepetitions();
 	void startAlignment();
 	void centerAlignment();
 	void setSettings(ODT_MODE, ODT_SETTING, double);
 	void setCameraSetting(CAMERA_SETTING, double);
 
 private:
+	void abortMode(std::unique_ptr <StorageWrapper>& storage) override;
+	void abortMode();
+
+	void calculateVoltages(ODT_MODE);
+
 	ODT_SETTINGS m_acqSettings{
 		0.3,
 		150,
@@ -59,15 +68,11 @@ private:
 
 	int m_algnPositionIndex{ 0 };
 
-	QTimer *m_algnTimer = nullptr;
-
-	void calculateVoltages(ODT_MODE);
-
-	void abortMode(std::unique_ptr <StorageWrapper> & storage) override;
-	void abortMode();
+	QTimer* m_algnTimer{ nullptr };
 
 private slots:
 	void acquire(std::unique_ptr <StorageWrapper> & storage) override;
+	
 	void nextAlgnPosition();
 
 signals:

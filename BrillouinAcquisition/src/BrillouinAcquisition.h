@@ -90,6 +90,117 @@ Q_DECLARE_METATYPE(SpatialCalibration);
 
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
+
+public:
+	BrillouinAcquisition(QWidget* parent = nullptr) noexcept;
+	~BrillouinAcquisition();
+
+private:
+	void initScanControl();
+	void initODT();
+	void initSpatialCalibration();
+	void initFluorescence();
+	void initCamera();
+	void initCameraBrillouin();
+
+	void checkElementButtons();
+	void addListToComboBox(QComboBox*, std::vector<std::wstring>, bool clear = true);
+
+	template <typename T>
+	void updateImage(PreviewBuffer<T>* previewBuffer, PLOT_SETTINGS* plotSettings);
+
+	template<typename T>
+	void plotting(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<T> unpackedBuffer);
+
+	Ui::BrillouinAcquisitionClass* ui;
+	ScanControl::SCAN_DEVICE m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSECU;
+	ScanControl::SCAN_DEVICE m_scanControllerTypeTemporary = m_scanControllerType;
+
+	typedef enum class enCameraDevice {
+		NONE = 0,
+		POINTGREY = 1,
+		UEYE = 2
+	} CAMERA_DEVICE;
+	std::vector<std::string> CAMERA_DEVICE_NAMES = { "None", "PointGrey", "uEye" };
+
+	typedef enum class enCameraBrillouinDevice {
+		ANDOR = 0,
+		PVCAM = 1
+	} CAMERA_BRILLOUIN_DEVICE;
+	std::vector<std::string> CAMERA_BRILLOUIN_DEVICE_NAMES = { "Andor", "PVCam" };
+
+	QCPGraph* m_focusMarker{ nullptr };
+	POINT2 m_focusMarkerPos{ -1, -1 };
+	bool m_selectFocus{ false };
+
+	CAMERA_DEVICE m_cameraType{ CAMERA_DEVICE::UEYE };
+	CAMERA_DEVICE m_cameraTypeTemporary = m_cameraType;
+
+	CAMERA_BRILLOUIN_DEVICE m_cameraBrillouinType = CAMERA_BRILLOUIN_DEVICE::PVCAM;
+	CAMERA_BRILLOUIN_DEVICE m_cameraBrillouinTypeTemporary = m_cameraBrillouinType;
+	QComboBox* m_scanControlDropdown;
+	QComboBox* m_cameraDropdown;
+	QComboBox* m_cameraBrillouinDropdown;
+	std::string m_calibrationFilePath;
+
+	QDialog* m_settingsDialog{ nullptr };
+	Camera* m_andor{ nullptr };
+	ScanControl* m_scanControl{ nullptr };
+	Camera* m_brightfieldCamera{ nullptr };
+	Acquisition* m_acquisition = new Acquisition(nullptr);
+
+	// Threads
+	Thread m_andorThread;
+	Thread m_brightfieldCameraThread;
+	Thread m_acquisitionThread;
+	Thread m_plottingThread;
+
+	Brillouin* m_Brillouin = new Brillouin(nullptr, m_acquisition, &m_andor, &m_scanControl);
+	BRILLOUIN_SETTINGS m_BrillouinSettings;
+	ODT* m_ODT{ nullptr };
+	Fluorescence* m_Fluorescence{ nullptr };
+	Calibration* m_Calibration{ nullptr };
+
+	PLOT_SETTINGS m_BrillouinPlot;
+	PLOT_SETTINGS m_ODTPlot;
+
+	converter* m_converter = new converter();
+
+	SETTINGS_DEVICES m_deviceSettings;
+	CAMERA_OPTIONS m_cameraOptions;
+	CAMERA_OPTIONS m_cameraOptionsODT;
+	StoragePath m_storagePath{ "", "." };
+	bool m_previewRunning{ false };
+	bool m_brightfieldPreviewRunning{ false };
+	ACQUISITION_MODE m_enabledModes{ ACQUISITION_MODE::NONE };
+
+	bool m_hasODT{ false };
+	bool m_hasSpatialCalibration{ false };
+	bool m_isTabVisibleODT{ false };
+	bool m_hasFluorescence{ false };
+	bool m_isTabVisibleFluorescence{ false };
+
+	TableModel* tableModel = new TableModel(0);
+	ButtonDelegate buttonDelegate;
+
+	std::vector<double> m_deviceElementPositions = { 0, 0, 0, 0, 0, 0 };
+
+	std::vector<std::vector<QPushButton*>> elementButtons;
+	std::vector<QSpinBox*> elementIntBox;
+	std::vector<QDoubleSpinBox*> elementDoubleBox;
+	std::vector<QSlider*> elementSlider;
+	std::vector<QPushButton*> presetButtons;
+
+	struct {
+		QIcon disconnected;
+		QIcon standby;
+		QIcon cooling;
+		QIcon ready;
+		QIcon fluoBlue;
+		QIcon fluoGreen;
+		QIcon fluoRed;
+		QIcon fluoBrightfield;
+	} m_icons;
 	
 private slots:
 	void on_rangeLower_valueChanged(int);
@@ -208,7 +319,6 @@ private slots:
 	void showCalibrationRunning(bool);
 	void updateFilename(std::string);
 	void updateCalibration(SpatialCalibration);
-
 
 	void showEnabledModes(ACQUISITION_MODE mode);
 	void showBrillouinStatus(ACQUISITION_STATUS state);
@@ -341,119 +451,6 @@ private slots:
 	 */
 	void writeSettings();
 	void readSettings();
-
-public:
-	BrillouinAcquisition(QWidget *parent = nullptr) noexcept;
-	~BrillouinAcquisition();
-
-private:
-
-	Ui::BrillouinAcquisitionClass* ui;
-	ScanControl::SCAN_DEVICE m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSECU;
-	ScanControl::SCAN_DEVICE m_scanControllerTypeTemporary = m_scanControllerType;
-
-	typedef enum class enCameraDevice {
-		NONE = 0,
-		POINTGREY = 1,
-		UEYE = 2
-	} CAMERA_DEVICE;
-	std::vector<std::string> CAMERA_DEVICE_NAMES = { "None", "PointGrey", "uEye" };
-
-	typedef enum class enCameraBrillouinDevice {
-		ANDOR = 0,
-		PVCAM = 1
-	} CAMERA_BRILLOUIN_DEVICE;
-	std::vector<std::string> CAMERA_BRILLOUIN_DEVICE_NAMES = { "Andor", "PVCam" };
-
-	QCPGraph *m_focusMarker{ nullptr };
-	POINT2 m_focusMarkerPos{ -1, -1 };
-	bool m_selectFocus{ false };
-
-	CAMERA_DEVICE m_cameraType = CAMERA_DEVICE::UEYE;
-	CAMERA_DEVICE m_cameraTypeTemporary = m_cameraType;
-
-	CAMERA_BRILLOUIN_DEVICE m_cameraBrillouinType = CAMERA_BRILLOUIN_DEVICE::PVCAM;
-	CAMERA_BRILLOUIN_DEVICE m_cameraBrillouinTypeTemporary = m_cameraBrillouinType;
-
-	void initScanControl();
-	void initODT();
-	void initSpatialCalibration();
-	void initFluorescence();
-	void initCamera();
-	void initCameraBrillouin();
-	QComboBox* m_scanControlDropdown;
-	QComboBox* m_cameraDropdown;
-	QComboBox* m_cameraBrillouinDropdown;
-	std::string m_calibrationFilePath;
-
-	QDialog *m_settingsDialog = nullptr;
-	void checkElementButtons();
-	void addListToComboBox(QComboBox*, std::vector<std::wstring>, bool clear = true);
-	Camera* m_andor = nullptr;
-	ScanControl* m_scanControl = nullptr;
-	Camera* m_brightfieldCamera = nullptr;
-	Acquisition *m_acquisition = new Acquisition(nullptr);
-
-	// Threads
-	Thread m_andorThread;
-	Thread m_brightfieldCameraThread;
-	Thread m_acquisitionThread;
-	Thread m_plottingThread;
-
-	Brillouin* m_Brillouin = new Brillouin(nullptr, m_acquisition, &m_andor, &m_scanControl);
-	BRILLOUIN_SETTINGS m_BrillouinSettings;
-	ODT* m_ODT = nullptr;
-	Fluorescence* m_Fluorescence = nullptr;
-	Calibration* m_Calibration = nullptr;
-
-	PLOT_SETTINGS m_BrillouinPlot;
-	PLOT_SETTINGS m_ODTPlot;
-
-	converter* m_converter = new converter();
-
-	template <typename T>
-	void updateImage(PreviewBuffer<T>* previewBuffer, PLOT_SETTINGS* plotSettings);
-
-	template<typename T>
-	void plotting(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<T> unpackedBuffer);
-
-	SETTINGS_DEVICES m_deviceSettings;
-	CAMERA_OPTIONS m_cameraOptions;
-	CAMERA_OPTIONS m_cameraOptionsODT;
-	StoragePath m_storagePath{ "", "." };
-	bool m_previewRunning = false;
-	bool m_brightfieldPreviewRunning = false;
-	ACQUISITION_MODE m_enabledModes = ACQUISITION_MODE::NONE;
-
-	bool m_hasODT{ false };
-	bool m_hasSpatialCalibration{ false };
-	bool m_isTabVisibleODT{ false };
-	bool m_hasFluorescence{ false };
-	bool m_isTabVisibleFluorescence{ false };
-
-	//std::vector<POINT3> m_savedPositions = { {0,0,0}, {100,100,100}, {-200,200,300}, { -10.4,100,100 } };
-
-	TableModel *tableModel = new TableModel(0);
-	ButtonDelegate buttonDelegate;
-
-	std::vector<double> m_deviceElementPositions = { 0, 0, 0, 0, 0, 0 };
-
-	std::vector<std::vector<QPushButton*>> elementButtons;
-	std::vector<QSpinBox*> elementIntBox;
-	std::vector<QDoubleSpinBox*> elementDoubleBox;
-	std::vector<QSlider*> elementSlider;
-	std::vector<QPushButton*> presetButtons;
-
-	struct {
-		QIcon disconnected;
-		QIcon standby;
-		QIcon cooling;
-		QIcon ready;
-		QIcon fluoBlue;
-		QIcon fluoGreen;
-		QIcon fluoRed;
-		QIcon fluoBrightfield;
-	} m_icons;
 };
 
 #endif // BRILLOUINACQUISITON_H

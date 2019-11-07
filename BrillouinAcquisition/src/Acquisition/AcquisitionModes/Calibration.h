@@ -26,9 +26,9 @@ public:
 	~Calibration();
 
 public slots:
-	void init();
+	void startRepetitions() override;
+
 	void initialize();
-	void startRepetitions();
 	void setCameraSetting(CAMERA_SETTING, double);
 	void load(std::string filepath);
 
@@ -38,17 +38,8 @@ public slots:
 	void setPixelSize(double);
 
 private:
-	CALIBRATION_SETTINGS m_acqSettings{};
-	CAMERA_SETTINGS m_cameraSettings{ 0.002, 0 };
-	Camera **m_camera;
-	ODTControl **m_ODTControl;
-
-	void abortMode(std::unique_ptr <StorageWrapper> & storage) override;
+	void abortMode(std::unique_ptr <StorageWrapper>& storage) override;
 	void abortMode();
-
-	double m_minimalIntensity = 100;		// [1] minimum peak intensity for valid peaks
-
-	SpatialCalibration m_calibration;
 
 	double readCalibrationValue(H5::H5File file, std::string datasetName);
 	void writeCalibrationValue(H5::Group group, const H5std_string datasetName, double value);
@@ -56,6 +47,15 @@ private:
 	void writeCalibrationMap(H5::Group group, std::string datasetName, std::vector<double> map);
 
 	void save();
+
+	CALIBRATION_SETTINGS m_acqSettings{};
+	CAMERA_SETTINGS m_cameraSettings{ 0.002, 0 };
+	Camera **m_camera;
+	ODTControl **m_ODTControl;
+
+	double m_minimalIntensity{ 100 };		// [1] minimum peak intensity for valid peaks
+
+	SpatialCalibration m_calibration;
 
 private slots:
 	void acquire(std::unique_ptr <StorageWrapper> & storage) override;

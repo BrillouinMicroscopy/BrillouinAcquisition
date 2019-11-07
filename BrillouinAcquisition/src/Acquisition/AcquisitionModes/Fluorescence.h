@@ -39,26 +39,28 @@ public:
 	~Fluorescence();
 
 public slots:
-	void init() {};
-	void initialize();
 	void startRepetitions() override;
 	void startRepetitions(std::vector<FLUORESCENCE_MODE> modes);
+
+	void initialize();
 	void setChannel(FLUORESCENCE_MODE, bool);
 	void setExposure(FLUORESCENCE_MODE, int);
 	void setGain(FLUORESCENCE_MODE mode, int gain);
 	void startStopPreview(FLUORESCENCE_MODE);
 
 private:
+	void abortMode(std::unique_ptr <StorageWrapper>& storage) override;
+
+	ChannelSettings* getChannelSettings(FLUORESCENCE_MODE mode);
+	std::vector<ChannelSettings*> getEnabledChannels();
+	void configureCamera();
+
 	Camera** m_camera;
 	ScanControl** m_scanControl;
 
 	FLUORESCENCE_SETTINGS m_settings;
-	ChannelSettings* getChannelSettings(FLUORESCENCE_MODE mode);
-	std::vector<ChannelSettings*> getEnabledChannels();
-	void configureCamera();
 	FLUORESCENCE_MODE previewChannel{ FLUORESCENCE_MODE::NONE };
 
-	void abortMode(std::unique_ptr <StorageWrapper> & storage) override;
 
 private slots:
 	void acquire(std::unique_ptr <StorageWrapper>& storage) override;

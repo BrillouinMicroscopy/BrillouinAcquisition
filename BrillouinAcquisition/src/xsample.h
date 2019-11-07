@@ -10,6 +10,13 @@ typedef enum class resampleMode {
 
 class xsample {
 
+public:
+	xsample();
+	~xsample();
+
+	template <typename T_in = double, typename T_out = double>
+	static void resample(T_in in, T_out out, int dim_x, int dim_y, int dim_x_new, int dim_y_new, RESAMPLE_MODE mode);
+
 private:
 
 	template <typename T_in = double, typename T_out = double>
@@ -17,13 +24,6 @@ private:
 
 	template <typename T_in = double, typename T_out = double>
 	static void nearest(T_in in, T_out out, int dim_x, int dim_y, int dim_x_new, int dim_y_new);
-	
-public:
-	xsample();
-	~xsample();
-
-	template <typename T_in = double, typename T_out = double>
-	static void resample(T_in in, T_out out, int dim_x, int dim_y, int dim_x_new, int dim_y_new, RESAMPLE_MODE mode);
 
 };
 
