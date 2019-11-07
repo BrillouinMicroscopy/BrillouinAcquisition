@@ -104,7 +104,10 @@ void ODT::startAlignment() {
 		CAMERA_SETTINGS settings = (*m_camera)->getSettings();
 		settings.exposureTime = m_cameraSettings.exposureTime;
 		settings.gain = m_cameraSettings.gain;
-		QMetaObject::invokeMethod((*m_camera), "setSettings", Qt::AutoConnection, Q_ARG(CAMERA_SETTINGS, settings));
+		QMetaObject::invokeMethod(
+			(*m_camera),
+			[&m_camera = (*m_camera), settings]() { m_camera->setSettings(settings); }, Qt::AutoConnection
+		);
 
 		// move to ODT configuration
 		(*m_ODTControl)->setPreset(ScanPreset::SCAN_ODT);
@@ -179,7 +182,11 @@ void ODT::setCameraSetting(CAMERA_SETTING type, double value) {
 	
 	// Apply camera settings immediately if alignment is running
 	if (m_algnRunning) {
-		QMetaObject::invokeMethod((*m_camera), "setSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, type), Q_ARG(double, value));
+		QMetaObject::invokeMethod(
+			(*m_camera),
+			[&m_camera = (*m_camera), type, value]() { m_camera->setSetting(type, value); },
+			Qt::AutoConnection
+		);
 	}
 
 	emit(s_cameraSettingsChanged(m_cameraSettings));
@@ -193,7 +200,11 @@ void ODT::abortMode(std::unique_ptr <StorageWrapper>& storage) {
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
 	auto connection = QWidget::connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
-	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
+	QMetaObject::invokeMethod(
+		storage.get(),
+		[&storage = storage]() { storage.get()->s_finishedQueueing(); },
+		Qt::AutoConnection
+	);
 	loop.exec();
 
 	abortMode();
@@ -279,7 +290,11 @@ void ODT::calculateVoltages(ODT_MODE mode) {
 void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 
-	QMetaObject::invokeMethod(storage.get(), "startWritingQueues", Qt::AutoConnection);
+	QMetaObject::invokeMethod(
+		storage.get(),
+		[&storage = storage]() { storage.get()->startWritingQueues(); },
+		Qt::AutoConnection
+	);
 
 	// move to ODT configuration
 	(*m_ODTControl)->setPreset(ScanPreset::SCAN_ODT);
@@ -335,14 +350,22 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 				.toString(Qt::ISODateWithMs).toStdString();
 			ODTIMAGE* img = new ODTIMAGE((int)i, rank_data, dims_data, date, *images_);
 
-			QMetaObject::invokeMethod(storage.get(), "s_enqueuePayload", Qt::AutoConnection, Q_ARG(ODTIMAGE*, img));
+			QMetaObject::invokeMethod(
+				storage.get(),
+				[&storage = storage, img]() { storage.get()->s_enqueuePayload(img); },
+				Qt::AutoConnection
+			);
 		}
 	}
 
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
 	auto connection = QWidget::connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
-	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
+	QMetaObject::invokeMethod(
+		storage.get(),
+		[&storage = storage]() { storage.get()->s_finishedQueueing(); },
+		Qt::AutoConnection
+	);
 	loop.exec();
 
 	setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);

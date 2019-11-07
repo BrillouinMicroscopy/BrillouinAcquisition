@@ -140,27 +140,27 @@ void PVCamera::startPreview() {
 	}
 	m_isPreviewRunning = true;
 	m_stopPreview = false;
-	QMetaObject::invokeMethod(this, "preparePreview", Qt::QueuedConnection);
+	QMetaObject::invokeMethod(this, [this]() { preparePreview(); }, Qt::QueuedConnection);
 
 	emit(s_previewRunning(m_isPreviewRunning));
 }
 
 void PVCamera::stopPreview() {
-	QMetaObject::invokeMethod(this, "cleanupPreview", Qt::QueuedConnection);
+	QMetaObject::invokeMethod(this, [this]() { cleanupPreview(); }, Qt::QueuedConnection);
 	m_isPreviewRunning = false;
 	m_stopPreview = false;
 	emit(s_previewRunning(m_isPreviewRunning));
 }
 
 void PVCamera::startAcquisition(CAMERA_SETTINGS settings) {
-	QMetaObject::invokeMethod(this, "prepareAcquisition", Qt::QueuedConnection, Q_ARG(CAMERA_SETTINGS, settings));
+	QMetaObject::invokeMethod(this, [this, settings]() { prepareAcquisition(settings); }, Qt::QueuedConnection);
 
 	m_isAcquisitionRunning = true;
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
 }
 
 void PVCamera::stopAcquisition() {
-	QMetaObject::invokeMethod(this, "cleanupAcquisition", Qt::QueuedConnection);
+	QMetaObject::invokeMethod(this, [this]() { cleanupAcquisition(); }, Qt::QueuedConnection);
 	m_isAcquisitionRunning = false;
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
 }

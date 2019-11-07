@@ -78,7 +78,11 @@ void Fluorescence::setExposure(FLUORESCENCE_MODE mode, int exposure) {
 	// Apply the settings immediately if the mode preview is running
 	if (previewChannel == mode) {
 		m_settings.camera.exposureTime = 1e-3 * channel->exposure;
-		QMetaObject::invokeMethod((*m_camera), "setSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::EXPOSURE), Q_ARG(double, 1e-3 * channel->exposure));
+		QMetaObject::invokeMethod(
+			(*m_camera),
+			[&m_camera = (*m_camera), channel]() { m_camera->setSetting(CAMERA_SETTING::EXPOSURE, 1e-3 * channel->exposure); },
+			Qt::AutoConnection
+		);
 	}
 	emit(s_acqSettingsChanged(m_settings));
 }
@@ -89,7 +93,11 @@ void Fluorescence::setGain(FLUORESCENCE_MODE mode, int gain) {
 	// Apply the settings immediately if the mode preview is running
 	if (previewChannel == mode) {
 		m_settings.camera.gain = channel->gain;
-		QMetaObject::invokeMethod((*m_camera), "setSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::GAIN), Q_ARG(double, channel->gain));
+		QMetaObject::invokeMethod(
+			(*m_camera),
+			[&m_camera = (*m_camera), channel]() { m_camera->setSetting(CAMERA_SETTING::GAIN, channel->gain); },
+			Qt::AutoConnection
+		);
 	}
 	emit(s_acqSettingsChanged(m_settings));
 }
@@ -98,7 +106,11 @@ void Fluorescence::startStopPreview(FLUORESCENCE_MODE mode) {
 	if (mode == previewChannel || mode == FLUORESCENCE_MODE::NONE) {
 		// stop preview
 		previewChannel = FLUORESCENCE_MODE::NONE;
-		QMetaObject::invokeMethod((*m_camera), "stopPreview", Qt::AutoConnection);
+		QMetaObject::invokeMethod(
+			(*m_camera),
+			[&m_camera = (*m_camera)]() { m_camera->stopPreview(); },
+			Qt::AutoConnection
+		);
 	} else {
 		// if preview is already running, stop it first
 		if ((*m_camera)->m_isPreviewRunning) {
@@ -114,7 +126,11 @@ void Fluorescence::startStopPreview(FLUORESCENCE_MODE mode) {
 		m_settings.camera.exposureTime = 1e-3 * channel->exposure;
 		m_settings.camera.gain = channel->gain;
 		(*m_camera)->setSettings(m_settings.camera);
-		QMetaObject::invokeMethod((*m_camera), "startPreview", Qt::AutoConnection);
+		QMetaObject::invokeMethod(
+			(*m_camera),
+			[&m_camera = (*m_camera)]() { m_camera->startPreview(); },
+			Qt::AutoConnection
+		);
 	}
 	emit(s_previewRunning(previewChannel));
 }
@@ -129,7 +145,11 @@ void Fluorescence::abortMode(std::unique_ptr <StorageWrapper>& storage) {
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
 	auto connection = QWidget::connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
-	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
+	QMetaObject::invokeMethod(
+		storage.get(),
+		[&storage = storage]() { storage.get()->s_finishedQueueing(); },
+		Qt::AutoConnection
+	);
 	loop.exec();
 
 	setAcquisitionStatus(ACQUISITION_STATUS::ABORTED);
@@ -217,7 +237,11 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 		}
 	}
 
-	QMetaObject::invokeMethod(storage.get(), "startWritingQueues", Qt::AutoConnection);
+	QMetaObject::invokeMethod(
+		storage.get(),
+		[&storage = storage]() { storage.get()->startWritingQueues(); },
+		Qt::AutoConnection
+	);
 
 	QElapsedTimer measurementTimer;
 	measurementTimer.start();
@@ -293,7 +317,11 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 			.toString(Qt::ISODateWithMs).toStdString();
 		FLUOIMAGE* img = new FLUOIMAGE(imageNumber, rank_data, dims_data, date, channel->name, *images_);
 
-		QMetaObject::invokeMethod(storage.get(), "s_enqueuePayload", Qt::AutoConnection, Q_ARG(FLUOIMAGE*, img));
+		QMetaObject::invokeMethod(
+			storage.get(),
+			[&storage = storage, img]() { storage.get()->s_enqueuePayload(img); },
+			Qt::AutoConnection
+		);
 
 		// configure camera for preview
 		(*m_camera)->stopAcquisition();
@@ -306,7 +334,11 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
 	auto connection = QWidget::connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
-	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
+	QMetaObject::invokeMethod(
+		storage.get(),
+		[&storage = storage]() { storage.get()->s_finishedQueueing(); },
+		Qt::AutoConnection
+	);
 	loop.exec();
 
 	setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
