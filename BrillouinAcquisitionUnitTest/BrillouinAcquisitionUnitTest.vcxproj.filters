@@ -169,6 +169,12 @@
     <Object Include="..\BrillouinAcquisition\x64\Debug\xsample.obj">
       <Filter>Source Files</Filter>
     </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_ODTControl.obj">
+      <Filter>Source Files</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\ODTControl.obj">
+      <Filter>Source Files</Filter>
+    </Object>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

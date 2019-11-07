@@ -77,6 +77,22 @@ POINT3 NIDAQ::getPosition() {
 	return m_position;
 }
 
+VOLTAGE2 NIDAQ::positionToVoltage(POINT2 position) {
+
+	auto Uxr = interpolation::biharmonic_spline_calculate_values(m_calibration.positions_weights.x, position.x, position.y);
+	auto Uyr = interpolation::biharmonic_spline_calculate_values(m_calibration.positions_weights.y, position.x, position.y);
+
+	return VOLTAGE2{ Uxr, Uyr };
+}
+
+POINT2 NIDAQ::voltageToPosition(VOLTAGE2 voltage) {
+
+	auto xr = interpolation::biharmonic_spline_calculate_values(m_calibration.voltages_weights.x, voltage.Ux, voltage.Uy);
+	auto yr = interpolation::biharmonic_spline_calculate_values(m_calibration.voltages_weights.y, voltage.Ux, voltage.Uy);
+
+	return POINT2{ xr, yr };
+}
+
 /*
  * Public slots
  */
@@ -327,22 +343,6 @@ void NIDAQ::centerPosition() {
 	Thorlabs_TIM::TIM_Home(m_serialNo_TIM, m_channelPosZ);
 	// set the scan position
 	applyScanPosition();
-}
-
-VOLTAGE2 NIDAQ::positionToVoltage(POINT2 position) {
-
-	auto Uxr = interpolation::biharmonic_spline_calculate_values(m_calibration.positions_weights.x, position.x, position.y);
-	auto Uyr = interpolation::biharmonic_spline_calculate_values(m_calibration.positions_weights.y, position.x, position.y);
-
-	return VOLTAGE2{ Uxr, Uyr };
-}
-
-POINT2 NIDAQ::voltageToPosition(VOLTAGE2 voltage) {
-
-	auto xr = interpolation::biharmonic_spline_calculate_values(m_calibration.voltages_weights.x, voltage.Ux, voltage.Uy);
-	auto yr = interpolation::biharmonic_spline_calculate_values(m_calibration.voltages_weights.y, voltage.Ux, voltage.Uy);
-
-	return POINT2{ xr, yr };
 }
 
 void NIDAQ::setFilter(FilterMount* device, int position) {

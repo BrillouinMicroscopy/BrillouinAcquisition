@@ -33,6 +33,9 @@ public:
 	void setPosition(POINT3 position) override;
 	POINT3 getPosition() override;
 
+	VOLTAGE2 positionToVoltage(POINT2 position);
+	POINT2 voltageToPosition(VOLTAGE2 position);
+
 public slots:
 	void init() override;
 	void connectDevice() override;
@@ -57,9 +60,6 @@ private:
 
 	void applyScanPosition();
 	void centerPosition();
-
-	VOLTAGE2 positionToVoltage(POINT2 position);
-	POINT2 voltageToPosition(VOLTAGE2 position);
 
 	void setFilter(FilterMount* device, int position);
 	int getFilter(FilterMount* device);

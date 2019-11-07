@@ -159,11 +159,13 @@
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_filtermount.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_h5bm.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_NIDAQ.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_ODTControl.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_scancontrol.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_storageWrapper.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_thread.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_ZeissECU.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\NIDAQ.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\ODTControl.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\qrc_BrillouinAcquisition.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\scancontrol.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\stdafx.obj" />
