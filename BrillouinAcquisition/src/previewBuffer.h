@@ -7,9 +7,9 @@
 #include "Devices\cameraParameters.h"
 
 struct BUFFER_SETTINGS {
-	int bufferNumber = 0;
-	unsigned int bufferSize = 0;
-	std::string bufferType = "unsigned char";
+	int bufferNumber{ 0 };
+	unsigned int bufferSize{ 0 };
+	std::string bufferType{ "unsigned char" };
 	CAMERA_ROI roi;
 	BUFFER_SETTINGS() noexcept {};
 	BUFFER_SETTINGS(int bufferNumber, unsigned int bufferSize, std::string bufferType, CAMERA_ROI roi) : roi(roi), bufferNumber(bufferNumber),

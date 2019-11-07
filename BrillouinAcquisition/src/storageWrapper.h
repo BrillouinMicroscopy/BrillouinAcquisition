@@ -8,8 +8,8 @@ public:
 	StoragePath() {};
 	StoragePath(const std::string filename, const std::string folder) : filename(filename), folder(folder) {};
 
-	std::string filename = "Brillouin.h5";	// filename
-	std::string folder = ".";
+	std::string filename{ "Brillouin.h5" };	// filename
+	std::string folder{ "." };
 
 	std::string fullPath() {
 		return folder + '/' + filename;
@@ -18,12 +18,6 @@ public:
 
 class StorageWrapper : public H5BM {
 	Q_OBJECT
-private:
-	bool m_finished = false;
-	bool m_observeQueues = false;
-	bool m_finishedQueueing = false;
-
-	QTimer *queueTimer = nullptr;
 
 public:
 	StorageWrapper(
@@ -37,7 +31,7 @@ public:
 	QQueue<ODTIMAGE*> m_payloadQueueODT;
 	QQueue<FLUOIMAGE*> m_payloadQueueFluorescence;
 	QQueue<CALIBRATION*> m_calibrationQueue;
-	bool m_abort = false;
+	bool m_abort{ false };
 
 	int m_writtenImagesNr{ 0 };
 	int m_writtenCalibrationsNr{ 0 };
@@ -56,6 +50,13 @@ public slots:
 	void s_enqueueCalibration(CALIBRATION *cal);
 
 	void s_finishedQueueing();
+
+private:
+	bool m_finished{ false };
+	bool m_observeQueues{ false };
+	bool m_finishedQueueing{ false };
+
+	QTimer* queueTimer{ nullptr };
 
 signals:
 	void finished();

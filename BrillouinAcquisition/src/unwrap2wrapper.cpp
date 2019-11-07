@@ -1,8 +1,7 @@
 #include "stdafx.h"
 #include "unwrap2Wrapper.h"
 
-unwrap2Wrapper::unwrap2Wrapper() {
-}
+unwrap2Wrapper::unwrap2Wrapper() {}
 
 unwrap2Wrapper::~unwrap2Wrapper() {
 	if (m_pixel) {
