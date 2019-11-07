@@ -47,12 +47,12 @@ void Camera::getImageForPreview() {
 		if (!m_previewBuffer->m_buffer->m_freeBuffers->tryAcquire()) {
 			Sleep(50);
 
-			QMetaObject::invokeMethod(this, "getImageForPreview", Qt::QueuedConnection);
+			QMetaObject::invokeMethod(this, [this]() { getImageForPreview(); }, Qt::QueuedConnection);
 			return;
 		}
 		acquireImage(m_previewBuffer->m_buffer->getWriteBuffer());
 		m_previewBuffer->m_buffer->m_usedBuffers->release();
 
-		QMetaObject::invokeMethod(this, "getImageForPreview", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(this, [this]() { getImageForPreview(); }, Qt::QueuedConnection);
 	}
 }

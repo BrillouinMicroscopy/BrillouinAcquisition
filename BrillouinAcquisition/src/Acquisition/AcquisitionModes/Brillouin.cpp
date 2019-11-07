@@ -207,14 +207,22 @@ void Brillouin::abortMode(std::unique_ptr <StorageWrapper>& storage) {
 
 	(*m_scanControl)->setPosition(m_startPosition);
 
-	QMetaObject::invokeMethod((*m_scanControl), "startAnnouncing", Qt::AutoConnection);
+	QMetaObject::invokeMethod(
+		(*m_scanControl),
+		[&m_scanControl = (*m_scanControl)]() { m_scanControl->startAnnouncing(); },
+		Qt::AutoConnection
+	);
 
 	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
 
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
 	auto connection = QWidget::connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
-	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
+	QMetaObject::invokeMethod(
+		storage.get(),
+		[&storage = storage]() { storage.get()->s_finishedQueueing(); },
+		Qt::AutoConnection
+	);
 	loop.exec();
 
 	setAcquisitionStatus(ACQUISITION_STATUS::ABORTED);
@@ -266,7 +274,11 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 		date					// the datetime
 	);
 
-	QMetaObject::invokeMethod(storage.get(), "s_enqueueCalibration", Qt::AutoConnection, Q_ARG(CALIBRATION*, cal));
+	QMetaObject::invokeMethod(
+		storage.get(),
+		[&storage = storage, cal]() { storage.get()->s_enqueueCalibration(cal); },
+		Qt::AutoConnection
+	);
 
 	nrCalibrations++;
 
@@ -287,7 +299,11 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	// prepare camera for image acquisition
 	(*m_andor)->startAcquisition(m_settings.camera);
 	m_settings.camera = (*m_andor)->getSettings();
-	QMetaObject::invokeMethod((*m_scanControl), "stopAnnouncing", Qt::AutoConnection);
+	QMetaObject::invokeMethod(
+		(*m_scanControl),
+		[&m_scanControl = (*m_scanControl)]() { m_scanControl->stopAnnouncing(); },
+		Qt::AutoConnection
+	);
 	// set optical elements for brightfield/Brillouin imaging
 	(*m_scanControl)->setPreset(ScanPreset::SCAN_BRILLOUIN);
 	Sleep(500);
@@ -394,7 +410,11 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	delete[] dims;
 
 	// do actual measurement
-	QMetaObject::invokeMethod(storage.get(), "startWritingQueues", Qt::AutoConnection);
+	QMetaObject::invokeMethod(
+		storage.get(),
+		[&storage = storage]() { storage.get()->startWritingQueues(); },
+		Qt::AutoConnection
+	);
 	
 	int rank_data{ 3 };
 	hsize_t dims_data[3] = { (hsize_t)m_settings.camera.frameCount, (hsize_t)m_settings.camera.roi.height, (hsize_t)m_settings.camera.roi.width };
@@ -460,7 +480,11 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 			(*m_scanControl)->setPosition(orderedPositions[ll + 1]);
 		}
 
-		QMetaObject::invokeMethod(storage.get(), "s_enqueuePayload", Qt::AutoConnection, Q_ARG(IMAGE*, img));
+		QMetaObject::invokeMethod(
+			storage.get(),
+			[&storage = storage, img]() { storage.get()->s_enqueuePayload(img); },
+			Qt::AutoConnection
+		);
 
 		double percentage{ 100 * (double)(ll + 1) / nrPositions };
 		int remaining{ (int)(1e-3 * measurementTimer.elapsed() / (ll + 1) * ((int64_t)nrPositions - ll + 1)) };
@@ -478,12 +502,20 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 
 	(*m_scanControl)->setPosition(m_startPosition);
 	emit(s_positionChanged({ 0, 0, 0 }, 0));
-	QMetaObject::invokeMethod((*m_scanControl), "startAnnouncing", Qt::AutoConnection);
+	QMetaObject::invokeMethod(
+		(*m_scanControl),
+		[&m_scanControl = (*m_scanControl)]() { m_scanControl->startAnnouncing(); },
+		Qt::AutoConnection
+	);
 
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
 	auto connection = QWidget::connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
-	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
+	QMetaObject::invokeMethod(
+		storage.get(),
+		[&storage = storage]() { storage.get()->s_finishedQueueing(); },
+		Qt::AutoConnection
+	);
 	loop.exec();
 
 	std::string info = "Acquisition finished.";

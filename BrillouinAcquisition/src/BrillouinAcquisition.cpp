@@ -392,18 +392,30 @@ void BrillouinAcquisition::plotClick(QMouseEvent* event) {
 	POINT2 positionInPix{posX, posY};
 
 	// Set laser focus to this position
-	QMetaObject::invokeMethod(m_scanControl, "setPositionInPix", Qt::QueuedConnection, Q_ARG(POINT2, positionInPix));
+	QMetaObject::invokeMethod(
+		m_scanControl,
+		[&m_scanControl = m_scanControl, positionInPix]() { m_scanControl->setPositionInPix(positionInPix); },
+		Qt::QueuedConnection
+	);
 }
 
 void BrillouinAcquisition::showEvent(QShowEvent* event) {
 	QWidget::showEvent(event);
 
 	// connect microscope automatically
-	QMetaObject::invokeMethod(m_scanControl, "connectDevice", Qt::QueuedConnection);
+	QMetaObject::invokeMethod(
+		m_scanControl,
+		[&m_scanControl = m_scanControl]() { m_scanControl->connectDevice(); },
+		Qt::QueuedConnection
+	);
 }
 
 void BrillouinAcquisition::setElement(DeviceElement element, double position) {
-	QMetaObject::invokeMethod(m_scanControl, "setElement", Qt::QueuedConnection, Q_ARG(DeviceElement, element), Q_ARG(double, position));
+	QMetaObject::invokeMethod(
+		m_scanControl,
+		[&m_scanControl = m_scanControl, element, position]() { m_scanControl->setElement(element, position); },
+		Qt::QueuedConnection
+	);
 }
 
 void BrillouinAcquisition::on_autoscalePlot_stateChanged(int state) {
@@ -419,7 +431,10 @@ void BrillouinAcquisition::on_autoscalePlot_brightfield_stateChanged(int state) 
 }
 
 void BrillouinAcquisition::setPreset(ScanPreset preset) {
-	QMetaObject::invokeMethod(m_scanControl, "setPreset", Qt::QueuedConnection, Q_ARG(ScanPreset, preset));
+	QMetaObject::invokeMethod(
+		m_scanControl,
+		[&m_scanControl = m_scanControl, preset]() { m_scanControl->setPreset(preset); },
+		Qt::QueuedConnection);
 }
 
 void BrillouinAcquisition::cameraOptionsChanged(CAMERA_OPTIONS options) {
@@ -678,21 +693,27 @@ void BrillouinAcquisition::on_alignmentUR_ODT_valueChanged(double voltage) {
 }
 
 void BrillouinAcquisition::on_alignmentNumber_ODT_valueChanged(int number) {
-	QMetaObject::invokeMethod(m_ODT, "setSettings", Qt::AutoConnection,
-		Q_ARG(ODT_MODE, ODT_MODE::ALGN), Q_ARG(ODT_SETTING, ODT_SETTING::NRPOINTS), Q_ARG(double, (double)number));
+	QMetaObject::invokeMethod(
+		m_ODT,
+		[&m_ODT = m_ODT, number]() { m_ODT->setSettings(ODT_MODE::ALGN, ODT_SETTING::NRPOINTS, (double)number); },
+		Qt::AutoConnection
+	);
 }
 
 void BrillouinAcquisition::on_alignmentRate_ODT_valueChanged(double rate) {
-	QMetaObject::invokeMethod(m_ODT, "setSettings", Qt::AutoConnection,
-		Q_ARG(ODT_MODE, ODT_MODE::ALGN), Q_ARG(ODT_SETTING, ODT_SETTING::SCANRATE), Q_ARG(double, rate));
+	QMetaObject::invokeMethod(
+		m_ODT,
+		[&m_ODT = m_ODT, rate]() { m_ODT->setSettings(ODT_MODE::ALGN, ODT_SETTING::SCANRATE, rate); },
+		Qt::AutoConnection
+	);
 }
 
 void BrillouinAcquisition::on_alignmentStartODT_clicked() {
-	QMetaObject::invokeMethod(m_ODT, "startAlignment", Qt::AutoConnection);
+	QMetaObject::invokeMethod(m_ODT, [&m_ODT = m_ODT]() { m_ODT->startAlignment(); }, Qt::AutoConnection);
 }
 
 void BrillouinAcquisition::on_alignmentCenterODT_clicked() {
-	QMetaObject::invokeMethod(m_ODT, "centerAlignment", Qt::AutoConnection);
+	QMetaObject::invokeMethod(m_ODT, [&m_ODT = m_ODT]() { m_ODT->centerAlignment(); }, Qt::AutoConnection);
 }
 
 void BrillouinAcquisition::on_acquisitionUR_ODT_valueChanged(double voltage) {
@@ -709,26 +730,42 @@ void BrillouinAcquisition::on_acquisitionRate_ODT_valueChanged(double rate) {
 
 void BrillouinAcquisition::on_acquisitionStartODT_clicked() {
 	if (m_ODT->getStatus() < ACQUISITION_STATUS::STARTED) {
-		QMetaObject::invokeMethod(m_ODT, "startRepetitions", Qt::AutoConnection);
+		QMetaObject::invokeMethod(m_ODT, [&m_ODT = m_ODT]() { m_ODT->startRepetitions(); }, Qt::AutoConnection);
 	} else {
 		m_ODT->m_abort = true;
 	}
 }
 
 void BrillouinAcquisition::on_exposureTimeODT_valueChanged(double exposureTime) {
-	QMetaObject::invokeMethod(m_brightfieldCamera, "setSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::EXPOSURE), Q_ARG(double, exposureTime));
+	QMetaObject::invokeMethod(
+		m_brightfieldCamera,
+		[&m_brightfieldCamera = m_brightfieldCamera, exposureTime]() { m_brightfieldCamera->setSetting(CAMERA_SETTING::EXPOSURE, exposureTime); },
+		Qt::AutoConnection
+	);
 }
 
 void BrillouinAcquisition::on_gainODT_valueChanged(double gain) {
-	QMetaObject::invokeMethod(m_brightfieldCamera, "setSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::GAIN), Q_ARG(double, gain));
+	QMetaObject::invokeMethod(
+		m_brightfieldCamera,
+		[&m_brightfieldCamera = m_brightfieldCamera, gain]() { m_brightfieldCamera->setSetting(CAMERA_SETTING::GAIN, gain); },
+		Qt::AutoConnection
+	);
 }
 
 void BrillouinAcquisition::on_exposureTimeCameraODT_valueChanged(double exposureTime) {
-	QMetaObject::invokeMethod(m_ODT, "setCameraSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::EXPOSURE), Q_ARG(double, exposureTime));
+	QMetaObject::invokeMethod(
+		m_ODT,
+		[&m_ODT = m_ODT, exposureTime]() { m_ODT->setCameraSetting(CAMERA_SETTING::EXPOSURE, exposureTime); },
+		Qt::AutoConnection
+	);
 }
 
 void BrillouinAcquisition::on_gainCameraODT_valueChanged(double gain) {
-	QMetaObject::invokeMethod(m_ODT, "setCameraSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::GAIN), Q_ARG(double, gain));
+	QMetaObject::invokeMethod(
+		m_ODT,
+		[&m_ODT = m_ODT, gain]() { m_ODT->setCameraSetting(CAMERA_SETTING::GAIN, gain); },
+		Qt::AutoConnection
+	);
 }
 
 void BrillouinAcquisition::on_camera_displayMode_currentIndexChanged(const QString & text) {
@@ -749,13 +786,21 @@ void BrillouinAcquisition::on_camera_displayMode_currentIndexChanged(const QStri
 }
 
 void BrillouinAcquisition::on_setBackground_clicked() {
-	QMetaObject::invokeMethod(m_converter, "updateBackground", Qt::AutoConnection);
+	QMetaObject::invokeMethod(
+		m_converter,
+		[&m_converter = m_converter]() { m_converter->updateBackground(); },
+		Qt::AutoConnection
+	);
 }
 
 void BrillouinAcquisition::on_acquisitionStartFluorescence_clicked() {
 	if (m_Fluorescence->getStatus() < ACQUISITION_STATUS::STARTED) {
 		startBrightfieldPreview(true);
-		QMetaObject::invokeMethod(m_Fluorescence, "startRepetitions", Qt::AutoConnection);
+		QMetaObject::invokeMethod(
+			m_Fluorescence,
+			[&m_Fluorescence = m_Fluorescence]() { m_Fluorescence->startRepetitions(); },
+			Qt::AutoConnection
+		);
 	} else {
 		m_Fluorescence->m_abort = true;
 	}
@@ -764,7 +809,11 @@ void BrillouinAcquisition::on_acquisitionStartFluorescence_clicked() {
 void BrillouinAcquisition::on_fluoBlueStart_clicked() {
 	if (m_Fluorescence->getStatus() < ACQUISITION_STATUS::STARTED) {
 		startBrightfieldPreview(true);
-		QMetaObject::invokeMethod(m_Fluorescence, "startRepetitions", Qt::AutoConnection, Q_ARG(std::vector<FLUORESCENCE_MODE>, { FLUORESCENCE_MODE::BLUE }));
+		QMetaObject::invokeMethod(
+			m_Fluorescence,
+			[&m_Fluorescence = m_Fluorescence]() { m_Fluorescence->startRepetitions({ FLUORESCENCE_MODE::BLUE }); },
+			Qt::AutoConnection
+		);
 	}
 	else {
 		m_Fluorescence->m_abort = true;
@@ -774,7 +823,11 @@ void BrillouinAcquisition::on_fluoBlueStart_clicked() {
 void BrillouinAcquisition::on_fluoGreenStart_clicked() {
 	if (m_Fluorescence->getStatus() < ACQUISITION_STATUS::STARTED) {
 		startBrightfieldPreview(true);
-		QMetaObject::invokeMethod(m_Fluorescence, "startRepetitions", Qt::AutoConnection, Q_ARG(std::vector<FLUORESCENCE_MODE>, { FLUORESCENCE_MODE::GREEN }));
+		QMetaObject::invokeMethod(
+			m_Fluorescence,
+			[&m_Fluorescence = m_Fluorescence]() { m_Fluorescence->startRepetitions({ FLUORESCENCE_MODE::GREEN }); },
+			Qt::AutoConnection
+		);
 	}
 	else {
 		m_Fluorescence->m_abort = true;
@@ -784,7 +837,11 @@ void BrillouinAcquisition::on_fluoGreenStart_clicked() {
 void BrillouinAcquisition::on_fluoRedStart_clicked() {
 	if (m_Fluorescence->getStatus() < ACQUISITION_STATUS::STARTED) {
 		startBrightfieldPreview(true);
-		QMetaObject::invokeMethod(m_Fluorescence, "startRepetitions", Qt::AutoConnection, Q_ARG(std::vector<FLUORESCENCE_MODE>, { FLUORESCENCE_MODE::RED }));
+		QMetaObject::invokeMethod(
+			m_Fluorescence,
+			[&m_Fluorescence = m_Fluorescence]() { m_Fluorescence->startRepetitions({ FLUORESCENCE_MODE::RED }); },
+			Qt::AutoConnection
+		);
 	}
 	else {
 		m_Fluorescence->m_abort = true;
@@ -794,7 +851,11 @@ void BrillouinAcquisition::on_fluoRedStart_clicked() {
 void BrillouinAcquisition::on_fluoBrightfieldStart_clicked() {
 	if (m_Fluorescence->getStatus() < ACQUISITION_STATUS::STARTED) {
 		startBrightfieldPreview(true);
-		QMetaObject::invokeMethod(m_Fluorescence, "startRepetitions", Qt::AutoConnection, Q_ARG(std::vector<FLUORESCENCE_MODE>, { FLUORESCENCE_MODE::BRIGHTFIELD }));
+		QMetaObject::invokeMethod(
+			m_Fluorescence,
+			[&m_Fluorescence = m_Fluorescence]() { m_Fluorescence->startRepetitions({ FLUORESCENCE_MODE::BRIGHTFIELD }); },
+			Qt::AutoConnection
+		);
 	}
 	else {
 		m_Fluorescence->m_abort = true;
@@ -802,19 +863,35 @@ void BrillouinAcquisition::on_fluoBrightfieldStart_clicked() {
 }
 
 void BrillouinAcquisition::on_fluoBluePreview_clicked() {
-	QMetaObject::invokeMethod(m_Fluorescence, "startStopPreview", Qt::AutoConnection, Q_ARG(FLUORESCENCE_MODE, FLUORESCENCE_MODE::BLUE));
+	QMetaObject::invokeMethod(
+		m_Fluorescence,
+		[&m_Fluorescence = m_Fluorescence]() { m_Fluorescence->startStopPreview({ FLUORESCENCE_MODE::BLUE }); },
+		Qt::AutoConnection
+	);
 }
 
 void BrillouinAcquisition::on_fluoGreenPreview_clicked() {
-	QMetaObject::invokeMethod(m_Fluorescence, "startStopPreview", Qt::AutoConnection, Q_ARG(FLUORESCENCE_MODE, FLUORESCENCE_MODE::GREEN));
+	QMetaObject::invokeMethod(
+		m_Fluorescence,
+		[&m_Fluorescence = m_Fluorescence]() { m_Fluorescence->startStopPreview({ FLUORESCENCE_MODE::GREEN }); },
+		Qt::AutoConnection
+	);
 }
 
 void BrillouinAcquisition::on_fluoRedPreview_clicked() {
-	QMetaObject::invokeMethod(m_Fluorescence, "startStopPreview", Qt::AutoConnection, Q_ARG(FLUORESCENCE_MODE, FLUORESCENCE_MODE::RED));
+	QMetaObject::invokeMethod(
+		m_Fluorescence,
+		[&m_Fluorescence = m_Fluorescence]() { m_Fluorescence->startStopPreview({ FLUORESCENCE_MODE::RED }); },
+		Qt::AutoConnection
+	);
 }
 
 void BrillouinAcquisition::on_fluoBrightfieldPreview_clicked() {
-	QMetaObject::invokeMethod(m_Fluorescence, "startStopPreview", Qt::AutoConnection, Q_ARG(FLUORESCENCE_MODE, FLUORESCENCE_MODE::BRIGHTFIELD));
+	QMetaObject::invokeMethod(
+		m_Fluorescence,
+		[&m_Fluorescence = m_Fluorescence]() { m_Fluorescence->startStopPreview({ FLUORESCENCE_MODE::BRIGHTFIELD }); },
+		Qt::AutoConnection
+	);
 }
 
 void BrillouinAcquisition::on_fluoBlueCheckbox_stateChanged(int enabled) {
@@ -1580,7 +1657,7 @@ void BrillouinAcquisition::updateImageBrillouin() {
 	if (m_previewRunning) {
 		updateImage(m_andor->m_previewBuffer, &m_BrillouinPlot);
 
-		QMetaObject::invokeMethod(this, "updateImageBrillouin", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(this, [this]() { updateImageBrillouin(); }, Qt::QueuedConnection);
 	}
 }
 
@@ -1588,7 +1665,7 @@ void BrillouinAcquisition::updateImageODT() {
 	if (m_brightfieldPreviewRunning) {
 		updateImage(m_brightfieldCamera->m_previewBuffer, &m_ODTPlot);
 
-		QMetaObject::invokeMethod(this, "updateImageODT", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(this, [this]() { updateImageODT(); }, Qt::QueuedConnection);
 	}
 }
 
@@ -1603,16 +1680,22 @@ void BrillouinAcquisition::updateImage(PreviewBuffer<T>* previewBuffer, PLOT_SET
 
 		if (previewBuffer->m_bufferSettings.bufferType == "unsigned short") {
 			auto unpackedBuffer = reinterpret_cast<unsigned short*>(previewBuffer->m_buffer->getReadBuffer());
-			QMetaObject::invokeMethod(m_converter, "convert", Qt::QueuedConnection,
-				Q_ARG(PreviewBuffer<unsigned char>*, previewBuffer),
-				Q_ARG(PLOT_SETTINGS*, plotSettings),
-				Q_ARG(unsigned short*, unpackedBuffer));
+			QMetaObject::invokeMethod(
+				m_converter,
+				[&m_converter = m_converter, previewBuffer, plotSettings, unpackedBuffer]() {
+					m_converter->convert(previewBuffer, plotSettings, unpackedBuffer);
+				},
+				Qt::QueuedConnection
+			);
 		} else if (previewBuffer->m_bufferSettings.bufferType == "unsigned char") {
 			auto unpackedBuffer = previewBuffer->m_buffer->getReadBuffer();
-			QMetaObject::invokeMethod(m_converter, "convert", Qt::QueuedConnection,
-				Q_ARG(PreviewBuffer<unsigned char>*, previewBuffer),
-				Q_ARG(PLOT_SETTINGS*, plotSettings),
-				Q_ARG(unsigned char*, unpackedBuffer));
+			QMetaObject::invokeMethod(
+				m_converter,
+				[&m_converter = m_converter, previewBuffer, plotSettings, unpackedBuffer]() {
+					m_converter->convert(previewBuffer, plotSettings, unpackedBuffer);
+				},
+				Qt::QueuedConnection
+			);
 		}
 	}
 }
@@ -1656,9 +1739,17 @@ void BrillouinAcquisition::plotting(PreviewBuffer<unsigned char>* previewBuffer,
 
 void BrillouinAcquisition::on_actionConnect_Camera_triggered() {
 	if (m_andor->getConnectionStatus()) {
-		QMetaObject::invokeMethod(m_andor, "disconnectDevice", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(
+			m_andor,
+			[&m_andor = m_andor]() { m_andor->disconnectDevice(); },
+			Qt::QueuedConnection
+		);
 	} else {
-		QMetaObject::invokeMethod(m_andor, "connectDevice", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(
+			m_andor,
+			[&m_andor = m_andor]() { m_andor->connectDevice(); },
+			Qt::QueuedConnection
+		);
 	}
 }
 
@@ -1670,7 +1761,11 @@ void BrillouinAcquisition::cameraConnectionChanged(bool isConnected) {
 		ui->camera_playPause->setEnabled(true);
 		ui->camera_singleShot->setEnabled(true);
 		// switch on cooling automatically
-		QMetaObject::invokeMethod(m_andor, "setSensorCooling", Qt::QueuedConnection, Q_ARG(bool, true));
+		QMetaObject::invokeMethod(
+			m_andor,
+			[&m_andor = m_andor]() { m_andor->setSensorCooling(true); },
+			Qt::QueuedConnection
+		);
 	} else {
 		ui->actionConnect_Camera->setText("Connect Camera");
 		ui->actionEnable_Cooling->setText("Enable Cooling");
@@ -1688,9 +1783,17 @@ void BrillouinAcquisition::showNoCameraFound() {
 void BrillouinAcquisition::on_actionEnable_Cooling_triggered() {
 	if (m_andor->getConnectionStatus()) {
 		if (m_andor->getSensorCooling()) {
-			QMetaObject::invokeMethod(m_andor, "setSensorCooling", Qt::QueuedConnection, Q_ARG(bool, false));
+			QMetaObject::invokeMethod(
+				m_andor,
+				[&m_andor = m_andor]() { m_andor->setSensorCooling(false); },
+				Qt::QueuedConnection
+			);
 		} else {
-			QMetaObject::invokeMethod(m_andor, "setSensorCooling", Qt::QueuedConnection, Q_ARG(bool, true));
+			QMetaObject::invokeMethod(
+				m_andor,
+				[&m_andor = m_andor]() { m_andor->setSensorCooling(true); },
+				Qt::QueuedConnection
+			);
 		}
 	}
 }
@@ -1707,9 +1810,17 @@ void BrillouinAcquisition::cameraCoolingChanged(bool isCooling) {
 
 void BrillouinAcquisition::on_actionConnect_Stage_triggered() {
 	if (m_scanControl->getConnectionStatus()) {
-		QMetaObject::invokeMethod(m_scanControl, "disconnectDevice", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(
+			m_scanControl,
+			[&m_scanControl = m_scanControl]() { m_scanControl->disconnectDevice(); },
+			Qt::QueuedConnection
+		);
 	} else {
-		QMetaObject::invokeMethod(m_scanControl, "connectDevice", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(
+			m_scanControl,
+			[&m_scanControl = m_scanControl]() { m_scanControl->connectDevice(); },
+			Qt::QueuedConnection
+		);
 	}
 }
 
@@ -1727,9 +1838,17 @@ void BrillouinAcquisition::microscopeConnectionChanged(bool isConnected) {
 
 void BrillouinAcquisition::on_actionConnect_Brightfield_camera_triggered() {
 	if (m_brightfieldCamera->getConnectionStatus()) {
-		QMetaObject::invokeMethod(m_brightfieldCamera, "disconnectDevice", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(
+			m_brightfieldCamera,
+			[&m_brightfieldCamera = m_brightfieldCamera]() { m_brightfieldCamera->disconnectDevice(); },
+			Qt::QueuedConnection
+		);
 	} else {
-		QMetaObject::invokeMethod(m_brightfieldCamera, "connectDevice", Qt::QueuedConnection);
+		QMetaObject::invokeMethod(
+			m_brightfieldCamera,
+			[&m_brightfieldCamera = m_brightfieldCamera]() { m_brightfieldCamera->connectDevice(); },
+			Qt::QueuedConnection
+		);
 	}
 }
 
@@ -1749,7 +1868,11 @@ void BrillouinAcquisition::brightfieldCameraConnectionChanged(bool isConnected) 
 
 void BrillouinAcquisition::on_camera_playPause_brightfield_clicked() {
 	if (!m_brightfieldCamera->m_isPreviewRunning) {
-		QMetaObject::invokeMethod(m_brightfieldCamera, "startPreview", Qt::AutoConnection);
+		QMetaObject::invokeMethod(
+			m_brightfieldCamera,
+			[&m_brightfieldCamera = m_brightfieldCamera]() { m_brightfieldCamera->startPreview(); },
+			Qt::QueuedConnection
+		);
 	} else {
 		m_brightfieldCamera->m_stopPreview = true;
 		m_Fluorescence->startStopPreview(FLUORESCENCE_MODE::NONE);
@@ -2249,7 +2372,7 @@ void BrillouinAcquisition::initScanControl() {
 
 	m_acquisitionThread.startWorker(m_scanControl);
 
-	QMetaObject::invokeMethod(m_scanControl, "connectDevice", Qt::AutoConnection);
+	QMetaObject::invokeMethod(m_scanControl, [&m_scanControl = m_scanControl]() { m_scanControl->connectDevice(); }, Qt::AutoConnection);
 }
 
 void BrillouinAcquisition::initODT() {
@@ -2499,7 +2622,7 @@ void BrillouinAcquisition::initCameraBrillouin() {
 	// start andor thread
 	m_andorThread.startWorker(m_andor);
 
-	QMetaObject::invokeMethod(m_andor, "connectDevice", Qt::AutoConnection);
+	QMetaObject::invokeMethod(m_andor, [&m_andor = m_andor]() { m_andor->connectDevice(); }, Qt::AutoConnection);
 }
 
 void BrillouinAcquisition::initCamera() {
@@ -2585,7 +2708,11 @@ void BrillouinAcquisition::initCamera() {
 
 	m_brightfieldCameraThread.startWorker(m_brightfieldCamera);
 
-	QMetaObject::invokeMethod(m_brightfieldCamera, "connectDevice", Qt::AutoConnection);
+	QMetaObject::invokeMethod(
+		m_brightfieldCamera,
+		[&m_brightfieldCamera = m_brightfieldCamera]() { m_brightfieldCamera->connectDevice(); },
+		Qt::AutoConnection
+	);
 }
 
 void BrillouinAcquisition::microscopeElementPositionsChanged(std::vector<double> positions) {
@@ -2685,7 +2812,7 @@ void BrillouinAcquisition::on_actionAbout_triggered() {
 void BrillouinAcquisition::on_camera_playPause_clicked() {
 	if (!m_andor->m_isPreviewRunning) {
 		m_andor->setSettings(m_BrillouinSettings.camera);
-		QMetaObject::invokeMethod(m_andor, "startPreview", Qt::AutoConnection);
+		QMetaObject::invokeMethod(m_andor, [&m_andor = m_andor]() { m_andor->startPreview(); }, Qt::AutoConnection);
 	} else {
 		m_andor->m_stopPreview = true;
 	}
@@ -2699,7 +2826,7 @@ void BrillouinAcquisition::on_BrillouinStart_clicked() {
 		// set camera ROI
 		m_BrillouinSettings.camera.roi = m_deviceSettings.camera.roi;
 		m_Brillouin->setSettings(m_BrillouinSettings);
-		QMetaObject::invokeMethod(m_Brillouin, "startRepetitions", Qt::AutoConnection);
+		QMetaObject::invokeMethod(m_Brillouin, [&m_Brillouin = m_Brillouin]() { m_Brillouin->startRepetitions(); }, Qt::AutoConnection);
 	} else {
 		m_Brillouin->m_abort = true;
 	}
@@ -2718,19 +2845,19 @@ void BrillouinAcquisition::updateCalibration(SpatialCalibration calibration) {
 }
 
 void BrillouinAcquisition::on_microscopeWidth_valueChanged(int width) {
-	QMetaObject::invokeMethod(m_Calibration, "setWidth", Qt::AutoConnection, Q_ARG(int, width));
+	QMetaObject::invokeMethod(m_Calibration, [&m_Calibration = m_Calibration, width]() { m_Calibration->setWidth(width); }, Qt::AutoConnection);
 }
 
 void BrillouinAcquisition::on_microscopeHeight_valueChanged(int height) {
-	QMetaObject::invokeMethod(m_Calibration, "setHeight", Qt::AutoConnection, Q_ARG(int, height));
+	QMetaObject::invokeMethod(m_Calibration, [&m_Calibration = m_Calibration, height]() { m_Calibration->setHeight(height); }, Qt::AutoConnection);
 }
 
 void BrillouinAcquisition::on_microscopeMag_valueChanged(double mag) {
-	QMetaObject::invokeMethod(m_Calibration, "setMagnification", Qt::AutoConnection, Q_ARG(double, mag));
+	QMetaObject::invokeMethod(m_Calibration, [&m_Calibration = m_Calibration, mag]() { m_Calibration->setMagnification(mag); }, Qt::AutoConnection);
 }
 
 void BrillouinAcquisition::on_microscopePixSize_valueChanged(double pixSize) {
-	QMetaObject::invokeMethod(m_Calibration, "setPixelSize", Qt::AutoConnection, Q_ARG(double, pixSize));
+	QMetaObject::invokeMethod(m_Calibration, [&m_Calibration = m_Calibration, pixSize]() { m_Calibration->setPixelSize(pixSize); }, Qt::AutoConnection);
 }
 
 void BrillouinAcquisition::updateBrillouinSettings() {
@@ -2857,34 +2984,58 @@ void BrillouinAcquisition::showRepProgress(int repNumber, int timeToNext) {
 }
 
 void BrillouinAcquisition::on_savePosition_clicked() {
-	QMetaObject::invokeMethod(m_scanControl, "savePosition", Qt::AutoConnection);
+	QMetaObject::invokeMethod(
+		m_scanControl,
+		[&m_scanControl = m_scanControl]() { m_scanControl->savePosition(); },
+		Qt::AutoConnection
+	);
 }
 
 void BrillouinAcquisition::on_setHome_clicked() {
-	QMetaObject::invokeMethod(m_scanControl, "setHome", Qt::AutoConnection);
+	QMetaObject::invokeMethod(
+		m_scanControl,
+		[&m_scanControl = m_scanControl]() { m_scanControl->setHome(); },
+		Qt::AutoConnection
+	);
 }
 
 void BrillouinAcquisition::on_moveHome_clicked() {
 	if (m_enabledModes == ACQUISITION_MODE::NONE) {
-		QMetaObject::invokeMethod(m_scanControl, "moveHome", Qt::AutoConnection);
+		QMetaObject::invokeMethod(
+			m_scanControl,
+			[&m_scanControl = m_scanControl]() { m_scanControl->moveHome(); },
+			Qt::AutoConnection
+		);
 	}
 }
 
 void BrillouinAcquisition::on_setPositionX_valueChanged(double positionX) {
 	if (m_enabledModes == ACQUISITION_MODE::NONE) {
-		QMetaObject::invokeMethod(m_scanControl, "setPositionRelativeX", Qt::AutoConnection, Q_ARG(double, positionX));
+		QMetaObject::invokeMethod(
+			m_scanControl,
+			[&m_scanControl = m_scanControl, positionX]() { m_scanControl->setPositionRelativeX(positionX); },
+			Qt::AutoConnection
+		);
 	}
 }
 
 void BrillouinAcquisition::on_setPositionY_valueChanged(double positionY) {
 	if (m_enabledModes == ACQUISITION_MODE::NONE) {
-		QMetaObject::invokeMethod(m_scanControl, "setPositionRelativeY", Qt::AutoConnection, Q_ARG(double, positionY));
+		QMetaObject::invokeMethod(
+			m_scanControl,
+			[&m_scanControl = m_scanControl, positionY]() { m_scanControl->setPositionRelativeY(positionY); },
+			Qt::AutoConnection
+		);
 	}
 }
 
 void BrillouinAcquisition::on_setPositionZ_valueChanged(double positionZ) {
 	if (m_enabledModes == ACQUISITION_MODE::NONE) {
-		QMetaObject::invokeMethod(m_scanControl, "setPositionRelativeZ", Qt::AutoConnection, Q_ARG(double, positionZ));
+		QMetaObject::invokeMethod(
+			m_scanControl,
+			[&m_scanControl = m_scanControl, positionZ]() { m_scanControl->setPositionRelativeZ(positionZ); },
+			Qt::AutoConnection
+		);
 	}
 }
 
@@ -3010,7 +3161,11 @@ void BrillouinAcquisition::on_actionNew_Acquisition_triggered() {
 
 	m_storagePath = splitFilePath(fullPath);
 
-	QMetaObject::invokeMethod(m_acquisition, "newFile", Qt::AutoConnection, Q_ARG(StoragePath, m_storagePath));
+	QMetaObject::invokeMethod(
+		m_acquisition,
+		[&m_acquisition = m_acquisition, &m_storagePath = m_storagePath]() { m_acquisition->newFile(m_storagePath); },
+		Qt::AutoConnection
+	);
 }
 
 void BrillouinAcquisition::on_actionOpen_Acquisition_triggered() {
@@ -3023,7 +3178,11 @@ void BrillouinAcquisition::on_actionOpen_Acquisition_triggered() {
 
 	m_storagePath = splitFilePath(fullPath);
 
-	QMetaObject::invokeMethod(m_acquisition, "openFile", Qt::AutoConnection, Q_ARG(StoragePath, m_storagePath));
+	QMetaObject::invokeMethod(
+		m_acquisition,
+		[&m_acquisition = m_acquisition, &m_storagePath = m_storagePath]() { m_acquisition->openFile(m_storagePath); },
+		Qt::AutoConnection
+	);
 }
 
 void BrillouinAcquisition::on_actionClose_Acquisition_triggered() {
