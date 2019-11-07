@@ -24,18 +24,23 @@ class AcquisitionMode : public QObject {
 public:
 	AcquisitionMode(QObject *parent, Acquisition *acquisition);
 	~AcquisitionMode();
-	bool m_abort = false;
+
+	bool m_abort{ false };
 
 public slots:
-	void init() {};
 	virtual void startRepetitions() = 0;
+
+	virtual void init() {};
+
 	ACQUISITION_STATUS getStatus();
 
 protected:
-	Acquisition *m_acquisition = nullptr;
 	virtual void abortMode(std::unique_ptr <StorageWrapper> & storage) = 0;
-	ACQUISITION_STATUS m_status{ ACQUISITION_STATUS::DISABLED };
+
 	void setAcquisitionStatus(ACQUISITION_STATUS);
+
+	ACQUISITION_STATUS m_status{ ACQUISITION_STATUS::DISABLED };
+	Acquisition* m_acquisition{ nullptr };
 
 private slots:
 	virtual void acquire(std::unique_ptr <StorageWrapper> & storage) = 0;

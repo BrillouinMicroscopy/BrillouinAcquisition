@@ -6,21 +6,19 @@
 
 using namespace std::filesystem;
 
+/*
+ * Public definitions
+ */
 
 Brillouin::Brillouin(QObject* parent, Acquisition* acquisition, Camera** andor, ScanControl** scanControl)
 	: AcquisitionMode(parent, acquisition), m_andor(andor), m_scanControl(scanControl) {
 }
 
-Brillouin::~Brillouin() {
-}
+Brillouin::~Brillouin() {}
 
-void Brillouin::setSettings(BRILLOUIN_SETTINGS settings) {
-	m_settings = settings;
-}
-
-void Brillouin::getScanOrder() {
-	determineScanOrder();
-}
+/*
+ * Public slots
+ */
 
 void Brillouin::startRepetitions() {
 	bool allowed = m_acquisition->enableMode(ACQUISITION_MODE::BRILLOUIN);
@@ -50,15 +48,6 @@ void Brillouin::startRepetitions() {
 	m_repetitionTimer->start(100);
 }
 
-void Brillouin::finaliseRepetitions() {
-	finaliseRepetitions(m_settings.repetitions.count, -1);
-}
-
-void Brillouin::finaliseRepetitions(int nrFinishedRepetitions, int status) {
-	emit(s_totalProgress(nrFinishedRepetitions, status));
-	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
-}
-
 void Brillouin::waitForNextRepetition() {
 
 	if (m_abort) {
@@ -67,13 +56,13 @@ void Brillouin::waitForNextRepetition() {
 	}
 
 	// Check if we have to start a new repetition or wait more
-	int timeSinceLast = m_startOfLastRepetition.elapsed() * 1e-3;
+	int timeSinceLast{ (int)(1e-3 * m_startOfLastRepetition.elapsed()) };
 	if (m_currentRepetition == 0 || timeSinceLast >= m_settings.repetitions.interval * 60) {
 		m_startOfLastRepetition.restart();
 		m_repetitionTimer->stop();
 		emit(s_totalProgress(m_currentRepetition, -1));
 		m_acquisition->newRepetition(ACQUISITION_MODE::BRILLOUIN);
-		
+
 		setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 		acquire(m_acquisition->m_storage);
 		m_currentRepetition++;
@@ -88,10 +77,18 @@ void Brillouin::waitForNextRepetition() {
 			setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
 		}
 	} else {
-		timeSinceLast = m_startOfLastRepetition.elapsed() * 1e-3;
+		timeSinceLast = 1e-3 * m_startOfLastRepetition.elapsed();
 		emit(s_totalProgress(m_currentRepetition, m_settings.repetitions.interval * 60 - timeSinceLast));
 	}
+}
 
+void Brillouin::finaliseRepetitions() {
+	finaliseRepetitions(m_settings.repetitions.count, -1);
+}
+
+void Brillouin::finaliseRepetitions(int nrFinishedRepetitions, int status) {
+	emit(s_totalProgress(nrFinishedRepetitions, status));
+	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
 }
 
 void Brillouin::setStepNumberX(int steps) {
@@ -108,6 +105,182 @@ void Brillouin::setStepNumberZ(int steps) {
 	m_settings.zSteps = steps;
 	determineScanOrder();
 }
+
+void Brillouin::setSettings(BRILLOUIN_SETTINGS settings) {
+	m_settings = settings;
+}
+
+/*
+ *	Scan direction order related variables and functions
+ */
+
+void Brillouin::setScanOrderX(int x) {
+	if (m_scanOrder.automatical) {
+		emit(s_scanOrderChanged(m_scanOrder));
+		return;
+	}
+	// switch values
+	if (m_scanOrder.y == x) {
+		m_scanOrder.y = m_scanOrder.x;
+	}
+	if (m_scanOrder.z == x) {
+		m_scanOrder.z = m_scanOrder.x;
+	}
+	m_scanOrder.x = x;
+	emit(s_scanOrderChanged(m_scanOrder));
+}
+
+void Brillouin::setScanOrderY(int y) {
+	if (m_scanOrder.automatical) {
+		emit(s_scanOrderChanged(m_scanOrder));
+		return;
+	}
+	// switch values
+	if (m_scanOrder.x == y) {
+		m_scanOrder.x = m_scanOrder.y;
+	}
+	if (m_scanOrder.z == y) {
+		m_scanOrder.z = m_scanOrder.y;
+	}
+	m_scanOrder.y = y;
+	emit(s_scanOrderChanged(m_scanOrder));
+}
+
+void Brillouin::setScanOrderZ(int z) {
+	if (m_scanOrder.automatical) {
+		emit(s_scanOrderChanged(m_scanOrder));
+		return;
+	}
+	// switch values
+	if (m_scanOrder.x == z) {
+		m_scanOrder.x = m_scanOrder.z;
+	}
+	if (m_scanOrder.y == z) {
+		m_scanOrder.y = m_scanOrder.z;
+	}
+	m_scanOrder.z = z;
+	emit(s_scanOrderChanged(m_scanOrder));
+}
+
+int Brillouin::getScanOrderX() { return m_scanOrder.x; }
+int Brillouin::getScanOrderY() { return m_scanOrder.y; }
+int Brillouin::getScanOrderZ() { return m_scanOrder.z; }
+
+void Brillouin::setScanOrderAuto(bool automatical) {
+	m_scanOrder.automatical = automatical;
+	determineScanOrder();
+}
+
+void Brillouin::determineScanOrder() {
+	if (m_scanOrder.automatical) {
+		// determine scan order based on step numbers
+		// highest step number first, then descending
+		std::vector<int> stepNumbers{ m_settings.xSteps, m_settings.ySteps, m_settings.zSteps };
+		auto indices = simplemath::tag_sort_inverse(stepNumbers);
+		std::vector<int> order(stepNumbers.size());
+		for (int jj{ 0 }; jj < order.size(); jj++) {
+			order[indices[jj]] = jj;
+		}
+
+		m_scanOrder.x = order[0];
+		m_scanOrder.y = order[1];
+		m_scanOrder.z = order[2];
+	}
+	emit(s_scanOrderChanged(m_scanOrder));
+}
+
+void Brillouin::getScanOrder() {
+	determineScanOrder();
+}
+
+/*
+ * Private definitions
+ */
+
+void Brillouin::abortMode(std::unique_ptr <StorageWrapper>& storage) {
+	m_repetitionTimer->stop();
+	m_startOfLastRepetition.invalidate();
+
+	(*m_andor)->stopAcquisition();
+
+	(*m_scanControl)->setPreset(ScanPreset::SCAN_LASEROFF);
+
+	(*m_scanControl)->setPosition(m_startPosition);
+
+	QMetaObject::invokeMethod((*m_scanControl), "startAnnouncing", Qt::AutoConnection);
+
+	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
+
+	// Here we wait until the storage object indicate it finished to write to the file.
+	QEventLoop loop;
+	auto connection = QWidget::connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
+	loop.exec();
+
+	setAcquisitionStatus(ACQUISITION_STATUS::ABORTED);
+	emit(s_positionChanged({ 0 , 0, 0 }, 0));
+	emit(s_timeToCalibration(0));
+}
+
+void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
+	// announce calibration start
+	emit(s_calibrationRunning(true));
+
+	// set exposure time for calibration
+	(*m_andor)->setCalibrationExposureTime(m_settings.calibrationExposureTime);
+
+	// move optical elements to position for calibration
+	(*m_scanControl)->setPreset(ScanPreset::SCAN_CALIBRATION);
+	Sleep(500);
+
+	double shift = 5.088; // this is the shift for water
+
+	// acquire images
+	int rank_cal = 3;
+	hsize_t dims_cal[3] = { (hsize_t)m_settings.nrCalibrationImages, (hsize_t)m_settings.camera.roi.height, (hsize_t)m_settings.camera.roi.width };
+
+	int bytesPerFrame = 2 * m_settings.camera.roi.width * m_settings.camera.roi.height;
+	std::vector<unsigned char> images((int64_t)bytesPerFrame * m_settings.nrCalibrationImages);
+	for (gsl::index mm = 0; mm < m_settings.nrCalibrationImages; mm++) {
+		if (m_abort) {
+			this->abortMode(storage);
+			return;
+		}
+		// acquire images
+		int64_t pointerPos = (int64_t)bytesPerFrame * mm;
+		(*m_andor)->getImageForAcquisition(&images[pointerPos]);
+	}
+	// cast the vector to unsigned short
+	std::vector<unsigned short>* images_ = (std::vector<unsigned short>*) & images;
+
+	// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
+	std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
+		.toString(Qt::ISODateWithMs).toStdString();
+	CALIBRATION* cal = new CALIBRATION(
+		nrCalibrations,			// index
+		*images_,				// data
+		rank_cal,				// the rank of the calibration data
+		dims_cal,				// the dimension of the calibration data
+		m_settings.sample,		// the samplename
+		shift,					// the Brillouin shift of the sample
+		date					// the datetime
+	);
+
+	QMetaObject::invokeMethod(storage.get(), "s_enqueueCalibration", Qt::AutoConnection, Q_ARG(CALIBRATION*, cal));
+
+	nrCalibrations++;
+
+	// revert optical elements to position for brightfield/Brillouin imaging
+	(*m_scanControl)->setPreset(ScanPreset::SCAN_BRILLOUIN);
+
+	// reset exposure time
+	(*m_andor)->setCalibrationExposureTime(m_settings.camera.exposureTime);
+	Sleep(500);
+}
+
+/*
+ * Private slots
+ */
 
 void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
@@ -209,7 +382,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 		}
 	}
 
-	int rank = 3;
+	int rank{ 3 };
 	hsize_t* dims = new hsize_t[rank];
 	dims[0] = m_settings.zSteps;
 	dims[1] = m_settings.xSteps;
@@ -223,9 +396,9 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	// do actual measurement
 	QMetaObject::invokeMethod(storage.get(), "startWritingQueues", Qt::AutoConnection);
 	
-	int rank_data = 3;
+	int rank_data{ 3 };
 	hsize_t dims_data[3] = { (hsize_t)m_settings.camera.frameCount, (hsize_t)m_settings.camera.roi.height, (hsize_t)m_settings.camera.roi.width };
-	int bytesPerFrame = 2 * m_settings.camera.roi.width * m_settings.camera.roi.height;
+	long long bytesPerFrame{ 2 * m_settings.camera.roi.width * m_settings.camera.roi.height };
 
 	// reset number of calibrations
 	nrCalibrations = 1;
@@ -244,7 +417,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	(*m_scanControl)->setPosition(orderedPositions[0]);
 	Sleep(50);
 
-	for (gsl::index ll = 0; ll < nrPositions; ll++) {
+	for (gsl::index ll{ 0 }; ll < nrPositions; ll++) {
 
 		// do live calibration if required and possible at the moment
 		if (m_settings.conCalibration && calibrationAllowed[ll]) {
@@ -262,7 +435,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 
 		std::vector<unsigned char> images(bytesPerFrame * m_settings.camera.frameCount);
 
-		for (gsl::index mm = 0; mm < m_settings.camera.frameCount; mm++) {
+		for (gsl::index mm{ 0 }; mm < m_settings.camera.frameCount; mm++) {
 			if (m_abort) {
 				this->abortMode(storage);
 				return;
@@ -289,8 +462,8 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 
 		QMetaObject::invokeMethod(storage.get(), "s_enqueuePayload", Qt::AutoConnection, Q_ARG(IMAGE*, img));
 
-		double percentage = 100 * (double)(ll+1) / nrPositions;
-		int remaining = 1e-3 * measurementTimer.elapsed() / (ll+1) * ((int64_t)nrPositions - ll + 1);
+		double percentage{ 100 * (double)(ll + 1) / nrPositions };
+		int remaining{ (int)(1e-3 * measurementTimer.elapsed() / (ll + 1) * ((int64_t)nrPositions - ll + 1)) };
 		emit(s_repetitionProgress(percentage, remaining));
 	}
 	// do post calibration
@@ -318,163 +491,4 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	emit(s_calibrationRunning(false));
 	setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
 	emit(s_timeToCalibration(0));
-}
-
-void Brillouin::abortMode(std::unique_ptr <StorageWrapper>& storage) {
-	m_repetitionTimer->stop();
-	m_startOfLastRepetition.invalidate();
-
-	(*m_andor)->stopAcquisition();
-
-	(*m_scanControl)->setPreset(ScanPreset::SCAN_LASEROFF);
-
-	(*m_scanControl)->setPosition(m_startPosition);
-
-	QMetaObject::invokeMethod((*m_scanControl), "startAnnouncing", Qt::AutoConnection);
-
-	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
-
-	// Here we wait until the storage object indicate it finished to write to the file.
-	QEventLoop loop;
-	auto connection = QWidget::connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
-	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
-	loop.exec();
-
-	setAcquisitionStatus(ACQUISITION_STATUS::ABORTED);
-	emit(s_positionChanged({0 , 0, 0}, 0));
-	emit(s_timeToCalibration(0));
-}
-
-void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
-	// announce calibration start
-	emit(s_calibrationRunning(true));
-
-	// set exposure time for calibration
-	(*m_andor)->setCalibrationExposureTime(m_settings.calibrationExposureTime);
-
-	// move optical elements to position for calibration
-	(*m_scanControl)->setPreset(ScanPreset::SCAN_CALIBRATION);
-	Sleep(500);
-
-	double shift = 5.088; // this is the shift for water
-
-	// acquire images
-	int rank_cal = 3;
-	hsize_t dims_cal[3] = { (hsize_t)m_settings.nrCalibrationImages, (hsize_t)m_settings.camera.roi.height, (hsize_t)m_settings.camera.roi.width };
-
-	int bytesPerFrame = 2 * m_settings.camera.roi.width * m_settings.camera.roi.height;
-	std::vector<unsigned char> images((int64_t)bytesPerFrame * m_settings.nrCalibrationImages);
-	for (gsl::index mm = 0; mm < m_settings.nrCalibrationImages; mm++) {
-		if (m_abort) {
-			this->abortMode(storage);
-			return;
-		}
-		// acquire images
-		int64_t pointerPos = (int64_t)bytesPerFrame * mm;
-		(*m_andor)->getImageForAcquisition(&images[pointerPos]);
-	}
-	// cast the vector to unsigned short
-	std::vector<unsigned short>* images_ = (std::vector<unsigned short>*) &images;
-
-	// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
-	std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
-		.toString(Qt::ISODateWithMs).toStdString();
-	CALIBRATION* cal = new CALIBRATION(
-		nrCalibrations,			// index
-		*images_,				// data
-		rank_cal,				// the rank of the calibration data
-		dims_cal,				// the dimension of the calibration data
-		m_settings.sample,		// the samplename
-		shift,					// the Brillouin shift of the sample
-		date					// the datetime
-	);
-
-	QMetaObject::invokeMethod(storage.get(), "s_enqueueCalibration", Qt::AutoConnection, Q_ARG(CALIBRATION*, cal));
-
-	nrCalibrations++;
-
-	// revert optical elements to position for brightfield/Brillouin imaging
-	(*m_scanControl)->setPreset(ScanPreset::SCAN_BRILLOUIN);
-
-	// reset exposure time
-	(*m_andor)->setCalibrationExposureTime(m_settings.camera.exposureTime);
-	Sleep(500);
-}
-
-/*
- *	Scan direction order related variables and functions
- */
-int Brillouin::getScanOrderX() { return m_scanOrder.x; }
-int Brillouin::getScanOrderY() { return m_scanOrder.y; }
-int Brillouin::getScanOrderZ() { return m_scanOrder.z; }
-
-void Brillouin::setScanOrderX(int x) {
-	if (m_scanOrder.automatical) {
-		emit(s_scanOrderChanged(m_scanOrder));
-		return;
-	}
-	// switch values
-	if (m_scanOrder.y == x) {
-		m_scanOrder.y = m_scanOrder.x;
-	}
-	if (m_scanOrder.z == x) {
-		m_scanOrder.z = m_scanOrder.x;
-	}
-	m_scanOrder.x = x;
-	emit(s_scanOrderChanged(m_scanOrder));
-}
-
-void Brillouin::setScanOrderY(int y) {
-	if (m_scanOrder.automatical) {
-		emit(s_scanOrderChanged(m_scanOrder));
-		return;
-	}
-	// switch values
-	if (m_scanOrder.x == y) {
-		m_scanOrder.x = m_scanOrder.y;
-	}
-	if (m_scanOrder.z == y) {
-		m_scanOrder.z = m_scanOrder.y;
-	}
-	m_scanOrder.y = y;
-	emit(s_scanOrderChanged(m_scanOrder));
-}
-
-void Brillouin::setScanOrderZ(int z) {
-	if (m_scanOrder.automatical) {
-		emit(s_scanOrderChanged(m_scanOrder));
-		return;
-	}
-	// switch values
-	if (m_scanOrder.x == z) {
-		m_scanOrder.x = m_scanOrder.z;
-	}
-	if (m_scanOrder.y == z) {
-		m_scanOrder.y = m_scanOrder.z;
-	}
-	m_scanOrder.z = z;
-	emit(s_scanOrderChanged(m_scanOrder));
-}
-
-void Brillouin::setScanOrderAuto(bool automatical) {
-	m_scanOrder.automatical = automatical;
-	determineScanOrder();
-}
-
-void Brillouin::determineScanOrder() {
-	if (m_scanOrder.automatical) {
-		// determine scan order based on step numbers
-		// highest step number first, then descending
-		std::vector<int> stepNumbers{ m_settings.xSteps, m_settings.ySteps, m_settings.zSteps };
-		auto indices = simplemath::tag_sort_inverse(stepNumbers);
-		std::vector<int> order(stepNumbers.size());
-		for (int jj{ 0 }; jj < order.size(); jj++) {
-			order[indices[jj]] = jj;
-		}
-
-		m_scanOrder.x = order[0];
-		m_scanOrder.y = order[1];
-		m_scanOrder.z = order[2];
-	}
-	emit(s_scanOrderChanged(m_scanOrder));
 }

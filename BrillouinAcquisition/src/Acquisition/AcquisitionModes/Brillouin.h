@@ -17,27 +17,27 @@ struct SCAN_ORDER {
 
 struct BRILLOUIN_SETTINGS {
 	// calibration parameters
-	std::string sample = "Methanol & Water";
-	bool preCalibration = true;				// do pre calibration
-	bool postCalibration = true;			// do post calibration
-	bool conCalibration = true;				// do continuous calibration
-	double conCalibrationInterval = 10;		// interval of continuous calibrations
-	int nrCalibrationImages = 10;				// number of calibration images
-	double calibrationExposureTime = 1;		// exposure time for calibration images
+	std::string sample{ "Methanol & Water" };
+	bool preCalibration{ true };				// do pre calibration
+	bool postCalibration{ true };				// do post calibration
+	bool conCalibration{ true };				// do continuous calibration
+	double conCalibrationInterval{ 10 };		// interval of continuous calibrations
+	int nrCalibrationImages{ 10 };				// number of calibration images
+	double calibrationExposureTime{ 1 };		// exposure time for calibration images
 
 	// repetition parameters
 	REPETITIONS repetitions;
 
 	// ROI parameters
-	double xMin = 0;	// [µm]	x minimum value
-	double xMax = 10;	// [µm]	x maximum value
-	int xSteps = 3;		// [1]	x steps
-	double yMin = 0;	// [µm]	y minimum value
-	double yMax = 10;	// [µm]	y maximum value
-	int ySteps = 3;		// [1]	y steps
-	double zMin = 0;	// [µm]	z minimum value
-	double zMax = 0;	// [µm]	z maximum value
-	int zSteps = 1;		// [1]	z steps
+	double xMin{ 0 };	// [µm]	x minimum value
+	double xMax{ 10 };	// [µm]	x maximum value
+	int xSteps{ 3 };	// [1]	x steps
+	double yMin{ 0 };	// [µm]	y minimum value
+	double yMax{ 10 };	// [µm]	y maximum value
+	int ySteps{ 3 };	// [1]	y steps
+	double zMin{ 0 };	// [µm]	z minimum value
+	double zMax{ 0 };	// [µm]	z maximum value
+	int zSteps{ 1 };	// [1]	z steps
 
 	CAMERA_SETTINGS camera;
 };
@@ -50,8 +50,7 @@ public:
 	~Brillouin();
 
 public slots:
-	void init() {};
-	void startRepetitions();
+	void startRepetitions() override;
 
 	void waitForNextRepetition();
 	void finaliseRepetitions();
@@ -67,13 +66,13 @@ public slots:
 	 *	Scan direction order related variables and functions
 	 */
 
-	int getScanOrderX();
-	int getScanOrderY();
-	int getScanOrderZ();
-
 	void setScanOrderX(int x);
 	void setScanOrderY(int y);
 	void setScanOrderZ(int z);
+
+	int getScanOrderX();
+	int getScanOrderY();
+	int getScanOrderZ();
 
 	void setScanOrderAuto(bool automatical);
 
@@ -82,21 +81,22 @@ public slots:
 	void getScanOrder();
 
 private:
+	void abortMode(std::unique_ptr <StorageWrapper>& storage) override;
+
+	void calibrate(std::unique_ptr <StorageWrapper>& storage);
+
 	BRILLOUIN_SETTINGS m_settings;
 	SCAN_ORDER m_scanOrder;
 	Camera** m_andor;
 	ScanControl** m_scanControl;
-	bool m_running = false;				// is acquisition currently running
+	bool m_running{ false };				// is acquisition currently running
 	POINT3 m_startPosition{ 0, 0, 0 };
 
-	QTimer *m_repetitionTimer = nullptr;
+	QTimer* m_repetitionTimer{ nullptr };
 	QElapsedTimer m_startOfLastRepetition;
 	int m_currentRepetition{ 0 };
 
-	int nrCalibrations = 1;
-	void calibrate(std::unique_ptr <StorageWrapper>& storage);
-
-	void abortMode(std::unique_ptr <StorageWrapper>& storage) override;
+	int nrCalibrations{ 1 };
 
 private slots:
 	void acquire(std::unique_ptr <StorageWrapper>& storage) override;

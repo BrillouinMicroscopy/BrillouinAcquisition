@@ -4,30 +4,19 @@
 #include "../../Devices/CalibrationHelper.h"
 #include "../../simplemath.h"
 
+/*
+ * Public definitions
+ */
+
 Calibration::Calibration(QObject* parent, Acquisition* acquisition, Camera** camera, ODTControl** ODTControl)
 	: AcquisitionMode(parent, acquisition), m_camera(camera), m_ODTControl(ODTControl) {
 }
 
 Calibration::~Calibration() {}
 
-void Calibration::setCameraSetting(CAMERA_SETTING type, double value) {
-	switch (type) {
-		case CAMERA_SETTING::EXPOSURE:
-			m_cameraSettings.exposureTime = value;
-			break;
-		case CAMERA_SETTING::GAIN:
-			m_cameraSettings.gain = value;
-			break;
-	}
-
-	emit(s_cameraSettingsChanged(m_cameraSettings));
-}
-
-void Calibration::init() {}
-
-void Calibration::initialize() {
-	emit(calibrationChanged(m_calibration));
-}
+/*
+ * Public slots
+ */
 
 void Calibration::startRepetitions() {
 	bool allowed = m_acquisition->enableMode(ACQUISITION_MODE::SPATIALCALIBRATION);
@@ -60,6 +49,211 @@ void Calibration::startRepetitions() {
 
 	m_acquisition->disableMode(ACQUISITION_MODE::SPATIALCALIBRATION);
 }
+
+void Calibration::initialize() {
+	emit(calibrationChanged(m_calibration));
+}
+
+void Calibration::setCameraSetting(CAMERA_SETTING type, double value) {
+	switch (type) {
+		case CAMERA_SETTING::EXPOSURE:
+			m_cameraSettings.exposureTime = value;
+			break;
+		case CAMERA_SETTING::GAIN:
+			m_cameraSettings.gain = value;
+			break;
+	}
+
+	emit(s_cameraSettingsChanged(m_cameraSettings));
+}
+
+void Calibration::load(std::string filepath) {
+
+	using namespace std::filesystem;
+
+	if (exists(filepath)) {
+		H5::H5File file(&filepath[0], H5F_ACC_RDONLY);
+
+		// read date
+		H5::Group root = file.openGroup("/");
+		H5::Attribute attr = root.openAttribute("date");
+		H5::DataType type = attr.getDataType();
+		hsize_t dateLength = attr.getStorageSize();
+		char* buf = new char[dateLength + 1];
+		attr.read(type, buf);
+		m_calibration.date.assign(buf, dateLength);
+		delete[] buf;
+		buf = nullptr;
+
+		// Read calibration maps
+		m_calibration.positions.x = readCalibrationMap(file, "/maps/positions/x");
+		m_calibration.positions.y = readCalibrationMap(file, "/maps/positions/y");
+		m_calibration.voltages.Ux = readCalibrationMap(file, "/maps/voltages/Ux");
+		m_calibration.voltages.Uy = readCalibrationMap(file, "/maps/voltages/Uy");
+
+		m_calibration.microscopeProperties.width = readCalibrationValue(file, "/camera/width");
+		m_calibration.microscopeProperties.height = readCalibrationValue(file, "/camera/height");
+		m_calibration.microscopeProperties.pixelSize = readCalibrationValue(file, "/camera/pixelSize");
+		m_calibration.microscopeProperties.mag = readCalibrationValue(file, "/camera/magnification");
+
+
+		m_calibration.valid = true;
+	}
+
+	CalibrationHelper::calculateCalibrationBounds(&m_calibration);
+	CalibrationHelper::calculateCalibrationWeights(&m_calibration);
+
+	(*m_ODTControl)->setSpatialCalibration(m_calibration);
+
+	emit(calibrationChanged(m_calibration));
+}
+
+void Calibration::setWidth(int width) {
+	m_calibration.microscopeProperties.width = width;
+	m_calibration.valid = false;
+}
+
+void Calibration::setHeight(int height) {
+	m_calibration.microscopeProperties.height = height;
+	m_calibration.valid = false;
+}
+
+void Calibration::setMagnification(double mag) {
+	m_calibration.microscopeProperties.mag = mag;
+	m_calibration.valid = false;
+}
+
+void Calibration::setPixelSize(double pixelSize) {
+	m_calibration.microscopeProperties.pixelSize = pixelSize;
+	m_calibration.valid = false;
+}
+
+/*
+ * Private definitions
+ */
+
+void Calibration::abortMode(std::unique_ptr <StorageWrapper>& storage) {}
+
+void Calibration::abortMode() {
+	m_acquisition->disableMode(ACQUISITION_MODE::SPATIALCALIBRATION);
+	setAcquisitionStatus(ACQUISITION_STATUS::ABORTED);
+}
+
+double Calibration::readCalibrationValue(H5::H5File file, std::string datasetName) {
+	using namespace H5;
+	double value{ 0 };
+
+	DataSet dataset = file.openDataSet(datasetName.c_str());
+	DataSpace filespace = dataset.getSpace();
+	int rank = filespace.getSimpleExtentNdims();
+	hsize_t dims[2];
+	rank = filespace.getSimpleExtentDims(dims);
+	DataSpace memspace(1, dims);
+	dataset.read(&value, PredType::NATIVE_DOUBLE, memspace, filespace);
+
+	return value;
+}
+
+void Calibration::writeCalibrationValue(H5::Group group, const H5std_string datasetName, double value) {
+	using namespace H5;
+
+	hsize_t dims[2];
+	dims[0] = 1;
+	dims[1] = 1;
+
+	DataSpace dataspace = DataSpace(2, dims);
+	DataSet dataset = group.createDataSet(&datasetName[0], PredType::NATIVE_DOUBLE, dataspace);
+
+	dataset.write(&value, PredType::NATIVE_DOUBLE);
+}
+
+std::vector<double> Calibration::readCalibrationMap(H5::H5File file, std::string datasetName) {
+	using namespace H5;
+	std::vector<double> map;
+
+	DataSet dataset = file.openDataSet(datasetName.c_str());
+	DataSpace filespace = dataset.getSpace();
+	int rank = filespace.getSimpleExtentNdims();
+	hsize_t dims[2];
+	rank = filespace.getSimpleExtentDims(dims);
+	DataSpace memspace(2, dims);
+	map.resize(dims[0] * dims[1]);
+	dataset.read(&map[0], PredType::NATIVE_DOUBLE, memspace, filespace);
+
+	return map;
+}
+
+void Calibration::writeCalibrationMap(H5::Group group, std::string datasetName, std::vector<double> map) {
+	using namespace H5;
+
+	hsize_t dims[2];
+	dims[0] = 1;
+	dims[1] = map.size();
+
+	DataSpace dataspace = DataSpace(2, dims);
+	DataSet dataset = group.createDataSet(&datasetName[0], PredType::NATIVE_DOUBLE, dataspace);
+
+	dataset.write(&map[0], PredType::NATIVE_DOUBLE);
+
+}
+
+void Calibration::save() {
+
+	if (m_calibration.positions.x.size() == 0) {
+		return;
+	}
+
+	std::string folder = m_acquisition->getCurrentFolder();
+
+	std::string fulldate = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
+		.toString(Qt::ISODateWithMs).toStdString();
+
+	std::string shortdate = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
+		.toString("yyyy-MM-ddTHHmmss").toStdString();
+	QDateTime dt1 = QDateTime::currentDateTime();
+	QDateTime dt2 = dt1.toUTC();
+	dt1.setTimeSpec(Qt::UTC);
+
+	int offset = dt2.secsTo(dt1) / 3600;
+
+	std::string offse = QString("+%1").arg(offset, 2, 10, QChar('0')).toStdString();
+
+	std::string filepath{ folder + "/_positionCalibration_" };
+	filepath += shortdate + offse + ".h5";
+
+
+	H5::H5File file(&filepath[0], H5F_ACC_TRUNC);
+
+	// write date
+	// Create the data space for the attribute.
+	H5::DataSpace attr_dataspace = H5::DataSpace(H5S_SCALAR);
+	// Create new string datatype for attribute
+	H5::StrType strdatatype(H5::PredType::C_S1, fulldate.size());
+	H5::Group root = file.openGroup("/");
+	H5::Attribute attr = root.createAttribute("date", strdatatype, attr_dataspace);
+	H5::DataType type = attr.getDataType();
+	attr.write(strdatatype, &fulldate[0]);
+
+	H5::Group group_camera(file.createGroup("/camera"));
+	writeCalibrationValue(group_camera, "width", m_calibration.microscopeProperties.width);
+	writeCalibrationValue(group_camera, "height", m_calibration.microscopeProperties.height);
+	writeCalibrationValue(group_camera, "pixelSize", m_calibration.microscopeProperties.pixelSize);
+	writeCalibrationValue(group_camera, "magnification", m_calibration.microscopeProperties.mag);
+
+	H5::Group maps(file.createGroup("/maps"));
+
+	H5::Group group_positions(maps.createGroup("positions"));
+	writeCalibrationMap(group_positions, "x", m_calibration.positions.x);
+	writeCalibrationMap(group_positions, "y", m_calibration.positions.y);
+
+	H5::Group group_voltages(maps.createGroup("voltages"));
+	writeCalibrationMap(group_voltages, "Ux", m_calibration.voltages.Ux);
+	writeCalibrationMap(group_voltages, "Uy", m_calibration.voltages.Uy);
+}
+
+/*
+ * Private slots
+ */
 
 void Calibration::acquire(std::unique_ptr <StorageWrapper> & storage) {}
 
@@ -186,184 +380,4 @@ void Calibration::acquire() {
 	emit(calibrationChanged(m_calibration));
 
 	setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
-}
-
-void Calibration::abortMode(std::unique_ptr <StorageWrapper> & storage) {}
-
-void Calibration::load(std::string filepath) {
-
-	using namespace std::filesystem;
-
-	if (exists(filepath)) {
-		H5::H5File file(&filepath[0], H5F_ACC_RDONLY);
-
-		// read date
-		H5::Group root = file.openGroup("/");
-		H5::Attribute attr = root.openAttribute("date");
-		H5::DataType type = attr.getDataType();
-		hsize_t dateLength = attr.getStorageSize();
-		char *buf = new char[dateLength + 1];
-		attr.read(type, buf);
-		m_calibration.date.assign(buf, dateLength);
-		delete[] buf;
-		buf = nullptr;
-
-		// Read calibration maps
-		m_calibration.positions.x = readCalibrationMap(file, "/maps/positions/x");
-		m_calibration.positions.y = readCalibrationMap(file, "/maps/positions/y");
-		m_calibration.voltages.Ux = readCalibrationMap(file, "/maps/voltages/Ux");
-		m_calibration.voltages.Uy = readCalibrationMap(file, "/maps/voltages/Uy");
-
-		m_calibration.microscopeProperties.width = readCalibrationValue(file, "/camera/width");
-		m_calibration.microscopeProperties.height = readCalibrationValue(file, "/camera/height");
-		m_calibration.microscopeProperties.pixelSize = readCalibrationValue(file, "/camera/pixelSize");
-		m_calibration.microscopeProperties.mag = readCalibrationValue(file, "/camera/magnification");
-
-
-		m_calibration.valid = true;
-	}
-
-	CalibrationHelper::calculateCalibrationBounds(&m_calibration);
-	CalibrationHelper::calculateCalibrationWeights(&m_calibration);
-
-	(*m_ODTControl)->setSpatialCalibration(m_calibration);
-
-	emit(calibrationChanged(m_calibration));
-}
-
-double Calibration::readCalibrationValue(H5::H5File file, std::string datasetName) {
-	using namespace H5;
-	double value{ 0 };
-
-	DataSet dataset = file.openDataSet(datasetName.c_str());
-	DataSpace filespace = dataset.getSpace();
-	int rank = filespace.getSimpleExtentNdims();
-	hsize_t dims[2];
-	rank = filespace.getSimpleExtentDims(dims);
-	DataSpace memspace(1, dims);
-	dataset.read(&value, PredType::NATIVE_DOUBLE, memspace, filespace);
-
-	return value;
-}
-
-void Calibration::writeCalibrationValue(H5::Group group, const H5std_string datasetName, double value) {
-	using namespace H5;
-
-	hsize_t dims[2];
-	dims[0] = 1;
-	dims[1] = 1;
-
-	DataSpace dataspace = DataSpace(2, dims);
-	DataSet dataset = group.createDataSet(&datasetName[0], PredType::NATIVE_DOUBLE, dataspace);
-	
-	dataset.write(&value, PredType::NATIVE_DOUBLE);
-}
-
-std::vector<double> Calibration::readCalibrationMap(H5::H5File file, std::string datasetName) {
-	using namespace H5;
-	std::vector<double> map;
-
-	DataSet dataset = file.openDataSet(datasetName.c_str());
-	DataSpace filespace = dataset.getSpace();
-	int rank = filespace.getSimpleExtentNdims();
-	hsize_t dims[2];
-	rank = filespace.getSimpleExtentDims(dims);
-	DataSpace memspace(2, dims);
-	map.resize(dims[0] * dims[1]);
-	dataset.read(&map[0], PredType::NATIVE_DOUBLE, memspace, filespace);
-
-	return map;
-}
-
-void Calibration::writeCalibrationMap(H5::Group group, std::string datasetName, std::vector<double> map) {
-	using namespace H5;
-
-	hsize_t dims[2];
-	dims[0] = 1;
-	dims[1] = map.size();
-
-	DataSpace dataspace = DataSpace(2, dims);
-	DataSet dataset = group.createDataSet(&datasetName[0], PredType::NATIVE_DOUBLE, dataspace);
-
-	dataset.write(&map[0], PredType::NATIVE_DOUBLE);
-
-}
-
-void Calibration::save() {
-
-	if (m_calibration.positions.x.size() == 0) {
-		return;
-	}
-
-	std::string folder = m_acquisition->getCurrentFolder();
-	
-	std::string fulldate = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
-		.toString(Qt::ISODateWithMs).toStdString();
-
-	std::string shortdate = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
-		.toString("yyyy-MM-ddTHHmmss").toStdString();
-	QDateTime dt1 = QDateTime::currentDateTime();
-	QDateTime dt2 = dt1.toUTC();
-	dt1.setTimeSpec(Qt::UTC);
-
-	int offset = dt2.secsTo(dt1) / 3600;
-
-	std::string offse = QString("+%1").arg(offset, 2, 10, QChar('0')).toStdString();
-
-	std::string filepath{ folder + "/_positionCalibration_" };
-	filepath += shortdate + offse + ".h5";
-
-
-	H5::H5File file(&filepath[0], H5F_ACC_TRUNC);
-
-	// write date
-	// Create the data space for the attribute.
-	H5::DataSpace attr_dataspace = H5::DataSpace(H5S_SCALAR);
-	// Create new string datatype for attribute
-	H5::StrType strdatatype(H5::PredType::C_S1, fulldate.size());
-	H5::Group root = file.openGroup("/");
-	H5::Attribute attr = root.createAttribute("date", strdatatype, attr_dataspace);
-	H5::DataType type = attr.getDataType();
-	attr.write(strdatatype, &fulldate[0]);
-
-	H5::Group group_camera(file.createGroup("/camera"));
-	writeCalibrationValue(group_camera, "width", m_calibration.microscopeProperties.width);
-	writeCalibrationValue(group_camera, "height", m_calibration.microscopeProperties.height);
-	writeCalibrationValue(group_camera, "pixelSize", m_calibration.microscopeProperties.pixelSize);
-	writeCalibrationValue(group_camera, "magnification", m_calibration.microscopeProperties.mag);
-
-	H5::Group maps(file.createGroup("/maps"));
-
-	H5::Group group_positions(maps.createGroup("positions"));
-	writeCalibrationMap(group_positions, "x", m_calibration.positions.x);
-	writeCalibrationMap(group_positions, "y", m_calibration.positions.y);
-
-	H5::Group group_voltages(maps.createGroup("voltages"));
-	writeCalibrationMap(group_voltages, "Ux", m_calibration.voltages.Ux);
-	writeCalibrationMap(group_voltages, "Uy", m_calibration.voltages.Uy);
-}
-
-void Calibration::abortMode() {
-	m_acquisition->disableMode(ACQUISITION_MODE::SPATIALCALIBRATION);
-	setAcquisitionStatus(ACQUISITION_STATUS::ABORTED);
-}
-
-void Calibration::setWidth(int width) {
-	m_calibration.microscopeProperties.width = width;
-	m_calibration.valid = false;
-}
-
-void Calibration::setHeight(int height) {
-	m_calibration.microscopeProperties.height = height;
-	m_calibration.valid = false;
-}
-
-void Calibration::setMagnification(double mag) {
-	m_calibration.microscopeProperties.mag = mag;
-	m_calibration.valid = false;
-}
-
-void Calibration::setPixelSize(double pixelSize) {
-	m_calibration.microscopeProperties.pixelSize = pixelSize;
-	m_calibration.valid = false;
 }

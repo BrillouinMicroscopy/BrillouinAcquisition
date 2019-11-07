@@ -1,15 +1,138 @@
 #include "stdafx.h"
 #include "Fluorescence.h"
 
+/*
+ * Public definitions
+ */
+
 Fluorescence::Fluorescence(QObject* parent, Acquisition* acquisition, Camera** camera, ScanControl** scanControl)
 	: AcquisitionMode(parent, acquisition), m_camera(camera), m_scanControl(scanControl) {}
 
 Fluorescence::~Fluorescence() {
 }
 
+/*
+ * Public slots
+ */
+
+void Fluorescence::startRepetitions() {
+	startRepetitions({});
+}
+
+void Fluorescence::startRepetitions(std::vector<FLUORESCENCE_MODE> modes) {
+	std::vector<ChannelSettings*> channels;
+	// If the provided mode vector is empty, acquire the enabled channels.
+	if (!modes.size()) {
+		channels = getEnabledChannels();
+		// If no channels are enabled, return.
+		if (!channels.size()) {
+			return;
+		}
+		// Else, find the channel settings for the given modes.
+	}
+	else {
+		for (auto const& mode : modes) {
+			auto channel = getChannelSettings(mode);
+			channels.push_back(channel);
+		}
+	}
+
+	bool allowed = m_acquisition->enableMode(ACQUISITION_MODE::FLUORESCENCE);
+	if (!allowed) {
+		return;
+	}
+
+	// stop preview if necessary
+	if (previewChannel != FLUORESCENCE_MODE::NONE) {
+		previewChannel = FLUORESCENCE_MODE::NONE;
+		(*m_camera)->stopPreview();
+	}
+
+	// reset abort flag
+	m_abort = false;
+
+	configureCamera();
+
+	m_acquisition->newRepetition(ACQUISITION_MODE::FLUORESCENCE);
+
+	// start repetition
+	acquire(m_acquisition->m_storage, channels);
+
+	m_acquisition->disableMode(ACQUISITION_MODE::FLUORESCENCE);
+}
+
 void Fluorescence::initialize() {
 	m_settings.camera.gain = 10;
 	emit(s_acqSettingsChanged(m_settings));
+}
+
+void Fluorescence::setChannel(FLUORESCENCE_MODE mode, bool enabled) {
+	ChannelSettings* channel = getChannelSettings(mode);
+	channel->enabled = enabled;
+	emit(s_acqSettingsChanged(m_settings));
+}
+
+void Fluorescence::setExposure(FLUORESCENCE_MODE mode, int exposure) {
+	ChannelSettings* channel = getChannelSettings(mode);
+	channel->exposure = exposure;
+	// Apply the settings immediately if the mode preview is running
+	if (previewChannel == mode) {
+		m_settings.camera.exposureTime = 1e-3 * channel->exposure;
+		QMetaObject::invokeMethod((*m_camera), "setSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::EXPOSURE), Q_ARG(double, 1e-3 * channel->exposure));
+	}
+	emit(s_acqSettingsChanged(m_settings));
+}
+
+void Fluorescence::setGain(FLUORESCENCE_MODE mode, int gain) {
+	ChannelSettings* channel = getChannelSettings(mode);
+	channel->gain = gain;
+	// Apply the settings immediately if the mode preview is running
+	if (previewChannel == mode) {
+		m_settings.camera.gain = channel->gain;
+		QMetaObject::invokeMethod((*m_camera), "setSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::GAIN), Q_ARG(double, channel->gain));
+	}
+	emit(s_acqSettingsChanged(m_settings));
+}
+
+void Fluorescence::startStopPreview(FLUORESCENCE_MODE mode) {
+	if (mode == previewChannel || mode == FLUORESCENCE_MODE::NONE) {
+		// stop preview
+		previewChannel = FLUORESCENCE_MODE::NONE;
+		QMetaObject::invokeMethod((*m_camera), "stopPreview", Qt::AutoConnection);
+	} else {
+		// if preview is already running, stop it first
+		if ((*m_camera)->m_isPreviewRunning) {
+			(*m_camera)->stopPreview();
+		}
+		previewChannel = mode;
+		ChannelSettings* channel = getChannelSettings(mode);
+
+		// move to Fluorescence configuration
+		(*m_scanControl)->setPreset(channel->preset);
+
+		// start image acquisition
+		m_settings.camera.exposureTime = 1e-3 * channel->exposure;
+		m_settings.camera.gain = channel->gain;
+		(*m_camera)->setSettings(m_settings.camera);
+		QMetaObject::invokeMethod((*m_camera), "startPreview", Qt::AutoConnection);
+	}
+	emit(s_previewRunning(previewChannel));
+}
+
+/*
+ * Private definitions
+ */
+
+void Fluorescence::abortMode(std::unique_ptr <StorageWrapper>& storage) {
+	m_acquisition->disableMode(ACQUISITION_MODE::FLUORESCENCE);
+
+	// Here we wait until the storage object indicate it finished to write to the file.
+	QEventLoop loop;
+	auto connection = QWidget::connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
+	loop.exec();
+
+	setAcquisitionStatus(ACQUISITION_STATUS::ABORTED);
 }
 
 ChannelSettings* Fluorescence::getChannelSettings(FLUORESCENCE_MODE mode) {
@@ -74,103 +197,9 @@ void Fluorescence::configureCamera() {
 	m_settings.camera.frameCount = 1;
 }
 
-void Fluorescence::setChannel(FLUORESCENCE_MODE mode, bool enabled) {
-	ChannelSettings* channel = getChannelSettings(mode);
-	channel->enabled = enabled;
-	emit(s_acqSettingsChanged(m_settings));
-}
-
-void Fluorescence::setExposure(FLUORESCENCE_MODE mode, int exposure) {
-	ChannelSettings* channel = getChannelSettings(mode);
-	channel->exposure = exposure;
-	// Apply the settings immediately if the mode preview is running
-	if (previewChannel == mode) {
-		m_settings.camera.exposureTime = 1e-3*channel->exposure;
-		QMetaObject::invokeMethod((*m_camera), "setSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::EXPOSURE), Q_ARG(double, 1e-3*channel->exposure));
-	}
-	emit(s_acqSettingsChanged(m_settings));
-}
-
-void Fluorescence::setGain(FLUORESCENCE_MODE mode, int gain) {
-	ChannelSettings* channel = getChannelSettings(mode);
-	channel->gain = gain;
-	// Apply the settings immediately if the mode preview is running
-	if (previewChannel == mode) {
-		m_settings.camera.gain = channel->gain;
-		QMetaObject::invokeMethod((*m_camera), "setSetting", Qt::AutoConnection, Q_ARG(CAMERA_SETTING, CAMERA_SETTING::GAIN), Q_ARG(double, channel->gain));
-	}
-	emit(s_acqSettingsChanged(m_settings));
-}
-
-void Fluorescence::startStopPreview(FLUORESCENCE_MODE mode) {
-	if (mode == previewChannel || mode == FLUORESCENCE_MODE::NONE) {
-		// stop preview
-		previewChannel = FLUORESCENCE_MODE::NONE;
-		QMetaObject::invokeMethod((*m_camera), "stopPreview", Qt::AutoConnection);
-	} else {
-		// if preview is already running, stop it first
-		if ((*m_camera)->m_isPreviewRunning) {
-			(*m_camera)->stopPreview();
-		}
-		previewChannel = mode;
-		ChannelSettings* channel = getChannelSettings(mode);
-
-		// move to Fluorescence configuration
-		(*m_scanControl)->setPreset(channel->preset);
-
-		// start image acquisition
-		m_settings.camera.exposureTime = 1e-3*channel->exposure;
-		m_settings.camera.gain = channel->gain;
-		(*m_camera)->setSettings(m_settings.camera);
-		QMetaObject::invokeMethod((*m_camera), "startPreview", Qt::AutoConnection);
-	}
-	emit(s_previewRunning(previewChannel));
-}
-
-void Fluorescence::startRepetitions() {
-	startRepetitions({});
-}
-
-void Fluorescence::startRepetitions(std::vector<FLUORESCENCE_MODE> modes) {
-	std::vector<ChannelSettings *> channels;
-	// If the provided mode vector is empty, acquire the enabled channels.
-	if (!modes.size()) {
-		channels = getEnabledChannels();
-		// If no channels are enabled, return.
-		if (!channels.size()) {
-			return;
-		}
-	// Else, find the channel settings for the given modes.
-	} else {
-		for (auto const& mode : modes) {
-			auto channel = getChannelSettings(mode);
-			channels.push_back(channel);
-		}
-	}
-
-	bool allowed = m_acquisition->enableMode(ACQUISITION_MODE::FLUORESCENCE);
-	if (!allowed) {
-		return;
-	}
-
-	// stop preview if necessary
-	if (previewChannel != FLUORESCENCE_MODE::NONE) {
-		previewChannel = FLUORESCENCE_MODE::NONE;
-		(*m_camera)->stopPreview();
-	}
-
-	// reset abort flag
-	m_abort = false;
-
-	configureCamera();
-
-	m_acquisition->newRepetition(ACQUISITION_MODE::FLUORESCENCE);
-
-	// start repetition
-	acquire(m_acquisition->m_storage, channels);
-
-	m_acquisition->disableMode(ACQUISITION_MODE::FLUORESCENCE);
-}
+/*
+ + Private slots
+ */
 
 void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	acquire(storage, {});
@@ -238,9 +267,8 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 		// read images from camera
 		std::vector<unsigned char> images(bytesPerFrame);
 
-			// acquire images
-		int64_t pointerPos = 0 * (int64_t)bytesPerFrame;
-		(*m_camera)->getImageForAcquisition(&images[pointerPos], true);
+		// acquire images
+		(*m_camera)->getImageForAcquisition(&images[0], true);
 
 		// cast the vector to unsigned short
 		std::vector<unsigned char>* images_ = (std::vector<unsigned char> *) &images;
@@ -250,7 +278,7 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 		unsigned char sum = simplemath::sum(*images_);
 		int i{ 0 };
 		while (sum == 0 && 5 > i++) {
-			(*m_camera)->getImageForAcquisition(&images[pointerPos], true);
+			(*m_camera)->getImageForAcquisition(&images[0], true);
 
 			// cast the vector to unsigned short
 			std::vector<unsigned char>* images_ = (std::vector<unsigned char> *) &images;
@@ -282,16 +310,4 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 	loop.exec();
 
 	setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
-}
-
-void Fluorescence::abortMode(std::unique_ptr <StorageWrapper> & storage) {
-	m_acquisition->disableMode(ACQUISITION_MODE::FLUORESCENCE);
-
-	// Here we wait until the storage object indicate it finished to write to the file.
-	QEventLoop loop;
-	auto connection = QWidget::connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
-	QMetaObject::invokeMethod(storage.get(), "s_finishedQueueing", Qt::AutoConnection);
-	loop.exec();
-
-	setAcquisitionStatus(ACQUISITION_STATUS::ABORTED);
 }

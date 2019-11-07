@@ -5,8 +5,8 @@
 #include "../thread.h"
 
 struct REPETITIONS {
-	int count = 1;			// [1]		number of repetitions
-	double interval = 10;	// [min]	interval between repetitions
+	int count{ 1 };			// [1]		number of repetitions
+	double interval{ 10 };	// [min]	interval between repetitions
 };
 
 class Acquisition : public QObject {
@@ -16,7 +16,7 @@ public:
 	Acquisition(QObject *parent);
 	~Acquisition();
 	ACQUISITION_MODE getEnabledModes();
-	std::unique_ptr <StorageWrapper> m_storage = nullptr;
+	std::unique_ptr <StorageWrapper> m_storage{ nullptr };
 
 public slots:
 	void init() {};
@@ -42,7 +42,7 @@ public slots:
 
 private:
 	StoragePath m_path;
-	ACQUISITION_MODE m_enabledModes = ACQUISITION_MODE::NONE;	// which mode is currently acquiring
+	ACQUISITION_MODE m_enabledModes{ ACQUISITION_MODE::NONE };	// which mode is currently acquiring
 	Thread* m_storageThread;
 	bool m_writingToFile{ false };
 
