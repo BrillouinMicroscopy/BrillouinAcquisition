@@ -210,7 +210,7 @@ void PVCamera::setSensorCooling(bool cooling) {
 		//m_sensorTemperature.setpoint = m_sensorTemperature.minSetpoint;
 		// TODO: We set the temperature to -15 �C for now, so we don't stress
 		// the camera to much while developing.
-		m_sensorTemperature.setpoint = -15.0;
+		m_sensorTemperature.setpoint = -20.0;
 	}
 	else {
 		double setpoint = m_sensorTemperature.maxSetpoint;
