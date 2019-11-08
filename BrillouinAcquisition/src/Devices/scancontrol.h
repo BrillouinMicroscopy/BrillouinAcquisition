@@ -174,6 +174,8 @@ public slots:
 	std::vector<POINT3> getSavedPositionsNormalized();
 	void announceSavedPositionsNormalized();
 
+	bool hasSpatialCalibration();
+
 protected:
 	virtual POINT2 pixToMicroMeter(POINT2) = 0;
 
@@ -184,6 +186,8 @@ protected:
 	bool m_isConnected{ false };
 	bool m_isCompatible{ false };
 	POINT3 m_homePosition{ 0, 0, 0 };
+
+	bool m_hasSpatialCalibration{ false };
 
 	std::vector<POINT3> m_savedPositions;
 

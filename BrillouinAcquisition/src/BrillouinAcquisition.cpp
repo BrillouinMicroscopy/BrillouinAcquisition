@@ -2282,28 +2282,23 @@ void BrillouinAcquisition::initScanControl() {
 		case ScanControl::SCAN_DEVICE::ZEISSECU:
 			m_scanControl = new ZeissECU();
 			m_hasODT = false;
-			m_hasSpatialCalibration = false;
 			break;
 		case ScanControl::SCAN_DEVICE::NIDAQ:
 			m_scanControl = new NIDAQ();
 			m_hasODT = true;
-			m_hasSpatialCalibration = true;
 			break;
 		case ScanControl::SCAN_DEVICE::ZEISSMTB:
 			m_scanControl = new ZeissMTB();
 			m_hasODT = false;
-			m_hasSpatialCalibration = false;
 			break;
 		case ScanControl::SCAN_DEVICE::ZEISSMTBERLANGEN:
 			m_scanControl = new ZeissMTB_Erlangen();
 			m_hasODT = true;
-			m_hasSpatialCalibration = false;
 			break;
 		default:
 			m_scanControl = new ZeissECU();
 			// disable ODT
 			m_hasODT = false;
-			m_hasSpatialCalibration = false;
 			break;
 	}
 
@@ -2440,7 +2435,7 @@ void BrillouinAcquisition::initODT() {
 }
 
 void BrillouinAcquisition::initSpatialCalibration() {
-	if (!m_hasSpatialCalibration) {
+	if (!m_scanControl->hasSpatialCalibration()) {
 		ui->actionLoad_Voltage_Position_calibration->setVisible(false);
 		ui->actionAcquire_Voltage_Position_calibration->setVisible(false);
 		if (m_Calibration) {

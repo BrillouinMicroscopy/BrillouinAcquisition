@@ -35,6 +35,8 @@ NIDAQ::NIDAQ() noexcept {
 
 	m_absoluteBounds = m_calibration.bounds;
 
+	m_hasSpatialCalibration = true;
+
 	m_elementPositions = std::vector<double>((int)DEVICE_ELEMENT::COUNT, -1);
 }
 

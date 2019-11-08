@@ -135,6 +135,10 @@ void ScanControl::announceSavedPositionsNormalized() {
 	emit(savedPositionsChanged(savedPositionsNormalized));
 }
 
+bool ScanControl::hasSpatialCalibration() {
+	return m_hasSpatialCalibration;
+}
+
 /*
  * Protected definitions
  */
