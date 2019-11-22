@@ -100,8 +100,7 @@ void ZeissMTB::init() {
 	try {
 		// create an instance of the connection class which can connect to the server
 		m_MTBConnection = IMTBConnectionPtr(CLSID_MTBConnection);
-	}
-	catch (_com_error e) {
+	} catch (_com_error e) {
 	}
 
 	positionTimer = new QTimer();
@@ -125,6 +124,10 @@ void ZeissMTB::init() {
 void ZeissMTB::connectDevice() {
 	if (!m_isConnected) {
 		try {
+			// Don't crash when MTB server is not running
+			if (!m_MTBConnection) {
+				return;
+			}
 			/*
 			 * Connect to Zeiss MTB Server
 			 */
