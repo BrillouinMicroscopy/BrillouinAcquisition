@@ -43,8 +43,18 @@ void Acquisition::openFile(StoragePath path, int flag) {
 	// Move storage object to own thread
 	m_storageThread->startWorker(m_storage.get());
 
-	auto connection = QWidget::connect(m_storage.get(), SIGNAL(started()), this, SLOT(startedWritingToFile()));
-	connection = QWidget::connect(m_storage.get(), SIGNAL(finished()), this, SLOT(finishedWritingToFile()));
+	auto connection = QWidget::connect(
+		m_storage.get(),
+		&StorageWrapper::started,
+		this,
+		&Acquisition::startedWritingToFile
+	);
+	connection = QWidget::connect(
+		m_storage.get(),
+		&StorageWrapper::finished,
+		this,
+		&Acquisition::finishedWritingToFile
+	);
 }
 
 void Acquisition::openFile() {

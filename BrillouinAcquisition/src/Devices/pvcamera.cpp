@@ -21,7 +21,12 @@ void PVCamera::init() {
 	// create timers and connect their signals
 	// after moving camera to another thread
 	m_tempTimer = new QTimer();
-	QMetaObject::Connection connection = QWidget::connect(m_tempTimer, SIGNAL(timeout()), this, SLOT(checkSensorTemperature()));
+	QMetaObject::Connection connection = QWidget::connect(
+		m_tempTimer,
+		&QTimer::timeout,
+		this,
+		&PVCamera::checkSensorTemperature
+	);
 }
 
 void PVCamera::connectDevice() {

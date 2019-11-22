@@ -31,7 +31,12 @@ StorageWrapper::~StorageWrapper() {
 
 void StorageWrapper::init() {
 	queueTimer = new QTimer();
-	QWidget::connect(queueTimer, SIGNAL(timeout()), this, SLOT(s_writeQueues()));
+	QMetaObject::Connection connection = QWidget::connect(
+		queueTimer,
+		&QTimer::timeout,
+		this,
+		&StorageWrapper::s_writeQueues
+	);
 }
 
 void StorageWrapper::s_enqueuePayload(IMAGE *img) {
