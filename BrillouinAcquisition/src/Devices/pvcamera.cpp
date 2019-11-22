@@ -35,9 +35,7 @@ void PVCamera::connectDevice() {
 			m_isConnected = true;
 			readOptions();
 			setSettings(m_settings);
-			if (!m_tempTimer->isActive()) {
-				m_tempTimer->start(1000);
-			}
+			startTempTimer();
 		}
 	}
 	emit(connectedDevice(m_isConnected));
@@ -45,9 +43,7 @@ void PVCamera::connectDevice() {
 
 void PVCamera::disconnectDevice() {
 	if (m_isConnected) {
-		if (m_tempTimer->isActive()) {
-			m_tempTimer->stop();
-		}
+		stopTempTimer();
 		bool i_retCode = PVCam::pl_cam_close(m_camera);
 		if (i_retCode == PVCam::PV_OK) {
 			m_isConnected = false;
@@ -140,27 +136,27 @@ void PVCamera::startPreview() {
 	}
 	m_isPreviewRunning = true;
 	m_stopPreview = false;
-	QMetaObject::invokeMethod(this, [this]() { preparePreview(); }, Qt::QueuedConnection);
+	preparePreview();
 
 	emit(s_previewRunning(m_isPreviewRunning));
 }
 
 void PVCamera::stopPreview() {
-	QMetaObject::invokeMethod(this, [this]() { cleanupPreview(); }, Qt::QueuedConnection);
+	cleanupPreview();
 	m_isPreviewRunning = false;
 	m_stopPreview = false;
 	emit(s_previewRunning(m_isPreviewRunning));
 }
 
 void PVCamera::startAcquisition(CAMERA_SETTINGS settings) {
-	QMetaObject::invokeMethod(this, [this, settings]() { prepareAcquisition(settings); }, Qt::QueuedConnection);
+	prepareAcquisition(settings);
 
 	m_isAcquisitionRunning = true;
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
 }
 
 void PVCamera::stopAcquisition() {
-	QMetaObject::invokeMethod(this, [this]() { cleanupAcquisition(); }, Qt::QueuedConnection);
+	cleanupAcquisition();
 	m_isAcquisitionRunning = false;
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
 }
@@ -502,6 +498,24 @@ void PVCamera::acquisitionCallback(PVCam::FRAME_INFO* pFrameInfo, void* context)
 	self->g_EofCond.notify_one();
 }
 
+void PVCamera::startTempTimer() {
+	if (!m_tempTimer->isActive()) {
+		QMetaObject::invokeMethod(this, [this]() { m_tempTimer->start(1000); }, Qt::AutoConnection);
+	}
+	while (!m_tempTimer->isActive()) {
+		Sleep(10);
+	}
+}
+
+void PVCamera::stopTempTimer() {
+	if (m_tempTimer->isActive()) {
+		QMetaObject::invokeMethod(this, [this]() { m_tempTimer->stop(); }, Qt::AutoConnection);
+	}
+	while (m_tempTimer->isActive()) {
+		Sleep(10);
+	}
+}
+
 bool PVCamera::IsParamAvailable(PVCam::uns32 paramID, const char* paramName) {
 	if (paramName == NULL) {
 		return false;
@@ -608,9 +622,7 @@ void PVCamera::getImageForPreview() {
 
 void PVCamera::preparePreview() {
 	// Disable temperature timer if it is running
-	if (m_tempTimer->isActive()) {
-		m_tempTimer->stop();
-	}
+	stopTempTimer();
 
 	// always use full camera image for live preview
 	m_settings.roi.width = m_options.ROIWidthLimits[1];
@@ -655,23 +667,19 @@ void PVCamera::preparePreview() {
 
 void PVCamera::cleanupPreview() {
 	PVCam::pl_exp_stop_cont(m_camera, PVCam::CCS_CLEAR);
-	if (!m_tempTimer->isActive()) {
-		m_tempTimer->start(1000);
-	}
+	startTempTimer();
 }
 
 void PVCamera::prepareAcquisition(CAMERA_SETTINGS settings) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 
-	// Disable temperature timer if it is running
-	if (m_tempTimer->isActive()) {
-		m_tempTimer->stop();
-	}
-
 	// check if currently a preview is running and stop it in case
 	if (m_isPreviewRunning) {
 		stopPreview();
 	}
+
+	// Disable temperature timer if it is running
+	stopTempTimer();
 
 	setSettings(settings);
 	PVCam::rgn_type camSettings = getCamSettings();
@@ -690,9 +698,7 @@ void PVCamera::prepareAcquisition(CAMERA_SETTINGS settings) {
 
 void PVCamera::cleanupAcquisition() {
 	PVCam::pl_exp_abort(m_camera, PVCam::CCS_NO_CHANGE);
-	if (!m_tempTimer->isActive()) {
-		m_tempTimer->start(1000);
-	}
+	startTempTimer();
 }
 
 void PVCamera::checkSensorTemperature() {

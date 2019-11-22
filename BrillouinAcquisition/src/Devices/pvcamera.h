@@ -49,6 +49,9 @@ private:
 	static void previewCallback(PVCam::FRAME_INFO* pFrameInfo, void* context);
 	static void acquisitionCallback(PVCam::FRAME_INFO* pFrameInfo, void* context);
 
+	void startTempTimer();
+	void stopTempTimer();
+
 	// Name-Value Pair type - an item in enumeration type
 	typedef struct NVP {
 		PVCam::int32 value{ 0 };
