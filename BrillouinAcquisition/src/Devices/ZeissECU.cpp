@@ -92,16 +92,26 @@ void ZeissECU::init() {
 
 	QMetaObject::Connection connection = QWidget::connect(
 		m_comObject,
-		SIGNAL(errorOccurred(QSerialPort::SerialPortError)),
+		&com::errorOccurred,
 		this,
-		SLOT(errorHandler(QSerialPort::SerialPortError))
+		&ZeissECU::errorHandler
 	);
 
 	positionTimer = new QTimer();
-	connection = QWidget::connect(positionTimer, SIGNAL(timeout()), this, SLOT(announcePosition()));
+	connection = QWidget::connect(
+		positionTimer,
+		&QTimer::timeout,
+		this,
+		&ZeissECU::announcePosition
+	);
 
 	elementPositionTimer = new QTimer();
-	connection = QWidget::connect(elementPositionTimer, SIGNAL(timeout()), this, SLOT(getElements()));
+	connection = QWidget::connect(
+		elementPositionTimer,
+		&QTimer::timeout,
+		this,
+		&ZeissECU::getElements
+	);
 	calculateHomePositionBounds();
 }
 

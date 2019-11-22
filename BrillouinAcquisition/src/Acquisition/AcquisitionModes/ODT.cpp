@@ -82,7 +82,12 @@ void ODT::startRepetitions() {
 
 void ODT::init() {
 	m_algnTimer = new QTimer();
-	QMetaObject::Connection connection = QWidget::connect(m_algnTimer, SIGNAL(timeout()), this, SLOT(nextAlgnPosition()));
+	QMetaObject::Connection connection = QWidget::connect(
+		m_algnTimer,
+		&QTimer::timeout,
+		this,
+		&ODT::nextAlgnPosition
+	);
 }
 
 void ODT::initialize() {
@@ -199,7 +204,12 @@ void ODT::setCameraSetting(CAMERA_SETTING type, double value) {
 void ODT::abortMode(std::unique_ptr <StorageWrapper>& storage) {
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
-	auto connection = QWidget::connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	auto connection = QWidget::connect(
+		storage.get(),
+		&StorageWrapper::finished,
+		&loop,
+		&QEventLoop::quit
+	);
 	QMetaObject::invokeMethod(
 		storage.get(),
 		[&storage = storage]() { storage.get()->s_finishedQueueing(); },
@@ -360,7 +370,12 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
-	auto connection = QWidget::connect(storage.get(), SIGNAL(finished()), &loop, SLOT(quit()));
+	auto connection = QWidget::connect(
+		storage.get(),
+		&StorageWrapper::finished,
+		&loop,
+		&QEventLoop::quit
+	);
 	QMetaObject::invokeMethod(
 		storage.get(),
 		[&storage = storage]() { storage.get()->s_finishedQueueing(); },

@@ -105,10 +105,20 @@ void ZeissMTB::init() {
 	}
 
 	positionTimer = new QTimer();
-	QMetaObject::Connection connection = QWidget::connect(positionTimer, SIGNAL(timeout()), this, SLOT(announcePosition()));
+	QMetaObject::Connection connection = QWidget::connect(
+		positionTimer,
+		&QTimer::timeout,
+		this,
+		&ZeissMTB::announcePosition
+		);
 
 	elementPositionTimer = new QTimer();
-	connection = QWidget::connect(elementPositionTimer, SIGNAL(timeout()), this, SLOT(getElements()));
+	connection = QWidget::connect(
+		elementPositionTimer,
+		&QTimer::timeout,
+		this,
+		&ZeissMTB::getElements
+	);
 	calculateHomePositionBounds();
 }
 

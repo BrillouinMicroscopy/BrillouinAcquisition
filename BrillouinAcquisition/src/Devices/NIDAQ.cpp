@@ -108,7 +108,12 @@ void NIDAQ::init() {
 	m_emFilter->init();
 
 	elementPositionTimer = new QTimer();
-	QMetaObject::Connection connection = QWidget::connect(elementPositionTimer, SIGNAL(timeout()), this, SLOT(getElements()));
+	QMetaObject::Connection connection = QWidget::connect(
+		elementPositionTimer,
+		&QTimer::timeout,
+		this,
+		&NIDAQ::getElements
+	);
 }
 
 void NIDAQ::connectDevice() {

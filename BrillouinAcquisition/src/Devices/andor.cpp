@@ -21,7 +21,12 @@ void Andor::init() {
 	// create timers and connect their signals
 	// after moving andor to another thread
 	m_tempTimer = new QTimer();
-	QMetaObject::Connection connection = QWidget::connect(m_tempTimer, SIGNAL(timeout()), this, SLOT(checkSensorTemperature()));
+	QMetaObject::Connection connection = QWidget::connect(
+		m_tempTimer,
+		&QTimer::timeout,
+		this,
+		&Andor::checkSensorTemperature
+	);
 }
 
 void Andor::connectDevice() {
