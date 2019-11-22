@@ -122,6 +122,10 @@ void ZeissMTB_Erlangen::connectDevice() {
 		ODTControl::connectDevice();
 
 		try {
+			// Don't crash when MTB server is not running
+			if (!m_MTBConnection) {
+				return;
+			}
 			/*
 			 * Connect to Zeiss MTB Server
 			 */
