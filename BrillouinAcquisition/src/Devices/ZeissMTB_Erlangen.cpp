@@ -11,18 +11,19 @@ ZeissMTB_Erlangen::ZeissMTB_Erlangen() noexcept {
 		{ "Objective",	6, (int)DEVICE_ELEMENT::OBJECTIVE },
 		{ "Reflector",	6, (int)DEVICE_ELEMENT::REFLECTOR, { "Green", "Red", "Blue" } },
 		{ "Sideport",	3, (int)DEVICE_ELEMENT::SIDEPORT, { "Eyepiece", "Left", "Right" } },
-		{ "RL Shutter",	2, (int)DEVICE_ELEMENT::RLSHUTTER, { "Close", "Open" } }
+		{ "RL Shutter",	2, (int)DEVICE_ELEMENT::RLSHUTTER, { "Close", "Open" } },
+		{ "Mirror",		4, (int)DEVICE_ELEMENT::MIRROR, { "Brillouin", "N/A", "ODT", "N/A" } }
 	};
 
 	m_presets = {
-		{ "Brillouin",		ScanPreset::SCAN_BRILLOUIN,		{ {}, {4}, {2}, {1} } },	// Brillouin
-		{ "Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {}, {4}, {2}, {1} } },	// Calibration
-		{ "ODT",			ScanPreset::SCAN_ODT,			{ {}, {4}, {2}, {1} } },	// ODT
-		{ "Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{ {}, {4}, {2}, {1} } },	// Brightfield
-		{ "Eyepiece",		ScanPreset::SCAN_EYEPIECE,		{ {}, {4}, {1}, {1} } },	// Eyepiece
-		{ "Fluo Blue",		ScanPreset::SCAN_EPIFLUOBLUE,	{ {}, {3},  {}, {2} } },	// Fluorescence blue
-		{ "Fluo Green",		ScanPreset::SCAN_EPIFLUOGREEN,	{ {}, {1},  {}, {2} } },	// Fluorescence green
-		{ "Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {}, {2},  {}, {2} } }		// Fluorescence red
+		{ "Brillouin",		ScanPreset::SCAN_BRILLOUIN,		{ {}, {4}, {2}, {1}, {1} } },	// Brillouin
+		{ "Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {}, {4}, {2}, {1}, {3} } },	// Calibration
+		{ "ODT",			ScanPreset::SCAN_ODT,			{ {}, {4}, {2}, {1}, {3} } },	// ODT
+		{ "Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{ {}, {4}, {2}, {1}, {1} } },	// Brightfield
+		{ "Eyepiece",		ScanPreset::SCAN_EYEPIECE,		{ {}, {4}, {1}, {1}, {1} } },	// Eyepiece
+		{ "Fluo Blue",		ScanPreset::SCAN_EPIFLUOBLUE,	{ {}, {3},  {}, {2}, {1} } },	// Fluorescence blue
+		{ "Fluo Green",		ScanPreset::SCAN_EPIFLUOGREEN,	{ {}, {1},  {}, {2}, {1} } },	// Fluorescence green
+		{ "Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {}, {2},  {}, {2}, {1} } }	// Fluorescence red
 	};
 
 	// bounds of the stage
@@ -98,6 +99,9 @@ void ZeissMTB_Erlangen::init() {
 	} catch (_com_error e) {
 	}
 
+	m_Mirror = new FilterMount("COM5");
+	m_Mirror->init();
+
 	positionTimer = new QTimer();
 	QMetaObject::Connection connection = QWidget::connect(
 		positionTimer,
@@ -168,6 +172,9 @@ void ZeissMTB_Erlangen::connectDevice() {
 		} catch (QString e) {
 			// todo
 		}
+
+		// Connect filter mounts
+		m_Mirror->connectDevice();
 	}
 	emit(connectedDevice(m_isConnected));
 }
@@ -189,6 +196,9 @@ void ZeissMTB_Erlangen::disconnectDevice() {
 			m_MTBConnection->Close();
 			m_isConnected = false;
 		}
+
+		// Disconnect filter mounts
+		m_Mirror->disconnectDevice();
 	}
 	emit(connectedDevice(m_isConnected));
 }
@@ -206,6 +216,9 @@ void ZeissMTB_Erlangen::setElement(DeviceElement element, double position) {
 		break;
 	case DEVICE_ELEMENT::RLSHUTTER:
 		setRLShutter((int)position, true);
+		break;
+	case DEVICE_ELEMENT::MIRROR:
+		setMirror((int)position);
 		break;
 	default:
 		break;
@@ -225,6 +238,7 @@ void ZeissMTB_Erlangen::getElements() {
 	m_elementPositionsTmp[(int)DEVICE_ELEMENT::OBJECTIVE] = getObjective();
 	m_elementPositionsTmp[(int)DEVICE_ELEMENT::SIDEPORT] = getSideport();
 	m_elementPositionsTmp[(int)DEVICE_ELEMENT::RLSHUTTER] = getRLShutter();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::MIRROR] = getMirror();
 	// We only emit changed positions
 	if (m_elementPositionsTmp != m_elementPositions) {
 		m_elementPositions = m_elementPositionsTmp;
@@ -332,4 +346,23 @@ void ZeissMTB_Erlangen::setRLShutter(int position, bool block) {
 
 int ZeissMTB_Erlangen::getRLShutter() {
 	return getElement(m_RLShutter);
+}
+
+void ZeissMTB_Erlangen::setMirror(int position) {
+	// calculate the position to set, slots are spaced every 32 mm
+	double pos = 32.0 * ((double)position - 1);
+	m_Mirror->setPosition(pos);
+}
+
+int ZeissMTB_Erlangen::getMirror() {
+	double pos = m_Mirror->getPosition();
+	// Somehow the filter mount does not position the filters very accurately.
+	// It can be off by multiple millimeters and the error increases with positions farther away.
+	// E.g. requested 0 -> got 0, 32 -> 31, 64 -> 62, 96 -> 93
+	for (gsl::index position{ 0 }; position < 4; position++) {
+		if (abs(pos - 32.0 * position) < (1.0 + position)) {
+			return (position + 1);
+		}
+	}
+	return -1;
 }
