@@ -7,6 +7,8 @@
 #import "MTBApi.tlb" named_guids
 using namespace MTBApi;
 
+#include "filtermount.h"
+
 class ZeissMTB_Erlangen: public ODTControl {
 	Q_OBJECT
 
@@ -47,6 +49,8 @@ private:
 	void setSideport(int value, bool check = false);
 	int getRLShutter();
 	void setRLShutter(int value, bool check = false);
+	void setMirror(int position);
+	int getMirror();
 
 	/*
 	 * Zeiss MTB handles
@@ -76,11 +80,15 @@ private:
 
 	bool m_isMTBConnected{ false };
 
+	// moveable filter mounts
+	FilterMount* m_Mirror{ nullptr };
+
 	enum class DEVICE_ELEMENT {
 		OBJECTIVE,
 		REFLECTOR,
 		SIDEPORT,
 		RLSHUTTER,
+		MIRROR,
 		COUNT
 	};
 };
