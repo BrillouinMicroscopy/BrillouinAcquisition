@@ -12,7 +12,7 @@ ZeissMTB_Erlangen::ZeissMTB_Erlangen() noexcept {
 		{ "Reflector",	6, (int)DEVICE_ELEMENT::REFLECTOR, { "Green", "Red", "Blue" } },
 		{ "Sideport",	3, (int)DEVICE_ELEMENT::SIDEPORT, { "Eyepiece", "Left", "Right" } },
 		{ "RL Shutter",	2, (int)DEVICE_ELEMENT::RLSHUTTER, { "Close", "Open" } },
-		{ "Mirror",		4, (int)DEVICE_ELEMENT::MIRROR, { "Brillouin", "N/A", "ODT", "N/A" } }
+		{ "Mirror",		2, (int)DEVICE_ELEMENT::MIRROR, { "ODT", "Brillouin" } }
 	};
 
 	m_presets = {
@@ -189,8 +189,7 @@ void ZeissMTB_Erlangen::disconnectDevice() {
 			// logout from MTB
 			try {
 				m_MTBConnection->Logout((BSTR)m_ID);
-			}
-			catch (_com_error e) {
+			} catch (_com_error e) {
 			}
 
 			m_MTBConnection->Close();
@@ -350,17 +349,21 @@ int ZeissMTB_Erlangen::getRLShutter() {
 
 void ZeissMTB_Erlangen::setMirror(int position) {
 	// calculate the position to set, slots are spaced every 32 mm
-	double pos = 32.0 * ((double)position - 1);
+	double pos = 60.0 * ((double)position - 1);
+	// This device has 1024 encoder pulses per mm
+	pos *= 1024;
 	m_Mirror->setPosition(pos);
 }
 
 int ZeissMTB_Erlangen::getMirror() {
 	double pos = m_Mirror->getPosition();
+	// This device has 1024 encoder pulses per mm
+	pos /= 1024;
 	// Somehow the filter mount does not position the filters very accurately.
 	// It can be off by multiple millimeters and the error increases with positions farther away.
 	// E.g. requested 0 -> got 0, 32 -> 31, 64 -> 62, 96 -> 93
-	for (gsl::index position{ 0 }; position < 4; position++) {
-		if (abs(pos - 32.0 * position) < (1.0 + position)) {
+	for (gsl::index position{ 0 }; position < 2; position++) {
+		if (abs(pos - 60.0 * position) < (1.0 + position)) {
 			return (position + 1);
 		}
 	}
