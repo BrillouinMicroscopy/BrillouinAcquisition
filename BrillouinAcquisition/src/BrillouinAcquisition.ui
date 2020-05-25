@@ -2452,7 +2452,10 @@ QTabBar::tab:!selected {
                        <enum>QAbstractSpinBox::NoButtons</enum>
                       </property>
                       <property name="decimals">
-                       <number>0</number>
+                       <number>2</number>
+                      </property>
+                      <property name="minimum">
+                       <double>0.010000000000000</double>
                       </property>
                       <property name="value">
                        <double>1.000000000000000</double>
