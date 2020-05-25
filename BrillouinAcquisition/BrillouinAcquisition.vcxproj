@@ -59,16 +59,12 @@
       <Command>powershell -ExecutionPolicy ByPass -File "$(SolutionDir)BrillouinAcquisition\src\generateVersionHeader.ps1"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>copy "$(ProgramW6432)\Andor SDK3\atcore.dll" "$(TargetDir)"
+      <Command>$(QTDIR)\bin\windeployqt.exe $(TargetDir)
+copy "$(ProgramW6432)\Andor SDK3\atcore.dll" "$(TargetDir)"
 copy "$(ProgramW6432)\Andor SDK3\atutility.dll" "$(TargetDir)"
 copy "$(ProgramW6432)\Andor SDK3\atblkbx.dll" "$(TargetDir)"
 copy "$(ProgramW6432)\Andor SDK3\atcl_bitflow.dll" "$(TargetDir)"
 copy "$(ProgramW6432)\Andor SDK3\atdevregcam.dll" "$(TargetDir)"
-copy "$(QTDIR)\bin\Qt5Cored.dll" "$(TargetDir)"
-copy "$(QTDIR)\bin\Qt5Widgetsd.dll" "$(TargetDir)"
-copy "$(QTDIR)\bin\Qt5Guid.dll" "$(TargetDir)"
-copy "$(QTDIR)\bin\Qt5SerialPortd.dll" "$(TargetDir)"
-copy "$(QTDIR)\bin\Qt5PrintSupportd.dll" "$(TargetDir)"
 copy "$(ProgramW6432)\HDF_Group\HDF5\1.10.5\bin\hdf5.dll" "$(TargetDir)"
 copy "$(ProgramW6432)\HDF_Group\HDF5\1.10.5\bin\hdf5_cpp.dll" "$(TargetDir)"
 copy "$(ProgramW6432)\HDF_Group\HDF5\1.10.5\bin\szip.dll" "$(TargetDir)"
@@ -112,16 +108,12 @@ copy "$(ProjectDir)external\fftw\libfftw3-3.dll" "$(TargetDir)"</Command>
       <Command>powershell -ExecutionPolicy ByPass -File "$(SolutionDir)BrillouinAcquisition\src\generateVersionHeader.ps1"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>copy "$(ProgramW6432)\Andor SDK3\atcore.dll" "$(TargetDir)"
+      <Command>$(QTDIR)\bin\windeployqt.exe $(TargetDir)
+copy "$(ProgramW6432)\Andor SDK3\atcore.dll" "$(TargetDir)"
 copy "$(ProgramW6432)\Andor SDK3\atutility.dll" "$(TargetDir)"
 copy "$(ProgramW6432)\Andor SDK3\atblkbx.dll" "$(TargetDir)"
 copy "$(ProgramW6432)\Andor SDK3\atcl_bitflow.dll" "$(TargetDir)"
 copy "$(ProgramW6432)\Andor SDK3\atdevregcam.dll" "$(TargetDir)"
-copy "$(QTDIR)\bin\Qt5Core.dll" "$(TargetDir)"
-copy "$(QTDIR)\bin\Qt5Widgets.dll" "$(TargetDir)"
-copy "$(QTDIR)\bin\Qt5Gui.dll" "$(TargetDir)"
-copy "$(QTDIR)\bin\Qt5SerialPort.dll" "$(TargetDir)"
-copy "$(QTDIR)\bin\Qt5PrintSupport.dll" "$(TargetDir)"
 copy "$(ProgramW6432)\HDF_Group\HDF5\1.10.5\bin\hdf5.dll" "$(TargetDir)"
 copy "$(ProgramW6432)\HDF_Group\HDF5\1.10.5\bin\hdf5_cpp.dll" "$(TargetDir)"
 copy "$(ProgramW6432)\HDF_Group\HDF5\1.10.5\bin\szip.dll" "$(TargetDir)"
