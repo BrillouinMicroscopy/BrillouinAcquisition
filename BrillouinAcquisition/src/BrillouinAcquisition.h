@@ -175,9 +175,7 @@ private:
 	ACQUISITION_MODE m_enabledModes{ ACQUISITION_MODE::NONE };
 
 	bool m_hasODT{ false };
-	bool m_isTabVisibleODT{ false };
 	bool m_hasFluorescence{ false };
-	bool m_isTabVisibleFluorescence{ false };
 
 	TableModel* tableModel = new TableModel(0);
 	ButtonDelegate buttonDelegate;

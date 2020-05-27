@@ -2372,8 +2372,10 @@ void BrillouinAcquisition::initScanControl() {
 
 void BrillouinAcquisition::initODT() {
 	if (!m_hasODT) {
-		ui->acquisitionModeTabs->removeTab(1);
-		m_isTabVisibleODT = false;
+		int tabIndexODT = ui->acquisitionModeTabs->indexOf(ui->ODT);
+		if (tabIndexODT > -1) {
+			ui->acquisitionModeTabs->removeTab(tabIndexODT);
+		}
 		if (m_ODT) {
 			m_ODT->deleteLater();
 			m_ODT = nullptr;
@@ -2381,7 +2383,6 @@ void BrillouinAcquisition::initODT() {
 	} else {
 		m_ODT = new ODT(nullptr, m_acquisition, &m_brightfieldCamera, (ODTControl**)&m_scanControl);
 		ui->acquisitionModeTabs->insertTab(1, ui->ODT, "ODT");
-		m_isTabVisibleODT = true;
 
 		static QMetaObject::Connection connection;
 		connection = QWidget::connect(
@@ -2470,24 +2471,17 @@ void BrillouinAcquisition::initSpatialCalibration() {
 
 void BrillouinAcquisition::initFluorescence() {
 	if (!m_hasFluorescence) {
-		if (!m_isTabVisibleODT) {
-			ui->acquisitionModeTabs->removeTab(1);
-		} else {
-			ui->acquisitionModeTabs->removeTab(2);
+		int tabIndexFluorescence = ui->acquisitionModeTabs->indexOf(ui->Fluorescence);
+		if (tabIndexFluorescence > -1) {
+			ui->acquisitionModeTabs->removeTab(tabIndexFluorescence);
 		}
-		m_isTabVisibleFluorescence = false;
 		if (m_Fluorescence) {
 			m_Fluorescence->deleteLater();
 			m_Fluorescence = nullptr;
 		}
 	} else {
 		m_Fluorescence = new Fluorescence(nullptr, m_acquisition, &m_brightfieldCamera, &m_scanControl);
-		if (!m_isTabVisibleODT) {
-			ui->acquisitionModeTabs->insertTab(1, ui->Fluorescence, "Fluorescence");
-		} else {
-			ui->acquisitionModeTabs->insertTab(2, ui->Fluorescence, "Fluorescence");
-		}
-		m_isTabVisibleFluorescence = true;
+		ui->acquisitionModeTabs->insertTab(2, ui->Fluorescence, "Fluorescence");
 
 		static QMetaObject::Connection connection;
 		connection = QWidget::connect(
