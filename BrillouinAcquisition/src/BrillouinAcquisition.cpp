@@ -2622,11 +2622,14 @@ void BrillouinAcquisition::initCamera() {
 	}
 
 	// initialize correct camera type
+	int tabIndexCamera = ui->settingsWidget->indexOf(ui->ODTcameraTab);
 	switch (m_cameraType) {
 		case CAMERA_DEVICE::NONE:
 			m_brightfieldCamera = nullptr;
 			ui->actionConnect_Brightfield_camera->setVisible(false);
-			ui->settingsWidget->removeTab(3);
+			if (tabIndexCamera > -1) {
+				ui->settingsWidget->removeTab(tabIndexCamera);
+			}
 			m_hasFluorescence = false;
 			break;
 		case CAMERA_DEVICE::POINTGREY:
@@ -2646,7 +2649,9 @@ void BrillouinAcquisition::initCamera() {
 		default:
 			m_brightfieldCamera = nullptr;
 			ui->actionConnect_Brightfield_camera->setVisible(false);
-			ui->settingsWidget->removeTab(3);
+			if (tabIndexCamera > -1) {
+				ui->settingsWidget->removeTab(tabIndexCamera);
+			}
 			m_hasFluorescence = false;
 			break;
 	}
