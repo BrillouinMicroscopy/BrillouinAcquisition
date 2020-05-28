@@ -8,22 +8,24 @@
 ZeissMTB_Erlangen::ZeissMTB_Erlangen() noexcept {
 
 	m_deviceElements = {
-		{ "Objective",	6, (int)DEVICE_ELEMENT::OBJECTIVE },
-		{ "Reflector",	6, (int)DEVICE_ELEMENT::REFLECTOR, { "Green", "Red", "Blue" } },
-		{ "Sideport",	3, (int)DEVICE_ELEMENT::SIDEPORT, { "Eyepiece", "Left", "Right" } },
-		{ "RL Shutter",	2, (int)DEVICE_ELEMENT::RLSHUTTER, { "Close", "Open" } },
-		{ "Mirror",		2, (int)DEVICE_ELEMENT::MIRROR, { "ODT", "Brillouin" } }
+		{ "Beam Block",			2, (int)DEVICE_ELEMENT::BEAMBLOCK,	{ "Close", "Open" } },
+		{ "Objective",			6, (int)DEVICE_ELEMENT::OBJECTIVE },
+		{ "Reflector",			6, (int)DEVICE_ELEMENT::REFLECTOR,	{ "Green", "Red", "Blue" } },
+		{ "Sideport",			3, (int)DEVICE_ELEMENT::SIDEPORT,	{ "Eyepiece", "Left", "Right" } },
+		{ "RL Shutter",			2, (int)DEVICE_ELEMENT::RLSHUTTER,	{ "Close", "Open" } },
+		{ "Mirror",				2, (int)DEVICE_ELEMENT::MIRROR,		{ "ODT", "Brillouin" } },
+		{ "LED illumination",	2, (int)DEVICE_ELEMENT::LEDLAMP,	{ "Off", "On" } }
 	};
 
 	m_presets = {
-		{ "Brillouin",		ScanPreset::SCAN_BRILLOUIN,		{ {}, {4}, {2}, {1}, {2} } },	// Brillouin
-		{ "Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {}, {4}, {2}, {1}, {1} } },	// Calibration
-		{ "ODT",			ScanPreset::SCAN_ODT,			{ {}, {4}, {2}, {1}, {1} } },	// ODT
-		{ "Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{ {}, {4}, {2}, {1}, {2} } },	// Brightfield
-		{ "Eyepiece",		ScanPreset::SCAN_EYEPIECE,		{ {}, {4}, {1}, {1}, {2} } },	// Eyepiece
-		{ "Fluo Blue",		ScanPreset::SCAN_EPIFLUOBLUE,	{ {}, {3},  {}, {2}, {2} } },	// Fluorescence blue
-		{ "Fluo Green",		ScanPreset::SCAN_EPIFLUOGREEN,	{ {}, {1},  {}, {2}, {2} } },	// Fluorescence green
-		{ "Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {}, {2},  {}, {2}, {2} } }	// Fluorescence red
+		{ "Brillouin",		ScanPreset::SCAN_BRILLOUIN,		{ {2}, {}, {4}, {2}, {1}, {2}, {2} } },	// Brillouin
+		{ "Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {2}, {}, {4}, {2}, {1}, {1}, {2} } },	// Calibration
+		{ "ODT",			ScanPreset::SCAN_ODT,			{ {2}, {}, {4}, {2}, {1}, {1}, {1} } },	// ODT
+		{ "Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{ {2}, {}, {4}, {2}, {1}, {2}, {2} } },	// Brightfield
+		{ "Eyepiece",		ScanPreset::SCAN_EYEPIECE,		{ {2}, {}, {4}, {1}, {1}, {2}, {2} } },	// Eyepiece
+		{ "Fluo Blue",		ScanPreset::SCAN_EPIFLUOBLUE,	{ {1}, {}, {3},  {}, {2}, {1}, {1} } },	// Fluorescence blue
+		{ "Fluo Green",		ScanPreset::SCAN_EPIFLUOGREEN,	{ {1}, {}, {1},  {}, {2}, {1}, {1} } },	// Fluorescence green
+		{ "Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {1}, {}, {2},  {}, {2}, {1}, {1} } }	// Fluorescence red
 	};
 
 	// bounds of the stage
@@ -125,6 +127,17 @@ void ZeissMTB_Erlangen::connectDevice() {
 		// Connect NIDAQ board
 		ODTControl::connectDevice();
 
+		// Create task for digital output to beam block
+		DAQmxCreateTask("DO_BEAMBLOCK", &DOtaskHandle_BeamBlock);
+		// Configure digital output channel
+		DAQmxCreateDOChan(DOtaskHandle_BeamBlock, "Dev1/Port0/Line3:3", "DO_BEAMBLOCK", DAQmx_Val_ChanForAllLines);
+		// Configure regen mode
+		DAQmxSetWriteAttribute(DOtaskHandle_BeamBlock, DAQmx_Write_RegenMode, DAQmx_Val_AllowRegen);
+		// Start digital task
+		DAQmxStartTask(DOtaskHandle_BeamBlock);
+		// Set digital line to low
+		DAQmxWriteDigitalLines(DOtaskHandle_BeamBlock, 1, false, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
+
 		try {
 			// Don't crash when MTB server is not running
 			if (!m_MTBConnection) {
@@ -204,6 +217,9 @@ void ZeissMTB_Erlangen::disconnectDevice() {
 
 void ZeissMTB_Erlangen::setElement(DeviceElement element, double position) {
 	switch ((DEVICE_ELEMENT)element.index) {
+	case DEVICE_ELEMENT::BEAMBLOCK:
+		setBeamBlock((int)position - 1);
+		break;
 	case DEVICE_ELEMENT::REFLECTOR:
 		setReflector((int)position, true);
 		break;
@@ -218,6 +234,9 @@ void ZeissMTB_Erlangen::setElement(DeviceElement element, double position) {
 		break;
 	case DEVICE_ELEMENT::MIRROR:
 		setMirror((int)position);
+		break;
+	case DEVICE_ELEMENT::LEDLAMP:
+		setLEDLamp((int)position - 1);
 		break;
 	default:
 		break;
@@ -238,6 +257,8 @@ void ZeissMTB_Erlangen::getElements() {
 	m_elementPositionsTmp[(int)DEVICE_ELEMENT::SIDEPORT] = getSideport();
 	m_elementPositionsTmp[(int)DEVICE_ELEMENT::RLSHUTTER] = getRLShutter();
 	m_elementPositionsTmp[(int)DEVICE_ELEMENT::MIRROR] = getMirror();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::BEAMBLOCK] = (double)getBeamBlock() + 1;
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::LEDLAMP] = (double)getLEDLamp() + 1;
 	// We only emit changed positions
 	if (m_elementPositionsTmp != m_elementPositions) {
 		m_elementPositions = m_elementPositionsTmp;
@@ -368,4 +389,15 @@ int ZeissMTB_Erlangen::getMirror() {
 		}
 	}
 	return -1;
+}
+
+void ZeissMTB_Erlangen::setBeamBlock(int position) {
+	m_beamBlockOpen = position;
+	// Write digital voltages
+	const uInt8	voltage = (uInt8)m_beamBlockOpen;
+	DAQmxWriteDigitalLines(DOtaskHandle_BeamBlock, 1, false, 10, DAQmx_Val_GroupByChannel, &voltage, NULL, NULL);
+}
+
+int ZeissMTB_Erlangen::getBeamBlock() {
+	return (int)m_beamBlockOpen;
 }

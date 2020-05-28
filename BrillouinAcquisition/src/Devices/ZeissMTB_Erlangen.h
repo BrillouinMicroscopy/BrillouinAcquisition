@@ -51,6 +51,8 @@ private:
 	void setRLShutter(int value, bool check = false);
 	void setMirror(int position);
 	int getMirror();
+	void setBeamBlock(int value);
+	int getBeamBlock();
 
 	/*
 	 * Zeiss MTB handles
@@ -83,12 +85,18 @@ private:
 	// moveable filter mounts
 	FilterMount* m_Mirror{ nullptr };
 
+	bool m_beamBlockOpen{ false };			// current state of the beam block
+
+	TaskHandle DOtaskHandle_BeamBlock{ 0 };
+
 	enum class DEVICE_ELEMENT {
+		BEAMBLOCK,
 		OBJECTIVE,
 		REFLECTOR,
 		SIDEPORT,
 		RLSHUTTER,
 		MIRROR,
+		LEDLAMP,
 		COUNT
 	};
 };
