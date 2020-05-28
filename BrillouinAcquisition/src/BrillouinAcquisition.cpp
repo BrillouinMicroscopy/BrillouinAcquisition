@@ -1654,6 +1654,11 @@ void BrillouinAcquisition::startBrightfieldPreview(bool isRunning) {
 }
 
 void BrillouinAcquisition::updateImageBrillouin() {
+	// Abort updating images when camera is not available
+	if (m_andor == nullptr) {
+		m_previewRunning = false;
+		return;
+	}
 	if (m_previewRunning) {
 		updateImage(m_andor->m_previewBuffer, &m_BrillouinPlot);
 
@@ -1662,6 +1667,11 @@ void BrillouinAcquisition::updateImageBrillouin() {
 }
 
 void BrillouinAcquisition::updateImageODT() {
+	// Abort updating images when camera is not available
+	if (m_brightfieldCamera == nullptr) {
+		m_brightfieldPreviewRunning = false;
+		return;
+	}
 	if (m_brightfieldPreviewRunning) {
 		updateImage(m_brightfieldCamera->m_previewBuffer, &m_ODTPlot);
 
