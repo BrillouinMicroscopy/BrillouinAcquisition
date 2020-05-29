@@ -18,7 +18,7 @@ typedef enum class enCameraTemperatureStatus {
 	STABILISED
 } CAMERA_TEMPERATURE_STATUS;
 
-typedef struct {
+typedef struct SensorTemperature {
 	double temperature{ 0 };
 	double setpoint{ 0 };
 	double minSetpoint{ 0 };
