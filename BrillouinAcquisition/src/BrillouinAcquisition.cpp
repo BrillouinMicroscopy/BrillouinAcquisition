@@ -1320,7 +1320,7 @@ void BrillouinAcquisition::initializePlot(PLOT_SETTINGS plotSettings) {
 	(plotSettings.dataRangeCallback)(plotSettings.cLim);
 	// rescale the data dimension (color) such that all data points lie in the span visualized by the color gradient:
 	if (plotSettings.autoscale) {
-		plotSettings.colorMap->rescaleDataRange();
+		plotSettings.colorMap->rescaleDataRange(true);
 		plotSettings.cLim = plotSettings.colorMap->dataRange();
 		(plotSettings.dataRangeCallback)(plotSettings.cLim);
 	}
@@ -1740,7 +1740,7 @@ void BrillouinAcquisition::plotting(PreviewBuffer<unsigned char>* previewBuffer,
 	}
 	previewBuffer->m_buffer->m_freeBuffers->release();
 	if (plotSettings->autoscale) {
-		plotSettings->colorMap->rescaleDataRange();
+		plotSettings->colorMap->rescaleDataRange(true);
 		plotSettings->cLim = plotSettings->colorMap->dataRange();
 		(plotSettings->dataRangeCallback)(plotSettings->cLim);
 	}
