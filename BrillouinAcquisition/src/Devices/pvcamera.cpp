@@ -69,17 +69,13 @@ void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 	int binning{ 1 };
 	if (m_settings.roi.binning == L"8x8") {
 		binning = 8;
-	}
-	else if (m_settings.roi.binning == L"4x4") {
+	} else if (m_settings.roi.binning == L"4x4") {
 		binning = 4;
-	}
-	else if (m_settings.roi.binning == L"2x2") {
+	} else if (m_settings.roi.binning == L"2x2") {
 		binning = 2;
-	}
-	else if (m_settings.roi.binning == L"1x1") {
+	} else if (m_settings.roi.binning == L"1x1") {
 		binning = 1;
-	}
-	else {
+	} else {
 		// Fallback to 1x1 binning
 		m_settings.roi.binning = L"1x1";
 	}
@@ -212,8 +208,7 @@ void PVCamera::setSensorCooling(bool cooling) {
 		// TODO: We set the temperature to -15 �C for now, so we don't stress
 		// the camera to much while developing.
 		m_sensorTemperature.setpoint = -20.0;
-	}
-	else {
+	} else {
 		double setpoint = m_sensorTemperature.maxSetpoint;
 		// We want to set the value no higher than room temperature.
 		if (setpoint > 20) {
@@ -233,8 +228,7 @@ bool PVCamera::getSensorCooling() {
 	// If the setpoint is lower than 0 �C we consider it cooling.
 	if (setpoint / 100.0 < 0.0) {
 		return true;
-	}
-	else {
+	} else {
 		return false;
 	}
 }
@@ -452,14 +446,12 @@ bool PVCamera::initialize() {
 			//error condition
 			//PrintErrorMessage(PVCam::pl_error_code(), "pl_pvcam_init() error");
 			m_isInitialised = false;
-		}
-		else {
+		} else {
 			PVCam::int16 i_numberOfCameras{ 0 };
 			PVCam::pl_cam_get_total(&i_numberOfCameras);
 			if (i_numberOfCameras > 0) {
 				m_isInitialised = true;
-			}
-			else {
+			} else {
 				emit(noCameraFound());
 				PVCam::pl_pvcam_uninit();
 				m_isInitialised = false;
@@ -711,14 +703,11 @@ void PVCamera::checkSensorTemperature() {
 	std::string status = getTemperatureStatus();
 	if (status == "Cooler Off") {
 		m_sensorTemperature.status = enCameraTemperatureStatus::COOLER_OFF;
-	}
-	else if (status == "Cooling") {
+	} else if (status == "Cooling") {
 		m_sensorTemperature.status = enCameraTemperatureStatus::COOLING;
-	}
-	else if (status == "Stabilised") {
+	} else if (status == "Stabilised") {
 		m_sensorTemperature.status = enCameraTemperatureStatus::STABILISED;
-	}
-	else {
+	} else {
 		m_sensorTemperature.status = enCameraTemperatureStatus::FAULT;
 	}
 	emit(s_sensorTemperatureChanged(m_sensorTemperature));
