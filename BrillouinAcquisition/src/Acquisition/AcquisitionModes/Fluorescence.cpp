@@ -229,7 +229,7 @@ void Fluorescence::configureCamera() {
 }
 
 /*
- + Private slots
+ * Private slots
  */
 
 void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage) {
