@@ -189,6 +189,9 @@ void uEyeCam::startAcquisition(CAMERA_SETTINGS settings) {
 	// check if currently a preview is running and stop it in case
 	if (m_isPreviewRunning) {
 		stopPreview();
+		m_wasPreviewRunning = true;
+	} else {
+		m_wasPreviewRunning = false;
 	}
 
 	setSettings(settings);
@@ -216,6 +219,11 @@ void uEyeCam::stopAcquisition() {
 	int nRet = uEye::is_FreeImageMem(m_camera, m_imageBuffer, m_imageBufferId);
 	m_isAcquisitionRunning = false;
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
+
+	// Restart the preview if it was running before the acquisition
+	if (m_wasPreviewRunning) {
+		startPreview();
+	}
 }
 
 void uEyeCam::getImageForAcquisition(unsigned char* buffer, bool preview) {

@@ -59,7 +59,8 @@ private:
 	ScanControl** m_scanControl;
 
 	FLUORESCENCE_SETTINGS m_settings;
-	FLUORESCENCE_MODE previewChannel{ FLUORESCENCE_MODE::NONE };
+	FLUORESCENCE_MODE m_currentPreviewChannel{ FLUORESCENCE_MODE::NONE };
+	FLUORESCENCE_MODE m_previousPreviewChannel{ FLUORESCENCE_MODE::NONE };
 
 
 private slots:

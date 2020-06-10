@@ -1150,7 +1150,7 @@ void BrillouinAcquisition::showFluorescenceStatus(ACQUISITION_STATUS status) {
 	} else {
 		ui->acquisitionStartFluorescence->setText("Acquire All");
 	}
-	startBrightfieldPreview(running);
+	//startBrightfieldPreview(running);
 
 	ui->fluoBlueStart->setDisabled(running);
 	ui->fluoGreenStart->setDisabled(running);

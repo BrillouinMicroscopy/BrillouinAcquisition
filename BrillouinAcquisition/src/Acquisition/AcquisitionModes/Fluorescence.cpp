@@ -42,9 +42,11 @@ void Fluorescence::startRepetitions(std::vector<FLUORESCENCE_MODE> modes) {
 		return;
 	}
 
+	// Save current preview channel to re-enable it after acquisition
+	m_previousPreviewChannel = m_currentPreviewChannel;
 	// stop preview if necessary
-	if (previewChannel != FLUORESCENCE_MODE::NONE) {
-		previewChannel = FLUORESCENCE_MODE::NONE;
+	if (m_currentPreviewChannel != FLUORESCENCE_MODE::NONE) {
+		m_currentPreviewChannel = FLUORESCENCE_MODE::NONE;
 		(*m_camera)->stopPreview();
 	}
 
@@ -59,6 +61,10 @@ void Fluorescence::startRepetitions(std::vector<FLUORESCENCE_MODE> modes) {
 	acquire(m_acquisition->m_storage, channels);
 
 	m_acquisition->disableMode(ACQUISITION_MODE::FLUORESCENCE);
+
+	if (m_previousPreviewChannel != FLUORESCENCE_MODE::NONE) {
+		startStopPreview(m_previousPreviewChannel);
+	}
 }
 
 void Fluorescence::initialize() {
@@ -76,7 +82,7 @@ void Fluorescence::setExposure(FLUORESCENCE_MODE mode, int exposure) {
 	ChannelSettings* channel = getChannelSettings(mode);
 	channel->exposure = exposure;
 	// Apply the settings immediately if the mode preview is running
-	if (previewChannel == mode) {
+	if (m_currentPreviewChannel == mode) {
 		m_settings.camera.exposureTime = 1e-3 * channel->exposure;
 		QMetaObject::invokeMethod(
 			(*m_camera),
@@ -91,7 +97,7 @@ void Fluorescence::setGain(FLUORESCENCE_MODE mode, int gain) {
 	ChannelSettings* channel = getChannelSettings(mode);
 	channel->gain = gain;
 	// Apply the settings immediately if the mode preview is running
-	if (previewChannel == mode) {
+	if (m_currentPreviewChannel == mode) {
 		m_settings.camera.gain = channel->gain;
 		QMetaObject::invokeMethod(
 			(*m_camera),
@@ -103,9 +109,9 @@ void Fluorescence::setGain(FLUORESCENCE_MODE mode, int gain) {
 }
 
 void Fluorescence::startStopPreview(FLUORESCENCE_MODE mode) {
-	if (mode == previewChannel || mode == FLUORESCENCE_MODE::NONE) {
+	if (mode == m_currentPreviewChannel || mode == FLUORESCENCE_MODE::NONE) {
 		// stop preview
-		previewChannel = FLUORESCENCE_MODE::NONE;
+		m_currentPreviewChannel = FLUORESCENCE_MODE::NONE;
 		QMetaObject::invokeMethod(
 			(*m_camera),
 			[&m_camera = (*m_camera)]() { m_camera->stopPreview(); },
@@ -116,7 +122,7 @@ void Fluorescence::startStopPreview(FLUORESCENCE_MODE mode) {
 		if ((*m_camera)->m_isPreviewRunning) {
 			(*m_camera)->stopPreview();
 		}
-		previewChannel = mode;
+		m_currentPreviewChannel = mode;
 		ChannelSettings* channel = getChannelSettings(mode);
 
 		// move to Fluorescence configuration
@@ -132,7 +138,7 @@ void Fluorescence::startStopPreview(FLUORESCENCE_MODE mode) {
 			Qt::AutoConnection
 		);
 	}
-	emit(s_previewRunning(previewChannel));
+	emit(s_previewRunning(m_currentPreviewChannel));
 }
 
 /*
