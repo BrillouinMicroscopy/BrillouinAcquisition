@@ -21,6 +21,7 @@ public:
 
 protected:
 	std::string m_terminator{ "\r" };
+	bool waitForReady(int timeout);
 };
 
 class helper {
