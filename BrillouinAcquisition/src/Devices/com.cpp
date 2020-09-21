@@ -13,9 +13,9 @@ std::string com::receive(std::string request) {
 	std::string response = "";
 	if (waitForBytesWritten(1000)) {
 		// read response
-		if (waitForReadyRead(1000)) {
+		if (waitForReady(1000)) {
 			QByteArray responseData = readAll();
-			while (waitForReadyRead(50))
+			while (waitForReady(50))
 				responseData += readAll();
 
 			response = responseData;
@@ -23,6 +23,19 @@ std::string com::receive(std::string request) {
 	}
 
 	return response;
+}
+
+bool com::waitForReady(int timeout) {
+	waitForReadyRead(1);
+	QElapsedTimer elapsed;
+	elapsed.start();
+	while (bytesAvailable() == 0 && elapsed.elapsed() < timeout) {
+		waitForReadyRead(1);
+	}
+	if (elapsed.elapsed() < timeout) {
+		return true;
+	}
+	return false;
 }
 
 void com::send(std::string message) {
