@@ -82,6 +82,9 @@ void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 	m_settings.roi.binX = binning;
 	m_settings.roi.binY = binning;
 
+	m_settings.roi.width /= m_settings.roi.binX;
+	m_settings.roi.height /= m_settings.roi.binY;
+
 	int speedTableIndex{ 0 };
 	for (gsl::index i{ 0 }; i < m_SpeedTable.size(); i++) {
 		if (m_SpeedTable[i].label == m_settings.readout.pixelReadoutRate) {
@@ -586,9 +589,9 @@ bool PVCamera::ReadEnumeration(NVPC* nvpc, PVCam::uns32 paramID, const char* par
 PVCam::rgn_type PVCamera::getCamSettings() {
 	PVCam::rgn_type camSettings;
 	camSettings.s1 = m_settings.roi.left - 1;
-	camSettings.s2 = m_settings.roi.width + m_settings.roi.left - 2;
+	camSettings.s2 = m_settings.roi.width * m_settings.roi.binX + m_settings.roi.left - 2;
 	camSettings.p1 = m_settings.roi.top - 1;
-	camSettings.p2 = m_settings.roi.height + m_settings.roi.top - 2;
+	camSettings.p2 = m_settings.roi.height * m_settings.roi.binY + m_settings.roi.top - 2;
 	camSettings.sbin = m_settings.roi.binY;
 	camSettings.pbin = m_settings.roi.binX;
 	return camSettings;
