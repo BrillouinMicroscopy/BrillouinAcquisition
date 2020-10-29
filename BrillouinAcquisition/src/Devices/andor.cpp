@@ -75,30 +75,26 @@ void Andor::setSettings(CAMERA_SETTINGS settings) {
 	AT_SetBool(m_camera, L"SpuriousNoiseFilter", m_settings.spuriousNoiseFilter);
 
 	// Set the AOI
-	AT_SetInt(m_camera, L"AOIWidth", m_settings.roi.width);
-	AT_SetInt(m_camera, L"AOILeft", m_settings.roi.left);
-	AT_SetInt(m_camera, L"AOIHeight", m_settings.roi.height);
-	AT_SetInt(m_camera, L"AOITop", m_settings.roi.top);
 	int binning{ 1 };
 	if (m_settings.roi.binning == L"8x8") {
 		binning = 8;
-	}
-	else if (m_settings.roi.binning == L"4x4") {
+	} else if (m_settings.roi.binning == L"4x4") {
 		binning = 4;
-	}
-	else if (m_settings.roi.binning == L"2x2") {
+	} else if (m_settings.roi.binning == L"2x2") {
 		binning = 2;
-	}
-	else if (m_settings.roi.binning == L"1x1") {
+	} else if (m_settings.roi.binning == L"1x1") {
 		binning = 1;
-	}
-	else {
+	} else {
 		// Fallback to 1x1 binning
 		m_settings.roi.binning = L"1x1";
 	}
 	m_settings.roi.binX = binning;
 	m_settings.roi.binY = binning;
 	AT_SetEnumeratedString(m_camera, L"AOIBinning", m_settings.roi.binning.c_str());
+	AT_SetInt(m_camera, L"AOIWidth", m_settings.roi.width / m_settings.roi.binX);
+	AT_SetInt(m_camera, L"AOILeft", m_settings.roi.left);
+	AT_SetInt(m_camera, L"AOIHeight", m_settings.roi.height / m_settings.roi.binY);
+	AT_SetInt(m_camera, L"AOITop", m_settings.roi.top);
 	AT_SetEnumeratedString(m_camera, L"SimplePreAmpGainControl", m_settings.readout.preAmpGain.c_str());
 
 	AT_SetEnumeratedString(m_camera, L"CycleMode", m_settings.readout.cycleMode.c_str());
@@ -109,11 +105,6 @@ void Andor::setSettings(CAMERA_SETTINGS settings) {
 	AT_64 ImageSizeBytes;
 	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
 	m_bufferSize = static_cast<int>(ImageSizeBytes);
-
-	AT_GetInt(m_camera, L"AOIHeight", &m_settings.roi.height);
-	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width);
-	AT_GetInt(m_camera, L"AOILeft", &m_settings.roi.left);
-	AT_GetInt(m_camera, L"AOITop", &m_settings.roi.top);
 
 	// read back the settings
 	readSettings();
