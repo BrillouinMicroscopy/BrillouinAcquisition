@@ -271,6 +271,8 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 	// cast the vector to unsigned short
 	std::vector<unsigned short>* images_ = (std::vector<unsigned short>*) & images;
 
+	std::string binning = getBinningString();
+
 	// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
 	std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 		.toString(Qt::ISODateWithMs).toStdString();
@@ -281,7 +283,10 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 		dims_cal,				// the dimension of the calibration data
 		m_settings.sample,		// the samplename
 		shift,					// the Brillouin shift of the sample
-		date					// the datetime
+		date,					// the datetime
+		m_settings.calibrationExposureTime, // the exposure time of the calibration
+		m_settings.camera.gain,
+		binning
 	);
 
 	QMetaObject::invokeMethod(
@@ -298,6 +303,18 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 	// reset exposure time
 	(*m_andor)->setCalibrationExposureTime(m_settings.camera.exposureTime);
 	Sleep(500);
+}
+
+std::string Brillouin::getBinningString() {
+	std::string binning{ "1x1" };
+	if (m_settings.camera.roi.binning == L"8x8") {
+		binning = "1x1";
+	} else if (m_settings.camera.roi.binning == L"4x4") {
+		binning = "1x1";
+	} else if (m_settings.camera.roi.binning == L"2x2") {
+		binning = "1x1";
+	}
+	return binning;
 }
 
 /*
@@ -447,6 +464,8 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	(*m_scanControl)->setPosition(orderedPositions[0]);
 	Sleep(50);
 
+	std::string binning = getBinningString();
+
 	for (gsl::index ll{ 0 }; ll < nrPositions; ll++) {
 
 		// do live calibration if required and possible at the moment
@@ -483,7 +502,8 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 		// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
 		std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 			.toString(Qt::ISODateWithMs).toStdString();
-		IMAGE* img = new IMAGE(indexX[ll], indexY[ll], indexZ[ll], rank_data, dims_data, date, *images_);
+		IMAGE* img = new IMAGE(indexX[ll], indexY[ll], indexZ[ll], rank_data, dims_data, date, *images_,
+			m_settings.camera.exposureTime, m_settings.camera.gain, binning);
 
 		// move stage to next position before saving the images
 		if (ll < ((gsl::index)nrPositions - 1)) {

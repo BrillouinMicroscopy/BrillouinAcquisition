@@ -293,6 +293,18 @@ void ODT::calculateVoltages(ODT_MODE mode) {
 	}
 }
 
+std::string ODT::getBinningString() {
+	std::string binning{ "1x1" };
+	if (m_cameraSettings.roi.binning == L"8x8") {
+		binning = "1x1";
+	} else if (m_cameraSettings.roi.binning == L"4x4") {
+		binning = "1x1";
+	} else if (m_cameraSettings.roi.binning == L"2x2") {
+		binning = "1x1";
+	}
+	return binning;
+}
+
 /*
  * Private slots
  */
@@ -336,6 +348,7 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	int rank_data{ 3 };
 	hsize_t dims_data[3] = { 1, (hsize_t)m_cameraSettings.roi.height, (hsize_t)m_cameraSettings.roi.width };
 	int bytesPerFrame = m_cameraSettings.roi.width * m_cameraSettings.roi.height;
+	std::string binning = getBinningString();
 	if (bytesPerFrame) {
 		for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
 
@@ -358,7 +371,8 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 			// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
 			std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 				.toString(Qt::ISODateWithMs).toStdString();
-			ODTIMAGE* img = new ODTIMAGE((int)i, rank_data, dims_data, date, *images_);
+			ODTIMAGE* img = new ODTIMAGE((int)i, rank_data, dims_data, date, *images_,
+				m_cameraSettings.exposureTime, m_cameraSettings.gain, binning);
 
 			QMetaObject::invokeMethod(
 				storage.get(),

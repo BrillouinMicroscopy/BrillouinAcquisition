@@ -62,6 +62,8 @@ private:
 	FLUORESCENCE_MODE m_currentPreviewChannel{ FLUORESCENCE_MODE::NONE };
 	FLUORESCENCE_MODE m_previousPreviewChannel{ FLUORESCENCE_MODE::NONE };
 
+	std::string getBinningString();
+
 
 private slots:
 	void acquire(std::unique_ptr <StorageWrapper>& storage) override;
