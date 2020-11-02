@@ -1,9 +1,9 @@
 Param (
   [String]$Project='.',
   [String]$VERSION_MAJOR = 0,
-  [String]$VERSION_MINOR = 0,
-  [String]$VERSION_PATCH = 1,
-  [String]$VERSION_PRERELEASE = "alpha",
+  [String]$VERSION_MINOR = 1,
+  [String]$VERSION_PATCH = 0,
+  [String]$VERSION_PRERELEASE = "",
   [String]$Namespace = 'Version',
   [String]$GitRoot,
   $Author = "Raimund Schlüßler",
