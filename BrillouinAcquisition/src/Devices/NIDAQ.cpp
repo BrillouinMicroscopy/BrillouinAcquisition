@@ -401,9 +401,9 @@ int NIDAQ::getBeamBlock() {
 void NIDAQ::setMirror(int position) {
 	double realPosition{ 0 };
 	if (position == 1) {
-		realPosition = 2.0;
+		realPosition = m_mirrorStart;
 	} else if (position == 2) {
-		realPosition = 18.0;
+		realPosition = m_mirrorEnd;
 	}
 	int incPos = realPosition * m_gearBoxRatio * m_stepsPerRev / m_pitch;
 	Thorlabs_KDC::CC_MoveToPosition(m_serialNo_KDC, incPos);
@@ -423,14 +423,12 @@ void NIDAQ::setMirror(int position) {
 int NIDAQ::getMirror() {
 	int currentIndex = Thorlabs_KDC::CC_GetPosition(m_serialNo_KDC);
 	// position 1
-	double realPosition = 2.0;
-	int targetIndex = realPosition * m_gearBoxRatio * m_stepsPerRev / m_pitch;
+	int targetIndex = m_mirrorStart * m_gearBoxRatio * m_stepsPerRev / m_pitch;
 	if (abs(currentIndex - targetIndex) < 10) {
 		return 1;
 	}
 	// position 2
-	realPosition = 18.0;
-	targetIndex = realPosition * m_gearBoxRatio * m_stepsPerRev / m_pitch;
+	targetIndex = m_mirrorEnd * m_gearBoxRatio * m_stepsPerRev / m_pitch;
 	if (abs(currentIndex - targetIndex) < 10) {
 		return 2;
 	}
