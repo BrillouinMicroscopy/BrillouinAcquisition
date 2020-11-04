@@ -123,7 +123,7 @@ void StorageWrapper::s_writeQueues() {
 			return;
 		}
 		CALIBRATION *cal = m_calibrationQueue.dequeue();
-		setCalibrationData(cal->index, cal->data, cal->rank, cal->dims, cal->sample, cal->shift, cal->date);
+		setCalibrationData(cal->index, cal->data, cal->rank, cal->dims, cal->sample, cal->shift, cal->date, cal->exposure, cal->gain, cal->binning);
 		//std::string info = "Calibration written " + std::to_string(m_writtenCalibrationsNr);
 		//qInfo(logInfo()) << info.c_str();
 		m_writtenCalibrationsNr++;

@@ -85,6 +85,8 @@ private:
 
 	void calibrate(std::unique_ptr <StorageWrapper>& storage);
 
+	std::string getBinningString();
+
 	BRILLOUIN_SETTINGS m_settings;
 	SCAN_ORDER m_scanOrder;
 	Camera** m_andor;

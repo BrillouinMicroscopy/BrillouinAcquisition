@@ -228,6 +228,18 @@ void Fluorescence::configureCamera() {
 	m_settings.camera.frameCount = 1;
 }
 
+std::string Fluorescence::getBinningString() {
+	std::string binning{ "1x1" };
+	if (m_settings.camera.roi.binning == L"8x8") {
+		binning = "1x1";
+	} else if (m_settings.camera.roi.binning == L"4x4") {
+		binning = "1x1";
+	} else if (m_settings.camera.roi.binning == L"2x2") {
+		binning = "1x1";
+	}
+	return binning;
+}
+
 /*
  * Private slots
  */
@@ -326,7 +338,9 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 		// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
 		std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 			.toString(Qt::ISODateWithMs).toStdString();
-		FLUOIMAGE* img = new FLUOIMAGE(imageNumber, rank_data, dims_data, date, channel->name, *images_);
+		std::string binning = getBinningString();
+		FLUOIMAGE* img = new FLUOIMAGE(imageNumber, rank_data, dims_data, date, channel->name, *images_,
+			m_settings.camera.exposureTime, m_settings.camera.gain, binning);
 
 		QMetaObject::invokeMethod(
 			storage.get(),

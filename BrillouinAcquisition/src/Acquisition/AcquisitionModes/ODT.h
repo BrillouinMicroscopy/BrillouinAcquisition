@@ -70,6 +70,8 @@ private:
 
 	QTimer* m_algnTimer{ nullptr };
 
+	std::string getBinningString();
+
 private slots:
 	void acquire(std::unique_ptr <StorageWrapper> & storage) override;
 	
