@@ -344,6 +344,9 @@
     <ClInclude Include="src\simplemath.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\colormaps.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="external\h5bm\h5bm.h">

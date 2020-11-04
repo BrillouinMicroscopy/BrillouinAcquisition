@@ -292,6 +292,7 @@ private slots:
 	void applyCameraSettings();
 
 	void setColormap(QCPColorGradient*, CustomGradientPreset);
+	void applyColorMap(QCPColorGradient* gradient, std::vector<std::vector<double>> colorMap);
 	void setElement(DeviceElement element, double position);
 	void setPreset(ScanPreset preset);
 	void updatePlotLimits(PLOT_SETTINGS plotSettings, CAMERA_OPTIONS options, CAMERA_ROI roi);
