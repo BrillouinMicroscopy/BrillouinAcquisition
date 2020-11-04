@@ -3,6 +3,7 @@
 #include "version.h"
 #include "logger.h"
 #include "simplemath.h"
+#include "colormaps.h"
 #include "filesystem"
 
 using namespace std::filesystem;
@@ -266,7 +267,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 			this->updateCLimRange(ui->rangeLower, ui->rangeUpper, range);
 		},
 		false,
-		CustomGradientPreset::gpParula
+		CustomGradientPreset::gpViridis
 	};
 
 	m_ODTPlot = {
@@ -812,10 +813,10 @@ void BrillouinAcquisition::on_camera_displayMode_currentIndexChanged(const QStri
 		m_ODTPlot.gradient = CustomGradientPreset::gpGrayscale;
 	} else if (text == "Spectrum") {
 		m_ODTPlot.mode = DISPLAY_MODE::SPECTRUM;
-		m_ODTPlot.gradient = CustomGradientPreset::gpJet;
+		m_ODTPlot.gradient = CustomGradientPreset::gpInferno;
 	} else if (text == "Phase") {
 		m_ODTPlot.mode = DISPLAY_MODE::PHASE;
-		m_ODTPlot.gradient = CustomGradientPreset::gpJet;
+		m_ODTPlot.gradient = CustomGradientPreset::gpInferno;
 	} else {
 		m_ODTPlot.mode = DISPLAY_MODE::INTENSITY;
 		m_ODTPlot.gradient = CustomGradientPreset::gpGrayscale;
@@ -3359,39 +3360,30 @@ void BrillouinAcquisition::on_actionClose_Acquisition_triggered() {
 void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradientPreset preset) {
 	gradient->clearColorStops();
 	switch (preset) {
-		case CustomGradientPreset::gpParula:
+		case CustomGradientPreset::gpViridis: {
 			gradient->setColorInterpolation(QCPColorGradient::ciRGB);
-			gradient->setColorStopAt(0.00, QColor( 53,  42, 135));
-			gradient->setColorStopAt(0.05, QColor( 53,  62, 175));
-			gradient->setColorStopAt(0.10, QColor( 27,  85, 215));
-			gradient->setColorStopAt(0.15, QColor(  2, 106, 225));
-			gradient->setColorStopAt(0.20, QColor( 15, 119, 219));
-			gradient->setColorStopAt(0.25, QColor( 20, 132, 212));
-			gradient->setColorStopAt(0.30, QColor( 13, 147, 210));
-			gradient->setColorStopAt(0.35, QColor(  6, 160, 205));
-			gradient->setColorStopAt(0.40, QColor(  7, 170, 193));
-			gradient->setColorStopAt(0.45, QColor( 24, 177, 178));
-			gradient->setColorStopAt(0.50, QColor( 51, 184, 161));
-			gradient->setColorStopAt(0.55, QColor( 85, 189, 142));
-			gradient->setColorStopAt(0.60, QColor(122, 191, 124));
-			gradient->setColorStopAt(0.65, QColor(155, 191, 111));
-			gradient->setColorStopAt(0.70, QColor(184, 189,  99));
-			gradient->setColorStopAt(0.75, QColor(211, 187,  88));
-			gradient->setColorStopAt(0.80, QColor(236, 185,  76));
-			gradient->setColorStopAt(0.85, QColor(255, 193,  58));
-			gradient->setColorStopAt(0.90, QColor(250, 209,  43));
-			gradient->setColorStopAt(0.95, QColor(245, 227,  30));
-			gradient->setColorStopAt(1.00, QColor(249, 251,  14));
+			BrillouinAcquisition::applyColorMap(gradient, ColorMaps::m_viridis);
 			break;
+		}
 		case CustomGradientPreset::gpGrayscale:
 			gradient->loadPreset(QCPColorGradient::gpGrayscale);
 			break;
-		case CustomGradientPreset::gpJet:
-			gradient->loadPreset(QCPColorGradient::gpJet);
+		case CustomGradientPreset::gpInferno:
+			gradient->setColorInterpolation(QCPColorGradient::ciRGB);
+			BrillouinAcquisition::applyColorMap(gradient, ColorMaps::m_inferno);
 			break;
 		default:
 			gradient->loadPreset(QCPColorGradient::gpGrayscale);
 			break;
+	}
+}
+
+void BrillouinAcquisition::applyColorMap(QCPColorGradient* gradient, std::vector<std::vector<double>> colorMap) {
+	auto index{ 0 };
+	auto position{ 0.0 };
+	for (auto it = std::begin(colorMap); it != std::end(colorMap); ++it) {
+		gradient->setColorStopAt((double)index / colorMap.size(), QColor((int)255*(*it)[0], (int)255*(*it)[1], (int)255*(*it)[2]));
+		++index;
 	}
 }
 

@@ -9,12 +9,12 @@
 #include "phase.h"
 
 enum class CustomGradientPreset {
-	gpParula,
+	gpViridis,
 	gpGrayscale,
 	gpRed,
 	gpGreen,
 	gpBlue,
-	gpJet
+	gpInferno
 };
 
 typedef enum class displayMode {
@@ -31,7 +31,7 @@ struct PLOT_SETTINGS {
 	QSpinBox* upperBox{ nullptr };
 	std::function<void(QCPRange)> dataRangeCallback{ nullptr };
 	bool autoscale{ false };
-	CustomGradientPreset gradient = CustomGradientPreset::gpParula;
+	CustomGradientPreset gradient = CustomGradientPreset::gpViridis;
 	DISPLAY_MODE mode{ DISPLAY_MODE::INTENSITY };
 };
 
