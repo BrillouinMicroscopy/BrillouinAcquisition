@@ -2,7 +2,7 @@
 #define ZEISSMTB_H
 
 #include <atlutil.h>
-#include "scancontrol.h"
+#include "ScanControl.h"
 
 namespace Thorlabs_FF {
 	#include <Thorlabs.MotionControl.FilterFlipper.h>
@@ -31,15 +31,7 @@ public slots:
 	void getElements() override;
 	void setPreset(ScanPreset preset) override;
 
-	// sets the position relative to the home position m_homePosition
-	void setPositionRelativeX(double position) override;
-	void setPositionRelativeY(double position) override;
-	void setPositionRelativeZ(double position) override;
-	void setPositionInPix(POINT2) override;
-
 private:
-	POINT2 pixToMicroMeter(POINT2) override;
-
 	bool setElement(IMTBChangerPtr element, int position);
 	int getElement(IMTBChangerPtr element);
 

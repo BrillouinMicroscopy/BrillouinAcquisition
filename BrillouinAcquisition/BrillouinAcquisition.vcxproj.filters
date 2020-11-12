@@ -46,6 +46,18 @@
     <Filter Include="Source Files\Acquisition\AcquisitionModes">
       <UniqueIdentifier>{db791b25-91d9-4fdf-b812-1ddf72d2bf37}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Devices\Cameras">
+      <UniqueIdentifier>{95d9e03f-76c5-409c-b6af-d6c2d25dde44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Devices\ScanControls">
+      <UniqueIdentifier>{99d67e35-55c6-4427-855f-9a491df9938b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Devices\Cameras">
+      <UniqueIdentifier>{2a8f549e-4329-4255-b1a0-fdce74b84900}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Devices\ScanControls">
+      <UniqueIdentifier>{99819167-c51e-418d-a2ae-c78969a36d45}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeneratedFiles\Debug\moc_BrillouinAcquisition.cpp">
@@ -177,26 +189,26 @@
     <ClCompile Include="src\stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Devices\andor.cpp">
-      <Filter>Source Files\Devices</Filter>
+    <ClCompile Include="src\Devices\Cameras\andor.cpp">
+      <Filter>Source Files\Devices\Cameras</Filter>
     </ClCompile>
-    <ClCompile Include="src\Devices\Camera.cpp">
-      <Filter>Source Files\Devices</Filter>
+    <ClCompile Include="src\Devices\Cameras\Camera.cpp">
+      <Filter>Source Files\Devices\Cameras</Filter>
     </ClCompile>
     <ClCompile Include="src\Devices\Device.cpp">
       <Filter>Source Files\Devices</Filter>
     </ClCompile>
-    <ClCompile Include="src\Devices\NIDAQ.cpp">
-      <Filter>Source Files\Devices</Filter>
+    <ClCompile Include="src\Devices\ScanControls\NIDAQ.cpp">
+      <Filter>Source Files\Devices\ScanControls</Filter>
     </ClCompile>
-    <ClCompile Include="src\Devices\PointGrey.cpp">
-      <Filter>Source Files\Devices</Filter>
+    <ClCompile Include="src\Devices\Cameras\PointGrey.cpp">
+      <Filter>Source Files\Devices\Cameras</Filter>
     </ClCompile>
-    <ClCompile Include="src\Devices\scancontrol.cpp">
-      <Filter>Source Files\Devices</Filter>
+    <ClCompile Include="src\Devices\ScanControls\ScanControl.cpp">
+      <Filter>Source Files\Devices\ScanControls</Filter>
     </ClCompile>
-    <ClCompile Include="src\Devices\ZeissECU.cpp">
-      <Filter>Source Files\Devices</Filter>
+    <ClCompile Include="src\Devices\ScanControls\ZeissECU.cpp">
+      <Filter>Source Files\Devices\ScanControls</Filter>
     </ClCompile>
     <ClCompile Include="src\Acquisition\Acquisition.cpp">
       <Filter>Source Files\Acquisition</Filter>
@@ -231,13 +243,13 @@
     <ClCompile Include="GeneratedFiles\Release\moc_uEyeCam.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Devices\uEyeCam.cpp">
-      <Filter>Source Files\Devices</Filter>
+    <ClCompile Include="src\Devices\Cameras\uEyeCam.cpp">
+      <Filter>Source Files\Devices\Cameras</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_Calibration.cpp">
+    <ClCompile Include="GeneratedFiles\Debug\moc_VoltageCalibration.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Acquisition\AcquisitionModes\Calibration.cpp">
+    <ClCompile Include="src\Acquisition\AcquisitionModes\VoltageCalibration.cpp">
       <Filter>Source Files\Acquisition\AcquisitionModes</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_converter.cpp">
@@ -258,8 +270,8 @@
     <ClCompile Include="src\xsample.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Devices\pvcamera.cpp">
-      <Filter>Source Files\Devices</Filter>
+    <ClCompile Include="src\Devices\Cameras\pvcamera.cpp">
+      <Filter>Source Files\Devices\Cameras</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_pvcamera.cpp">
       <Filter>Generated Files</Filter>
@@ -267,8 +279,8 @@
     <ClCompile Include="GeneratedFiles\Release\moc_pvcamera.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Devices\ZeissMTB.cpp">
-      <Filter>Source Files\Devices</Filter>
+    <ClCompile Include="src\Devices\ScanControls\ZeissMTB.cpp">
+      <Filter>Source Files\Devices\ScanControls</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_ZeissMTB_Erlangen.cpp">
       <Filter>Generated Files</Filter>
@@ -276,8 +288,8 @@
     <ClCompile Include="GeneratedFiles\Release\moc_ZeissMTB_Erlangen.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Devices\ZeissMTB_Erlangen.cpp">
-      <Filter>Source Files\Devices</Filter>
+    <ClCompile Include="src\Devices\ScanControls\ZeissMTB_Erlangen.cpp">
+      <Filter>Source Files\Devices\ScanControls</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_ODTControl.cpp">
       <Filter>Generated Files</Filter>
@@ -285,13 +297,13 @@
     <ClCompile Include="GeneratedFiles\Release\moc_ODTControl.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Devices\ODTControl.cpp">
-      <Filter>Source Files\Devices</Filter>
+    <ClCompile Include="src\Devices\ScanControls\ODTControl.cpp">
+      <Filter>Source Files\Devices\ScanControls</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_ZeissMTB.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_Calibration.cpp">
+    <ClCompile Include="GeneratedFiles\Release\moc_VoltageCalibration.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_filtermount.cpp">
@@ -301,6 +313,15 @@
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_ZeissMTB.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Acquisition\AcquisitionModes\ScaleCalibration.cpp">
+      <Filter>Source Files\Acquisition\AcquisitionModes</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ScaleCalibration.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ScaleCalibration.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -320,13 +341,10 @@
     <ClInclude Include="src\stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Devices\cameraParameters.h">
-      <Filter>Header Files\Devices</Filter>
+    <ClInclude Include="src\Devices\Cameras\cameraParameters.h">
+      <Filter>Header Files\Devices\Cameras</Filter>
     </ClInclude>
     <ClInclude Include="src\Devices\com.h">
-      <Filter>Header Files\Devices</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Devices\CalibrationHelper.h">
       <Filter>Header Files\Devices</Filter>
     </ClInclude>
     <ClInclude Include="external\unwrap\unwrap2D.h">
@@ -346,6 +364,15 @@
     </ClInclude>
     <ClInclude Include="src\colormaps.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Acquisition\AcquisitionModes\VoltageCalibrationHelper.h">
+      <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\POINTS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Acquisition\AcquisitionModes\ScaleCalibrationHelper.h">
+      <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -376,26 +403,26 @@
     <CustomBuild Include="BrillouinAcquisition.qrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\Devices\andor.h">
-      <Filter>Header Files\Devices</Filter>
+    <CustomBuild Include="src\Devices\Cameras\andor.h">
+      <Filter>Header Files\Devices\Cameras</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\Devices\Camera.h">
-      <Filter>Header Files\Devices</Filter>
+    <CustomBuild Include="src\Devices\Cameras\Camera.h">
+      <Filter>Header Files\Devices\Cameras</Filter>
     </CustomBuild>
     <CustomBuild Include="src\Devices\Device.h">
       <Filter>Header Files\Devices</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\Devices\NIDAQ.h">
-      <Filter>Header Files\Devices</Filter>
+    <CustomBuild Include="src\Devices\ScanControls\NIDAQ.h">
+      <Filter>Header Files\Devices\ScanControls</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\Devices\PointGrey.h">
-      <Filter>Header Files\Devices</Filter>
+    <CustomBuild Include="src\Devices\Cameras\PointGrey.h">
+      <Filter>Header Files\Devices\Cameras</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\Devices\scancontrol.h">
-      <Filter>Header Files\Devices</Filter>
+    <CustomBuild Include="src\Devices\ScanControls\ScanControl.h">
+      <Filter>Header Files\Devices\ScanControls</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\Devices\ZeissECU.h">
-      <Filter>Header Files\Devices</Filter>
+    <CustomBuild Include="src\Devices\ScanControls\ZeissECU.h">
+      <Filter>Header Files\Devices\ScanControls</Filter>
     </CustomBuild>
     <CustomBuild Include="src\Acquisition\Acquisition.h">
       <Filter>Header Files\Acquisition</Filter>
@@ -415,26 +442,29 @@
     <CustomBuild Include="src\Acquisition\AcquisitionModes\Fluorescence.h">
       <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\Devices\uEyeCam.h">
-      <Filter>Header Files\Devices</Filter>
+    <CustomBuild Include="src\Devices\Cameras\uEyeCam.h">
+      <Filter>Header Files\Devices\Cameras</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\Acquisition\AcquisitionModes\Calibration.h">
+    <CustomBuild Include="src\Acquisition\AcquisitionModes\VoltageCalibration.h">
       <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
     </CustomBuild>
     <CustomBuild Include="src\converter.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\Devices\pvcamera.h">
-      <Filter>Header Files\Devices</Filter>
+    <CustomBuild Include="src\Devices\Cameras\pvcamera.h">
+      <Filter>Header Files\Devices\Cameras</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\Devices\ZeissMTB.h">
-      <Filter>Header Files\Devices</Filter>
+    <CustomBuild Include="src\Devices\ScanControls\ZeissMTB.h">
+      <Filter>Header Files\Devices\ScanControls</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\Devices\ZeissMTB_Erlangen.h">
-      <Filter>Header Files\Devices</Filter>
+    <CustomBuild Include="src\Devices\ScanControls\ZeissMTB_Erlangen.h">
+      <Filter>Header Files\Devices\ScanControls</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\Devices\ODTControl.h">
-      <Filter>Header Files\Devices</Filter>
+    <CustomBuild Include="src\Devices\ScanControls\ODTControl.h">
+      <Filter>Header Files\Devices\ScanControls</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Acquisition\AcquisitionModes\ScaleCalibration.h">
+      <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

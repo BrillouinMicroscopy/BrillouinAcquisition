@@ -18,32 +18,40 @@ ZeissMTB_Erlangen::ZeissMTB_Erlangen() noexcept {
 	};
 
 	m_presets = {
-		{ "Brillouin",		ScanPreset::SCAN_BRILLOUIN,		{ {2}, {}, {4}, {2}, {1}, {2}, {2} } },	// Brillouin
-		{ "Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {2}, {}, {4}, {2}, {1}, {1}, {2} } },	// Calibration
-		{ "ODT",			ScanPreset::SCAN_ODT,			{ {2}, {}, {4}, {2}, {1}, {1}, {1} } },	// ODT
-		{ "Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{ {2}, {}, {4}, {2}, {1}, {2}, {2} } },	// Brightfield
-		{ "Eyepiece",		ScanPreset::SCAN_EYEPIECE,		{ {2}, {}, {4}, {1}, {1}, {2}, {2} } },	// Eyepiece
-		{ "Fluo Blue",		ScanPreset::SCAN_EPIFLUOBLUE,	{ {1}, {}, {3},  {}, {2}, {1}, {1} } },	// Fluorescence blue
-		{ "Fluo Green",		ScanPreset::SCAN_EPIFLUOGREEN,	{ {1}, {}, {1},  {}, {2}, {1}, {1} } },	// Fluorescence green
-		{ "Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {1}, {}, {2},  {}, {2}, {1}, {1} } }	// Fluorescence red
-	};
-
-	// bounds of the stage
-	m_absoluteBounds = {
-		-150000,	// [µm] minimal x-value
-		 150000,	// [µm] maximal x-value
-		-150000,	// [µm] minimal y-value
-		 150000,	// [µm] maximal y-value
-		-150000,	// [µm] minimal z-value
-		 150000		// [µm] maximal z-value
+		{ "Brillouin",		ScanPreset::SCAN_BRILLOUIN,		{ {2}, {}, {4}, {2}, {1}, {2}, {2} }	},	// Brillouin
+		{ "Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {2}, {}, {4}, {2}, {1}, {1}, {2} }	},	// Calibration
+		{ "ODT",			ScanPreset::SCAN_ODT,			{ {2}, {}, {4}, {2}, {1}, {1}, {1} }	},	// ODT
+		{ "Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{ {2}, {}, {4}, {2}, {1}, {2}, {2} }	},	// Brightfield
+		{ "Eyepiece",		ScanPreset::SCAN_EYEPIECE,		{ {2}, {}, {4}, {1}, {1}, {2}, {2} }	},	// Eyepiece
+		{ "Fluo Blue",		ScanPreset::SCAN_EPIFLUOBLUE,	{ {1}, {}, {3},  {}, {2}, {1}, {1} }	},	// Fluorescence blue
+		{ "Fluo Green",		ScanPreset::SCAN_EPIFLUOGREEN,	{ {1}, {}, {1},  {}, {2}, {1}, {1} }	},	// Fluorescence green
+		{ "Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {1}, {}, {2},  {}, {2}, {1}, {1} }	}	// Fluorescence red
 	};
 
 	m_elementPositions = std::vector<double>((int)DEVICE_ELEMENT::COUNT, -1);
+
+	// Register capabilities
+	registerCapability(Capabilities::ODT);
+	registerCapability(Capabilities::TranslationStage);
+	registerCapability(Capabilities::ScaleCalibration);
+
+	/*
+	 * Initialize the scale calibration with default values (determined for a 20x objective)
+	 */
+	auto scale = double{ 0.22873 };						// [µm/pix] image scale
+
+	auto scaleCalibration = ScaleCalibrationData{};
+	scaleCalibration.pixToMicrometerX = { 0, scale };	// camera x axis is stage y axis
+	scaleCalibration.pixToMicrometerY = { scale, 0 };	// camera y axis is state x axis
+
+	ScaleCalibrationHelper::initializeCalibrationFromPixel(&scaleCalibration);
+
+	setScaleCalibration(scaleCalibration);
 }
 
 ZeissMTB_Erlangen::~ZeissMTB_Erlangen() {
-	positionTimer->stop();
-	elementPositionTimer->stop();
+	m_positionTimer->stop();
+	m_elementPositionTimer->stop();
 	disconnectDevice();
 	/*
 	 * Clean up Zeiss MTB handles
@@ -52,38 +60,46 @@ ZeissMTB_Erlangen::~ZeissMTB_Erlangen() {
 }
 
 void ZeissMTB_Erlangen::setPosition(POINT2 position) {
-	bool success{ false };
+	auto success{ false };
 	if (m_stageX && m_stageY) {
-		success = m_stageX->SetPosition(position.x, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
-		success = m_stageY->SetPosition(position.y, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		// We have to subtract the position of the scanner to get the position of the stage.
+		auto positionStage = position - m_positionScanner;
+		if (abs(m_positionStage.x - positionStage.x) > 1e-6) {
+			m_positionStage.x = positionStage.x;
+			success = m_stageX->SetPosition(m_positionStage.x, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		}
+		if (abs(m_positionStage.y - positionStage.y) > 1e-6) {
+			m_positionStage.y = positionStage.y;
+			success = m_stageY->SetPosition(m_positionStage.y, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		}
 	}
-	calculateCurrentPositionBounds();
+	calculateCurrentPositionBounds(POINT3{ position.x, position.y, m_positionFocus });
+	announcePositions();
 }
 
 void ZeissMTB_Erlangen::setPosition(POINT3 position) {
-	bool success{ false };
-	if (m_stageX && m_stageY) {
-		success = m_stageX->SetPosition(position.x, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
-		success = m_stageY->SetPosition(position.y, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
-	}
+	auto success{ false };
 	if (m_ObjectiveFocus) {
-		success = m_ObjectiveFocus->SetPosition(position.z, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		// Only set position if it has changed
+		if (abs(m_positionFocus - position.z) > 1e-6) {
+			m_positionFocus = position.z;
+			success = m_ObjectiveFocus->SetPosition(m_positionFocus, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		}
 	}
-	calculateCurrentPositionBounds(position);
+	setPosition(POINT2{ position.x, position.y });
 }
 
 POINT3 ZeissMTB_Erlangen::getPosition() {
-	double x{ 0 };
-	double y{ 0 };
-	double z{ 0 };
 	if (m_stageX && m_stageY) {
-		x = m_stageX->GetPosition("µm");
-		y = m_stageY->GetPosition("µm");
+		m_positionStage.x = m_stageX->GetPosition("µm");
+		m_positionStage.y = m_stageY->GetPosition("µm");
 	}
 	if (m_ObjectiveFocus) {
-		z = m_ObjectiveFocus->GetPosition("µm");
+		m_positionFocus = m_ObjectiveFocus->GetPosition("µm");
 	}
-	return POINT3{ x, y, z };
+
+	// Return the current position
+	return ScanControl::getPosition();
 }
 
 /*
@@ -104,17 +120,17 @@ void ZeissMTB_Erlangen::init() {
 	m_Mirror = new FilterMount("COM5");
 	m_Mirror->init();
 
-	positionTimer = new QTimer();
-	QMetaObject::Connection connection = QWidget::connect(
-		positionTimer,
+	m_positionTimer = new QTimer();
+	auto connection = QWidget::connect(
+		m_positionTimer,
 		&QTimer::timeout,
 		this,
 		&ZeissMTB_Erlangen::announcePosition
 	);
 
-	elementPositionTimer = new QTimer();
+	m_elementPositionTimer = new QTimer();
 	connection = QWidget::connect(
-		elementPositionTimer,
+		m_elementPositionTimer,
 		&QTimer::timeout,
 		this,
 		&ZeissMTB_Erlangen::getElements
@@ -271,7 +287,7 @@ void ZeissMTB_Erlangen::setPreset(ScanPreset presetType) {
 	auto preset = getPreset(presetType);
 	getElements();
 
-	for (gsl::index ii = 0; ii < m_deviceElements.size(); ii++) {
+	for (gsl::index ii{ 0 }; ii < m_deviceElements.size(); ii++) {
 		// check if element position needs to be changed
 		if (!preset.elementPositions[ii].empty() && !simplemath::contains(preset.elementPositions[ii], m_elementPositions[ii])) {
 			setElement(m_deviceElements[ii], preset.elementPositions[ii][0]);
@@ -282,41 +298,9 @@ void ZeissMTB_Erlangen::setPreset(ScanPreset presetType) {
 	emit(elementPositionsChanged(m_elementPositions));
 }
 
-void ZeissMTB_Erlangen::setPositionRelativeX(double positionX) {
-	bool success{ false };
-	if (m_stageX) {
-		success = m_stageX->SetPosition(positionX + m_homePosition.x, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
-	}
-	calculateCurrentPositionBounds();
-}
-
-void ZeissMTB_Erlangen::setPositionRelativeY(double positionY) {
-	bool success{ false };
-	if (m_stageY) {
-		success = m_stageY->SetPosition(positionY + m_homePosition.y, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
-	}
-	calculateCurrentPositionBounds();
-}
-
-void ZeissMTB_Erlangen::setPositionRelativeZ(double positionZ) {
-	bool success{ false };
-	if (m_ObjectiveFocus) {
-		success = m_ObjectiveFocus->SetPosition(positionZ + m_homePosition.z, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
-	}
-	calculateCurrentPositionBounds();
-}
-
-void ZeissMTB_Erlangen::setPositionInPix(POINT2) {
-	// Does nothing for now, since for the 780 nm setup no spatial calibration is in place yet.
-}
-
 /*
  * Private definitions
  */
-
-POINT2 ZeissMTB_Erlangen::pixToMicroMeter(POINT2) {
-	return POINT2();
-}
 
 bool ZeissMTB_Erlangen::setElement(IMTBChangerPtr element, int position) {
 	if (!element) {
@@ -370,14 +354,14 @@ int ZeissMTB_Erlangen::getRLShutter() {
 
 void ZeissMTB_Erlangen::setMirror(int position) {
 	// calculate the position to set, slots are spaced every 32 mm
-	double pos = 60.0 * ((double)position - 1);
+	auto pos = 60.0 * ((double)position - 1);
 	// This device has 1024 encoder pulses per mm
 	pos *= 1024;
 	m_Mirror->setPosition(pos);
 }
 
 int ZeissMTB_Erlangen::getMirror() {
-	double pos = m_Mirror->getPosition();
+	auto pos = m_Mirror->getPosition();
 	// This device has 1024 encoder pulses per mm
 	pos /= 1024;
 	// Somehow the filter mount does not position the filters very accurately.
@@ -394,7 +378,7 @@ int ZeissMTB_Erlangen::getMirror() {
 void ZeissMTB_Erlangen::setBeamBlock(int position) {
 	m_beamBlockOpen = position;
 	// Write digital voltages
-	const uInt8	voltage = (uInt8)m_beamBlockOpen;
+	const auto	voltage = (uInt8)m_beamBlockOpen;
 	DAQmxWriteDigitalLines(DOtaskHandle_BeamBlock, 1, false, 10, DAQmx_Val_GroupByChannel, &voltage, NULL, NULL);
 }
 

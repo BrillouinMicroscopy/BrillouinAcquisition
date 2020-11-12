@@ -7,7 +7,7 @@
 #import "MTBApi.tlb" named_guids
 using namespace MTBApi;
 
-#include "filtermount.h"
+#include "..\filtermount.h"
 
 class ZeissMTB_Erlangen: public ODTControl {
 	Q_OBJECT
@@ -29,15 +29,7 @@ public slots:
 	void getElements() override;
 	void setPreset(ScanPreset preset) override;
 
-	// sets the position relative to the home position m_homePosition
-	void setPositionRelativeX(double position) override;
-	void setPositionRelativeY(double position) override;
-	void setPositionRelativeZ(double position) override;
-	void setPositionInPix(POINT2) override;
-
 private:
-	POINT2 pixToMicroMeter(POINT2) override;
-
 	bool setElement(IMTBChangerPtr element, int position);
 	int getElement(IMTBChangerPtr element);
 

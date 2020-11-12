@@ -4,10 +4,10 @@
 #include <QtCore>
 #include <gsl/gsl>
 
-#include "Device.h"
+#include "../Device.h"
 
 #include "cameraParameters.h"
-#include "..\previewBuffer.h"
+#include "../../previewBuffer.h"
 
 typedef enum class enCameraTemperatureStatus {
 	COOLER_OFF,

@@ -8,6 +8,7 @@
 #include <iterator>
 
 #include <math.h>
+#include <gsl/gsl>
 #include "simplemath.h"
 
 #include "../external/fftw/fftw3.h"
@@ -82,8 +83,8 @@ private:
 
 	std::vector<int> createMask(int dim_x, int dim_y, double maskRadius) {
 		std::vector<int> mask((size_t)dim_x * dim_y, 0);
-		for (int x{ (int)round(dim_x / 2.0 - m_maskRadius) }; x < round(dim_x / 2.0 + m_maskRadius); x++) {
-			for (int y{ (int)round(dim_y / 2.0 - m_maskRadius) }; y < round(dim_y / 2.0 + m_maskRadius); y++) {
+		for (gsl::index x{ (int)round(dim_x / 2.0 - m_maskRadius) }; x < round(dim_x / 2.0 + m_maskRadius); x++) {
+			for (gsl::index y{ (int)round(dim_y / 2.0 - m_maskRadius) }; y < round(dim_y / 2.0 + m_maskRadius); y++) {
 				if (sqrt(pow((x - dim_x/2.0), 2) + pow(y - dim_y/2.0, 2)) <= m_maskRadius) {
 					mask[x + (size_t)dim_x * y] = 1;
 				}
@@ -95,7 +96,7 @@ private:
 
 	template <typename T_in = double>
 	void copyToInput(fftw_complex* dest, T_in* intensity, int dim_x, int dim_y) {
-		for (int i{ 0 }; i < dim_x * dim_y; i++) {
+		for (gsl::index i{ 0 }; i < dim_x * dim_y; i++) {
 			dest[i][0] = intensity[i];
 			dest[i][1] = 0.0;
 		}
@@ -104,7 +105,7 @@ private:
 	void getRawPhase() {
 		// Shift background spectrum to center and mask unwanted regions
 		circshift(m_out_FFT, m_dim_x, m_dim_y, -m_max_x, -m_max_y);
-		for (int jj{ 0 }; jj < m_dim_x * m_dim_y; jj++) {
+		for (gsl::index jj{ 0 }; jj < m_dim_x * m_dim_y; jj++) {
 			m_out_FFT[jj][0] *= m_mask[jj];
 			m_out_FFT[jj][1] *= m_mask[jj];
 		}
@@ -178,7 +179,7 @@ public:
 		// Calculate magnitude of background image to find the indices of the largest element
 		std::vector<double> background;
 		background.resize((size_t)dim_x * dim_y);
-		for (int i{ 0 }; i < dim_x * dim_y; i++) {
+		for (gsl::index i{ 0 }; i < dim_x * dim_y; i++) {
 			background[i] = pow(m_out_FFT[i][0], 2) + pow(m_out_FFT[i][1], 2);
 		}
 
@@ -211,7 +212,7 @@ public:
 		fftw_execute(m_FFT);
 
 		// Calculate the absolute value
-		for (int i{ 0 }; i < dim_x * dim_y; i++) {
+		for (gsl::index i{ 0 }; i < dim_x * dim_y; i++) {
 			(*spectrum)[i] = log10(sqrt(pow(m_out_FFT[i][0], 2) + pow(m_out_FFT[i][1], 2)) / ((size_t)dim_x * dim_y));
 		}
 
@@ -248,7 +249,7 @@ public:
 		}
 
 		// Divide by background and calculate the phase angle
-		for (int i{ 0 }; i < N; i++) {
+		for (gsl::index i{ 0 }; i < N; i++) {
 			double a = m_out_IFFT[i][0];
 			double b = m_out_IFFT[i][1];
 			double c = m_background[i][0];
@@ -272,7 +273,7 @@ public:
 		auto end = std::end(phase_lowRes);
 		auto median = simplemath::median(beg, end);
 
-		for (int i{ 0 }; i < dim_x_new * dim_y_new; i++) {
+		for (gsl::index i{ 0 }; i < dim_x_new * dim_y_new; i++) {
 			phaseUnwrapped[i] -= median;
 		}
 

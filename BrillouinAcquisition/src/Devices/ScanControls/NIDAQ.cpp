@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "NIDAQ.h"
 #include <windows.h>
+#include "..\..\simplemath.h"
 
 /*
  * Public definitions
@@ -19,78 +20,100 @@ NIDAQ::NIDAQ() noexcept {
 	};
 
 	m_presets = {
-		{	"Brillouin",	ScanPreset::SCAN_BRILLOUIN,		{ {2}, {1}, {1},  {},  {},  {},  {} }	},	// Brillouin
-		{	"Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {2}, {2}, {1},  {},  {},  {},  {} }	},	// Brillouin Calibration
-		{	"ODT",			ScanPreset::SCAN_ODT,			{ {2},  {}, {2}, {1}, {1}, {1},  {} }	},	// ODT
-		{	"Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{  {},  {},  {},  {}, {2}, {2},  {} }	},	// Brightfield
-		{	"Fluo off",		ScanPreset::SCAN_EPIFLUOOFF,	{  {},  {},  {}, {1}, {1},  {},  {} }	},	// Fluorescence off
-		{	"Fluo Blue",	ScanPreset::SCAN_EPIFLUOBLUE,	{ {1},  {},  {}, {2}, {2}, {1},  {} }	},	// Fluorescence blue
-		{	"Fluo Green",	ScanPreset::SCAN_EPIFLUOGREEN,	{ {1},  {},  {}, {3}, {3}, {1},  {} }	},	// Fluorescence green
-		{	"Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {1},  {},  {}, {4}, {4}, {1},  {} }	},	// Fluorescence red
-		{	"Laser off",	ScanPreset::SCAN_LASEROFF,		{ {1},  {},  {},  {},  {},  {},  {} }	}	// Laser off
+		{ "Brillouin",		ScanPreset::SCAN_BRILLOUIN,		{ {2}, {1}, {1},  {},  {},  {}, {} }	},	// Brillouin
+		{ "Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {2}, {2}, {1},  {},  {},  {}, {} }	},	// Brillouin Calibration
+		{ "ODT",			ScanPreset::SCAN_ODT,			{ {2},  {}, {2}, {1}, {1}, {1}, {} }	},	// ODT
+		{ "Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{  {},  {},  {},  {}, {2}, {2}, {} }	},	// Brightfield
+		{ "Fluo off",		ScanPreset::SCAN_EPIFLUOOFF,	{  {},  {},  {}, {1}, {1},  {}, {} }	},	// Fluorescence off
+		{ "Fluo Blue",		ScanPreset::SCAN_EPIFLUOBLUE,	{ {1},  {},  {}, {2}, {2}, {1}, {} }	},	// Fluorescence blue
+		{ "Fluo Green",		ScanPreset::SCAN_EPIFLUOGREEN,	{ {1},  {},  {}, {3}, {3}, {1}, {} }	},	// Fluorescence green
+		{ "Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {1},  {},  {}, {4}, {4}, {1}, {} }	},	// Fluorescence red
+		{ "Laser off",		ScanPreset::SCAN_LASEROFF,		{ {1},  {},  {},  {},  {},  {}, {} }	}	// Laser off
 	};
 
-	CalibrationHelper::calculateCalibrationBounds(&m_calibration);
-	CalibrationHelper::calculateCalibrationWeights(&m_calibration);
-
-	m_absoluteBounds = m_calibration.bounds;
-
-	m_hasSpatialCalibration = true;
+	VoltageCalibrationHelper::calculateCalibrationWeights(&m_voltageCalibration);
 
 	m_elementPositions = std::vector<double>((int)DEVICE_ELEMENT::COUNT, -1);
+
+	// Register capabilities
+	registerCapability(Capabilities::ODT);
+	registerCapability(Capabilities::VoltageCalibration);
+	registerCapability(Capabilities::LaserScanner);
+
+	/*
+	 * Initialize the scale calibration
+	 */
+	auto pixelSize = double{ 4.8 };	// [µm]  pixel size
+	auto mag = double{ 58 };		// [1]   magnification
+	auto scale = mag / pixelSize;
+
+	auto scaleCalibration = ScaleCalibrationData{};
+	scaleCalibration.micrometerToPixX = { scale, 0 };
+	scaleCalibration.micrometerToPixY = { 0, scale };
+
+	auto width = double{ 1280 };	// [pix] camera image width
+	auto height = double{ 1024 };	// [pix] camera image height
+	scaleCalibration.originPix = { width / 2, height / 2 };
+
+	ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&scaleCalibration);
+
+	setScaleCalibration(scaleCalibration);
 }
 
 NIDAQ::~NIDAQ() {
-	elementPositionTimer->stop();
+	m_elementPositionTimer->stop();
 	disconnectDevice();
 }
 
-void NIDAQ::setPosition(POINT2 newPosition) {
-	POINT3 position = m_position;
-	position.x = newPosition.x;
-	position.y = newPosition.y;
-	setPosition(position);
+void NIDAQ::setPosition(POINT2 position) {
+	// Since the NIDAQ class does not support capability TranslationStage,
+	// m_positionStage is always { 0, 0 } and we don't have to handle it here.
+
+	// Check if the position is in valid range.
+	// This could also throw an exception in the future.
+	// x-value
+	if (position.x < m_absoluteBounds.xMin) {
+		position.x = m_absoluteBounds.xMin;
+	}
+	if (position.x > m_absoluteBounds.xMax) {
+		position.x = m_absoluteBounds.xMax;
+	}
+	// y-value
+	if (position.y < m_absoluteBounds.yMin) {
+		position.y = m_absoluteBounds.yMin;
+	}
+	if (position.y > m_absoluteBounds.yMax) {
+		position.y = m_absoluteBounds.yMax;
+	}
+
+	m_positionScanner = position;
+
+	// Set the scan position
+	applyPosition();
+
+	// Announce the updated positions
+	announcePositions();
+	announcePositionScanner();
 }
 
 void NIDAQ::setPosition(POINT3 position) {
-	// check if position is in valid range
-	// this could also throw an exception in the future
-	// x-value
-	if (position.x < m_calibration.bounds.xMin) {
-		position.x = m_calibration.bounds.xMin;
-	}
-	if (position.x > m_calibration.bounds.xMax) {
-		position.x = m_calibration.bounds.xMax;
-	}
-	// y-value
-	if (position.y < m_calibration.bounds.yMin) {
-		position.y = m_calibration.bounds.yMin;
-	}
-	if (position.y > m_calibration.bounds.yMax) {
-		position.y = m_calibration.bounds.yMax;
-	}
+	m_positionFocus = position.z;
 
-	m_position = position;
-	// set the scan position
-	applyScanPosition();
-}
-
-POINT3 NIDAQ::getPosition() {
-	return m_position;
+	setPosition(POINT2{ position.x, position.y });
 }
 
 VOLTAGE2 NIDAQ::positionToVoltage(POINT2 position) {
 
-	auto Uxr = interpolation::biharmonic_spline_calculate_values(m_calibration.positions_weights.x, position.x, position.y);
-	auto Uyr = interpolation::biharmonic_spline_calculate_values(m_calibration.positions_weights.y, position.x, position.y);
+	auto Uxr = interpolation::biharmonic_spline_calculate_values(m_voltageCalibration.positions_weights.x, position.x, position.y);
+	auto Uyr = interpolation::biharmonic_spline_calculate_values(m_voltageCalibration.positions_weights.y, position.x, position.y);
 
 	return VOLTAGE2{ Uxr, Uyr };
 }
 
 POINT2 NIDAQ::voltageToPosition(VOLTAGE2 voltage) {
 
-	auto xr = interpolation::biharmonic_spline_calculate_values(m_calibration.voltages_weights.x, voltage.Ux, voltage.Uy);
-	auto yr = interpolation::biharmonic_spline_calculate_values(m_calibration.voltages_weights.y, voltage.Ux, voltage.Uy);
+	auto xr = interpolation::biharmonic_spline_calculate_values(m_voltageCalibration.voltages_weights.x, voltage.Ux, voltage.Uy);
+	auto yr = interpolation::biharmonic_spline_calculate_values(m_voltageCalibration.voltages_weights.y, voltage.Ux, voltage.Uy);
 
 	return POINT2{ xr, yr };
 }
@@ -107,9 +130,9 @@ void NIDAQ::init() {
 	m_emFilter = new FilterMount("COM6");
 	m_emFilter->init();
 
-	elementPositionTimer = new QTimer();
+	m_elementPositionTimer = new QTimer();
 	QMetaObject::Connection connection = QWidget::connect(
-		elementPositionTimer,
+		m_elementPositionTimer,
 		&QTimer::timeout,
 		this,
 		&NIDAQ::getElements
@@ -258,7 +281,7 @@ void NIDAQ::getElements() {
 void NIDAQ::setPreset(ScanPreset presetType) {
 	auto preset = getPreset(presetType);
 
-	for (gsl::index ii = 0; ii < m_deviceElements.size(); ii++) {
+	for (gsl::index ii{ 0 }; ii < m_deviceElements.size(); ii++) {
 		// check if element position needs to be changed
 		if (!preset.elementPositions[ii].empty() && !simplemath::contains(preset.elementPositions[ii], m_elementPositions[ii])) {
 			setElement(m_deviceElements[ii], preset.elementPositions[ii][0]);
@@ -276,39 +299,16 @@ void NIDAQ::setPreset(ScanPreset presetType) {
 	emit(elementPositionsChanged(m_elementPositions));
 }
 
-void NIDAQ::setPositionRelativeX(double positionX) {
-	m_position.x = positionX + m_homePosition.x;
-	setPosition(m_position);
-}
-
-void NIDAQ::setPositionRelativeY(double positionY) {
-	m_position.y = positionY + m_homePosition.y;
-	setPosition(m_position);
-}
-
-void NIDAQ::setPositionRelativeZ(double positionZ) {
-	m_position.z = positionZ + m_homePosition.z;
-	setPosition(m_position);
-}
-
-void NIDAQ::setPositionInPix(POINT2 positionPix) {
-	POINT2 positionMicroMeter = pixToMicroMeter(positionPix);
-
-	setPosition(positionMicroMeter);
-}
-
-void NIDAQ::setSpatialCalibration(SpatialCalibration spatialCalibration) {
-	m_calibration = spatialCalibration;
+void NIDAQ::setVoltageCalibration(VoltageCalibrationData voltageCalibration) {
+	m_voltageCalibration = voltageCalibration;
 
 	centerPosition();
 	calculateHomePositionBounds();
-
-	m_absoluteBounds = m_calibration.bounds;
 }
 
 void NIDAQ::setHome() {
 	// Set current z position to zero
-	m_position.z = 0;
+	m_positionFocus = 0;
 	Thorlabs_TIM::TIM_Home(m_serialNo_TIM, m_channelPosZ);
 
 	ScanControl::setHome();
@@ -318,48 +318,52 @@ void NIDAQ::setHome() {
  * Private definitions
  */
 
-/*
- * Function converts a position in pixel to a position im µm
- * by taking into account the pixel size and magnification.
- * The center of the camera image is the point of origin (0,0).
- */
-POINT2 NIDAQ::pixToMicroMeter(POINT2 positionPix) {
+void NIDAQ::calculateBounds() {
+	// TODO: Would be good to untangle this from the camera parameters. Question is how.
+	auto width = double{ 1280 };	// [pix] camera image width
+	auto height = double{ 1024 };	// [pix] camera image height
 
-	POINT2 positionMicroMeter;
-	positionMicroMeter.x = 1e6 * (positionPix.x - m_calibration.microscopeProperties.width / 2) * m_calibration.microscopeProperties.pixelSize / m_calibration.microscopeProperties.mag;
-	positionMicroMeter.y = 1e6 * (positionPix.y - m_calibration.microscopeProperties.height / 2) * m_calibration.microscopeProperties.pixelSize / m_calibration.microscopeProperties.mag;
+	auto pos0 = pixToMicroMeter({ 0, 0 });
+	auto pos1 = pixToMicroMeter({ 0, height });
+	auto pos2 = pixToMicroMeter({ width, 0 });
+	auto pos3 = pixToMicroMeter({ width, height });
 
-	return positionMicroMeter;
+	auto x = std::vector<double>{ pos0.x, pos1.x, pos2.x, pos3.x };
+	auto y = std::vector<double>{ pos0.y, pos1.y, pos2.y, pos3.y };
+
+	m_absoluteBounds.xMin = simplemath::min(x);
+	m_absoluteBounds.xMax = simplemath::max(x);
+	m_absoluteBounds.yMin = simplemath::min(y);
+	m_absoluteBounds.yMax = simplemath::max(y);
 }
 
-void NIDAQ::applyScanPosition() {
+void NIDAQ::applyPosition() {
 	DAQmxStopTask(AOtaskHandle);
 	// set the x- and y-position
-	m_voltages = positionToVoltage(POINT2{ 1e-6 * m_position.x, 1e-6 * m_position.y });
+	m_voltages = positionToVoltage(POINT2{ m_positionScanner.x, m_positionScanner.y });
 	float64 data[2] = { m_voltages.Ux, m_voltages.Uy };
 	DAQmxWriteAnalogF64(AOtaskHandle, 1, true, 10.0, DAQmx_Val_GroupByChannel, data, NULL, NULL);
 	// set the z-position
-	Thorlabs_TIM::TIM_MoveAbsolute(m_serialNo_TIM, m_channelPosZ, m_PiezoIncPerMum * m_position.z);
+	Thorlabs_TIM::TIM_MoveAbsolute(m_serialNo_TIM, m_channelPosZ, m_PiezoIncPerMum * m_positionFocus);
 	calculateCurrentPositionBounds();
 	announcePosition();
 }
 
 void NIDAQ::centerPosition() {
-	m_position = { 0, 0, 0 };
-	// Set current position to zero
+	// Set current focus position to zero
 	Thorlabs_TIM::TIM_Home(m_serialNo_TIM, m_channelPosZ);
-	// set the scan position
-	applyScanPosition();
+
+	setPosition({ 0, 0, 0 });
 }
 
 void NIDAQ::setFilter(FilterMount* device, int position) {
 	// calculate the position to set, slots are spaced every 32 mm
-	double pos = 32.0 * ((double)position - 1);
+	auto pos = 32.0 * ((double)position - 1);
 	device->setPosition(pos);
 }
 
 int NIDAQ::getFilter(FilterMount* device) {
-	double pos = device->getPosition();
+	auto pos = device->getPosition();
 	// Somehow the filter mount does not position the filters very accurately.
 	// It can be off by multiple millimeters and the error increases with positions farther away.
 	// E.g. requested 0 -> got 0, 32 -> 31, 64 -> 62, 96 -> 93
@@ -399,36 +403,36 @@ int NIDAQ::getBeamBlock() {
 }
 
 void NIDAQ::setMirror(int position) {
-	double realPosition{ 0 };
+	auto realPosition{ 0.0 };
 	if (position == 1) {
 		realPosition = m_mirrorStart;
 	} else if (position == 2) {
 		realPosition = m_mirrorEnd;
 	}
-	int incPos = realPosition * m_gearBoxRatio * m_stepsPerRev / m_pitch;
+	auto incPos = realPosition * m_gearBoxRatio * m_stepsPerRev / m_pitch;
 	Thorlabs_KDC::CC_MoveToPosition(m_serialNo_KDC, incPos);
 
 	// check if motor is still moving
-	WORD messageType;
-	WORD messageId;
-	DWORD messageData;
+	auto messageType = WORD{};
+	auto messageId = WORD{};
+	auto messageData = DWORD{};
 	Thorlabs_KDC::CC_WaitForMessage(m_serialNo_KDC, &messageType, &messageId, &messageData);
 	while (messageType != 2 || messageId != 1) {
 		Thorlabs_KDC::CC_WaitForMessage(m_serialNo_KDC, &messageType, &messageId, &messageData);
 	}
 
-	int currentPos = Thorlabs_KDC::CC_GetPosition(m_serialNo_KDC);
+	auto currentPos = Thorlabs_KDC::CC_GetPosition(m_serialNo_KDC);
 }
 
 int NIDAQ::getMirror() {
-	int currentIndex = Thorlabs_KDC::CC_GetPosition(m_serialNo_KDC);
+	auto currentIndex = Thorlabs_KDC::CC_GetPosition(m_serialNo_KDC);
 	// position 1
-	int targetIndex = m_mirrorStart * m_gearBoxRatio * m_stepsPerRev / m_pitch;
+	auto targetIndex = (int)(m_mirrorStart * m_gearBoxRatio * m_stepsPerRev / m_pitch);
 	if (abs(currentIndex - targetIndex) < 10) {
 		return 1;
 	}
 	// position 2
-	targetIndex = m_mirrorEnd * m_gearBoxRatio * m_stepsPerRev / m_pitch;
+	targetIndex = (int)(m_mirrorEnd * m_gearBoxRatio * m_stepsPerRev / m_pitch);
 	if (abs(currentIndex - targetIndex) < 10) {
 		return 2;
 	}

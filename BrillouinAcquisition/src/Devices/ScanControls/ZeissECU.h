@@ -1,8 +1,8 @@
 #ifndef ZEISSECU_H
 #define ZEISSECU_H
 
-#include "scancontrol.h"
-#include "com.h"
+#include "ScanControl.h"
+#include "../com.h"
 
 namespace Thorlabs_FF {
 	#include <Thorlabs.MotionControl.FilterFlipper.h>
@@ -12,7 +12,7 @@ class Element : public QObject {
 	Q_OBJECT
 
 public:
-	Element(com *comObject, std::string prefix, std::vector<std::string> versions) : m_comObject(comObject), m_prefix(prefix), m_versions(versions) {};
+	Element(com* comObject, std::string prefix, std::vector<std::string> versions) : m_comObject(comObject), m_prefix(prefix), m_versions(versions) {};
 	~Element() {};
 	void setDevice(com* device);
 	bool checkCompatibility();
@@ -36,7 +36,7 @@ private:
 class Stand : public Element {
 	Q_OBJECT
 public:
-	Stand(com *comObject) : Element(comObject, "H", { "AV_V3_17" }) {};
+	Stand(com* comObject) : Element(comObject, "H", { "AV_V3_17" }) {};
 
 	void setReflector(int position, bool check = false);
 	int getReflector();
@@ -60,7 +60,7 @@ private:
 class Focus : public Element {
 
 public:
-	Focus(com *comObject) : Element(comObject, "F", { "ZM_V2_04" }) {};
+	Focus(com* comObject) : Element(comObject, "F", { "ZM_V2_04" }) {};
 
 	void setZ(double position);
 	double getZ();
@@ -83,7 +83,7 @@ private:
 class MCU : public Element {
 
 public:
-	MCU(com *comObject) : Element(comObject, "N", { "MC V2.08" }) {};
+	MCU(com* comObject) : Element(comObject, "N", { "MC V2.08" }) {};
 
 	void setX(double position);
 	double getX();
@@ -129,15 +129,7 @@ public slots:
 	void getElements() override;
 	void setPreset(ScanPreset preset) override;
 
-	// sets the position relative to the home position m_homePosition
-	void setPositionRelativeX(double position) override;
-	void setPositionRelativeY(double position) override;
-	void setPositionRelativeZ(double position) override;
-	void setPositionInPix(POINT2) override;
-
 private:
-	POINT2 pixToMicroMeter(POINT2) override;
-
 	void setBeamBlock(int position);
 	int getBeamBlock();
 

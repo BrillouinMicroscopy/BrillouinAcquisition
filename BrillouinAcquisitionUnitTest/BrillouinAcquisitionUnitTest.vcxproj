@@ -116,6 +116,9 @@
     </ClCompile>
     <ClCompile Include="NIDAQ_PositionVoltage.cpp" />
     <ClCompile Include="phase.cpp" />
+    <ClCompile Include="POINT2Test.cpp" />
+    <ClCompile Include="POINT3Test.cpp" />
+    <ClCompile Include="ScaleCalibrationHelperTest.cpp" />
     <ClCompile Include="simplemath.cpp" />
     <ClCompile Include="unwrap.cpp" />
     <ClCompile Include="xsample.cpp" />
@@ -145,7 +148,6 @@
   <ItemGroup>
     <Object Include="..\BrillouinAcquisition\x64\Debug\Acquisition.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\AcquisitionMode.obj" />
-    <Object Include="..\BrillouinAcquisition\x64\Debug\Calibration.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\Camera.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\com.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\filtermount.obj" />
@@ -153,7 +155,6 @@
     <Object Include="..\BrillouinAcquisition\x64\Debug\logger.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_Acquisition.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_AcquisitionMode.obj" />
-    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_Calibration.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_camera.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_device.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_filtermount.obj" />
@@ -163,6 +164,7 @@
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_scancontrol.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_storageWrapper.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_thread.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_VoltageCalibration.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_ZeissECU.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\NIDAQ.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\ODTControl.obj" />
@@ -172,6 +174,7 @@
     <Object Include="..\BrillouinAcquisition\x64\Debug\storageWrapper.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\unwrap2D.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\unwrap2wrapper.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\VoltageCalibration.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\xsample.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\ZeissECU.obj" />
   </ItemGroup>

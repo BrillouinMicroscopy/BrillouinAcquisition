@@ -18,32 +18,37 @@ ZeissECU::ZeissECU() noexcept {
 	};
 
 	m_presets = {
-		{	"Brillouin",	ScanPreset::SCAN_BRILLOUIN,		{ {2}, {}, {1}, {3}, {1}, {2},  {} }	},	// Brillouin
-		{	"Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {2}, {}, {1}, {3}, {1}, {3},  {} }	},	// Calibration
-		{	"Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{ {2}, {}, {1}, {3}, {1}, {2}, {2} }	},	// Brightfield
-		{	"Eyepiece",		ScanPreset::SCAN_EYEPIECE,		{ {2}, {}, {1}, {3}, {2}, {3}, {2} }	},	// Eyepiece
-		{	"Fluo Blue",	ScanPreset::SCAN_EPIFLUOBLUE,	{ {1}, {}, {2}, {3}, {},  {2}, {1} }	},	// Fluorescence blue
-		{	"Fluo Green",	ScanPreset::SCAN_EPIFLUOGREEN,	{ {1}, {}, {3}, {3}, {},  {2}, {1} }	},	// Fluorescence green
-		{	"Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {1}, {}, {4}, {3}, {},  {2}, {1} }	},	// Fluorescence red
-		{	"Laser off",	ScanPreset::SCAN_LASEROFF,		{ {1}, {},  {},  {}, {},   {},  {} }	}	// Laser off
-	};
-
-	// bounds of the stage
-	m_absoluteBounds = {
-		-150000,	// [µm] minimal x-value
-		 150000,	// [µm] maximal x-value
-		-150000,	// [µm] minimal y-value
-		 150000,	// [µm] maximal y-value
-		-150000,	// [µm] minimal z-value
-		 150000		// [µm] maximal z-value
+		{ "Brillouin",		ScanPreset::SCAN_BRILLOUIN,		{ {2}, {}, {1}, {3}, {1}, {2},  {} }	},	// Brillouin
+		{ "Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {2}, {}, {1}, {3}, {1}, {3},  {} }	},	// Calibration
+		{ "Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{ {2}, {}, {1}, {3}, {1}, {2}, {2} }	},	// Brightfield
+		{ "Eyepiece",		ScanPreset::SCAN_EYEPIECE,		{ {2}, {}, {1}, {3}, {2}, {3}, {2} }	},	// Eyepiece
+		{ "Fluo Blue",		ScanPreset::SCAN_EPIFLUOBLUE,	{ {1}, {}, {2}, {3},  {}, {2}, {1} }	},	// Fluorescence blue
+		{ "Fluo Green",		ScanPreset::SCAN_EPIFLUOGREEN,	{ {1}, {}, {3}, {3},  {}, {2}, {1} }	},	// Fluorescence green
+		{ "Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {1}, {}, {4}, {3},  {}, {2}, {1} }	},	// Fluorescence red
+		{ "Laser off",		ScanPreset::SCAN_LASEROFF,		{ {1}, {},  {},  {},  {},  {},  {} }	}	// Laser off
 	};
 
 	m_elementPositions = std::vector<double>((int)DEVICE_ELEMENT::COUNT, -1);
+
+	// Register capabilities
+	registerCapability(Capabilities::TranslationStage);
+	registerCapability(Capabilities::ScaleCalibration);
+
+	/*
+	 * Initialize the scale calibration with default values (determined for a 40x objective)
+	 */
+	auto scaleCalibration = ScaleCalibrationData{};
+	scaleCalibration.micrometerToPixX = { -7.95, 9.05 };
+	scaleCalibration.micrometerToPixY = { 9.45, 8.65 };
+
+	ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&scaleCalibration);
+
+	setScaleCalibration(scaleCalibration);
 }
 
 ZeissECU::~ZeissECU() {
-	positionTimer->stop();
-	elementPositionTimer->stop();
+	m_positionTimer->stop();
+	m_elementPositionTimer->stop();
 	disconnectDevice();
 	delete m_focus;
 	delete m_mcu;
@@ -52,23 +57,39 @@ ZeissECU::~ZeissECU() {
 }
 
 void ZeissECU::setPosition(POINT2 position) {
-	m_mcu->setX(position.x);
-	m_mcu->setY(position.y);
-	calculateCurrentPositionBounds();
+	// We have to subtract the position of the scanner to get the position of the stage.
+	auto positionStage = position - m_positionScanner;
+	if (abs(m_positionStage.x - positionStage.x) > 1e-6) {
+		m_positionStage.x = positionStage.x;
+		m_mcu->setX(m_positionStage.x);
+	}
+	if (abs(m_positionStage.y - positionStage.y) > 1e-6) {
+		m_positionStage.y = positionStage.y;
+		m_mcu->setY(m_positionStage.y);
+	}
+	calculateCurrentPositionBounds(POINT3{ position.x, position.y, m_positionFocus });
+	announcePositions();
 }
 
 void ZeissECU::setPosition(POINT3 position) {
-	m_mcu->setX(position.x);
-	m_mcu->setY(position.y);
-	m_focus->setZ(position.z);
-	calculateCurrentPositionBounds(position);
+	// Only set position if it has changed
+	if (abs(m_positionFocus - position.z) > 1e-6) {
+		m_positionFocus = position.z;
+		m_focus->setZ(m_positionFocus);
+	}
+
+	setPosition(POINT2{ position.x, position.y });
 }
 
 POINT3 ZeissECU::getPosition() {
-	double x = m_mcu->getX();
-	double y = m_mcu->getY();
-	double z = m_focus->getZ();
-	return POINT3{ x, y, z };
+	// Update the positions from the hardware
+	m_positionStage.x = m_mcu->getX();
+	m_positionStage.y = m_mcu->getY();
+
+	m_positionFocus = m_focus->getZ();
+
+	// Return the current position
+	return ScanControl::getPosition();
 }
 
 void ZeissECU::setDevice(com* device) {
@@ -90,24 +111,24 @@ void ZeissECU::init() {
 	m_mcu = new MCU(m_comObject);
 	m_stand = new Stand(m_comObject);
 
-	QMetaObject::Connection connection = QWidget::connect(
+	auto connection = QWidget::connect(
 		m_comObject,
 		&com::errorOccurred,
 		this,
 		&ZeissECU::errorHandler
 	);
 
-	positionTimer = new QTimer();
+	m_positionTimer = new QTimer();
 	connection = QWidget::connect(
-		positionTimer,
+		m_positionTimer,
 		&QTimer::timeout,
 		this,
 		&ZeissECU::announcePosition
 	);
 
-	elementPositionTimer = new QTimer();
+	m_elementPositionTimer = new QTimer();
 	connection = QWidget::connect(
-		elementPositionTimer,
+		m_elementPositionTimer,
 		&QTimer::timeout,
 		this,
 		&ZeissECU::getElements
@@ -140,19 +161,19 @@ void ZeissECU::connectDevice() {
 			}
 			m_comObject->clear();
 
-			int baudRate = m_comObject->baudRate();
-			QSerialPort::DataBits dataBits = m_comObject->dataBits();
-			QSerialPort::FlowControl flowControl = m_comObject->flowControl();
-			QSerialPort::Parity parity = m_comObject->parity();
-			QSerialPort::StopBits stopBits = m_comObject->stopBits();
+			auto baudRate = m_comObject->baudRate();
+			auto dataBits = m_comObject->dataBits();
+			auto flowControl = m_comObject->flowControl();
+			auto parity = m_comObject->parity();
+			auto stopBits = m_comObject->stopBits();
 
 			Thorlabs_FF::FF_Open(m_serialNo_FF2);
 			Thorlabs_FF::FF_StartPolling(m_serialNo_FF2, 200);
 
 			// check if connected to compatible device
-			bool focus = m_focus->checkCompatibility();
-			bool stand = m_stand->checkCompatibility();
-			bool mcu = m_mcu->checkCompatibility();
+			auto focus = m_focus->checkCompatibility();
+			auto stand = m_stand->checkCompatibility();
+			auto mcu = m_mcu->checkCompatibility();
 
 			m_isCompatible = focus && stand && mcu;
 
@@ -244,7 +265,7 @@ void ZeissECU::setPreset(ScanPreset presetType) {
 	auto preset = getPreset(presetType);
 	getElements();
 
-	for (gsl::index ii = 0; ii < m_deviceElements.size(); ii++) {
+	for (gsl::index ii{ 0 }; ii < m_deviceElements.size(); ii++) {
 		// check if element position needs to be changed
 		if (!preset.elementPositions[ii].empty() && !simplemath::contains(preset.elementPositions[ii], m_elementPositions[ii])) {
 			setElement(m_deviceElements[ii], preset.elementPositions[ii][0]);
@@ -255,35 +276,9 @@ void ZeissECU::setPreset(ScanPreset presetType) {
 	emit(elementPositionsChanged(m_elementPositions));
 }
 
-void ZeissECU::setPositionRelativeX(double positionX) {
-	m_mcu->setX(positionX + m_homePosition.x);
-	calculateCurrentPositionBounds();
-}
-
-void ZeissECU::setPositionRelativeY(double positionY) {
-	m_mcu->setY(positionY + m_homePosition.y);
-	calculateCurrentPositionBounds();
-}
-
-void ZeissECU::setPositionRelativeZ(double positionZ) {
-	m_focus->setZ(positionZ + m_homePosition.z);
-	calculateCurrentPositionBounds();
-}
-
-void ZeissECU::setPositionInPix(POINT2) {
-	// Does nothing for now, since for the 780 nm setup no spatial calibration is in place yet.
-}
-
 /*
  * Private definitions
  */
-
-POINT2 ZeissECU::pixToMicroMeter(POINT2) {
-	return POINT2();
-}
-
-void ZeissECU::errorHandler(QSerialPort::SerialPortError error) {
-}
 
 void ZeissECU::setBeamBlock(int position) {
 	Thorlabs_FF::FF_MoveToPosition(m_serialNo_FF2, (Thorlabs_FF::FF_Positions)position);
@@ -296,6 +291,8 @@ void ZeissECU::setBeamBlock(int position) {
 int ZeissECU::getBeamBlock() {
 	return Thorlabs_FF::FF_GetPosition(m_serialNo_FF2);
 }
+
+void ZeissECU::errorHandler(QSerialPort::SerialPortError error) {}
 
 /*
  * Functions of the parent class for all elements
@@ -310,7 +307,7 @@ void Element::setDevice(com* device) {
 }
 
 bool Element::checkCompatibility() {
-	std::string version = requestVersion();
+	auto version = requestVersion();
 	return std::find(m_versions.begin(), m_versions.end(), version) != m_versions.end();
 }
 
@@ -319,7 +316,7 @@ bool Element::checkCompatibility() {
  */
 
 std::string Element::receive(std::string request) {
-	std::string answer = m_comObject->receive(m_prefix + "P" + request);
+	auto answer = m_comObject->receive(m_prefix + "P" + request);
 	return helper::parse(answer, m_prefix);
 }
 
@@ -332,7 +329,7 @@ void Element::clear() {
 }
 
 std::string Element::requestVersion() {
-	std::string answer = m_comObject->receive(m_prefix + "P" + "Tv");
+	auto answer = m_comObject->receive(m_prefix + "P" + "Tv");
 	return helper::parse(answer, m_prefix);
 }
 
@@ -432,7 +429,7 @@ int Stand::getElementPosition(std::string device) {
 void Stand::blockUntilPositionReached(bool block, std::string elementNr) {
 	// don't return until the position or the timeout is reached
 	if (block) {
-		int count{ 0 };
+		auto count{ 0 };
 		auto pos = getElementPosition(elementNr);
 		// wait for one second max
 		while (!pos && count < 100) {
@@ -454,16 +451,16 @@ void Stand::blockUntilPositionReached(bool block, std::string elementNr) {
 
 void Focus::setZ(double position) {
 	position = round(position / m_umperinc);
-	int inc = positive_modulo(position, m_rangeFocus);
+	auto inc = positive_modulo(position, m_rangeFocus);
 
-	std::string pos = helper::dec2hex(inc, 6);
+	auto pos = helper::dec2hex(inc, 6);
 	send("ZD" + pos);
 	clear();
 }
 
 double Focus::getZ() {
-	std::string position = "0x" + receive("Zp");
-	int pos = helper::hex2dec(position);
+	auto position = "0x" + receive("Zp");
+	auto pos = helper::hex2dec(position);
 	// The actual travel range of the focus is significantly smaller than the theoretically possible maximum increment value (FFFFFF or 16777215).
 	// When the microscope starts, it sets it home position to (0, 0, 0). Values in the negative range are then adressed as (16777215 - positionInInc).
 	// Hence, we consider all values > 16777215/2 to actually be negative and wrap them accordingly (similar to what positive_modulo(...,...) for the setPosition() functions does).
@@ -474,7 +471,7 @@ double Focus::getZ() {
 }
 
 void Focus::setVelocityZ(double velocity) {
-	std::string vel = helper::dec2hex(velocity, 6);
+	auto vel = helper::dec2hex(velocity, 6);
 	send("ZG" + vel);
 }
 
@@ -491,12 +488,12 @@ void Focus::scanStop() {
 }
 
 int Focus::getScanStatus() {
-	std::string status = receive("Zt");
+	auto status = receive("Zt");
 	return std::stoi(status);
 }
 
 int Focus::getStatusKey() {
-	std::string status = receive("Zw");
+	auto status = receive("Zw");
 	return std::stoi(status);
 }
 
@@ -555,15 +552,15 @@ void MCU::stopY() {
 
 void MCU::setPosition(std::string axis, double position) {
 	position = round(position / m_umperinc);
-	int inc = positive_modulo(position, m_rangeFocus);
+	auto inc = positive_modulo(position, m_rangeFocus);
 
-	std::string pos = helper::dec2hex(inc, 6);
+	auto pos = helper::dec2hex(inc, 6);
 	send(axis + "T" + pos);
 }
 
 double MCU::getPosition(std::string axis) {
-	std::string position = receive(axis + "p");
-	int pos = helper::hex2dec(position);
+	auto position = receive(axis + "p");
+	auto pos = helper::hex2dec(position);
 	// The actual travel range of the stage is significantly smaller than the theoretically possible maximum increment value (FFFFFF or 16777215).
 	// When the microscope starts, it sets it home position to (0, 0, 0). Values in the negative range are then adressed as (16777215 - positionInInc).
 	// Hence, we consider all values > 16777215/2 to actually be negative and wrap them accordingly (similar to what positive_modulo(...,...) for the setPosition() functions does).
@@ -574,6 +571,6 @@ double MCU::getPosition(std::string axis) {
 }
 
 void MCU::setVelocity(std::string axis, int velocity) {
-	std::string vel = helper::dec2hex(velocity, 6);
+	auto vel = helper::dec2hex(velocity, 6);
 	send(axis + "V" + vel);
 }

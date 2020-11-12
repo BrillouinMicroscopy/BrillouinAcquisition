@@ -2,10 +2,10 @@
 #define BRILLOUIN_H
 
 #include "AcquisitionMode.h"
-#include "../../Devices/andor.h"
-#include "../../Devices/scancontrol.h"
-#include "../../thread.h"
-#include "../../circularBuffer.h"
+#include "..\..\Devices\Cameras\Camera.h"
+#include "..\..\Devices\ScanControls\ScanControl.h"
+#include "..\..\thread.h"
+#include "..\..\circularBuffer.h"
 
 
 struct SCAN_ORDER {
@@ -60,6 +60,13 @@ public slots:
 	void setStepNumberY(int);
 	void setStepNumberZ(int);
 
+	void setXMin(double);
+	void setXMax(double);
+	void setYMin(double);
+	void setYMax(double);
+	void setZMin(double);
+	void setZMax(double);
+
 	void setSettings(BRILLOUIN_SETTINGS settings);
 
 	/*
@@ -70,15 +77,11 @@ public slots:
 	void setScanOrderY(int y);
 	void setScanOrderZ(int z);
 
-	int getScanOrderX();
-	int getScanOrderY();
-	int getScanOrderZ();
-
 	void setScanOrderAuto(bool automatical);
 
 	void determineScanOrder();
 
-	void getScanOrder();
+	std::vector<POINT3> getOrderedPositions();
 
 private:
 	void abortMode(std::unique_ptr <StorageWrapper>& storage) override;
@@ -100,8 +103,15 @@ private:
 
 	int nrCalibrations{ 1 };
 
+	std::vector<POINT3> m_orderedPositions;	// The positions to measure in absolute values
+	std::vector<POINT3> m_orderedPositionsRelative;	// The positions to measure relative to start position
+	std::vector<INDEX3> m_orderedIndices;	// The associated indices
+	std::vector<bool> m_calibrationAllowed;	// If a calibration is allowed for this position
+
 private slots:
 	void acquire(std::unique_ptr <StorageWrapper>& storage) override;
+
+	void updatePositions();
 
 signals:
 	// current position in x, y and z, as well as the current image number
@@ -109,6 +119,7 @@ signals:
 	void s_timeToCalibration(int);	// time to next calibration
 	void s_calibrationRunning(bool);	// is calibration running
 	void s_scanOrderChanged(SCAN_ORDER);
+	void s_orderedPositionsChanged(std::vector<POINT3>);
 };
 
 #endif //BRILLOUIN_H
