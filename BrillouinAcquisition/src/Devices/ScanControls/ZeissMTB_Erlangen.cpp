@@ -283,21 +283,6 @@ void ZeissMTB_Erlangen::getElements() {
 	}
 }
 
-void ZeissMTB_Erlangen::setPreset(ScanPreset presetType) {
-	auto preset = getPreset(presetType);
-	getElements();
-
-	for (gsl::index ii{ 0 }; ii < m_deviceElements.size(); ii++) {
-		// check if element position needs to be changed
-		if (!preset.elementPositions[ii].empty() && !simplemath::contains(preset.elementPositions[ii], m_elementPositions[ii])) {
-			setElement(m_deviceElements[ii], preset.elementPositions[ii][0]);
-			m_elementPositions[ii] = preset.elementPositions[ii][0];
-		}
-	}
-	checkPresets();
-	emit(elementPositionsChanged(m_elementPositions));
-}
-
 /*
  * Private definitions
  */

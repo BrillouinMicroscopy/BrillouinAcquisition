@@ -42,13 +42,13 @@ public slots:
 	void setElement(DeviceElement element, double position) override;
 	int getElement(DeviceElement element) override;
 	void getElements() override;
-	void setPreset(ScanPreset preset) override;
 
 	void setVoltageCalibration(VoltageCalibrationData voltageCalibration) override;
 
 	void setHome();
 
 private:
+	void setPresetAfter(ScanPreset preset) override;
 
 	void calculateBounds() override;
 

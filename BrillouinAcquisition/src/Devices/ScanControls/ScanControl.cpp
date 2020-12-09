@@ -94,6 +94,23 @@ void ScanControl::enableMeasurementMode(bool enabled) {
 	m_measurementMode = enabled;
 }
 
+void ScanControl::setPreset(ScanPreset presetType) {
+	auto preset = getPreset(presetType);
+	getElements();
+
+	for (gsl::index ii{ 0 }; ii < m_deviceElements.size(); ii++) {
+		// check if element position needs to be changed
+		if (!preset.elementPositions[ii].empty() && !simplemath::contains(preset.elementPositions[ii], m_elementPositions[ii])) {
+			setElement(m_deviceElements[ii], preset.elementPositions[ii][0]);
+			m_elementPositions[ii] = preset.elementPositions[ii][0];
+		}
+	}
+	checkPresets();
+	emit(elementPositionsChanged(m_elementPositions));
+
+	setPresetAfter(presetType);
+}
+
 Preset ScanControl::getPreset(ScanPreset presetType) {
 	for (gsl::index ii{ 0 }; ii < m_presets.size(); ii++) {
 		if (m_presets[ii].index == presetType) {
@@ -255,6 +272,8 @@ POINT2 ScanControl::microMeterToPix(POINT3 positionMicrometer) {
 /*
  * Protected definitions
  */
+void ScanControl::setPresetAfter(ScanPreset presetType) {}
+
 void ScanControl::calculateBounds() {
 	// Bounds of the stage
 	m_absoluteBounds = {

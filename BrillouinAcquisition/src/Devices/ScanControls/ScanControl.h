@@ -144,7 +144,6 @@ public slots:
 	virtual void setElement(DeviceElement, double) = 0;
 	virtual int getElement(DeviceElement) = 0;
 	virtual void getElements() = 0;
-	virtual void setPreset(ScanPreset) = 0;
 	// sets the position relative to the home position m_homePosition
 	void setPositionRelativeX(double position);
 	void setPositionRelativeY(double position);
@@ -160,6 +159,7 @@ public slots:
 
 	void enableMeasurementMode(bool enabled);
 
+	void setPreset(ScanPreset presetType);
 	Preset getPreset(ScanPreset);
 	void checkPresets();
 	bool isPresetActive(ScanPreset);
@@ -188,6 +188,7 @@ public slots:
 	POINT2 microMeterToPix(POINT3 positionMicrometer);
 
 protected:
+	virtual void setPresetAfter(ScanPreset presetType);
 
 	virtual void calculateBounds();
 	void calculateHomePositionBounds();

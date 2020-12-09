@@ -127,7 +127,6 @@ public slots:
 	void setElement(DeviceElement element, double position) override;
 	int getElement(DeviceElement element) override;
 	void getElements() override;
-	void setPreset(ScanPreset preset) override;
 
 private:
 	void setBeamBlock(int position);

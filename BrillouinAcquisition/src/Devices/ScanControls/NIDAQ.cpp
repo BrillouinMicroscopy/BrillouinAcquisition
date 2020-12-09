@@ -267,36 +267,20 @@ int NIDAQ::getElement(DeviceElement element) {
 }
 
 void NIDAQ::getElements() {
-	m_elementPositions[(int)DEVICE_ELEMENT::BEAMBLOCK] = getBeamBlock();
-	m_elementPositions[(int)DEVICE_ELEMENT::CALFLIPMIRROR] = getCalFlipMirror();
-	m_elementPositions[(int)DEVICE_ELEMENT::MOVEMIRROR] = getMirror();
-	m_elementPositions[(int)DEVICE_ELEMENT::EXFILTER] = getExFilter();
-	m_elementPositions[(int)DEVICE_ELEMENT::EMFILTER] = getEmFilter();
-	m_elementPositions[(int)DEVICE_ELEMENT::LEDLAMP] = (double)getLEDLamp() + 1;
-	m_elementPositions[(int)DEVICE_ELEMENT::LOWEROBJECTIVE] = getLowerObjective();
-	checkPresets();
-	emit(elementPositionsChanged(m_elementPositions));
-}
-
-void NIDAQ::setPreset(ScanPreset presetType) {
-	auto preset = getPreset(presetType);
-
-	for (gsl::index ii{ 0 }; ii < m_deviceElements.size(); ii++) {
-		// check if element position needs to be changed
-		if (!preset.elementPositions[ii].empty() && !simplemath::contains(preset.elementPositions[ii], m_elementPositions[ii])) {
-			setElement(m_deviceElements[ii], preset.elementPositions[ii][0]);
-			m_elementPositions[ii] = preset.elementPositions[ii][0];
-		}
+	m_elementPositionsTmp = m_elementPositions;
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::BEAMBLOCK] = getBeamBlock();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::CALFLIPMIRROR] = getCalFlipMirror();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::MOVEMIRROR] = getMirror();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::EXFILTER] = getExFilter();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::EMFILTER] = getEmFilter();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::LEDLAMP] = (double)getLEDLamp() + 1;
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::LOWEROBJECTIVE] = getLowerObjective();
+	// We only emit changed positions
+	if (m_elementPositionsTmp != m_elementPositions) {
+		m_elementPositions = m_elementPositionsTmp;
+		checkPresets();
+		emit(elementPositionsChanged(m_elementPositions));
 	}
-
-	if (presetType == ScanPreset::SCAN_CALIBRATION) {
-		// Set voltage of galvo mirrors to zero
-		// Otherwise the laser beam might not hit the calibration samples
-		setVoltage({ 0, 0 });
-	}
-
-	checkPresets();
-	emit(elementPositionsChanged(m_elementPositions));
 }
 
 void NIDAQ::setVoltageCalibration(VoltageCalibrationData voltageCalibration) {
@@ -317,6 +301,13 @@ void NIDAQ::setHome() {
 /*
  * Private definitions
  */
+void NIDAQ::setPresetAfter(ScanPreset presetType) {
+	if (presetType == ScanPreset::SCAN_CALIBRATION) {
+		// Set voltage of galvo mirrors to zero
+		// Otherwise the laser beam might not hit the calibration samples
+		setVoltage({ 0, 0 });
+	}
+}
 
 void NIDAQ::calculateBounds() {
 	// TODO: Would be good to untangle this from the camera parameters. Question is how.
