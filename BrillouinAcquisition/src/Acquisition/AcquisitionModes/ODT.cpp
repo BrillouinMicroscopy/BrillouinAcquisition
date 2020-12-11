@@ -52,8 +52,8 @@ void ODT::startRepetitions() {
 	// set ROI and readout parameters to default ODT values, exposure time and gain will be kept
 	settings.roi.left = 128;
 	settings.roi.top = 0;
-	settings.roi.width = 1024;
-	settings.roi.height = 1024;
+	settings.roi.width_physical = 1024;
+	settings.roi.height_physical = 1024;
 	settings.readout.pixelEncoding = L"Raw8";
 	settings.readout.triggerMode = L"External";
 	settings.readout.cycleMode = L"Continuous";
@@ -346,8 +346,8 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	(*m_ODTControl)->setAcquisitionVoltages(voltages);
 
 	int rank_data{ 3 };
-	hsize_t dims_data[3] = { 1, (hsize_t)m_cameraSettings.roi.height, (hsize_t)m_cameraSettings.roi.width };
-	int bytesPerFrame = m_cameraSettings.roi.width * m_cameraSettings.roi.height;
+	hsize_t dims_data[3] = { 1, (hsize_t)m_cameraSettings.roi.height_binned, (hsize_t)m_cameraSettings.roi.width_binned };
+	int bytesPerFrame = m_cameraSettings.roi.width_binned * m_cameraSettings.roi.height_binned;
 	std::string binning = getBinningString();
 	if (bytesPerFrame) {
 		for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {

@@ -119,9 +119,12 @@ void PointGrey::setSettings(CAMERA_SETTINGS settings) {
 	// Offset y
 	fmt7ImageSettings.offsetY = m_settings.roi.top;
 	// Width
-	fmt7ImageSettings.width = m_settings.roi.width;
+	fmt7ImageSettings.width = m_settings.roi.width_physical;
 	// Height
-	fmt7ImageSettings.height = m_settings.roi.height;
+	fmt7ImageSettings.height = m_settings.roi.height_physical;
+
+	m_settings.roi.width_binned = m_settings.roi.width_physical;
+	m_settings.roi.height_binned = m_settings.roi.height_physical;
 
 	FlyCapture2::Format7PacketInfo fmt7PacketInfo;
 	bool valid{ false };
@@ -209,7 +212,7 @@ void PointGrey::startAcquisition(CAMERA_SETTINGS settings) {
 	}
 	setSettings(settings);
 
-	unsigned int pixelNumber = m_settings.roi.width * m_settings.roi.height;
+	unsigned int pixelNumber = m_settings.roi.width_physical * m_settings.roi.height_physical;
 	BUFFER_SETTINGS bufferSettings = { 1, pixelNumber, "unsigned char", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
@@ -239,7 +242,7 @@ void PointGrey::getImageForAcquisition(unsigned char* buffer, bool preview) {
 
 	if (preview && buffer != nullptr) {
 		// write image to preview buffer
-		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.width * m_settings.roi.height);
+		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.width_physical * m_settings.roi.height_physical);
 		m_previewBuffer->m_buffer->m_usedBuffers->release();
 	}
 }
@@ -261,7 +264,7 @@ int PointGrey::acquireImage(unsigned char* buffer) {
 
 	// Copy data to provided buffer
 	if (data != NULL && buffer != nullptr) {
-		memcpy(buffer, data, m_settings.roi.width * m_settings.roi.height);
+		memcpy(buffer, data, m_settings.roi.width_physical * m_settings.roi.height_physical);
 		return 1;
 	}
 	return 0;
@@ -324,8 +327,8 @@ void PointGrey::readSettings() {
 	i_retCode = m_camera.GetFormat7Configuration(&fmt7ImageSettings, &packetSize, &speed);
 
 	// ROI
-	m_settings.roi.height = fmt7ImageSettings.height;
-	m_settings.roi.width = fmt7ImageSettings.width;
+	m_settings.roi.height_physical = fmt7ImageSettings.height;
+	m_settings.roi.width_physical = fmt7ImageSettings.width;
 	m_settings.roi.left = fmt7ImageSettings.offsetX;
 	m_settings.roi.top = fmt7ImageSettings.offsetY;
 
@@ -363,8 +366,8 @@ void PointGrey::preparePreview() {
 	// set ROI and readout parameters to default preview values, exposure time and gain will be kept
 	m_settings.roi.left = 0;
 	m_settings.roi.top = 0;
-	m_settings.roi.width = m_options.ROIWidthLimits[1];
-	m_settings.roi.height = m_options.ROIHeightLimits[1];
+	m_settings.roi.width_physical = m_options.ROIWidthLimits[1];
+	m_settings.roi.height_physical = m_options.ROIHeightLimits[1];
 	m_settings.readout.pixelEncoding = L"Raw8";
 	m_settings.readout.triggerMode = L"Internal";
 	m_settings.readout.cycleMode = L"Fixed";
@@ -372,7 +375,7 @@ void PointGrey::preparePreview() {
 
 	setSettings(m_settings);
 
-	unsigned int pixelNumber = m_settings.roi.width * m_settings.roi.height;
+	unsigned int pixelNumber = m_settings.roi.width_physical * m_settings.roi.height_physical;
 	BUFFER_SETTINGS bufferSettings = { 1, pixelNumber, "unsigned char", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());

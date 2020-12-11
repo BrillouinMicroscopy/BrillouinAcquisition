@@ -82,8 +82,8 @@ void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 	m_settings.roi.binX = binning;
 	m_settings.roi.binY = binning;
 
-	m_settings.roi.width /= m_settings.roi.binX;
-	m_settings.roi.height /= m_settings.roi.binY;
+	m_settings.roi.width_binned = m_settings.roi.width_physical / m_settings.roi.binX;
+	m_settings.roi.height_binned = m_settings.roi.height_physical / m_settings.roi.binY;
 
 	int speedTableIndex{ 0 };
 	for (gsl::index i{ 0 }; i < m_SpeedTable.size(); i++) {
@@ -589,9 +589,9 @@ bool PVCamera::ReadEnumeration(NVPC* nvpc, PVCam::uns32 paramID, const char* par
 PVCam::rgn_type PVCamera::getCamSettings() {
 	PVCam::rgn_type camSettings;
 	camSettings.s1 = m_settings.roi.left - 1;
-	camSettings.s2 = m_settings.roi.width * m_settings.roi.binX + m_settings.roi.left - 2;
+	camSettings.s2 = m_settings.roi.width_physical + m_settings.roi.left - 2;
 	camSettings.p1 = m_settings.roi.top - 1;
-	camSettings.p2 = m_settings.roi.height * m_settings.roi.binY + m_settings.roi.top - 2;
+	camSettings.p2 = m_settings.roi.height_physical + m_settings.roi.top - 2;
 	camSettings.sbin = m_settings.roi.binY;
 	camSettings.pbin = m_settings.roi.binX;
 	return camSettings;
@@ -625,9 +625,9 @@ void PVCamera::preparePreview() {
 	stopTempTimer();
 
 	// always use full camera image for live preview
-	m_settings.roi.width = m_options.ROIWidthLimits[1];
+	m_settings.roi.width_physical = m_options.ROIWidthLimits[1];
 	m_settings.roi.left = 1;
-	m_settings.roi.height = m_options.ROIHeightLimits[1];
+	m_settings.roi.height_physical = m_options.ROIHeightLimits[1];
 	m_settings.roi.top = 1;
 
 	setSettings(m_settings);

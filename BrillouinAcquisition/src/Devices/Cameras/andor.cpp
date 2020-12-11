@@ -91,9 +91,9 @@ void Andor::setSettings(CAMERA_SETTINGS settings) {
 	m_settings.roi.binX = binning;
 	m_settings.roi.binY = binning;
 	AT_SetEnumeratedString(m_camera, L"AOIBinning", m_settings.roi.binning.c_str());
-	AT_SetInt(m_camera, L"AOIWidth", m_settings.roi.width / m_settings.roi.binX);
+	AT_SetInt(m_camera, L"AOIWidth", m_settings.roi.width_physical / m_settings.roi.binX);
 	AT_SetInt(m_camera, L"AOILeft", m_settings.roi.left);
-	AT_SetInt(m_camera, L"AOIHeight", m_settings.roi.height / m_settings.roi.binY);
+	AT_SetInt(m_camera, L"AOIHeight", m_settings.roi.height_physical / m_settings.roi.binY);
 	AT_SetInt(m_camera, L"AOITop", m_settings.roi.top);
 	AT_SetEnumeratedString(m_camera, L"SimplePreAmpGainControl", m_settings.readout.preAmpGain.c_str());
 
@@ -167,7 +167,7 @@ void Andor::getImageForAcquisition(unsigned char* buffer, bool preview) {
 
 	if (preview) {
 		// write image to preview buffer
-		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.width * m_settings.roi.height * 2);
+		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.width_binned * m_settings.roi.height_binned * 2);
 		m_previewBuffer->m_buffer->m_usedBuffers->release();
 	}
 }
@@ -215,11 +215,11 @@ int Andor::acquireImage(unsigned char* buffer) {
 
 	// Process the image
 	//Unpack the 12 bit packed data
-	AT_GetInt(m_camera, L"AOIHeight", &m_settings.roi.height);
-	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width);
+	AT_GetInt(m_camera, L"AOIHeight", &m_settings.roi.height_binned);
+	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width_binned);
 	AT_GetInt(m_camera, L"AOIStride", &m_imageStride);
 
-	AT_ConvertBuffer(Buffer, buffer, m_settings.roi.width, m_settings.roi.height, m_imageStride, m_settings.readout.pixelEncoding.c_str(), L"Mono16");
+	AT_ConvertBuffer(Buffer, buffer, m_settings.roi.width_binned, m_settings.roi.height_binned, m_imageStride, m_settings.readout.pixelEncoding.c_str(), L"Mono16");
 
 	delete[] Buffer;
 	return 1;
@@ -248,11 +248,13 @@ void Andor::readSettings() {
 	AT_GetBool(m_camera, L"SpuriousNoiseFilter", (int*)&m_settings.spuriousNoiseFilter);
 
 	// ROI
-	AT_GetInt(m_camera, L"AOIHeight", &m_settings.roi.height);
-	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width);
+	AT_GetInt(m_camera, L"AOIHeight", &m_settings.roi.height_binned);
+	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width_binned);
 	AT_GetInt(m_camera, L"AOILeft", &m_settings.roi.left);
 	AT_GetInt(m_camera, L"AOITop", &m_settings.roi.top);
 	getEnumString(L"AOIBinning", &m_settings.roi.binning);
+	m_settings.roi.width_physical = m_settings.roi.width_binned * m_settings.roi.binX;
+	m_settings.roi.height_physical = m_settings.roi.height_binned * m_settings.roi.binY;
 
 	// readout parameters
 	getEnumString(L"CycleMode", &m_settings.readout.cycleMode);
@@ -295,9 +297,9 @@ bool Andor::initialize() {
 
 void Andor::preparePreview() {
 	// always use full camera image for live preview
-	m_settings.roi.width = m_options.ROIWidthLimits[1];
+	m_settings.roi.width_physical = m_options.ROIWidthLimits[1];
 	m_settings.roi.left = 1;
-	m_settings.roi.height = m_options.ROIHeightLimits[1];
+	m_settings.roi.height_physical = m_options.ROIHeightLimits[1];
 	m_settings.roi.top = 1;
 
 	setSettings(m_settings);

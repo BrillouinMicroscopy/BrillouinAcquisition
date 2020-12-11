@@ -26,8 +26,8 @@ void converter::updateBackground() {
 
 template <typename T>
 void converter::conv(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, T* unpackedBuffer) {
-	int dim_x = previewBuffer->m_bufferSettings.roi.width;
-	int dim_y = previewBuffer->m_bufferSettings.roi.height;
+	int dim_x = previewBuffer->m_bufferSettings.roi.width_binned;
+	int dim_y = previewBuffer->m_bufferSettings.roi.height_binned;
 
 	std::vector<float> converted(unpackedBuffer, unpackedBuffer + (size_t)dim_x*dim_y);
 	switch (plotSettings->mode) {

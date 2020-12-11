@@ -40,13 +40,13 @@ void uEyeCam::connectDevice() {
 
 			m_settings.roi.left = 0;
 			m_settings.roi.top = 0;
-			m_settings.roi.width = 3840;
-			m_settings.roi.height = 2748;
+			m_settings.roi.width_physical = 3840;
+			m_settings.roi.height_physical = 2748;
 			
 			m_settings.roi.left = 800;
 			m_settings.roi.top = 400;
-			m_settings.roi.width = 1800;
-			m_settings.roi.height = 2000;
+			m_settings.roi.width_physical = 1800;
+			m_settings.roi.height_physical = 2000;
 
 			m_settings.readout.triggerMode = L"Software";
 			m_settings.readout.pixelEncoding = L"Raw8";
@@ -131,11 +131,14 @@ void uEyeCam::setSettings(CAMERA_SETTINGS settings) {
 	// Offset y
 	AOI.s32Y = m_settings.roi.top;
 	// Width
-	AOI.s32Width = m_settings.roi.width;
+	AOI.s32Width = m_settings.roi.width_physical;
 	// Height
-	AOI.s32Height = m_settings.roi.height;
+	AOI.s32Height = m_settings.roi.height_physical;
 	// Apply values
 	ret = uEye::is_AOI(m_camera, IS_AOI_IMAGE_SET_AOI, (void*)&AOI, sizeof(AOI));
+
+	m_settings.roi.width_binned = m_settings.roi.width_physical;
+	m_settings.roi.height_binned = m_settings.roi.height_physical;
 
 	/*
 	 * Set trigger mode
@@ -199,13 +202,13 @@ void uEyeCam::startAcquisition(CAMERA_SETTINGS settings) {
 	// Wait for camera to really apply settings
 	Sleep(500);
 
-	unsigned int pixelNumber = m_settings.roi.width * m_settings.roi.height;
+	unsigned int pixelNumber = m_settings.roi.width_physical * m_settings.roi.height_physical;
 	BUFFER_SETTINGS bufferSettings = { 1, pixelNumber, "unsigned char", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
 	// allocate and add memory
-	int nRet = uEye::is_AllocImageMem(m_camera, m_settings.roi.width, m_settings.roi.height, 8, &m_imageBuffer, &m_imageBufferId);
+	int nRet = uEye::is_AllocImageMem(m_camera, m_settings.roi.width_physical, m_settings.roi.height_physical, 8, &m_imageBuffer, &m_imageBufferId);
 
 	if (nRet == IS_SUCCESS) {
 		nRet = uEye::is_SetImageMem(m_camera, m_imageBuffer, m_imageBufferId);
@@ -238,7 +241,7 @@ void uEyeCam::getImageForAcquisition(unsigned char* buffer, bool preview) {
 
 	if (preview && buffer != nullptr) {
 		// write image to preview buffer
-		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.width * m_settings.roi.height);
+		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.width_physical * m_settings.roi.height_physical);
 		m_previewBuffer->m_buffer->m_usedBuffers->release();
 	}
 }
@@ -251,7 +254,7 @@ int uEyeCam::acquireImage(unsigned char* buffer) {
 
 	// Copy data to provided buffer
 	if (m_imageBuffer != NULL && buffer != nullptr) {
-		memcpy(buffer, m_imageBuffer, m_settings.roi.width * m_settings.roi.height);
+		memcpy(buffer, m_imageBuffer, m_settings.roi.width_physical * m_settings.roi.height_physical);
 		return 1;
 	}
 	return 0;
@@ -303,8 +306,8 @@ void uEyeCam::readSettings() {
 	uEye::IS_RECT AOI;
 	ret = uEye::is_AOI(m_camera, IS_AOI_IMAGE_GET_AOI, (void*)&AOI, sizeof(AOI));
 	if (ret == IS_SUCCESS) {
-		m_settings.roi.height = AOI.s32Height;
-		m_settings.roi.width = AOI.s32Width;
+		m_settings.roi.height_physical = AOI.s32Height;
+		m_settings.roi.width_physical = AOI.s32Width;
 		m_settings.roi.left = AOI.s32X;
 		m_settings.roi.top = AOI.s32Y;
 	}
@@ -351,26 +354,26 @@ void uEyeCam::preparePreview() {
 	// set ROI and readout parameters to default preview values, exposure time and gain will be kept
 	m_settings.roi.left = 0;
 	m_settings.roi.top = 0;
-	m_settings.roi.width = m_options.ROIWidthLimits[1];
-	m_settings.roi.height = m_options.ROIHeightLimits[1];
+	m_settings.roi.width_physical = m_options.ROIWidthLimits[1];
+	m_settings.roi.height_physical = m_options.ROIHeightLimits[1];
 
 	m_settings.roi.left = 800;
 	m_settings.roi.top = 400;
-	m_settings.roi.width = 1800;
-	m_settings.roi.height = 2000;
+	m_settings.roi.width_physical = 1800;
+	m_settings.roi.height_physical = 2000;
 
 	m_settings.readout.pixelEncoding = L"Raw8";
 	m_settings.readout.triggerMode = L"Internal";
 
 	setSettings(m_settings);
 
-	unsigned int pixelNumber = m_settings.roi.width * m_settings.roi.height;
+	unsigned int pixelNumber = m_settings.roi.width_physical * m_settings.roi.height_physical;
 	BUFFER_SETTINGS bufferSettings = { 1, pixelNumber, "unsigned char", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
 	// allocate and add memory
-	int nRet = uEye::is_AllocImageMem(m_camera, m_settings.roi.width, m_settings.roi.height, 8, &m_imageBuffer, &m_imageBufferId);
+	int nRet = uEye::is_AllocImageMem(m_camera, m_settings.roi.width_physical, m_settings.roi.height_physical, 8, &m_imageBuffer, &m_imageBufferId);
 
 	if (nRet == IS_SUCCESS) {
 		nRet = uEye::is_AddToSequence(m_camera, m_imageBuffer, m_imageBufferId);

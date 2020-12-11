@@ -653,9 +653,9 @@ void BrillouinAcquisition::cameraODTSettingsChanged(CAMERA_SETTINGS settings) {
 	ui->gainODT->blockSignals(false);
 	//ui->frameCount->setValue(settings.frameCount);
 	ui->ROILeftODT->setValue(settings.roi.left);
-	ui->ROIWidthODT->setValue(settings.roi.width);
+	ui->ROIWidthODT->setValue(settings.roi.width_physical);
 	ui->ROITopODT->setValue(settings.roi.top);
-	ui->ROIHeightODT->setValue(settings.roi.height);
+	ui->ROIHeightODT->setValue(settings.roi.height_physical);
 
 	ui->pixelEncodingODT->setCurrentText(QString::fromStdWString(settings.readout.pixelEncoding));
 }
@@ -1507,14 +1507,14 @@ void BrillouinAcquisition::yAxisRangeChangedODT(const QCPRange &newRange) {
 void BrillouinAcquisition::xAxisRangeChanged(const QCPRange &newRange) {
 	ui->customplot->xAxis->setRange(newRange.bounded(1, m_cameraOptions.ROIWidthLimits[1]));
 	m_deviceSettings.camera.roi.left = newRange.lower;
-	m_deviceSettings.camera.roi.width = newRange.upper - newRange.lower + 1;
+	m_deviceSettings.camera.roi.width_physical = newRange.upper - newRange.lower + 1;
 	settingsCameraUpdate(ROI_SOURCE::PLOT);
 }
 
 void BrillouinAcquisition::yAxisRangeChanged(const QCPRange &newRange) {
 	ui->customplot->yAxis->setRange(newRange.bounded(1, m_cameraOptions.ROIHeightLimits[1]));
 	m_deviceSettings.camera.roi.top = m_cameraOptions.ROIHeightLimits[1] - newRange.upper + 1;
-	m_deviceSettings.camera.roi.height = newRange.upper - newRange.lower + 1;
+	m_deviceSettings.camera.roi.height_physical = newRange.upper - newRange.lower + 1;
 	settingsCameraUpdate(ROI_SOURCE::PLOT);
 }
 
@@ -1524,7 +1524,7 @@ void BrillouinAcquisition::on_ROILeft_valueChanged(int left) {
 }
 
 void BrillouinAcquisition::on_ROIWidth_valueChanged(int width) {
-	m_deviceSettings.camera.roi.width = width;
+	m_deviceSettings.camera.roi.width_physical = width;
 	settingsCameraUpdate(ROI_SOURCE::BOX);
 }
 
@@ -1534,7 +1534,7 @@ void BrillouinAcquisition::on_ROITop_valueChanged(int top) {
 }
 
 void BrillouinAcquisition::on_ROIHeight_valueChanged(int height) {
-	m_deviceSettings.camera.roi.height = height;
+	m_deviceSettings.camera.roi.height_physical = height;
 	settingsCameraUpdate(ROI_SOURCE::BOX);
 }
 
@@ -1546,21 +1546,21 @@ void BrillouinAcquisition::settingsCameraUpdate(int source) {
 
 	// check these requirements
 	// for x
-	std::vector<AT_64> xIn = { m_deviceSettings.camera.roi.left, m_deviceSettings.camera.roi.width };
+	std::vector<AT_64> xIn = { m_deviceSettings.camera.roi.left, m_deviceSettings.camera.roi.width_physical };
 	std::vector<AT_64> xOut = checkROI(xIn, m_cameraOptions.ROIWidthLimits);
 	bool xChanged = (xIn != xOut);
 	if (xChanged) {
 		m_deviceSettings.camera.roi.left = xOut[0];
-		m_deviceSettings.camera.roi.width = xOut[1];
+		m_deviceSettings.camera.roi.width_physical = xOut[1];
 	}
 
 	//for y
-	std::vector<AT_64> yIn = { m_deviceSettings.camera.roi.top, m_deviceSettings.camera.roi.height };
+	std::vector<AT_64> yIn = { m_deviceSettings.camera.roi.top, m_deviceSettings.camera.roi.height_physical };
 	std::vector<AT_64> yOut = checkROI(yIn, m_cameraOptions.ROIHeightLimits);
 	bool yChanged = (yIn != yOut);
 	if (yChanged) {
 		m_deviceSettings.camera.roi.top = yOut[0];
-		m_deviceSettings.camera.roi.height = yOut[1];
+		m_deviceSettings.camera.roi.height_physical = yOut[1];
 	}
 
 	// set values of manual input fields
@@ -1569,7 +1569,7 @@ void BrillouinAcquisition::settingsCameraUpdate(int source) {
 		ui->ROILeft->blockSignals(true);
 		ui->ROIWidth->blockSignals(true);
 		ui->ROILeft->setValue(m_deviceSettings.camera.roi.left);
-		ui->ROIWidth->setValue(m_deviceSettings.camera.roi.width);
+		ui->ROIWidth->setValue(m_deviceSettings.camera.roi.width_physical);
 		ui->ROILeft->blockSignals(false);
 		ui->ROIWidth->blockSignals(false);
 	}
@@ -1578,17 +1578,17 @@ void BrillouinAcquisition::settingsCameraUpdate(int source) {
 		ui->ROITop->blockSignals(true);
 		ui->ROIHeight->blockSignals(true);
 		ui->ROITop->setValue(m_deviceSettings.camera.roi.top);
-		ui->ROIHeight->setValue(m_deviceSettings.camera.roi.height);
+		ui->ROIHeight->setValue(m_deviceSettings.camera.roi.height_physical);
 		ui->ROITop->blockSignals(false);
 		ui->ROIHeight->blockSignals(false);
 	}
 	// set plot range
 	//ui->customplot->yAxis->setRange(newRange.bounded(1, m_cameraOptions.ROIHeightLimits[1]));
 	if (source == ROI_SOURCE::BOX || xChanged) {
-		ui->customplot->xAxis->setRange(QCPRange(m_deviceSettings.camera.roi.left, m_deviceSettings.camera.roi.left + m_deviceSettings.camera.roi.width - 1));
+		ui->customplot->xAxis->setRange(QCPRange(m_deviceSettings.camera.roi.left, m_deviceSettings.camera.roi.left + m_deviceSettings.camera.roi.width_physical - 1));
 	}
 	if (source == ROI_SOURCE::BOX || yChanged) {
-		double l = m_cameraOptions.ROIHeightLimits[1] - m_deviceSettings.camera.roi.top - m_deviceSettings.camera.roi.height + 2;
+		double l = m_cameraOptions.ROIHeightLimits[1] - m_deviceSettings.camera.roi.top - m_deviceSettings.camera.roi.height_physical + 2;
 		double h = m_cameraOptions.ROIHeightLimits[1] - m_deviceSettings.camera.roi.top + 1;
 		ui->customplot->yAxis->setRange(QCPRange(l, h));
 	}
@@ -1654,10 +1654,10 @@ void BrillouinAcquisition::applyCameraSettings() {
 
 void BrillouinAcquisition::updatePlotLimits(PLOT_SETTINGS plotSettings,	CAMERA_OPTIONS options, CAMERA_ROI roi) {
 	// set the properties of the colormap to the correct values of the preview buffer
-	plotSettings.colorMap->data()->setSize(roi.width, roi.height);
-	QCPRange xRange = QCPRange(roi.left, roi.width * roi.binX + roi.left - 1);
+	plotSettings.colorMap->data()->setSize(roi.width_binned, roi.height_binned);
+	QCPRange xRange = QCPRange(roi.left, roi.width_physical + roi.left - 1);
 	QCPRange yRange = QCPRange(
-		options.ROIHeightLimits[1] - roi.top - roi.height * roi.binY + 2,
+		options.ROIHeightLimits[1] - roi.top - roi.height_physical + 2,
 		options.ROIHeightLimits[1] - roi.top + 1
 	);
 	plotSettings.colorMap->data()->setRange(xRange, yRange);
@@ -1825,8 +1825,8 @@ void BrillouinAcquisition::plot(PreviewBuffer<unsigned char>* previewBuffer, PLO
 
 template <typename T>
 void BrillouinAcquisition::plotting(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<T> unpackedBuffer) {
-	int dim_x = previewBuffer->m_bufferSettings.roi.width;
-	int dim_y = previewBuffer->m_bufferSettings.roi.height;
+	int dim_x = previewBuffer->m_bufferSettings.roi.width_binned;
+	int dim_y = previewBuffer->m_bufferSettings.roi.height_binned;
 	// images are given row by row, starting at the top left
 	int tIndex{ 0 };
 	for (gsl::index yIndex{ 0 }; yIndex < dim_y; ++yIndex) {
@@ -3007,8 +3007,8 @@ void BrillouinAcquisition::on_BrillouinStart_clicked() {
 		// set camera ROI
 		m_BrillouinSettings.camera.roi.top = m_deviceSettings.camera.roi.top;
 		m_BrillouinSettings.camera.roi.left = m_deviceSettings.camera.roi.left;
-		m_BrillouinSettings.camera.roi.width = m_deviceSettings.camera.roi.width;
-		m_BrillouinSettings.camera.roi.height = m_deviceSettings.camera.roi.height;
+		m_BrillouinSettings.camera.roi.width_physical = m_deviceSettings.camera.roi.width_physical;
+		m_BrillouinSettings.camera.roi.height_physical = m_deviceSettings.camera.roi.height_physical;
 		m_Brillouin->setSettings(m_BrillouinSettings);
 		QMetaObject::invokeMethod(
 			m_Brillouin,

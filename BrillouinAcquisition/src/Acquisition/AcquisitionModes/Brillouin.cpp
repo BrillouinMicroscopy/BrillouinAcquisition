@@ -290,9 +290,13 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 
 	// acquire images
 	auto rank_cal = 3;
-	hsize_t dims_cal[3] = { (hsize_t)m_settings.nrCalibrationImages, (hsize_t)m_settings.camera.roi.height, (hsize_t)m_settings.camera.roi.width };
+	hsize_t dims_cal[3] = {
+		(hsize_t)m_settings.nrCalibrationImages,
+		(hsize_t)m_settings.camera.roi.height_binned,
+		(hsize_t)m_settings.camera.roi.width_binned
+	};
 
-	auto bytesPerFrame = (int)(2 * m_settings.camera.roi.width * m_settings.camera.roi.height);
+	auto bytesPerFrame = (int)(2 * m_settings.camera.roi.width_binned * m_settings.camera.roi.height_binned);
 	auto images = std::vector<unsigned char>((int64_t)bytesPerFrame * m_settings.nrCalibrationImages);
 	for (gsl::index mm{ 0 }; mm < m_settings.nrCalibrationImages; mm++) {
 		if (m_abort) {
@@ -489,8 +493,12 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	);
 	
 	auto rank_data{ 3 };
-	hsize_t dims_data[3] = { (hsize_t)m_settings.camera.frameCount, (hsize_t)m_settings.camera.roi.height, (hsize_t)m_settings.camera.roi.width };
-	auto bytesPerFrame = long long{ 2 * m_settings.camera.roi.width * m_settings.camera.roi.height };
+	hsize_t dims_data[3] = {
+		(hsize_t)m_settings.camera.frameCount,
+		(hsize_t)m_settings.camera.roi.height_binned,
+		(hsize_t)m_settings.camera.roi.width_binned
+	};
+	auto bytesPerFrame = long long{ 2 * m_settings.camera.roi.width_binned * m_settings.camera.roi.height_binned };
 
 	// reset number of calibrations
 	nrCalibrations = 1;

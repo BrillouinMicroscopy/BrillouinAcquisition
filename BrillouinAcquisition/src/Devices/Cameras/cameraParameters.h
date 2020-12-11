@@ -17,9 +17,11 @@ struct CAMERA_OPTIONS {
 
 struct CAMERA_ROI {
 	long long left{ 1 };
-	long long width{ 2048 };
+	long long width_physical{ 2048 };
+	long long width_binned{ 2048 };
 	long long top{ 1 };
-	long long height{ 2048 };
+	long long height_physical{ 2048 };
+	long long height_binned{ 2048 };
 	long long binX{ 1 };
 	long long binY{ 1 };
 	std::wstring binning{ L"1x1" };
