@@ -207,20 +207,20 @@ void Fluorescence::configureCamera() {
 	// This needs a proper implementation with user defined values. Probably by a configuration file.
 	m_settings.camera.roi.left = 128;
 	m_settings.camera.roi.top = 0;
-	m_settings.camera.roi.width = 1024;
-	m_settings.camera.roi.height = 1024;
+	m_settings.camera.roi.width_physical = 1024;
+	m_settings.camera.roi.height_physical = 1024;
 	if (cameraType == "class uEyeCam") {
 		m_settings.camera.roi.left = 800;
 		m_settings.camera.roi.top = 400;
-		m_settings.camera.roi.width = 1800;
-		m_settings.camera.roi.height = 2000;
+		m_settings.camera.roi.width_physical = 1800;
+		m_settings.camera.roi.height_physical = 2000;
 		m_settings.camera.readout.triggerMode = L"Software";
 	}
 	else if (cameraType == "class PointGrey") {
 		m_settings.camera.roi.left = 128;
 		m_settings.camera.roi.top = 0;
-		m_settings.camera.roi.width = 1024;
-		m_settings.camera.roi.height = 1024;
+		m_settings.camera.roi.width_physical = 1024;
+		m_settings.camera.roi.height_physical = 1024;
 		m_settings.camera.readout.triggerMode = L"Software";
 	}
 	m_settings.camera.readout.pixelEncoding = L"Raw8";
@@ -270,8 +270,8 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 	measurementTimer.start();
 
 	int rank_data{ 3 };
-	hsize_t dims_data[3] = { 1, (hsize_t)m_settings.camera.roi.height, (hsize_t)m_settings.camera.roi.width };
-	int bytesPerFrame = m_settings.camera.roi.width * m_settings.camera.roi.height;
+	hsize_t dims_data[3] = { 1, (hsize_t)m_settings.camera.roi.height_binned, (hsize_t)m_settings.camera.roi.width_binned };
+	int bytesPerFrame = m_settings.camera.roi.width_binned * m_settings.camera.roi.height_binned;
 	// Loop through the different modes
 	int imageNumber{ 0 };
 	for (auto const& channel : channels) {

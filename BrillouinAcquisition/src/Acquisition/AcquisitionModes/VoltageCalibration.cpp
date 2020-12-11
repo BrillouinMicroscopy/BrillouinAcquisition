@@ -37,8 +37,8 @@ void VoltageCalibration::startRepetitions() {
 	m_cameraSettings.roi.left = 0;
 	m_cameraSettings.roi.top = 0;
 	// Set camera to full frame
-	m_cameraSettings.roi.width = cameraOptions.ROIWidthLimits[1];
-	m_cameraSettings.roi.height = cameraOptions.ROIHeightLimits[1];
+	m_cameraSettings.roi.width_physical = cameraOptions.ROIWidthLimits[1];
+	m_cameraSettings.roi.height_physical = cameraOptions.ROIHeightLimits[1];
 	m_cameraSettings.readout.pixelEncoding = L"Raw8";
 	m_cameraSettings.readout.triggerMode = L"External";
 	m_cameraSettings.readout.cycleMode = L"Continuous";
@@ -283,8 +283,8 @@ void VoltageCalibration::acquire() {
 		(*m_ODTControl)->setAcquisitionVoltages(voltages);
 
 		int rank_data{ 3 };
-		hsize_t dims_data[3] = { 1, (hsize_t)m_cameraSettings.roi.height, (hsize_t)m_cameraSettings.roi.width };
-		int bytesPerFrame = m_cameraSettings.roi.width * m_cameraSettings.roi.height;
+		hsize_t dims_data[3] = { 1, (hsize_t)m_cameraSettings.roi.height_binned, (hsize_t)m_cameraSettings.roi.width_binned };
+		int bytesPerFrame = m_cameraSettings.roi.width_binned * m_cameraSettings.roi.height_binned;
 		for (gsl::index i{ 0 }; i < chunkSize; i++) {
 
 			// read images from camera
@@ -305,8 +305,8 @@ void VoltageCalibration::acquire() {
 			auto iterator_max = std::max_element(images.begin(), images.end());
 			auto index = std::distance(images.begin(), iterator_max);
 			if (*iterator_max > m_minimalIntensity) {
-				int y = m_cameraSettings.roi.height - floor(index / m_cameraSettings.roi.width);
-				int x = index % m_cameraSettings.roi.width;
+				int y = m_cameraSettings.roi.height_binned - floor(index / m_cameraSettings.roi.width_binned);
+				int x = index % m_cameraSettings.roi.width_binned;
 				
 				POINT2 pos = (*m_ODTControl)->pixToMicroMeter({ (double)x, (double)y });
 
