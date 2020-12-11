@@ -399,11 +399,11 @@ void Brillouin::updatePositions() {
 std::string Brillouin::getBinningString() {
 	auto binning = std::string{ "1x1" };
 	if (m_settings.camera.roi.binning == L"8x8") {
-		binning = "1x1";
+		binning = "8x8";
 	} else if (m_settings.camera.roi.binning == L"4x4") {
-		binning = "1x1";
+		binning = "4x4";
 	} else if (m_settings.camera.roi.binning == L"2x2") {
-		binning = "1x1";
+		binning = "2x2";
 	}
 	return binning;
 }
