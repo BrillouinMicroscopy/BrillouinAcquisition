@@ -41,9 +41,9 @@ public:
 	}
 	
 	template <typename T = double>
-		static T absSum(std::vector<T> vector) {
-		T sum = 0;
-		for (int jj(0); jj < vector.size(); jj++) {
+	static T absSum(std::vector<T> vector) {
+		auto sum = T{ 0 };
+		for (gsl::index jj{ 0 }; jj < vector.size(); jj++) {
 			sum += abs(vector[jj]);
 		}
 		return sum;

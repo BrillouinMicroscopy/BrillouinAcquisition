@@ -5,15 +5,16 @@
 
 #include "thread.h"
 
-#include "Devices/andor.h"
-#include "Devices/pvcamera.h"
-#include "Devices/scancontrol.h"
-#include "Devices/ZeissECU.h"
-#include "Devices/ZeissMTB.h"
-#include "Devices/ZeissMTB_Erlangen.h"
-#include "Devices/NIDAQ.h"
-#include "Devices/PointGrey.h"
-#include "Devices/uEyeCam.h"
+#include "Devices/Cameras/andor.h"
+#include "Devices/Cameras/pvcamera.h"
+#include "Devices/Cameras/PointGrey.h"
+#include "Devices/Cameras/uEyeCam.h"
+
+#include "Devices/ScanControls/ScanControl.h"
+#include "Devices/ScanControls/ZeissECU.h"
+#include "Devices/ScanControls/ZeissMTB.h"
+#include "Devices/ScanControls/ZeissMTB_Erlangen.h"
+#include "Devices/ScanControls/NIDAQ.h"
 
 #include "Acquisition/Acquisition.h"
 #include "external/qcustomplot/qcustomplot.h"
@@ -23,7 +24,8 @@
 #include "Acquisition/AcquisitionModes/Brillouin.h"
 #include "Acquisition/AcquisitionModes/ODT.h"
 #include "Acquisition/AcquisitionModes/Fluorescence.h"
-#include "Acquisition/AcquisitionModes/Calibration.h"
+#include "Acquisition/AcquisitionModes/ScaleCalibration.h"
+#include "Acquisition/AcquisitionModes/VoltageCalibration.h"
 
 #include "converter.h"
 
@@ -59,6 +61,11 @@ Q_DECLARE_METATYPE(CAMERA_OPTIONS);
 Q_DECLARE_METATYPE(std::vector<int>);
 Q_DECLARE_METATYPE(std::vector<double>);
 Q_DECLARE_METATYPE(std::vector<float>);
+Q_DECLARE_METATYPE(std::vector<unsigned char>);
+Q_DECLARE_METATYPE(std::vector<unsigned short>);
+Q_DECLARE_METATYPE(std::vector<FLUORESCENCE_MODE>);
+Q_DECLARE_METATYPE(std::vector<POINT2>);
+Q_DECLARE_METATYPE(std::vector<POINT3>);
 Q_DECLARE_METATYPE(QSerialPort::SerialPortError);
 Q_DECLARE_METATYPE(IMAGE*);
 Q_DECLARE_METATYPE(CALIBRATION*);
@@ -67,7 +74,6 @@ Q_DECLARE_METATYPE(DeviceElement);
 Q_DECLARE_METATYPE(SensorTemperature);
 Q_DECLARE_METATYPE(POINT3);
 Q_DECLARE_METATYPE(POINT2);
-Q_DECLARE_METATYPE(std::vector<POINT3>);
 Q_DECLARE_METATYPE(BOUNDS);
 Q_DECLARE_METATYPE(QMouseEvent*);
 Q_DECLARE_METATYPE(VOLTAGE2);
@@ -82,11 +88,9 @@ Q_DECLARE_METATYPE(PLOT_SETTINGS*);
 Q_DECLARE_METATYPE(PreviewBuffer<unsigned char>*);
 Q_DECLARE_METATYPE(unsigned char*);
 Q_DECLARE_METATYPE(unsigned short*);
-Q_DECLARE_METATYPE(std::vector<unsigned char>);
-Q_DECLARE_METATYPE(std::vector<unsigned short>);
 Q_DECLARE_METATYPE(bool*);
-Q_DECLARE_METATYPE(std::vector<FLUORESCENCE_MODE>);
-Q_DECLARE_METATYPE(SpatialCalibration);
+Q_DECLARE_METATYPE(VoltageCalibrationData);
+Q_DECLARE_METATYPE(SCAN_ORDER);
 
 class BrillouinAcquisition : public QMainWindow {
 	Q_OBJECT
@@ -98,7 +102,8 @@ public:
 private:
 	void initScanControl();
 	void initODT();
-	void initSpatialCalibration();
+	void initVoltageCalibration();
+	void initScaleCalibration();
 	void initFluorescence();
 	void initCamera();
 	void initCameraBrillouin();
@@ -129,9 +134,14 @@ private:
 	} CAMERA_BRILLOUIN_DEVICE;
 	std::vector<std::string> CAMERA_BRILLOUIN_DEVICE_NAMES = { "Andor", "PVCam" };
 
-	QCPGraph* m_focusMarker{ nullptr };
-	POINT2 m_focusMarkerPos{ -1, -1 };
-	bool m_selectFocus{ false };
+	QCPGraph* m_positionScannerMarker{ nullptr };
+	POINT2 m_positionScanner{ -1, -1 };
+	bool m_locatePositionScanner{ false };
+
+	QCPCurve* m_positionsMarker{ nullptr };
+	std::vector<POINT3> m_positionsMicrometer;	// [µm]		Positions to raster, relative to current start point
+	std::vector<POINT2> m_positionsPixel;		// [pix]	Positions to raster
+	bool m_showPositions{ true };
 
 	CAMERA_DEVICE m_cameraType{ CAMERA_DEVICE::UEYE };
 	CAMERA_DEVICE m_cameraTypeTemporary = m_cameraType;
@@ -141,7 +151,8 @@ private:
 	QComboBox* m_scanControlDropdown;
 	QComboBox* m_cameraDropdown;
 	QComboBox* m_cameraBrillouinDropdown;
-	std::string m_calibrationFilePath;
+	std::string m_voltageCalibrationFilePath;
+	std::string m_scaleCalibrationFilePath;
 
 	QDialog* m_settingsDialog{ nullptr };
 	Camera* m_andor{ nullptr };
@@ -159,7 +170,8 @@ private:
 	BRILLOUIN_SETTINGS m_BrillouinSettings;
 	ODT* m_ODT{ nullptr };
 	Fluorescence* m_Fluorescence{ nullptr };
-	Calibration* m_Calibration{ nullptr };
+	VoltageCalibration* m_voltageCalibration{ nullptr };
+	ScaleCalibration* m_scaleCalibration{ nullptr };
 
 	PLOT_SETTINGS m_BrillouinPlot;
 	PLOT_SETTINGS m_ODTPlot;
@@ -174,7 +186,6 @@ private:
 	bool m_brightfieldPreviewRunning{ false };
 	ACQUISITION_MODE m_enabledModes{ ACQUISITION_MODE::NONE };
 
-	bool m_hasODT{ false };
 	bool m_hasFluorescence{ false };
 
 	TableModel* tableModel = new TableModel(0);
@@ -208,6 +219,7 @@ private slots:
 	void updatePlot(PLOT_SETTINGS plotSettings);
 	void updateCLimRange(QSpinBox*, QSpinBox*, QCPRange);
 
+	void initializeLaserPositionLocation();
 	void on_addFocusMarker_brightfield_clicked();
 
 	void showEvent(QShowEvent* event);
@@ -236,13 +248,11 @@ private slots:
 	void selectCameraDevice(int index);
 	void selectCameraBrillouinDevice(int index);
 
-	void on_actionAcquire_Voltage_Position_calibration_triggered();
-	void on_actionLoad_Voltage_Position_calibration_triggered();
+	void on_action_Voltage_calibration_acquire_triggered();
+	void on_action_Voltage_calibration_load_triggered();
 
-	void on_microscopeWidth_valueChanged(int);
-	void on_microscopeHeight_valueChanged(int);
-	void on_microscopeMag_valueChanged(double);
-	void on_microscopePixSize_valueChanged(double);
+	void on_action_Scale_calibration_acquire_triggered();
+	void on_action_Scale_calibration_load_triggered();
 
 	void initBeampathButtons();
 
@@ -261,7 +271,7 @@ private slots:
 
 	void initializePlot(PLOT_SETTINGS plotSettings);
 
-	void drawFocusMarker();
+	void drawPositionScannerMarker(POINT2 positionScanner);
 
 	void xAxisRangeChangedODT(const QCPRange& newRange);
 	void yAxisRangeChangedODT(const QCPRange& newRange);
@@ -317,7 +327,6 @@ private slots:
 	void showCalibrationInterval(int);
 	void showCalibrationRunning(bool);
 	void updateFilename(std::string);
-	void updateCalibration(SpatialCalibration);
 
 	void showEnabledModes(ACQUISITION_MODE mode);
 	void showBrillouinStatus(ACQUISITION_STATUS state);
@@ -410,6 +419,10 @@ private slots:
 	void on_stepsX_valueChanged(int);
 	void on_stepsY_valueChanged(int);
 	void on_stepsZ_valueChanged(int);
+	void on_showOverlay_stateChanged(int);
+	void on_AOI_changed(std::vector<POINT3> orderedPositions);
+	void on_scaleCalibrationChanged(std::vector<POINT2> positions);
+	void update_AOI_preview();
 
 	// live calibration
 	void on_preCalibration_stateChanged(int);

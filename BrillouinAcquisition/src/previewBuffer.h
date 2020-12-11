@@ -4,7 +4,7 @@
 #include <QtCore>
 #include <gsl/gsl>
 #include "circularBuffer.h"
-#include "Devices\cameraParameters.h"
+#include "Devices\Cameras\cameraParameters.h"
 
 struct BUFFER_SETTINGS {
 	int bufferNumber{ 0 };

@@ -1,19 +1,10 @@
-#ifndef CALIBRATIONHELPER_H
-#define CALIBRATIONHELPER_H
+#ifndef VOLTAGECALIBRATIONHELPER_H
+#define VOLTAGECALIBRATIONHELPER_H
 
 #include <gsl/gsl>
 #include <string>
 
-#include "../interpolation.h"
-
-struct BOUNDS {
-	double xMin{ -1e3 };	// [µm] minimal x-value
-	double xMax{ 1e3 };		// [µm] maximal x-value
-	double yMin{ -1e3 };	// [µm] minimal y-value
-	double yMax{ 1e3 };		// [µm] maximal y-value
-	double zMin{ -1e3 };	// [µm] minimal z-value
-	double zMax{ 1e3 };		// [µm] maximal z-value
-};
+#include "../../interpolation.h"
 
 struct POSITION_MAPS {
 	std::vector<double> x{ 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5 };
@@ -25,43 +16,19 @@ struct VOLTAGE_MAPS {
 	std::vector<double> Uy{ -2, -1, 0, 1, 2, -2, -1, 0, 1, 2, -2, -1, 0, 1, 2, -2, -1, 0, 1, 2, -2, -1, 0, 1, 2 };
 };
 
-struct MicroscopeProperties {
-	int width{ 1280 };			// [pix] image width
-	int height{ 1024 };			// [pix] image height
-	double pixelSize{ 4.8e-6 };	// [µm]  pixel size
-	double mag = 58;			// [1]   magnification
-};
-
-struct SpatialCalibration {
+struct VoltageCalibrationData {
 	std::string date{ "" };
 	POSITION_MAPS positions;
 	WEIGHTS2<double> positions_weights;
 	VOLTAGE_MAPS voltages;
 	WEIGHTS2<double> voltages_weights;
-	BOUNDS bounds = {
-		-53,	// [µm] minimal x-value
-		 53,	// [µm] maximal x-value
-		-43,	// [µm] minimal y-value
-		 43,	// [µm] maximal y-value
-		 -1000,	// [µm] minimal z-value
-		  1000	// [µm] maximal z-value
-	};
-	MicroscopeProperties microscopeProperties;
-	bool valid = false;
+	bool valid{ false };
 };
 
-class CalibrationHelper {
+class VoltageCalibrationHelper {
 
 public:
-	static void CalibrationHelper::calculateCalibrationBounds(SpatialCalibration *calibration) {
-		double fac = 1e6 * calibration->microscopeProperties.pixelSize / calibration->microscopeProperties.mag / 2;
-		calibration->bounds.xMin = -1 * fac * calibration->microscopeProperties.width;
-		calibration->bounds.xMax = fac * calibration->microscopeProperties.width;
-		calibration->bounds.yMin = -1 * fac * calibration->microscopeProperties.height;
-		calibration->bounds.yMax = fac * calibration->microscopeProperties.height;
-	}
-
-	static void CalibrationHelper::calculateCalibrationWeights(SpatialCalibration *calibration) {
+	static void VoltageCalibrationHelper::calculateCalibrationWeights(VoltageCalibrationData* calibration) {
 		if (calibration->positions.x.size() == 0) {
 			return;
 		}
@@ -86,4 +53,4 @@ public:
 
 };
 
-#endif //CALIBRATIONHELPER_H
+#endif //VOLTAGECALIBRATIONHELPER_H

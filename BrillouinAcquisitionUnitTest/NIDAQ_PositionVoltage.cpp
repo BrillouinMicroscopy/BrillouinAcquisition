@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
-#include "..\BrillouinAcquisition\src\Devices\NIDAQ.h"
-#include "..\BrillouinAcquisition\src\Acquisition\AcquisitionModes\Calibration.h"
+#include "..\BrillouinAcquisition\src\Devices\ScanControls\NIDAQ.h"
+#include "..\BrillouinAcquisition\src\Acquisition\AcquisitionModes\VoltageCalibration.h"
 #include "..\BrillouinAcquisition\src\Acquisition\Acquisition.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -15,7 +15,7 @@ namespace BrillouinAcquisitionUnitTest
 			NIDAQ *nidaq = new NIDAQ();
 			Acquisition *acquisition = new Acquisition(nullptr);
 			Camera *brightfieldCamera = nullptr;
-			Calibration *calibration = new Calibration(nullptr, acquisition, &brightfieldCamera, (ODTControl**)&nidaq);
+			VoltageCalibration *calibration = new VoltageCalibration(nullptr, acquisition, &brightfieldCamera, (ODTControl**)&nidaq);
 			calibration->load("");
 			VOLTAGE2 voltage{ 0, 0 };
 			POINT2 answer = nidaq->voltageToPosition(voltage);
@@ -28,7 +28,7 @@ namespace BrillouinAcquisitionUnitTest
 			NIDAQ *nidaq = new NIDAQ();
 			Acquisition *acquisition = new Acquisition(nullptr);
 			Camera *brightfieldCamera = nullptr;
-			Calibration *calibration = new Calibration(nullptr, acquisition, &brightfieldCamera, (ODTControl**)&nidaq);
+			VoltageCalibration*calibration = new VoltageCalibration(nullptr, acquisition, &brightfieldCamera, (ODTControl**)&nidaq);
 			calibration->load("");
 			VOLTAGE2 voltage{ 0, 0 };
 			POINT2 position = nidaq->voltageToPosition(voltage);

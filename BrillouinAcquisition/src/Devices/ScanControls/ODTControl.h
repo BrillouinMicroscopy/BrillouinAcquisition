@@ -4,7 +4,8 @@
 #include <QSerialPort>
 #include <vector>
 #include "NIDAQmx.h"
-#include "scancontrol.h"
+#include "ScanControl.h"
+#include "../../Acquisition/AcquisitionModes/VoltageCalibrationHelper.h"
 
 #include "H5Cpp.h"
 #include "filesystem"
@@ -42,6 +43,7 @@ public slots:
 	int getLEDLamp();
 
 	void setAcquisitionVoltages(ACQ_VOLTAGES voltages);
+	virtual void setVoltageCalibration(VoltageCalibrationData voltageCalibration) {};
 
 protected:
 	TaskHandle AOtaskHandle{ 0 };
@@ -51,7 +53,8 @@ protected:
 	TTL m_TTL;
 
 	VOLTAGE2 m_voltages{ 0, 0 };	// current voltage
-	POINT3 m_position{ 0, 0, 0 };	// current position
+
+	VoltageCalibrationData m_voltageCalibration;
 
 private:
 	bool m_LEDon{ false };			// current state of the LED illumination source

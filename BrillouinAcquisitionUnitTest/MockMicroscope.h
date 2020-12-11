@@ -1,4 +1,4 @@
-#include "../BrillouinAcquisition/src/Devices/ZeissECU.h"
+#include "..\BrillouinAcquisition\src\Devices\ScanControls\ZeissECU.h"
 #include <QObject>
 
 class MockMicroscope : public com {

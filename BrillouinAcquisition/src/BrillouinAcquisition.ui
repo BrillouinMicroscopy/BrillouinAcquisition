@@ -794,7 +794,7 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>0</y>
                 <width>230</width>
-                <height>180</height>
+                <height>207</height>
                </rect>
               </property>
               <property name="sizePolicy">
@@ -1058,13 +1058,13 @@ QTabBar::tab:!selected {
                 <x>0</x>
                 <y>-31</y>
                 <width>223</width>
-                <height>250</height>
+                <height>207</height>
                </rect>
               </property>
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>250</height>
+                <height>207</height>
                </size>
               </property>
               <widget class="QGroupBox" name="binningROIBoxODT">
@@ -1326,159 +1326,6 @@ QTabBar::tab:!selected {
                 </item>
                </layout>
               </widget>
-              <widget class="QGroupBox" name="cameraPropsBoxODT">
-               <property name="geometry">
-                <rect>
-                 <x>8</x>
-                 <y>176</y>
-                 <width>209</width>
-                 <height>65</height>
-                </rect>
-               </property>
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="title">
-                <string>Camera properties</string>
-               </property>
-               <widget class="QLabel" name="microscopeWidthLabel">
-                <property name="geometry">
-                 <rect>
-                  <x>8</x>
-                  <y>16</y>
-                  <width>32</width>
-                  <height>18</height>
-                 </rect>
-                </property>
-                <property name="text">
-                 <string>Width</string>
-                </property>
-               </widget>
-               <widget class="QLabel" name="microscopeMagLabel">
-                <property name="geometry">
-                 <rect>
-                  <x>8</x>
-                  <y>40</y>
-                  <width>32</width>
-                  <height>18</height>
-                 </rect>
-                </property>
-                <property name="text">
-                 <string>Magn.</string>
-                </property>
-               </widget>
-               <widget class="QLabel" name="microscopeHeightLabel">
-                <property name="geometry">
-                 <rect>
-                  <x>96</x>
-                  <y>16</y>
-                  <width>32</width>
-                  <height>18</height>
-                 </rect>
-                </property>
-                <property name="text">
-                 <string>Height</string>
-                </property>
-               </widget>
-               <widget class="QLabel" name="microscopePixSizeLabel">
-                <property name="geometry">
-                 <rect>
-                  <x>96</x>
-                  <y>40</y>
-                  <width>49</width>
-                  <height>18</height>
-                 </rect>
-                </property>
-                <property name="text">
-                 <string>Pix size [µm]</string>
-                </property>
-               </widget>
-               <widget class="QSpinBox" name="microscopeWidth">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="geometry">
-                 <rect>
-                  <x>40</x>
-                  <y>16</y>
-                  <width>49</width>
-                  <height>18</height>
-                 </rect>
-                </property>
-                <property name="minimum">
-                 <number>1</number>
-                </property>
-                <property name="maximum">
-                 <number>2048</number>
-                </property>
-                <property name="value">
-                 <number>1280</number>
-                </property>
-               </widget>
-               <widget class="QSpinBox" name="microscopeHeight">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="geometry">
-                 <rect>
-                  <x>151</x>
-                  <y>16</y>
-                  <width>49</width>
-                  <height>18</height>
-                 </rect>
-                </property>
-                <property name="minimum">
-                 <number>1</number>
-                </property>
-                <property name="maximum">
-                 <number>2048</number>
-                </property>
-                <property name="value">
-                 <number>1024</number>
-                </property>
-               </widget>
-               <widget class="QDoubleSpinBox" name="microscopeMag">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="geometry">
-                 <rect>
-                  <x>40</x>
-                  <y>40</y>
-                  <width>49</width>
-                  <height>18</height>
-                 </rect>
-                </property>
-                <property name="locale">
-                 <locale language="English" country="UnitedStates"/>
-                </property>
-                <property name="value">
-                 <double>57.000000000000000</double>
-                </property>
-               </widget>
-               <widget class="QDoubleSpinBox" name="microscopePixSize">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="geometry">
-                 <rect>
-                  <x>151</x>
-                  <y>40</y>
-                  <width>49</width>
-                  <height>18</height>
-                 </rect>
-                </property>
-                <property name="locale">
-                 <locale language="English" country="UnitedStates"/>
-                </property>
-                <property name="value">
-                 <double>4.800000000000000</double>
-                </property>
-               </widget>
-              </widget>
              </widget>
             </widget>
            </item>
@@ -1698,22 +1545,22 @@ QTabBar::tab:!selected {
                       <x>0</x>
                       <y>0</y>
                       <width>221</width>
-                      <height>570</height>
+                      <height>600</height>
                      </rect>
                     </property>
                     <property name="minimumSize">
                      <size>
                       <width>0</width>
-                      <height>570</height>
+                      <height>600</height>
                      </size>
                     </property>
                     <widget class="QGroupBox" name="acquisitionAOI">
                      <property name="geometry">
                       <rect>
                        <x>8</x>
-                       <y>32</y>
+                       <y>28</y>
                        <width>209</width>
-                       <height>201</height>
+                       <height>225</height>
                       </rect>
                      </property>
                      <property name="title">
@@ -2234,12 +2081,28 @@ QTabBar::tab:!selected {
                        <string>Select order of scan directions:</string>
                       </property>
                      </widget>
+                     <widget class="QCheckBox" name="showOverlay">
+                      <property name="geometry">
+                       <rect>
+                        <x>8</x>
+                        <y>200</y>
+                        <width>193</width>
+                        <height>18</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Show positions in brightfield image</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
                     </widget>
                     <widget class="QGroupBox" name="liveCalibration">
                      <property name="geometry">
                       <rect>
                        <x>8</x>
-                       <y>240</y>
+                       <y>260</y>
                        <width>209</width>
                        <height>137</height>
                       </rect>
@@ -2482,7 +2345,7 @@ QTabBar::tab:!selected {
                      <property name="geometry">
                       <rect>
                        <x>8</x>
-                       <y>456</y>
+                       <y>476</y>
                        <width>209</width>
                        <height>113</height>
                       </rect>
@@ -2646,7 +2509,7 @@ border: none;</string>
                      <property name="geometry">
                       <rect>
                        <x>8</x>
-                       <y>384</y>
+                       <y>404</y>
                        <width>209</width>
                        <height>65</height>
                       </rect>
@@ -4155,12 +4018,26 @@ border: none;</string>
     <property name="title">
      <string>Devices</string>
     </property>
+    <widget class="QMenu" name="menu_Scale_calibration">
+     <property name="title">
+      <string>Scale calibration</string>
+     </property>
+     <addaction name="action_Scale_calibration_acquire"/>
+     <addaction name="action_Scale_calibration_load"/>
+    </widget>
+    <widget class="QMenu" name="menu_Voltage_calibration">
+     <property name="title">
+      <string>Voltage calibration</string>
+     </property>
+     <addaction name="action_Voltage_calibration_acquire"/>
+     <addaction name="action_Voltage_calibration_load"/>
+    </widget>
     <addaction name="actionConnect_Camera"/>
     <addaction name="actionEnable_Cooling"/>
     <addaction name="separator"/>
     <addaction name="actionConnect_Stage"/>
-    <addaction name="actionAcquire_Voltage_Position_calibration"/>
-    <addaction name="actionLoad_Voltage_Position_calibration"/>
+    <addaction name="menu_Voltage_calibration"/>
+    <addaction name="menu_Scale_calibration"/>
     <addaction name="separator"/>
     <addaction name="actionConnect_Brightfield_camera"/>
     <addaction name="separator"/>
@@ -4250,9 +4127,24 @@ border: none;</string>
     <string>Ctrl+W</string>
    </property>
   </action>
-  <action name="actionAcquire_Voltage_Position_calibration">
+  <action name="action_Voltage_calibration_acquire">
    <property name="text">
-    <string>Acquire V-µm calibration</string>
+    <string>Acquire</string>
+   </property>
+  </action>
+  <action name="action_Voltage_calibration_load">
+   <property name="text">
+    <string>Load</string>
+   </property>
+  </action>
+  <action name="action_Scale_calibration_acquire">
+   <property name="text">
+    <string>Acquire</string>
+   </property>
+  </action>
+  <action name="action_Scale_calibration_load">
+   <property name="text">
+    <string>Load</string>
    </property>
   </action>
  </widget>
@@ -4300,10 +4192,6 @@ border: none;</string>
   <tabstop>ROITopODT</tabstop>
   <tabstop>ROIHeightODT</tabstop>
   <tabstop>pixelEncodingODT</tabstop>
-  <tabstop>microscopeWidth</tabstop>
-  <tabstop>microscopeHeight</tabstop>
-  <tabstop>microscopeMag</tabstop>
-  <tabstop>microscopePixSize</tabstop>
   <tabstop>scrollArea</tabstop>
   <tabstop>startX</tabstop>
   <tabstop>endX</tabstop>

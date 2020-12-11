@@ -1,9 +1,10 @@
 #ifndef SCANCONTROL_H
 #define SCANCONTROL_H
 
-#include "Device.h"
-#include "CalibrationHelper.h"
-#include "../../external/h5bm/TypesafeBitmask.h"
+#include "../Device.h"
+#include "../../../external/h5bm/TypesafeBitmask.h"
+#include "../../POINTS.h"
+#include "../../Acquisition/AcquisitionModes/ScaleCalibrationHelper.h"
 
 enum class ScanPreset {
 	SCAN_NULL			= 0x0,
@@ -20,27 +21,22 @@ enum class ScanPreset {
 };
 ENABLE_BITMASK_OPERATORS(ScanPreset)
 
-struct POINT3 {
-	double x{ 0 };
-	double y{ 0 };
-	double z{ 0 };
-	POINT3 operator+(const POINT3 &pos) {
-		return POINT3{ x + pos.x, y + pos.y, z + pos.z };
-	}
-	POINT3 operator-(const POINT3 &pos) {
-		return POINT3{ x - pos.x, y - pos.y, z - pos.z };
-	}
+struct BOUNDS {
+	double xMin{ -1e3 };	// [µm] minimal x-value
+	double xMax{ 1e3 };		// [µm] maximal x-value
+	double yMin{ -1e3 };	// [µm] minimal y-value
+	double yMax{ 1e3 };		// [µm] maximal y-value
+	double zMin{ -1e3 };	// [µm] minimal z-value
+	double zMax{ 1e3 };		// [µm] maximal z-value
 };
 
-struct POINT2 {
-	double x{ 0 };
-	double y{ 0 };
-	POINT2 operator+(const POINT2 &pos) {
-		return POINT2{ x + pos.x, y + pos.y };
-	}
-	POINT2 operator-(const POINT2 &pos) {
-		return POINT2{ x - pos.x, y - pos.y };
-	}
+enum class Capabilities {
+	ODT,
+	TranslationStage,
+	ScaleCalibration,
+	VoltageCalibration,
+	LaserScanner,
+	COUNT
 };
 
 typedef enum class enDeviceInput {
@@ -122,8 +118,9 @@ public:
 	virtual void setPosition(POINT2 position) = 0;
 	virtual void setPosition(POINT3 position) = 0;
 	// moves the position relative to current position
+	void movePosition(POINT2 distance);
 	void movePosition(POINT3 distance);
-	virtual POINT3 getPosition() = 0;
+	virtual POINT3 getPosition();
 
 	typedef enum class enScanDevice {
 		ZEISSECU = 0,
@@ -147,13 +144,22 @@ public slots:
 	virtual void setElement(DeviceElement, double) = 0;
 	virtual int getElement(DeviceElement) = 0;
 	virtual void getElements() = 0;
-	virtual void setPreset(ScanPreset) = 0;
 	// sets the position relative to the home position m_homePosition
-	virtual void setPositionRelativeX(double position) = 0;
-	virtual void setPositionRelativeY(double position) = 0;
-	virtual void setPositionRelativeZ(double position) = 0;
-	virtual void setPositionInPix(POINT2) = 0;
+	void setPositionRelativeX(double position);
+	void setPositionRelativeY(double position);
+	void setPositionRelativeZ(double position);
 
+	// In case no laser scanner is present, the laser position needs to be provided by the user
+	// (or searched automatically by the software later on).
+	void locatePositionScanner(POINT2 positionLaserPix);
+
+	bool supportsCapability(Capabilities);
+
+	void setPositionInPix(POINT2);
+
+	void enableMeasurementMode(bool enabled);
+
+	void setPreset(ScanPreset presetType);
 	Preset getPreset(ScanPreset);
 	void checkPresets();
 	bool isPresetActive(ScanPreset);
@@ -169,36 +175,59 @@ public slots:
 	void savePosition();
 	void moveToSavedPosition(int index);
 	void deleteSavedPosition(int index);
-	virtual void setSpatialCalibration(SpatialCalibration spatialCalibration) {};
 
 	std::vector<POINT3> getSavedPositionsNormalized();
 	void announceSavedPositionsNormalized();
+	
+	void setScaleCalibration(ScaleCalibrationData scaleCalibration);
 
-	bool hasSpatialCalibration();
+	std::vector<POINT2> getPositionsPix(std::vector<POINT3> positionsMicrometer);
+
+	virtual POINT2 pixToMicroMeter(POINT2 positionPix);
+	virtual POINT2 microMeterToPix(POINT2 positionMicrometer);
+	POINT2 microMeterToPix(POINT3 positionMicrometer);
 
 protected:
-	virtual POINT2 pixToMicroMeter(POINT2) = 0;
+	virtual void setPresetAfter(ScanPreset presetType);
 
+	virtual void calculateBounds();
 	void calculateHomePositionBounds();
 	void calculateCurrentPositionBounds();
 	void calculateCurrentPositionBounds(POINT3 currentPosition);
+	void announcePositions();
+	void announcePositionScanner();
+	void registerCapability(Capabilities);
+
+	std::vector<Capabilities> m_capabilities;
+
+	double m_positionFocus{ 0 };			// [µm]	position of the focus (z-position)
+	POINT2 m_positionStage{ 0, 0 };			// [µm]	position of the stage (x-y-position)
+	POINT2 m_positionScanner{ 0, 0 };		// [µm]	position of the scanner (x-y-position)
 
 	bool m_isConnected{ false };
 	bool m_isCompatible{ false };
 	POINT3 m_homePosition{ 0, 0, 0 };
+	POINT2 m_startPosition{ 0, 0 };		// [µm]	start position
 
-	bool m_hasSpatialCalibration{ false };
+	ScaleCalibrationData m_scaleCalibration;
 
 	std::vector<POINT3> m_savedPositions;
 
-	QTimer* positionTimer{ nullptr };
-	QTimer* elementPositionTimer{ nullptr };
+	QTimer* m_positionTimer{ nullptr };
+	QTimer* m_elementPositionTimer{ nullptr };
 
 	BOUNDS m_absoluteBounds;
 	BOUNDS m_homePositionBounds;
 	BOUNDS m_currentPositionBounds;
 
-	SpatialCalibration m_calibration;
+	bool m_measurementMode{ false };
+	POINT2 m_positionStageOld{ 0, 0 };
+	POINT2 m_positionScannerOld{ 0, 0 };
+
+private:
+	std::vector<POINT2> convertPositionsToPix();
+
+	std::vector<POINT3> m_AOI_positions;
 
 signals:
 	void elementPositionsChanged(std::vector<double>);
@@ -207,6 +236,8 @@ signals:
 	void savedPositionsChanged(std::vector<POINT3>);
 	void homePositionBoundsChanged(BOUNDS);
 	void currentPositionBoundsChanged(BOUNDS);
+	void s_scaleCalibrationChanged(std::vector<POINT2>);
+	void s_positionScannerChanged(POINT2);
 };
 
 #endif // SCANCONTROL_H

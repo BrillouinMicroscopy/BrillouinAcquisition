@@ -113,7 +113,15 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		[this](SCAN_ORDER scanOrder) { scanOrderChanged(scanOrder); }
 	);
 
-	m_Brillouin->getScanOrder();
+	// slot to positions in brightfield
+	connection = QWidget::connect(
+		m_Brillouin,
+		&Brillouin::s_orderedPositionsChanged,
+		this,
+		[this](std::vector<POINT3> orderedPositions) { on_AOI_changed(orderedPositions); }
+	);
+
+	m_Brillouin->determineScanOrder();
 
 	qRegisterMetaType<std::string>("std::string");
 	qRegisterMetaType<AT_64>("AT_64");
@@ -127,6 +135,11 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<std::vector<int>>("std::vector<int>");
 	qRegisterMetaType<std::vector<double>>("std::vector<double>");
 	qRegisterMetaType<std::vector<float>>("std::vector<float>");
+	qRegisterMetaType<std::vector<unsigned short>>("std::vector<unsigned short>");
+	qRegisterMetaType<std::vector<unsigned char>>("std::vector<unsigned char>");
+	qRegisterMetaType<std::vector<FLUORESCENCE_MODE>>("std::vector<FLUORESCENCE_MODE>");
+	qRegisterMetaType<std::vector<POINT2>>("std::vector<POINT2>");
+	qRegisterMetaType<std::vector<POINT3>>("std::vector<POINT3>");
 	qRegisterMetaType<QSerialPort::SerialPortError>("QSerialPort::SerialPortError");
 	qRegisterMetaType<IMAGE*>("IMAGE*");
 	qRegisterMetaType<CALIBRATION*>("CALIBRATION*");
@@ -135,7 +148,6 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<SensorTemperature>("SensorTemperature");
 	qRegisterMetaType<POINT3>("POINT3");
 	qRegisterMetaType<POINT2>("POINT2");
-	qRegisterMetaType<std::vector<POINT3>>("std::vector<POINT3>");
 	qRegisterMetaType<BOUNDS>("BOUNDS");
 	qRegisterMetaType<QMouseEvent*>("QMouseEvent*");
 	qRegisterMetaType<VOLTAGE2>("VOLTAGE2");
@@ -151,11 +163,9 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<PreviewBuffer<unsigned char>*>("PreviewBuffer<unsigned char>*");
 	qRegisterMetaType<unsigned char*>("unsigned char*");
 	qRegisterMetaType<unsigned short*>("unsigned short*");
-	qRegisterMetaType<std::vector<unsigned short>>("std::vector<unsigned short>");
-	qRegisterMetaType<std::vector<unsigned char>>("std::vector<unsigned char>");
 	qRegisterMetaType<bool*>("bool*");
-	qRegisterMetaType<std::vector<FLUORESCENCE_MODE>>("std::vector<FLUORESCENCE_MODE>");
-	qRegisterMetaType<SpatialCalibration>("SpatialCalibration");
+	qRegisterMetaType<VoltageCalibrationData>("VoltageCalibrationData");
+	qRegisterMetaType<SCAN_ORDER>("SCAN_ORDER");
 	
 	// Set up icons
 	m_icons.disconnected.addFile(":/BrillouinAcquisition/assets/00disconnected10px.png", QSize(10, 10));
@@ -283,10 +293,6 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		CustomGradientPreset::gpGrayscale
 	};
 
-	// set up laser focus marker
-	ui->addFocusMarker_brightfield->setIcon(m_icons.fluoBlue);
-	ui->addFocusMarker_brightfield->setText("");
-
 	// set up the camera image plot
 	BrillouinAcquisition::initializePlot(m_BrillouinPlot);
 	BrillouinAcquisition::initializePlot(m_ODTPlot);
@@ -306,6 +312,11 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	initCameraBrillouin();
 	initScanControl();
 	initCamera();
+
+	// set up laser focus marker
+	ui->addFocusMarker_brightfield->setIcon(m_icons.fluoBlue);
+	ui->addFocusMarker_brightfield->setText("");
+	initializeLaserPositionLocation();
 
 	updateBrillouinSettings();
 	initSettingsDialog();
@@ -373,33 +384,33 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 }
 
 void BrillouinAcquisition::plotClick(QMouseEvent* event) {
-	QPoint position = event->pos();
+	auto position = event->pos();
 
-	double posX = m_ODTPlot.plotHandle->xAxis->pixelToCoord(position.x());
-	double posY = m_ODTPlot.plotHandle->yAxis->pixelToCoord(position.y());
+	auto posX = m_ODTPlot.plotHandle->xAxis->pixelToCoord(position.x());
+	auto posY = m_ODTPlot.plotHandle->yAxis->pixelToCoord(position.y());
 
-	if (m_selectFocus) {
-		m_focusMarkerPos = { posX, posY };
-		drawFocusMarker();
+	auto positionInPix = POINT2{ posX, posY };
+
+	// If we currently select the new focus, don't move there
+	if (m_locatePositionScanner) {
+		m_scanControl->locatePositionScanner(positionInPix);
+	} else {
+		auto xRange = m_ODTPlot.plotHandle->xAxis->range();
+		auto yRange = m_ODTPlot.plotHandle->yAxis->range();
+
+		if (!xRange.contains(posX) || !yRange.contains(posY)) {
+			return;
+		}
+
+		// Set laser focus to this position
+		QMetaObject::invokeMethod(
+			m_scanControl,
+			[&m_scanControl = m_scanControl, positionInPix]() {
+				m_scanControl->setPositionInPix(positionInPix);
+			},
+			Qt::QueuedConnection
+		);
 	}
-
-	QCPRange xRange = m_ODTPlot.plotHandle->xAxis->range();
-	QCPRange yRange = m_ODTPlot.plotHandle->yAxis->range();
-
-	if (!xRange.contains(posX) || !yRange.contains(posY)) {
-		return;
-	}
-
-	POINT2 positionInPix{posX, posY};
-
-	// Set laser focus to this position
-	QMetaObject::invokeMethod(
-		m_scanControl,
-		[&m_scanControl = m_scanControl, positionInPix]() {
-			m_scanControl->setPositionInPix(positionInPix);
-		},
-		Qt::QueuedConnection
-	);
 }
 
 void BrillouinAcquisition::showEvent(QShowEvent* event) {
@@ -1399,10 +1410,24 @@ void BrillouinAcquisition::applyGradient(PLOT_SETTINGS plotSettings) {
 	plotSettings.colorMap->setGradient(gradient);
 }
 
-void BrillouinAcquisition::on_addFocusMarker_brightfield_clicked() {
-	m_selectFocus = !m_selectFocus;
+void BrillouinAcquisition::initializeLaserPositionLocation() {
+	// If the scanControl supports capability LaserScanner, there is no need to set the laser position manually.
+	if (m_scanControl != nullptr && m_scanControl->supportsCapability(Capabilities::LaserScanner)) {
+		ui->addFocusMarker_brightfield->hide();
+	} else {
+		ui->addFocusMarker_brightfield->show();
+	}
+}
 
-	if (!m_selectFocus) {
+void BrillouinAcquisition::on_addFocusMarker_brightfield_clicked() {
+	// If the scanControl supports capability LaserScanner, there is no need to set the laser position manually.
+	if (m_scanControl != nullptr && m_scanControl->supportsCapability(Capabilities::LaserScanner)) {
+		return;
+	}
+
+	m_locatePositionScanner = !m_locatePositionScanner;
+
+	if (!m_locatePositionScanner) {
 		ui->addFocusMarker_brightfield->setIcon(m_icons.fluoBlue);
 		ui->addFocusMarker_brightfield->setText("");
 	} else {
@@ -1411,26 +1436,27 @@ void BrillouinAcquisition::on_addFocusMarker_brightfield_clicked() {
 	}
 }
 
-void BrillouinAcquisition::drawFocusMarker() {
+void BrillouinAcquisition::drawPositionScannerMarker(POINT2 positionScanner) {
+	m_positionScanner = positionScanner;
 	// Don't draw if outside of image
-	if (m_focusMarkerPos.x < 0 || m_focusMarkerPos.y < 0)	{
+	if (m_positionScanner.x < 0 || m_positionScanner.y < 0)	{
 		return;
 	}
 
 	// Add a marker to the plot to indicate the laser focus
-	if (!m_focusMarker) {
-		 m_focusMarker = m_ODTPlot.plotHandle->addGraph();
+	if (!m_positionScannerMarker) {
+		m_positionScannerMarker = m_ODTPlot.plotHandle->addGraph();
+		QPen pen;
+		pen.setColor(Qt::blue);
+		pen.setWidth(2);
+		QCPScatterStyle scatterStyle;
+		scatterStyle.setShape(QCPScatterStyle::ssCircle);
+		scatterStyle.setPen(pen);
+		scatterStyle.setSize(8);
+		m_positionScannerMarker->setScatterStyle(scatterStyle);
 	}
-	m_focusMarker->setData(QVector<double>{m_focusMarkerPos.x}, QVector<double>{m_focusMarkerPos.y});
-	QPen pen;
-	pen.setColor(Qt::blue);
-	pen.setWidth(2);
-	QCPScatterStyle scatterStyle;
-	scatterStyle.setShape(QCPScatterStyle::ssCircle);
-	scatterStyle.setPen(pen);
-	scatterStyle.setSize(8);
-	m_focusMarker->setScatterStyle(scatterStyle);
-	m_ODTPlot.plotHandle->replot();
+	m_positionScannerMarker->setData(QVector<double>{m_positionScanner.x}, QVector<double>{m_positionScanner.y});
+	ui->customplot_brightfield->replot();
 }
 
 void BrillouinAcquisition::on_rangeLower_valueChanged(int value) {
@@ -2175,14 +2201,36 @@ void BrillouinAcquisition::selectCameraBrillouinDevice(int index) {
 	m_cameraBrillouinTypeTemporary = (CAMERA_BRILLOUIN_DEVICE)index;
 }
 
-void BrillouinAcquisition::on_actionAcquire_Voltage_Position_calibration_triggered() {
-	m_Calibration->startRepetitions();
+void BrillouinAcquisition::on_action_Voltage_calibration_acquire_triggered() {
+	QMetaObject::invokeMethod(
+		m_voltageCalibration,
+		[&m_voltageCalibration = m_voltageCalibration]() {
+			m_voltageCalibration->startRepetitions();
+		},
+		Qt::AutoConnection
+	);
 }
 
-void BrillouinAcquisition::on_actionLoad_Voltage_Position_calibration_triggered() {
-	m_calibrationFilePath = QFileDialog::getOpenFileName(this, tr("Select Voltage-Position map"),
-		QString::fromStdString(m_calibrationFilePath), tr("Calibration map (*.h5)")).toStdString();
-	m_Calibration->load(m_calibrationFilePath);
+void BrillouinAcquisition::on_action_Voltage_calibration_load_triggered() {
+	m_voltageCalibrationFilePath = QFileDialog::getOpenFileName(this, tr("Select Voltage-Position map"),
+		QString::fromStdString(m_voltageCalibrationFilePath), tr("Calibration map (*.h5)")).toStdString();
+	m_voltageCalibration->load(m_voltageCalibrationFilePath);
+}
+
+void BrillouinAcquisition::on_action_Scale_calibration_acquire_triggered() {
+	QMetaObject::invokeMethod(
+		m_scaleCalibration,
+		[&m_scaleCalibration = m_scaleCalibration]() {
+			m_scaleCalibration->startRepetitions();
+		},
+		Qt::AutoConnection
+	);
+}
+
+void BrillouinAcquisition::on_action_Scale_calibration_load_triggered() {
+	m_scaleCalibrationFilePath = QFileDialog::getOpenFileName(this, tr("Select scale calibration"),
+		QString::fromStdString(m_scaleCalibrationFilePath), tr("Scale calibration (*.h5)")).toStdString();
+	m_scaleCalibration->load(m_scaleCalibrationFilePath);
 }
 
 void BrillouinAcquisition::initBeampathButtons() {
@@ -2377,37 +2425,37 @@ void BrillouinAcquisition::initScanControl() {
 		m_scanControl = nullptr;
 	}
 
-	static QMetaObject::Connection connection;
 	// initialize correct scanner type
 	switch (m_scanControllerType) {
 		case ScanControl::SCAN_DEVICE::ZEISSECU:
 			m_scanControl = new ZeissECU();
-			m_hasODT = false;
 			break;
 		case ScanControl::SCAN_DEVICE::NIDAQ:
 			m_scanControl = new NIDAQ();
-			m_hasODT = true;
 			break;
 		case ScanControl::SCAN_DEVICE::ZEISSMTB:
 			m_scanControl = new ZeissMTB();
-			m_hasODT = false;
 			break;
 		case ScanControl::SCAN_DEVICE::ZEISSMTBERLANGEN:
 			m_scanControl = new ZeissMTB_Erlangen();
-			m_hasODT = true;
 			break;
 		default:
 			m_scanControl = new ZeissECU();
-			// disable ODT
-			m_hasODT = false;
 			break;
 	}
 
 	// init or de-init ODT
 	initODT();
-	initSpatialCalibration();
+	initVoltageCalibration();
+	initScaleCalibration();
+
+	initializeLaserPositionLocation();
+
+	// Update positions preview
+	on_AOI_changed(m_positionsMicrometer);
 
 	// reestablish m_scanControl connections
+	static QMetaObject::Connection connection;
 	connection = QWidget::connect(
 		m_scanControl,
 		&ScanControl::connectedDevice,
@@ -2464,6 +2512,18 @@ void BrillouinAcquisition::initScanControl() {
 		this,
 		[this](BOUNDS bounds) { setCurrentPositionBounds(bounds); }
 	);
+	connection = QWidget::connect(
+		m_scanControl,
+		&ScanControl::s_scaleCalibrationChanged,
+		this,
+		[this](std::vector<POINT2> positions) { on_scaleCalibrationChanged(positions); }
+	);
+	connection = QWidget::connect(
+		m_scanControl,
+		&ScanControl::s_positionScannerChanged,
+		this,
+		[this](POINT2 position) { drawPositionScannerMarker(position); }
+	);
 	tableModel->setStorage(m_scanControl->getSavedPositionsNormalized());
 
 	m_acquisitionThread.startWorker(m_scanControl);
@@ -2478,7 +2538,7 @@ void BrillouinAcquisition::initScanControl() {
 }
 
 void BrillouinAcquisition::initODT() {
-	if (!m_hasODT) {
+	if (!m_scanControl->supportsCapability(Capabilities::ODT)) {
 		int tabIndexODT = ui->acquisitionModeTabs->indexOf(ui->ODT);
 		if (tabIndexODT > -1) {
 			ui->acquisitionModeTabs->removeTab(tabIndexODT);
@@ -2542,37 +2602,43 @@ void BrillouinAcquisition::initODT() {
 	}
 }
 
-void BrillouinAcquisition::initSpatialCalibration() {
-	if (!m_scanControl->hasSpatialCalibration()) {
-		ui->actionLoad_Voltage_Position_calibration->setVisible(false);
-		ui->actionAcquire_Voltage_Position_calibration->setVisible(false);
-		if (m_Calibration) {
-			m_Calibration->deleteLater();
-			m_Calibration = nullptr;
+void BrillouinAcquisition::initVoltageCalibration() {
+	if (!m_scanControl->supportsCapability(Capabilities::VoltageCalibration)) {
+		ui->menu_Voltage_calibration->menuAction()->setVisible(false);
+		if (m_voltageCalibration) {
+			m_voltageCalibration->deleteLater();
+			m_voltageCalibration = nullptr;
 		}
 	} else {
-		m_Calibration = new Calibration(nullptr, m_acquisition, &m_brightfieldCamera, (ODTControl**)&m_scanControl);
-		ui->actionLoad_Voltage_Position_calibration->setVisible(true);
-		ui->actionAcquire_Voltage_Position_calibration->setVisible(true);
+		m_voltageCalibration = new VoltageCalibration(nullptr, m_acquisition, &m_brightfieldCamera, (ODTControl**)&m_scanControl);
+		ui->menu_Voltage_calibration->menuAction()->setVisible(true);
 
 		static QMetaObject::Connection connection;
 		connection = QWidget::connect(
-			m_Calibration,
-			&Calibration::s_cameraSettingsChanged,
+			m_voltageCalibration,
+			&VoltageCalibration::s_cameraSettingsChanged,
 			this,
 			[this](CAMERA_SETTINGS settings) { updateODTCameraSettings(settings); }
 		);
 
-		connection = QWidget::connect(
-			m_Calibration,
-			&Calibration::calibrationChanged,
-			this,
-			[this](SpatialCalibration spatialCalibration) { updateCalibration(spatialCalibration); }
-		);
-
 		// start Calibration thread
-		m_acquisitionThread.startWorker(m_Calibration);
-		m_Calibration->initialize();
+		m_acquisitionThread.startWorker(m_voltageCalibration);
+	}
+}
+
+void BrillouinAcquisition::initScaleCalibration() {
+	// If the scanControl does not support ScaleCalibration, we hide the "Acquire" entry.
+	if (!m_scanControl->supportsCapability(Capabilities::ScaleCalibration)) {
+		ui->action_Scale_calibration_acquire->setVisible(false);
+	} else {
+		ui->action_Scale_calibration_acquire->setVisible(true);
+	}
+
+	// Initialize scaleCalibration if it is not running already.
+	if (!m_scaleCalibration) {
+		m_scaleCalibration = new ScaleCalibration(nullptr, m_acquisition, &m_brightfieldCamera, &m_scanControl);
+		// start Calibration thread
+		m_acquisitionThread.startWorker(m_scaleCalibration);
 	}
 }
 
@@ -2961,53 +3027,6 @@ void BrillouinAcquisition::updateFilename(std::string filename) {
 	updateBrillouinSettings();
 }
 
-void BrillouinAcquisition::updateCalibration(SpatialCalibration calibration) {
-	ui->microscopeWidth->setValue(calibration.microscopeProperties.width);
-	ui->microscopeHeight->setValue(calibration.microscopeProperties.height);
-	ui->microscopeMag->setValue(calibration.microscopeProperties.mag);
-	ui->microscopePixSize->setValue(1e6 * calibration.microscopeProperties.pixelSize);
-}
-
-void BrillouinAcquisition::on_microscopeWidth_valueChanged(int width) {
-	QMetaObject::invokeMethod(
-		m_Calibration,
-		[&m_Calibration = m_Calibration, width]() {
-			m_Calibration->setWidth(width);
-		},
-		Qt::AutoConnection
-	);
-}
-
-void BrillouinAcquisition::on_microscopeHeight_valueChanged(int height) {
-	QMetaObject::invokeMethod(
-		m_Calibration,
-		[&m_Calibration = m_Calibration, height]() {
-			m_Calibration->setHeight(height);
-		},
-		Qt::AutoConnection
-	);
-}
-
-void BrillouinAcquisition::on_microscopeMag_valueChanged(double mag) {
-	QMetaObject::invokeMethod(
-		m_Calibration,
-		[&m_Calibration = m_Calibration, mag]() {
-			m_Calibration->setMagnification(mag);
-		},
-		Qt::AutoConnection
-	);
-}
-
-void BrillouinAcquisition::on_microscopePixSize_valueChanged(double pixSize) {
-	QMetaObject::invokeMethod(
-		m_Calibration,
-		[&m_Calibration = m_Calibration, pixSize]() {
-			m_Calibration->setPixelSize(pixSize);
-		},
-		Qt::AutoConnection
-	);
-}
-
 void BrillouinAcquisition::updateBrillouinSettings() {
 	ui->acquisitionFilename->setText(QString::fromStdString(m_storagePath.filename));
 
@@ -3035,26 +3054,32 @@ void BrillouinAcquisition::updateBrillouinSettings() {
 
 void BrillouinAcquisition::on_startX_valueChanged(double value) {
 	m_BrillouinSettings.xMin = value;
+	m_Brillouin->setXMin(value);
 }
 
 void BrillouinAcquisition::on_startY_valueChanged(double value) {
 	m_BrillouinSettings.yMin = value;
+	m_Brillouin->setYMin(value);
 }
 
 void BrillouinAcquisition::on_startZ_valueChanged(double value) {
 	m_BrillouinSettings.zMin = value;
+	m_Brillouin->setZMin(value);
 }
 
 void BrillouinAcquisition::on_endX_valueChanged(double value) {
 	m_BrillouinSettings.xMax = value;
+	m_Brillouin->setXMax(value);
 }
 
 void BrillouinAcquisition::on_endY_valueChanged(double value) {
 	m_BrillouinSettings.yMax = value;
+	m_Brillouin->setYMax(value);
 }
 
 void BrillouinAcquisition::on_endZ_valueChanged(double value) {
 	m_BrillouinSettings.zMax = value;
+	m_Brillouin->setZMax(value);
 }
 
 void BrillouinAcquisition::on_stepsX_valueChanged(int value) {
@@ -3070,6 +3095,66 @@ void BrillouinAcquisition::on_stepsY_valueChanged(int value) {
 void BrillouinAcquisition::on_stepsZ_valueChanged(int value) {
 	m_BrillouinSettings.zSteps = value;
 	m_Brillouin->setStepNumberZ(value);
+}
+
+void BrillouinAcquisition::on_showOverlay_stateChanged(int show) {
+	m_showPositions = show;
+	update_AOI_preview();
+}
+
+/*
+ * React when the ordered positions have changed
+ */
+void BrillouinAcquisition::on_AOI_changed(std::vector<POINT3> orderedPositions) {
+	if (m_scanControl) {
+		m_positionsMicrometer = orderedPositions;
+		m_positionsPixel = m_scanControl->getPositionsPix(m_positionsMicrometer);
+		update_AOI_preview();
+	}
+}
+
+/*
+ * React when the scancontrol settings have changed, e.g. the start position was adjusted
+ */
+void BrillouinAcquisition::on_scaleCalibrationChanged(std::vector<POINT2> positions) {
+	m_positionsPixel = positions;
+	update_AOI_preview();
+}
+
+/*
+ * Update the plot showing the measurement positions as overlay in the brightfield preview
+ */
+void BrillouinAcquisition::update_AOI_preview() {
+	if (m_showPositions) {
+		QVector<double> xPos(m_positionsPixel.size());
+		QVector<double> yPos(m_positionsPixel.size());
+		int index{ 0 };
+		for (auto const& position : m_positionsPixel) {
+			xPos[index] = position.x;
+			yPos[index] = position.y;
+			++index;
+		}
+		// Add a marker to the plot to indicate the laser focus
+		if (!m_positionsMarker) {
+			m_positionsMarker = new QCPCurve(ui->customplot_brightfield->xAxis, ui->customplot_brightfield->yAxis);
+			QPen pen;
+			pen.setColor(Qt::red);
+			pen.setWidth(2);
+			QCPScatterStyle scatterStyle;
+			scatterStyle.setShape(QCPScatterStyle::ssCross);
+			scatterStyle.setPen(pen);
+			scatterStyle.setSize(8);
+			m_positionsMarker->setScatterStyle(scatterStyle);
+		}
+		m_positionsMarker->setData(xPos, yPos);
+		ui->customplot_brightfield->replot();
+	} else if (m_positionsMarker) {
+		// Remove the graph and set handle to nullptr if successful
+		if (ui->customplot_brightfield->removePlottable(m_positionsMarker)) {
+			m_positionsMarker = nullptr;
+			ui->customplot_brightfield->replot();
+		}
+	}
 }
 
 void BrillouinAcquisition::on_preCalibration_stateChanged(int state) {

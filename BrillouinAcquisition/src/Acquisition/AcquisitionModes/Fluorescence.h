@@ -2,8 +2,8 @@
 #define FLUORESCENCE_H
 
 #include "AcquisitionMode.h"
-#include "../../Devices/PointGrey.h"
-#include "../../Devices/scancontrol.h"
+#include "..\..\Devices\Cameras\Camera.h"
+#include "..\..\Devices\ScanControls\ScanControl.h"
 
 enum class FLUORESCENCE_MODE {
 	NONE,

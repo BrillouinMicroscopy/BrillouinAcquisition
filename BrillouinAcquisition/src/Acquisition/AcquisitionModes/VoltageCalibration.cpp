@@ -1,31 +1,32 @@
 #include "stdafx.h"
-#include "H5Cpp.h"
-#include "Calibration.h"
-#include "../../Devices/CalibrationHelper.h"
+#include "filesystem"
+#include "VoltageCalibration.h"
 #include "../../simplemath.h"
 
 /*
  * Public definitions
  */
 
-Calibration::Calibration(QObject* parent, Acquisition* acquisition, Camera** camera, ODTControl** ODTControl)
+VoltageCalibration::VoltageCalibration(QObject* parent, Acquisition* acquisition, Camera** camera, ODTControl** ODTControl)
 	: AcquisitionMode(parent, acquisition), m_camera(camera), m_ODTControl(ODTControl) {
 }
 
-Calibration::~Calibration() {}
+VoltageCalibration::~VoltageCalibration() {}
 
 /*
  * Public slots
  */
 
-void Calibration::startRepetitions() {
-	bool allowed = m_acquisition->enableMode(ACQUISITION_MODE::SPATIALCALIBRATION);
+void VoltageCalibration::startRepetitions() {
+	bool allowed = m_acquisition->enableMode(ACQUISITION_MODE::VOLTAGECALIBRATION);
 	if (!allowed) {
 		return;
 	}
 
 	// reset abort flag
 	m_abort = false;
+
+	CAMERA_OPTIONS cameraOptions = (*m_camera)->getOptions();
 
 	// configure camera for measurement
 	m_cameraSettings = (*m_camera)->getSettings();
@@ -35,8 +36,9 @@ void Calibration::startRepetitions() {
 	}
 	m_cameraSettings.roi.left = 0;
 	m_cameraSettings.roi.top = 0;
-	m_cameraSettings.roi.width = m_calibration.microscopeProperties.width;
-	m_cameraSettings.roi.height = m_calibration.microscopeProperties.height;
+	// Set camera to full frame
+	m_cameraSettings.roi.width = cameraOptions.ROIWidthLimits[1];
+	m_cameraSettings.roi.height = cameraOptions.ROIHeightLimits[1];
 	m_cameraSettings.readout.pixelEncoding = L"Raw8";
 	m_cameraSettings.readout.triggerMode = L"External";
 	m_cameraSettings.readout.cycleMode = L"Continuous";
@@ -47,14 +49,10 @@ void Calibration::startRepetitions() {
 
 	// configure camera for preview
 
-	m_acquisition->disableMode(ACQUISITION_MODE::SPATIALCALIBRATION);
+	m_acquisition->disableMode(ACQUISITION_MODE::VOLTAGECALIBRATION);
 }
 
-void Calibration::initialize() {
-	emit(calibrationChanged(m_calibration));
-}
-
-void Calibration::setCameraSetting(CAMERA_SETTING type, double value) {
+void VoltageCalibration::setCameraSetting(CAMERA_SETTING type, double value) {
 	switch (type) {
 		case CAMERA_SETTING::EXPOSURE:
 			m_cameraSettings.exposureTime = value;
@@ -67,7 +65,7 @@ void Calibration::setCameraSetting(CAMERA_SETTING type, double value) {
 	emit(s_cameraSettingsChanged(m_cameraSettings));
 }
 
-void Calibration::load(std::string filepath) {
+void VoltageCalibration::load(std::string filepath) {
 
 	using namespace std::filesystem;
 
@@ -81,65 +79,36 @@ void Calibration::load(std::string filepath) {
 		hsize_t dateLength = attr.getStorageSize();
 		char* buf = new char[dateLength + 1];
 		attr.read(type, buf);
-		m_calibration.date.assign(buf, dateLength);
+		m_voltageCalibration.date.assign(buf, dateLength);
 		delete[] buf;
 		buf = nullptr;
 
 		// Read calibration maps
-		m_calibration.positions.x = readCalibrationMap(file, "/maps/positions/x");
-		m_calibration.positions.y = readCalibrationMap(file, "/maps/positions/y");
-		m_calibration.voltages.Ux = readCalibrationMap(file, "/maps/voltages/Ux");
-		m_calibration.voltages.Uy = readCalibrationMap(file, "/maps/voltages/Uy");
+		m_voltageCalibration.positions.x = readCalibrationMap(file, "/maps/positions/x");
+		m_voltageCalibration.positions.y = readCalibrationMap(file, "/maps/positions/y");
+		m_voltageCalibration.voltages.Ux = readCalibrationMap(file, "/maps/voltages/Ux");
+		m_voltageCalibration.voltages.Uy = readCalibrationMap(file, "/maps/voltages/Uy");
 
-		m_calibration.microscopeProperties.width = readCalibrationValue(file, "/camera/width");
-		m_calibration.microscopeProperties.height = readCalibrationValue(file, "/camera/height");
-		m_calibration.microscopeProperties.pixelSize = readCalibrationValue(file, "/camera/pixelSize");
-		m_calibration.microscopeProperties.mag = readCalibrationValue(file, "/camera/magnification");
-
-
-		m_calibration.valid = true;
+		m_voltageCalibration.valid = true;
 	}
 
-	CalibrationHelper::calculateCalibrationBounds(&m_calibration);
-	CalibrationHelper::calculateCalibrationWeights(&m_calibration);
+	VoltageCalibrationHelper::calculateCalibrationWeights(&m_voltageCalibration);
 
-	(*m_ODTControl)->setSpatialCalibration(m_calibration);
-
-	emit(calibrationChanged(m_calibration));
-}
-
-void Calibration::setWidth(int width) {
-	m_calibration.microscopeProperties.width = width;
-	m_calibration.valid = false;
-}
-
-void Calibration::setHeight(int height) {
-	m_calibration.microscopeProperties.height = height;
-	m_calibration.valid = false;
-}
-
-void Calibration::setMagnification(double mag) {
-	m_calibration.microscopeProperties.mag = mag;
-	m_calibration.valid = false;
-}
-
-void Calibration::setPixelSize(double pixelSize) {
-	m_calibration.microscopeProperties.pixelSize = pixelSize;
-	m_calibration.valid = false;
+	(*m_ODTControl)->setVoltageCalibration(m_voltageCalibration);
 }
 
 /*
  * Private definitions
  */
 
-void Calibration::abortMode(std::unique_ptr <StorageWrapper>& storage) {}
+void VoltageCalibration::abortMode(std::unique_ptr <StorageWrapper>& storage) {}
 
-void Calibration::abortMode() {
-	m_acquisition->disableMode(ACQUISITION_MODE::SPATIALCALIBRATION);
+void VoltageCalibration::abortMode() {
+	m_acquisition->disableMode(ACQUISITION_MODE::VOLTAGECALIBRATION);
 	setAcquisitionStatus(ACQUISITION_STATUS::ABORTED);
 }
 
-double Calibration::readCalibrationValue(H5::H5File file, std::string datasetName) {
+double VoltageCalibration::readCalibrationValue(H5::H5File file, std::string datasetName) {
 	using namespace H5;
 	double value{ 0 };
 
@@ -154,7 +123,7 @@ double Calibration::readCalibrationValue(H5::H5File file, std::string datasetNam
 	return value;
 }
 
-void Calibration::writeCalibrationValue(H5::Group group, const H5std_string datasetName, double value) {
+void VoltageCalibration::writeCalibrationValue(H5::Group group, const H5std_string datasetName, double value) {
 	using namespace H5;
 
 	hsize_t dims[2];
@@ -167,7 +136,7 @@ void Calibration::writeCalibrationValue(H5::Group group, const H5std_string data
 	dataset.write(&value, PredType::NATIVE_DOUBLE);
 }
 
-std::vector<double> Calibration::readCalibrationMap(H5::H5File file, std::string datasetName) {
+std::vector<double> VoltageCalibration::readCalibrationMap(H5::H5File file, std::string datasetName) {
 	using namespace H5;
 	std::vector<double> map;
 
@@ -183,7 +152,7 @@ std::vector<double> Calibration::readCalibrationMap(H5::H5File file, std::string
 	return map;
 }
 
-void Calibration::writeCalibrationMap(H5::Group group, std::string datasetName, std::vector<double> map) {
+void VoltageCalibration::writeCalibrationMap(H5::Group group, std::string datasetName, std::vector<double> map) {
 	using namespace H5;
 
 	hsize_t dims[2];
@@ -197,9 +166,9 @@ void Calibration::writeCalibrationMap(H5::Group group, std::string datasetName, 
 
 }
 
-void Calibration::save() {
+void VoltageCalibration::save() {
 
-	if (m_calibration.positions.x.size() == 0) {
+	if (m_voltageCalibration.positions.x.size() == 0) {
 		return;
 	}
 
@@ -234,30 +203,24 @@ void Calibration::save() {
 	H5::DataType type = attr.getDataType();
 	attr.write(strdatatype, &fulldate[0]);
 
-	H5::Group group_camera(file.createGroup("/camera"));
-	writeCalibrationValue(group_camera, "width", m_calibration.microscopeProperties.width);
-	writeCalibrationValue(group_camera, "height", m_calibration.microscopeProperties.height);
-	writeCalibrationValue(group_camera, "pixelSize", m_calibration.microscopeProperties.pixelSize);
-	writeCalibrationValue(group_camera, "magnification", m_calibration.microscopeProperties.mag);
-
 	H5::Group maps(file.createGroup("/maps"));
 
 	H5::Group group_positions(maps.createGroup("positions"));
-	writeCalibrationMap(group_positions, "x", m_calibration.positions.x);
-	writeCalibrationMap(group_positions, "y", m_calibration.positions.y);
+	writeCalibrationMap(group_positions, "x", m_voltageCalibration.positions.x);
+	writeCalibrationMap(group_positions, "y", m_voltageCalibration.positions.y);
 
 	H5::Group group_voltages(maps.createGroup("voltages"));
-	writeCalibrationMap(group_voltages, "Ux", m_calibration.voltages.Ux);
-	writeCalibrationMap(group_voltages, "Uy", m_calibration.voltages.Uy);
+	writeCalibrationMap(group_voltages, "Ux", m_voltageCalibration.voltages.Ux);
+	writeCalibrationMap(group_voltages, "Uy", m_voltageCalibration.voltages.Uy);
 }
 
 /*
  * Private slots
  */
 
-void Calibration::acquire(std::unique_ptr <StorageWrapper> & storage) {}
+void VoltageCalibration::acquire(std::unique_ptr <StorageWrapper> & storage) {}
 
-void Calibration::acquire() {
+void VoltageCalibration::acquire() {
 	setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 
 	// move to Brillouin configuration
@@ -342,18 +305,15 @@ void Calibration::acquire() {
 			auto iterator_max = std::max_element(images.begin(), images.end());
 			auto index = std::distance(images.begin(), iterator_max);
 			if (*iterator_max > m_minimalIntensity) {
-				int y = floor(index / m_cameraSettings.roi.width);
+				int y = m_cameraSettings.roi.height - floor(index / m_cameraSettings.roi.width);
 				int x = index % m_cameraSettings.roi.width;
-
-				double x_m = m_calibration.microscopeProperties.pixelSize / m_calibration.microscopeProperties.mag
-					* ((double)x - m_calibration.microscopeProperties.width / 2 - 0.5);
-				double y_m = -1 * m_calibration.microscopeProperties.pixelSize / m_calibration.microscopeProperties.mag
-					* ((double)y - m_calibration.microscopeProperties.height / 2 - 0.5);
+				
+				POINT2 pos = (*m_ODTControl)->pixToMicroMeter({ (double)x, (double)y });
 
 				Ux_valid.push_back(m_acqSettings.voltages[i + chunkBegin].Ux);
 				Uy_valid.push_back(m_acqSettings.voltages[i + chunkBegin].Uy);
-				x_valid.push_back(x_m);
-				y_valid.push_back(y_m);
+				x_valid.push_back(pos.x);
+				y_valid.push_back(pos.y);
 			}
 		}
 
@@ -361,23 +321,20 @@ void Calibration::acquire() {
 	}
 
 	// Construct spatial calibration object
-	m_calibration.date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
+	m_voltageCalibration.date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 		.toString(Qt::ISODateWithMs).toStdString();
-	m_calibration.voltages.Ux = Ux_valid;
-	m_calibration.voltages.Uy = Uy_valid;
-	m_calibration.positions.x = x_valid;
-	m_calibration.positions.y = y_valid;
-	m_calibration.valid = true;
+	m_voltageCalibration.voltages.Ux = Ux_valid;
+	m_voltageCalibration.voltages.Uy = Uy_valid;
+	m_voltageCalibration.positions.x = x_valid;
+	m_voltageCalibration.positions.y = y_valid;
+	m_voltageCalibration.valid = true;
 
-	CalibrationHelper::calculateCalibrationBounds(&m_calibration);
-	CalibrationHelper::calculateCalibrationWeights(&m_calibration);
+	VoltageCalibrationHelper::calculateCalibrationWeights(&m_voltageCalibration);
 
 	save();
-	(*m_ODTControl)->setSpatialCalibration(m_calibration);
+	(*m_ODTControl)->setVoltageCalibration(m_voltageCalibration);
 
 	(*m_ODTControl)->setPreset(ScanPreset::SCAN_BRILLOUIN);
-
-	emit(calibrationChanged(m_calibration));
 
 	setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
 }

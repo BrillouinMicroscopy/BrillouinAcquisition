@@ -109,7 +109,7 @@ bool Acquisition::isModeEnabled(ACQUISITION_MODE mode) {
  */
 bool Acquisition::enableMode(ACQUISITION_MODE mode) {
 	// If no acquisition file is open, open one.
-	if (m_storage == nullptr && mode != ACQUISITION_MODE::SPATIALCALIBRATION) {
+	if (m_storage == nullptr && mode != ACQUISITION_MODE::VOLTAGECALIBRATION) {
 		openFile();
 	}
 
@@ -118,7 +118,7 @@ bool Acquisition::enableMode(ACQUISITION_MODE mode) {
 		return true;
 	}
 	// Check, that no other mode is enabled when spatial calibration is requested
-	if (mode == ACQUISITION_MODE::SPATIALCALIBRATION && m_enabledModes != ACQUISITION_MODE::NONE) {
+	if (mode == ACQUISITION_MODE::VOLTAGECALIBRATION && m_enabledModes != ACQUISITION_MODE::NONE) {
 		return false;
 	}
 	// Check, that Brillouin and ODT don't run simultaneously.

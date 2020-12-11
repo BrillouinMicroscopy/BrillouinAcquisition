@@ -17,7 +17,7 @@ namespace Thorlabs_KSC {
 namespace Thorlabs_KDC {
 	#include <Thorlabs.MotionControl.KCube.DCServo.h>
 }
-#include "filtermount.h"
+#include "../filtermount.h"
 
 #include "H5Cpp.h"
 #include "filesystem"
@@ -31,7 +31,6 @@ public:
 
 	void setPosition(POINT2 position) override;
 	void setPosition(POINT3 position) override;
-	POINT3 getPosition() override;
 
 	VOLTAGE2 positionToVoltage(POINT2 position);
 	POINT2 voltageToPosition(VOLTAGE2 position);
@@ -43,22 +42,17 @@ public slots:
 	void setElement(DeviceElement element, double position) override;
 	int getElement(DeviceElement element) override;
 	void getElements() override;
-	void setPreset(ScanPreset preset) override;
 
-	// sets the position relative to the home position m_homePosition
-	void setPositionRelativeX(double position) override;
-	void setPositionRelativeY(double position) override;
-	void setPositionRelativeZ(double position) override;
-	void setPositionInPix(POINT2) override;
-
-	void setSpatialCalibration(SpatialCalibration spatialCalibration) override;
+	void setVoltageCalibration(VoltageCalibrationData voltageCalibration) override;
 
 	void setHome();
 
 private:
-	POINT2 pixToMicroMeter(POINT2) override;
+	void setPresetAfter(ScanPreset preset) override;
 
-	void applyScanPosition();
+	void calculateBounds() override;
+
+	void applyPosition();
 	void centerPosition();
 
 	void setFilter(FilterMount* device, int position);

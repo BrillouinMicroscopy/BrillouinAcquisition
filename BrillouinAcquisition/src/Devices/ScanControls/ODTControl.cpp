@@ -70,7 +70,7 @@ void ODTControl::disconnectDevice() {
 void ODTControl::setLEDLamp(bool position) {
 	m_LEDon = position;
 	// Write digital voltages
-	const uInt8	voltage = (uInt8)m_LEDon;
+	const auto voltage = (uInt8)m_LEDon;
 	DAQmxWriteDigitalLines(DOtaskHandle_LED, 1, false, 10, DAQmx_Val_GroupByChannel, &voltage, NULL, NULL);
 }
 

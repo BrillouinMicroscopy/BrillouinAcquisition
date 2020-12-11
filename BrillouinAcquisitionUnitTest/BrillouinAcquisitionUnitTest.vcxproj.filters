@@ -24,12 +24,12 @@
       <Extensions>moc;h;cpp</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
+    <Filter Include="Source Files\Dependencies">
+      <UniqueIdentifier>{138a1741-5320-4d23-9ef3-176874324434}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BrillouinAcquisitionUnitTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MockMicroscope.cpp">
@@ -59,6 +59,18 @@
     <ClCompile Include="xsample.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files\Dependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="POINT3Test.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="POINT2Test.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ScaleCalibrationHelperTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BrillouinAcquisitionUnitTest.h">
@@ -77,103 +89,98 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\BrillouinAcquisition\x64\Debug\BrillouinAcquisition.pch">
-      <Filter>Source Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\logger.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_h5bm.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_scancontrol.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_thread.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\qrc_BrillouinAcquisition.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\scancontrol.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\stdafx.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\ZeissECU.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_ZeissECU.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\NIDAQ.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_NIDAQ.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\com.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_device.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_filtermount.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\filtermount.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\Camera.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_camera.obj">
-      <Filter>Source Files</Filter>
-    </Object>
     <Object Include="..\BrillouinAcquisition\x64\Debug\Acquisition.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_Acquisition.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\Calibration.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_Calibration.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\storageWrapper.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_storageWrapper.obj">
-      <Filter>Source Files</Filter>
-    </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\h5bm.obj">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Dependencies</Filter>
     </Object>
     <Object Include="..\BrillouinAcquisition\x64\Debug\AcquisitionMode.obj">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\Camera.obj">
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\com.obj">
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\filtermount.obj">
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\h5bm.obj">
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\logger.obj">
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_Acquisition.obj">
+      <Filter>Source Files\Dependencies</Filter>
     </Object>
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_AcquisitionMode.obj">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Dependencies</Filter>
     </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\unwrap2wrapper.obj">
-      <Filter>Source Files</Filter>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_camera.obj">
+      <Filter>Source Files\Dependencies</Filter>
     </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\unwrap2D.obj">
-      <Filter>Source Files</Filter>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_device.obj">
+      <Filter>Source Files\Dependencies</Filter>
     </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\xsample.obj">
-      <Filter>Source Files</Filter>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_filtermount.obj">
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_h5bm.obj">
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_NIDAQ.obj">
+      <Filter>Source Files\Dependencies</Filter>
     </Object>
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_ODTControl.obj">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_scancontrol.obj">
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_storageWrapper.obj">
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_thread.obj">
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_VoltageCalibration.obj">
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_ZeissECU.obj">
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\NIDAQ.obj">
+      <Filter>Source Files\Dependencies</Filter>
     </Object>
     <Object Include="..\BrillouinAcquisition\x64\Debug\ODTControl.obj">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\qrc_BrillouinAcquisition.obj">
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\scancontrol.obj">
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\stdafx.obj">
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\storageWrapper.obj">
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\unwrap2D.obj">
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\unwrap2wrapper.obj">
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\VoltageCalibration.obj">
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\xsample.obj">
+      <Filter>Source Files\Dependencies</Filter>
+    </Object>
+    <Object Include="..\BrillouinAcquisition\x64\Debug\ZeissECU.obj">
+      <Filter>Source Files\Dependencies</Filter>
     </Object>
   </ItemGroup>
   <ItemGroup>
@@ -196,5 +203,10 @@
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\BrillouinAcquisition\external\eigen\debug\msvc\eigen.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\BrillouinAcquisition\x64\Debug\BrillouinAcquisition.pch">
+      <Filter>Source Files\Dependencies</Filter>
+    </None>
   </ItemGroup>
 </Project>
