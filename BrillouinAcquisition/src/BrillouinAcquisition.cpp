@@ -1504,14 +1504,22 @@ void BrillouinAcquisition::yAxisRangeChangedODT(const QCPRange &newRange) {
 	m_ODTPlot.plotHandle->yAxis->setRange(newRange.bounded(1, m_cameraOptionsODT.ROIHeightLimits[1]));
 }
 
-void BrillouinAcquisition::xAxisRangeChanged(const QCPRange &newRange) {
+void BrillouinAcquisition::xAxisRangeChanged(QCPRange &newRange) {
+	// We need rounded values as this represents pixels
+	newRange.lower = floor(newRange.lower);
+	newRange.upper = ceil(newRange.upper);
+
 	ui->customplot->xAxis->setRange(newRange.bounded(1, m_cameraOptions.ROIWidthLimits[1]));
 	m_deviceSettings.camera.roi.left = newRange.lower;
 	m_deviceSettings.camera.roi.width_physical = newRange.upper - newRange.lower + 1;
 	settingsCameraUpdate(ROI_SOURCE::PLOT);
 }
 
-void BrillouinAcquisition::yAxisRangeChanged(const QCPRange &newRange) {
+void BrillouinAcquisition::yAxisRangeChanged(QCPRange &newRange) {
+	// We need rounded values as this represents pixels
+	newRange.lower = floor(newRange.lower);
+	newRange.upper = ceil(newRange.upper);
+
 	ui->customplot->yAxis->setRange(newRange.bounded(1, m_cameraOptions.ROIHeightLimits[1]));
 	m_deviceSettings.camera.roi.top = m_cameraOptions.ROIHeightLimits[1] - newRange.upper + 1;
 	m_deviceSettings.camera.roi.height_physical = newRange.upper - newRange.lower + 1;
@@ -1666,12 +1674,12 @@ void BrillouinAcquisition::updatePlotLimits(PLOT_SETTINGS plotSettings,	CAMERA_O
 	QCPRange yRangeCurrent = plotSettings.plotHandle->yAxis->range();
 
 	QCPRange xRangeNew = QCPRange(
-		simplemath::max({ xRangeCurrent.lower, xRange.lower }),
-		simplemath::min({ xRangeCurrent.upper, xRange.upper })
+		floor(simplemath::max({ xRangeCurrent.lower, xRange.lower })),
+		ceil(simplemath::min({ xRangeCurrent.upper, xRange.upper }))
 	);
 	QCPRange yRangeNew = QCPRange(
-		simplemath::max({ yRangeCurrent.lower, yRange.lower }),
-		simplemath::min({ yRangeCurrent.upper, yRange.upper })
+		floor(simplemath::max({ yRangeCurrent.lower, yRange.lower })),
+		ceil(simplemath::min({ yRangeCurrent.upper, yRange.upper }))
 	);
 
 	plotSettings.plotHandle->xAxis->setRange(xRangeNew);

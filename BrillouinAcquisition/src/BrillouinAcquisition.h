@@ -279,8 +279,8 @@ private slots:
 	void plotClick(QMouseEvent* event);
 
 	// set and check camera ROI
-	void xAxisRangeChanged(const QCPRange& newRange);
-	void yAxisRangeChanged(const QCPRange& newRange);
+	void xAxisRangeChanged(QCPRange& newRange);
+	void yAxisRangeChanged(QCPRange& newRange);
 	void on_ROILeft_valueChanged(int);
 	void on_ROIWidth_valueChanged(int);
 	void on_ROITop_valueChanged(int);
