@@ -82,6 +82,16 @@ void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 	m_settings.roi.binX = binning;
 	m_settings.roi.binY = binning;
 
+	// Verify that the image size is a multiple of the binning number
+	auto modx = m_settings.roi.width_physical % m_settings.roi.binX;
+	if (modx) {
+		m_settings.roi.width_physical -= modx;
+	}
+	auto mody = m_settings.roi.height_physical % m_settings.roi.binY;
+	if (mody) {
+		m_settings.roi.height_physical -= mody;
+	}
+
 	m_settings.roi.width_binned = m_settings.roi.width_physical / m_settings.roi.binX;
 	m_settings.roi.height_binned = m_settings.roi.height_physical / m_settings.roi.binY;
 

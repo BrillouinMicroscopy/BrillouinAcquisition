@@ -90,6 +90,17 @@ void Andor::setSettings(CAMERA_SETTINGS settings) {
 	}
 	m_settings.roi.binX = binning;
 	m_settings.roi.binY = binning;
+
+	// Verify that the image size is a multiple of the binning number
+	auto modx = m_settings.roi.width_physical % m_settings.roi.binX;
+	if (modx) {
+		m_settings.roi.width_physical -= modx;
+	}
+	auto mody = m_settings.roi.height_physical % m_settings.roi.binY;
+	if (mody) {
+		m_settings.roi.height_physical -= mody;
+	}
+
 	AT_SetEnumeratedString(m_camera, L"AOIBinning", m_settings.roi.binning.c_str());
 	AT_SetInt(m_camera, L"AOIWidth", m_settings.roi.width_physical / m_settings.roi.binX);
 	AT_SetInt(m_camera, L"AOILeft", m_settings.roi.left);
