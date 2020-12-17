@@ -215,8 +215,7 @@ void Fluorescence::configureCamera() {
 		m_settings.camera.roi.width_physical = 1800;
 		m_settings.camera.roi.height_physical = 2000;
 		m_settings.camera.readout.triggerMode = L"Software";
-	}
-	else if (cameraType == "class PointGrey") {
+	} else if (cameraType == "class PointGrey") {
 		m_settings.camera.roi.left = 128;
 		m_settings.camera.roi.top = 0;
 		m_settings.camera.roi.width_physical = 1024;
@@ -226,6 +225,9 @@ void Fluorescence::configureCamera() {
 	m_settings.camera.readout.pixelEncoding = L"Raw8";
 	m_settings.camera.readout.cycleMode = L"Fixed";
 	m_settings.camera.frameCount = 1;
+
+	(*m_camera)->setSettings(m_settings.camera);
+	m_settings.camera = (*m_camera)->getSettings();
 }
 
 std::string Fluorescence::getBinningString() {
