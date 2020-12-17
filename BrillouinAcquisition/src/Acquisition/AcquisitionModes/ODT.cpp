@@ -296,11 +296,11 @@ void ODT::calculateVoltages(ODT_MODE mode) {
 std::string ODT::getBinningString() {
 	std::string binning{ "1x1" };
 	if (m_cameraSettings.roi.binning == L"8x8") {
-		binning = "1x1";
+		binning = "8x8";
 	} else if (m_cameraSettings.roi.binning == L"4x4") {
-		binning = "1x1";
+		binning = "4x4";
 	} else if (m_cameraSettings.roi.binning == L"2x2") {
-		binning = "1x1";
+		binning = "2x2";
 	}
 	return binning;
 }
