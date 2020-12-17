@@ -21,7 +21,7 @@ void Andor::init() {
 	// create timers and connect their signals
 	// after moving andor to another thread
 	m_tempTimer = new QTimer();
-	QMetaObject::Connection connection = QWidget::connect(
+	auto connection = QWidget::connect(
 		m_tempTimer,
 		&QTimer::timeout,
 		this,
@@ -33,7 +33,7 @@ void Andor::connectDevice() {
 	// initialize library
 	initialize();
 	if (!m_isConnected && m_isInitialised) {
-		int i_retCode = AT_Open(0, &m_camera);
+		auto i_retCode = AT_Open(0, &m_camera);
 		if (i_retCode == AT_SUCCESS) {
 			m_isConnected = true;
 			readOptions();
@@ -51,7 +51,7 @@ void Andor::disconnectDevice() {
 		if (m_tempTimer->isActive()) {
 			m_tempTimer->stop();
 		}
-		int i_retCode = AT_Close(m_camera);
+		auto i_retCode = AT_Close(m_camera);
 		if (i_retCode == AT_SUCCESS) {
 			m_isConnected = false;
 		}
@@ -75,7 +75,7 @@ void Andor::setSettings(CAMERA_SETTINGS settings) {
 	AT_SetBool(m_camera, L"SpuriousNoiseFilter", m_settings.spuriousNoiseFilter);
 
 	// Set the AOI
-	int binning{ 1 };
+	auto binning{ 1 };
 	if (m_settings.roi.binning == L"8x8") {
 		binning = 8;
 	} else if (m_settings.roi.binning == L"4x4") {
@@ -113,7 +113,7 @@ void Andor::setSettings(CAMERA_SETTINGS settings) {
 
 	// Allocate a buffer
 	// Get the number of bytes required to store one frame
-	AT_64 ImageSizeBytes;
+	auto ImageSizeBytes = AT_64{};
 	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
 	m_bufferSize = static_cast<int>(ImageSizeBytes);
 
@@ -150,11 +150,11 @@ void Andor::startAcquisition(CAMERA_SETTINGS settings) {
 
 	setSettings(settings);
 
-	AT_64 ImageSizeBytes;
+	auto ImageSizeBytes = AT_64{};
 	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
-	unsigned int BufferSize = static_cast<int>(ImageSizeBytes);
+	auto BufferSize = static_cast<unsigned int>(ImageSizeBytes);
 
-	BUFFER_SETTINGS bufferSettings = { 4, BufferSize, "unsigned short", m_settings.roi };
+	auto bufferSettings = BUFFER_SETTINGS{ 4, BufferSize, "unsigned short", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
@@ -193,14 +193,14 @@ void Andor::setCalibrationExposureTime(double exposureTime) {
 }
 
 void Andor::setSensorCooling(bool cooling) {
-	int i_retCode = AT_SetBool(m_camera, L"SensorCooling", (int)cooling);
+	auto i_retCode = AT_SetBool(m_camera, L"SensorCooling", (int)cooling);
 	m_isCooling = cooling;
 	emit(cameraCoolingChanged(m_isCooling));
 }
 
 bool Andor::getSensorCooling() {
-	AT_BOOL szValue;
-	int i_retCode = AT_GetBool(m_camera, L"SensorCooling", &szValue);
+	auto szValue = AT_BOOL{};
+	auto i_retCode = AT_GetBool(m_camera, L"SensorCooling", &szValue);
 	return szValue;
 }
 
@@ -210,15 +210,15 @@ bool Andor::getSensorCooling() {
 
 int Andor::acquireImage(unsigned char* buffer) {
 	// Pass this buffer to the SDK
-	unsigned char* UserBuffer = new unsigned char[m_bufferSize];
+	auto UserBuffer = new unsigned char[m_bufferSize];
 	AT_QueueBuffer(m_camera, UserBuffer, m_bufferSize);
 
 	// Acquire camera images
 	AT_Command(m_camera, L"SoftwareTrigger");
 
 	// Sleep in this thread until data is ready
-	unsigned char* Buffer;
-	int ret = AT_WaitBuffer(m_camera, &Buffer, &m_bufferSize, 1500 * m_settings.exposureTime);
+	unsigned char* Buffer{ nullptr };
+	auto ret = AT_WaitBuffer(m_camera, &Buffer, &m_bufferSize, 1500 * m_settings.exposureTime);
 	// return if AT_WaitBuffer timed out
 	if (ret == AT_ERR_TIMEDOUT) {
 		return 0;
@@ -280,21 +280,19 @@ void Andor::readSettings() {
 
 bool Andor::initialize() {
 	if (!m_isInitialised) {
-		int i_retCode = AT_InitialiseLibrary();
+		auto i_retCode = AT_InitialiseLibrary();
 		if (i_retCode != AT_SUCCESS) {
 			//error condition, check atdebug.log file
 			m_isInitialised = false;
-		}
-		else {
+		} else {
 			// when AT_InitialiseLibrary is called when the camera is still disabled, it will succeed,
 			// but the camera is never found even if switched on later
-			AT_64 i_numberOfDevices = 0;
+			auto i_numberOfDevices = AT_64{ 0 };
 			// Use system handle as inidivdual handle to the camera hasn't been opened. 
-			int i_errorCode = AT_GetInt(AT_HANDLE_SYSTEM, L"DeviceCount", &i_numberOfDevices);
+			auto i_errorCode = AT_GetInt(AT_HANDLE_SYSTEM, L"DeviceCount", &i_numberOfDevices);
 			if (i_numberOfDevices > 0) {
 				m_isInitialised = true;
-			}
-			else {
+			} else {
 				// if no camera is found and it was attempted to initialise the library, reinitializing will not help (wtf?)
 				// the program has to be restarted
 				emit(noCameraFound());
@@ -315,11 +313,11 @@ void Andor::preparePreview() {
 
 	setSettings(m_settings);
 
-	AT_64 ImageSizeBytes;
+	auto ImageSizeBytes = AT_64{};
 	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
-	unsigned int BufferSize = static_cast<int>(ImageSizeBytes);
+	auto BufferSize = static_cast<unsigned int>(ImageSizeBytes);
 
-	BUFFER_SETTINGS bufferSettings = { 5, BufferSize, "unsigned short", m_settings.roi };
+	auto bufferSettings = BUFFER_SETTINGS{ 5, BufferSize, "unsigned short", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
@@ -335,7 +333,7 @@ void Andor::cleanupAcquisition() {
 }
 
 const std::string Andor::getTemperatureStatus() {
-	int i_retCode = AT_GetEnumIndex(m_camera, L"TemperatureStatus", &m_temperatureStatusIndex);
+	auto i_retCode = AT_GetEnumIndex(m_camera, L"TemperatureStatus", &m_temperatureStatusIndex);
 	AT_WC temperatureStatus[256];
 	AT_GetEnumStringByIndex(m_camera, L"TemperatureStatus", m_temperatureStatusIndex, temperatureStatus, 256);
 	std::wstring temperatureStatusString = temperatureStatus;
@@ -344,17 +342,17 @@ const std::string Andor::getTemperatureStatus() {
 }
 
 double Andor::getSensorTemperature() {
-	double szValue;
-	int i_retCode = AT_GetFloat(m_camera, L"SensorTemperature", &szValue);
+	auto szValue{ 0.0 };
+	auto i_retCode = AT_GetFloat(m_camera, L"SensorTemperature", &szValue);
 	return szValue;
 }
 
 void Andor::getEnumString(AT_WC* feature, std::wstring* value) {
-	int enumIndex;
+	auto enumIndex{ 0 };
 	AT_GetEnumIndex(m_camera, feature, &enumIndex);
 	AT_WC tmpValue[256];
 	AT_GetEnumStringByIndex(m_camera, feature, enumIndex, tmpValue, 256);
-	std::wstring tmp = std::wstring(tmpValue);
+	auto tmp = std::wstring(tmpValue);
 	value = &tmp;
 }
 
@@ -364,7 +362,7 @@ void Andor::getEnumString(AT_WC* feature, std::wstring* value) {
 
 void Andor::checkSensorTemperature() {
 	m_sensorTemperature.temperature = getSensorTemperature();
-	std::string status = getTemperatureStatus();
+	auto status = getTemperatureStatus();
 	if (status == "Cooler Off") {
 		m_sensorTemperature.status = enCameraTemperatureStatus::COOLER_OFF;
 	} else if (status == "Fault") {

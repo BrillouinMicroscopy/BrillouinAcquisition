@@ -17,10 +17,10 @@ uEyeCam::~uEyeCam() {
 void uEyeCam::connectDevice() {
 	if (!m_isConnected) {
 
-		int nRet = uEye::is_InitCamera(&m_camera, NULL);
+		auto nRet = uEye::is_InitCamera(&m_camera, NULL);
 		if (nRet == IS_STARTER_FW_UPLOAD_NEEDED) {
 			// Time for the firmware upload = 25 seconds by default
-			int nUploadTime{ 25000 };
+			auto nUploadTime{ 25000 };
 			uEye::is_GetDuration(m_camera, uEye::IS_STARTER_FW_UPLOAD, &nUploadTime);
 
 			// Try again to open the camera. This time we allow the automatic upload of the firmware by
@@ -93,8 +93,7 @@ void uEyeCam::setSettings(CAMERA_SETTINGS settings) {
 	/*
 	 * Set the exposure time
 	 */
-	double exposureTemp{ 0.0 };
-	exposureTemp = (double)1e3 * m_settings.exposureTime;
+	auto exposureTemp = (double)1e3 * m_settings.exposureTime;
 	uEye::is_Exposure(m_camera, uEye::IS_EXPOSURE_CMD_SET_EXPOSURE, (void*)&exposureTemp, sizeof(exposureTemp));
 
 	/*
@@ -107,25 +106,22 @@ void uEyeCam::setSettings(CAMERA_SETTINGS settings) {
 	  * Set the pixel format
 	  */
 	  // Set the pixel format, possible values are: PIXEL_FORMAT_RAW8, PIXEL_FORMAT_MONO8, PIXEL_FORMAT_MONO12, PIXEL_FORMAT_MONO16
-	int pixelFormat{ IS_CM_SENSOR_RAW8 };
+	auto pixelFormat{ IS_CM_SENSOR_RAW8 };
 	if (m_settings.readout.pixelEncoding == L"Raw8") {
 		pixelFormat = IS_CM_SENSOR_RAW8;
-	}
-	else if (m_settings.readout.pixelEncoding == L"Mono8") {
+	} else if (m_settings.readout.pixelEncoding == L"Mono8") {
 		pixelFormat = IS_CM_MONO8;
-	}
-	else if (m_settings.readout.pixelEncoding == L"Mono12") {
+	} else if (m_settings.readout.pixelEncoding == L"Mono12") {
 		pixelFormat = IS_CM_MONO12;
-	}
-	else if (m_settings.readout.pixelEncoding == L"Mono16") {
+	} else if (m_settings.readout.pixelEncoding == L"Mono16") {
 		pixelFormat = IS_CM_MONO16;
 	}
-	int ret = uEye::is_SetColorMode(m_camera, pixelFormat);
+	auto ret = uEye::is_SetColorMode(m_camera, pixelFormat);
 
 	/*
 	 * Set the region of interest
 	 */
-	uEye::IS_RECT AOI;
+	auto AOI = uEye::IS_RECT{};
 	// Offset x
 	AOI.s32X = m_settings.roi.left;
 	// Offset y
@@ -145,11 +141,9 @@ void uEyeCam::setSettings(CAMERA_SETTINGS settings) {
 	 */
 	if (m_settings.readout.triggerMode == L"Internal") {
 		ret = uEye::is_SetExternalTrigger(m_camera, IS_SET_TRIGGER_OFF);
-	}
-	else if (m_settings.readout.triggerMode == L"Software") {
+	} else if (m_settings.readout.triggerMode == L"Software") {
 		ret = uEye::is_SetExternalTrigger(m_camera, IS_SET_TRIGGER_SOFTWARE);	// software trigger
-	}
-	else if (m_settings.readout.triggerMode == L"External") {
+	} else if (m_settings.readout.triggerMode == L"External") {
 		ret = uEye::is_SetExternalTrigger(m_camera, IS_SET_TRIGGER_LO_HI);	// external trigger low high
 	}
 
@@ -181,7 +175,7 @@ void uEyeCam::startPreview() {
 void uEyeCam::stopPreview() {
 	uEye::is_StopLiveVideo(m_camera, IS_FORCE_VIDEO_STOP);
 	uEye::is_ClearSequence(m_camera);
-	int nRet = uEye::is_FreeImageMem(m_camera, m_imageBuffer, m_imageBufferId);
+	auto nRet = uEye::is_FreeImageMem(m_camera, m_imageBuffer, m_imageBufferId);
 	m_isPreviewRunning = false;
 	m_stopPreview = false;
 	emit(s_previewRunning(m_isPreviewRunning));
@@ -202,13 +196,13 @@ void uEyeCam::startAcquisition(CAMERA_SETTINGS settings) {
 	// Wait for camera to really apply settings
 	Sleep(500);
 
-	unsigned int pixelNumber = m_settings.roi.width_physical * m_settings.roi.height_physical;
-	BUFFER_SETTINGS bufferSettings = { 1, pixelNumber, "unsigned char", m_settings.roi };
+	auto pixelNumber{ m_settings.roi.width_physical * m_settings.roi.height_physical };
+	auto bufferSettings = BUFFER_SETTINGS{ 1, (unsigned int)pixelNumber, "unsigned char", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
 	// allocate and add memory
-	int nRet = uEye::is_AllocImageMem(m_camera, m_settings.roi.width_physical, m_settings.roi.height_physical, 8, &m_imageBuffer, &m_imageBufferId);
+	auto nRet = uEye::is_AllocImageMem(m_camera, m_settings.roi.width_physical, m_settings.roi.height_physical, 8, &m_imageBuffer, &m_imageBufferId);
 
 	if (nRet == IS_SUCCESS) {
 		nRet = uEye::is_SetImageMem(m_camera, m_imageBuffer, m_imageBufferId);
@@ -219,7 +213,7 @@ void uEyeCam::startAcquisition(CAMERA_SETTINGS settings) {
 }
 
 void uEyeCam::stopAcquisition() {
-	int nRet = uEye::is_FreeImageMem(m_camera, m_imageBuffer, m_imageBufferId);
+	auto nRet = uEye::is_FreeImageMem(m_camera, m_imageBuffer, m_imageBufferId);
 	m_isAcquisitionRunning = false;
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
 
@@ -232,7 +226,7 @@ void uEyeCam::stopAcquisition() {
 void uEyeCam::getImageForAcquisition(unsigned char* buffer, bool preview) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	// Calculate timeout in multiples of 10 ms to be slightly higher than exposure time
-	int timeout = 500 * m_settings.exposureTime;
+	auto timeout{ (int)(500 * m_settings.exposureTime) };
 	if (timeout < 20) {
 		timeout = 20;
 	}
@@ -265,16 +259,16 @@ void uEyeCam::readOptions() {
 	m_options.pixelEncodings = { L"Raw8", L"Mono8" };
 	////m_options.cycleModes = { L"Continuous", L"Fixed single", L"Fixed multiple" };
 
-	double exposureMin{ 0.0 };
-	int ret = uEye::is_Exposure(m_camera, uEye::IS_EXPOSURE_CMD_GET_EXPOSURE_RANGE_MIN, (void*)&exposureMin, sizeof(exposureMin));
-	double exposureMax{ 0.0 };
+	auto exposureMin{ 0.0 };
+	auto ret = uEye::is_Exposure(m_camera, uEye::IS_EXPOSURE_CMD_GET_EXPOSURE_RANGE_MIN, (void*)&exposureMin, sizeof(exposureMin));
+	auto exposureMax{ 0.0 };
 	ret = uEye::is_Exposure(m_camera, uEye::IS_EXPOSURE_CMD_GET_EXPOSURE_RANGE_MAX, (void*)&exposureMax, sizeof(exposureMax));
 	m_options.exposureTimeLimits[0] = 1e-3*exposureMin;
 	m_options.exposureTimeLimits[1] = 1e-3*exposureMax;
 
-	uEye::IS_SIZE_2D sizeAOImin;
+	auto sizeAOImin = uEye::IS_SIZE_2D{};
 	ret = uEye::is_AOI(m_camera, IS_AOI_IMAGE_GET_SIZE_MIN, (void*)&sizeAOImin, sizeof(sizeAOImin));
-	uEye::IS_SIZE_2D sizeAOImax;
+	auto sizeAOImax = uEye::IS_SIZE_2D{};
 	ret = uEye::is_AOI(m_camera, IS_AOI_IMAGE_GET_SIZE_MAX, (void*)&sizeAOImax, sizeof(sizeAOImax));
 	m_options.ROIWidthLimits[0] = sizeAOImin.s32Width;
 	m_options.ROIWidthLimits[1] = sizeAOImax.s32Width;
@@ -289,8 +283,8 @@ void uEyeCam::readSettings() {
 	/*
 	 * Get the exposure time
 	 */
-	double exposureTemp{ 0.0 };
-	int ret = uEye::is_Exposure(m_camera, uEye::IS_EXPOSURE_CMD_GET_EXPOSURE, (void*)&exposureTemp, sizeof(exposureTemp));
+	auto exposureTemp{ 0.0 };
+	auto ret = uEye::is_Exposure(m_camera, uEye::IS_EXPOSURE_CMD_GET_EXPOSURE, (void*)&exposureTemp, sizeof(exposureTemp));
 	if (ret == IS_SUCCESS) {
 		m_settings.exposureTime = 1e-3*exposureTemp;	// [s] exposure time
 	}
@@ -303,7 +297,7 @@ void uEyeCam::readSettings() {
 	/*
 	 * Get the region of interest
 	 */
-	uEye::IS_RECT AOI;
+	auto AOI = uEye::IS_RECT{};
 	ret = uEye::is_AOI(m_camera, IS_AOI_IMAGE_GET_AOI, (void*)&AOI, sizeof(AOI));
 	if (ret == IS_SUCCESS) {
 		m_settings.roi.height_physical = AOI.s32Height;
@@ -367,13 +361,13 @@ void uEyeCam::preparePreview() {
 
 	setSettings(m_settings);
 
-	unsigned int pixelNumber = m_settings.roi.width_physical * m_settings.roi.height_physical;
-	BUFFER_SETTINGS bufferSettings = { 1, pixelNumber, "unsigned char", m_settings.roi };
+	auto pixelNumber{ m_settings.roi.width_physical * m_settings.roi.height_physical };
+	auto bufferSettings = BUFFER_SETTINGS{ 1, (unsigned int)pixelNumber, "unsigned char", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
 	// allocate and add memory
-	int nRet = uEye::is_AllocImageMem(m_camera, m_settings.roi.width_physical, m_settings.roi.height_physical, 8, &m_imageBuffer, &m_imageBufferId);
+	auto nRet = uEye::is_AllocImageMem(m_camera, m_settings.roi.width_physical, m_settings.roi.height_physical, 8, &m_imageBuffer, &m_imageBufferId);
 
 	if (nRet == IS_SUCCESS) {
 		nRet = uEye::is_AddToSequence(m_camera, m_imageBuffer, m_imageBufferId);
