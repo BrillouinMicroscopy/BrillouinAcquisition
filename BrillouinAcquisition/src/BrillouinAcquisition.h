@@ -99,7 +99,11 @@ public:
 	BrillouinAcquisition(QWidget* parent = nullptr) noexcept;
 	~BrillouinAcquisition();
 
+
 private:
+	void closeEvent(QCloseEvent* event);
+	QMessageBox::StandardButton BrillouinAcquisition::confirmQuit();
+
 	void initScanControl();
 	void initODT();
 	void initVoltageCalibration();
@@ -212,6 +216,8 @@ private:
 	} m_icons;
 	
 private slots:
+	void on_actionQuit_triggered();
+
 	void on_rangeLower_valueChanged(int);
 	void on_rangeUpper_valueChanged(int);
 	void on_rangeLowerODT_valueChanged(int);
@@ -391,8 +397,6 @@ private slots:
 
 
 	QString formatSeconds(int seconds);
-
-	void on_actionQuit_triggered();
 
 	void on_autoscalePlot_stateChanged(int);
 	void on_autoscalePlot_brightfield_stateChanged(int);

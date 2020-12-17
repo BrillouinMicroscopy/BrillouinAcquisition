@@ -383,6 +383,33 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 	delete ui;
 }
 
+void BrillouinAcquisition::closeEvent(QCloseEvent* event) {
+	event->ignore();
+	if (QMessageBox::Yes == confirmQuit()) {
+		event->accept();
+	}
+}
+
+void BrillouinAcquisition::on_actionQuit_triggered() {
+	if (QMessageBox::Yes == confirmQuit()) {
+		QApplication::quit();
+	}
+}
+
+QMessageBox::StandardButton BrillouinAcquisition::confirmQuit() {
+	// Directly quit in Debug mode
+	#ifdef DEBUG
+		return QMessageBox::Yes;
+	#else
+		return QMessageBox::question(
+			this,
+			"Close BrillouinAcquisition?",
+			"Do you really want to close BrillouinAcquisition?",
+			QMessageBox::Yes | QMessageBox::No
+		);
+	#endif
+}
+
 void BrillouinAcquisition::plotClick(QMouseEvent* event) {
 	auto position = event->pos();
 
@@ -590,10 +617,6 @@ void BrillouinAcquisition::setCurrentPositionBounds(BOUNDS bounds) {
 	ui->startZ->setMaximum(bounds.zMax);
 	ui->endZ->setMinimum(bounds.zMin);
 	ui->endZ->setMaximum(bounds.zMax);
-}
-
-void BrillouinAcquisition::on_actionQuit_triggered() {
-	QApplication::quit();
 }
 
 void BrillouinAcquisition::showCalibrationInterval(int value) {
