@@ -18,7 +18,7 @@ public:
 
 	void setPosition(POINT2 position) override;
 	void setPosition(POINT3 position) override;
-	POINT3 getPosition() override;
+	POINT3 getPosition(PositionType positionType = PositionType::BOTH) override;
 
 public slots:
 	void init() override;

@@ -20,9 +20,23 @@ void ScanControl::movePosition(POINT3 distance) {
 	setPosition(position);
 }
 
-POINT3 ScanControl::getPosition() {
-	// We return the absolute position, including the position of the stage and the scanner
-	auto pos = m_positionStage + m_positionScanner;
+POINT3 ScanControl::getPosition(PositionType positionType) {
+	auto pos = POINT2{};
+	switch (positionType) {
+		case PositionType::BOTH:
+			// We return the absolute position, including the position of the stage and the scanner
+			pos = m_positionStage + m_positionScanner;
+			break;
+		case PositionType::STAGE:
+			pos = m_positionStage;
+			break;
+		case PositionType::SCANNER:
+			pos = m_positionScanner;
+			break;
+		default:
+			break;
+	}
+
 	return POINT3{ pos.x, pos.y, m_positionFocus };
 }
 
