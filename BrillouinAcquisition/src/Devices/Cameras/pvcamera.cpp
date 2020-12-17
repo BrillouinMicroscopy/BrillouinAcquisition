@@ -21,7 +21,7 @@ void PVCamera::init() {
 	// create timers and connect their signals
 	// after moving camera to another thread
 	m_tempTimer = new QTimer();
-	QMetaObject::Connection connection = QWidget::connect(
+	auto connection = QWidget::connect(
 		m_tempTimer,
 		&QTimer::timeout,
 		this,
@@ -35,7 +35,7 @@ void PVCamera::connectDevice() {
 	if (!m_isConnected && m_isInitialised) {
 		char g_Camera0_Name[CAM_NAME_LEN] = "";
 		PVCam::pl_cam_get_name(0, g_Camera0_Name);
-		bool i_retCode = PVCam::pl_cam_open(g_Camera0_Name, &m_camera, PVCam::OPEN_EXCLUSIVE);
+		auto i_retCode = PVCam::pl_cam_open(g_Camera0_Name, &m_camera, PVCam::OPEN_EXCLUSIVE);
 		if (i_retCode == PVCam::PV_OK) {
 			m_isConnected = true;
 			readOptions();
@@ -49,7 +49,7 @@ void PVCamera::connectDevice() {
 void PVCamera::disconnectDevice() {
 	if (m_isConnected) {
 		stopTempTimer();
-		bool i_retCode = PVCam::pl_cam_close(m_camera);
+		auto i_retCode = PVCam::pl_cam_close(m_camera);
 		if (i_retCode == PVCam::PV_OK) {
 			m_isConnected = false;
 		}
@@ -59,14 +59,14 @@ void PVCamera::disconnectDevice() {
 
 void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 	// We have to update the options when we change port and speed
-	bool updateOptions{ false };
+	auto updateOptions{ false };
 	if (m_settings.readout.pixelReadoutRate != settings.readout.pixelReadoutRate) {
 		updateOptions = true;
 	}
 
 	m_settings = settings;
 
-	int binning{ 1 };
+	auto binning{ 1 };
 	if (m_settings.roi.binning == L"8x8") {
 		binning = 8;
 	} else if (m_settings.roi.binning == L"4x4") {
@@ -95,7 +95,7 @@ void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 	m_settings.roi.width_binned = m_settings.roi.width_physical / m_settings.roi.binX;
 	m_settings.roi.height_binned = m_settings.roi.height_physical / m_settings.roi.binY;
 
-	int speedTableIndex{ 0 };
+	auto speedTableIndex{ 0 };
 	for (gsl::index i{ 0 }; i < m_SpeedTable.size(); i++) {
 		if (m_SpeedTable[i].label == m_settings.readout.pixelReadoutRate) {
 			speedTableIndex = i;
@@ -103,7 +103,7 @@ void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 		}
 	}
 
-	int gainIndex{ 0 };
+	auto gainIndex{ 0 };
 	for (gsl::index i{ 0 }; i < m_SpeedTable[speedTableIndex].gains.size(); i++) {
 		if (std::to_wstring(m_SpeedTable[speedTableIndex].gains[i]) == m_settings.readout.preAmpGain) {
 			gainIndex = i;
@@ -178,12 +178,12 @@ void PVCamera::stopAcquisition() {
 void PVCamera::getImageForAcquisition(unsigned char* buffer, bool preview) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 
-	bool i_retCode = PVCam::pl_exp_start_seq(m_camera, m_acquisitionBuffer);
+	auto i_retCode = PVCam::pl_exp_start_seq(m_camera, m_acquisitionBuffer);
 
 	{
 		std::unique_lock<std::mutex> lock(g_EofMutex);
 		if (!g_EofFlag) {
-			int waitTime = (int)(2 * m_settings.exposureTime);
+			auto waitTime = (int)(2 * m_settings.exposureTime);
 			waitTime = (waitTime < 5) ? 5 : waitTime;
 			g_EofCond.wait_for(lock, std::chrono::seconds(waitTime), [this]() {
 				return (g_EofFlag);
@@ -207,11 +207,11 @@ void PVCamera::setCalibrationExposureTime(double exposureTime) {
 	PVCam::pl_exp_abort(m_camera, PVCam::CCS_NO_CHANGE);
 	// Set the exposure time
 	m_settings.exposureTime = exposureTime;
-	PVCam::rgn_type camSettings = getCamSettings();
+	auto camSettings = getCamSettings();
 
 	PVCam::pl_cam_register_callback_ex3(m_camera, PVCam::PL_CALLBACK_EOF, (void*)acquisitionCallback, (void*)this);
 
-	PVCam::uns32 bufferSize{ 0 };
+	auto bufferSize = PVCam::uns32{ 0 };
 	PVCam::pl_exp_setup_seq(m_camera, 1, 1, &camSettings, PVCam::TIMED_MODE, 1e3 * m_settings.exposureTime, &bufferSize);
 }
 
@@ -222,22 +222,22 @@ void PVCamera::setSensorCooling(bool cooling) {
 		// the camera to much while developing.
 		m_sensorTemperature.setpoint = -20.0;
 	} else {
-		double setpoint = m_sensorTemperature.maxSetpoint;
+		auto setpoint = m_sensorTemperature.maxSetpoint;
 		// We want to set the value no higher than room temperature.
 		if (setpoint > 20) {
 			setpoint = 20;
 		}
 		m_sensorTemperature.setpoint = setpoint;
 	}
-	PVCam::int16 setpoint = 100 * m_sensorTemperature.setpoint;
-	int i_retCode = PVCam::pl_set_param(m_camera, PARAM_TEMP_SETPOINT, (void*)&setpoint);
+	auto setpoint{ (PVCam::int16)(100 * m_sensorTemperature.setpoint) };
+	auto i_retCode = PVCam::pl_set_param(m_camera, PARAM_TEMP_SETPOINT, (void*)&setpoint);
 	m_isCooling = cooling;
 	emit(cameraCoolingChanged(m_isCooling));
 }
 
 bool PVCamera::getSensorCooling() {
-	PVCam::int16 setpoint{ 0 };
-	int i_retCode = PVCam::pl_get_param(m_camera, PARAM_TEMP_SETPOINT, PVCam::ATTR_CURRENT, (void*)&setpoint);
+	auto setpoint = PVCam::int16{ 0 };
+	auto i_retCode = PVCam::pl_get_param(m_camera, PARAM_TEMP_SETPOINT, PVCam::ATTR_CURRENT, (void*)&setpoint);
 	// If the setpoint is lower than 0 �C we consider it cooling.
 	if (setpoint / 100.0 < 0.0) {
 		return true;
@@ -251,9 +251,9 @@ bool PVCamera::getSensorCooling() {
  */
 
 int PVCamera::acquireImage(unsigned char* buffer) {
-	PVCam::int16 status;
-	PVCam::uns32 byte_cnt;
-	PVCam::uns32 buffer_cnt;
+	auto status = PVCam::int16{};
+	auto byte_cnt = PVCam::uns32{};
+	auto buffer_cnt = PVCam::uns32{};
 	while (PVCam::pl_exp_check_cont_status(m_camera, &status, &byte_cnt, &buffer_cnt)
 		&& status != PVCam::FRAME_AVAILABLE && status != PVCam::READOUT_NOT_ACTIVE) {
 		// Waiting for frame exposure and readout
@@ -264,7 +264,7 @@ int PVCamera::acquireImage(unsigned char* buffer) {
 		return 0;
 	}
 
-	PVCam::uns16* frameAddress;
+	PVCam::uns16* frameAddress { nullptr };
 	PVCam::pl_exp_get_latest_frame(m_camera, (void**)&frameAddress);
 	memcpy(buffer, frameAddress, m_bufferSize);
 
@@ -272,51 +272,51 @@ int PVCamera::acquireImage(unsigned char* buffer) {
 }
 
 void PVCamera::readOptions() {
-	int i_retCode{ 0 };
+	auto i_retCode{ 0 };
 	// Read min and max temperature setpoint
-	PVCam::int16 setpointMin{ 0 };
+	auto setpointMin = PVCam::int16{ 0 };
 	i_retCode = PVCam::pl_get_param(m_camera, PARAM_TEMP_SETPOINT, PVCam::ATTR_MIN, (void*)&setpointMin);
 	if (i_retCode == PVCam::PV_OK) {
 		m_sensorTemperature.minSetpoint = setpointMin / 100.0;
 	}
 
-	PVCam::int16 setpointMax{ 0 };
+	auto setpointMax = PVCam::int16{ 0 };
 	PVCam::pl_get_param(m_camera, PARAM_TEMP_SETPOINT, PVCam::ATTR_MAX, (void*)&setpointMax);
 	if (i_retCode == PVCam::PV_OK) {
 		m_sensorTemperature.maxSetpoint = setpointMax / 100.0;
 	}
 
 
-	PVCam::int16 ROIHeight{ 0 };
+	auto ROIHeight = PVCam::int16{ 0 };
 	PVCam::pl_get_param(m_camera, PARAM_PAR_SIZE, PVCam::ATTR_CURRENT, (void*)&ROIHeight);
 	m_options.ROIHeightLimits[0] = 0;
 	m_options.ROIHeightLimits[1] = ROIHeight;
 
-	PVCam::int16 ROIWidth{ 0 };
+	auto ROIWidth = PVCam::int16{ 0 };
 	PVCam::pl_get_param(m_camera, PARAM_SER_SIZE, PVCam::ATTR_CURRENT, (void*)&ROIWidth);
 	m_options.ROIWidthLimits[0] = 0;
 	m_options.ROIWidthLimits[1] = ROIWidth;
 
-	PVCam::int16 exposureMin{ 0 };
+	auto exposureMin = PVCam::int16{ 0 };
 	PVCam::pl_get_param(m_camera, PARAM_EXPOSURE_TIME, PVCam::ATTR_MIN, (void*)&exposureMin);
 	m_options.exposureTimeLimits[0] = 1e-3 * (double)exposureMin;
 
-	PVCam::int16 exposureMax{ 0 };
+	auto exposureMax = PVCam::int16{ 0 };
 	PVCam::pl_get_param(m_camera, PARAM_EXPOSURE_TIME, PVCam::ATTR_MAX, (void*)&exposureMax);
 	m_options.exposureTimeLimits[1] = 1e-3 * (double)exposureMax;
 
 	/*
 	 * Get the possible binning factors
 	 */
-	PVCam::rs_bool isAvailable{ false };
+	auto isAvailable = PVCam::rs_bool{ false };
 	PVCam::pl_get_param(m_camera, PARAM_BINNING_PAR, PVCam::ATTR_AVAIL, (void*)&isAvailable);
 	if (isAvailable) {
-		NVPC binsSer;
+		auto binsSer = NVPC{};
 		ReadEnumeration(&binsSer, PARAM_BINNING_SER, "PARAM_BINNING_SER");
-		NVPC binsPar;
+		auto binsPar = NVPC{};
 		ReadEnumeration(&binsPar, PARAM_BINNING_PAR, "PARAM_BINNING_PAR");
-		const PVCam::uns32 binCount = (PVCam::uns32)std::min<size_t>(binsSer.size(), binsPar.size());
-		int i{ 0 };
+		const auto binCount = (PVCam::uns32)std::min<size_t>(binsSer.size(), binsPar.size());
+		auto i{ 0 };
 		m_options.imageBinnings.clear();
 		for (PVCam::uns32 n{ 0 }; n < binCount; n++) {
 			std::wstring string = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(binsSer[n].name);
@@ -324,7 +324,7 @@ void PVCamera::readOptions() {
 		}
 	}
 
-	NVPC ports;
+	auto ports = NVPC{};
 	ReadEnumeration(&ports, PARAM_READOUT_PORT, "PARAM_READOUT_PORT");
 
 	m_SpeedTable.clear();
@@ -339,7 +339,7 @@ void PVCamera::readOptions() {
 		}
 
 		// Get number of available speeds for this port
-		PVCam::uns32 speedCount;
+		auto speedCount = PVCam::uns32{};
 		if (PVCam::PV_OK != PVCam::pl_get_param(m_camera, PARAM_SPDTAB_INDEX, PVCam::ATTR_COUNT,
 			(void*)&speedCount)) {
 			//PrintErrorMessage(pl_error_code(),
@@ -359,7 +359,7 @@ void PVCamera::readOptions() {
 			// Get pixel time (readout time of one pixel in nanoseconds) for the
 			// current port/speed pair. This can be used to calculate readout
 			// frequency of the port/speed pair.
-			PVCam::uns16 pixTime;
+			auto pixTime = PVCam::uns16{};
 			if (PVCam::PV_OK != PVCam::pl_get_param(m_camera, PARAM_PIX_TIME, PVCam::ATTR_CURRENT,
 				(void*)&pixTime)) {
 				//PrintErrorMessage(pl_error_code(),
@@ -368,7 +368,7 @@ void PVCamera::readOptions() {
 			}
 
 			// Get bit depth of the current readout port/speed pair
-			PVCam::int16 bitDepth;
+			auto bitDepth = PVCam::int16{};
 			if (PVCam::PV_OK != PVCam::pl_get_param(m_camera, PARAM_BIT_DEPTH, PVCam::ATTR_CURRENT,
 				(void*)&bitDepth)) {
 				//PrintErrorMessage(pl_error_code(),
@@ -376,7 +376,7 @@ void PVCamera::readOptions() {
 				//return false;
 			}
 
-			PVCam::int16 gainMin;
+			auto gainMin = PVCam::int16{};
 			if (PVCam::PV_OK != PVCam::pl_get_param(m_camera, PARAM_GAIN_INDEX, PVCam::ATTR_MIN,
 				(void*)&gainMin)) {
 				//PrintErrorMessage(pl_error_code(),
@@ -384,7 +384,7 @@ void PVCamera::readOptions() {
 				//return false;
 			}
 
-			PVCam::int16 gainMax;
+			auto gainMax = PVCam::int16{};
 			if (PVCam::PV_OK != PVCam::pl_get_param(m_camera, PARAM_GAIN_INDEX, PVCam::ATTR_MAX,
 				(void*)&gainMax)) {
 				//PrintErrorMessage(pl_error_code(),
@@ -392,7 +392,7 @@ void PVCamera::readOptions() {
 				//return false;
 			}
 
-			PVCam::int16 gainIncrement;
+			auto gainIncrement = PVCam::int16{};
 			if (PVCam::PV_OK != PVCam::pl_get_param(m_camera, PARAM_GAIN_INDEX, PVCam::ATTR_INCREMENT,
 				(void*)&gainIncrement)) {
 				//PrintErrorMessage(pl_error_code(),
@@ -401,18 +401,18 @@ void PVCamera::readOptions() {
 			}
 
 			// Save the port/speed information to our Speed Table
-			READOUT_OPTION ro;
+			auto ro = READOUT_OPTION{};
 			ro.port = ports[pi];
 			ro.speedIndex = si;
 			ro.readoutFrequency = 1000 / (float)pixTime;
 			ro.bitDepth = bitDepth;
-			std::ostringstream ss;
+			auto ss = std::ostringstream{};
 			ss << "P" << ro.port.value << "S" << ro.speedIndex
 				<< ": " << ro.readoutFrequency << " MHz";
 			ro.label = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(ss.str());
 
 			ro.gains.clear();
-			PVCam::int16 gainValue = gainMin;
+			auto gainValue = gainMin;
 			while (gainValue <= gainMax) {
 				ro.gains.push_back(gainValue);
 				gainValue += gainIncrement;
@@ -435,7 +435,7 @@ void PVCamera::readOptions() {
 		}
 	}
 	m_options.pixelEncodings.clear();
-	std::ostringstream ss;
+	auto ss = std::ostringstream{};
 	ss << m_SpeedTable[speedTableIndex].bitDepth << " bit";
 	m_options.pixelEncodings.push_back(std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(ss.str()));
 
@@ -454,13 +454,13 @@ void PVCamera::readSettings() {
 
 bool PVCamera::initialize() {
 	if (!m_isInitialised) {
-		bool i_retCode = PVCam::pl_pvcam_init();
+		auto i_retCode = PVCam::pl_pvcam_init();
 		if (i_retCode != PVCam::PV_OK) {
 			//error condition
 			//PrintErrorMessage(PVCam::pl_error_code(), "pl_pvcam_init() error");
 			m_isInitialised = false;
 		} else {
-			PVCam::int16 i_numberOfCameras{ 0 };
+			auto i_numberOfCameras = PVCam::int16{ 0 };
 			PVCam::pl_cam_get_total(&i_numberOfCameras);
 			if (i_numberOfCameras > 0) {
 				m_isInitialised = true;
@@ -481,7 +481,7 @@ const std::string PVCamera::getTemperatureStatus() {
 	}
 	// If sensor temperature and setpoint differ no more than 1 K
 	// we consider the temperature stabilised.
-	double temp = getSensorTemperature();
+	auto temp = getSensorTemperature();
 	if (abs(temp - m_sensorTemperature.setpoint) < 1.0) {
 		return "Stabilised";
 	}
@@ -489,18 +489,18 @@ const std::string PVCamera::getTemperatureStatus() {
 }
 
 double PVCamera::getSensorTemperature() {
-	PVCam::int16 temperature;
-	bool i_retCode = PVCam::pl_get_param(m_camera, PARAM_TEMP, PVCam::ATTR_CURRENT, (void*)&temperature);
+	auto temperature = PVCam::int16{};
+	auto i_retCode = PVCam::pl_get_param(m_camera, PARAM_TEMP, PVCam::ATTR_CURRENT, (void*)&temperature);
 	return temperature / 100.0;
 }
 
 void PVCamera::previewCallback(PVCam::FRAME_INFO* pFrameInfo, void* context) {
-	PVCamera* self = static_cast<PVCamera*>(context);
+	auto self = static_cast<PVCamera*>(context);
 	self->getImageForPreview();
 }
 
 void PVCamera::acquisitionCallback(PVCam::FRAME_INFO* pFrameInfo, void* context) {
-	PVCamera* self = static_cast<PVCamera*>(context);
+	auto self = static_cast<PVCamera*>(context);
 	{
 		std::lock_guard<std::mutex> lock(self->g_EofMutex);
 		self->g_EofFlag = true; // Set flag
@@ -531,7 +531,7 @@ bool PVCamera::IsParamAvailable(PVCam::uns32 paramID, const char* paramName) {
 		return false;
 	}
 
-	PVCam::rs_bool isAvailable;
+	auto isAvailable = PVCam::rs_bool{};
 	if (PVCam::PV_OK != PVCam::pl_get_param(m_camera, paramID, PVCam::ATTR_AVAIL, (void*)&isAvailable)) {
 		//printf("Error reading ATTR_AVAIL of %s\n", paramName);
 		return false;
@@ -551,7 +551,7 @@ bool PVCamera::ReadEnumeration(NVPC* nvpc, PVCam::uns32 paramID, const char* par
 	if (!IsParamAvailable(paramID, paramName))
 		return false;
 
-	PVCam::uns32 count;
+	auto count = PVCam::uns32{};
 	if (PVCam::PV_OK != PVCam::pl_get_param(m_camera, paramID, PVCam::ATTR_COUNT, (void*)&count)) {
 		//const std::string msg =
 		//	"pl_get_param(" + std::string(paramName) + ") error";
@@ -562,7 +562,7 @@ bool PVCamera::ReadEnumeration(NVPC* nvpc, PVCam::uns32 paramID, const char* par
 	// Actually get the triggering/exposure names
 	for (PVCam::uns32 i{ 0 }; i < count; ++i) {
 		// Ask how long the string is
-		PVCam::uns32 strLength;
+		auto strLength = PVCam::uns32{};
 		if (PVCam::PV_OK != PVCam::pl_enum_str_length(m_camera, paramID, i, &strLength)) {
 			//const std::string msg =
 			//	"pl_enum_str_length(" + std::string(paramName) + ") error";
@@ -571,7 +571,7 @@ bool PVCamera::ReadEnumeration(NVPC* nvpc, PVCam::uns32 paramID, const char* par
 		}
 
 		// Allocate the destination string
-		char* name = new (std::nothrow) char[strLength];
+		auto name = new (std::nothrow) char[strLength];
 		if (name) {
 
 			// Actually get the string and value
@@ -584,7 +584,7 @@ bool PVCamera::ReadEnumeration(NVPC* nvpc, PVCam::uns32 paramID, const char* par
 				return false;
 			}
 
-			NVP nvp;
+			auto nvp = NVP{};
 			nvp.value = value;
 			nvp.name = name;
 			nvpc->push_back(nvp);
@@ -597,7 +597,7 @@ bool PVCamera::ReadEnumeration(NVPC* nvpc, PVCam::uns32 paramID, const char* par
 }
 
 PVCam::rgn_type PVCamera::getCamSettings() {
-	PVCam::rgn_type camSettings;
+	auto camSettings = PVCam::rgn_type{};
 	camSettings.s1 = m_settings.roi.left - 1;
 	camSettings.s2 = m_settings.roi.width_physical + m_settings.roi.left - 2;
 	camSettings.p1 = m_settings.roi.top - 1;
@@ -642,20 +642,20 @@ void PVCamera::preparePreview() {
 
 	setSettings(m_settings);
 
-	PVCam::rgn_type settings = getCamSettings();
+	auto settings = getCamSettings();
 
-	int circBufferFrames{ 8 };
+	auto circBufferFrames{ 8 };
 	// Only even numbers are accepted for the frame count.
 	if (circBufferFrames % 2) {
 		circBufferFrames += 1;
 	}
-	PVCam::uns32 bufferSize;
-	bool i_retCode = PVCam::pl_exp_setup_cont(m_camera, 1, &settings, PVCam::TIMED_MODE, 1e3 * m_settings.exposureTime,
+	auto bufferSize = PVCam::uns32{};
+	auto i_retCode = PVCam::pl_exp_setup_cont(m_camera, 1, &settings, PVCam::TIMED_MODE, 1e3 * m_settings.exposureTime,
 		&bufferSize, PVCam::CIRC_OVERWRITE);
 	m_bufferSize = bufferSize;
 
 	// preview buffer
-	BUFFER_SETTINGS bufferSettings = { circBufferFrames, m_bufferSize, "unsigned short", m_settings.roi };
+	auto bufferSettings = BUFFER_SETTINGS{ circBufferFrames, m_bufferSize, "unsigned short", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
@@ -664,7 +664,7 @@ void PVCamera::preparePreview() {
 		delete[] m_buffer;
 		m_buffer = nullptr;
 	}
-	int bufSize = (size_t)circBufferFrames * m_bufferSize / sizeof(PVCam::uns16);
+	auto bufSize = (size_t)circBufferFrames * m_bufferSize / sizeof(PVCam::uns16);
 	m_buffer = new (std::nothrow) PVCam::uns16[bufSize];
 
 	// Register callback
@@ -692,16 +692,16 @@ void PVCamera::prepareAcquisition(CAMERA_SETTINGS settings) {
 	stopTempTimer();
 
 	setSettings(settings);
-	PVCam::rgn_type camSettings = getCamSettings();
+	auto camSettings = getCamSettings();
 
 	PVCam::pl_cam_register_callback_ex3(m_camera, PVCam::PL_CALLBACK_EOF, (void*)acquisitionCallback, (void*)this);
 
-	PVCam::uns32 bufferSize{ 0 };
+	auto bufferSize = PVCam::uns32{ 0 };
 	PVCam::pl_exp_setup_seq(m_camera, 1, 1, &camSettings, PVCam::TIMED_MODE, 1e3 * m_settings.exposureTime, &bufferSize);
 	m_acquisitionBuffer = new (std::nothrow) PVCam::uns16[bufferSize / sizeof(PVCam::uns16)];
 	m_bufferSize = bufferSize;
 
-	BUFFER_SETTINGS bufferSettings = { 8, m_bufferSize, "unsigned short", m_settings.roi };
+	auto bufferSettings = BUFFER_SETTINGS{ 8, m_bufferSize, "unsigned short", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 }
@@ -713,7 +713,7 @@ void PVCamera::cleanupAcquisition() {
 
 void PVCamera::checkSensorTemperature() {
 	m_sensorTemperature.temperature = getSensorTemperature();
-	std::string status = getTemperatureStatus();
+	auto status = getTemperatureStatus();
 	if (status == "Cooler Off") {
 		m_sensorTemperature.status = enCameraTemperatureStatus::COOLER_OFF;
 	} else if (status == "Cooling") {
