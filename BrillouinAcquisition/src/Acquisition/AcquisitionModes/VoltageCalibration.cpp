@@ -8,7 +8,7 @@
  */
 
 VoltageCalibration::VoltageCalibration(QObject* parent, Acquisition* acquisition, Camera** camera, ODTControl** ODTControl)
-	: AcquisitionMode(parent, acquisition), m_camera(camera), m_ODTControl(ODTControl) {
+	: AcquisitionMode(parent, acquisition, (ScanControl**)ODTControl), m_camera(camera), m_ODTControl(ODTControl) {
 }
 
 VoltageCalibration::~VoltageCalibration() {}

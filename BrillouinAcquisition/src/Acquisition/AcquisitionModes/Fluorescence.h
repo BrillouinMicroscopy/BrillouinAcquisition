@@ -55,8 +55,7 @@ private:
 	std::vector<ChannelSettings*> getEnabledChannels();
 	void configureCamera();
 
-	Camera** m_camera;
-	ScanControl** m_scanControl;
+	Camera** m_camera{ nullptr };
 
 	FLUORESCENCE_SETTINGS m_settings;
 	FLUORESCENCE_MODE m_currentPreviewChannel{ FLUORESCENCE_MODE::NONE };

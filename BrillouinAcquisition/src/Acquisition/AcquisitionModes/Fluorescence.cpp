@@ -6,7 +6,7 @@
  */
 
 Fluorescence::Fluorescence(QObject* parent, Acquisition* acquisition, Camera** camera, ScanControl** scanControl)
-	: AcquisitionMode(parent, acquisition), m_camera(camera), m_scanControl(scanControl) {}
+	: AcquisitionMode(parent, acquisition, scanControl), m_camera(camera) {}
 
 Fluorescence::~Fluorescence() {
 }
@@ -261,6 +261,8 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 			return;
 		}
 	}
+
+	writeScaleCalibration(storage);
 
 	QMetaObject::invokeMethod(
 		storage.get(),

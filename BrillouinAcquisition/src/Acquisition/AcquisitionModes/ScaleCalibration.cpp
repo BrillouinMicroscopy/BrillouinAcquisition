@@ -7,7 +7,7 @@
  */
 
 ScaleCalibration::ScaleCalibration(QObject* parent, Acquisition* acquisition, Camera** camera, ScanControl** scanControl)
-	: AcquisitionMode(parent, acquisition), m_camera(camera), m_scanControl(scanControl) {
+	: AcquisitionMode(parent, acquisition, scanControl), m_camera(camera) {
 }
 
 ScaleCalibration::~ScaleCalibration() {}

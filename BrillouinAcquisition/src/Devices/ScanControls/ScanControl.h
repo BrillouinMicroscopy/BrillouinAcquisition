@@ -186,6 +186,7 @@ public slots:
 	void announceSavedPositionsNormalized();
 	
 	void setScaleCalibration(ScaleCalibrationData scaleCalibration);
+	ScaleCalibrationData getScaleCalibration();
 
 	std::vector<POINT2> getPositionsPix(std::vector<POINT3> positionsMicrometer);
 

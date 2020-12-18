@@ -7,7 +7,7 @@
  */
 
 ODT::ODT(QObject* parent, Acquisition* acquisition, Camera** camera, ODTControl** ODTControl)
-	: AcquisitionMode(parent, acquisition), m_camera(camera), m_ODTControl(ODTControl) {
+	: AcquisitionMode(parent, acquisition, (ScanControl**)ODTControl), m_camera(camera), m_ODTControl(ODTControl) {
 }
 
 ODT::~ODT() {
@@ -324,6 +324,8 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	// Set first mirror voltage already
 	(*m_ODTControl)->setVoltage(m_acqSettings.voltages[0]);
 	Sleep(100);
+
+	writeScaleCalibration(storage);
 
 	ACQ_VOLTAGES voltages;
 
