@@ -5,6 +5,8 @@
 #include <gsl/gsl>
 #include "H5Cpp.h"
 
+#include "opencv2/imgproc.hpp"
+
 #include "AcquisitionMode.h"
 #include "ScaleCalibrationHelper.h"
 #include "../../Devices/Cameras/Camera.h"

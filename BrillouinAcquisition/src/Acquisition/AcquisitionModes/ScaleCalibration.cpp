@@ -122,6 +122,11 @@ void ScaleCalibration::acquire(std::unique_ptr <StorageWrapper>& storage) {}
 void ScaleCalibration::acquire() {
 	setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 
+	auto image0 = cv::InputArray{};
+	auto image1 = cv::InputArray{};
+
+	auto shift = cv::phaseCorrelate(image0, image1);
+
 	save();
 
 	setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
