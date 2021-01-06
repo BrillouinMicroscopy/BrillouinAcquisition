@@ -4,7 +4,8 @@
 #include <QtCore>
 #include <gsl/gsl>
 
-#include "../Acquisition.h"
+#include "..\Acquisition.h"
+#include "..\..\Devices\ScanControls\ScanControl.h"
 
 enum class ACQUISITION_STATUS {
 	DISABLED,
@@ -22,7 +23,7 @@ class AcquisitionMode : public QObject {
 	Q_OBJECT
 
 public:
-	AcquisitionMode(QObject *parent, Acquisition *acquisition);
+	AcquisitionMode(QObject *parent, Acquisition *acquisition, ScanControl** scanControl);
 	~AcquisitionMode();
 
 	bool m_abort{ false };
@@ -39,8 +40,11 @@ protected:
 
 	void setAcquisitionStatus(ACQUISITION_STATUS);
 
+	void writeScaleCalibration(std::unique_ptr <StorageWrapper>& storage);
+
 	ACQUISITION_STATUS m_status{ ACQUISITION_STATUS::DISABLED };
 	Acquisition* m_acquisition{ nullptr };
+	ScanControl** m_scanControl{ nullptr };
 
 private slots:
 	virtual void acquire(std::unique_ptr <StorageWrapper> & storage) = 0;

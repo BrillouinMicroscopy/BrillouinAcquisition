@@ -39,6 +39,12 @@ enum class Capabilities {
 	COUNT
 };
 
+enum class PositionType {
+	BOTH,
+	STAGE,
+	SCANNER
+};
+
 typedef enum class enDeviceInput {
 	PUSHBUTTON,
 	INTBOX,
@@ -120,7 +126,7 @@ public:
 	// moves the position relative to current position
 	void movePosition(POINT2 distance);
 	void movePosition(POINT3 distance);
-	virtual POINT3 getPosition();
+	virtual POINT3 getPosition(PositionType positionType = PositionType::BOTH);
 
 	typedef enum class enScanDevice {
 		ZEISSECU = 0,
@@ -180,6 +186,7 @@ public slots:
 	void announceSavedPositionsNormalized();
 	
 	void setScaleCalibration(ScaleCalibrationData scaleCalibration);
+	ScaleCalibrationData getScaleCalibration();
 
 	std::vector<POINT2> getPositionsPix(std::vector<POINT3> positionsMicrometer);
 

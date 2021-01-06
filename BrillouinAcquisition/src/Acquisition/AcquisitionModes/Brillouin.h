@@ -3,7 +3,6 @@
 
 #include "AcquisitionMode.h"
 #include "..\..\Devices\Cameras\Camera.h"
-#include "..\..\Devices\ScanControls\ScanControl.h"
 #include "..\..\thread.h"
 #include "..\..\circularBuffer.h"
 
@@ -92,8 +91,7 @@ private:
 
 	BRILLOUIN_SETTINGS m_settings;
 	SCAN_ORDER m_scanOrder;
-	Camera** m_andor;
-	ScanControl** m_scanControl;
+	Camera** m_andor{ nullptr };
 	bool m_running{ false };				// is acquisition currently running
 	POINT3 m_startPosition{ 0, 0, 0 };
 

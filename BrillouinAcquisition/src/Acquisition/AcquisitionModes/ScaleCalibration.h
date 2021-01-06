@@ -28,8 +28,7 @@ private:
 
 	void save();
 
-	Camera** m_camera;
-	ScanControl** m_scanControl;
+	Camera** m_camera{ nullptr };
 
 	ScaleCalibrationData m_scaleCalibration;
 

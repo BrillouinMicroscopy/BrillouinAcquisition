@@ -11,7 +11,7 @@ using namespace std::filesystem;
  */
 
 Brillouin::Brillouin(QObject* parent, Acquisition* acquisition, Camera** andor, ScanControl** scanControl)
-	: AcquisitionMode(parent, acquisition), m_andor(andor), m_scanControl(scanControl) {
+	: AcquisitionMode(parent, acquisition, scanControl), m_andor(andor) {
 	static QMetaObject::Connection connection = QWidget::connect(
 		this,
 		&Brillouin::s_scanOrderChanged,
@@ -443,6 +443,8 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	storage->setResolution("z", m_settings.zSteps);
 
 	auto resolutionXout = storage->getResolution("x");
+
+	writeScaleCalibration(storage);
 
 	/*
 	 * Update the positions vector

@@ -46,8 +46,8 @@ private:
 
 	CALIBRATION_SETTINGS m_acqSettings{};
 	CAMERA_SETTINGS m_cameraSettings{ 0.002, 0 };
-	Camera** m_camera;
-	ODTControl** m_ODTControl;
+	Camera** m_camera{ nullptr };
+	ODTControl** m_ODTControl{ nullptr };
 
 	double m_minimalIntensity{ 100 };		// [1] minimum peak intensity for valid peaks
 

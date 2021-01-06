@@ -62,8 +62,8 @@ private:
 	};
 	ODT_SETTINGS m_algnSettings;
 	CAMERA_SETTINGS m_cameraSettings{ 0.002, 0 };
-	Camera **m_camera;
-	ODTControl **m_ODTControl;
+	Camera** m_camera{ nullptr };
+	ODTControl** m_ODTControl{ nullptr };
 	bool m_algnRunning{ false };			// is alignment currently running
 
 	int m_algnPositionIndex{ 0 };

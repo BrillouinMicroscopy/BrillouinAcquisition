@@ -89,7 +89,7 @@ void ZeissMTB_Erlangen::setPosition(POINT3 position) {
 	setPosition(POINT2{ position.x, position.y });
 }
 
-POINT3 ZeissMTB_Erlangen::getPosition() {
+POINT3 ZeissMTB_Erlangen::getPosition(PositionType positionType) {
 	if (m_stageX && m_stageY) {
 		m_positionStage.x = m_stageX->GetPosition("µm");
 		m_positionStage.y = m_stageY->GetPosition("µm");
@@ -99,7 +99,7 @@ POINT3 ZeissMTB_Erlangen::getPosition() {
 	}
 
 	// Return the current position
-	return ScanControl::getPosition();
+	return ScanControl::getPosition(positionType);
 }
 
 /*

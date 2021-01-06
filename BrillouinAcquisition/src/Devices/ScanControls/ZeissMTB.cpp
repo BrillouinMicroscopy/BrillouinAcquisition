@@ -88,7 +88,7 @@ void ZeissMTB::setPosition(POINT3 position) {
 	setPosition(POINT2{ position.x, position.y });
 }
 
-POINT3 ZeissMTB::getPosition() {
+POINT3 ZeissMTB::getPosition(PositionType positionType) {
 	// Update the positions from the hardware
 	if (m_stageX && m_stageY) {
 		m_positionStage.x = m_stageX->GetPosition("µm");
@@ -99,7 +99,7 @@ POINT3 ZeissMTB::getPosition() {
 	}
 
 	// Return the current position
-	return ScanControl::getPosition();
+	return ScanControl::getPosition(positionType);
 }
 
 /*

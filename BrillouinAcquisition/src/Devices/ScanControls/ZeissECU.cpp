@@ -81,7 +81,7 @@ void ZeissECU::setPosition(POINT3 position) {
 	setPosition(POINT2{ position.x, position.y });
 }
 
-POINT3 ZeissECU::getPosition() {
+POINT3 ZeissECU::getPosition(PositionType positionType) {
 	// Update the positions from the hardware
 	m_positionStage.x = m_mcu->getX();
 	m_positionStage.y = m_mcu->getY();
@@ -89,7 +89,7 @@ POINT3 ZeissECU::getPosition() {
 	m_positionFocus = m_focus->getZ();
 
 	// Return the current position
-	return ScanControl::getPosition();
+	return ScanControl::getPosition(positionType);
 }
 
 void ZeissECU::setDevice(com* device) {
