@@ -2,6 +2,9 @@
 #include "filesystem"
 #include "ScaleCalibration.h"
 
+#include "opencv2/core.hpp"
+#include "opencv2/highgui.hpp"
+
 /*
  * Public definitions
  */
@@ -64,10 +67,19 @@ void ScaleCalibration::abortMode(std::unique_ptr <StorageWrapper>& storage) {}
 
 void ScaleCalibration::abortMode() {
 	m_acquisition->disableMode(ACQUISITION_MODE::SCALECALIBRATION);
+
+	(*m_scanControl)->setPosition(m_startPosition);
+
+	QMetaObject::invokeMethod(
+		(*m_scanControl),
+		[&m_scanControl = (*m_scanControl)]() { m_scanControl->startAnnouncing(); },
+		Qt::AutoConnection
+	);
+
 	setAcquisitionStatus(ACQUISITION_STATUS::ABORTED);
 }
 
-void ScaleCalibration::save() {
+void ScaleCalibration::save(std::vector<std::vector<unsigned char>> images, double dx, double dy) {
 	/*
 	 * Construct the filepath
 	 */
@@ -122,12 +134,151 @@ void ScaleCalibration::acquire(std::unique_ptr <StorageWrapper>& storage) {}
 void ScaleCalibration::acquire() {
 	setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 
-	auto image0 = cv::InputArray{};
-	auto image1 = cv::InputArray{};
+	QMetaObject::invokeMethod(
+		(*m_scanControl),
+		[&m_scanControl = (*m_scanControl)]() { m_scanControl->stopAnnouncing(); },
+		Qt::AutoConnection
+	);
+	// Set optical elements for brightfield/Brillouin imaging
+	(*m_scanControl)->setPreset(ScanPreset::SCAN_BRIGHTFIELD);
+	Sleep(500);
 
-	auto shift = cv::phaseCorrelate(image0, image1);
+	// Get the current stage position
+	m_startPosition = (*m_scanControl)->getPosition();
 
-	save();
+	/*
+	 * Configure the camera
+	 */
+	auto cameraSettings = (*m_camera)->getSettings();
+
+	cameraSettings.roi.left = 1000;
+	cameraSettings.roi.top = 800;
+	cameraSettings.roi.width_physical = 1000;
+	cameraSettings.roi.height_physical = 1000;
+	cameraSettings.frameCount = 1;
+	(*m_camera)->setSettings(cameraSettings);
+
+	cameraSettings = (*m_camera)->getSettings();
+
+	// This will fail if the camera uses a format other than unsigned char.
+	// Should be moved to the camera into cameraSettings.roi.bytesPerFrame.
+	auto bytesPerFrame = cameraSettings.roi.width_binned * cameraSettings.roi.height_binned;
+
+	/*
+	 * We acquire three images here, one at the origin, and one each shifted in x- and y-direction.
+	 */
+	auto dx{ 10.0 };					// [�m]	shift in x-direction
+	auto dy{ 10.0 };					// [�m]	shift in y-direction
+	auto hysteresisCompensation{ 10.0 };// [�m] distance for compensation of the stage hysteresis
+	// Construct the positions
+	auto positions = std::vector<POINT2>{ { 0, 0 }, { dx, 0 }, { 0, dy } };
+
+	// Acquire memory for image acquisition
+	auto images = std::vector<std::vector<unsigned char>>(positions.size());
+	for (auto& image : images) {
+		image.resize(bytesPerFrame);
+	}
+
+	(*m_camera)->startAcquisition(cameraSettings);
+
+	auto iteration{ 0 };
+	for (const auto& position : positions) {
+		// Abort if requested
+		if (m_abort) {
+			this->abortMode();
+			return;
+		}
+
+		/*
+		 * Set the new stage position
+		 */
+		auto positionAbsolute = m_startPosition + POINT3{ position.x, position.y, 0 };
+		// To prevent problems with the hysteresis of the stage, we always move to the desired point coming from lower values.
+		(*m_scanControl)->setPosition(positionAbsolute - POINT3{ hysteresisCompensation, hysteresisCompensation, 0 });
+		Sleep(100);
+		(*m_scanControl)->setPosition(positionAbsolute);
+		Sleep(200);
+
+		/*
+		 * Acquire the camera image
+		 */
+
+		// acquire images
+		(*m_camera)->getImageForAcquisition(&(images[iteration])[0], false);
+
+		// Sometimes the uEye camera returns a black image (only zeros), we try to catch this here by
+		// repeating the acquisition a maximum of 5 times
+		auto sum = simplemath::sum(images[iteration]);
+		auto tryCount{ 0 };
+		while (sum == 0 && 5 > tryCount++) {
+			(*m_camera)->getImageForAcquisition(&(images[iteration])[0], false);
+
+			sum = simplemath::sum(images[iteration]);
+		}
+
+		++iteration;
+	}
+
+	// Stop the camera acquisition
+	(*m_camera)->stopAcquisition();
+
+	// Create input matrices for OpenCV from camera images
+	auto imagesCV = std::vector<cv::Mat>(images.size());
+	for (gsl::index i{ 0 }; i < images.size(); i++) {
+		imagesCV[i] = cv::Mat(cameraSettings.roi.height_binned, cameraSettings.roi.width_binned, CV_8UC1, &(images[i])[0]);
+	}
+
+	/*
+	 * Convert the images to floating point (CV_32FC1)
+	 * for phase correlation (phaseCorrelate doesn't throw an error
+	 * on CV_8UC1 data, it just doesn't work).
+	 */
+	auto imagesCV_float = std::vector<cv::Mat>(imagesCV.size());
+	for (gsl::index i{ 0 }; i < imagesCV.size(); i++) {
+		imagesCV[i].convertTo(imagesCV_float[i], CV_32FC1, 1.0 / 255);
+	}
+
+	/*
+	 * Determine the shift in pixels
+	 */
+
+	// Create a hanning window to reduce edge effects
+	auto hanningWindow = cv::Mat{};
+	cv::createHanningWindow(hanningWindow, imagesCV_float[0].size(), CV_32F);
+
+	// Show the input images for debugging
+	//cv::imshow("Origin", imagesCV_float[0]);
+	//cv::imshow("Dx", imagesCV_float[1]);
+	//cv::imshow("Dy", imagesCV_float[2]);
+	//cv::imshow("Hanning window", hanningWindow);
+
+	// Calculate the shift
+	auto shiftDx = cv::phaseCorrelate(imagesCV_float[0], imagesCV_float[1], hanningWindow);
+	auto shiftDy = cv::phaseCorrelate(imagesCV_float[0], imagesCV_float[2], hanningWindow);
+
+	/*
+	 * Construct the scale calibration
+	 */
+	m_scaleCalibration.micrometerToPixX = { -1 * shiftDx.x / dx, shiftDx.y / dx };
+	m_scaleCalibration.micrometerToPixY = { -1 * shiftDy.x / dy, shiftDy.y / dy };
+	ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
+
+	// Store the calibration in a file
+	save(images, dx, dy);
+
+	// Apply the scale calibration
+	// TODO: Check if it's valid before applying
+	//(*m_scanControl)->setScaleCalibration(m_scaleCalibration);
+
+	/*
+	 * Cleanup the acquisition mode
+	 */
+	(*m_scanControl)->setPosition(m_startPosition);
+	QMetaObject::invokeMethod(
+		(*m_scanControl),
+		[&m_scanControl = (*m_scanControl)]() { m_scanControl->startAnnouncing(); },
+		Qt::AutoConnection
+	);
 
 	setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
 }

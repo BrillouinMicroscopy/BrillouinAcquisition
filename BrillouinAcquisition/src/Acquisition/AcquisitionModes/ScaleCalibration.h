@@ -28,9 +28,10 @@ private:
 	void abortMode(std::unique_ptr <StorageWrapper>& storage) override;
 	void abortMode();
 
-	void save();
+	void save(std::vector<std::vector<unsigned char>> images, double dx, double dy);
 
 	Camera** m_camera{ nullptr };
+	POINT3 m_startPosition{ 0, 0, 0 };
 
 	ScaleCalibrationData m_scaleCalibration;
 
