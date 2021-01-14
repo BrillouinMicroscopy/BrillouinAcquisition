@@ -2677,7 +2677,7 @@ void BrillouinAcquisition::initScaleCalibration() {
 
 	// Initialize scaleCalibration if it is not running already.
 	if (!m_scaleCalibration) {
-		m_scaleCalibration = new ScaleCalibration(nullptr, m_acquisition, &m_brightfieldCamera, &m_scanControl);
+		m_scaleCalibration = new ScaleCalibration(this, m_acquisition, &m_brightfieldCamera, &m_scanControl);
 		// start Calibration thread
 		m_acquisitionThread.startWorker(m_scaleCalibration);
 	}
