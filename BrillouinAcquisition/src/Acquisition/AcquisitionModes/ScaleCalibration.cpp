@@ -148,21 +148,33 @@ void ScaleCalibration::load(std::string filepath) {
 	using namespace std::filesystem;
 
 	if (exists(filepath)) {
-		auto file = H5::H5File(&filepath[0], H5F_ACC_RDONLY);
+		try {
+			auto file = H5::H5File(&filepath[0], H5F_ACC_RDONLY);
 
-		// read date
-		auto root = file.openGroup("/");
+			// read date
+			auto root = file.openGroup("/");
 
-		m_scaleCalibration.originPix = readPoint(root, "origin");
+			m_scaleCalibration.originPix = readPoint(root, "origin");
 
-		m_scaleCalibration.pixToMicrometerX = readPoint(root, "pixToMicrometerX");
-		m_scaleCalibration.pixToMicrometerY = readPoint(root, "pixToMicrometerY");
+			m_scaleCalibration.pixToMicrometerX = readPoint(root, "pixToMicrometerX");
+			m_scaleCalibration.pixToMicrometerY = readPoint(root, "pixToMicrometerY");
 
-		m_scaleCalibration.micrometerToPixX = readPoint(root, "micrometerToPixX");
-		m_scaleCalibration.micrometerToPixY = readPoint(root, "micrometerToPixY");
+			m_scaleCalibration.micrometerToPixX = readPoint(root, "micrometerToPixX");
+			m_scaleCalibration.micrometerToPixY = readPoint(root, "micrometerToPixY");
 
-		// Apply the scale calibration
-		(*m_scanControl)->setScaleCalibration(m_scaleCalibration);
+			// Apply the scale calibration
+			(*m_scanControl)->setScaleCalibration(m_scaleCalibration);
+		} catch (H5::Exception exception) {
+			auto msgBox = QMessageBox(
+				QMessageBox::Icon::Warning,
+				"Could not load the scale calibration",
+				"Please select a valid scale calibration file.",
+				QMessageBox::StandardButton::Close,
+				(QWidget*)parent(),
+				Qt::WindowTitleHint | Qt::WindowCloseButtonHint
+			);
+			msgBox.exec();
+		}
 	}
 }
 

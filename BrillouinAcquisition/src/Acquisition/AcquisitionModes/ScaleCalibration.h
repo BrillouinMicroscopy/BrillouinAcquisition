@@ -43,8 +43,8 @@ private:
 	POINT3 m_startPosition{ 0, 0, 0 };
 
 	ScaleCalibrationData m_scaleCalibration;
-	double m_Dx{ 10.0 };	// [ï¿½m]	shift in x-direction
-	double m_Dy{ 10.0 };	// [ï¿½m]	shift in y-direction
+	double m_Dx{ 10.0 };	// [µm]	shift in x-direction
+	double m_Dy{ 10.0 };	// [µm]	shift in y-direction
 
 	Ui::Dialog m_ui;
 	QDialog* m_Dialog{ nullptr };
