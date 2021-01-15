@@ -25,6 +25,7 @@ struct CAMERA_ROI {
 	long long binX{ 1 };
 	long long binY{ 1 };
 	std::wstring binning{ L"1x1" };
+	int bytesPerFrame{ -1 };
 };
 
 struct CAMERA_READOUT {

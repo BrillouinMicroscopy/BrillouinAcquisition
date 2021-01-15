@@ -275,7 +275,6 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 
 	int rank_data{ 3 };
 	hsize_t dims_data[3] = { 1, (hsize_t)m_settings.camera.roi.height_binned, (hsize_t)m_settings.camera.roi.width_binned };
-	int bytesPerFrame = m_settings.camera.roi.width_binned * m_settings.camera.roi.height_binned;
 	// Loop through the different modes
 	int imageNumber{ 0 };
 	for (auto const& channel : channels) {
@@ -316,7 +315,7 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 		(*m_camera)->startAcquisition(m_settings.camera);
 
 		// read images from camera
-		std::vector<unsigned char> images(bytesPerFrame);
+		std::vector<unsigned char> images(m_settings.camera.roi.bytesPerFrame);
 
 		// acquire images
 		(*m_camera)->getImageForAcquisition(&images[0], true);

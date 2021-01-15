@@ -284,11 +284,10 @@ void VoltageCalibration::acquire() {
 
 		int rank_data{ 3 };
 		hsize_t dims_data[3] = { 1, (hsize_t)m_cameraSettings.roi.height_binned, (hsize_t)m_cameraSettings.roi.width_binned };
-		int bytesPerFrame = m_cameraSettings.roi.width_binned * m_cameraSettings.roi.height_binned;
 		for (gsl::index i{ 0 }; i < chunkSize; i++) {
 
 			// read images from camera
-			std::vector<unsigned char> images(bytesPerFrame);
+			std::vector<unsigned char> images(m_cameraSettings.roi.bytesPerFrame);
 
 			for (gsl::index mm{ 0 }; mm < 1; mm++) {
 				if (m_abort) {
@@ -297,7 +296,7 @@ void VoltageCalibration::acquire() {
 				}
 
 				// acquire images
-				int64_t pointerPos = (int64_t)bytesPerFrame * mm;
+				int64_t pointerPos = (int64_t)m_cameraSettings.roi.bytesPerFrame * mm;
 				(*m_camera)->getImageForAcquisition(&images[pointerPos], false);
 			}
 

@@ -55,7 +55,6 @@ private:
 	QTimer* m_tempTimer{ nullptr };
 	SensorTemperature m_sensorTemperature;
 	AT_64 m_imageStride{ 0 };
-	int m_bufferSize{ -1 };
 
 private slots:
 	void checkSensorTemperature();

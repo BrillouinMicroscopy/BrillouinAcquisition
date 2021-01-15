@@ -296,15 +296,14 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 		(hsize_t)m_settings.camera.roi.width_binned
 	};
 
-	auto bytesPerFrame = (int)(2 * m_settings.camera.roi.width_binned * m_settings.camera.roi.height_binned);
-	auto images = std::vector<unsigned char>((int64_t)bytesPerFrame * m_settings.nrCalibrationImages);
+	auto images = std::vector<unsigned char>((int64_t)m_settings.camera.roi.bytesPerFrame * m_settings.nrCalibrationImages);
 	for (gsl::index mm{ 0 }; mm < m_settings.nrCalibrationImages; mm++) {
 		if (m_abort) {
 			this->abortMode(storage);
 			return;
 		}
 		// acquire images
-		auto pointerPos = (int64_t)bytesPerFrame * mm;
+		auto pointerPos = (int64_t)m_settings.camera.roi.bytesPerFrame * mm;
 		(*m_andor)->getImageForAcquisition(&images[pointerPos]);
 	}
 	// cast the vector to unsigned short
@@ -500,7 +499,6 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 		(hsize_t)m_settings.camera.roi.height_binned,
 		(hsize_t)m_settings.camera.roi.width_binned
 	};
-	auto bytesPerFrame = long long{ 2 * m_settings.camera.roi.width_binned * m_settings.camera.roi.height_binned };
 
 	// reset number of calibrations
 	nrCalibrations = 1;
@@ -537,7 +535,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 		auto nextCalibration = int{ (int)(100 * (1e-3 * calibrationTimer.elapsed()) / (60 * m_settings.conCalibrationInterval)) };
 		emit(s_timeToCalibration(nextCalibration));
 
-		std::vector<unsigned char> images(bytesPerFrame * m_settings.camera.frameCount);
+		std::vector<unsigned char> images(m_settings.camera.roi.bytesPerFrame * m_settings.camera.frameCount);
 
 		for (gsl::index mm{ 0 }; mm < m_settings.camera.frameCount; mm++) {
 			if (m_abort) {
@@ -546,7 +544,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 			}
 			emit(s_positionChanged(m_orderedPositions[ll] - m_startPosition, mm + 1));
 			// acquire images
-			auto pointerPos = (int64_t)bytesPerFrame * mm;
+			auto pointerPos = (int64_t)m_settings.camera.roi.bytesPerFrame * mm;
 			(*m_andor)->getImageForAcquisition(&images[pointerPos]);
 		}
 

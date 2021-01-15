@@ -123,6 +123,8 @@ void PointGrey::setSettings(CAMERA_SETTINGS settings) {
 	m_settings.roi.width_binned = m_settings.roi.width_physical;
 	m_settings.roi.height_binned = m_settings.roi.height_physical;
 
+	m_settings.roi.bytesPerFrame = m_settings.roi.width_binned * m_settings.roi.height_binned;
+
 	auto fmt7PacketInfo = FlyCapture2::Format7PacketInfo{};
 	auto valid{ false };
 	i_retCode = m_camera.ValidateFormat7Settings(&fmt7ImageSettings, &valid, &fmt7PacketInfo);
@@ -205,8 +207,7 @@ void PointGrey::startAcquisition(CAMERA_SETTINGS settings) {
 	}
 	setSettings(settings);
 
-	auto pixelNumber{ m_settings.roi.width_physical * m_settings.roi.height_physical };
-	auto bufferSettings = BUFFER_SETTINGS{ 1, (unsigned int)pixelNumber, "unsigned char", m_settings.roi };
+	auto bufferSettings = BUFFER_SETTINGS{ 1, (unsigned int)m_settings.roi.bytesPerFrame, "unsigned char", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
@@ -235,7 +236,7 @@ void PointGrey::getImageForAcquisition(unsigned char* buffer, bool preview) {
 
 	if (preview && buffer != nullptr) {
 		// write image to preview buffer
-		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.width_physical * m_settings.roi.height_physical);
+		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.bytesPerFrame);
 		m_previewBuffer->m_buffer->m_usedBuffers->release();
 	}
 }
@@ -257,7 +258,7 @@ int PointGrey::acquireImage(unsigned char* buffer) {
 
 	// Copy data to provided buffer
 	if (data != NULL && buffer != nullptr) {
-		memcpy(buffer, data, m_settings.roi.width_physical * m_settings.roi.height_physical);
+		memcpy(buffer, data, m_settings.roi.bytesPerFrame);
 		return 1;
 	}
 	return 0;
@@ -368,8 +369,7 @@ void PointGrey::preparePreview() {
 
 	setSettings(m_settings);
 
-	auto pixelNumber = m_settings.roi.width_physical * m_settings.roi.height_physical;
-	auto bufferSettings = BUFFER_SETTINGS{ 1, (unsigned int)pixelNumber, "unsigned char", m_settings.roi };
+	auto bufferSettings = BUFFER_SETTINGS{ 1, (unsigned int)m_settings.roi.bytesPerFrame, "unsigned char", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 

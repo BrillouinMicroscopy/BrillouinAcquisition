@@ -91,7 +91,7 @@ private:
 	bool g_EofFlag{ false };
 
 	PVCam::uns16* m_buffer{ nullptr };
-	unsigned int m_bufferSize{ 0 };
+	unsigned int m_bufferSiz1e{ 0 };
 
 	// Vector of camera readout options
 	std::vector<READOUT_OPTION> m_SpeedTable;
