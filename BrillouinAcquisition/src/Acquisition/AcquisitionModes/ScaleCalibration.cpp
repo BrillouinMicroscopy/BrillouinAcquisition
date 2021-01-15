@@ -372,10 +372,6 @@ void ScaleCalibration::acquire() {
 
 	cameraSettings = (*m_camera)->getSettings();
 
-	// This will fail if the camera uses a format other than unsigned char.
-	// Should be moved to the camera into cameraSettings.roi.bytesPerFrame.
-	auto bytesPerFrame = cameraSettings.roi.width_binned * cameraSettings.roi.height_binned;
-
 	/*
 	 * We acquire three images here, one at the origin, and one each shifted in x- and y-direction.
 	 */
@@ -388,7 +384,7 @@ void ScaleCalibration::acquire() {
 	// Acquire memory for image acquisition
 	auto images = std::vector<std::vector<unsigned char>>(positions.size());
 	for (auto& image : images) {
-		image.resize(bytesPerFrame);
+		image.resize(cameraSettings.roi.bytesPerFrame);
 	}
 
 	(*m_camera)->startAcquisition(cameraSettings);
