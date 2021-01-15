@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Acquire scale calibration</string>
+   <string>Scale calibration</string>
   </property>
   <widget class="QPushButton" name="button_cancel">
    <property name="geometry">

@@ -28,10 +28,10 @@ void ScaleCalibration::startRepetitions() {
 	auto parentObject{ parent() };
 	if (parentObject->isWidgetType()) {
 		m_Dialog = new QDialog((QWidget*)parent(), Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
-		m_Dialog->setWindowTitle("Acquire scale calibration");
-		m_Dialog->setWindowModality(Qt::ApplicationModal);
-
 		m_ui.setupUi(m_Dialog);
+
+		m_Dialog->setWindowTitle("Scale calibration");
+		m_Dialog->setWindowModality(Qt::ApplicationModal);
 
 		m_scaleCalibration = (*m_scanControl)->getScaleCalibration();
 
