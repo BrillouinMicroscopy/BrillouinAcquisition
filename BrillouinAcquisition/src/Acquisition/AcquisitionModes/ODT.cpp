@@ -349,13 +349,12 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 
 	int rank_data{ 3 };
 	hsize_t dims_data[3] = { 1, (hsize_t)m_cameraSettings.roi.height_binned, (hsize_t)m_cameraSettings.roi.width_binned };
-	int bytesPerFrame = m_cameraSettings.roi.width_binned * m_cameraSettings.roi.height_binned;
 	std::string binning = getBinningString();
-	if (bytesPerFrame) {
+	if (m_cameraSettings.roi.bytesPerFrame) {
 		for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
 
 			// read images from camera
-			std::vector<unsigned char> images(bytesPerFrame);
+			std::vector<unsigned char> images(m_cameraSettings.roi.bytesPerFrame);
 
 			if (m_abort) {
 				this->abortMode(storage);

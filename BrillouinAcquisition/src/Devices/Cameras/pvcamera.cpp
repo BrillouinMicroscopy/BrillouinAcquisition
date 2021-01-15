@@ -95,6 +95,19 @@ void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 	m_settings.roi.width_binned = m_settings.roi.width_physical / m_settings.roi.binX;
 	m_settings.roi.height_binned = m_settings.roi.height_physical / m_settings.roi.binY;
 
+	auto camSettings = getCamSettings();
+	auto bufferSize = PVCam::uns32{};
+	auto i_retCode = PVCam::pl_exp_setup_cont(
+		m_camera,
+		1,
+		&camSettings,
+		PVCam::TIMED_MODE,
+		1e3 * m_settings.exposureTime,
+		&bufferSize,
+		PVCam::CIRC_OVERWRITE
+	);
+	m_settings.roi.bytesPerFrame = bufferSize;
+
 	auto speedTableIndex{ 0 };
 	for (gsl::index i{ 0 }; i < m_SpeedTable.size(); i++) {
 		if (m_SpeedTable[i].label == m_settings.readout.pixelReadoutRate) {
@@ -192,27 +205,25 @@ void PVCamera::getImageForAcquisition(unsigned char* buffer, bool preview) {
 		g_EofFlag = false; // Reset flag
 	}
 
-	memcpy(buffer, m_acquisitionBuffer, m_bufferSize);
+	memcpy(buffer, m_acquisitionBuffer, m_settings.roi.bytesPerFrame);
 
 	PVCam::pl_exp_finish_seq(m_camera, m_acquisitionBuffer, 0);
 
 	if (preview) {
 		// write image to preview buffer
-		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_bufferSize);
+		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.bytesPerFrame);
 		m_previewBuffer->m_buffer->m_usedBuffers->release();
 	}
 }
 
 void PVCamera::setCalibrationExposureTime(double exposureTime) {
 	PVCam::pl_exp_abort(m_camera, PVCam::CCS_NO_CHANGE);
-	// Set the exposure time
-	m_settings.exposureTime = exposureTime;
-	auto camSettings = getCamSettings();
 
 	PVCam::pl_cam_register_callback_ex3(m_camera, PVCam::PL_CALLBACK_EOF, (void*)acquisitionCallback, (void*)this);
 
-	auto bufferSize = PVCam::uns32{ 0 };
-	PVCam::pl_exp_setup_seq(m_camera, 1, 1, &camSettings, PVCam::TIMED_MODE, 1e3 * m_settings.exposureTime, &bufferSize);
+	// Set the exposure time
+	m_settings.exposureTime = exposureTime;
+	setSettings(m_settings);
 }
 
 void PVCamera::setSensorCooling(bool cooling) {
@@ -266,7 +277,7 @@ int PVCamera::acquireImage(unsigned char* buffer) {
 
 	PVCam::uns16* frameAddress { nullptr };
 	PVCam::pl_exp_get_latest_frame(m_camera, (void**)&frameAddress);
-	memcpy(buffer, frameAddress, m_bufferSize);
+	memcpy(buffer, frameAddress, m_settings.roi.bytesPerFrame);
 
 	return 1;
 }
@@ -642,20 +653,13 @@ void PVCamera::preparePreview() {
 
 	setSettings(m_settings);
 
-	auto settings = getCamSettings();
-
+	// preview buffer
 	auto circBufferFrames{ 8 };
 	// Only even numbers are accepted for the frame count.
 	if (circBufferFrames % 2) {
 		circBufferFrames += 1;
 	}
-	auto bufferSize = PVCam::uns32{};
-	auto i_retCode = PVCam::pl_exp_setup_cont(m_camera, 1, &settings, PVCam::TIMED_MODE, 1e3 * m_settings.exposureTime,
-		&bufferSize, PVCam::CIRC_OVERWRITE);
-	m_bufferSize = bufferSize;
-
-	// preview buffer
-	auto bufferSettings = BUFFER_SETTINGS{ circBufferFrames, m_bufferSize, "unsigned short", m_settings.roi };
+	auto bufferSettings = BUFFER_SETTINGS{ circBufferFrames, (unsigned int)m_settings.roi.bytesPerFrame, "unsigned short", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
@@ -664,7 +668,7 @@ void PVCamera::preparePreview() {
 		delete[] m_buffer;
 		m_buffer = nullptr;
 	}
-	auto bufSize = (size_t)circBufferFrames * m_bufferSize / sizeof(PVCam::uns16);
+	auto bufSize = (size_t)circBufferFrames * m_settings.roi.bytesPerFrame / sizeof(PVCam::uns16);
 	m_buffer = new (std::nothrow) PVCam::uns16[bufSize];
 
 	// Register callback
@@ -691,17 +695,13 @@ void PVCamera::prepareAcquisition(CAMERA_SETTINGS settings) {
 	// Disable temperature timer if it is running
 	stopTempTimer();
 
-	setSettings(settings);
-	auto camSettings = getCamSettings();
-
 	PVCam::pl_cam_register_callback_ex3(m_camera, PVCam::PL_CALLBACK_EOF, (void*)acquisitionCallback, (void*)this);
+	
+	setSettings(settings);
 
-	auto bufferSize = PVCam::uns32{ 0 };
-	PVCam::pl_exp_setup_seq(m_camera, 1, 1, &camSettings, PVCam::TIMED_MODE, 1e3 * m_settings.exposureTime, &bufferSize);
-	m_acquisitionBuffer = new (std::nothrow) PVCam::uns16[bufferSize / sizeof(PVCam::uns16)];
-	m_bufferSize = bufferSize;
+	m_acquisitionBuffer = new (std::nothrow) PVCam::uns16[m_settings.roi.bytesPerFrame / sizeof(PVCam::uns16)];
 
-	auto bufferSettings = BUFFER_SETTINGS{ 8, m_bufferSize, "unsigned short", m_settings.roi };
+	auto bufferSettings = BUFFER_SETTINGS{ 8, (unsigned int)m_settings.roi.bytesPerFrame, "unsigned short", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 }

@@ -115,7 +115,7 @@ void Andor::setSettings(CAMERA_SETTINGS settings) {
 	// Get the number of bytes required to store one frame
 	auto ImageSizeBytes = AT_64{};
 	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
-	m_bufferSize = static_cast<int>(ImageSizeBytes);
+	m_settings.roi.bytesPerFrame = static_cast<int>(ImageSizeBytes);
 
 	// read back the settings
 	readSettings();
@@ -150,11 +150,7 @@ void Andor::startAcquisition(CAMERA_SETTINGS settings) {
 
 	setSettings(settings);
 
-	auto ImageSizeBytes = AT_64{};
-	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
-	auto BufferSize = static_cast<unsigned int>(ImageSizeBytes);
-
-	auto bufferSettings = BUFFER_SETTINGS{ 4, BufferSize, "unsigned short", m_settings.roi };
+	auto bufferSettings = BUFFER_SETTINGS{ 4, (unsigned int)m_settings.roi.bytesPerFrame, "unsigned short", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
@@ -178,7 +174,7 @@ void Andor::getImageForAcquisition(unsigned char* buffer, bool preview) {
 
 	if (preview) {
 		// write image to preview buffer
-		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.width_binned * m_settings.roi.height_binned * 2);
+		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.bytesPerFrame);
 		m_previewBuffer->m_buffer->m_usedBuffers->release();
 	}
 }
@@ -210,15 +206,15 @@ bool Andor::getSensorCooling() {
 
 int Andor::acquireImage(unsigned char* buffer) {
 	// Pass this buffer to the SDK
-	auto UserBuffer = new unsigned char[m_bufferSize];
-	AT_QueueBuffer(m_camera, UserBuffer, m_bufferSize);
+	auto UserBuffer = new unsigned char[m_settings.roi.bytesPerFrame];
+	AT_QueueBuffer(m_camera, UserBuffer, m_settings.roi.bytesPerFrame);
 
 	// Acquire camera images
 	AT_Command(m_camera, L"SoftwareTrigger");
 
 	// Sleep in this thread until data is ready
 	unsigned char* Buffer{ nullptr };
-	auto ret = AT_WaitBuffer(m_camera, &Buffer, &m_bufferSize, 1500 * m_settings.exposureTime);
+	auto ret = AT_WaitBuffer(m_camera, &Buffer, &m_settings.roi.bytesPerFrame, 1500 * m_settings.exposureTime);
 	// return if AT_WaitBuffer timed out
 	if (ret == AT_ERR_TIMEDOUT) {
 		return 0;
@@ -313,11 +309,7 @@ void Andor::preparePreview() {
 
 	setSettings(m_settings);
 
-	auto ImageSizeBytes = AT_64{};
-	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
-	auto BufferSize = static_cast<unsigned int>(ImageSizeBytes);
-
-	auto bufferSettings = BUFFER_SETTINGS{ 5, BufferSize, "unsigned short", m_settings.roi };
+	auto bufferSettings = BUFFER_SETTINGS{ 5, (unsigned int)m_settings.roi.bytesPerFrame, "unsigned short", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 

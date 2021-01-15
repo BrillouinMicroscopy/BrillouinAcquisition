@@ -136,6 +136,8 @@ void uEyeCam::setSettings(CAMERA_SETTINGS settings) {
 	m_settings.roi.width_binned = m_settings.roi.width_physical;
 	m_settings.roi.height_binned = m_settings.roi.height_physical;
 
+	m_settings.roi.bytesPerFrame = m_settings.roi.width_binned * m_settings.roi.height_binned;
+
 	/*
 	 * Set trigger mode
 	 */
@@ -196,8 +198,7 @@ void uEyeCam::startAcquisition(CAMERA_SETTINGS settings) {
 	// Wait for camera to really apply settings
 	Sleep(500);
 
-	auto pixelNumber{ m_settings.roi.width_physical * m_settings.roi.height_physical };
-	auto bufferSettings = BUFFER_SETTINGS{ 1, (unsigned int)pixelNumber, "unsigned char", m_settings.roi };
+	auto bufferSettings = BUFFER_SETTINGS{ 1, (unsigned int)m_settings.roi.bytesPerFrame, "unsigned char", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
@@ -235,7 +236,7 @@ void uEyeCam::getImageForAcquisition(unsigned char* buffer, bool preview) {
 
 	if (preview && buffer != nullptr) {
 		// write image to preview buffer
-		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.width_physical * m_settings.roi.height_physical);
+		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.bytesPerFrame);
 		m_previewBuffer->m_buffer->m_usedBuffers->release();
 	}
 }
@@ -248,7 +249,7 @@ int uEyeCam::acquireImage(unsigned char* buffer) {
 
 	// Copy data to provided buffer
 	if (m_imageBuffer != NULL && buffer != nullptr) {
-		memcpy(buffer, m_imageBuffer, m_settings.roi.width_physical * m_settings.roi.height_physical);
+		memcpy(buffer, m_imageBuffer, m_settings.roi.bytesPerFrame);
 		return 1;
 	}
 	return 0;
@@ -361,8 +362,7 @@ void uEyeCam::preparePreview() {
 
 	setSettings(m_settings);
 
-	auto pixelNumber{ m_settings.roi.width_physical * m_settings.roi.height_physical };
-	auto bufferSettings = BUFFER_SETTINGS{ 1, (unsigned int)pixelNumber, "unsigned char", m_settings.roi };
+	auto bufferSettings = BUFFER_SETTINGS{ 1, (unsigned int)m_settings.roi.bytesPerFrame, "unsigned char", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
