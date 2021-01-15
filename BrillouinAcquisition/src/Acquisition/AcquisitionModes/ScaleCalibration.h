@@ -30,7 +30,12 @@ private:
 	void abortMode(std::unique_ptr <StorageWrapper>& storage) override;
 	void abortMode();
 
-	void save(std::vector<std::vector<unsigned char>> images);
+	void save(std::vector<std::vector<unsigned char>> images, CAMERA_SETTINGS settings, std::vector<POINT2> positions);
+
+	void writePoint(H5::Group group, std::string name, POINT2 point);
+	POINT2 readPoint(H5::Group group, const std::string& name);
+	void setAttribute(H5::DataSet parent, std::string name, double value);
+	void setAttribute(H5::DataSet parent, std::string name, std::string value);
 
 	Camera** m_camera{ nullptr };
 	POINT3 m_startPosition{ 0, 0, 0 };
@@ -45,8 +50,6 @@ private:
 private slots:
 	void acquire(std::unique_ptr <StorageWrapper>& storage) override;
 	void acquire();
-	void writePoint(H5::Group group, std::string name, POINT2 point);
-	POINT2 readPoint(H5::Group group, const std::string& name);
 
 	void on_buttonCancel_clicked();
 	void on_buttonApply_clicked();

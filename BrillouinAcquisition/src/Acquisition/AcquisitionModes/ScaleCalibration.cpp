@@ -186,7 +186,7 @@ void ScaleCalibration::abortMode() {
 	setAcquisitionStatus(ACQUISITION_STATUS::ABORTED);
 }
 
-void ScaleCalibration::save(std::vector<std::vector<unsigned char>> images) {
+void ScaleCalibration::save(std::vector<std::vector<unsigned char>> images, CAMERA_SETTINGS settings, std::vector<POINT2> positions) {
 	/*
 	 * Construct the filepath
 	 */
@@ -230,6 +230,106 @@ void ScaleCalibration::save(std::vector<std::vector<unsigned char>> images) {
 
 	writePoint(root, "micrometerToPixX", m_scaleCalibration.micrometerToPixX);
 	writePoint(root, "micrometerToPixY", m_scaleCalibration.micrometerToPixY);
+
+	// Write images and set positions as attributes
+	auto imageGroup = root.createGroup("images");
+	hsize_t dims[3] = {
+		(hsize_t)settings.frameCount,
+		(hsize_t)settings.roi.height_binned,
+		(hsize_t)settings.roi.width_binned
+	};
+	auto names = std::vector<std::string>{ "origin", "dx", "dy" };
+	auto i = gsl::index{ 0 };
+	for (const auto& image : images) {
+		// Check that we don't run into trouble iterating over two arrays
+		if (i >= names.size()) {
+			continue;
+		}
+		auto dataspace = H5::DataSpace(3, dims, dims);
+		// For some unknown reason using the overloaded function createDataSet(const H5std_string&, const DataType&, const DataSpace&)
+		// only produces corrupted datasets in Debug mode (probably the HDF5 libraries would need to be build in Debug mode as well),
+		// so we have to use the const char* version to better debug it.
+		// TODO: Correctly determine the correct DataType from the image (NATIVE_CHAR might fail for other cameras).
+		auto dataset = imageGroup.createDataSet(names[i].c_str(), H5::PredType::NATIVE_CHAR, dataspace);
+		dataset.write(image.data(), H5::PredType::NATIVE_CHAR);
+
+		setAttribute(dataset, "CLASS", "IMAGE");
+		setAttribute(dataset, "IMAGE_VERSION", "1.2");
+		setAttribute(dataset, "IMAGE_SUBCLASS", "IMAGE_GRAYSCALE");
+
+		setAttribute(dataset, "dx", positions[i].x);
+		setAttribute(dataset, "dy", positions[i].y);
+
+		dataset.close();
+		++i;
+	}
+}
+
+void ScaleCalibration::writePoint(H5::Group group, std::string name, POINT2 point) {
+	using namespace H5;
+
+	auto subgroup = H5::Group(group.createGroup(&name[0]));
+
+	hsize_t dims[2];
+	dims[0] = 1;
+	dims[1] = 1;
+	auto dataspace = DataSpace(2, dims);
+
+	// Write x coordinate
+	auto x = subgroup.createAttribute("x", PredType::NATIVE_DOUBLE, dataspace);
+	x.write(PredType::NATIVE_DOUBLE, &point.x);
+	x.close();
+
+	// Write y coordinate
+	auto y = subgroup.createAttribute("y", PredType::NATIVE_DOUBLE, dataspace);
+	y.write(PredType::NATIVE_DOUBLE, &point.y);
+	y.close();
+
+	subgroup.close();
+}
+
+POINT2 ScaleCalibration::readPoint(H5::Group group, const std::string& name) {
+	auto point = POINT2{};
+
+	// Open point group
+	try {
+		auto pointGroup = group.openGroup(&name[0]);
+
+		// Read x coordinate
+		auto attr = pointGroup.openAttribute("x");
+		auto type = attr.getDataType();
+		attr.read(type, &point.x);
+		attr.close();
+
+		// Read y coordinate
+		attr = pointGroup.openAttribute("y");
+		type = attr.getDataType();
+		attr.read(type, &point.y);
+		attr.close();
+
+	} catch (H5::GroupIException exception) {
+		// Exception
+	}
+
+	return point;
+}
+
+void ScaleCalibration::setAttribute(H5::DataSet parent, std::string name, double value) {
+	auto attr_dataspace = H5::DataSpace(H5S_SCALAR);
+	// Create new string datatype for attribute
+	auto strdatatype = H5::PredType::NATIVE_DOUBLE;
+	auto attr = parent.createAttribute(name.c_str(), strdatatype, attr_dataspace);
+	attr.write(strdatatype, &value);
+	attr.close();
+}
+
+void ScaleCalibration::setAttribute(H5::DataSet parent, std::string name, std::string value) {
+	auto attr_dataspace = H5::DataSpace(H5S_SCALAR);
+	// Create new string datatype for attribute
+	auto strdatatype = H5::StrType(H5::PredType::C_S1, value.size());
+	auto attr = parent.createAttribute(name.c_str(), strdatatype, attr_dataspace);
+	attr.write(strdatatype, value.c_str());
+	attr.close();
 }
 
 /*
@@ -373,7 +473,7 @@ void ScaleCalibration::acquire() {
 	ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
 
 	// Store the calibration in a file
-	save(images);
+	save(images, cameraSettings, positions);
 
 	updateScaleCalibrationBoxes();
 
@@ -388,49 +488,6 @@ void ScaleCalibration::acquire() {
 	);
 
 	setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
-}
-
-void ScaleCalibration::writePoint(H5::Group group, std::string name, POINT2 point) {
-	using namespace H5;
-
-	auto subgroup = H5::Group(group.createGroup(&name[0]));
-
-	hsize_t dims[2];
-	dims[0] = 1;
-	dims[1] = 1;
-	auto dataspace = DataSpace(2, dims);
-	
-	// Write x coordinate
-	auto x = subgroup.createAttribute("x", PredType::NATIVE_DOUBLE, dataspace);
-	x.write(PredType::NATIVE_DOUBLE, &point.x);
-
-	// Write y coordinate
-	auto y = subgroup.createAttribute("y", PredType::NATIVE_DOUBLE, dataspace);
-	y.write(PredType::NATIVE_DOUBLE, &point.y);
-}
-
-POINT2 ScaleCalibration::readPoint(H5::Group group, const std::string& name) {
-	auto point = POINT2{};
-
-	// Open point group
-	try {
-		auto pointGroup = group.openGroup(&name[0]);
-
-		// Read x coordinate
-		auto attr = pointGroup.openAttribute("x");
-		auto type = attr.getDataType();
-		attr.read(type, &point.x);
-
-		// Read y coordinate
-		attr = pointGroup.openAttribute("y");
-		type = attr.getDataType();
-		attr.read(type, &point.y);
-
-	} catch (H5::GroupIException exception) {
-		// Exception
-	}
-
-	return point;
 }
 
 void ScaleCalibration::on_buttonCancel_clicked() {
