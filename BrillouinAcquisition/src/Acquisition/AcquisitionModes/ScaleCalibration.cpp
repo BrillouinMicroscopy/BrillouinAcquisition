@@ -379,9 +379,9 @@ void ScaleCalibration::acquire() {
 	/*
 	 * We acquire three images here, one at the origin, and one each shifted in x- and y-direction.
 	 */
-	auto dx{ 10.0 };					// [�m]	shift in x-direction
-	auto dy{ 10.0 };					// [�m]	shift in y-direction
-	auto hysteresisCompensation{ 10.0 };// [�m] distance for compensation of the stage hysteresis
+	auto dx{ 10.0 };					// [µm]	shift in x-direction
+	auto dy{ 10.0 };					// [µm]	shift in y-direction
+	auto hysteresisCompensation{ 10.0 };// [µm] distance for compensation of the stage hysteresis
 	// Construct the positions
 	auto positions = std::vector<POINT2>{ { 0, 0 }, { m_Dx, 0 }, { 0, m_Dy } };
 
