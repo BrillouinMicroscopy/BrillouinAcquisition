@@ -253,12 +253,12 @@ void ScaleCalibration::save(std::vector<std::vector<unsigned char>> images, CAME
 		auto dataset = imageGroup.createDataSet(names[i].c_str(), H5::PredType::NATIVE_CHAR, dataspace);
 		dataset.write(image.data(), H5::PredType::NATIVE_CHAR);
 
-		setAttribute(dataset, "CLASS", "IMAGE");
-		setAttribute(dataset, "IMAGE_VERSION", "1.2");
-		setAttribute(dataset, "IMAGE_SUBCLASS", "IMAGE_GRAYSCALE");
+		writeAttribute(dataset, "CLASS", "IMAGE");
+		writeAttribute(dataset, "IMAGE_VERSION", "1.2");
+		writeAttribute(dataset, "IMAGE_SUBCLASS", "IMAGE_GRAYSCALE");
 
-		setAttribute(dataset, "dx", positions[i].x);
-		setAttribute(dataset, "dy", positions[i].y);
+		writeAttribute(dataset, "dx", positions[i].x);
+		writeAttribute(dataset, "dy", positions[i].y);
 
 		dataset.close();
 		++i;
@@ -270,20 +270,8 @@ void ScaleCalibration::writePoint(H5::Group group, std::string name, POINT2 poin
 
 	auto subgroup = H5::Group(group.createGroup(&name[0]));
 
-	hsize_t dims[2];
-	dims[0] = 1;
-	dims[1] = 1;
-	auto dataspace = DataSpace(2, dims);
-
-	// Write x coordinate
-	auto x = subgroup.createAttribute("x", PredType::NATIVE_DOUBLE, dataspace);
-	x.write(PredType::NATIVE_DOUBLE, &point.x);
-	x.close();
-
-	// Write y coordinate
-	auto y = subgroup.createAttribute("y", PredType::NATIVE_DOUBLE, dataspace);
-	y.write(PredType::NATIVE_DOUBLE, &point.y);
-	y.close();
+	writeAttribute(subgroup, "x", point.x);
+	writeAttribute(subgroup, "y", point.y);
 
 	subgroup.close();
 }
@@ -296,16 +284,9 @@ POINT2 ScaleCalibration::readPoint(H5::Group group, const std::string& name) {
 		auto pointGroup = group.openGroup(&name[0]);
 
 		// Read x coordinate
-		auto attr = pointGroup.openAttribute("x");
-		auto type = attr.getDataType();
-		attr.read(type, &point.x);
-		attr.close();
-
+		readAttribute(pointGroup, "x", &point.x);
 		// Read y coordinate
-		attr = pointGroup.openAttribute("y");
-		type = attr.getDataType();
-		attr.read(type, &point.y);
-		attr.close();
+		readAttribute(pointGroup, "y", &point.y);
 
 	} catch (H5::GroupIException exception) {
 		// Exception
@@ -314,7 +295,7 @@ POINT2 ScaleCalibration::readPoint(H5::Group group, const std::string& name) {
 	return point;
 }
 
-void ScaleCalibration::setAttribute(H5::DataSet parent, std::string name, double value) {
+void ScaleCalibration::writeAttribute(H5::H5Object& parent, std::string name, double value) {
 	auto attr_dataspace = H5::DataSpace(H5S_SCALAR);
 	// Create new string datatype for attribute
 	auto strdatatype = H5::PredType::NATIVE_DOUBLE;
@@ -323,12 +304,24 @@ void ScaleCalibration::setAttribute(H5::DataSet parent, std::string name, double
 	attr.close();
 }
 
-void ScaleCalibration::setAttribute(H5::DataSet parent, std::string name, std::string value) {
+void ScaleCalibration::writeAttribute(H5::H5Object& parent, std::string name, std::string value) {
 	auto attr_dataspace = H5::DataSpace(H5S_SCALAR);
 	// Create new string datatype for attribute
 	auto strdatatype = H5::StrType(H5::PredType::C_S1, value.size());
 	auto attr = parent.createAttribute(name.c_str(), strdatatype, attr_dataspace);
 	attr.write(strdatatype, value.c_str());
+	attr.close();
+}
+
+void ScaleCalibration::readAttribute(H5::H5Object& parent, std::string name, double* value) {
+	auto attr = parent.openAttribute(name.c_str());
+	auto type = attr.getDataType();
+	// If this is not a double, return NaN
+	if (type != H5::PredType::NATIVE_DOUBLE) {
+		return;
+	}
+	attr.read(type, value);
+	type.close();
 	attr.close();
 }
 

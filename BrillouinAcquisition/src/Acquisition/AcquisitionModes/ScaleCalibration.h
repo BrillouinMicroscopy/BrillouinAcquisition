@@ -34,15 +34,17 @@ private:
 
 	void writePoint(H5::Group group, std::string name, POINT2 point);
 	POINT2 readPoint(H5::Group group, const std::string& name);
-	void setAttribute(H5::DataSet parent, std::string name, double value);
-	void setAttribute(H5::DataSet parent, std::string name, std::string value);
+
+	void writeAttribute(H5::H5Object& parent, std::string name, double value);
+	void writeAttribute(H5::H5Object& parent, std::string name, std::string value);
+	void readAttribute(H5::H5Object& parent, std::string name, double* value);
 
 	Camera** m_camera{ nullptr };
 	POINT3 m_startPosition{ 0, 0, 0 };
 
 	ScaleCalibrationData m_scaleCalibration;
-	double m_Dx{ 10.0 };	// [µm]	shift in x-direction
-	double m_Dy{ 10.0 };	// [µm]	shift in y-direction
+	double m_Dx{ 10.0 };	// [ï¿½m]	shift in x-direction
+	double m_Dy{ 10.0 };	// [ï¿½m]	shift in y-direction
 
 	Ui::Dialog m_ui;
 	QDialog* m_Dialog{ nullptr };
