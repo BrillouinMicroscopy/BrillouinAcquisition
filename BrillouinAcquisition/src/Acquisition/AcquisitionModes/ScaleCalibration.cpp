@@ -330,32 +330,47 @@ void ScaleCalibration::acquire() {
 	}
 
 	/*
-	 * Convert the images to floating point (CV_32FC1)
-	 * for phase correlation (phaseCorrelate doesn't throw an error
-	 * on CV_8UC1 data, it just doesn't work).
-	 */
-	auto imagesCV_float = std::vector<cv::Mat>(imagesCV.size());
-	for (gsl::index i{ 0 }; i < imagesCV.size(); i++) {
-		imagesCV[i].convertTo(imagesCV_float[i], CV_32FC1, 1.0 / 255);
-	}
-
-	/*
 	 * Determine the shift in pixels
 	 */
 
-	// Create a hanning window to reduce edge effects
-	auto hanningWindow = cv::Mat{};
-	cv::createHanningWindow(hanningWindow, imagesCV_float[0].size(), CV_32F);
+	#ifdef _DEBUG
+		// Show the input images for debugging
+		cv::imshow("Origin", imagesCV[0]);
+		cv::imshow("Dx", imagesCV[1]);
+		cv::imshow("Dy", imagesCV[2]);
+	#endif
 
-	// Show the input images for debugging
-	//cv::imshow("Origin", imagesCV_float[0]);
-	//cv::imshow("Dx", imagesCV_float[1]);
-	//cv::imshow("Dy", imagesCV_float[2]);
-	//cv::imshow("Hanning window", hanningWindow);
+	// We use template matching, so we have to create a template from the origin image
+	auto padding = 200.0;
+	auto size = imagesCV[0].size();
+	auto templateROI = cv::Rect(padding, padding, size.width - 2 * padding, size.height - 2 * padding);
+	auto templ = imagesCV[0](templateROI);
 
-	// Calculate the shift
-	auto shiftDx = cv::phaseCorrelate(imagesCV_float[0], imagesCV_float[1], hanningWindow);
-	auto shiftDy = cv::phaseCorrelate(imagesCV_float[0], imagesCV_float[2], hanningWindow);
+	#ifdef _DEBUG
+		cv::imshow("Template", templ);
+	#endif
+
+	auto outputX = cv::Mat{};
+	cv::matchTemplate(imagesCV[1], templ, outputX, cv::TemplateMatchModes::TM_SQDIFF);
+	auto outputY = cv::Mat{};
+	cv::matchTemplate(imagesCV[2], templ, outputY, cv::TemplateMatchModes::TM_SQDIFF);
+
+	cv::normalize(outputX, outputX, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
+	cv::normalize(outputY, outputY, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
+
+	auto minValX = double{};
+	auto maxValX = double{};
+	auto minLocX = cv::Point{};
+	auto maxLocX = cv::Point{};
+	cv::minMaxLoc(outputX, &minValX, &maxValX, &minLocX, &maxLocX, cv::Mat());
+	auto shiftDx = minLocX - cv::Point(padding, padding);
+
+	auto minValY = double{};
+	auto maxValY = double{};
+	auto minLocY = cv::Point{};
+	auto maxLocY = cv::Point{};
+	cv::minMaxLoc(outputY, &minValY, &maxValY, &minLocY, &maxLocY, cv::Mat());
+	auto shiftDy = minLocY - cv::Point(padding, padding);
 
 	/*
 	 * Construct the scale calibration
