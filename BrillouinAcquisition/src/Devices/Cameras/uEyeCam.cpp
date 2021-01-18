@@ -133,11 +133,6 @@ void uEyeCam::setSettings(CAMERA_SETTINGS settings) {
 	// Apply values
 	ret = uEye::is_AOI(m_camera, IS_AOI_IMAGE_SET_AOI, (void*)&AOI, sizeof(AOI));
 
-	m_settings.roi.width_binned = m_settings.roi.width_physical;
-	m_settings.roi.height_binned = m_settings.roi.height_physical;
-
-	m_settings.roi.bytesPerFrame = m_settings.roi.width_binned * m_settings.roi.height_binned;
-
 	/*
 	 * Set trigger mode
 	 */
@@ -154,6 +149,11 @@ void uEyeCam::setSettings(CAMERA_SETTINGS settings) {
 
 	// Read changed options
 	readOptions();
+
+	m_settings.roi.width_binned = m_settings.roi.width_physical;
+	m_settings.roi.height_binned = m_settings.roi.height_physical;
+
+	m_settings.roi.bytesPerFrame = m_settings.roi.width_binned * m_settings.roi.height_binned;
 
 	// If the preview was running, start it again.
 	if (m_isPreviewRunning) {
