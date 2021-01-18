@@ -17,7 +17,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	if (Version::PRERELEASE.length() > 0) {
 		title += "-" + QString::fromStdString(Version::PRERELEASE);
 	}
-	#ifdef DEBUG
+	#ifdef _DEBUG
 		title += QString{ " - Debug" };
 	#endif
 	this->setWindowTitle(title);
@@ -409,7 +409,7 @@ void BrillouinAcquisition::on_actionQuit_triggered() {
 
 QMessageBox::StandardButton BrillouinAcquisition::confirmQuit() {
 	// Directly quit in Debug mode
-	#ifdef DEBUG
+	#ifdef _DEBUG
 		return QMessageBox::Yes;
 	#else
 		return QMessageBox::question(
@@ -3269,7 +3269,7 @@ void BrillouinAcquisition::on_actionAbout_triggered() {
 	}
 
 	auto debugString = QString{ "" };
-	#ifdef DEBUG
+	#ifdef _DEBUG
 		debugString = QString{ " - Debug" };
 	#endif
 	QString str = QString("BrillouinAcquisition v%1.%2.%3%4%11 <br> Build from commit: <a href='%5'>%6</a><br>Clean build: %7<br>Author: <a href='mailto:%8?subject=BrillouinAcquisition'>%9</a><br>Date: %10")
