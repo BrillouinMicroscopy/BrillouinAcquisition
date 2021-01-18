@@ -2266,28 +2266,8 @@ void BrillouinAcquisition::on_action_Scale_calibration_acquire_triggered() {
 	m_scaleCalibrationDialog->setWindowTitle("Scale calibration");
 	m_scaleCalibrationDialog->setWindowModality(Qt::ApplicationModal);
 
-	// Connect signals/slots for updating values
-	auto connection = QWidget::connect(
-		m_scaleCalibration,
-		&ScaleCalibration::s_Ds_changed,
-		this,
-		[this](POINT2 translation) { updateScaleCalibrationTranslationValue(translation); }
-	);
-	connection = QWidget::connect(
-		m_scaleCalibration,
-		&ScaleCalibration::s_scaleCalibrationChanged,
-		this,
-		[this](ScaleCalibrationData scaleCalibration) { updateScaleCalibrationData(scaleCalibration); }
-	);
-	connection = QWidget::connect(
-		m_scaleCalibration,
-		&ScaleCalibration::s_scaleCalibrationAcquisitionProgress,
-		this,
-		[this](double progress) { updateScaleCalibrationAcquisitionProgress(progress); }
-	);
-
 	// Connect close signal
-	connection = QWidget::connect(
+	auto connection = QWidget::connect(
 		m_scaleCalibrationDialog,
 		&QDialog::rejected,
 		this,
@@ -2426,11 +2406,25 @@ void BrillouinAcquisition::updateScaleCalibrationData(ScaleCalibrationData scale
 }
 
 void BrillouinAcquisition::closeScaleCalibrationDialog() {
-	m_scaleCalibrationDialog->hide();
+	if (m_scaleCalibrationDialog) {
+		m_scaleCalibrationDialog->hide();
+	}
 }
 
 void BrillouinAcquisition::updateScaleCalibrationAcquisitionProgress(double progress) {
 	m_scaleCalibrationDialogUi.progress->setValue(progress);
+}
+
+void BrillouinAcquisition::showScaleCalibrationStatus(std::string title, std::string message) {
+	auto msgBox = QMessageBox(
+		QMessageBox::Icon::Warning,
+		QString::fromStdString(title),
+		QString::fromStdString(message),
+		QMessageBox::StandardButton::Close,
+		this,
+		Qt::WindowTitleHint | Qt::WindowCloseButtonHint
+	);
+	msgBox.exec();
 }
 
 void BrillouinAcquisition::on_scaleCalibrationButtonApply_clicked() {
@@ -2441,7 +2435,6 @@ void BrillouinAcquisition::on_scaleCalibrationButtonApply_clicked() {
 		},
 		Qt::AutoConnection
 	);
-	closeScaleCalibrationDialog();
 }
 
 void BrillouinAcquisition::on_scaleCalibrationButtonAcquire_clicked() {
@@ -2497,7 +2490,13 @@ void BrillouinAcquisition::setPixToMicrometerY_y(double value) {
 void BrillouinAcquisition::on_action_Scale_calibration_load_triggered() {
 	m_scaleCalibrationFilePath = QFileDialog::getOpenFileName(this, tr("Select scale calibration"),
 		QString::fromStdString(m_scaleCalibrationFilePath), tr("Scale calibration (*.h5)")).toStdString();
-	m_scaleCalibration->load(m_scaleCalibrationFilePath);
+	QMetaObject::invokeMethod(
+		m_scaleCalibration,
+		[&m_scaleCalibration = m_scaleCalibration, &m_scaleCalibrationFilePath = m_scaleCalibrationFilePath]() {
+			m_scaleCalibration->load(m_scaleCalibrationFilePath);
+		},
+		Qt::AutoConnection
+	);
 }
 
 void BrillouinAcquisition::initBeampathButtons() {
@@ -2906,6 +2905,38 @@ void BrillouinAcquisition::initScaleCalibration() {
 		m_scaleCalibration = new ScaleCalibration(nullptr, m_acquisition, &m_brightfieldCamera, &m_scanControl);
 		// start Calibration thread
 		m_acquisitionThread.startWorker(m_scaleCalibration);
+
+		// Connect signals/slots for updating values
+		auto connection = QWidget::connect(
+			m_scaleCalibration,
+			&ScaleCalibration::s_Ds_changed,
+			this,
+			[this](POINT2 translation) { updateScaleCalibrationTranslationValue(translation); }
+		);
+		connection = QWidget::connect(
+			m_scaleCalibration,
+			&ScaleCalibration::s_scaleCalibrationChanged,
+			this,
+			[this](ScaleCalibrationData scaleCalibration) { updateScaleCalibrationData(scaleCalibration); }
+		);
+		connection = QWidget::connect(
+			m_scaleCalibration,
+			&ScaleCalibration::s_scaleCalibrationAcquisitionProgress,
+			this,
+			[this](double progress) { updateScaleCalibrationAcquisitionProgress(progress); }
+		);
+		connection = QWidget::connect(
+			m_scaleCalibration,
+			&ScaleCalibration::s_scaleCalibrationStatus,
+			this,
+			[this](std::string title, std::string message) { showScaleCalibrationStatus(title, message); }
+		);
+		connection = QWidget::connect(
+			m_scaleCalibration,
+			&ScaleCalibration::s_closeScaleCalibrationDialog,
+			this,
+			[this]() { closeScaleCalibrationDialog(); }
+		);
 	}
 }
 

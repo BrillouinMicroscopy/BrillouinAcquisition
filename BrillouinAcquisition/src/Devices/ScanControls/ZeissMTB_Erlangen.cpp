@@ -44,9 +44,12 @@ ZeissMTB_Erlangen::ZeissMTB_Erlangen() noexcept {
 	scaleCalibration.pixToMicrometerX = { 0, scale };	// camera x axis is stage y axis
 	scaleCalibration.pixToMicrometerY = { scale, 0 };	// camera y axis is state x axis
 
-	ScaleCalibrationHelper::initializeCalibrationFromPixel(&scaleCalibration);
+	try {
+		ScaleCalibrationHelper::initializeCalibrationFromPixel(&scaleCalibration);
 
-	setScaleCalibration(scaleCalibration);
+		setScaleCalibration(scaleCalibration);
+	} catch (std::exception& e) {
+	}
 }
 
 ZeissMTB_Erlangen::~ZeissMTB_Erlangen() {

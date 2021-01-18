@@ -55,9 +55,12 @@ NIDAQ::NIDAQ() noexcept {
 	auto height = double{ 1024 };	// [pix] camera image height
 	scaleCalibration.originPix = { width / 2, height / 2 };
 
-	ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&scaleCalibration);
+	try {
+		ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&scaleCalibration);
 
-	setScaleCalibration(scaleCalibration);
+		setScaleCalibration(scaleCalibration);
+	} catch (std::exception& e) {
+	}
 }
 
 NIDAQ::~NIDAQ() {

@@ -54,17 +54,9 @@ void ScaleCalibration::load(std::string filepath) {
 			m_scaleCalibration.micrometerToPixY = readPoint(root, "micrometerToPixY");
 
 			// Apply the scale calibration
-			(*m_scanControl)->setScaleCalibration(m_scaleCalibration);
+			apply();
 		} catch (H5::Exception exception) {
-			auto msgBox = QMessageBox(
-				QMessageBox::Icon::Warning,
-				"Could not load the scale calibration",
-				"Please select a valid scale calibration file.",
-				QMessageBox::StandardButton::Close,
-				(QWidget*)parent(),
-				Qt::WindowTitleHint | Qt::WindowCloseButtonHint
-			);
-			msgBox.exec();
+			emit(s_scaleCalibrationStatus("Could not load the scale calibration", "Please select a valid scale calibration file."));
 		}
 	}
 }
@@ -192,7 +184,7 @@ POINT2 ScaleCalibration::readPoint(H5::Group group, const std::string& name) {
 		readAttribute(pointGroup, "y", &point.y);
 
 	} catch (H5::GroupIException exception) {
-		// Exception
+		throw exception;
 	}
 
 	return point;
@@ -375,12 +367,18 @@ void ScaleCalibration::acquire() {
 	 */
 	m_scaleCalibration.micrometerToPixX = { -1 * shiftDx.x / m_Ds.x, shiftDx.y / m_Ds.x };
 	m_scaleCalibration.micrometerToPixY = { -1 * shiftDy.x / m_Ds.y, shiftDy.y / m_Ds.y };
-	ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
+	try {
+		// Can throw an exception (if the provided calibration is invalid):
+		ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
 
-	// Store the calibration in a file
-	save(images, cameraSettings, positions);
+		// Store the calibration in a file
+		save(images, cameraSettings, positions);
 
-	emit(s_scaleCalibrationChanged(m_scaleCalibration));
+		emit(s_scaleCalibrationChanged(m_scaleCalibration));
+
+	} catch (std::exception& e) {
+		emit(s_scaleCalibrationStatus("Scale calibration failed", "Please make sure there are distinct structures visible."));
+	}
 
 	/*
 	 * Cleanup the acquisition mode
@@ -406,9 +404,14 @@ void ScaleCalibration::initialize() {
 }
 
 void ScaleCalibration::apply() {
-	// Apply the scale calibration
-	// TODO: Check if it's valid before applying
-	(*m_scanControl)->setScaleCalibration(m_scaleCalibration);
+	try {
+		ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
+		ScaleCalibrationHelper::initializeCalibrationFromPixel(&m_scaleCalibration);
+		(*m_scanControl)->setScaleCalibration(m_scaleCalibration);
+		emit(s_closeScaleCalibrationDialog());
+	} catch (std::exception& e) {
+		emit(s_scaleCalibrationStatus("Cannot apply scale calibration", "The provided scale calibration is invalid."));
+	}
 }
 
 void ScaleCalibration::setTranslationDistanceX(double dx) {
@@ -423,48 +426,72 @@ void ScaleCalibration::setTranslationDistanceY(double dy) {
 
 void ScaleCalibration::setMicrometerToPixX_x(double value) {
 	m_scaleCalibration.micrometerToPixX.x = value;
-	ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
-	emit(s_scaleCalibrationChanged(m_scaleCalibration));
+	try {
+		ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
+		emit(s_scaleCalibrationChanged(m_scaleCalibration));
+	} catch (std::exception& e) {
+	}
 }
 
 void ScaleCalibration::setMicrometerToPixX_y(double value) {
 	m_scaleCalibration.micrometerToPixX.y = value;
-	ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
-	emit(s_scaleCalibrationChanged(m_scaleCalibration));
+	try {
+		ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
+		emit(s_scaleCalibrationChanged(m_scaleCalibration));
+	} catch (std::exception& e) {
+	}
 }
 
 void ScaleCalibration::setMicrometerToPixY_x(double value) {
 	m_scaleCalibration.micrometerToPixY.x = value;
-	ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
-	emit(s_scaleCalibrationChanged(m_scaleCalibration));
+	try {
+		ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
+		emit(s_scaleCalibrationChanged(m_scaleCalibration));
+	} catch (std::exception& e) {
+	}
 }
 
 void ScaleCalibration::setMicrometerToPixY_y(double value) {
 	m_scaleCalibration.micrometerToPixY.y = value;
-	ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
-	emit(s_scaleCalibrationChanged(m_scaleCalibration));
+	try {
+		ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
+		emit(s_scaleCalibrationChanged(m_scaleCalibration));
+	} catch (std::exception& e) {
+	}
 }
 
 void ScaleCalibration::setPixToMicrometerX_x(double value) {
 	m_scaleCalibration.pixToMicrometerX.x = value;
-	ScaleCalibrationHelper::initializeCalibrationFromPixel(&m_scaleCalibration);
-	emit(s_scaleCalibrationChanged(m_scaleCalibration));
+	try {
+		ScaleCalibrationHelper::initializeCalibrationFromPixel(&m_scaleCalibration);
+		emit(s_scaleCalibrationChanged(m_scaleCalibration));
+	} catch (std::exception& e) {
+	}
 }
 
 void ScaleCalibration::setPixToMicrometerX_y(double value) {
 	m_scaleCalibration.pixToMicrometerX.y = value;
-	ScaleCalibrationHelper::initializeCalibrationFromPixel(&m_scaleCalibration);
-	emit(s_scaleCalibrationChanged(m_scaleCalibration));
+	try {
+		ScaleCalibrationHelper::initializeCalibrationFromPixel(&m_scaleCalibration);
+		emit(s_scaleCalibrationChanged(m_scaleCalibration));
+	} catch (std::exception& e) {
+	}
 }
 
 void ScaleCalibration::setPixToMicrometerY_x(double value) {
 	m_scaleCalibration.pixToMicrometerY.x = value;
-	ScaleCalibrationHelper::initializeCalibrationFromPixel(&m_scaleCalibration);
-	emit(s_scaleCalibrationChanged(m_scaleCalibration));
+	try {
+		ScaleCalibrationHelper::initializeCalibrationFromPixel(&m_scaleCalibration);
+		emit(s_scaleCalibrationChanged(m_scaleCalibration));
+	} catch (std::exception& e) {
+	}
 }
 
 void ScaleCalibration::setPixToMicrometerY_y(double value) {
 	m_scaleCalibration.pixToMicrometerY.y = value;
-	ScaleCalibrationHelper::initializeCalibrationFromPixel(&m_scaleCalibration);
-	emit(s_scaleCalibrationChanged(m_scaleCalibration));
+	try {
+		ScaleCalibrationHelper::initializeCalibrationFromPixel(&m_scaleCalibration);
+		emit(s_scaleCalibrationChanged(m_scaleCalibration));
+	} catch (std::exception& e) {
+	}
 }

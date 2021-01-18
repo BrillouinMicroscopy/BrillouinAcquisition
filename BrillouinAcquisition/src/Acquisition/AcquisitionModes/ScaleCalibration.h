@@ -69,6 +69,8 @@ signals:
 	void s_Ds_changed(POINT2);
 	void s_scaleCalibrationChanged(ScaleCalibrationData);
 	void s_scaleCalibrationAcquisitionProgress(double);
+	void s_scaleCalibrationStatus(std::string title, std::string message);
+	void s_closeScaleCalibrationDialog();
 };
 
 #endif //SCALECALIBRATION_H

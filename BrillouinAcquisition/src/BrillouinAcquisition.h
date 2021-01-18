@@ -268,6 +268,7 @@ private slots:
 	void updateScaleCalibrationTranslationValue(POINT2 translation);
 	void updateScaleCalibrationData(ScaleCalibrationData scaleCalibration);
 	void updateScaleCalibrationAcquisitionProgress(double progress);
+	void showScaleCalibrationStatus(std::string title, std::string message);
 
 	void closeScaleCalibrationDialog();
 	void on_scaleCalibrationButtonApply_clicked();
