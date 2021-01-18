@@ -43,9 +43,12 @@ ZeissMTB::ZeissMTB() noexcept {
 	scaleCalibration.micrometerToPixX = { -7.95, 9.05 };
 	scaleCalibration.micrometerToPixY = { 9.45, 8.65 };
 
-	ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&scaleCalibration);
+	try {
+		ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&scaleCalibration);
 
-	setScaleCalibration(scaleCalibration);
+		setScaleCalibration(scaleCalibration);
+	} catch (std::exception& e) {
+	}
 }
 
 ZeissMTB::~ZeissMTB() {

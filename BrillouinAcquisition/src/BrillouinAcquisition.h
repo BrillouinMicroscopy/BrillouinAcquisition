@@ -90,6 +90,7 @@ Q_DECLARE_METATYPE(unsigned char*);
 Q_DECLARE_METATYPE(unsigned short*);
 Q_DECLARE_METATYPE(bool*);
 Q_DECLARE_METATYPE(VoltageCalibrationData);
+Q_DECLARE_METATYPE(ScaleCalibrationData);
 Q_DECLARE_METATYPE(SCAN_ORDER);
 
 class BrillouinAcquisition : public QMainWindow {
@@ -159,6 +160,10 @@ private:
 	std::string m_scaleCalibrationFilePath;
 
 	QDialog* m_settingsDialog{ nullptr };
+
+	Ui::Dialog m_scaleCalibrationDialogUi;
+	QDialog* m_scaleCalibrationDialog{ nullptr };
+
 	Camera* m_andor{ nullptr };
 	ScanControl* m_scanControl{ nullptr };
 	Camera* m_brightfieldCamera{ nullptr };
@@ -259,6 +264,28 @@ private slots:
 
 	void on_action_Scale_calibration_acquire_triggered();
 	void on_action_Scale_calibration_load_triggered();
+
+	void updateScaleCalibrationTranslationValue(POINT2 translation);
+	void updateScaleCalibrationData(ScaleCalibrationData scaleCalibration);
+	void updateScaleCalibrationAcquisitionProgress(double progress);
+	void showScaleCalibrationStatus(std::string title, std::string message);
+
+	void closeScaleCalibrationDialog();
+	void on_scaleCalibrationButtonApply_clicked();
+	void on_scaleCalibrationButtonAcquire_clicked();
+
+	void setTranslationDistanceX(double dx);
+	void setTranslationDistanceY(double dy);
+
+	void setMicrometerToPixX_x(double value);
+	void setMicrometerToPixX_y(double value);
+	void setMicrometerToPixY_x(double value);
+	void setMicrometerToPixY_y(double value);
+
+	void setPixToMicrometerX_x(double value);
+	void setPixToMicrometerX_y(double value);
+	void setPixToMicrometerY_x(double value);
+	void setPixToMicrometerY_y(double value);
 
 	void initBeampathButtons();
 

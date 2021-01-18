@@ -26,7 +26,7 @@ public:
 	static void ScaleCalibrationHelper::initializeCalibrationFromMicrometer(ScaleCalibrationData* calibration) {
 		// Check that the given vectors are actually a basis
 		if (!isBasis(calibration->micrometerToPixX, calibration->micrometerToPixY)) {
-			return;
+			throw std::exception("Provided vectors are not a basis.");
 		}
 
 		auto micrometerToPix = Matrix2{ calibration->micrometerToPixX.x, calibration->micrometerToPixY.x,
@@ -40,7 +40,7 @@ public:
 	static void ScaleCalibrationHelper::initializeCalibrationFromPixel(ScaleCalibrationData* calibration) {
 		// Check that the given vectors are actually a basis
 		if (!isBasis(calibration->pixToMicrometerX, calibration->pixToMicrometerY)) {
-			return;
+			throw std::exception("Provided vectors are not a basis.");
 		}
 
 		auto pixToMicrometer = Matrix2{ calibration->pixToMicrometerX.x, calibration->pixToMicrometerY.x,

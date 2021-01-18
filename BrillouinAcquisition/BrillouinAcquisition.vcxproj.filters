@@ -374,6 +374,9 @@
     <ClInclude Include="src\Acquisition\AcquisitionModes\ScaleCalibrationHelper.h">
       <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
     </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_ScaleCalibrationDialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="external\h5bm\h5bm.h">
@@ -465,6 +468,9 @@
     </CustomBuild>
     <CustomBuild Include="src\Acquisition\AcquisitionModes\ScaleCalibration.h">
       <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\ScaleCalibrationDialog.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
