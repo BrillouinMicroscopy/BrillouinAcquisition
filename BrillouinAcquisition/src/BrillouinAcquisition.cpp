@@ -175,6 +175,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<unsigned short*>("unsigned short*");
 	qRegisterMetaType<bool*>("bool*");
 	qRegisterMetaType<VoltageCalibrationData>("VoltageCalibrationData");
+	qRegisterMetaType<ScaleCalibrationData>("ScaleCalibrationData");
 	qRegisterMetaType<SCAN_ORDER>("SCAN_ORDER");
 	
 	// Set up icons
@@ -2259,6 +2260,191 @@ void BrillouinAcquisition::on_action_Voltage_calibration_load_triggered() {
 }
 
 void BrillouinAcquisition::on_action_Scale_calibration_acquire_triggered() {
+	m_scaleCalibrationDialog = new QDialog(this, Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+	m_scaleCalibrationDialogUi.setupUi(m_scaleCalibrationDialog);
+
+	m_scaleCalibrationDialog->setWindowTitle("Scale calibration");
+	m_scaleCalibrationDialog->setWindowModality(Qt::ApplicationModal);
+
+	// Connect signals/slots for updating values
+	auto connection = QWidget::connect(
+		m_scaleCalibration,
+		&ScaleCalibration::s_Ds_changed,
+		this,
+		[this](POINT2 translation) { updateScaleCalibrationTranslationValue(translation); }
+	);
+	connection = QWidget::connect(
+		m_scaleCalibration,
+		&ScaleCalibration::s_scaleCalibrationChanged,
+		this,
+		[this](ScaleCalibrationData scaleCalibration) { updateScaleCalibrationData(scaleCalibration); }
+	);
+	connection = QWidget::connect(
+		m_scaleCalibration,
+		&ScaleCalibration::s_scaleCalibrationAcquisitionProgress,
+		this,
+		[this](double progress) { updateScaleCalibrationAcquisitionProgress(progress); }
+	);
+
+	// Connect close signal
+	connection = QWidget::connect(
+		m_scaleCalibrationDialog,
+		&QDialog::rejected,
+		this,
+		[this]() { closeScaleCalibrationDialog(); }
+	);
+
+	// Connect push buttons
+	connection = QWidget::connect(
+		m_scaleCalibrationDialogUi.button_cancel,
+		&QPushButton::clicked,
+		this,
+		[this]() { closeScaleCalibrationDialog(); }
+	);
+	connection = QWidget::connect(
+		m_scaleCalibrationDialogUi.button_apply,
+		&QPushButton::clicked,
+		this,
+		[this]() { on_scaleCalibrationButtonApply_clicked(); }
+	);
+	connection = QWidget::connect(
+		m_scaleCalibrationDialogUi.button_acquire,
+		&QPushButton::clicked,
+		this,
+		[this]() { on_scaleCalibrationButtonAcquire_clicked(); }
+	);
+
+	// Connect translation distance boxes
+	connection = QWidget::connect<void(QDoubleSpinBox::*)(double)>(
+		m_scaleCalibrationDialogUi.dx,
+		&QDoubleSpinBox::valueChanged,
+		this,
+		[this](double dx) { setTranslationDistanceX(dx); }
+	);
+	connection = QWidget::connect<void(QDoubleSpinBox::*)(double)>(
+		m_scaleCalibrationDialogUi.dy,
+		&QDoubleSpinBox::valueChanged,
+		this,
+		[this](double dy) { setTranslationDistanceY(dy); }
+	);
+
+	// Connect scale calibration boxes
+	connection = QWidget::connect<void(QDoubleSpinBox::*)(double)>(
+		m_scaleCalibrationDialogUi.micrometerToPixX_x,
+		&QDoubleSpinBox::valueChanged,
+		this,
+		[this](double value) { setMicrometerToPixX_x(value); }
+	);
+	connection = QWidget::connect<void(QDoubleSpinBox::*)(double)>(
+		m_scaleCalibrationDialogUi.micrometerToPixX_y,
+		&QDoubleSpinBox::valueChanged,
+		this,
+		[this](double value) { setMicrometerToPixX_y(value); }
+	);
+	connection = QWidget::connect<void(QDoubleSpinBox::*)(double)>(
+		m_scaleCalibrationDialogUi.micrometerToPixY_x,
+		&QDoubleSpinBox::valueChanged,
+		this,
+		[this](double value) { setMicrometerToPixY_x(value); }
+	);
+	connection = QWidget::connect<void(QDoubleSpinBox::*)(double)>(
+		m_scaleCalibrationDialogUi.micrometerToPixY_y,
+		&QDoubleSpinBox::valueChanged,
+		this,
+		[this](double value) { setMicrometerToPixY_y(value); }
+	);
+
+	connection = QWidget::connect<void(QDoubleSpinBox::*)(double)>(
+		m_scaleCalibrationDialogUi.pixToMicrometerX_x,
+		&QDoubleSpinBox::valueChanged,
+		this,
+		[this](double value) { setPixToMicrometerX_x(value); }
+	);
+	connection = QWidget::connect<void(QDoubleSpinBox::*)(double)>(
+		m_scaleCalibrationDialogUi.pixToMicrometerX_y,
+		&QDoubleSpinBox::valueChanged,
+		this,
+		[this](double value) { setPixToMicrometerX_y(value); }
+	);
+	connection = QWidget::connect<void(QDoubleSpinBox::*)(double)>(
+		m_scaleCalibrationDialogUi.pixToMicrometerY_x,
+		&QDoubleSpinBox::valueChanged,
+		this,
+		[this](double value) { setPixToMicrometerY_x(value); }
+	);
+	connection = QWidget::connect<void(QDoubleSpinBox::*)(double)>(
+		m_scaleCalibrationDialogUi.pixToMicrometerY_y,
+		&QDoubleSpinBox::valueChanged,
+		this,
+		[this](double value) { setPixToMicrometerY_y(value); }
+	);
+
+	// Initialize the scaleCalibration
+	m_scaleCalibration->initialize();
+
+	m_scaleCalibrationDialog->show();
+}
+
+void BrillouinAcquisition::updateScaleCalibrationTranslationValue(POINT2 translation) {
+	// Initialize all values
+	m_scaleCalibrationDialogUi.dx->setValue(translation.x);
+	m_scaleCalibrationDialogUi.dy->setValue(translation.y);
+}
+
+void BrillouinAcquisition::updateScaleCalibrationData(ScaleCalibrationData scaleCalibration) {
+	// We have to block the signals so that programmatically setting new values
+	// doesn't trigger a new round of calculations
+	m_scaleCalibrationDialogUi.micrometerToPixX_x->blockSignals(true);
+	m_scaleCalibrationDialogUi.micrometerToPixX_y->blockSignals(true);
+	m_scaleCalibrationDialogUi.micrometerToPixY_x->blockSignals(true);
+	m_scaleCalibrationDialogUi.micrometerToPixY_y->blockSignals(true);
+
+	m_scaleCalibrationDialogUi.pixToMicrometerX_x->blockSignals(true);
+	m_scaleCalibrationDialogUi.pixToMicrometerX_y->blockSignals(true);
+	m_scaleCalibrationDialogUi.pixToMicrometerY_x->blockSignals(true);
+	m_scaleCalibrationDialogUi.pixToMicrometerY_y->blockSignals(true);
+
+	m_scaleCalibrationDialogUi.micrometerToPixX_x->setValue(scaleCalibration.micrometerToPixX.x);
+	m_scaleCalibrationDialogUi.micrometerToPixX_y->setValue(scaleCalibration.micrometerToPixX.y);
+	m_scaleCalibrationDialogUi.micrometerToPixY_x->setValue(scaleCalibration.micrometerToPixY.x);
+	m_scaleCalibrationDialogUi.micrometerToPixY_y->setValue(scaleCalibration.micrometerToPixY.y);
+
+	m_scaleCalibrationDialogUi.pixToMicrometerX_x->setValue(scaleCalibration.pixToMicrometerX.x);
+	m_scaleCalibrationDialogUi.pixToMicrometerX_y->setValue(scaleCalibration.pixToMicrometerX.y);
+	m_scaleCalibrationDialogUi.pixToMicrometerY_x->setValue(scaleCalibration.pixToMicrometerY.x);
+	m_scaleCalibrationDialogUi.pixToMicrometerY_y->setValue(scaleCalibration.pixToMicrometerY.y);
+
+	m_scaleCalibrationDialogUi.micrometerToPixX_x->blockSignals(false);
+	m_scaleCalibrationDialogUi.micrometerToPixX_y->blockSignals(false);
+	m_scaleCalibrationDialogUi.micrometerToPixY_x->blockSignals(false);
+	m_scaleCalibrationDialogUi.micrometerToPixY_y->blockSignals(false);
+
+	m_scaleCalibrationDialogUi.pixToMicrometerX_x->blockSignals(false);
+	m_scaleCalibrationDialogUi.pixToMicrometerX_y->blockSignals(false);
+	m_scaleCalibrationDialogUi.pixToMicrometerY_x->blockSignals(false);
+	m_scaleCalibrationDialogUi.pixToMicrometerY_y->blockSignals(false);
+}
+
+void BrillouinAcquisition::closeScaleCalibrationDialog() {
+	m_scaleCalibrationDialog->hide();
+}
+
+void BrillouinAcquisition::updateScaleCalibrationAcquisitionProgress(double progress) {
+	m_scaleCalibrationDialogUi.progress->setValue(progress);
+}
+
+void BrillouinAcquisition::on_scaleCalibrationButtonApply_clicked() {
+	QMetaObject::invokeMethod(
+		m_scaleCalibration,
+		[&m_scaleCalibration = m_scaleCalibration]() {
+			m_scaleCalibration->apply();
+		},
+		Qt::AutoConnection
+	);
+	closeScaleCalibrationDialog();
+}
+
+void BrillouinAcquisition::on_scaleCalibrationButtonAcquire_clicked() {
 	QMetaObject::invokeMethod(
 		m_scaleCalibration,
 		[&m_scaleCalibration = m_scaleCalibration]() {
@@ -2266,6 +2452,46 @@ void BrillouinAcquisition::on_action_Scale_calibration_acquire_triggered() {
 		},
 		Qt::AutoConnection
 	);
+}
+
+void BrillouinAcquisition::setTranslationDistanceX(double dx) {
+	m_scaleCalibration->setTranslationDistanceX(dx);
+}
+
+void BrillouinAcquisition::setTranslationDistanceY(double dy) {
+	m_scaleCalibration->setTranslationDistanceY(dy);
+}
+
+void BrillouinAcquisition::setMicrometerToPixX_x(double value) {
+	m_scaleCalibration->setMicrometerToPixX_x(value);
+}
+
+void BrillouinAcquisition::setMicrometerToPixX_y(double value) {
+	m_scaleCalibration->setMicrometerToPixX_y(value);
+}
+
+void BrillouinAcquisition::setMicrometerToPixY_x(double value) {
+	m_scaleCalibration->setMicrometerToPixY_x(value);
+}
+
+void BrillouinAcquisition::setMicrometerToPixY_y(double value) {
+	m_scaleCalibration->setMicrometerToPixY_y(value);
+}
+
+void BrillouinAcquisition::setPixToMicrometerX_x(double value) {
+	m_scaleCalibration->setPixToMicrometerX_x(value);
+}
+
+void BrillouinAcquisition::setPixToMicrometerX_y(double value) {
+	m_scaleCalibration->setPixToMicrometerX_y(value);
+}
+
+void BrillouinAcquisition::setPixToMicrometerY_x(double value) {
+	m_scaleCalibration->setPixToMicrometerY_x(value);
+}
+
+void BrillouinAcquisition::setPixToMicrometerY_y(double value) {
+	m_scaleCalibration->setPixToMicrometerY_y(value);
 }
 
 void BrillouinAcquisition::on_action_Scale_calibration_load_triggered() {
@@ -2677,7 +2903,7 @@ void BrillouinAcquisition::initScaleCalibration() {
 
 	// Initialize scaleCalibration if it is not running already.
 	if (!m_scaleCalibration) {
-		m_scaleCalibration = new ScaleCalibration(this, m_acquisition, &m_brightfieldCamera, &m_scanControl);
+		m_scaleCalibration = new ScaleCalibration(nullptr, m_acquisition, &m_brightfieldCamera, &m_scanControl);
 		// start Calibration thread
 		m_acquisitionThread.startWorker(m_scaleCalibration);
 	}

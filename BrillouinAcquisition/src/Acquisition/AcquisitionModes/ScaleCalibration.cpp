@@ -25,122 +25,13 @@ void ScaleCalibration::startRepetitions() {
 		return;
 	}
 
-	auto parentObject{ parent() };
-	if (parentObject->isWidgetType()) {
-		m_Dialog = new QDialog((QWidget*)parent(), Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
-		m_ui.setupUi(m_Dialog);
+	// reset abort flag
+	m_abort = false;
 
-		m_Dialog->setWindowTitle("Scale calibration");
-		m_Dialog->setWindowModality(Qt::ApplicationModal);
+	acquire();
 
-		m_scaleCalibration = (*m_scanControl)->getScaleCalibration();
-
-		// Initialize all values
-		m_ui.dx->setValue(m_Dx);
-		m_ui.dy->setValue(m_Dy);
-
-		updateScaleCalibrationBoxes();
-
-		// Connect close signal
-		auto connection = QWidget::connect(
-			m_Dialog,
-			&QDialog::rejected,
-			this,
-			[this]() { closeDialog(); }
-		);
-
-		// Connect push buttons
-		connection = QWidget::connect(
-			m_ui.button_cancel,
-			&QPushButton::clicked,
-			this,
-			[this]() { on_buttonCancel_clicked(); }
-		);
-		connection = QWidget::connect(
-			m_ui.button_apply,
-			&QPushButton::clicked,
-			this,
-			[this]() { on_buttonApply_clicked(); }
-		);
-		connection = QWidget::connect(
-			m_ui.button_acquire,
-			&QPushButton::clicked,
-			this,
-			[this]() { on_buttonAcquire_clicked(); }
-		);
-
-		// Connect translation distance boxes
-		connection = QWidget::connect<void(QDoubleSpinBox::*)(double)>(
-			m_ui.dx,
-			&QDoubleSpinBox::valueChanged,
-			this,
-			[this](double dx) { setTranslationDistanceX(dx); }
-		);
-		connection = QWidget::connect<void(QDoubleSpinBox::*)(double)>(
-			m_ui.dy,
-			&QDoubleSpinBox::valueChanged,
-			this,
-			[this](double dy) { setTranslationDistanceY(dy); }
-		);
-
-		// Connect scale calibration boxes
-		connection = QWidget::connect<void(QDoubleSpinBox::*)(double)>(
-			m_ui.micrometerToPixX_x,
-			&QDoubleSpinBox::valueChanged,
-			this,
-			[this](double value) { setMicrometerToPixX_x(value); }
-		);
-		connection = QWidget::connect<void(QDoubleSpinBox::*)(double)>(
-			m_ui.micrometerToPixX_y,
-			&QDoubleSpinBox::valueChanged,
-			this,
-			[this](double value) { setMicrometerToPixX_y(value); }
-		);
-		connection = QWidget::connect<void(QDoubleSpinBox::*)(double)>(
-			m_ui.micrometerToPixY_x,
-			&QDoubleSpinBox::valueChanged,
-			this,
-			[this](double value) { setMicrometerToPixY_x(value); }
-		);
-		connection = QWidget::connect<void(QDoubleSpinBox::*)(double)>(
-			m_ui.micrometerToPixY_y,
-			&QDoubleSpinBox::valueChanged,
-			this,
-			[this](double value) { setMicrometerToPixY_y(value); }
-		);
-
-		connection = QWidget::connect<void(QDoubleSpinBox::*)(double)>(
-			m_ui.pixToMicrometerX_x,
-			&QDoubleSpinBox::valueChanged,
-			this,
-			[this](double value) { setPixToMicrometerX_x(value); }
-		);
-		connection = QWidget::connect<void(QDoubleSpinBox::*)(double)>(
-			m_ui.pixToMicrometerX_y,
-			&QDoubleSpinBox::valueChanged,
-			this,
-			[this](double value) { setPixToMicrometerX_y(value); }
-		);
-		connection = QWidget::connect<void(QDoubleSpinBox::*)(double)>(
-			m_ui.pixToMicrometerY_x,
-			&QDoubleSpinBox::valueChanged,
-			this,
-			[this](double value) { setPixToMicrometerY_x(value); }
-		);
-		connection = QWidget::connect<void(QDoubleSpinBox::*)(double)>(
-			m_ui.pixToMicrometerY_y,
-			&QDoubleSpinBox::valueChanged,
-			this,
-			[this](double value) { setPixToMicrometerY_y(value); }
-		);
-
-		
-
-		m_Dialog->show();
-
-		// reset abort flag
-		m_abort = false;
-	}
+	m_acquisition->disableMode(ACQUISITION_MODE::SCALECALIBRATION);
+	
 }
 
 void ScaleCalibration::load(std::string filepath) {
@@ -379,7 +270,7 @@ void ScaleCalibration::acquire() {
 	auto dy{ 10.0 };					// [µm]	shift in y-direction
 	auto hysteresisCompensation{ 10.0 };// [µm] distance for compensation of the stage hysteresis
 	// Construct the positions
-	auto positions = std::vector<POINT2>{ { 0, 0 }, { m_Dx, 0 }, { 0, m_Dy } };
+	auto positions = std::vector<POINT2>{ { 0, 0 }, { m_Ds.x, 0 }, { 0, m_Ds.y } };
 
 	// Acquire memory for image acquisition
 	auto images = std::vector<std::vector<unsigned char>>(positions.size());
@@ -390,7 +281,7 @@ void ScaleCalibration::acquire() {
 	(*m_camera)->startAcquisition(cameraSettings);
 
 	auto iteration{ 0 };
-	m_ui.progress->setValue(iteration);
+	emit(s_scaleCalibrationAcquisitionProgress(iteration));
 	for (const auto& position : positions) {
 		// Abort if requested
 		if (m_abort) {
@@ -426,7 +317,7 @@ void ScaleCalibration::acquire() {
 		}
 
 		++iteration;
-		m_ui.progress->setValue(iteration * 100.0 / images.size());
+		emit(s_scaleCalibrationAcquisitionProgress(iteration * 100.0 / images.size()));
 	}
 
 	// Stop the camera acquisition
@@ -469,14 +360,14 @@ void ScaleCalibration::acquire() {
 	/*
 	 * Construct the scale calibration
 	 */
-	m_scaleCalibration.micrometerToPixX = { -1 * shiftDx.x / m_Dx, shiftDx.y / m_Dx };
-	m_scaleCalibration.micrometerToPixY = { -1 * shiftDy.x / m_Dy, shiftDy.y / m_Dy };
+	m_scaleCalibration.micrometerToPixX = { -1 * shiftDx.x / m_Ds.x, shiftDx.y / m_Ds.x };
+	m_scaleCalibration.micrometerToPixY = { -1 * shiftDy.x / m_Ds.y, shiftDy.y / m_Ds.y };
 	ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
 
 	// Store the calibration in a file
 	save(images, cameraSettings, positions);
 
-	updateScaleCalibrationBoxes();
+	emit(s_scaleCalibrationChanged(m_scaleCalibration));
 
 	/*
 	 * Cleanup the acquisition mode
@@ -491,116 +382,76 @@ void ScaleCalibration::acquire() {
 	setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
 }
 
-void ScaleCalibration::on_buttonCancel_clicked() {
-	closeDialog();
+void ScaleCalibration::initialize() {
+	// Get the current scale calibration from the scanControl
+	m_scaleCalibration = (*m_scanControl)->getScaleCalibration();
+
+	// Emit it to the main GUI thread
+	emit(s_scaleCalibrationAcquisitionProgress(0.0));
+	emit(s_scaleCalibrationChanged(m_scaleCalibration));
+	emit(s_Ds_changed(m_Ds));
 }
 
-void ScaleCalibration::on_buttonApply_clicked() {
+void ScaleCalibration::apply() {
 	// Apply the scale calibration
 	// TODO: Check if it's valid before applying
 	(*m_scanControl)->setScaleCalibration(m_scaleCalibration);
-	closeDialog();
-}
-
-void ScaleCalibration::on_buttonAcquire_clicked() {
-	acquire();
-}
-
-void ScaleCalibration::closeDialog() {
-	// Disable the scale calibration mode
-	m_acquisition->disableMode(ACQUISITION_MODE::SCALECALIBRATION);
-	if (m_Dialog != nullptr) {
-		// Hide the scale calibration dialog
-		m_Dialog->hide();
-	}
 }
 
 void ScaleCalibration::setTranslationDistanceX(double dx) {
-	m_Dx = dx;
+	m_Ds.x = dx;
+	emit(s_Ds_changed(m_Ds));
 }
 
 void ScaleCalibration::setTranslationDistanceY(double dy) {
-	m_Dy = dy;
-}
-
-void ScaleCalibration::updateScaleCalibrationBoxes() {
-	// We have to block the signals so that programmatically setting new values
-	// doesn't trigger a new round of calculations
-	m_ui.micrometerToPixX_x->blockSignals(true);
-	m_ui.micrometerToPixX_y->blockSignals(true);
-	m_ui.micrometerToPixY_x->blockSignals(true);
-	m_ui.micrometerToPixY_y->blockSignals(true);
-
-	m_ui.pixToMicrometerX_x->blockSignals(true);
-	m_ui.pixToMicrometerX_y->blockSignals(true);
-	m_ui.pixToMicrometerY_x->blockSignals(true);
-	m_ui.pixToMicrometerY_y->blockSignals(true);
-
-	m_ui.micrometerToPixX_x->setValue(m_scaleCalibration.micrometerToPixX.x);
-	m_ui.micrometerToPixX_y->setValue(m_scaleCalibration.micrometerToPixX.y);
-	m_ui.micrometerToPixY_x->setValue(m_scaleCalibration.micrometerToPixY.x);
-	m_ui.micrometerToPixY_y->setValue(m_scaleCalibration.micrometerToPixY.y);
-
-	m_ui.pixToMicrometerX_x->setValue(m_scaleCalibration.pixToMicrometerX.x);
-	m_ui.pixToMicrometerX_y->setValue(m_scaleCalibration.pixToMicrometerX.y);
-	m_ui.pixToMicrometerY_x->setValue(m_scaleCalibration.pixToMicrometerY.x);
-	m_ui.pixToMicrometerY_y->setValue(m_scaleCalibration.pixToMicrometerY.y);
-
-	m_ui.micrometerToPixX_x->blockSignals(false);
-	m_ui.micrometerToPixX_y->blockSignals(false);
-	m_ui.micrometerToPixY_x->blockSignals(false);
-	m_ui.micrometerToPixY_y->blockSignals(false);
-
-	m_ui.pixToMicrometerX_x->blockSignals(false);
-	m_ui.pixToMicrometerX_y->blockSignals(false);
-	m_ui.pixToMicrometerY_x->blockSignals(false);
-	m_ui.pixToMicrometerY_y->blockSignals(false);
+	m_Ds.y = dy;
+	emit(s_Ds_changed(m_Ds));
 }
 
 void ScaleCalibration::setMicrometerToPixX_x(double value) {
 	m_scaleCalibration.micrometerToPixX.x = value;
 	ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
-	updateScaleCalibrationBoxes();
+	emit(s_scaleCalibrationChanged(m_scaleCalibration));
 }
 
 void ScaleCalibration::setMicrometerToPixX_y(double value) {
 	m_scaleCalibration.micrometerToPixX.y = value;
 	ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
-	updateScaleCalibrationBoxes();
+	emit(s_scaleCalibrationChanged(m_scaleCalibration));
 }
 
 void ScaleCalibration::setMicrometerToPixY_x(double value) {
 	m_scaleCalibration.micrometerToPixY.x = value;
 	ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
-	updateScaleCalibrationBoxes();
+	emit(s_scaleCalibrationChanged(m_scaleCalibration));
 }
 
 void ScaleCalibration::setMicrometerToPixY_y(double value) {
 	m_scaleCalibration.micrometerToPixY.y = value;
 	ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
-	updateScaleCalibrationBoxes();
+	emit(s_scaleCalibrationChanged(m_scaleCalibration));
 }
 
 void ScaleCalibration::setPixToMicrometerX_x(double value) {
 	m_scaleCalibration.pixToMicrometerX.x = value;
 	ScaleCalibrationHelper::initializeCalibrationFromPixel(&m_scaleCalibration);
-	updateScaleCalibrationBoxes();
+	emit(s_scaleCalibrationChanged(m_scaleCalibration));
 }
 
 void ScaleCalibration::setPixToMicrometerX_y(double value) {
 	m_scaleCalibration.pixToMicrometerX.y = value;
 	ScaleCalibrationHelper::initializeCalibrationFromPixel(&m_scaleCalibration);
-	updateScaleCalibrationBoxes();
+	emit(s_scaleCalibrationChanged(m_scaleCalibration));
 }
 
 void ScaleCalibration::setPixToMicrometerY_x(double value) {
 	m_scaleCalibration.pixToMicrometerY.x = value;
 	ScaleCalibrationHelper::initializeCalibrationFromPixel(&m_scaleCalibration);
-	updateScaleCalibrationBoxes();
+	emit(s_scaleCalibrationChanged(m_scaleCalibration));
 }
 
 void ScaleCalibration::setPixToMicrometerY_y(double value) {
 	m_scaleCalibration.pixToMicrometerY.y = value;
 	ScaleCalibrationHelper::initializeCalibrationFromPixel(&m_scaleCalibration);
-	updateScaleCalibrationBoxes();
+	emit(s_scaleCalibrationChanged(m_scaleCalibration));
 }

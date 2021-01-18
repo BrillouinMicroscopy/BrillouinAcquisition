@@ -26,6 +26,26 @@ public slots:
 
 	void load(std::string filepath);
 
+	void acquire(std::unique_ptr <StorageWrapper>& storage) override;
+	void acquire();
+
+	void initialize();
+
+	void apply();
+
+	void setTranslationDistanceX(double dx);
+	void setTranslationDistanceY(double dy);
+
+	void setMicrometerToPixX_x(double value);
+	void setMicrometerToPixX_y(double value);
+	void setMicrometerToPixY_x(double value);
+	void setMicrometerToPixY_y(double value);
+
+	void setPixToMicrometerX_x(double value);
+	void setPixToMicrometerX_y(double value);
+	void setPixToMicrometerY_x(double value);
+	void setPixToMicrometerY_y(double value);
+
 private:
 	void abortMode(std::unique_ptr <StorageWrapper>& storage) override;
 	void abortMode();
@@ -43,35 +63,12 @@ private:
 	POINT3 m_startPosition{ 0, 0, 0 };
 
 	ScaleCalibrationData m_scaleCalibration;
-	double m_Dx{ 10.0 };	// [µm]	shift in x-direction
-	double m_Dy{ 10.0 };	// [µm]	shift in y-direction
+	POINT2 m_Ds{ 10.0, 10.0 };	// [µm]	shift in x- and y-direction
 
-	Ui::Dialog m_ui;
-	QDialog* m_Dialog{ nullptr };
-
-private slots:
-	void acquire(std::unique_ptr <StorageWrapper>& storage) override;
-	void acquire();
-
-	void on_buttonCancel_clicked();
-	void on_buttonApply_clicked();
-	void on_buttonAcquire_clicked();
-	void closeDialog();
-
-	void setTranslationDistanceX(double dx);
-	void setTranslationDistanceY(double dy);
-
-	void updateScaleCalibrationBoxes();
-
-	void setMicrometerToPixX_x(double value);
-	void setMicrometerToPixX_y(double value);
-	void setMicrometerToPixY_x(double value);
-	void setMicrometerToPixY_y(double value);
-
-	void setPixToMicrometerX_x(double value);
-	void setPixToMicrometerX_y(double value);
-	void setPixToMicrometerY_x(double value);
-	void setPixToMicrometerY_y(double value);
+signals:
+	void s_Ds_changed(POINT2);
+	void s_scaleCalibrationChanged(ScaleCalibrationData);
+	void s_scaleCalibrationAcquisitionProgress(double);
 };
 
 #endif //SCALECALIBRATION_H
