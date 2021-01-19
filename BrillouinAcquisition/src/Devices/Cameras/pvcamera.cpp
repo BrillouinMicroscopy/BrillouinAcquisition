@@ -95,19 +95,6 @@ void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 	m_settings.roi.width_binned = m_settings.roi.width_physical / m_settings.roi.binX;
 	m_settings.roi.height_binned = m_settings.roi.height_physical / m_settings.roi.binY;
 
-	auto camSettings = getCamSettings();
-	auto bufferSize = PVCam::uns32{};
-	auto i_retCode = PVCam::pl_exp_setup_cont(
-		m_camera,
-		1,
-		&camSettings,
-		PVCam::TIMED_MODE,
-		1e3 * m_settings.exposureTime,
-		&bufferSize,
-		PVCam::CIRC_OVERWRITE
-	);
-	m_settings.roi.bytesPerFrame = bufferSize;
-
 	auto speedTableIndex{ 0 };
 	for (gsl::index i{ 0 }; i < m_SpeedTable.size(); i++) {
 		if (m_SpeedTable[i].label == m_settings.readout.pixelReadoutRate) {
@@ -146,6 +133,19 @@ void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 		//PrintErrorMessage(pl_error_code(), "Gain index could not be set");
 		//return false;
 	}
+
+	auto camSettings = getCamSettings();
+	auto bufferSize = PVCam::uns32{};
+	auto i_retCode = PVCam::pl_exp_setup_cont(
+		m_camera,
+		1,
+		&camSettings,
+		PVCam::TIMED_MODE,
+		1e3 * m_settings.exposureTime,
+		&bufferSize,
+		PVCam::CIRC_OVERWRITE
+	);
+	m_settings.roi.bytesPerFrame = bufferSize;
 
 	// read options as they might change with port and speed
 	if (updateOptions) {
