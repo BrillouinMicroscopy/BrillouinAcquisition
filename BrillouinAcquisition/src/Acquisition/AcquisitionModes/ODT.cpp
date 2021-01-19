@@ -325,7 +325,7 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	(*m_ODTControl)->setVoltage(m_acqSettings.voltages[0]);
 	Sleep(100);
 
-	writeScaleCalibration(storage);
+	writeScaleCalibration(storage, ACQUISITION_MODE::ODT);
 
 	ACQ_VOLTAGES voltages;
 

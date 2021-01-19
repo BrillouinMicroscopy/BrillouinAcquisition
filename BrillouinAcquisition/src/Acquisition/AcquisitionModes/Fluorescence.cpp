@@ -262,7 +262,7 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 		}
 	}
 
-	writeScaleCalibration(storage);
+	writeScaleCalibration(storage, ACQUISITION_MODE::FLUORESCENCE);
 
 	QMetaObject::invokeMethod(
 		storage.get(),

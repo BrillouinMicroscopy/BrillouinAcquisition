@@ -40,7 +40,7 @@ protected:
 
 	void setAcquisitionStatus(ACQUISITION_STATUS);
 
-	void writeScaleCalibration(std::unique_ptr <StorageWrapper>& storage);
+	void writeScaleCalibration(std::unique_ptr <StorageWrapper>& storage, ACQUISITION_MODE mode);
 
 	ACQUISITION_STATUS m_status{ ACQUISITION_STATUS::DISABLED };
 	Acquisition* m_acquisition{ nullptr };

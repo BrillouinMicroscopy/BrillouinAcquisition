@@ -29,11 +29,11 @@ void AcquisitionMode::setAcquisitionStatus(ACQUISITION_STATUS status) {
 	emit(s_acquisitionStatus(m_status));
 }
 
-void AcquisitionMode::writeScaleCalibration(std::unique_ptr <StorageWrapper>& storage) {
+void AcquisitionMode::writeScaleCalibration(std::unique_ptr <StorageWrapper>& storage, ACQUISITION_MODE mode) {
 	auto scaleCalibration = (*m_scanControl)->getScaleCalibration();
 
 	auto positionStage = (*m_scanControl)->getPosition(PositionType::STAGE);
 	auto positionScanner = (*m_scanControl)->getPosition(PositionType::SCANNER);
 
-	storage->setScaleCalibration({ scaleCalibration, positionStage, positionScanner });
+	storage->setScaleCalibration(mode, { scaleCalibration, positionStage, positionScanner });
 }

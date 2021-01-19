@@ -443,7 +443,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 
 	auto resolutionXout = storage->getResolution("x");
 
-	writeScaleCalibration(storage);
+	writeScaleCalibration(storage, ACQUISITION_MODE::BRILLOUIN);
 
 	/*
 	 * Update the positions vector
