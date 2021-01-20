@@ -225,9 +225,6 @@ void Fluorescence::configureCamera() {
 	m_settings.camera.readout.pixelEncoding = L"Raw8";
 	m_settings.camera.readout.cycleMode = L"Fixed";
 	m_settings.camera.frameCount = 1;
-
-	(*m_camera)->setSettings(m_settings.camera);
-	m_settings.camera = (*m_camera)->getSettings();
 }
 
 std::string Fluorescence::getBinningString() {
@@ -274,7 +271,6 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 	measurementTimer.start();
 
 	int rank_data{ 3 };
-	hsize_t dims_data[3] = { 1, (hsize_t)m_settings.camera.roi.height_binned, (hsize_t)m_settings.camera.roi.width_binned };
 	// Loop through the different modes
 	int imageNumber{ 0 };
 	for (auto const& channel : channels) {
@@ -294,8 +290,8 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 		 * Might be worse for free running mode.
 		 * See https://www.ptgrey.com/KB/10086
 		 */
-		bool changed{ false };
-		if (((int)1e3*m_settings.camera.exposureTime != channel->exposure) || (m_settings.camera.gain != channel->gain)) {
+		auto changed{ false };
+		if (((int)(1e3*m_settings.camera.exposureTime) != channel->exposure) || (m_settings.camera.gain != channel->gain)) {
 			changed = true;
 		}
 
@@ -305,6 +301,8 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 		if (changed) {
 			m_settings.camera.frameCount = 2;
 			(*m_camera)->startAcquisition(m_settings.camera);
+			// Settings might change after acquisition start (e.g. binning size and bytes per frame)
+			m_settings.camera = (*m_camera)->getSettings();
 			(*m_camera)->getImageForAcquisition(nullptr, false);
 			(*m_camera)->getImageForAcquisition(nullptr, false);
 			(*m_camera)->stopAcquisition();
@@ -313,6 +311,10 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 		// start image acquisition
 		m_settings.camera.frameCount = 1;
 		(*m_camera)->startAcquisition(m_settings.camera);
+
+		// Settings might change after acquisition start (e.g. binning size and bytes per frame)
+		m_settings.camera = (*m_camera)->getSettings();
+		hsize_t dims_data[3] = { 1, (hsize_t)m_settings.camera.roi.height_binned, (hsize_t)m_settings.camera.roi.width_binned };
 
 		// read images from camera
 		std::vector<unsigned char> images(m_settings.camera.roi.bytesPerFrame);
