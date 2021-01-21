@@ -29,9 +29,9 @@ void Acquisition::newFile(StoragePath path) {
 	openFile(path, H5F_ACC_TRUNC);
 }
 
-void Acquisition::openFile(StoragePath path, int flag) {
+void Acquisition::openFile(StoragePath path, int flag, bool forceOpen) {
 	// if an acquisition is running, do nothing
-	if (m_enabledModes != ACQUISITION_MODE::NONE) {
+	if (m_enabledModes != ACQUISITION_MODE::NONE && !forceOpen) {
 		emit(s_enabledModes(m_enabledModes));
 		return;
 	}
@@ -57,11 +57,15 @@ void Acquisition::openFile(StoragePath path, int flag) {
 	);
 }
 
-void Acquisition::openFile() {
-	m_path.filename = StoragePath{}.filename;
+void Acquisition::openFile(std::string filename, bool forceOpen) {
+	if (filename.empty()) {
+		m_path.filename = StoragePath{}.filename;
+	} else {
+		m_path.filename = filename;
+	}
 	StoragePath defaultPath = checkFilename(m_path);
 
-	openFile(defaultPath);
+	openFile(defaultPath, H5F_ACC_RDWR, forceOpen);
 }
 
 void Acquisition::newRepetition(ACQUISITION_MODE mode) {
@@ -97,6 +101,10 @@ int Acquisition::closeFile() {
 
 std::string Acquisition::getCurrentFolder() {
 	return m_path.folder;
+}
+
+std::string Acquisition::getCurrentFilename() {
+	return m_path.filename;
 }
 
 bool Acquisition::isModeEnabled(ACQUISITION_MODE mode) {

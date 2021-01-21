@@ -7,6 +7,7 @@
 struct REPETITIONS {
 	int count{ 1 };			// [1]		number of repetitions
 	double interval{ 10 };	// [min]	interval between repetitions
+	bool filePerRepetition{ false };	// [bool]	create a new file per repetition
 };
 
 class Acquisition : public QObject {
@@ -26,14 +27,16 @@ public slots:
 	 * Opens acquisition and adds new repetitions without overriding by default.
 	 * Different behaviour can be specified by supplying a different flag.
 	 */
-	void openFile(StoragePath path, int flag = H5F_ACC_RDWR);
-	void openFile();
+	void openFile(StoragePath path, int flag = H5F_ACC_RDWR, bool forceOpen = false);
+	void openFile(std::string filename = "", bool forceOpen = false);
 	void newRepetition(ACQUISITION_MODE mode);
 	void startedWritingToFile();
 	void finishedWritingToFile();
 	int closeFile();
 
 	std::string getCurrentFolder();
+
+	std::string getCurrentFilename();
 	
 	bool isModeEnabled(ACQUISITION_MODE mode);
 
