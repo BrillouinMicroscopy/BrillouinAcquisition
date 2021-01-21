@@ -467,6 +467,7 @@ private slots:
 	// repetitions
 	void on_repetitionCount_valueChanged(int);
 	void on_repetitionInterval_valueChanged(double);
+	void on_repetitionNewFile_stateChanged(int);
 	void showRepProgress(int repNumber, int timeToNext);
 
 	// manual stage control

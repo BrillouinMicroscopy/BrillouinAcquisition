@@ -89,6 +89,8 @@ private:
 
 	std::string getBinningString();
 
+	std::string getRepetitionFilename();
+
 	BRILLOUIN_SETTINGS m_settings;
 	SCAN_ORDER m_scanOrder;
 	Camera** m_andor{ nullptr };
@@ -100,6 +102,8 @@ private:
 	int m_currentRepetition{ 0 };
 
 	int nrCalibrations{ 1 };
+
+	std::string m_baseFilename{ "" };
 
 	std::vector<POINT3> m_orderedPositions;	// The positions to measure in absolute values
 	std::vector<POINT3> m_orderedPositionsRelative;	// The positions to measure relative to start position

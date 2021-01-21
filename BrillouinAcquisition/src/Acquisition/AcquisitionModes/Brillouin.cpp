@@ -67,6 +67,11 @@ void Brillouin::waitForNextRepetition() {
 		this->abortMode(m_acquisition->m_storage);
 		return;
 	}
+	
+	// Save the filename of the first repetition
+	if (m_currentRepetition == 0) {
+		m_baseFilename = m_acquisition->getCurrentFilename();
+	}
 
 	// Check if we have to start a new repetition or wait more
 	auto timeSinceLast = int{ (int)(1e-3 * m_startOfLastRepetition.elapsed()) };
@@ -74,6 +79,12 @@ void Brillouin::waitForNextRepetition() {
 		m_startOfLastRepetition.restart();
 		m_repetitionTimer->stop();
 		emit(s_totalProgress(m_currentRepetition, -1));
+
+		if (m_settings.repetitions.filePerRepetition && m_currentRepetition != 0) {
+			auto repetitionFilename = getRepetitionFilename();
+			m_acquisition->openFile(repetitionFilename, true);
+		}
+
 		m_acquisition->newRepetition(ACQUISITION_MODE::BRILLOUIN);
 
 		setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
@@ -409,6 +420,21 @@ std::string Brillouin::getBinningString() {
 		binning = "2x2";
 	}
 	return binning;
+}
+
+std::string Brillouin::getRepetitionFilename() {
+	auto rawFilename = m_baseFilename.substr(0, m_baseFilename.find_last_of("."));
+	auto fileEnding = m_baseFilename.substr(m_baseFilename.find_last_of("."), std::string::npos);
+
+	// Get the number of digits necessary for the desired repetition count
+	auto nrDigits = (int)floor(log10(m_settings.repetitions.count) + 1);
+
+	auto formatString = std::string{ rawFilename + "_rep%0" + std::to_string(nrDigits) + "d" + fileEnding};
+
+	auto string = QString{};
+	string.sprintf(formatString.c_str(), m_currentRepetition);
+
+	return string.toStdString();
 }
 
 /*

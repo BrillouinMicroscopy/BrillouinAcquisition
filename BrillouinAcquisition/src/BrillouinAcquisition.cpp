@@ -3354,6 +3354,10 @@ void BrillouinAcquisition::updateBrillouinSettings() {
 	ui->calibrationExposureTime->setValue(m_BrillouinSettings.calibrationExposureTime);
 	ui->sampleSelection->setCurrentText(QString::fromStdString(m_BrillouinSettings.sample));
 
+	// repetition settings
+	ui->repetitionCount->setValue(m_BrillouinSettings.repetitions.count);
+	ui->repetitionInterval->setValue(m_BrillouinSettings.repetitions.interval);
+	ui->repetitionNewFile->setChecked(m_BrillouinSettings.repetitions.filePerRepetition);
 }
 
 void BrillouinAcquisition::on_startX_valueChanged(double value) {
@@ -3500,6 +3504,10 @@ void BrillouinAcquisition::on_repetitionCount_valueChanged(int count) {
 
 void BrillouinAcquisition::on_repetitionInterval_valueChanged(double interval) {
 	m_BrillouinSettings.repetitions.interval = interval;
+}
+
+void BrillouinAcquisition::on_repetitionNewFile_stateChanged(int checked) {
+	m_BrillouinSettings.repetitions.filePerRepetition = (bool)checked;
 }
 
 void BrillouinAcquisition::showRepProgress(int repNumber, int timeToNext) {
