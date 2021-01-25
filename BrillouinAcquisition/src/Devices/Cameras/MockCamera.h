@@ -22,11 +22,14 @@ public slots:
 	void stopAcquisition() override;
 	void getImageForAcquisition(unsigned char* buffer, bool preview = true) override;
 
+	void setCalibrationExposureTime(double exposureTime);
+
 private:
 	int acquireImage(unsigned char* buffer) override;
 
 	void readOptions() override;
 	void readSettings() override;
+	void preparePreview();
 };
 
 #endif // MOCKCAMERA_H
