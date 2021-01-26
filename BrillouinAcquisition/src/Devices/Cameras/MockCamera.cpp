@@ -34,8 +34,34 @@ void MockCamera::disconnectDevice() {
 void MockCamera::setSettings(CAMERA_SETTINGS settings) {
 	m_settings = settings;
 
-	m_settings.roi.height_binned = m_settings.roi.height_physical;
-	m_settings.roi.width_binned = m_settings.roi.width_physical;
+	auto binning{ 1 };
+	if (m_settings.roi.binning == L"8x8") {
+		binning = 8;
+	} else if (m_settings.roi.binning == L"4x4") {
+		binning = 4;
+	} else if (m_settings.roi.binning == L"2x2") {
+		binning = 2;
+	} else if (m_settings.roi.binning == L"1x1") {
+		binning = 1;
+	} else {
+		// Fallback to 1x1 binning
+		m_settings.roi.binning = L"1x1";
+	}
+	m_settings.roi.binX = binning;
+	m_settings.roi.binY = binning;
+
+	// Verify that the image size is a multiple of the binning number
+	auto modx = m_settings.roi.width_physical % m_settings.roi.binX;
+	if (modx) {
+		m_settings.roi.width_physical -= modx;
+	}
+	auto mody = m_settings.roi.height_physical % m_settings.roi.binY;
+	if (mody) {
+		m_settings.roi.height_physical -= mody;
+	}
+
+	m_settings.roi.height_binned = m_settings.roi.height_physical / m_settings.roi.binX;
+	m_settings.roi.width_binned = m_settings.roi.width_physical / m_settings.roi.binY;
 
 	m_settings.roi.bytesPerFrame = m_settings.roi.height_binned * m_settings.roi.width_binned;
 	// Read back the settings
@@ -132,6 +158,8 @@ int MockCamera::acquireImage(unsigned char* buffer) {
 void MockCamera::readOptions() {
 	m_options.ROIWidthLimits = {1, 1000};
 	m_options.ROIHeightLimits = { 1, 1000 };
+
+	m_options.imageBinnings = {L"1x1", L"2x2", L"4x4", L"8x8"};
 
 	emit(optionsChanged(m_options));
 }
