@@ -20,6 +20,9 @@ void MockCamera::connectDevice() {
 	readOptions();
 
 	emit(connectedDevice(m_isConnected));
+
+	auto sensor = SensorTemperature{ 0, 0, 0, 0, enCameraTemperatureStatus::STABILISED };
+	emit(s_sensorTemperatureChanged(sensor));
 }
 
 void MockCamera::disconnectDevice() {
