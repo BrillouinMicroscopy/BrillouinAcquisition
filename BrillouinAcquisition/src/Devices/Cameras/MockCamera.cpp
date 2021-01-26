@@ -2,6 +2,7 @@
 #include "MockCamera.h"
 
 #include <thread>
+#include <limits>
 
 /*
  * Public definitions
@@ -139,11 +140,27 @@ void MockCamera::setCalibrationExposureTime(double exposureTime) {
 
 int MockCamera::acquireImage(unsigned char* buffer) {
 
-	auto random = std::rand();
+	auto rangeMax = std::numeric_limits<unsigned char>::max();
 
-	auto data = std::vector<unsigned char>( m_settings.roi.bytesPerFrame, 0 );
+	// Create test image
+	auto data = std::vector<unsigned char>(m_settings.roi.bytesPerFrame, 0.1 * rangeMax);
+	auto incX{ 0.35 * rangeMax / m_options.ROIWidthLimits[1] * m_settings.roi.binX };
+	auto incY{ 0.35 * rangeMax / m_options.ROIHeightLimits[1] * m_settings.roi.binY };
+
+	for (gsl::index xx{ 0 }; xx < m_settings.roi.width_binned; xx++) {
+		for (gsl::index yy{ 0 }; yy < m_settings.roi.height_binned; yy++) {
+			auto i = yy * m_settings.roi.width_binned + xx;
+			data[i] += (xx + m_settings.roi.left / m_settings.roi.binX) * incX +
+				(yy + m_settings.roi.top / m_settings.roi.binY) * incY;
+		}
+	}
+
+
+	// Add noise with 10% dynamic range to test image
+	auto noiseLvl{ 0.1 };
+	auto scaling{ noiseLvl * rangeMax / RAND_MAX };
 	for (gsl::index i{ 0 }; i < data.size(); i++) {
-		data[i] = i + std::rand();
+		data[i] += scaling * std::rand();
 	}
 
 	// Copy data to provided buffer
