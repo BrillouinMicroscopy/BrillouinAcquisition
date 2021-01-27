@@ -34,6 +34,7 @@ struct CAMERA_READOUT {
 	std::wstring cycleMode{ L"Continuous" };
 	std::wstring triggerMode{ L"Software" };
 	std::wstring preAmpGain{ L"16-bit (low noise & high well capacity)" };
+	std::string dataType{ "unsigned char" };	// type of the data
 };
 
 struct CAMERA_SETTINGS {

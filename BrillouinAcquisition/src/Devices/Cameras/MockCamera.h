@@ -27,6 +27,9 @@ public slots:
 private:
 	int acquireImage(unsigned char* buffer) override;
 
+	template <typename T>
+	int acquireImage(unsigned char* buffer);
+
 	void readOptions() override;
 	void readSettings() override;
 	void preparePreview();

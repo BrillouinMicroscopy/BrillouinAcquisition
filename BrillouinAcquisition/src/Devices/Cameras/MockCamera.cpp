@@ -65,6 +65,23 @@ void MockCamera::setSettings(CAMERA_SETTINGS settings) {
 	m_settings.roi.width_binned = m_settings.roi.width_physical / m_settings.roi.binY;
 
 	m_settings.roi.bytesPerFrame = m_settings.roi.height_binned * m_settings.roi.width_binned;
+
+	if (m_settings.readout.pixelEncoding == L"16 bit") {
+		m_settings.readout.dataType = "unsigned short";
+		m_settings.roi.bytesPerFrame *= sizeof(unsigned short);
+	} else if (m_settings.readout.pixelEncoding == L"12 bit") {
+		m_settings.readout.dataType = "unsigned short";
+		m_settings.roi.bytesPerFrame *= sizeof(unsigned short);
+	} else if (m_settings.readout.pixelEncoding == L"8 bit") {
+		m_settings.readout.dataType = "unsigned char";
+		m_settings.roi.bytesPerFrame *= sizeof(unsigned char);
+	} else {
+		// Fallback
+		m_settings.readout.pixelEncoding = L"8 bit";
+		m_settings.readout.dataType = "unsigned char";
+		m_settings.roi.bytesPerFrame *= sizeof(unsigned char);
+	}
+
 	// Read back the settings
 	readSettings();
 }
@@ -99,7 +116,7 @@ void MockCamera::startAcquisition(CAMERA_SETTINGS settings) {
 	}
 	setSettings(settings);
 
-	auto bufferSettings = BUFFER_SETTINGS{ 4, (unsigned int)m_settings.roi.bytesPerFrame, "unsigned char", m_settings.roi };
+	auto bufferSettings = BUFFER_SETTINGS{ 4, (unsigned int)m_settings.roi.bytesPerFrame, m_settings.readout.dataType, m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 
 	emit(s_previewBufferSettingsChanged());
@@ -138,36 +155,53 @@ void MockCamera::setCalibrationExposureTime(double exposureTime) {
  * Private definitions
  */
 
+template <typename T>
 int MockCamera::acquireImage(unsigned char* buffer) {
 
-	auto rangeMax = std::numeric_limits<unsigned char>::max();
+	if (buffer == nullptr) {
+		return 0;
+	}
+
+	auto rangeMax{ 0 };
+	if (m_settings.readout.pixelEncoding == L"16 bit") {
+		rangeMax = 65536;
+	} else if (m_settings.readout.pixelEncoding == L"12 bit") {
+		rangeMax = 4096;
+	} else if (m_settings.readout.pixelEncoding == L"8 bit") {
+		rangeMax = 255;
+	} else {
+		rangeMax = 255;
+	}
 
 	// Create test image
-	auto data = std::vector<unsigned char>(m_settings.roi.bytesPerFrame, 0.1 * rangeMax);
 	auto incX{ 0.35 * rangeMax / m_options.ROIWidthLimits[1] * m_settings.roi.binX };
 	auto incY{ 0.35 * rangeMax / m_options.ROIHeightLimits[1] * m_settings.roi.binY };
 
+	auto noiseLvl{ 0.1 };
+	auto scaling{ noiseLvl * rangeMax / RAND_MAX };
+
+	auto typeSize = sizeof(T);
+	auto value = T{};
 	for (gsl::index xx{ 0 }; xx < m_settings.roi.width_binned; xx++) {
 		for (gsl::index yy{ 0 }; yy < m_settings.roi.height_binned; yy++) {
-			auto i = yy * m_settings.roi.width_binned + xx;
-			data[i] += (xx + m_settings.roi.left / m_settings.roi.binX) * incX +
-				(yy + m_settings.roi.top / m_settings.roi.binY) * incY;
+
+			value = (T)(0.1 * rangeMax + (xx + m_settings.roi.left / m_settings.roi.binX) * incX +
+				(yy + m_settings.roi.top / m_settings.roi.binY) * incY + scaling * std::rand());
+
+			memcpy(&buffer[typeSize * (yy * m_settings.roi.width_binned + xx)], &value, typeSize);
 		}
 	}
 
+	// Sleep for exposure time
+	std::this_thread::sleep_for(std::chrono::milliseconds((int)(1e3 * m_settings.exposureTime)));
+	return 1;
+}
 
-	// Add noise with 10% dynamic range to test image
-	auto noiseLvl{ 0.1 };
-	auto scaling{ noiseLvl * rangeMax / RAND_MAX };
-	for (gsl::index i{ 0 }; i < data.size(); i++) {
-		data[i] += scaling * std::rand();
-	}
-
-	// Copy data to provided buffer
-	if (buffer != nullptr) {
-		std::this_thread::sleep_for(std::chrono::milliseconds((int)(1e3*m_settings.exposureTime)));
-		memcpy(buffer, &data[0], m_settings.roi.bytesPerFrame);
-		return 1;
+int MockCamera::acquireImage(unsigned char* buffer) {
+	if (m_settings.readout.dataType == "unsigned short") {
+		return acquireImage<unsigned short>(buffer);
+	} if (m_settings.readout.dataType == "unsigned char") {
+		return acquireImage<unsigned char>(buffer);
 	}
 	return 0;
 }
@@ -175,6 +209,8 @@ int MockCamera::acquireImage(unsigned char* buffer) {
 void MockCamera::readOptions() {
 	m_options.ROIWidthLimits = {1, 1000};
 	m_options.ROIHeightLimits = { 1, 1000 };
+
+	m_options.pixelEncodings = {L"8 bit", L"12 bit", L"16 bit"};
 
 	m_options.imageBinnings = {L"1x1", L"2x2", L"4x4", L"8x8"};
 
@@ -195,7 +231,7 @@ void MockCamera::preparePreview() {
 
 	setSettings(m_settings);
 
-	auto bufferSettings = BUFFER_SETTINGS{ 5, (unsigned int)m_settings.roi.bytesPerFrame, "unsigned char", m_settings.roi };
+	auto bufferSettings = BUFFER_SETTINGS{ 5, (unsigned int)m_settings.roi.bytesPerFrame, m_settings.readout.dataType, m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 }
