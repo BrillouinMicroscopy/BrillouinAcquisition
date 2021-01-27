@@ -3008,6 +3008,11 @@ void BrillouinAcquisition::initCameraBrillouin() {
 		case CAMERA_BRILLOUIN_DEVICE::PVCAM:
 			m_andor = new PVCamera();
 			break;
+#ifdef _DEBUG
+		case CAMERA_BRILLOUIN_DEVICE::MOCK:
+			m_andor = new MockCamera();
+			break;
+#endif
 		default:
 			m_andor = new Andor();
 			break;
@@ -3123,6 +3128,15 @@ void BrillouinAcquisition::initCamera() {
 			ui->settingsWidget->setTabIcon(3, m_icons.disconnected);
 			m_hasFluorescence = true;
 			break;
+#ifdef _DEBUG
+		case CAMERA_DEVICE::MOCK:
+			m_brightfieldCamera = new MockCamera();
+			ui->actionConnect_Brightfield_camera->setVisible(true);
+			ui->settingsWidget->addTab(ui->ODTcameraTab, "ODT Camera");
+			ui->settingsWidget->setTabIcon(3, m_icons.disconnected);
+			m_hasFluorescence = true;
+			break;
+#endif
 		default:
 			m_brightfieldCamera = nullptr;
 			ui->actionConnect_Brightfield_camera->setVisible(false);
@@ -3788,7 +3802,7 @@ void BrillouinAcquisition::writeSettings() {
 	QSettings settings(QSettings::IniFormat, QSettings::UserScope,
 		"Guck Lab", "Brillouin Acquisition");
 
-	QString brillouinCamera;
+	auto brillouinCamera = QString{};
 	switch (m_cameraBrillouinType) {
 		case CAMERA_BRILLOUIN_DEVICE::ANDOR:
 			brillouinCamera = "andor";
@@ -3796,12 +3810,17 @@ void BrillouinAcquisition::writeSettings() {
 		case CAMERA_BRILLOUIN_DEVICE::PVCAM:
 			brillouinCamera = "pvcam";
 			break;
+#ifdef _DEBUG
+		case CAMERA_BRILLOUIN_DEVICE::MOCK:
+			brillouinCamera = "mock";
+			break;
+#endif
 		default:
 			brillouinCamera = "andor";
 			break;
 	}
 
-	QString brightfieldCamera;
+	auto brightfieldCamera = QString{};
 	switch (m_cameraType) {
 		case CAMERA_DEVICE::UEYE:
 			brightfieldCamera = "ueye";
@@ -3809,12 +3828,17 @@ void BrillouinAcquisition::writeSettings() {
 		case CAMERA_DEVICE::POINTGREY:
 			brightfieldCamera = "pointgrey";
 			break;
+#ifdef _DEBUG
+		case CAMERA_DEVICE::MOCK:
+			brightfieldCamera = "mock";
+			break;
+#endif
 		default:
 			brightfieldCamera = "none";
 			break;
 	}
 
-	QString stage;
+	auto stage = QString{};
 	switch (m_scanControllerType) {
 		case ScanControl::SCAN_DEVICE::ZEISSECU:
 			stage = "zeiss-ecu";
@@ -3854,7 +3878,13 @@ void BrillouinAcquisition::readSettings() {
 		m_cameraBrillouinType = CAMERA_BRILLOUIN_DEVICE::ANDOR;
 	} else if (BrillouinCam == "pvcam") {
 		m_cameraBrillouinType = CAMERA_BRILLOUIN_DEVICE::PVCAM;
-	} else {
+	}
+#ifdef _DEBUG
+	else if (BrillouinCam == "mock") {
+		m_cameraBrillouinType = CAMERA_BRILLOUIN_DEVICE::MOCK;
+	}
+#endif
+	else {
 		m_cameraBrillouinType = CAMERA_BRILLOUIN_DEVICE::ANDOR;
 	}
 
@@ -3863,7 +3893,13 @@ void BrillouinAcquisition::readSettings() {
 		m_cameraType = CAMERA_DEVICE::UEYE;
 	} else if (BrightfieldCam == "pointgrey") {
 		m_cameraType = CAMERA_DEVICE::POINTGREY;
-	} else {
+	}
+#ifdef _DEBUG
+	else if (BrightfieldCam == "mock") {
+		m_cameraType = CAMERA_DEVICE::MOCK;
+	}
+#endif
+	else {
 		m_cameraType = CAMERA_DEVICE::NONE;
 	}
 

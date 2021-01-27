@@ -150,6 +150,9 @@
     <ClCompile Include="GeneratedFiles\Release\moc_PointGrey.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_MockCamera.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_Brillouin.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -324,6 +327,9 @@
     <ClCompile Include="GeneratedFiles\Release\moc_ScaleCalibration.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Devices\Cameras\MockCamera.cpp">
+      <Filter>Source Files\Devices\Cameras</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_BrillouinAcquisition.h">
@@ -471,6 +477,9 @@
     </CustomBuild>
     <CustomBuild Include="src\ScaleCalibrationDialog.ui">
       <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Devices\Cameras\MockCamera.h">
+      <Filter>Header Files\Devices\Cameras</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

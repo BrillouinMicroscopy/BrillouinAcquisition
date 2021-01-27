@@ -9,6 +9,9 @@
 #include "Devices/Cameras/pvcamera.h"
 #include "Devices/Cameras/PointGrey.h"
 #include "Devices/Cameras/uEyeCam.h"
+#ifdef _DEBUG
+	#include "Devices/Cameras/MockCamera.h"
+#endif
 
 #include "Devices/ScanControls/ScanControl.h"
 #include "Devices/ScanControls/ZeissECU.h"
@@ -130,14 +133,33 @@ private:
 		NONE = 0,
 		POINTGREY = 1,
 		UEYE = 2
+#ifdef _DEBUG
+		, MOCK = 3
+#endif
 	} CAMERA_DEVICE;
-	std::vector<std::string> CAMERA_DEVICE_NAMES = { "None", "PointGrey", "uEye" };
+	std::vector<std::string> CAMERA_DEVICE_NAMES = {
+		"None",
+		"PointGrey",
+		"uEye"
+#ifdef _DEBUG
+		, "Mock Camera"
+#endif
+	};
 
 	typedef enum class enCameraBrillouinDevice {
 		ANDOR = 0,
 		PVCAM = 1
+#ifdef _DEBUG
+		, MOCK = 2
+#endif
 	} CAMERA_BRILLOUIN_DEVICE;
-	std::vector<std::string> CAMERA_BRILLOUIN_DEVICE_NAMES = { "Andor", "PVCam" };
+	std::vector<std::string> CAMERA_BRILLOUIN_DEVICE_NAMES = {
+		"Andor",
+		"PVCam"
+#ifdef _DEBUG
+		, "Mock Camera"
+#endif
+	};
 
 	QCPGraph* m_positionScannerMarker{ nullptr };
 	POINT2 m_positionScanner{ -1, -1 };
