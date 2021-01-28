@@ -10,6 +10,7 @@
 
 MockCamera::~MockCamera() {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
+	disconnectDevice();
 }
 
 /*
