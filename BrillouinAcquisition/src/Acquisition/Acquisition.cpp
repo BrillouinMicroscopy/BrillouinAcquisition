@@ -16,8 +16,8 @@ Acquisition::Acquisition(QObject *parent)
 Acquisition::~Acquisition() {
 	m_enabledModes = ACQUISITION_MODE::NONE;
 	// Wait for storage thread to finish writing the queue
+	m_storage.reset(nullptr);
 	m_storageThread->exit();
-	m_storageThread->terminate();
 	m_storageThread->wait();
 }
 

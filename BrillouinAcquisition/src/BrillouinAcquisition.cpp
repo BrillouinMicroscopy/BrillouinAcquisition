@@ -361,8 +361,14 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 
 BrillouinAcquisition::~BrillouinAcquisition() {
 	writeSettings();
-	delete m_acquisition;
-	delete m_Brillouin;
+	if (m_acquisition) {
+		m_acquisition->deleteLater();
+		m_acquisition = nullptr;
+	}
+	if (m_Brillouin) {
+		m_Brillouin->deleteLater();
+		m_Brillouin = nullptr;
+	}
 	if (m_ODT) {
 		m_ODT->deleteLater();
 		m_ODT = nullptr;
@@ -371,24 +377,33 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 		m_Fluorescence->deleteLater();
 		m_Fluorescence = nullptr;
 	}
-	m_scanControl->deleteLater();
-	m_brightfieldCamera->deleteLater();
-	m_andor->deleteLater();
-	//m_cameraThread.exit();
-	//m_cameraThread.wait();
-	//m_microscopeThread.exit();
-	//m_microscopeThread.wait();
+	if (m_scaleCalibration) {
+		m_scaleCalibration->deleteLater();
+		m_scaleCalibration = nullptr;
+	}
+	if (m_voltageCalibration) {
+		m_voltageCalibration->deleteLater();
+		m_voltageCalibration = nullptr;
+	}
+	if (m_brightfieldCamera) {
+		m_brightfieldCamera->deleteLater();
+		m_brightfieldCamera = nullptr;
+	}
+	if (m_scanControl) {
+		m_scanControl->deleteLater();
+		m_scanControl = nullptr;
+	}
+	if (m_andor) {
+		m_andor->deleteLater();
+		m_andor = nullptr;
+	}
 	m_andorThread.exit();
-	m_andorThread.terminate();
 	m_andorThread.wait();
 	m_brightfieldCameraThread.exit();
-	m_brightfieldCameraThread.terminate();
 	m_brightfieldCameraThread.wait();
 	m_acquisitionThread.exit();
-	m_acquisitionThread.terminate();
 	m_acquisitionThread.wait();
 	m_plottingThread.exit();
-	m_plottingThread.terminate();
 	m_plottingThread.wait();
 	qInfo(logInfo()) << "BrillouinAcquisition closed.";
 	delete ui;
