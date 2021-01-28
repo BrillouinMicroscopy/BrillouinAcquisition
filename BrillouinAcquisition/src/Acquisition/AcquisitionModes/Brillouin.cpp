@@ -89,6 +89,10 @@ void Brillouin::waitForNextRepetition() {
 
 		setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 		acquire(m_acquisition->m_storage);
+		if (m_abort) {
+			this->abortMode(m_acquisition->m_storage);
+			return;
+		}
 		m_currentRepetition++;
 		// Check if this was the last repetition
 		if (m_currentRepetition < m_settings.repetitions.count) {
@@ -251,18 +255,19 @@ std::vector<POINT3> Brillouin::getOrderedPositions() {
 void Brillouin::abortMode(std::unique_ptr <StorageWrapper>& storage) {
 	m_repetitionTimer->stop();
 	m_startOfLastRepetition.invalidate();
+	if (m_andor) {
+		(*m_andor)->stopAcquisition();
+	}
 
-	(*m_andor)->stopAcquisition();
-
-	(*m_scanControl)->setPreset(ScanPreset::SCAN_LASEROFF);
-
-	(*m_scanControl)->setPosition(m_startPosition);
-
-	QMetaObject::invokeMethod(
-		(*m_scanControl),
-		[&m_scanControl = (*m_scanControl)]() { m_scanControl->startAnnouncing(); },
-		Qt::AutoConnection
-	);
+	if (m_scanControl) {
+		(*m_scanControl)->setPreset(ScanPreset::SCAN_LASEROFF);
+		(*m_scanControl)->setPosition(m_startPosition);
+		QMetaObject::invokeMethod(
+			(*m_scanControl),
+			[&m_scanControl = (*m_scanControl)]() { m_scanControl->startAnnouncing(); },
+			Qt::AutoConnection
+		);
+	}
 
 	m_acquisition->disableMode(ACQUISITION_MODE::BRILLOUIN);
 
@@ -291,10 +296,14 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 	emit(s_calibrationRunning(true));
 
 	// set exposure time for calibration
-	(*m_andor)->setCalibrationExposureTime(m_settings.calibrationExposureTime);
+	if (m_andor) {
+		(*m_andor)->setCalibrationExposureTime(m_settings.calibrationExposureTime);
+	}
 
 	// move optical elements to position for calibration
-	(*m_scanControl)->setPreset(ScanPreset::SCAN_CALIBRATION);
+	if (m_scanControl) {
+		(*m_scanControl)->setPreset(ScanPreset::SCAN_CALIBRATION);
+	}
 	Sleep(500);
 
 	auto shift = 5.088; // this is the shift for water
@@ -315,7 +324,10 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 		}
 		// acquire images
 		auto pointerPos = (int64_t)m_settings.camera.roi.bytesPerFrame * mm;
-		(*m_andor)->getImageForAcquisition(&images[pointerPos]);
+
+		if (m_andor) {
+			(*m_andor)->getImageForAcquisition(&images[pointerPos]);
+		}
 	}
 	// cast the vector to unsigned short
 	std::vector<unsigned short>* images_ = (std::vector<unsigned short>*) & images;
@@ -347,10 +359,14 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 	nrCalibrations++;
 
 	// revert optical elements to position for brightfield/Brillouin imaging
-	(*m_scanControl)->setPreset(ScanPreset::SCAN_BRILLOUIN);
+	if (m_scanControl) {
+		(*m_scanControl)->setPreset(ScanPreset::SCAN_BRILLOUIN);
+	}
 
 	// reset exposure time
-	(*m_andor)->setCalibrationExposureTime(m_settings.camera.exposureTime);
+	if (m_andor) {
+		(*m_andor)->setCalibrationExposureTime(m_settings.camera.exposureTime);
+	}
 	Sleep(500);
 }
 
@@ -444,21 +460,38 @@ std::string Brillouin::getRepetitionFilename() {
 void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 	// prepare camera for image acquisition
-	(*m_andor)->startAcquisition(m_settings.camera);
-	m_settings.camera = (*m_andor)->getSettings();
-	QMetaObject::invokeMethod(
-		(*m_scanControl),
-		[&m_scanControl = (*m_scanControl)]() { m_scanControl->stopAnnouncing(); },
-		Qt::AutoConnection
-	);
-	// set optical elements for brightfield/Brillouin imaging
-	(*m_scanControl)->setPreset(ScanPreset::SCAN_BRILLOUIN);
+
+	if (m_andor) {
+		(*m_andor)->startAcquisition(m_settings.camera);
+		m_settings.camera = (*m_andor)->getSettings();
+	} else {
+		m_abort = true;
+		return;
+	}
+
+	if (m_scanControl) {
+		QMetaObject::invokeMethod(
+			(*m_scanControl),
+			[&m_scanControl = (*m_scanControl)]() { m_scanControl->stopAnnouncing(); },
+			Qt::AutoConnection
+		);
+		// set optical elements for brightfield/Brillouin imaging
+		(*m_scanControl)->setPreset(ScanPreset::SCAN_BRILLOUIN);
+	} else {
+		m_abort = true;
+		return;
+	}
 	Sleep(500);
 
 	// get current stage position
-	m_startPosition = (*m_scanControl)->getPosition();
-	// Enable measurement mode (so the AOI display is correct).
-	(*m_scanControl)->enableMeasurementMode(true);
+	if (m_scanControl) {
+		m_startPosition = (*m_scanControl)->getPosition();
+		// Enable measurement mode (so the AOI display is correct).
+		(*m_scanControl)->enableMeasurementMode(true);
+	} else {
+		m_abort = true;
+		return;
+	}
 
 	auto commentIn = std::string{ "Brillouin data" };
 	storage->setComment(commentIn);
@@ -540,7 +573,12 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	calibrationTimer.start();
 
 	// move stage to first position, wait 50 ms for it to finish
-	(*m_scanControl)->setPosition(m_orderedPositions[0]);
+	if (m_scanControl) {
+		(*m_scanControl)->setPosition(m_orderedPositions[0]);
+	} else {
+		m_abort = true;
+		return;
+	}
 	Sleep(50);
 
 	auto binning = getBinningString();
@@ -553,7 +591,12 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 				calibrate(storage);
 				calibrationTimer.start();
 				// After we calibrated, we move back to the current position
-				(*m_scanControl)->setPosition(m_orderedPositions[ll]);
+				if (m_scanControl) {
+					(*m_scanControl)->setPosition(m_orderedPositions[ll]);
+				} else {
+					m_abort = true;
+					return;
+				}
 				Sleep(100);
 			}
 		}
@@ -565,13 +608,19 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 
 		for (gsl::index mm{ 0 }; mm < m_settings.camera.frameCount; mm++) {
 			if (m_abort) {
-				this->abortMode(storage);
+				m_abort = true;
 				return;
 			}
 			emit(s_positionChanged(m_orderedPositions[ll] - m_startPosition, mm + 1));
 			// acquire images
 			auto pointerPos = (int64_t)m_settings.camera.roi.bytesPerFrame * mm;
-			(*m_andor)->getImageForAcquisition(&images[pointerPos]);
+			
+			if (m_andor) {
+				(*m_andor)->getImageForAcquisition(&images[pointerPos]);
+			} else {
+				m_abort = true;
+				return;
+			}
 		}
 
 		// cast the vector to unsigned short
@@ -586,7 +635,12 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 
 		// move stage to next position before saving the images
 		if (ll < ((gsl::index)nrPositions - 1)) {
-			(*m_scanControl)->setPosition(m_orderedPositions[ll + 1]);
+			if (m_scanControl) {
+				(*m_scanControl)->setPosition(m_orderedPositions[ll + 1]);
+			} else {
+				m_abort = true;
+				return;
+			}
 		}
 
 		QMetaObject::invokeMethod(
@@ -605,18 +659,28 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	}
 
 	// close camera libraries, clear buffers
-	(*m_andor)->stopAcquisition();
+	if (m_andor) {
+		(*m_andor)->stopAcquisition();
+	} else {
+		m_abort = true;
+		return;
+	}
 
-	(*m_scanControl)->setPreset(ScanPreset::SCAN_LASEROFF);
+	if (m_scanControl) {
+		(*m_scanControl)->setPreset(ScanPreset::SCAN_LASEROFF);
 
-	(*m_scanControl)->setPosition(m_startPosition);
-	(*m_scanControl)->enableMeasurementMode(false);
-	emit(s_positionChanged({ 0, 0, 0 }, 0));
-	QMetaObject::invokeMethod(
-		(*m_scanControl),
-		[&m_scanControl = (*m_scanControl)]() { m_scanControl->startAnnouncing(); },
-		Qt::AutoConnection
-	);
+		(*m_scanControl)->setPosition(m_startPosition);
+		(*m_scanControl)->enableMeasurementMode(false);
+		emit(s_positionChanged({ 0, 0, 0 }, 0));
+		QMetaObject::invokeMethod(
+			(*m_scanControl),
+			[&m_scanControl = (*m_scanControl)]() { m_scanControl->startAnnouncing(); },
+			Qt::AutoConnection
+		);
+	} else {
+		m_abort = true;
+		return;
+	}
 
 	// Here we wait until the storage object indicate it finished to write to the file.
 	QEventLoop loop;
