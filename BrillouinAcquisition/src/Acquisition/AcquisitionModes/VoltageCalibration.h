@@ -44,6 +44,9 @@ private:
 
 	void save();
 
+	template <typename T>
+	void __acquire();
+
 	CALIBRATION_SETTINGS m_acqSettings{};
 	CAMERA_SETTINGS m_cameraSettings{ 0.002, 0 };
 	Camera** m_camera{ nullptr };
@@ -54,8 +57,8 @@ private:
 	VoltageCalibrationData m_voltageCalibration;
 
 private slots:
+	void acquire();
 	void acquire(std::unique_ptr <StorageWrapper>& storage) override;
-	void acquire() ;
 
 signals:
 	void s_cameraSettingsChanged(CAMERA_SETTINGS);				// emit the camera settings

@@ -54,7 +54,6 @@ void ODT::startRepetitions() {
 	settings.roi.top = 0;
 	settings.roi.width_physical = 1024;
 	settings.roi.height_physical = 1024;
-	settings.readout.pixelEncoding = L"Raw8";
 	settings.readout.triggerMode = L"External";
 	settings.readout.cycleMode = L"Continuous";
 	settings.frameCount = m_acqSettings.numberPoints;
@@ -305,11 +304,8 @@ std::string ODT::getBinningString() {
 	return binning;
 }
 
-/*
- * Private slots
- */
-
-void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
+template <typename T>
+void ODT::__acquire(std::unique_ptr <StorageWrapper> & storage) {
 	setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 
 	QMetaObject::invokeMethod(
@@ -354,7 +350,7 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 		for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
 
 			// read images from camera
-			std::vector<unsigned char> images(m_cameraSettings.roi.bytesPerFrame);
+			std::vector<std::byte> images(m_cameraSettings.roi.bytesPerFrame);
 
 			if (m_abort) {
 				this->abortMode(storage);
@@ -364,15 +360,16 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 			// acquire images
 			(*m_camera)->getImageForAcquisition(&images[0], false);
 
-			// cast the vector to unsigned short
-			std::vector<unsigned char>* images_ = (std::vector<unsigned char>*) & images;
 
 			// store images
 			// asynchronously write image to disk
 			// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
 			std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 				.toString(Qt::ISODateWithMs).toStdString();
-			ODTIMAGE* img = new ODTIMAGE((int)i, rank_data, dims_data, date, *images_,
+
+			// cast the image to type T
+			auto images_ = (std::vector<T>*) & images;
+			auto img = new ODTIMAGE<T>((int)i, rank_data, dims_data, date, *images_,
 				m_cameraSettings.exposureTime, m_cameraSettings.gain, binning);
 
 			QMetaObject::invokeMethod(
@@ -399,6 +396,17 @@ void ODT::acquire(std::unique_ptr <StorageWrapper> & storage) {
 	loop.exec();
 
 	setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
+}
+
+/*
+ * Private slots
+ */
+void ODT::acquire(std::unique_ptr <StorageWrapper>& storage) {
+	if (m_cameraSettings.readout.dataType == "unsigned short") {
+		__acquire<unsigned short>(storage);
+	} else if (m_cameraSettings.readout.dataType == "unsigned char") {
+		__acquire<unsigned char>(storage);
+	}
 }
 
 void ODT::nextAlgnPosition() {

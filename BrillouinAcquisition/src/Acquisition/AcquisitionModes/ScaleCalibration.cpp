@@ -2,6 +2,8 @@
 #include "filesystem"
 #include "ScaleCalibration.h"
 
+#include "../../h5/h5_helper.h"
+
 #include "opencv2/core.hpp"
 #include "opencv2/highgui.hpp"
 
@@ -27,6 +29,20 @@ void ScaleCalibration::startRepetitions() {
 
 	// reset abort flag
 	m_abort = false;
+
+	/*
+	 * Configure the camera
+	 */
+	m_cameraSettings = (*m_camera)->getSettings();
+
+	m_cameraSettings.roi.left = 1000;
+	m_cameraSettings.roi.top = 800;
+	m_cameraSettings.roi.width_physical = 1000;
+	m_cameraSettings.roi.height_physical = 1000;
+	m_cameraSettings.frameCount = 1;
+	(*m_camera)->setSettings(m_cameraSettings);
+
+	m_cameraSettings = (*m_camera)->getSettings();
 
 	acquire();
 
@@ -81,7 +97,8 @@ void ScaleCalibration::abortMode() {
 	setAcquisitionStatus(ACQUISITION_STATUS::ABORTED);
 }
 
-void ScaleCalibration::save(std::vector<std::vector<unsigned char>> images, CAMERA_SETTINGS settings, std::vector<POINT2> positions) {
+template <typename T>
+void ScaleCalibration::save(std::vector<std::vector<T>> images, std::vector<POINT2> positions) {
 	/*
 	 * Construct the filepath
 	 */
@@ -129,9 +146,9 @@ void ScaleCalibration::save(std::vector<std::vector<unsigned char>> images, CAME
 	// Write images and set positions as attributes
 	auto imageGroup = root.createGroup("images");
 	hsize_t dims[3] = {
-		(hsize_t)settings.frameCount,
-		(hsize_t)settings.roi.height_binned,
-		(hsize_t)settings.roi.width_binned
+		(hsize_t)m_cameraSettings.frameCount,
+		(hsize_t)m_cameraSettings.roi.height_binned,
+		(hsize_t)m_cameraSettings.roi.width_binned
 	};
 	auto names = std::vector<std::string>{ "origin", "dx", "dy" };
 	auto i = gsl::index{ 0 };
@@ -141,12 +158,12 @@ void ScaleCalibration::save(std::vector<std::vector<unsigned char>> images, CAME
 			continue;
 		}
 		auto dataspace = H5::DataSpace(3, dims, dims);
+		auto type_id = h5_helper::get_memtype<T>();
 		// For some unknown reason using the overloaded function createDataSet(const H5std_string&, const DataType&, const DataSpace&)
 		// only produces corrupted datasets in Debug mode (probably the HDF5 libraries would need to be build in Debug mode as well),
 		// so we have to use the const char* version to better debug it.
-		// TODO: Correctly determine the correct DataType from the image (NATIVE_CHAR might fail for other cameras).
-		auto dataset = imageGroup.createDataSet(names[i].c_str(), H5::PredType::NATIVE_CHAR, dataspace);
-		dataset.write(image.data(), H5::PredType::NATIVE_CHAR);
+		auto dataset = imageGroup.createDataSet(names[i].c_str(), type_id, dataspace);
+		dataset.write(image.data(), type_id);
 
 		writeAttribute(dataset, "CLASS", "IMAGE");
 		writeAttribute(dataset, "IMAGE_VERSION", "1.2");
@@ -220,13 +237,8 @@ void ScaleCalibration::readAttribute(H5::H5Object& parent, std::string name, dou
 	attr.close();
 }
 
-/*
- * Private slots
- */
-
-void ScaleCalibration::acquire(std::unique_ptr <StorageWrapper>& storage) {}
-
-void ScaleCalibration::acquire() {
+template <typename T>
+void ScaleCalibration::__acquire() {
 	setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 
 	QMetaObject::invokeMethod(
@@ -242,20 +254,6 @@ void ScaleCalibration::acquire() {
 	m_startPosition = (*m_scanControl)->getPosition();
 
 	/*
-	 * Configure the camera
-	 */
-	auto cameraSettings = (*m_camera)->getSettings();
-
-	cameraSettings.roi.left = 1000;
-	cameraSettings.roi.top = 800;
-	cameraSettings.roi.width_physical = 1000;
-	cameraSettings.roi.height_physical = 1000;
-	cameraSettings.frameCount = 1;
-	(*m_camera)->setSettings(cameraSettings);
-
-	cameraSettings = (*m_camera)->getSettings();
-
-	/*
 	 * We acquire three images here, one at the origin, and one each shifted in x- and y-direction.
 	 */
 	auto hysteresisCompensation{ 10.0 };// [µm] distance for compensation of the stage hysteresis
@@ -263,12 +261,12 @@ void ScaleCalibration::acquire() {
 	auto positions = std::vector<POINT2>{ { 0, 0 }, { m_Ds.x, 0 }, { 0, m_Ds.y } };
 
 	// Acquire memory for image acquisition
-	auto images = std::vector<std::vector<unsigned char>>(positions.size());
+	auto images = std::vector<std::vector<std::byte>>(positions.size());
 	for (auto& image : images) {
-		image.resize(cameraSettings.roi.bytesPerFrame);
+		image.resize(m_cameraSettings.roi.bytesPerFrame);
 	}
 
-	(*m_camera)->startAcquisition(cameraSettings);
+	(*m_camera)->startAcquisition(m_cameraSettings);
 
 	auto iteration{ 0 };
 	emit(s_scaleCalibrationAcquisitionProgress(iteration));
@@ -293,17 +291,21 @@ void ScaleCalibration::acquire() {
 		 * Acquire the camera image
 		 */
 
-		// acquire images
+		 // acquire images
 		(*m_camera)->getImageForAcquisition(&(images[iteration])[0], false);
 
 		// Sometimes the uEye camera returns a black image (only zeros), we try to catch this here by
 		// repeating the acquisition a maximum of 5 times
-		auto sum = simplemath::sum(images[iteration]);
+		// cast the vector type T
+		auto images_ = (std::vector<T> *) &(images[iteration]);
+
+		auto sum = simplemath::sum(*images_);
 		auto tryCount{ 0 };
 		while (sum == 0 && 5 > tryCount++) {
 			(*m_camera)->getImageForAcquisition(&(images[iteration])[0], false);
 
-			sum = simplemath::sum(images[iteration]);
+			auto images_ = (std::vector<T> *) &(images[iteration]);
+			sum = simplemath::sum(*images_);
 		}
 
 		++iteration;
@@ -316,19 +318,19 @@ void ScaleCalibration::acquire() {
 	// Create input matrices for OpenCV from camera images
 	auto imagesCV = std::vector<cv::Mat>(images.size());
 	for (gsl::index i{ 0 }; i < images.size(); i++) {
-		imagesCV[i] = cv::Mat(cameraSettings.roi.height_binned, cameraSettings.roi.width_binned, CV_8UC1, &(images[i])[0]);
+		imagesCV[i] = cv::Mat(m_cameraSettings.roi.height_binned, m_cameraSettings.roi.width_binned, CV_8UC1, &(images[i])[0]);
 	}
 
 	/*
 	 * Determine the shift in pixels
 	 */
 
-	#ifdef _DEBUG
-		// Show the input images for debugging
-		cv::imshow("Origin", imagesCV[0]);
-		cv::imshow("Dx", imagesCV[1]);
-		cv::imshow("Dy", imagesCV[2]);
-	#endif
+#ifdef _DEBUG
+	 // Show the input images for debugging
+	cv::imshow("Origin", imagesCV[0]);
+	cv::imshow("Dx", imagesCV[1]);
+	cv::imshow("Dy", imagesCV[2]);
+#endif
 
 	// We use template matching, so we have to create a template from the origin image
 	auto padding = 200.0;
@@ -336,9 +338,9 @@ void ScaleCalibration::acquire() {
 	auto templateROI = cv::Rect(padding, padding, size.width - 2 * padding, size.height - 2 * padding);
 	auto templ = imagesCV[0](templateROI);
 
-	#ifdef _DEBUG
-		cv::imshow("Template", templ);
-	#endif
+#ifdef _DEBUG
+	cv::imshow("Template", templ);
+#endif
 
 	auto outputX = cv::Mat{};
 	cv::matchTemplate(imagesCV[1], templ, outputX, cv::TemplateMatchModes::TM_SQDIFF);
@@ -372,7 +374,9 @@ void ScaleCalibration::acquire() {
 		ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
 
 		// Store the calibration in a file
-		save(images, cameraSettings, positions);
+
+		auto images_ = (std::vector<std::vector<T>> *) &images;
+		save((*images_), positions);
 
 		emit(s_scaleCalibrationChanged(m_scaleCalibration));
 
@@ -391,6 +395,20 @@ void ScaleCalibration::acquire() {
 	);
 
 	setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
+}
+
+/*
+ * Private slots
+ */
+
+void ScaleCalibration::acquire(std::unique_ptr <StorageWrapper>& storage) {}
+
+void ScaleCalibration::acquire() {
+	if (m_cameraSettings.readout.dataType == "unsigned short") {
+		__acquire<unsigned short>();
+	} else if (m_cameraSettings.readout.dataType == "unsigned char") {
+		__acquire<unsigned char>();
+	}
 }
 
 void ScaleCalibration::initialize() {

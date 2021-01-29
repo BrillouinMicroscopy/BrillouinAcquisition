@@ -20,15 +20,15 @@ public slots:
 	void stopPreview() override;
 	void startAcquisition(CAMERA_SETTINGS) override;
 	void stopAcquisition() override;
-	void getImageForAcquisition(unsigned char* buffer, bool preview = true) override;
+	void getImageForAcquisition(std::byte* buffer, bool preview = true) override;
 
 	void setCalibrationExposureTime(double exposureTime);
 
 private:
-	int acquireImage(unsigned char* buffer) override;
+	int acquireImage(std::byte* buffer) override;
 
 	template <typename T>
-	int acquireImage(unsigned char* buffer);
+	int acquireImage(std::byte* buffer);
 
 	void readOptions() override;
 	void readSettings() override;

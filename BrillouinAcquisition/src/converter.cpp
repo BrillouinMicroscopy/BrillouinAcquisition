@@ -12,11 +12,11 @@ void converter::init() {
 	m_phase = new phase();
 }
 
-void converter::convert(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, unsigned char* unpackedBuffer) {
+void converter::convert(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS* plotSettings, unsigned char* unpackedBuffer) {
 	conv(previewBuffer, plotSettings, unpackedBuffer);
 }
 
-void converter::convert(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, unsigned short* unpackedBuffer) {
+void converter::convert(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS* plotSettings, unsigned short* unpackedBuffer) {
 	conv(previewBuffer, plotSettings, unpackedBuffer);
 }
 
@@ -25,7 +25,7 @@ void converter::updateBackground() {
 }
 
 template <typename T>
-void converter::conv(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, T* unpackedBuffer) {
+void converter::conv(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS* plotSettings, T* unpackedBuffer) {
 	int dim_x = previewBuffer->m_bufferSettings.roi.width_binned;
 	int dim_y = previewBuffer->m_bufferSettings.roi.height_binned;
 

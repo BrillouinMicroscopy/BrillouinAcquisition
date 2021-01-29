@@ -59,6 +59,20 @@ void PointGrey::disconnectDevice() {
 void PointGrey::setSettings(CAMERA_SETTINGS settings) {
 	m_settings = settings;
 
+	if (m_settings.readout.pixelEncoding == L"Raw8") {
+		m_settings.readout.dataType = "unsigned char";
+	} else if (m_settings.readout.pixelEncoding == L"Mono8") {
+		m_settings.readout.dataType = "unsigned char";
+	} else if (m_settings.readout.pixelEncoding == L"Mono12") {
+		m_settings.readout.dataType = "unsigned short";
+	} else if (m_settings.readout.pixelEncoding == L"Mono16") {
+		m_settings.readout.dataType = "unsigned short";
+	} else {
+		// Fallback
+		m_settings.readout.pixelEncoding = L"Raw8";
+		m_settings.readout.dataType = "unsigned char";
+	}
+
 	/*
 	* Set the exposure time
 	*/
@@ -227,7 +241,7 @@ void PointGrey::stopAcquisition() {
 	}
 }
 
-void PointGrey::getImageForAcquisition(unsigned char* buffer, bool preview) {
+void PointGrey::getImageForAcquisition(std::byte* buffer, bool preview) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	if (m_settings.readout.triggerMode == L"Software") {
 		FireSoftwareTrigger();
@@ -245,7 +259,7 @@ void PointGrey::getImageForAcquisition(unsigned char* buffer, bool preview) {
  * Private definitions
  */
 
-int PointGrey::acquireImage(unsigned char* buffer) {
+int PointGrey::acquireImage(std::byte* buffer) {
 	auto rawImage = FlyCapture2::Image{};
 	auto tmp = m_camera.RetrieveBuffer(&rawImage);
 

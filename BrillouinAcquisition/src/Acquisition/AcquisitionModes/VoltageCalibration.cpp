@@ -28,7 +28,9 @@ void VoltageCalibration::startRepetitions() {
 
 	CAMERA_OPTIONS cameraOptions = (*m_camera)->getOptions();
 
-	// configure camera for measurement
+	/*
+	 * Configure the camera
+	 */
 	m_cameraSettings = (*m_camera)->getSettings();
 	// set ROI and readout parameters to default Brillouin values, exposure time and gain will be kept
 	if (m_cameraSettings.exposureTime > 0.003) {
@@ -39,10 +41,12 @@ void VoltageCalibration::startRepetitions() {
 	// Set camera to full frame
 	m_cameraSettings.roi.width_physical = cameraOptions.ROIWidthLimits[1];
 	m_cameraSettings.roi.height_physical = cameraOptions.ROIHeightLimits[1];
-	m_cameraSettings.readout.pixelEncoding = L"Raw8";
 	m_cameraSettings.readout.triggerMode = L"External";
 	m_cameraSettings.readout.cycleMode = L"Continuous";
 	m_cameraSettings.frameCount = (long long)m_acqSettings.Ux_steps * m_acqSettings.Uy_steps;
+	(*m_camera)->setSettings(m_cameraSettings);
+
+	m_cameraSettings = (*m_camera)->getSettings();
 
 	// start repetition
 	acquire();
@@ -214,13 +218,8 @@ void VoltageCalibration::save() {
 	writeCalibrationMap(group_voltages, "Uy", m_voltageCalibration.voltages.Uy);
 }
 
-/*
- * Private slots
- */
-
-void VoltageCalibration::acquire(std::unique_ptr <StorageWrapper> & storage) {}
-
-void VoltageCalibration::acquire() {
+template <typename T>
+void VoltageCalibration::__acquire() {
 	setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 
 	// move to Brillouin configuration
@@ -287,7 +286,7 @@ void VoltageCalibration::acquire() {
 		for (gsl::index i{ 0 }; i < chunkSize; i++) {
 
 			// read images from camera
-			std::vector<unsigned char> images(m_cameraSettings.roi.bytesPerFrame);
+			std::vector<std::byte> images(m_cameraSettings.roi.bytesPerFrame);
 
 			for (gsl::index mm{ 0 }; mm < 1; mm++) {
 				if (m_abort) {
@@ -300,13 +299,16 @@ void VoltageCalibration::acquire() {
 				(*m_camera)->getImageForAcquisition(&images[pointerPos], false);
 			}
 
+			// cast the image to type T
+			auto images_ = (std::vector<T> *) &images;
+
 			// Extract spot position from camera image
-			auto iterator_max = std::max_element(images.begin(), images.end());
-			auto index = std::distance(images.begin(), iterator_max);
+			auto iterator_max = std::max_element((*images_).begin(), (*images_).end());
+			auto index = std::distance((*images_).begin(), iterator_max);
 			if (*iterator_max > m_minimalIntensity) {
 				int y = m_cameraSettings.roi.height_binned - floor(index / m_cameraSettings.roi.width_binned);
 				int x = index % m_cameraSettings.roi.width_binned;
-				
+
 				POINT2 pos = (*m_ODTControl)->pixToMicroMeter({ (double)x, (double)y });
 
 				Ux_valid.push_back(m_acqSettings.voltages[i + chunkBegin].Ux);
@@ -337,3 +339,17 @@ void VoltageCalibration::acquire() {
 
 	setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
 }
+
+/*
+ * Private slots
+ */
+
+void VoltageCalibration::acquire() {
+	if (m_cameraSettings.readout.dataType == "unsigned short") {
+		__acquire<unsigned short>();
+	} else if (m_cameraSettings.readout.dataType == "unsigned char") {
+		__acquire<unsigned char>();
+	}
+}
+
+void VoltageCalibration::acquire(std::unique_ptr <StorageWrapper> & storage) {}

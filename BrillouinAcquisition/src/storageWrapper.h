@@ -27,10 +27,18 @@ public:
 	) noexcept : H5BM(parent, fullPath, flags) {};
 	~StorageWrapper();
 
-	QQueue<IMAGE*> m_payloadQueueBrillouin;
-	QQueue<ODTIMAGE*> m_payloadQueueODT;
-	QQueue<FLUOIMAGE*> m_payloadQueueFluorescence;
-	QQueue<CALIBRATION*> m_calibrationQueue;
+	QQueue<IMAGE<unsigned char>*> m_payloadQueueBrillouin_char;
+	QQueue<IMAGE<unsigned short>*> m_payloadQueueBrillouin_short;
+
+	QQueue<ODTIMAGE<unsigned char>*> m_payloadQueueODT_char;
+	QQueue<ODTIMAGE<unsigned short>*> m_payloadQueueODT_short;
+
+	QQueue<FLUOIMAGE<unsigned char>*> m_payloadQueueFluorescence_char;
+	QQueue<FLUOIMAGE<unsigned short>*> m_payloadQueueFluorescence_short;
+
+	QQueue<CALIBRATION<unsigned char>*> m_calibrationQueue_char;
+	QQueue<CALIBRATION<unsigned short>*> m_calibrationQueue_short;
+
 	bool m_abort{ false };
 
 	int m_writtenImagesNr{ 0 };
@@ -44,10 +52,17 @@ public slots:
 
 	void s_writeQueues();
 
-	void s_enqueuePayload(IMAGE*);
-	void s_enqueuePayload(ODTIMAGE*);
-	void s_enqueuePayload(FLUOIMAGE*);
-	void s_enqueueCalibration(CALIBRATION *cal);
+	void s_enqueuePayload(IMAGE<unsigned char>*);
+	void s_enqueuePayload(IMAGE<unsigned short>*);
+
+	void s_enqueuePayload(ODTIMAGE<unsigned char>*);
+	void s_enqueuePayload(ODTIMAGE<unsigned short>*);
+
+	void s_enqueuePayload(FLUOIMAGE<unsigned char>*);
+	void s_enqueuePayload(FLUOIMAGE<unsigned short>*);
+
+	void s_enqueueCalibration(CALIBRATION<unsigned char>* cal);
+	void s_enqueueCalibration(CALIBRATION<unsigned short>* cal);
 
 	void s_finishedQueueing();
 

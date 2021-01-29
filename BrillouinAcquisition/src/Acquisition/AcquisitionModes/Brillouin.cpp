@@ -89,6 +89,7 @@ void Brillouin::waitForNextRepetition() {
 
 		setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 		acquire(m_acquisition->m_storage);
+
 		if (m_abort) {
 			this->abortMode(m_acquisition->m_storage);
 			return;
@@ -316,7 +317,7 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 		(hsize_t)m_settings.camera.roi.width_binned
 	};
 
-	auto images = std::vector<unsigned char>((int64_t)m_settings.camera.roi.bytesPerFrame * m_settings.nrCalibrationImages);
+	auto images = std::vector<std::byte>((int64_t)m_settings.camera.roi.bytesPerFrame * m_settings.nrCalibrationImages);
 	for (gsl::index mm{ 0 }; mm < m_settings.nrCalibrationImages; mm++) {
 		if (m_abort) {
 			this->abortMode(storage);
@@ -329,32 +330,56 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 			(*m_andor)->getImageForAcquisition(&images[pointerPos]);
 		}
 	}
-	// cast the vector to unsigned short
-	std::vector<unsigned short>* images_ = (std::vector<unsigned short>*) & images;
 
 	auto binning = getBinningString();
 
 	// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
 	auto date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 		.toString(Qt::ISODateWithMs).toStdString();
-	CALIBRATION* cal = new CALIBRATION(
-		nrCalibrations,			// index
-		*images_,				// data
-		rank_cal,				// the rank of the calibration data
-		dims_cal,				// the dimension of the calibration data
-		m_settings.sample,		// the samplename
-		shift,					// the Brillouin shift of the sample
-		date,					// the datetime
-		m_settings.calibrationExposureTime, // the exposure time of the calibration
-		m_settings.camera.gain,
-		binning
-	);
 
-	QMetaObject::invokeMethod(
-		storage.get(),
-		[&storage = storage, cal]() { storage.get()->s_enqueueCalibration(cal); },
-		Qt::AutoConnection
-	);
+	if (m_settings.camera.readout.dataType == "unsigned short") {
+		// cast the image to unsigned short
+		auto images_ = (std::vector<unsigned short> *) & images;
+		auto cal = new CALIBRATION<unsigned short>(
+			nrCalibrations,			// index
+			*images_,				// data
+			rank_cal,				// the rank of the calibration data
+			dims_cal,				// the dimension of the calibration data
+			m_settings.sample,		// the samplename
+			shift,					// the Brillouin shift of the sample
+			date,					// the datetime
+			m_settings.calibrationExposureTime, // the exposure time of the calibration
+			m_settings.camera.gain,
+			binning
+			);
+
+		QMetaObject::invokeMethod(
+			storage.get(),
+			[&storage = storage, cal]() { storage.get()->s_enqueueCalibration(cal); },
+			Qt::AutoConnection
+		);
+	} else if (m_settings.camera.readout.dataType == "unsigned char") {
+		// cast the image to unsigned char
+		auto images_ = (std::vector<unsigned char> *) & images;
+		auto cal = new CALIBRATION<unsigned char>(
+			nrCalibrations,			// index
+			*images_,				// data
+			rank_cal,				// the rank of the calibration data
+			dims_cal,				// the dimension of the calibration data
+			m_settings.sample,		// the samplename
+			shift,					// the Brillouin shift of the sample
+			date,					// the datetime
+			m_settings.calibrationExposureTime, // the exposure time of the calibration
+			m_settings.camera.gain,
+			binning
+			);
+
+		QMetaObject::invokeMethod(
+			storage.get(),
+			[&storage = storage, cal]() { storage.get()->s_enqueueCalibration(cal); },
+			Qt::AutoConnection
+		);
+	}
 
 	nrCalibrations++;
 
@@ -453,6 +478,7 @@ std::string Brillouin::getRepetitionFilename() {
 	return string.toStdString();
 }
 
+
 /*
  * Private slots
  */
@@ -512,7 +538,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	/*
 	 * Construct positions vector for H5 file with row-major order: z, x, y
 	 */
-	// construct directions vectors
+	 // construct directions vectors
 	auto directionsX{ simplemath::linspace(m_settings.xMin, m_settings.xMax, m_settings.xSteps) };
 	auto directionsY{ simplemath::linspace(m_settings.yMin, m_settings.yMax, m_settings.ySteps) };
 	auto directionsZ{ simplemath::linspace(m_settings.zMin, m_settings.zMax, m_settings.zSteps) };
@@ -551,7 +577,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 		[&storage = storage]() { storage.get()->startWritingQueues(); },
 		Qt::AutoConnection
 	);
-	
+
 	auto rank_data{ 3 };
 	hsize_t dims_data[3] = {
 		(hsize_t)m_settings.camera.frameCount,
@@ -604,7 +630,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 		auto nextCalibration = int{ (int)(100 * (1e-3 * calibrationTimer.elapsed()) / (60 * m_settings.conCalibrationInterval)) };
 		emit(s_timeToCalibration(nextCalibration));
 
-		std::vector<unsigned char> images(m_settings.camera.roi.bytesPerFrame * m_settings.camera.frameCount);
+		std::vector<std::byte> images(m_settings.camera.roi.bytesPerFrame * m_settings.camera.frameCount);
 
 		for (gsl::index mm{ 0 }; mm < m_settings.camera.frameCount; mm++) {
 			if (m_abort) {
@@ -614,7 +640,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 			emit(s_positionChanged(m_orderedPositions[ll] - m_startPosition, mm + 1));
 			// acquire images
 			auto pointerPos = (int64_t)m_settings.camera.roi.bytesPerFrame * mm;
-			
+
 			if (m_andor) {
 				(*m_andor)->getImageForAcquisition(&images[pointerPos]);
 			} else {
@@ -623,17 +649,37 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 			}
 		}
 
-		// cast the vector to unsigned short
-		std::vector<unsigned short>* images_ = (std::vector<unsigned short> *) &images;
 
 		// asynchronously write image to disk
 		// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
 		auto date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 			.toString(Qt::ISODateWithMs).toStdString();
-		IMAGE* img = new IMAGE(m_orderedIndices[ll].x, m_orderedIndices[ll].y, m_orderedIndices[ll].z, rank_data, dims_data, date, *images_,
-			m_settings.camera.exposureTime, m_settings.camera.gain, binning);
 
-		// move stage to next position before saving the images
+		if (m_settings.camera.readout.dataType == "unsigned short") {
+			// cast the image to unsigned short
+			auto images_ = (std::vector<unsigned short> *) & images;
+			auto img = new IMAGE<unsigned short>(m_orderedIndices[ll].x, m_orderedIndices[ll].y, m_orderedIndices[ll].z, rank_data, dims_data, date, *images_,
+				m_settings.camera.exposureTime, m_settings.camera.gain, binning);
+
+			QMetaObject::invokeMethod(
+				storage.get(),
+				[&storage = storage, img]() { storage.get()->s_enqueuePayload(img); },
+				Qt::AutoConnection
+			);
+		} else if (m_settings.camera.readout.dataType == "unsigned char") {
+			// cast the image to unsigned char
+			auto images_ = (std::vector<unsigned char> *) & images;
+			auto img = new IMAGE<unsigned char>(m_orderedIndices[ll].x, m_orderedIndices[ll].y, m_orderedIndices[ll].z, rank_data, dims_data, date, *images_,
+				m_settings.camera.exposureTime, m_settings.camera.gain, binning);
+
+			QMetaObject::invokeMethod(
+				storage.get(),
+				[&storage = storage, img]() { storage.get()->s_enqueuePayload(img); },
+				Qt::AutoConnection
+			);
+		}
+
+		// move stage to next position
 		if (ll < ((gsl::index)nrPositions - 1)) {
 			if (m_scanControl) {
 				(*m_scanControl)->setPosition(m_orderedPositions[ll + 1]);
@@ -642,12 +688,6 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 				return;
 			}
 		}
-
-		QMetaObject::invokeMethod(
-			storage.get(),
-			[&storage = storage, img]() { storage.get()->s_enqueuePayload(img); },
-			Qt::AutoConnection
-		);
 
 		auto percentage{ 100 * (double)(ll + 1) / nrPositions };
 		auto remaining{ (int)(1e-3 * measurementTimer.elapsed() / (ll + 1) * ((int64_t)nrPositions - ll + 1)) };

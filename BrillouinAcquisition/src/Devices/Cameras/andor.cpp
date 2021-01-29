@@ -62,6 +62,18 @@ void Andor::disconnectDevice() {
 void Andor::setSettings(CAMERA_SETTINGS settings) {
 	m_settings = settings;
 
+	if (m_settings.readout.pixelEncoding == L"16 bit") {
+		m_settings.readout.dataType = "unsigned short";
+	} else if (m_settings.readout.pixelEncoding == L"12 bit") {
+		m_settings.readout.dataType = "unsigned short";
+	} else if (m_settings.readout.pixelEncoding == L"8 bit") {
+		m_settings.readout.dataType = "unsigned char";
+	} else {
+		// Fallback
+		m_settings.readout.pixelEncoding = L"8 bit";
+		m_settings.readout.dataType = "unsigned char";
+	}
+
 	// Set the pixel Encoding
 	AT_SetEnumeratedString(m_camera, L"Pixel Encoding", m_settings.readout.pixelEncoding.c_str());
 
@@ -168,7 +180,7 @@ void Andor::stopAcquisition() {
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
 }
 
-void Andor::getImageForAcquisition(unsigned char* buffer, bool preview) {
+void Andor::getImageForAcquisition(std::byte* buffer, bool preview) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	acquireImage(buffer);
 
@@ -204,7 +216,7 @@ bool Andor::getSensorCooling() {
  * Private definitions
  */
 
-int Andor::acquireImage(unsigned char* buffer) {
+int Andor::acquireImage(std::byte* buffer) {
 	// Pass this buffer to the SDK
 	auto UserBuffer = new unsigned char[m_settings.roi.bytesPerFrame];
 	AT_QueueBuffer(m_camera, UserBuffer, m_settings.roi.bytesPerFrame);
@@ -226,7 +238,7 @@ int Andor::acquireImage(unsigned char* buffer) {
 	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width_binned);
 	AT_GetInt(m_camera, L"AOIStride", &m_imageStride);
 
-	AT_ConvertBuffer(Buffer, buffer, m_settings.roi.width_binned, m_settings.roi.height_binned, m_imageStride, m_settings.readout.pixelEncoding.c_str(), L"Mono16");
+	AT_ConvertBuffer(Buffer, (AT_U8*)buffer, m_settings.roi.width_binned, m_settings.roi.height_binned, m_imageStride, m_settings.readout.pixelEncoding.c_str(), L"Mono16");
 
 	delete[] Buffer;
 	return 1;

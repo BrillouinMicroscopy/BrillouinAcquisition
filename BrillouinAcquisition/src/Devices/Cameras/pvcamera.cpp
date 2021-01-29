@@ -66,6 +66,18 @@ void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 
 	m_settings = settings;
 
+	if (m_settings.readout.pixelEncoding == L"16 bit") {
+		m_settings.readout.dataType = "unsigned short";
+	} else if (m_settings.readout.pixelEncoding == L"12 bit") {
+		m_settings.readout.dataType = "unsigned short";
+	} else if (m_settings.readout.pixelEncoding == L"8 bit") {
+		m_settings.readout.dataType = "unsigned char";
+	} else {
+		// Fallback
+		m_settings.readout.pixelEncoding = L"8 bit";
+		m_settings.readout.dataType = "unsigned char";
+	}
+
 	auto binning{ 1 };
 	if (m_settings.roi.binning == L"8x8") {
 		binning = 8;
@@ -188,7 +200,7 @@ void PVCamera::stopAcquisition() {
 	emit(s_acquisitionRunning(m_isAcquisitionRunning));
 }
 
-void PVCamera::getImageForAcquisition(unsigned char* buffer, bool preview) {
+void PVCamera::getImageForAcquisition(std::byte* buffer, bool preview) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 
 	auto i_retCode = PVCam::pl_exp_start_seq(m_camera, m_acquisitionBuffer);
@@ -261,7 +273,7 @@ bool PVCamera::getSensorCooling() {
  * Private definitions
  */
 
-int PVCamera::acquireImage(unsigned char* buffer) {
+int PVCamera::acquireImage(std::byte* buffer) {
 	auto status = PVCam::int16{};
 	auto byte_cnt = PVCam::uns32{};
 	auto buffer_cnt = PVCam::uns32{};

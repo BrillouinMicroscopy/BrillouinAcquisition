@@ -54,6 +54,11 @@ private:
 
 	void calculateVoltages(ODT_MODE);
 
+	std::string getBinningString();
+
+	template <typename T>
+	void __acquire(std::unique_ptr <StorageWrapper>& storage);
+
 	ODT_SETTINGS m_acqSettings{
 		0.3,
 		150,
@@ -69,8 +74,6 @@ private:
 	int m_algnPositionIndex{ 0 };
 
 	QTimer* m_algnTimer{ nullptr };
-
-	std::string getBinningString();
 
 private slots:
 	void acquire(std::unique_ptr <StorageWrapper> & storage) override;

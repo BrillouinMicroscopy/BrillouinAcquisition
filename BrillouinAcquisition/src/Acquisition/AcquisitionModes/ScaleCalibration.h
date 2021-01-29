@@ -50,7 +50,8 @@ private:
 	void abortMode(std::unique_ptr <StorageWrapper>& storage) override;
 	void abortMode();
 
-	void save(std::vector<std::vector<unsigned char>> images, CAMERA_SETTINGS settings, std::vector<POINT2> positions);
+	template <typename T>
+	void save(std::vector<std::vector<T>> images, std::vector<POINT2> positions);
 
 	void writePoint(H5::Group group, std::string name, POINT2 point);
 	POINT2 readPoint(H5::Group group, const std::string& name);
@@ -59,6 +60,10 @@ private:
 	void writeAttribute(H5::H5Object& parent, std::string name, std::string value);
 	void readAttribute(H5::H5Object& parent, std::string name, double* value);
 
+	template <typename T>
+	void __acquire();
+
+	CAMERA_SETTINGS m_cameraSettings;
 	Camera** m_camera{ nullptr };
 	POINT3 m_startPosition{ 0, 0, 0 };
 

@@ -108,13 +108,21 @@ void uEyeCam::setSettings(CAMERA_SETTINGS settings) {
 	  // Set the pixel format, possible values are: PIXEL_FORMAT_RAW8, PIXEL_FORMAT_MONO8, PIXEL_FORMAT_MONO12, PIXEL_FORMAT_MONO16
 	auto pixelFormat{ IS_CM_SENSOR_RAW8 };
 	if (m_settings.readout.pixelEncoding == L"Raw8") {
+		m_settings.readout.dataType = "unsigned char";
 		pixelFormat = IS_CM_SENSOR_RAW8;
 	} else if (m_settings.readout.pixelEncoding == L"Mono8") {
+		m_settings.readout.dataType = "unsigned char";
 		pixelFormat = IS_CM_MONO8;
 	} else if (m_settings.readout.pixelEncoding == L"Mono12") {
+		m_settings.readout.dataType = "unsigned short";
 		pixelFormat = IS_CM_MONO12;
 	} else if (m_settings.readout.pixelEncoding == L"Mono16") {
+		m_settings.readout.dataType = "unsigned short";
 		pixelFormat = IS_CM_MONO16;
+	} else {
+		m_settings.readout.pixelEncoding = L"Raw8";
+		m_settings.readout.dataType = "unsigned char";
+		pixelFormat = IS_CM_SENSOR_RAW8;
 	}
 	auto ret = uEye::is_SetColorMode(m_camera, pixelFormat);
 
@@ -224,7 +232,7 @@ void uEyeCam::stopAcquisition() {
 	}
 }
 
-void uEyeCam::getImageForAcquisition(unsigned char* buffer, bool preview) {
+void uEyeCam::getImageForAcquisition(std::byte* buffer, bool preview) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	// Calculate timeout in multiples of 10 ms to be slightly higher than exposure time
 	auto timeout{ (int)(500 * m_settings.exposureTime) };
@@ -245,7 +253,7 @@ void uEyeCam::getImageForAcquisition(unsigned char* buffer, bool preview) {
  * Private definitions
  */
 
-int uEyeCam::acquireImage(unsigned char* buffer) {
+int uEyeCam::acquireImage(std::byte* buffer) {
 
 	// Copy data to provided buffer
 	if (m_imageBuffer != NULL && buffer != nullptr) {

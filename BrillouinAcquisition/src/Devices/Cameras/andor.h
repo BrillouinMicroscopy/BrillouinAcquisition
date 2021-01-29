@@ -24,14 +24,14 @@ public slots:
 	void stopPreview() override;
 	void startAcquisition(CAMERA_SETTINGS) override;
 	void stopAcquisition() override;
-	void getImageForAcquisition(unsigned char* buffer, bool preview = true) override;
+	void getImageForAcquisition(std::byte* buffer, bool preview = true) override;
 
 	void setCalibrationExposureTime(double) override;
 	void setSensorCooling(bool cooling) override;
 	bool getSensorCooling() override;
 
 private:
-	int acquireImage(unsigned char* buffer) override;
+	int acquireImage(std::byte* buffer) override;
 
 	void readOptions() override;
 	void readSettings() override;

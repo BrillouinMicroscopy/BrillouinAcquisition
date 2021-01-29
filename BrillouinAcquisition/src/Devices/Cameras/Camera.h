@@ -43,7 +43,7 @@ public:
 	bool m_stopAcquisition{ false };
 
 	// preview buffer for live acquisition
-	PreviewBuffer<unsigned char>* m_previewBuffer = new PreviewBuffer<unsigned char>;
+	PreviewBuffer<std::byte>* m_previewBuffer = new PreviewBuffer<std::byte>;
 
 public slots:
 	virtual void setSettings(CAMERA_SETTINGS) = 0;
@@ -51,7 +51,7 @@ public slots:
 	virtual void stopPreview() = 0;
 	virtual void startAcquisition(CAMERA_SETTINGS) = 0;
 	virtual void stopAcquisition() = 0;
-	virtual void getImageForAcquisition(unsigned char* buffer, bool preview = true) = 0;
+	virtual void getImageForAcquisition(std::byte* buffer, bool preview = true) = 0;
 
 	virtual void setCalibrationExposureTime(double) {};
 	virtual void setSensorCooling(bool cooling) {};
@@ -60,7 +60,7 @@ public slots:
 	void setSetting(CAMERA_SETTING, double);
 
 protected:
-	virtual int acquireImage(unsigned char* buffer) = 0;
+	virtual int acquireImage(std::byte* buffer) = 0;
 
 	virtual void readOptions() = 0;
 	virtual void readSettings() = 0;

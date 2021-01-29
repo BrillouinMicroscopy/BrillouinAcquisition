@@ -136,7 +136,7 @@ void MockCamera::stopAcquisition() {
 	}
 }
 
-void MockCamera::getImageForAcquisition(unsigned char* buffer, bool preview) {
+void MockCamera::getImageForAcquisition(std::byte* buffer, bool preview) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 
 	acquireImage(buffer);
@@ -157,7 +157,7 @@ void MockCamera::setCalibrationExposureTime(double exposureTime) {
  */
 
 template <typename T>
-int MockCamera::acquireImage(unsigned char* buffer) {
+int MockCamera::acquireImage(std::byte* buffer) {
 
 	if (buffer == nullptr) {
 		return 0;
@@ -198,7 +198,7 @@ int MockCamera::acquireImage(unsigned char* buffer) {
 	return 1;
 }
 
-int MockCamera::acquireImage(unsigned char* buffer) {
+int MockCamera::acquireImage(std::byte* buffer) {
 	if (m_settings.readout.dataType == "unsigned short") {
 		return acquireImage<unsigned short>(buffer);
 	} if (m_settings.readout.dataType == "unsigned char") {

@@ -70,8 +70,10 @@ Q_DECLARE_METATYPE(std::vector<FLUORESCENCE_MODE>);
 Q_DECLARE_METATYPE(std::vector<POINT2>);
 Q_DECLARE_METATYPE(std::vector<POINT3>);
 Q_DECLARE_METATYPE(QSerialPort::SerialPortError);
-Q_DECLARE_METATYPE(IMAGE*);
-Q_DECLARE_METATYPE(CALIBRATION*);
+Q_DECLARE_METATYPE(IMAGE<unsigned char>*);
+Q_DECLARE_METATYPE(IMAGE<unsigned short>*);
+Q_DECLARE_METATYPE(CALIBRATION<unsigned char>*);
+Q_DECLARE_METATYPE(CALIBRATION<unsigned short>*);
 Q_DECLARE_METATYPE(ScanPreset);
 Q_DECLARE_METATYPE(DeviceElement);
 Q_DECLARE_METATYPE(SensorTemperature);
@@ -83,8 +85,10 @@ Q_DECLARE_METATYPE(VOLTAGE2);
 Q_DECLARE_METATYPE(ODT_MODE);
 Q_DECLARE_METATYPE(ODT_SETTING);
 Q_DECLARE_METATYPE(ODT_SETTINGS);
-Q_DECLARE_METATYPE(ODTIMAGE*);
-Q_DECLARE_METATYPE(FLUOIMAGE*);
+Q_DECLARE_METATYPE(ODTIMAGE<unsigned char>*);
+Q_DECLARE_METATYPE(ODTIMAGE<unsigned short>*);
+Q_DECLARE_METATYPE(FLUOIMAGE<unsigned char>*);
+Q_DECLARE_METATYPE(FLUOIMAGE<unsigned short>*);
 Q_DECLARE_METATYPE(FLUORESCENCE_SETTINGS);
 Q_DECLARE_METATYPE(FLUORESCENCE_MODE);
 Q_DECLARE_METATYPE(PLOT_SETTINGS*);
@@ -123,7 +127,7 @@ private:
 	void updateImage(PreviewBuffer<T>* previewBuffer, PLOT_SETTINGS* plotSettings);
 
 	template<typename T>
-	void plotting(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<T> unpackedBuffer);
+	void plotting(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<T> unpackedBuffer);
 
 	Ui::BrillouinAcquisitionClass* ui;
 	ScanControl::SCAN_DEVICE m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSECU;
@@ -319,10 +323,10 @@ private slots:
 	void updateImageBrillouin();
 	void updateImageODT();
 
-	void plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<unsigned char> unpackedBuffer);
-	void plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<unsigned short> unpackedBuffer);
-	void plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<double> unpackedBuffer);
-	void plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<float> unpackedBuffer);
+	void plot(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<unsigned char> unpackedBuffer);
+	void plot(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<unsigned short> unpackedBuffer);
+	void plot(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<double> unpackedBuffer);
+	void plot(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<float> unpackedBuffer);
 
 	void initializePlot(PLOT_SETTINGS plotSettings);
 
