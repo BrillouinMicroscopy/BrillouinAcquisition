@@ -34,6 +34,11 @@ void MockCamera::disconnectDevice() {
 }
 
 void MockCamera::setSettings(CAMERA_SETTINGS settings) {
+	// Don't do anything if an acquisition is running.
+	if (m_isAcquisitionRunning) {
+		return;
+	}
+
 	m_settings = settings;
 
 	auto binning{ 1 };
@@ -85,6 +90,10 @@ void MockCamera::setSettings(CAMERA_SETTINGS settings) {
 
 	// Read back the settings
 	readSettings();
+
+	if (m_isPreviewRunning) {
+		preparePreviewBuffer();
+	}
 }
 
 void MockCamera::startPreview() {
@@ -92,9 +101,9 @@ void MockCamera::startPreview() {
 	if (m_isAcquisitionRunning) {
 		return;
 	}
+	preparePreview();
 	m_isPreviewRunning = true;
 	m_stopPreview = false;
-	preparePreview();
 	getImageForPreview();
 
 	emit(s_previewRunning(m_isPreviewRunning));
@@ -232,6 +241,10 @@ void MockCamera::preparePreview() {
 
 	setSettings(m_settings);
 
+	preparePreviewBuffer();
+}
+
+void MockCamera::preparePreviewBuffer() {
 	auto bufferSettings = BUFFER_SETTINGS{ 5, (unsigned int)m_settings.roi.bytesPerFrame, m_settings.readout.dataType, m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());

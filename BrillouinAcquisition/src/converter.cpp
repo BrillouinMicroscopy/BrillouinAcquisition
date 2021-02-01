@@ -12,12 +12,23 @@ void converter::init() {
 	m_phase = new phase();
 }
 
-void converter::convert(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS* plotSettings, unsigned char* unpackedBuffer) {
-	conv(previewBuffer, plotSettings, unpackedBuffer);
-}
+void converter::convert(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS* plotSettings) {
+	{
+		std::lock_guard<std::mutex> lockGuard(previewBuffer->m_mutex);
+		// if no image is ready return immediately
+		if (!previewBuffer->m_buffer->m_usedBuffers->tryAcquire()) {
+			return;
+		}
 
-void converter::convert(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS* plotSettings, unsigned short* unpackedBuffer) {
-	conv(previewBuffer, plotSettings, unpackedBuffer);
+		if (previewBuffer->m_bufferSettings.bufferType == "unsigned short") {
+			auto unpackedBuffer = reinterpret_cast<unsigned short*>(previewBuffer->m_buffer->getReadBuffer());
+			conv(previewBuffer, plotSettings, unpackedBuffer);
+		} else if (previewBuffer->m_bufferSettings.bufferType == "unsigned char") {
+			auto unpackedBuffer = reinterpret_cast<unsigned char*>(previewBuffer->m_buffer->getReadBuffer());
+			conv(previewBuffer, plotSettings, unpackedBuffer);
+		}
+
+	}
 }
 
 void converter::updateBackground() {
@@ -26,8 +37,8 @@ void converter::updateBackground() {
 
 template <typename T>
 void converter::conv(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS* plotSettings, T* unpackedBuffer) {
-	int dim_x = previewBuffer->m_bufferSettings.roi.width_binned;
-	int dim_y = previewBuffer->m_bufferSettings.roi.height_binned;
+	auto dim_x = previewBuffer->m_bufferSettings.roi.width_binned;
+	auto dim_y = previewBuffer->m_bufferSettings.roi.height_binned;
 
 	std::vector<float> converted(unpackedBuffer, unpackedBuffer + (size_t)dim_x*dim_y);
 	switch (plotSettings->mode) {
@@ -40,5 +51,6 @@ void converter::conv(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS* plo
 	default:
 		break;
 	}
-	emit(s_converted(previewBuffer, plotSettings, converted));
+	previewBuffer->m_buffer->m_freeBuffers->release();
+	emit(s_converted(plotSettings, dim_x, dim_y, converted));
 }

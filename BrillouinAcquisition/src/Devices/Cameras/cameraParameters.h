@@ -50,7 +50,8 @@ struct CAMERA_SETTINGS {
 
 typedef enum class enCameraSetting {
 	EXPOSURE,
-	GAIN
+	GAIN,
+	ENCODING
 } CAMERA_SETTING;
 
 #endif // CAMERAPARAMETERS_H

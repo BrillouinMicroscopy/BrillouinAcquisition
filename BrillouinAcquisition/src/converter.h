@@ -45,8 +45,7 @@ public:
 public slots:
 	void init();
 
-	void convert(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS* plotSettings, unsigned char* unpackedBuffer);
-	void convert(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS* plotSettings, unsigned short* unpackedBuffer);
+	void convert(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS* plotSettings);
 
 	void updateBackground();
 
@@ -57,10 +56,10 @@ private:
 	void conv(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS* plotSettings, T* unpackedBuffer);
 
 signals:
-	void s_converted(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<unsigned char> unpackedBuffer);
-	void s_converted(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<unsigned short> unpackedBuffer);
-	void s_converted(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<double> unpackedBuffer);
-	void s_converted(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<float> unpackedBuffer);
+	void s_converted(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<unsigned char> unpackedBuffer);
+	void s_converted(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<unsigned short> unpackedBuffer);
+	void s_converted(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<double> unpackedBuffer);
+	void s_converted(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<float> unpackedBuffer);
 
 };
 

@@ -127,7 +127,7 @@ private:
 	void updateImage(PreviewBuffer<T>* previewBuffer, PLOT_SETTINGS* plotSettings);
 
 	template<typename T>
-	void plotting(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<T> unpackedBuffer);
+	void plotting(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<T> unpackedBuffer);
 
 	Ui::BrillouinAcquisitionClass* ui;
 	ScanControl::SCAN_DEVICE m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSECU;
@@ -323,10 +323,10 @@ private slots:
 	void updateImageBrillouin();
 	void updateImageODT();
 
-	void plot(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<unsigned char> unpackedBuffer);
-	void plot(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<unsigned short> unpackedBuffer);
-	void plot(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<double> unpackedBuffer);
-	void plot(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS * plotSettings, std::vector<float> unpackedBuffer);
+	void plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<unsigned char> unpackedBuffer);
+	void plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<unsigned short> unpackedBuffer);
+	void plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<double> unpackedBuffer);
+	void plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<float> unpackedBuffer);
 
 	void initializePlot(PLOT_SETTINGS plotSettings);
 
@@ -410,6 +410,7 @@ private slots:
 
 	void on_exposureTimeCameraODT_valueChanged(double exposureTime);
 	void on_gainCameraODT_valueChanged(double gain);
+	void on_pixelEncodingODT_currentIndexChanged(const QString& text);
 
 	void on_camera_displayMode_currentIndexChanged(const QString &text);
 	void on_setBackground_clicked();

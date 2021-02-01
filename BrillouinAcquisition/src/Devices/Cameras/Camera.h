@@ -58,6 +58,7 @@ public slots:
 	virtual bool getSensorCooling() { return false; };
 
 	void setSetting(CAMERA_SETTING, double);
+	void setSetting(CAMERA_SETTING, std::wstring);
 
 protected:
 	virtual int acquireImage(std::byte* buffer) = 0;

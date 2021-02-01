@@ -31,6 +31,17 @@ void Camera::setSetting(CAMERA_SETTING setting, double value) {
 	setSettings(m_settings);
 }
 
+void Camera::setSetting(CAMERA_SETTING setting, std::wstring value) {
+	switch (setting) {
+		case CAMERA_SETTING::ENCODING:
+			m_settings.readout.pixelEncoding = value;
+			break;
+		default:
+			return;
+	}
+	setSettings(m_settings);
+}
+
 /*
  * Protected slots
  */

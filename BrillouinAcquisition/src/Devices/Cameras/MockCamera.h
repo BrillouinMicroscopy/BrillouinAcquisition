@@ -33,6 +33,7 @@ private:
 	void readOptions() override;
 	void readSettings() override;
 	void preparePreview();
+	void preparePreviewBuffer();
 };
 
 #endif // MOCKCAMERA_H
