@@ -39,6 +39,10 @@ StorageWrapper::~StorageWrapper() {
 			auto cal = m_calibrationQueue_short.dequeue();
 			delete cal;
 		}
+		while (!m_calibrationQueue_int.isEmpty()) {
+			auto cal = m_calibrationQueue_int.dequeue();
+			delete cal;
+		}
 	}
 	queueTimer->stop();
 	delete queueTimer;
@@ -63,6 +67,10 @@ void StorageWrapper::s_enqueuePayload(IMAGE<unsigned short>* img) {
 	m_payloadQueueBrillouin_short.enqueue(img);
 }
 
+void StorageWrapper::s_enqueuePayload(IMAGE<unsigned int>* img) {
+	m_payloadQueueBrillouin_int.enqueue(img);
+}
+
 void StorageWrapper::s_enqueuePayload(ODTIMAGE<unsigned char>*img) {
 	m_payloadQueueODT_char.enqueue(img);
 }
@@ -85,6 +93,10 @@ void StorageWrapper::s_enqueueCalibration(CALIBRATION<unsigned char>*cal) {
 
 void StorageWrapper::s_enqueueCalibration(CALIBRATION<unsigned short>* cal) {
 	m_calibrationQueue_short.enqueue(cal);
+}
+
+void StorageWrapper::s_enqueueCalibration(CALIBRATION<unsigned int>* cal) {
+	m_calibrationQueue_int.enqueue(cal);
 }
 
 void StorageWrapper::s_finishedQueueing() {
@@ -126,6 +138,19 @@ void StorageWrapper::s_writeQueues() {
 			return;
 		}
 		auto img = m_payloadQueueBrillouin_short.dequeue();
+		setPayloadData(img);
+		//std::string info = "Image written " + std::to_string(m_writtenImagesNr);
+		//qInfo(logInfo()) << info.c_str();
+		m_writtenImagesNr++;
+		delete img;
+		img = nullptr;
+	}
+	while (!m_payloadQueueBrillouin_int.isEmpty()) {
+		if (m_abort) {
+			stopWritingQueues();
+			return;
+		}
+		auto img = m_payloadQueueBrillouin_int.dequeue();
 		setPayloadData(img);
 		//std::string info = "Image written " + std::to_string(m_writtenImagesNr);
 		//qInfo(logInfo()) << info.c_str();

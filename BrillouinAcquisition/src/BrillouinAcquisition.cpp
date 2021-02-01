@@ -147,6 +147,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<std::vector<float>>("std::vector<float>");
 	qRegisterMetaType<std::vector<unsigned short>>("std::vector<unsigned short>");
 	qRegisterMetaType<std::vector<unsigned char>>("std::vector<unsigned char>");
+	qRegisterMetaType<std::vector<unsigned int>>("std::vector<unsigned int>");
 	qRegisterMetaType<std::vector<FLUORESCENCE_MODE>>("std::vector<FLUORESCENCE_MODE>");
 	qRegisterMetaType<std::vector<POINT2>>("std::vector<POINT2>");
 	qRegisterMetaType<std::vector<POINT3>>("std::vector<POINT3>");
@@ -272,6 +273,12 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		&converter::s_converted,
 		this,
 		[this](PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<float> unpackedBuffer) { plot(plotSettings, dim_x, dim_y, unpackedBuffer); }
+	);
+	connection = QWidget::connect<void(converter::*)(PLOT_SETTINGS*, long long, long long, std::vector<int>)>(
+		m_converter,
+		&converter::s_converted,
+		this,
+		[this](PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<int> unpackedBuffer) { plot(plotSettings, dim_x, dim_y, unpackedBuffer); }
 	);
 
 	// start acquisition thread
@@ -1868,6 +1875,10 @@ void BrillouinAcquisition::plot(PLOT_SETTINGS* plotSettings, long long dim_x, lo
 }
 
 void BrillouinAcquisition::plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<float> unpackedBuffer) {
+	plotting(plotSettings, dim_x, dim_y, unpackedBuffer);
+}
+
+void BrillouinAcquisition::plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<int> unpackedBuffer) {
 	plotting(plotSettings, dim_x, dim_y, unpackedBuffer);
 }
 

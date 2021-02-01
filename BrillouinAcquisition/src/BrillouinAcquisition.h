@@ -66,6 +66,7 @@ Q_DECLARE_METATYPE(std::vector<double>);
 Q_DECLARE_METATYPE(std::vector<float>);
 Q_DECLARE_METATYPE(std::vector<unsigned char>);
 Q_DECLARE_METATYPE(std::vector<unsigned short>);
+Q_DECLARE_METATYPE(std::vector<unsigned int>);
 Q_DECLARE_METATYPE(std::vector<FLUORESCENCE_MODE>);
 Q_DECLARE_METATYPE(std::vector<POINT2>);
 Q_DECLARE_METATYPE(std::vector<POINT3>);
@@ -327,6 +328,7 @@ private slots:
 	void plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<unsigned short> unpackedBuffer);
 	void plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<double> unpackedBuffer);
 	void plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<float> unpackedBuffer);
+	void plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<int> unpackedBuffer);
 
 	void initializePlot(PLOT_SETTINGS plotSettings);
 

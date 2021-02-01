@@ -29,6 +29,7 @@ public:
 
 	QQueue<IMAGE<unsigned char>*> m_payloadQueueBrillouin_char;
 	QQueue<IMAGE<unsigned short>*> m_payloadQueueBrillouin_short;
+	QQueue<IMAGE<unsigned int>*> m_payloadQueueBrillouin_int;
 
 	QQueue<ODTIMAGE<unsigned char>*> m_payloadQueueODT_char;
 	QQueue<ODTIMAGE<unsigned short>*> m_payloadQueueODT_short;
@@ -38,6 +39,7 @@ public:
 
 	QQueue<CALIBRATION<unsigned char>*> m_calibrationQueue_char;
 	QQueue<CALIBRATION<unsigned short>*> m_calibrationQueue_short;
+	QQueue<CALIBRATION<unsigned int>*> m_calibrationQueue_int;
 
 	bool m_abort{ false };
 
@@ -54,6 +56,7 @@ public slots:
 
 	void s_enqueuePayload(IMAGE<unsigned char>*);
 	void s_enqueuePayload(IMAGE<unsigned short>*);
+	void s_enqueuePayload(IMAGE<unsigned int>*);
 
 	void s_enqueuePayload(ODTIMAGE<unsigned char>*);
 	void s_enqueuePayload(ODTIMAGE<unsigned short>*);
@@ -63,6 +66,7 @@ public slots:
 
 	void s_enqueueCalibration(CALIBRATION<unsigned char>* cal);
 	void s_enqueueCalibration(CALIBRATION<unsigned short>* cal);
+	void s_enqueueCalibration(CALIBRATION<unsigned int>* cal);
 
 	void s_finishedQueueing();
 

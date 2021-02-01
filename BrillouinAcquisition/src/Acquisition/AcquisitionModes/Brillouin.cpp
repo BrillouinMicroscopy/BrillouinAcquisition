@@ -379,6 +379,27 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 			[&storage = storage, cal]() { storage.get()->s_enqueueCalibration(cal); },
 			Qt::AutoConnection
 		);
+	} else if (m_settings.camera.readout.dataType == "unsigned int") {
+		// cast the image to unsigned char
+		auto images_ = (std::vector<unsigned int> *) & images;
+		auto cal = new CALIBRATION<unsigned int>(
+			nrCalibrations,			// index
+			*images_,				// data
+			rank_cal,				// the rank of the calibration data
+			dims_cal,				// the dimension of the calibration data
+			m_settings.sample,		// the samplename
+			shift,					// the Brillouin shift of the sample
+			date,					// the datetime
+			m_settings.calibrationExposureTime, // the exposure time of the calibration
+			m_settings.camera.gain,
+			binning
+			);
+
+		QMetaObject::invokeMethod(
+			storage.get(),
+			[&storage = storage, cal]() { storage.get()->s_enqueueCalibration(cal); },
+			Qt::AutoConnection
+		);
 	}
 
 	nrCalibrations++;
@@ -670,6 +691,17 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 			// cast the image to unsigned char
 			auto images_ = (std::vector<unsigned char> *) & images;
 			auto img = new IMAGE<unsigned char>(m_orderedIndices[ll].x, m_orderedIndices[ll].y, m_orderedIndices[ll].z, rank_data, dims_data, date, *images_,
+				m_settings.camera.exposureTime, m_settings.camera.gain, binning);
+
+			QMetaObject::invokeMethod(
+				storage.get(),
+				[&storage = storage, img]() { storage.get()->s_enqueuePayload(img); },
+				Qt::AutoConnection
+			);
+		} else if (m_settings.camera.readout.dataType == "unsigned int") {
+			// cast the image to unsigned char
+			auto images_ = (std::vector<unsigned int> *) & images;
+			auto img = new IMAGE<unsigned int>(m_orderedIndices[ll].x, m_orderedIndices[ll].y, m_orderedIndices[ll].z, rank_data, dims_data, date, *images_,
 				m_settings.camera.exposureTime, m_settings.camera.gain, binning);
 
 			QMetaObject::invokeMethod(

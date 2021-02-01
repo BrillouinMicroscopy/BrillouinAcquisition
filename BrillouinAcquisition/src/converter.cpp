@@ -26,6 +26,9 @@ void converter::convert(PreviewBuffer<std::byte>* previewBuffer, PLOT_SETTINGS* 
 		} else if (previewBuffer->m_bufferSettings.bufferType == "unsigned char") {
 			auto unpackedBuffer = reinterpret_cast<unsigned char*>(previewBuffer->m_buffer->getReadBuffer());
 			conv(previewBuffer, plotSettings, unpackedBuffer);
+		} else if (previewBuffer->m_bufferSettings.bufferType == "unsigned int") {
+			auto unpackedBuffer = reinterpret_cast<unsigned int*>(previewBuffer->m_buffer->getReadBuffer());
+			conv(previewBuffer, plotSettings, unpackedBuffer);
 		}
 
 	}

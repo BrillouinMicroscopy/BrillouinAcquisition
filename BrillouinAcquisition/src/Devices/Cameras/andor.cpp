@@ -62,16 +62,23 @@ void Andor::disconnectDevice() {
 void Andor::setSettings(CAMERA_SETTINGS settings) {
 	m_settings = settings;
 
-	if (m_settings.readout.pixelEncoding == L"16 bit") {
+	if (m_settings.readout.pixelEncoding == L"Mono12") {
 		m_settings.readout.dataType = "unsigned short";
-	} else if (m_settings.readout.pixelEncoding == L"12 bit") {
+		m_outputPixelEncoding = L"Mono16";
+	} else if (m_settings.readout.pixelEncoding == L"Mono12Packed") {
 		m_settings.readout.dataType = "unsigned short";
-	} else if (m_settings.readout.pixelEncoding == L"8 bit") {
-		m_settings.readout.dataType = "unsigned char";
+		m_outputPixelEncoding = L"Mono16";
+	} else if (m_settings.readout.pixelEncoding == L"Mono16") {
+		m_settings.readout.dataType = "unsigned short";
+		m_outputPixelEncoding = L"Mono16";
+	} else if (m_settings.readout.pixelEncoding == L"Mono32") {
+		m_settings.readout.dataType = "unsigned int";
+		m_outputPixelEncoding = L"Mono32";
 	} else {
 		// Fallback
-		m_settings.readout.pixelEncoding = L"8 bit";
-		m_settings.readout.dataType = "unsigned char";
+		m_settings.readout.pixelEncoding = L"Mono16";
+		m_settings.readout.dataType = "unsigned short";
+		m_outputPixelEncoding = L"Mono16";
 	}
 
 	// Set the pixel Encoding
@@ -162,7 +169,7 @@ void Andor::startAcquisition(CAMERA_SETTINGS settings) {
 
 	setSettings(settings);
 
-	auto bufferSettings = BUFFER_SETTINGS{ 4, (unsigned int)m_settings.roi.bytesPerFrame, "unsigned short", m_settings.roi };
+	auto bufferSettings = BUFFER_SETTINGS{ 4, (unsigned int)m_settings.roi.bytesPerFrame, m_settings.readout.dataType, m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
@@ -228,7 +235,7 @@ int Andor::acquireImage(std::byte* buffer) {
 	unsigned char* Buffer{ nullptr };
 	auto ret = AT_WaitBuffer(m_camera, &Buffer, &m_settings.roi.bytesPerFrame, 1500 * m_settings.exposureTime);
 	// return if AT_WaitBuffer timed out
-	if (ret == AT_ERR_TIMEDOUT) {
+	if (ret != AT_SUCCESS) {
 		return 0;
 	}
 
@@ -238,7 +245,15 @@ int Andor::acquireImage(std::byte* buffer) {
 	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width_binned);
 	AT_GetInt(m_camera, L"AOIStride", &m_imageStride);
 
-	AT_ConvertBuffer(Buffer, (AT_U8*)buffer, m_settings.roi.width_binned, m_settings.roi.height_binned, m_imageStride, m_settings.readout.pixelEncoding.c_str(), L"Mono16");
+	AT_ConvertBuffer(
+		Buffer,
+		(AT_U8*)buffer,
+		m_settings.roi.width_binned,
+		m_settings.roi.height_binned,
+		m_imageStride,
+		m_settings.readout.pixelEncoding.c_str(),
+		m_outputPixelEncoding.c_str()
+	);
 
 	delete[] Buffer;
 	return 1;
@@ -256,6 +271,14 @@ void Andor::readOptions() {
 
 	AT_GetIntMin(m_camera, L"AOIWidth", &m_options.ROIWidthLimits[0]);
 	AT_GetIntMax(m_camera, L"AOIWidth", &m_options.ROIWidthLimits[1]);
+
+	/*
+	 * We don't offer L"Mono12Packed" and L"Mono32" here for now.
+	 * With L"Mono12Packed" the encoding seems to be broken and
+	 * with L"Mono32" the camera won't accept intermediate stoppings of the acquisition (WTF??),
+	 * so we cannot adjust the exposure time for the calibration.
+	 */
+	m_options.pixelEncodings = { L"Mono12", L"Mono16" };
 
 	emit(optionsChanged(m_options));
 }
@@ -321,7 +344,7 @@ void Andor::preparePreview() {
 
 	setSettings(m_settings);
 
-	auto bufferSettings = BUFFER_SETTINGS{ 5, (unsigned int)m_settings.roi.bytesPerFrame, "unsigned short", m_settings.roi };
+	auto bufferSettings = BUFFER_SETTINGS{ 5, (unsigned int)m_settings.roi.bytesPerFrame, m_settings.readout.dataType, m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 

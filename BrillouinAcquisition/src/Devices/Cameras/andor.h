@@ -55,6 +55,7 @@ private:
 	QTimer* m_tempTimer{ nullptr };
 	SensorTemperature m_sensorTemperature;
 	AT_64 m_imageStride{ 0 };
+	std::wstring m_outputPixelEncoding{ L"Mono16" };
 
 private slots:
 	void checkSensorTemperature();

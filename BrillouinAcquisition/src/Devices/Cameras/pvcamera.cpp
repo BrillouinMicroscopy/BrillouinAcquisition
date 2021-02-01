@@ -671,7 +671,7 @@ void PVCamera::preparePreview() {
 	if (circBufferFrames % 2) {
 		circBufferFrames += 1;
 	}
-	auto bufferSettings = BUFFER_SETTINGS{ circBufferFrames, (unsigned int)m_settings.roi.bytesPerFrame, "unsigned short", m_settings.roi };
+	auto bufferSettings = BUFFER_SETTINGS{ circBufferFrames, (unsigned int)m_settings.roi.bytesPerFrame, m_settings.readout.dataType, m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 
@@ -713,7 +713,7 @@ void PVCamera::prepareAcquisition(CAMERA_SETTINGS settings) {
 
 	m_acquisitionBuffer = new (std::nothrow) PVCam::uns16[m_settings.roi.bytesPerFrame / sizeof(PVCam::uns16)];
 
-	auto bufferSettings = BUFFER_SETTINGS{ 8, (unsigned int)m_settings.roi.bytesPerFrame, "unsigned short", m_settings.roi };
+	auto bufferSettings = BUFFER_SETTINGS{ 8, (unsigned int)m_settings.roi.bytesPerFrame, m_settings.readout.dataType, m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 }
