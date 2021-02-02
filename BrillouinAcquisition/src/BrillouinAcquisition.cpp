@@ -128,7 +128,7 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		m_Brillouin,
 		&Brillouin::s_orderedPositionsChanged,
 		this,
-		[this](std::vector<POINT3> orderedPositions) { on_AOI_changed(orderedPositions); }
+		[this](std::vector<POINT3> orderedPositions) { AOI_changed(orderedPositions); }
 	);
 
 	m_Brillouin->determineScanOrder();
@@ -2294,13 +2294,13 @@ void BrillouinAcquisition::on_action_Scale_calibration_acquire_triggered() {
 		m_scaleCalibrationDialogUi.button_apply,
 		&QPushButton::clicked,
 		this,
-		[this]() { on_scaleCalibrationButtonApply_clicked(); }
+		[this]() { scaleCalibrationButtonApply_clicked(); }
 	);
 	connection = QWidget::connect(
 		m_scaleCalibrationDialogUi.button_acquire,
 		&QPushButton::clicked,
 		this,
-		[this]() { on_scaleCalibrationButtonAcquire_clicked(); }
+		[this]() { scaleCalibrationButtonAcquire_clicked(); }
 	);
 
 	// Connect translation distance boxes
@@ -2436,7 +2436,7 @@ void BrillouinAcquisition::showScaleCalibrationStatus(std::string title, std::st
 	msgBox.exec();
 }
 
-void BrillouinAcquisition::on_scaleCalibrationButtonApply_clicked() {
+void BrillouinAcquisition::scaleCalibrationButtonApply_clicked() {
 	QMetaObject::invokeMethod(
 		m_scaleCalibration,
 		[&m_scaleCalibration = m_scaleCalibration]() {
@@ -2446,7 +2446,7 @@ void BrillouinAcquisition::on_scaleCalibrationButtonApply_clicked() {
 	);
 }
 
-void BrillouinAcquisition::on_scaleCalibrationButtonAcquire_clicked() {
+void BrillouinAcquisition::scaleCalibrationButtonAcquire_clicked() {
 	QMetaObject::invokeMethod(
 		m_scaleCalibration,
 		[&m_scaleCalibration = m_scaleCalibration]() {
@@ -2727,7 +2727,7 @@ void BrillouinAcquisition::initScanControl() {
 	initializeLaserPositionLocation();
 
 	// Update positions preview
-	on_AOI_changed(m_positionsMicrometer);
+	AOI_changed(m_positionsMicrometer);
 
 	// reestablish m_scanControl connections
 	static QMetaObject::Connection connection;
@@ -3457,7 +3457,7 @@ void BrillouinAcquisition::on_showOverlay_stateChanged(int show) {
 /*
  * React when the ordered positions have changed
  */
-void BrillouinAcquisition::on_AOI_changed(std::vector<POINT3> orderedPositions) {
+void BrillouinAcquisition::AOI_changed(std::vector<POINT3> orderedPositions) {
 	if (m_scanControl) {
 		m_positionsMicrometer = orderedPositions;
 		m_positionsPixel = m_scanControl->getPositionsPix(m_positionsMicrometer);

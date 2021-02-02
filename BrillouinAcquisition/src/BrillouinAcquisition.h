@@ -298,8 +298,8 @@ private slots:
 	void showScaleCalibrationStatus(std::string title, std::string message);
 
 	void closeScaleCalibrationDialog();
-	void on_scaleCalibrationButtonApply_clicked();
-	void on_scaleCalibrationButtonAcquire_clicked();
+	void scaleCalibrationButtonApply_clicked();
+	void scaleCalibrationButtonAcquire_clicked();
 
 	void setTranslationDistanceX(double dx);
 	void setTranslationDistanceY(double dy);
@@ -480,7 +480,7 @@ private slots:
 	void on_stepsY_valueChanged(int);
 	void on_stepsZ_valueChanged(int);
 	void on_showOverlay_stateChanged(int);
-	void on_AOI_changed(std::vector<POINT3> orderedPositions);
+	void AOI_changed(std::vector<POINT3> orderedPositions);
 	void on_scaleCalibrationChanged(std::vector<POINT2> positions);
 	void update_AOI_preview();
 
