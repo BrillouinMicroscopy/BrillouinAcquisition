@@ -384,6 +384,14 @@ BrillouinAcquisition::~BrillouinAcquisition() {
 		m_ODT->deleteLater();
 		m_ODT = nullptr;
 	}
+	if (m_converter) {
+		m_converter->deleteLater();
+		m_converter = nullptr;
+	}
+	if (tableModel) {
+		tableModel->deleteLater();
+		tableModel = nullptr;
+	}
 	if (m_Fluorescence) {
 		m_Fluorescence->deleteLater();
 		m_Fluorescence = nullptr;
@@ -2092,6 +2100,10 @@ void BrillouinAcquisition::cancelSettings() {
 
 void BrillouinAcquisition::initSettingsDialog() {
 
+	if (m_settingsDialog) {
+		m_settingsDialog->deleteLater();
+		m_settingsDialog = nullptr;
+	}
 	m_settingsDialog = new QDialog(this, Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
 	m_settingsDialog->setWindowTitle("Settings");
 	m_settingsDialog->setWindowModality(Qt::ApplicationModal);
@@ -2273,7 +2285,9 @@ void BrillouinAcquisition::on_action_Voltage_calibration_load_triggered() {
 }
 
 void BrillouinAcquisition::on_action_Scale_calibration_acquire_triggered() {
-	m_scaleCalibrationDialog = new QDialog(this, Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+	if (!m_scaleCalibrationDialog) {
+		m_scaleCalibrationDialog = new QDialog(this, Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+	}
 	m_scaleCalibrationDialogUi.setupUi(m_scaleCalibrationDialog);
 
 	m_scaleCalibrationDialog->setWindowTitle("Scale calibration");
@@ -2817,14 +2831,14 @@ void BrillouinAcquisition::initScanControl() {
 }
 
 void BrillouinAcquisition::initODT() {
+	if (m_ODT) {
+		m_ODT->deleteLater();
+		m_ODT = nullptr;
+	}
 	if (!m_scanControl->supportsCapability(Capabilities::ODT)) {
 		int tabIndexODT = ui->acquisitionModeTabs->indexOf(ui->ODT);
 		if (tabIndexODT > -1) {
 			ui->acquisitionModeTabs->removeTab(tabIndexODT);
-		}
-		if (m_ODT) {
-			m_ODT->deleteLater();
-			m_ODT = nullptr;
 		}
 	} else {
 		m_ODT = new ODT(nullptr, m_acquisition, &m_brightfieldCamera, (ODTControl**)&m_scanControl);
@@ -2882,12 +2896,12 @@ void BrillouinAcquisition::initODT() {
 }
 
 void BrillouinAcquisition::initVoltageCalibration() {
+	if (m_voltageCalibration) {
+		m_voltageCalibration->deleteLater();
+		m_voltageCalibration = nullptr;
+	}
 	if (!m_scanControl->supportsCapability(Capabilities::VoltageCalibration)) {
 		ui->menu_Voltage_calibration->menuAction()->setVisible(false);
-		if (m_voltageCalibration) {
-			m_voltageCalibration->deleteLater();
-			m_voltageCalibration = nullptr;
-		}
 	} else {
 		m_voltageCalibration = new VoltageCalibration(nullptr, m_acquisition, &m_brightfieldCamera, (ODTControl**)&m_scanControl);
 		ui->menu_Voltage_calibration->menuAction()->setVisible(true);
@@ -2954,14 +2968,14 @@ void BrillouinAcquisition::initScaleCalibration() {
 }
 
 void BrillouinAcquisition::initFluorescence() {
+	if (m_Fluorescence) {
+		m_Fluorescence->deleteLater();
+		m_Fluorescence = nullptr;
+	}
 	if (!m_hasFluorescence) {
 		int tabIndexFluorescence = ui->acquisitionModeTabs->indexOf(ui->Fluorescence);
 		if (tabIndexFluorescence > -1) {
 			ui->acquisitionModeTabs->removeTab(tabIndexFluorescence);
-		}
-		if (m_Fluorescence) {
-			m_Fluorescence->deleteLater();
-			m_Fluorescence = nullptr;
 		}
 	} else {
 		m_Fluorescence = new Fluorescence(nullptr, m_acquisition, &m_brightfieldCamera, &m_scanControl);

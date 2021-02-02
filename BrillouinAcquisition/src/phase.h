@@ -18,7 +18,6 @@
 class phase {
 
 private:
-
 	fftw_complex* m_background{ nullptr };
 	fftw_complex* m_in_FFT{ nullptr };
 	fftw_complex* m_out_FFT{ nullptr };
@@ -136,7 +135,12 @@ public:
 			fftw_free(m_background);
 		}
 
-		delete(m_unwrapper);
+		if (m_unwrapper) {
+			delete m_unwrapper;
+		}
+		if (m_xsample) {
+			delete m_xsample;
+		}
 	}
 
 	/*

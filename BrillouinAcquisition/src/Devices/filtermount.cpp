@@ -7,6 +7,9 @@ void FilterMount::init() {
 
 FilterMount::~FilterMount() {
 	disconnectDevice();
+	if (m_comObject) {
+		m_comObject->deleteLater();
+	}
 }
 
 void FilterMount::connectDevice() {

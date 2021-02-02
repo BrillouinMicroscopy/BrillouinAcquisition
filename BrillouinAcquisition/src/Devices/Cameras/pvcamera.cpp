@@ -8,6 +8,18 @@
 PVCamera::~PVCamera() {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	disconnectDevice();
+	if (m_tempTimer) {
+		m_tempTimer->stop();
+		m_tempTimer->deleteLater();
+	}
+	if (m_buffer) {
+		delete[] m_buffer;
+		m_buffer = nullptr;
+	}
+	if (m_acquisitionBuffer) {
+		delete[] m_acquisitionBuffer;
+		m_acquisitionBuffer = nullptr;
+	}
 	if (m_isInitialised) {
 		PVCam::pl_pvcam_uninit();
 	}
@@ -718,6 +730,10 @@ void PVCamera::prepareAcquisition(CAMERA_SETTINGS settings) {
 	
 	setSettings(settings);
 
+	if (m_acquisitionBuffer) {
+		delete[] m_acquisitionBuffer;
+		m_acquisitionBuffer = nullptr;
+	}
 	m_acquisitionBuffer = new (std::nothrow) PVCam::uns16[m_settings.roi.bytesPerFrame / sizeof(PVCam::uns16)];
 
 	auto bufferSettings = BUFFER_SETTINGS{ 8, (unsigned int)m_settings.roi.bytesPerFrame, m_settings.readout.dataType, m_settings.roi };

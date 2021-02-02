@@ -53,9 +53,18 @@ ZeissMTB_Erlangen::ZeissMTB_Erlangen() noexcept {
 }
 
 ZeissMTB_Erlangen::~ZeissMTB_Erlangen() {
-	m_positionTimer->stop();
-	m_elementPositionTimer->stop();
 	disconnectDevice();
+	if (m_positionTimer) {
+		m_positionTimer->stop();
+		m_positionTimer->deleteLater();
+	}
+	if (m_elementPositionTimer) {
+		m_elementPositionTimer->stop();
+		m_elementPositionTimer->deleteLater();
+	}
+	if (m_Mirror) {
+		m_Mirror->deleteLater();
+	}
 	/*
 	 * Clean up Zeiss MTB handles
 	 */

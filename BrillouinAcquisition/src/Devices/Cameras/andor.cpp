@@ -8,6 +8,10 @@
 Andor::~Andor() {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	disconnectDevice();
+	if (m_tempTimer) {
+		m_tempTimer->stop();
+		m_tempTimer->deleteLater();
+	}
 	if (m_isInitialised) {
 		AT_FinaliseLibrary();
 	}
@@ -174,7 +178,11 @@ int Andor::acquireImage(std::byte* buffer) {
 		m_outputPixelEncoding.c_str()
 	);
 
-	delete[] Buffer;
+	// Buffer and UserBuffer point to the same address, so we just have to delete one
+	if (Buffer) {
+		delete[] Buffer;
+		Buffer = nullptr;
+	}
 	return 1;
 }
 

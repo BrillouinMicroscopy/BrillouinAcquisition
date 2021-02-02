@@ -5,7 +5,10 @@ converter::converter() {
 }
 
 converter::~converter() {
-	delete m_phase;
+	if (m_phase) {
+		delete m_phase;
+		m_phase = nullptr;
+	}
 }
 
 void converter::init() {
