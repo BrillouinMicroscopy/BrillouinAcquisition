@@ -1805,7 +1805,6 @@ void BrillouinAcquisition::showFluorescencePreviewRunning(FLUORESCENCE_MODE mode
 void BrillouinAcquisition::startPreview(bool isRunning) {
 	// if preview was not running, start it, else leave it running (don't start it twice)
 	if (!m_previewRunning && isRunning) {
-		m_previewRunning = true;
 		updateImageBrillouin();
 	}
 	m_previewRunning = isRunning;
@@ -1814,7 +1813,6 @@ void BrillouinAcquisition::startPreview(bool isRunning) {
 void BrillouinAcquisition::startBrightfieldPreview(bool isRunning) {
 	// if preview was not running, start it, else leave it running (don't start it twice)
 	if (!m_brightfieldPreviewRunning && isRunning) {
-		m_brightfieldPreviewRunning = true;
 		updateImageODT();
 	}
 	m_brightfieldPreviewRunning = isRunning;
@@ -1828,14 +1826,6 @@ void BrillouinAcquisition::updateImageBrillouin() {
 	}
 	if (m_previewRunning) {
 		updateImage(m_andor->m_previewBuffer, &m_BrillouinPlot);
-
-		QMetaObject::invokeMethod(
-			this,
-			[this]() {
-				updateImageBrillouin();
-			},
-			Qt::QueuedConnection
-		);
 	}
 }
 
@@ -1847,14 +1837,6 @@ void BrillouinAcquisition::updateImageODT() {
 	}
 	if (m_brightfieldPreviewRunning) {
 		updateImage(m_brightfieldCamera->m_previewBuffer, &m_ODTPlot);
-
-		QMetaObject::invokeMethod(
-			this,
-			[this]() {
-				updateImageODT();
-			},
-			Qt::QueuedConnection
-		);
 	}
 }
 
@@ -3078,6 +3060,13 @@ void BrillouinAcquisition::initCameraBrillouin() {
 
 	connection = QWidget::connect(
 		m_andor,
+		&Camera::s_imageReady,
+		this,
+		[this] { updateImageBrillouin(); }
+	);
+
+	connection = QWidget::connect(
+		m_andor,
 		&Camera::s_previewRunning,
 		this,
 		[this](bool isRunning) { showPreviewRunning(isRunning); }
@@ -3188,6 +3177,13 @@ void BrillouinAcquisition::initCamera() {
 		&Camera::connectedDevice,
 		this,
 		[this](bool isConnected) { brightfieldCameraConnectionChanged(isConnected); }
+	);
+
+	connection = QWidget::connect(
+		m_brightfieldCamera,
+		&Camera::s_imageReady,
+		this,
+		[this] { updateImageODT(); }
 	);
 
 	connection = QWidget::connect(

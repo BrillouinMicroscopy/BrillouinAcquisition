@@ -72,13 +72,14 @@ void Camera::getImageForPreview() {
 
 		// if no image is ready return immediately
 		if (!m_previewBuffer->m_buffer->m_freeBuffers->tryAcquire()) {
-			Sleep(50);
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
 			QMetaObject::invokeMethod(this, [this]() { getImageForPreview(); }, Qt::QueuedConnection);
 			return;
 		}
 		acquireImage(m_previewBuffer->m_buffer->getWriteBuffer());
 		m_previewBuffer->m_buffer->m_usedBuffers->release();
+		emit(s_imageReady());
 
 		QMetaObject::invokeMethod(this, [this]() { getImageForPreview(); }, Qt::QueuedConnection);
 	}
