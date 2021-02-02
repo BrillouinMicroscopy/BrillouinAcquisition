@@ -91,6 +91,7 @@ signals:
 	void cameraCoolingChanged(bool);
 	void noCameraFound();
 	void s_sensorTemperatureChanged(SensorTemperature);
+	void s_imageReady();
 };
 
 #endif //CAMERA_H
