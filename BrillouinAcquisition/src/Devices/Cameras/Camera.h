@@ -46,7 +46,6 @@ public:
 	PreviewBuffer<std::byte>* m_previewBuffer = new PreviewBuffer<std::byte>;
 
 public slots:
-	virtual void setSettings(CAMERA_SETTINGS) = 0;
 	virtual void startPreview() = 0;
 	virtual void stopPreview() = 0;
 	virtual void startAcquisition(CAMERA_SETTINGS) = 0;
@@ -57,6 +56,7 @@ public slots:
 	virtual void setSensorCooling(bool cooling) {};
 	virtual bool getSensorCooling() { return false; };
 
+	void setSettings(CAMERA_SETTINGS);
 	void setSetting(CAMERA_SETTING, double);
 	void setSetting(CAMERA_SETTING, std::wstring);
 
@@ -65,6 +65,7 @@ protected:
 
 	virtual void readOptions() = 0;
 	virtual void readSettings() = 0;
+	virtual void applySettings(CAMERA_SETTINGS settings) = 0;
 
 	CAMERA_OPTIONS m_options;
 	CAMERA_SETTINGS m_settings;

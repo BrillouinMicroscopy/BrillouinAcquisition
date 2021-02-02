@@ -17,6 +17,22 @@ CAMERA_SETTINGS Camera::getSettings() {
  * Public slots
  */
 
+void Camera::setSettings(CAMERA_SETTINGS settings) {
+	// Don't do anything if an acquisition is running.
+	if (m_isAcquisitionRunning) {
+		return;
+	}
+
+	// Check that pixel encoding is valid
+	if (std::find(m_options.pixelEncodings.begin(), m_options.pixelEncodings.end(), m_settings.readout.pixelEncoding) ==
+		m_options.pixelEncodings.end() && !m_options.pixelEncodings.empty()
+	) {
+		m_settings.readout.pixelEncoding = m_options.pixelEncodings[0];
+	}
+
+	applySettings(settings);
+}
+
 void Camera::setSetting(CAMERA_SETTING setting, double value) {
 	switch (setting) {
 		case CAMERA_SETTING::EXPOSURE:

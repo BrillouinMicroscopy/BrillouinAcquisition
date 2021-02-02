@@ -56,140 +56,6 @@ void PointGrey::disconnectDevice() {
 	emit(connectedDevice(m_isConnected));
 }
 
-void PointGrey::setSettings(CAMERA_SETTINGS settings) {
-	m_settings = settings;
-
-	if (m_settings.readout.pixelEncoding == L"Raw8") {
-		m_settings.readout.dataType = "unsigned char";
-	} else if (m_settings.readout.pixelEncoding == L"Mono8") {
-		m_settings.readout.dataType = "unsigned char";
-	} else if (m_settings.readout.pixelEncoding == L"Mono12") {
-		m_settings.readout.dataType = "unsigned short";
-	} else if (m_settings.readout.pixelEncoding == L"Mono16") {
-		m_settings.readout.dataType = "unsigned short";
-	} else {
-		// Fallback
-		m_settings.readout.pixelEncoding = L"Raw8";
-		m_settings.readout.dataType = "unsigned char";
-	}
-
-	/*
-	* Set the exposure time
-	*/
-	auto prop = FlyCapture2::Property{};
-	//Define the property to adjust.
-	prop.type = FlyCapture2::SHUTTER;
-	//Ensure the property is on.
-	prop.onOff = true;
-	// Ensure auto - adjust mode is off.
-	prop.autoManualMode = false;
-	//Ensure the property is set up to use absolute value control.
-	prop.absControl = true;
-	//Set the absolute value of shutter
-	prop.absValue = 1e3 * m_settings.exposureTime;
-	//Set the property.
-	auto i_retCode = m_camera.SetProperty(&prop);
-
-
-	/*
-	 * Set the camera gain
-	 */
-	auto propGain = FlyCapture2::Property{};
-	// Define the property to adjust.
-	propGain.type = FlyCapture2::GAIN;
-	// Ensure auto-adjust mode is off.
-	propGain.autoManualMode = false;
-	// Ensure the property is set up to use absolute value control.
-	propGain.absControl = true;
-	//Set the absolute value of gain to 10.5 dB.
-	propGain.absValue = m_settings.gain;
-	//Set the property.
-	i_retCode = m_camera.SetProperty(&propGain);
-
-
-	/*
-	* Set region of interest and pixel format
-	*/
-	// Create a Format7 Configuration
-	auto fmt7ImageSettings = FlyCapture2::Format7ImageSettings{};
-	// Acquisition mode is always "MODE_0" for this application
-	fmt7ImageSettings.mode = FlyCapture2::MODE_0;
-	// Set the pixel format, possible values are: PIXEL_FORMAT_RAW8, PIXEL_FORMAT_MONO8, PIXEL_FORMAT_MONO12, PIXEL_FORMAT_MONO16
-	if (m_settings.readout.pixelEncoding == L"Raw8") {
-		fmt7ImageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_RAW8;
-	} else if (m_settings.readout.pixelEncoding == L"Mono8") {
-		fmt7ImageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_MONO8;
-	} else if (m_settings.readout.pixelEncoding == L"Mono12") {
-		fmt7ImageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_MONO12;
-	} else if (m_settings.readout.pixelEncoding == L"Mono16") {
-		fmt7ImageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_MONO16;
-	}
-
-	// Offset x
-	fmt7ImageSettings.offsetX = m_settings.roi.left;
-	// Offset y
-	fmt7ImageSettings.offsetY = m_settings.roi.top;
-	// Width
-	fmt7ImageSettings.width = m_settings.roi.width_physical;
-	// Height
-	fmt7ImageSettings.height = m_settings.roi.height_physical;
-
-	m_settings.roi.width_binned = m_settings.roi.width_physical;
-	m_settings.roi.height_binned = m_settings.roi.height_physical;
-
-	m_settings.roi.bytesPerFrame = m_settings.roi.width_binned * m_settings.roi.height_binned;
-
-	auto fmt7PacketInfo = FlyCapture2::Format7PacketInfo{};
-	auto valid{ false };
-	i_retCode = m_camera.ValidateFormat7Settings(&fmt7ImageSettings, &valid, &fmt7PacketInfo);
-	if (valid) {
-		i_retCode = m_camera.SetFormat7Configuration(&fmt7ImageSettings, fmt7PacketInfo.recommendedBytesPerPacket);
-	}
-
-	/*
-	* Set trigger mode
-	*/
-	auto triggerMode = FlyCapture2::TriggerMode{};
-	i_retCode = m_camera.GetTriggerMode(&triggerMode);
-	triggerMode.mode = 0;
-	triggerMode.parameter = 0;
-	triggerMode.polarity = 0;
-	if (m_settings.readout.triggerMode == L"Internal") {
-		triggerMode.onOff = false;
-	} else if (m_settings.readout.triggerMode == L"Software") {
-		triggerMode.onOff = true;
-		triggerMode.source = 7;	// 7 for software trigger
-	} else if (m_settings.readout.triggerMode == L"External") {
-		triggerMode.onOff = true;
-		triggerMode.source = 0;	// 0 for external trigger
-	}
-
-	i_retCode = m_camera.SetTriggerMode(&triggerMode);
-
-	// Wait for software trigger ready
-	if (m_settings.readout.triggerMode == L"Software") {
-		PollForTriggerReady();
-	}
-
-	/*
-	* Set the buffering mode.
-	*/
-	auto BufferFrame = FlyCapture2::FC2Config{};
-	i_retCode = m_camera.GetConfiguration(&BufferFrame);
-	if (m_settings.readout.cycleMode == L"Fixed") {				// For image preview
-		BufferFrame.grabMode = FlyCapture2::DROP_FRAMES;
-		BufferFrame.highPerformanceRetrieveBuffer = false;
-	} else if (m_settings.readout.cycleMode == L"Continuous") {	// For image preview
-		BufferFrame.grabMode = FlyCapture2::BUFFER_FRAMES;
-		BufferFrame.highPerformanceRetrieveBuffer = true;
-	}
-	BufferFrame.numBuffers = m_settings.frameCount;
-	i_retCode = m_camera.SetConfiguration(&BufferFrame);
-
-	// Read back the settings
-	readSettings();
-}
-
 void PointGrey::startPreview() {
 	// don't do anything if an acquisition is running
 	if (m_isAcquisitionRunning) {
@@ -368,6 +234,145 @@ void PointGrey::readSettings() {
 
 	// emit signal that settings changed
 	emit(settingsChanged(m_settings));
+}
+
+void PointGrey::applySettings(CAMERA_SETTINGS settings) {
+	// Don't do anything if an acquisition is running.
+	if (m_isAcquisitionRunning) {
+		return;
+	}
+
+	m_settings = settings;
+
+	if (m_settings.readout.pixelEncoding == L"Raw8") {
+		m_settings.readout.dataType = "unsigned char";
+	} else if (m_settings.readout.pixelEncoding == L"Mono8") {
+		m_settings.readout.dataType = "unsigned char";
+	} else if (m_settings.readout.pixelEncoding == L"Mono12") {
+		m_settings.readout.dataType = "unsigned short";
+	} else if (m_settings.readout.pixelEncoding == L"Mono16") {
+		m_settings.readout.dataType = "unsigned short";
+	} else {
+		// Fallback
+		m_settings.readout.pixelEncoding = L"Raw8";
+		m_settings.readout.dataType = "unsigned char";
+	}
+
+	/*
+	* Set the exposure time
+	*/
+	auto prop = FlyCapture2::Property{};
+	//Define the property to adjust.
+	prop.type = FlyCapture2::SHUTTER;
+	//Ensure the property is on.
+	prop.onOff = true;
+	// Ensure auto - adjust mode is off.
+	prop.autoManualMode = false;
+	//Ensure the property is set up to use absolute value control.
+	prop.absControl = true;
+	//Set the absolute value of shutter
+	prop.absValue = 1e3 * m_settings.exposureTime;
+	//Set the property.
+	auto i_retCode = m_camera.SetProperty(&prop);
+
+
+	/*
+	 * Set the camera gain
+	 */
+	auto propGain = FlyCapture2::Property{};
+	// Define the property to adjust.
+	propGain.type = FlyCapture2::GAIN;
+	// Ensure auto-adjust mode is off.
+	propGain.autoManualMode = false;
+	// Ensure the property is set up to use absolute value control.
+	propGain.absControl = true;
+	//Set the absolute value of gain to 10.5 dB.
+	propGain.absValue = m_settings.gain;
+	//Set the property.
+	i_retCode = m_camera.SetProperty(&propGain);
+
+
+	/*
+	* Set region of interest and pixel format
+	*/
+	// Create a Format7 Configuration
+	auto fmt7ImageSettings = FlyCapture2::Format7ImageSettings{};
+	// Acquisition mode is always "MODE_0" for this application
+	fmt7ImageSettings.mode = FlyCapture2::MODE_0;
+	// Set the pixel format, possible values are: PIXEL_FORMAT_RAW8, PIXEL_FORMAT_MONO8, PIXEL_FORMAT_MONO12, PIXEL_FORMAT_MONO16
+	if (m_settings.readout.pixelEncoding == L"Raw8") {
+		fmt7ImageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_RAW8;
+	} else if (m_settings.readout.pixelEncoding == L"Mono8") {
+		fmt7ImageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_MONO8;
+	} else if (m_settings.readout.pixelEncoding == L"Mono12") {
+		fmt7ImageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_MONO12;
+	} else if (m_settings.readout.pixelEncoding == L"Mono16") {
+		fmt7ImageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_MONO16;
+	}
+
+	// Offset x
+	fmt7ImageSettings.offsetX = m_settings.roi.left;
+	// Offset y
+	fmt7ImageSettings.offsetY = m_settings.roi.top;
+	// Width
+	fmt7ImageSettings.width = m_settings.roi.width_physical;
+	// Height
+	fmt7ImageSettings.height = m_settings.roi.height_physical;
+
+	m_settings.roi.width_binned = m_settings.roi.width_physical;
+	m_settings.roi.height_binned = m_settings.roi.height_physical;
+
+	m_settings.roi.bytesPerFrame = m_settings.roi.width_binned * m_settings.roi.height_binned;
+
+	auto fmt7PacketInfo = FlyCapture2::Format7PacketInfo{};
+	auto valid{ false };
+	i_retCode = m_camera.ValidateFormat7Settings(&fmt7ImageSettings, &valid, &fmt7PacketInfo);
+	if (valid) {
+		i_retCode = m_camera.SetFormat7Configuration(&fmt7ImageSettings, fmt7PacketInfo.recommendedBytesPerPacket);
+	}
+
+	/*
+	* Set trigger mode
+	*/
+	auto triggerMode = FlyCapture2::TriggerMode{};
+	i_retCode = m_camera.GetTriggerMode(&triggerMode);
+	triggerMode.mode = 0;
+	triggerMode.parameter = 0;
+	triggerMode.polarity = 0;
+	if (m_settings.readout.triggerMode == L"Internal") {
+		triggerMode.onOff = false;
+	} else if (m_settings.readout.triggerMode == L"Software") {
+		triggerMode.onOff = true;
+		triggerMode.source = 7;	// 7 for software trigger
+	} else if (m_settings.readout.triggerMode == L"External") {
+		triggerMode.onOff = true;
+		triggerMode.source = 0;	// 0 for external trigger
+	}
+
+	i_retCode = m_camera.SetTriggerMode(&triggerMode);
+
+	// Wait for software trigger ready
+	if (m_settings.readout.triggerMode == L"Software") {
+		PollForTriggerReady();
+	}
+
+	/*
+	* Set the buffering mode.
+	*/
+	auto BufferFrame = FlyCapture2::FC2Config{};
+	i_retCode = m_camera.GetConfiguration(&BufferFrame);
+	if (m_settings.readout.cycleMode == L"Fixed") {				// For image preview
+		BufferFrame.grabMode = FlyCapture2::DROP_FRAMES;
+		BufferFrame.highPerformanceRetrieveBuffer = false;
+	} else if (m_settings.readout.cycleMode == L"Continuous") {	// For image preview
+		BufferFrame.grabMode = FlyCapture2::BUFFER_FRAMES;
+		BufferFrame.highPerformanceRetrieveBuffer = true;
+	}
+	BufferFrame.numBuffers = m_settings.frameCount;
+	i_retCode = m_camera.SetConfiguration(&BufferFrame);
+
+	// Read back the settings
+	readSettings();
 }
 
 void PointGrey::preparePreview() {

@@ -19,7 +19,6 @@ public slots:
 	void connectDevice() override;
 	void disconnectDevice() override;
 
-	void setSettings(CAMERA_SETTINGS) override;
 	void startPreview() override;
 	void stopPreview() override;
 	void startAcquisition(CAMERA_SETTINGS) override;
@@ -35,6 +34,7 @@ private:
 
 	void readOptions() override;
 	void readSettings() override;
+	void applySettings(CAMERA_SETTINGS settings) override;
 
 	bool initialize();
 

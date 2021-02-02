@@ -33,69 +33,6 @@ void MockCamera::disconnectDevice() {
 	emit(connectedDevice(m_isConnected));
 }
 
-void MockCamera::setSettings(CAMERA_SETTINGS settings) {
-	// Don't do anything if an acquisition is running.
-	if (m_isAcquisitionRunning) {
-		return;
-	}
-
-	m_settings = settings;
-
-	auto binning{ 1 };
-	if (m_settings.roi.binning == L"8x8") {
-		binning = 8;
-	} else if (m_settings.roi.binning == L"4x4") {
-		binning = 4;
-	} else if (m_settings.roi.binning == L"2x2") {
-		binning = 2;
-	} else if (m_settings.roi.binning == L"1x1") {
-		binning = 1;
-	} else {
-		// Fallback to 1x1 binning
-		m_settings.roi.binning = L"1x1";
-	}
-	m_settings.roi.binX = binning;
-	m_settings.roi.binY = binning;
-
-	// Verify that the image size is a multiple of the binning number
-	auto modx = m_settings.roi.width_physical % m_settings.roi.binX;
-	if (modx) {
-		m_settings.roi.width_physical -= modx;
-	}
-	auto mody = m_settings.roi.height_physical % m_settings.roi.binY;
-	if (mody) {
-		m_settings.roi.height_physical -= mody;
-	}
-
-	m_settings.roi.height_binned = m_settings.roi.height_physical / m_settings.roi.binX;
-	m_settings.roi.width_binned = m_settings.roi.width_physical / m_settings.roi.binY;
-
-	m_settings.roi.bytesPerFrame = m_settings.roi.height_binned * m_settings.roi.width_binned;
-
-	if (m_settings.readout.pixelEncoding == L"16 bit") {
-		m_settings.readout.dataType = "unsigned short";
-		m_settings.roi.bytesPerFrame *= sizeof(unsigned short);
-	} else if (m_settings.readout.pixelEncoding == L"12 bit") {
-		m_settings.readout.dataType = "unsigned short";
-		m_settings.roi.bytesPerFrame *= sizeof(unsigned short);
-	} else if (m_settings.readout.pixelEncoding == L"8 bit") {
-		m_settings.readout.dataType = "unsigned char";
-		m_settings.roi.bytesPerFrame *= sizeof(unsigned char);
-	} else {
-		// Fallback
-		m_settings.readout.pixelEncoding = L"8 bit";
-		m_settings.readout.dataType = "unsigned char";
-		m_settings.roi.bytesPerFrame *= sizeof(unsigned char);
-	}
-
-	// Read back the settings
-	readSettings();
-
-	if (m_isPreviewRunning) {
-		preparePreviewBuffer();
-	}
-}
-
 void MockCamera::startPreview() {
 	// don't do anything if an acquisition is running
 	if (m_isAcquisitionRunning) {
@@ -230,6 +167,69 @@ void MockCamera::readOptions() {
 void MockCamera::readSettings() {
 	// emit signal that settings changed
 	emit(settingsChanged(m_settings));
+}
+
+void MockCamera::applySettings(CAMERA_SETTINGS settings) {
+	// Don't do anything if an acquisition is running.
+	if (m_isAcquisitionRunning) {
+		return;
+	}
+
+	m_settings = settings;
+
+	auto binning{ 1 };
+	if (m_settings.roi.binning == L"8x8") {
+		binning = 8;
+	} else if (m_settings.roi.binning == L"4x4") {
+		binning = 4;
+	} else if (m_settings.roi.binning == L"2x2") {
+		binning = 2;
+	} else if (m_settings.roi.binning == L"1x1") {
+		binning = 1;
+	} else {
+		// Fallback to 1x1 binning
+		m_settings.roi.binning = L"1x1";
+	}
+	m_settings.roi.binX = binning;
+	m_settings.roi.binY = binning;
+
+	// Verify that the image size is a multiple of the binning number
+	auto modx = m_settings.roi.width_physical % m_settings.roi.binX;
+	if (modx) {
+		m_settings.roi.width_physical -= modx;
+	}
+	auto mody = m_settings.roi.height_physical % m_settings.roi.binY;
+	if (mody) {
+		m_settings.roi.height_physical -= mody;
+	}
+
+	m_settings.roi.height_binned = m_settings.roi.height_physical / m_settings.roi.binX;
+	m_settings.roi.width_binned = m_settings.roi.width_physical / m_settings.roi.binY;
+
+	m_settings.roi.bytesPerFrame = m_settings.roi.height_binned * m_settings.roi.width_binned;
+
+	if (m_settings.readout.pixelEncoding == L"16 bit") {
+		m_settings.readout.dataType = "unsigned short";
+		m_settings.roi.bytesPerFrame *= sizeof(unsigned short);
+	} else if (m_settings.readout.pixelEncoding == L"12 bit") {
+		m_settings.readout.dataType = "unsigned short";
+		m_settings.roi.bytesPerFrame *= sizeof(unsigned short);
+	} else if (m_settings.readout.pixelEncoding == L"8 bit") {
+		m_settings.readout.dataType = "unsigned char";
+		m_settings.roi.bytesPerFrame *= sizeof(unsigned char);
+	} else {
+		// Fallback
+		m_settings.readout.pixelEncoding = L"8 bit";
+		m_settings.readout.dataType = "unsigned char";
+		m_settings.roi.bytesPerFrame *= sizeof(unsigned char);
+	}
+
+	// Read back the settings
+	readSettings();
+
+	if (m_isPreviewRunning) {
+		preparePreviewBuffer();
+	}
 }
 
 void MockCamera::preparePreview() {

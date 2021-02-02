@@ -57,123 +57,6 @@ void PVCamera::disconnectDevice() {
 	emit(connectedDevice(m_isConnected));
 }
 
-void PVCamera::setSettings(CAMERA_SETTINGS settings) {
-	// We have to update the options when we change port and speed
-	auto updateOptions{ false };
-	if (m_settings.readout.pixelReadoutRate != settings.readout.pixelReadoutRate) {
-		updateOptions = true;
-	}
-
-	m_settings = settings;
-
-	if (std::find(m_options.pixelEncodings.begin(), m_options.pixelEncodings.end(), m_settings.readout.pixelEncoding) == m_options.pixelEncodings.end() && !m_options.pixelEncodings.empty()) {
-		m_settings.readout.pixelEncoding = m_options.pixelEncodings[0];
-	}
-
-	if (m_settings.readout.pixelEncoding == L"16 bit") {
-		m_settings.readout.dataType = "unsigned short";
-	} else if (m_settings.readout.pixelEncoding == L"12 bit") {
-		m_settings.readout.dataType = "unsigned short";
-	} else if (m_settings.readout.pixelEncoding == L"11 bit") {
-		m_settings.readout.dataType = "unsigned short";
-	} else if (m_settings.readout.pixelEncoding == L"8 bit") {
-		m_settings.readout.dataType = "unsigned char";
-	} else {
-		// Fallback
-		m_settings.readout.pixelEncoding = L"16 bit";
-		m_settings.readout.dataType = "unsigned short";
-	}
-
-	auto binning{ 1 };
-	if (m_settings.roi.binning == L"8x8") {
-		binning = 8;
-	} else if (m_settings.roi.binning == L"4x4") {
-		binning = 4;
-	} else if (m_settings.roi.binning == L"2x2") {
-		binning = 2;
-	} else if (m_settings.roi.binning == L"1x1") {
-		binning = 1;
-	} else {
-		// Fallback to 1x1 binning
-		m_settings.roi.binning = L"1x1";
-	}
-	m_settings.roi.binX = binning;
-	m_settings.roi.binY = binning;
-
-	// Verify that the image size is a multiple of the binning number
-	auto modx = m_settings.roi.width_physical % m_settings.roi.binX;
-	if (modx) {
-		m_settings.roi.width_physical -= modx;
-	}
-	auto mody = m_settings.roi.height_physical % m_settings.roi.binY;
-	if (mody) {
-		m_settings.roi.height_physical -= mody;
-	}
-
-	m_settings.roi.width_binned = m_settings.roi.width_physical / m_settings.roi.binX;
-	m_settings.roi.height_binned = m_settings.roi.height_physical / m_settings.roi.binY;
-
-	auto speedTableIndex{ 0 };
-	for (gsl::index i{ 0 }; i < m_SpeedTable.size(); i++) {
-		if (m_SpeedTable[i].label == m_settings.readout.pixelReadoutRate) {
-			speedTableIndex = i;
-			break;
-		}
-	}
-
-	auto gainIndex{ 0 };
-	for (gsl::index i{ 0 }; i < m_SpeedTable[speedTableIndex].gains.size(); i++) {
-		if (std::to_wstring(m_SpeedTable[speedTableIndex].gains[i]) == m_settings.readout.preAmpGain) {
-			gainIndex = i;
-			break;
-		}
-	}
-
-	// Set camera to first port
-	if (PVCam::PV_OK != PVCam::pl_set_param(m_camera, PARAM_READOUT_PORT,
-		(void*)&m_SpeedTable[speedTableIndex].port.value)) {
-		//PrintErrorMessage(pl_error_code(), "Readout port could not be set");
-		//return false;
-	}
-	//printf("Setting readout port to %s\n", m_SpeedTable[0].port.name.c_str());
-
-	// Set camera to speed 0
-	if (PVCam::PV_OK != PVCam::pl_set_param(m_camera, PARAM_SPDTAB_INDEX,
-		(void*)&m_SpeedTable[speedTableIndex].speedIndex)) {
-		//PrintErrorMessage(pl_error_code(), "Readout port could not be set");
-		//return false;
-	}
-	//printf("Setting readout speed index to %d\n", m_SpeedTable[0].speedIndex);
-
-	// Set gain index to one (the first one)
-	if (PVCam::PV_OK != PVCam::pl_set_param(m_camera, PARAM_GAIN_INDEX,
-		(void*)&m_SpeedTable[speedTableIndex].gains[gainIndex])) {
-		//PrintErrorMessage(pl_error_code(), "Gain index could not be set");
-		//return false;
-	}
-
-	auto camSettings = getCamSettings();
-	auto bufferSize = PVCam::uns32{};
-	auto i_retCode = PVCam::pl_exp_setup_cont(
-		m_camera,
-		1,
-		&camSettings,
-		PVCam::TIMED_MODE,
-		1e3 * m_settings.exposureTime,
-		&bufferSize,
-		PVCam::CIRC_OVERWRITE
-	);
-	m_settings.roi.bytesPerFrame = bufferSize;
-
-	// read options as they might change with port and speed
-	if (updateOptions) {
-		readOptions();
-	}
-
-	// read back the settings
-	readSettings();
-}
-
 void PVCamera::startPreview() {
 	// don't do anything if an acquisition is running
 	if (m_isAcquisitionRunning) {
@@ -479,6 +362,124 @@ void PVCamera::readOptions() {
 void PVCamera::readSettings() {
 	// emit signal that settings changed
 	emit(settingsChanged(m_settings));
+}
+
+void PVCamera::applySettings(CAMERA_SETTINGS settings) {
+	// Don't do anything if an acquisition is running.
+	if (m_isAcquisitionRunning) {
+		return;
+	}
+
+	// We have to update the options when we change port and speed
+	auto updateOptions{ false };
+	if (m_settings.readout.pixelReadoutRate != settings.readout.pixelReadoutRate) {
+		updateOptions = true;
+	}
+
+	m_settings = settings;
+
+	if (m_settings.readout.pixelEncoding == L"16 bit") {
+		m_settings.readout.dataType = "unsigned short";
+	} else if (m_settings.readout.pixelEncoding == L"12 bit") {
+		m_settings.readout.dataType = "unsigned short";
+	} else if (m_settings.readout.pixelEncoding == L"11 bit") {
+		m_settings.readout.dataType = "unsigned short";
+	} else if (m_settings.readout.pixelEncoding == L"8 bit") {
+		m_settings.readout.dataType = "unsigned char";
+	} else {
+		// Fallback
+		m_settings.readout.pixelEncoding = L"16 bit";
+		m_settings.readout.dataType = "unsigned short";
+	}
+
+	auto binning{ 1 };
+	if (m_settings.roi.binning == L"8x8") {
+		binning = 8;
+	} else if (m_settings.roi.binning == L"4x4") {
+		binning = 4;
+	} else if (m_settings.roi.binning == L"2x2") {
+		binning = 2;
+	} else if (m_settings.roi.binning == L"1x1") {
+		binning = 1;
+	} else {
+		// Fallback to 1x1 binning
+		m_settings.roi.binning = L"1x1";
+	}
+	m_settings.roi.binX = binning;
+	m_settings.roi.binY = binning;
+
+	// Verify that the image size is a multiple of the binning number
+	auto modx = m_settings.roi.width_physical % m_settings.roi.binX;
+	if (modx) {
+		m_settings.roi.width_physical -= modx;
+	}
+	auto mody = m_settings.roi.height_physical % m_settings.roi.binY;
+	if (mody) {
+		m_settings.roi.height_physical -= mody;
+	}
+
+	m_settings.roi.width_binned = m_settings.roi.width_physical / m_settings.roi.binX;
+	m_settings.roi.height_binned = m_settings.roi.height_physical / m_settings.roi.binY;
+
+	auto speedTableIndex{ 0 };
+	for (gsl::index i{ 0 }; i < m_SpeedTable.size(); i++) {
+		if (m_SpeedTable[i].label == m_settings.readout.pixelReadoutRate) {
+			speedTableIndex = i;
+			break;
+		}
+	}
+
+	auto gainIndex{ 0 };
+	for (gsl::index i{ 0 }; i < m_SpeedTable[speedTableIndex].gains.size(); i++) {
+		if (std::to_wstring(m_SpeedTable[speedTableIndex].gains[i]) == m_settings.readout.preAmpGain) {
+			gainIndex = i;
+			break;
+		}
+	}
+
+	// Set camera to first port
+	if (PVCam::PV_OK != PVCam::pl_set_param(m_camera, PARAM_READOUT_PORT,
+		(void*)&m_SpeedTable[speedTableIndex].port.value)) {
+		//PrintErrorMessage(pl_error_code(), "Readout port could not be set");
+		//return false;
+	}
+	//printf("Setting readout port to %s\n", m_SpeedTable[0].port.name.c_str());
+
+	// Set camera to speed 0
+	if (PVCam::PV_OK != PVCam::pl_set_param(m_camera, PARAM_SPDTAB_INDEX,
+		(void*)&m_SpeedTable[speedTableIndex].speedIndex)) {
+		//PrintErrorMessage(pl_error_code(), "Readout port could not be set");
+		//return false;
+	}
+	//printf("Setting readout speed index to %d\n", m_SpeedTable[0].speedIndex);
+
+	// Set gain index to one (the first one)
+	if (PVCam::PV_OK != PVCam::pl_set_param(m_camera, PARAM_GAIN_INDEX,
+		(void*)&m_SpeedTable[speedTableIndex].gains[gainIndex])) {
+		//PrintErrorMessage(pl_error_code(), "Gain index could not be set");
+		//return false;
+	}
+
+	auto camSettings = getCamSettings();
+	auto bufferSize = PVCam::uns32{};
+	auto i_retCode = PVCam::pl_exp_setup_cont(
+		m_camera,
+		1,
+		&camSettings,
+		PVCam::TIMED_MODE,
+		1e3 * m_settings.exposureTime,
+		&bufferSize,
+		PVCam::CIRC_OVERWRITE
+	);
+	m_settings.roi.bytesPerFrame = bufferSize;
+
+	// read options as they might change with port and speed
+	if (updateOptions) {
+		readOptions();
+	}
+
+	// read back the settings
+	readSettings();
 }
 
 bool PVCamera::initialize() {

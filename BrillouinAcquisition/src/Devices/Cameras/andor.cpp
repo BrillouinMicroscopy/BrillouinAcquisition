@@ -59,87 +59,6 @@ void Andor::disconnectDevice() {
 	emit(connectedDevice(m_isConnected));
 }
 
-void Andor::setSettings(CAMERA_SETTINGS settings) {
-	m_settings = settings;
-
-	if (m_settings.readout.pixelEncoding == L"Mono12") {
-		m_settings.readout.dataType = "unsigned short";
-		m_outputPixelEncoding = L"Mono16";
-	} else if (m_settings.readout.pixelEncoding == L"Mono12Packed") {
-		m_settings.readout.dataType = "unsigned short";
-		m_outputPixelEncoding = L"Mono16";
-	} else if (m_settings.readout.pixelEncoding == L"Mono16") {
-		m_settings.readout.dataType = "unsigned short";
-		m_outputPixelEncoding = L"Mono16";
-	} else if (m_settings.readout.pixelEncoding == L"Mono32") {
-		m_settings.readout.dataType = "unsigned int";
-		m_outputPixelEncoding = L"Mono32";
-	} else {
-		// Fallback
-		m_settings.readout.pixelEncoding = L"Mono16";
-		m_settings.readout.dataType = "unsigned short";
-		m_outputPixelEncoding = L"Mono16";
-	}
-
-	// Set the pixel Encoding
-	AT_SetEnumeratedString(m_camera, L"Pixel Encoding", m_settings.readout.pixelEncoding.c_str());
-
-	// Set the pixel Readout Rate
-	AT_SetEnumeratedString(m_camera, L"Pixel Readout Rate", m_settings.readout.pixelReadoutRate.c_str());
-
-	// Set the exposure time
-	AT_SetFloat(m_camera, L"ExposureTime", m_settings.exposureTime);
-
-	// enable spurious noise filter
-	AT_SetBool(m_camera, L"SpuriousNoiseFilter", m_settings.spuriousNoiseFilter);
-
-	// Set the AOI
-	auto binning{ 1 };
-	if (m_settings.roi.binning == L"8x8") {
-		binning = 8;
-	} else if (m_settings.roi.binning == L"4x4") {
-		binning = 4;
-	} else if (m_settings.roi.binning == L"2x2") {
-		binning = 2;
-	} else if (m_settings.roi.binning == L"1x1") {
-		binning = 1;
-	} else {
-		// Fallback to 1x1 binning
-		m_settings.roi.binning = L"1x1";
-	}
-	m_settings.roi.binX = binning;
-	m_settings.roi.binY = binning;
-
-	// Verify that the image size is a multiple of the binning number
-	auto modx = m_settings.roi.width_physical % m_settings.roi.binX;
-	if (modx) {
-		m_settings.roi.width_physical -= modx;
-	}
-	auto mody = m_settings.roi.height_physical % m_settings.roi.binY;
-	if (mody) {
-		m_settings.roi.height_physical -= mody;
-	}
-
-	AT_SetEnumeratedString(m_camera, L"AOIBinning", m_settings.roi.binning.c_str());
-	AT_SetInt(m_camera, L"AOIWidth", m_settings.roi.width_physical / m_settings.roi.binX);
-	AT_SetInt(m_camera, L"AOILeft", m_settings.roi.left);
-	AT_SetInt(m_camera, L"AOIHeight", m_settings.roi.height_physical / m_settings.roi.binY);
-	AT_SetInt(m_camera, L"AOITop", m_settings.roi.top);
-	AT_SetEnumeratedString(m_camera, L"SimplePreAmpGainControl", m_settings.readout.preAmpGain.c_str());
-
-	AT_SetEnumeratedString(m_camera, L"CycleMode", m_settings.readout.cycleMode.c_str());
-	AT_SetEnumeratedString(m_camera, L"TriggerMode", m_settings.readout.triggerMode.c_str());
-
-	// Allocate a buffer
-	// Get the number of bytes required to store one frame
-	auto ImageSizeBytes = AT_64{};
-	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
-	m_settings.roi.bytesPerFrame = static_cast<int>(ImageSizeBytes);
-
-	// read back the settings
-	readSettings();
-}
-
 void Andor::startPreview() {
 	// don't do anything if an acquisition is running
 	if (m_isAcquisitionRunning) {
@@ -307,6 +226,92 @@ void Andor::readSettings() {
 
 	// emit signal that settings changed
 	emit(settingsChanged(m_settings));
+}
+
+void Andor::applySettings(CAMERA_SETTINGS settings) {
+	// Don't do anything if an acquisition is running.
+	if (m_isAcquisitionRunning) {
+		return;
+	}
+
+	m_settings = settings;
+
+	if (m_settings.readout.pixelEncoding == L"Mono12") {
+		m_settings.readout.dataType = "unsigned short";
+		m_outputPixelEncoding = L"Mono16";
+	} else if (m_settings.readout.pixelEncoding == L"Mono12Packed") {
+		m_settings.readout.dataType = "unsigned short";
+		m_outputPixelEncoding = L"Mono16";
+	} else if (m_settings.readout.pixelEncoding == L"Mono16") {
+		m_settings.readout.dataType = "unsigned short";
+		m_outputPixelEncoding = L"Mono16";
+	} else if (m_settings.readout.pixelEncoding == L"Mono32") {
+		m_settings.readout.dataType = "unsigned int";
+		m_outputPixelEncoding = L"Mono32";
+	} else {
+		// Fallback
+		m_settings.readout.pixelEncoding = L"Mono16";
+		m_settings.readout.dataType = "unsigned short";
+		m_outputPixelEncoding = L"Mono16";
+	}
+
+	// Set the pixel Encoding
+	AT_SetEnumeratedString(m_camera, L"Pixel Encoding", m_settings.readout.pixelEncoding.c_str());
+
+	// Set the pixel Readout Rate
+	AT_SetEnumeratedString(m_camera, L"Pixel Readout Rate", m_settings.readout.pixelReadoutRate.c_str());
+
+	// Set the exposure time
+	AT_SetFloat(m_camera, L"ExposureTime", m_settings.exposureTime);
+
+	// enable spurious noise filter
+	AT_SetBool(m_camera, L"SpuriousNoiseFilter", m_settings.spuriousNoiseFilter);
+
+	// Set the AOI
+	auto binning{ 1 };
+	if (m_settings.roi.binning == L"8x8") {
+		binning = 8;
+	} else if (m_settings.roi.binning == L"4x4") {
+		binning = 4;
+	} else if (m_settings.roi.binning == L"2x2") {
+		binning = 2;
+	} else if (m_settings.roi.binning == L"1x1") {
+		binning = 1;
+	} else {
+		// Fallback to 1x1 binning
+		m_settings.roi.binning = L"1x1";
+	}
+	m_settings.roi.binX = binning;
+	m_settings.roi.binY = binning;
+
+	// Verify that the image size is a multiple of the binning number
+	auto modx = m_settings.roi.width_physical % m_settings.roi.binX;
+	if (modx) {
+		m_settings.roi.width_physical -= modx;
+	}
+	auto mody = m_settings.roi.height_physical % m_settings.roi.binY;
+	if (mody) {
+		m_settings.roi.height_physical -= mody;
+	}
+
+	AT_SetEnumeratedString(m_camera, L"AOIBinning", m_settings.roi.binning.c_str());
+	AT_SetInt(m_camera, L"AOIWidth", m_settings.roi.width_physical / m_settings.roi.binX);
+	AT_SetInt(m_camera, L"AOILeft", m_settings.roi.left);
+	AT_SetInt(m_camera, L"AOIHeight", m_settings.roi.height_physical / m_settings.roi.binY);
+	AT_SetInt(m_camera, L"AOITop", m_settings.roi.top);
+	AT_SetEnumeratedString(m_camera, L"SimplePreAmpGainControl", m_settings.readout.preAmpGain.c_str());
+
+	AT_SetEnumeratedString(m_camera, L"CycleMode", m_settings.readout.cycleMode.c_str());
+	AT_SetEnumeratedString(m_camera, L"TriggerMode", m_settings.readout.triggerMode.c_str());
+
+	// Allocate a buffer
+	// Get the number of bytes required to store one frame
+	auto ImageSizeBytes = AT_64{};
+	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
+	m_settings.roi.bytesPerFrame = static_cast<int>(ImageSizeBytes);
+
+	// read back the settings
+	readSettings();
 }
 
 bool Andor::initialize() {
