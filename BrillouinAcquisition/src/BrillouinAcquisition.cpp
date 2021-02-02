@@ -1086,7 +1086,7 @@ void BrillouinAcquisition::showEnabledModes(ACQUISITION_MODE modes) {
 	bool BrillouinMode = (bool)(m_enabledModes & ACQUISITION_MODE::BRILLOUIN);
 	bool FluorescenceMode = (bool)(m_enabledModes & ACQUISITION_MODE::FLUORESCENCE);
 
-	if (BrillouinMode | FluorescenceMode) {
+	if (BrillouinMode || FluorescenceMode) {
 		ui->acquisitionStartODT->setEnabled(false);
 		ui->alignmentStartODT->setEnabled(false);
 		ui->alignmentCenterODT->setEnabled(false);
@@ -1127,6 +1127,7 @@ void BrillouinAcquisition::showBrillouinStatus(ACQUISITION_STATUS status) {
 		case ACQUISITION_STATUS::STARTED:
 			string = "Acquisition started.";
 			ui->progressBar->setValue(0);
+			[[fallthrough]];
 		case ACQUISITION_STATUS::RUNNING:
 			ui->BrillouinStart->setText("Cancel");
 			running = true;
