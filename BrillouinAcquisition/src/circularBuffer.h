@@ -51,11 +51,23 @@ inline int CircularBuffer<T>::checkBufferNumber(int bufferNumber) {
 template<class T>
 inline CircularBuffer<T>::~CircularBuffer() {
 	for (gsl::index i{ 0 }; i < m_bufferNumber; i++) {
-		delete[] m_buffers[i];
+		if (m_buffers[i]) {
+			delete[] m_buffers[i];
+			m_buffers[i] = nullptr;
+		}
 	}
-	delete[] m_buffers;
-	delete m_freeBuffers;
-	delete m_usedBuffers;
+	if (m_buffers) {
+		delete[] m_buffers;
+		m_buffers = nullptr;
+	}
+	if (m_freeBuffers) {
+		delete m_freeBuffers;
+		m_freeBuffers = nullptr;
+	}
+	if (m_freeBuffers) {
+		delete m_usedBuffers;
+		m_usedBuffers = nullptr;
+	}
 }
 
 template<class T>

@@ -22,7 +22,12 @@ Brillouin::Brillouin(QObject* parent, Acquisition* acquisition, Camera** andor, 
 	updatePositions();
 }
 
-Brillouin::~Brillouin() {}
+Brillouin::~Brillouin() {
+	if (m_repetitionTimer) {
+		m_repetitionTimer->stop();
+		m_repetitionTimer->deleteLater();
+	}
+}
 
 /*
  * Public slots

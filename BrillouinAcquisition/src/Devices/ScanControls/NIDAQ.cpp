@@ -64,8 +64,19 @@ NIDAQ::NIDAQ() noexcept {
 }
 
 NIDAQ::~NIDAQ() {
-	m_elementPositionTimer->stop();
 	disconnectDevice();
+	if (m_elementPositionTimer) {
+		m_elementPositionTimer->stop();
+		m_elementPositionTimer->deleteLater();
+	}
+	if (m_exFilter) {
+		m_exFilter->deleteLater();
+		m_exFilter = nullptr;
+	}
+	if (m_emFilter) {
+		m_emFilter->deleteLater();
+		m_emFilter = nullptr;
+	}
 }
 
 void NIDAQ::setPosition(POINT2 position) {

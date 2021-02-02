@@ -50,13 +50,27 @@ ZeissECU::ZeissECU() noexcept {
 }
 
 ZeissECU::~ZeissECU() {
-	m_positionTimer->stop();
-	m_elementPositionTimer->stop();
 	disconnectDevice();
-	delete m_focus;
-	delete m_mcu;
-	delete m_stand;
-	delete m_comObject;
+	if (m_positionTimer) {
+		m_positionTimer->stop();
+		m_positionTimer->deleteLater();
+	}
+	if (m_elementPositionTimer) {
+		m_elementPositionTimer->stop();
+		m_elementPositionTimer->deleteLater();
+	}
+	if (m_focus) {
+		m_focus->deleteLater();
+	}
+	if (m_mcu) {
+		m_mcu->deleteLater();
+	}
+	if (m_stand) {
+		m_stand->deleteLater();
+	}
+	if (m_comObject) {
+		m_comObject->deleteLater();
+	}
 }
 
 void ZeissECU::setPosition(POINT2 position) {
@@ -96,7 +110,10 @@ POINT3 ZeissECU::getPosition(PositionType positionType) {
 }
 
 void ZeissECU::setDevice(com* device) {
-	delete m_comObject;
+	if (m_comObject) {
+		m_comObject->deleteLater();
+		m_comObject = nullptr;
+	}
 	m_comObject = device;
 	m_focus->setDevice(device);
 	m_mcu->setDevice(device);

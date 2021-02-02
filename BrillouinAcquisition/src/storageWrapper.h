@@ -75,7 +75,7 @@ private:
 	bool m_observeQueues{ false };
 	bool m_finishedQueueing{ false };
 
-	QTimer* queueTimer{ nullptr };
+	QTimer* m_queueTimer{ nullptr };
 
 signals:
 	void finished();

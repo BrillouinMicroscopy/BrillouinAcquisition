@@ -31,7 +31,12 @@ class Camera : public Device {
 
 public:
 	Camera() {};
-	~Camera() {};
+	~Camera() {
+		if (m_previewBuffer) {
+			delete m_previewBuffer;
+			m_previewBuffer = nullptr;
+		}
+	};
 
 	CAMERA_OPTIONS getOptions();
 	CAMERA_SETTINGS getSettings();

@@ -44,15 +44,17 @@ StorageWrapper::~StorageWrapper() {
 			delete cal;
 		}
 	}
-	queueTimer->stop();
-	delete queueTimer;
+	if (m_queueTimer) {
+		m_queueTimer->stop();
+		m_queueTimer->deleteLater();
+	}
 	emit(finished());
 }
 
 void StorageWrapper::init() {
-	queueTimer = new QTimer();
+	m_queueTimer = new QTimer();
 	QMetaObject::Connection connection = QWidget::connect(
-		queueTimer,
+		m_queueTimer,
 		&QTimer::timeout,
 		this,
 		&StorageWrapper::s_writeQueues
@@ -107,13 +109,13 @@ void StorageWrapper::startWritingQueues() {
 	m_observeQueues = true;
 	m_finishedQueueing = false;
 	emit(started());
-	queueTimer->start(50);
+	m_queueTimer->start(50);
 }
 
 void StorageWrapper::stopWritingQueues() {
 	m_observeQueues = false;
 	m_finished = true;
-	queueTimer->stop();
+	m_queueTimer->stop();
 	m_finishedQueueing = true;
 	emit(finished());
 }
@@ -242,7 +244,7 @@ void StorageWrapper::s_writeQueues() {
 	}
 
 	if (m_finishedQueueing) {
-		queueTimer->stop();
+		m_queueTimer->stop();
 		emit(finished());
 	}
 }

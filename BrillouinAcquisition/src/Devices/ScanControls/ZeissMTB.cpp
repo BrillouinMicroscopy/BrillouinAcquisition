@@ -52,9 +52,15 @@ ZeissMTB::ZeissMTB() noexcept {
 }
 
 ZeissMTB::~ZeissMTB() {
-	m_positionTimer->stop();
-	m_elementPositionTimer->stop();
 	disconnectDevice();
+	if (m_positionTimer) {
+		m_positionTimer->stop();
+		m_positionTimer->deleteLater();
+	}
+	if (m_elementPositionTimer) {
+		m_elementPositionTimer->stop();
+		m_elementPositionTimer->deleteLater();
+	}
 	/*
 	 * Clean up Zeiss MTB handles
 	 */

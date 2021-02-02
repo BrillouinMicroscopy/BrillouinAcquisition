@@ -43,7 +43,10 @@ inline PreviewBuffer<T>::PreviewBuffer(BUFFER_SETTINGS bufferSettings) :
 
 template<class T>
 inline PreviewBuffer<T>::~PreviewBuffer() {
-	delete m_buffer;
+	if (m_buffer) {
+		delete m_buffer;
+		m_buffer = nullptr;
+	}
 }
 
 template<class T>
@@ -53,6 +56,7 @@ void inline PreviewBuffer<T>::initializeBuffer(BUFFER_SETTINGS bufferSettings) {
 	m_bufferSettings = bufferSettings;
 	if (m_buffer != nullptr) {
 		delete m_buffer;
+		m_buffer = nullptr;
 	}
 	m_buffer = new CircularBuffer<T>(m_bufferSettings.bufferNumber, m_bufferSettings.bufferSize);
 }

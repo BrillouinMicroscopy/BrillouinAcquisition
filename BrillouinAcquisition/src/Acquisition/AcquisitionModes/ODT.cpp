@@ -12,6 +12,11 @@ ODT::ODT(QObject* parent, Acquisition* acquisition, Camera** camera, ODTControl*
 
 ODT::~ODT() {
 	m_algnRunning = false;
+	if (m_algnTimer) {
+		m_algnTimer->stop();
+		m_algnTimer->deleteLater();
+		m_algnTimer = nullptr;
+	}
 }
 
 bool ODT::isAlgnRunning() {
