@@ -147,12 +147,15 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<std::vector<float>>("std::vector<float>");
 	qRegisterMetaType<std::vector<unsigned short>>("std::vector<unsigned short>");
 	qRegisterMetaType<std::vector<unsigned char>>("std::vector<unsigned char>");
+	qRegisterMetaType<std::vector<unsigned int>>("std::vector<unsigned int>");
 	qRegisterMetaType<std::vector<FLUORESCENCE_MODE>>("std::vector<FLUORESCENCE_MODE>");
 	qRegisterMetaType<std::vector<POINT2>>("std::vector<POINT2>");
 	qRegisterMetaType<std::vector<POINT3>>("std::vector<POINT3>");
 	qRegisterMetaType<QSerialPort::SerialPortError>("QSerialPort::SerialPortError");
-	qRegisterMetaType<IMAGE*>("IMAGE*");
-	qRegisterMetaType<CALIBRATION*>("CALIBRATION*");
+	qRegisterMetaType<IMAGE<unsigned char>*>("IMAGE<unsigned char>*");
+	qRegisterMetaType<IMAGE<unsigned short>*>("IMAGE<unsigned short>*");
+	qRegisterMetaType<CALIBRATION<unsigned char>*>("CALIBRATION<unsigned char>*");
+	qRegisterMetaType<CALIBRATION<unsigned short>*>("CALIBRATION<unsigned short>*");
 	qRegisterMetaType<ScanPreset>("ScanPreset");
 	qRegisterMetaType<DeviceElement>("DeviceElement");
 	qRegisterMetaType<SensorTemperature>("SensorTemperature");
@@ -164,8 +167,10 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	qRegisterMetaType<ODT_MODE>("ODT_MODE");
 	qRegisterMetaType<ODT_SETTING>("ODT_SETTING");
 	qRegisterMetaType<ODT_SETTINGS>("ODT_SETTINGS");
-	qRegisterMetaType<ODTIMAGE*>("ODTIMAGE*");
-	qRegisterMetaType<FLUOIMAGE*>("FLUOIMAGE*");
+	qRegisterMetaType<ODTIMAGE<unsigned char>*>("ODTIMAGE<unsigned char>*");
+	qRegisterMetaType<ODTIMAGE<unsigned short>*>("ODTIMAGE<unsigned short>*");
+	qRegisterMetaType<FLUOIMAGE<unsigned char>*>("FLUOIMAGE<unsigned char>*");
+	qRegisterMetaType<FLUOIMAGE<unsigned short>*>("FLUOIMAGE<unsigned short>*");
 	qRegisterMetaType<FLUORESCENCE_SETTINGS>("FLUORESCENCE_SETTINGS");
 	qRegisterMetaType<FLUORESCENCE_MODE>("FLUORESCENCE_MODE");
 	qRegisterMetaType<PLOT_SETTINGS*>("PLOT_SETTINGS*");
@@ -245,29 +250,35 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 	ui->actionEnable_Cooling->setEnabled(false);
 	ui->autoscalePlot->setChecked(m_BrillouinPlot.autoscale);
 
-	connection = QWidget::connect<void(converter::*)(PreviewBuffer<unsigned char>*, PLOT_SETTINGS*, std::vector<unsigned char>)>(
+	connection = QWidget::connect<void(converter::*)(PLOT_SETTINGS*, long long, long long, std::vector<unsigned char>)>(
 		m_converter,
 		&converter::s_converted,
 		this,
-		[this](PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<unsigned char> unpackedBuffer) { plot(previewBuffer, plotSettings, unpackedBuffer); }
+		[this](PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<unsigned char> unpackedBuffer) { plot(plotSettings, dim_x, dim_y, unpackedBuffer); }
 	);
-	connection = QWidget::connect<void(converter::*)(PreviewBuffer<unsigned char>*, PLOT_SETTINGS*, std::vector<unsigned short>)>(
+	connection = QWidget::connect<void(converter::*)(PLOT_SETTINGS*, long long, long long, std::vector<unsigned short>)>(
 		m_converter,
 		&converter::s_converted,
 		this,
-		[this](PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<unsigned short> unpackedBuffer) { plot(previewBuffer, plotSettings, unpackedBuffer); }
+		[this](PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<unsigned short> unpackedBuffer) { plot(plotSettings, dim_x, dim_y, unpackedBuffer); }
 	);
-	connection = QWidget::connect<void(converter::*)(PreviewBuffer<unsigned char>*, PLOT_SETTINGS*, std::vector<double>)>(
+	connection = QWidget::connect<void(converter::*)(PLOT_SETTINGS*, long long, long long, std::vector<double>)>(
 		m_converter,
 		&converter::s_converted,
 		this,
-		[this](PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<double> unpackedBuffer) { plot(previewBuffer, plotSettings, unpackedBuffer); }
+		[this](PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<double> unpackedBuffer) { plot(plotSettings, dim_x, dim_y, unpackedBuffer); }
 	);
-	connection = QWidget::connect<void(converter::*)(PreviewBuffer<unsigned char>*, PLOT_SETTINGS*, std::vector<float>)>(
+	connection = QWidget::connect<void(converter::*)(PLOT_SETTINGS*, long long, long long, std::vector<float>)>(
 		m_converter,
 		&converter::s_converted,
 		this,
-		[this](PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<float> unpackedBuffer) { plot(previewBuffer, plotSettings, unpackedBuffer); }
+		[this](PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<float> unpackedBuffer) { plot(plotSettings, dim_x, dim_y, unpackedBuffer); }
+	);
+	connection = QWidget::connect<void(converter::*)(PLOT_SETTINGS*, long long, long long, std::vector<int>)>(
+		m_converter,
+		&converter::s_converted,
+		this,
+		[this](PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<int> unpackedBuffer) { plot(plotSettings, dim_x, dim_y, unpackedBuffer); }
 	);
 
 	// start acquisition thread
@@ -666,7 +677,6 @@ void BrillouinAcquisition::addListToComboBox(QComboBox* box, std::vector<std::ws
 	if (currentList == list) {
 		return;
 	}
-	box->blockSignals(true);
 	if (clear) {
 		box->clear();
 	}
@@ -862,6 +872,17 @@ void BrillouinAcquisition::on_gainCameraODT_valueChanged(double gain) {
 		m_ODT,
 		[&m_ODT = m_ODT, gain]() {
 			m_ODT->setCameraSetting(CAMERA_SETTING::GAIN, gain);
+		},
+		Qt::AutoConnection
+	);
+}
+
+void BrillouinAcquisition::on_pixelEncodingODT_currentIndexChanged(const QString& text) {
+	auto encoding = text.toStdWString();
+	QMetaObject::invokeMethod(
+		m_brightfieldCamera,
+		[&m_brightfieldCamera = m_brightfieldCamera, encoding]() {
+			m_brightfieldCamera->setSetting(CAMERA_SETTING::ENCODING, encoding);
 		},
 		Qt::AutoConnection
 	);
@@ -1831,55 +1852,37 @@ void BrillouinAcquisition::updateImageODT() {
 
 template <typename T>
 void BrillouinAcquisition::updateImage(PreviewBuffer<T>* previewBuffer, PLOT_SETTINGS *plotSettings) {
-	{
-		std::lock_guard<std::mutex> lockGuard(previewBuffer->m_mutex);
-		// if no image is ready return immediately
-		if (!previewBuffer->m_buffer->m_usedBuffers->tryAcquire()) {
-			return;
-		}
-
-		if (previewBuffer->m_bufferSettings.bufferType == "unsigned short") {
-			auto unpackedBuffer = reinterpret_cast<unsigned short*>(previewBuffer->m_buffer->getReadBuffer());
-			QMetaObject::invokeMethod(
-				m_converter,
-				[&m_converter = m_converter, previewBuffer, plotSettings, unpackedBuffer]() {
-					m_converter->convert(previewBuffer, plotSettings, unpackedBuffer);
-				},
-				Qt::QueuedConnection
-			);
-		} else if (previewBuffer->m_bufferSettings.bufferType == "unsigned char") {
-			auto unpackedBuffer = previewBuffer->m_buffer->getReadBuffer();
-			QMetaObject::invokeMethod(
-				m_converter,
-				[&m_converter = m_converter, previewBuffer, plotSettings, unpackedBuffer]() {
-					m_converter->convert(previewBuffer, plotSettings, unpackedBuffer);
-				},
-				Qt::QueuedConnection
-			);
-		}
-	}
+	QMetaObject::invokeMethod(
+		m_converter,
+		[&m_converter = m_converter, previewBuffer, plotSettings]() {
+			m_converter->convert(previewBuffer, plotSettings);
+		},
+		Qt::QueuedConnection
+	);
 }
 
-void BrillouinAcquisition::plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<unsigned char> unpackedBuffer) {
-	plotting(previewBuffer, plotSettings, unpackedBuffer);
+void BrillouinAcquisition::plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<unsigned char> unpackedBuffer) {
+	plotting(plotSettings, dim_x, dim_y, unpackedBuffer);
 }
 
-void BrillouinAcquisition::plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<unsigned short> unpackedBuffer) {
-	plotting(previewBuffer, plotSettings, unpackedBuffer);
+void BrillouinAcquisition::plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<unsigned short> unpackedBuffer) {
+	plotting(plotSettings, dim_x, dim_y, unpackedBuffer);
 }
 
-void BrillouinAcquisition::plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<double> unpackedBuffer) {
-	plotting(previewBuffer, plotSettings, unpackedBuffer);
+void BrillouinAcquisition::plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<double> unpackedBuffer) {
+	plotting(plotSettings, dim_x, dim_y, unpackedBuffer);
 }
 
-void BrillouinAcquisition::plot(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<float> unpackedBuffer) {
-	plotting(previewBuffer, plotSettings, unpackedBuffer);
+void BrillouinAcquisition::plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<float> unpackedBuffer) {
+	plotting(plotSettings, dim_x, dim_y, unpackedBuffer);
+}
+
+void BrillouinAcquisition::plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<int> unpackedBuffer) {
+	plotting(plotSettings, dim_x, dim_y, unpackedBuffer);
 }
 
 template <typename T>
-void BrillouinAcquisition::plotting(PreviewBuffer<unsigned char>* previewBuffer, PLOT_SETTINGS* plotSettings, std::vector<T> unpackedBuffer) {
-	int dim_x = previewBuffer->m_bufferSettings.roi.width_binned;
-	int dim_y = previewBuffer->m_bufferSettings.roi.height_binned;
+void BrillouinAcquisition::plotting(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<T> unpackedBuffer) {
 	// images are given row by row, starting at the top left
 	int tIndex{ 0 };
 	for (gsl::index yIndex{ 0 }; yIndex < dim_y; ++yIndex) {
@@ -1888,7 +1891,6 @@ void BrillouinAcquisition::plotting(PreviewBuffer<unsigned char>* previewBuffer,
 			plotSettings->colorMap->data()->setCell(xIndex, dim_y - yIndex - 1, unpackedBuffer[tIndex]);
 		}
 	}
-	previewBuffer->m_buffer->m_freeBuffers->release();
 	if (plotSettings->autoscale) {
 		plotSettings->colorMap->rescaleDataRange(true);
 		plotSettings->cLim = plotSettings->colorMap->dataRange();

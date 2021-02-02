@@ -33,7 +33,148 @@ void MockCamera::disconnectDevice() {
 	emit(connectedDevice(m_isConnected));
 }
 
-void MockCamera::setSettings(CAMERA_SETTINGS settings) {
+void MockCamera::startPreview() {
+	// don't do anything if an acquisition is running
+	if (m_isAcquisitionRunning) {
+		return;
+	}
+	preparePreview();
+	m_isPreviewRunning = true;
+	m_stopPreview = false;
+	getImageForPreview();
+
+	emit(s_previewRunning(m_isPreviewRunning));
+}
+
+void MockCamera::stopPreview() {
+	m_isPreviewRunning = false;
+	m_stopPreview = false;
+	emit(s_previewRunning(m_isPreviewRunning));
+}
+
+void MockCamera::startAcquisition(CAMERA_SETTINGS settings) {
+	std::lock_guard<std::mutex> lockGuard(m_mutex);
+	// check if currently a preview is running and stop it in case
+	if (m_isPreviewRunning) {
+		stopPreview();
+		m_wasPreviewRunning = true;
+	} else {
+		m_wasPreviewRunning = false;
+	}
+	setSettings(settings);
+
+	auto bufferSettings = BUFFER_SETTINGS{ 4, (unsigned int)m_settings.roi.bytesPerFrame, m_settings.readout.dataType, m_settings.roi };
+	m_previewBuffer->initializeBuffer(bufferSettings);
+
+	emit(s_previewBufferSettingsChanged());
+
+	m_isAcquisitionRunning = true;
+	emit(s_acquisitionRunning(m_isAcquisitionRunning));
+}
+
+void MockCamera::stopAcquisition() {
+	m_isAcquisitionRunning = false;
+	emit(s_acquisitionRunning(m_isAcquisitionRunning));
+
+	// Restart the preview if it was running before the acquisition
+	if (m_wasPreviewRunning) {
+		startPreview();
+	}
+}
+
+void MockCamera::getImageForAcquisition(std::byte* buffer, bool preview) {
+	std::lock_guard<std::mutex> lockGuard(m_mutex);
+
+	acquireImage(buffer);
+
+	if (preview && buffer != nullptr) {
+		// write image to preview buffer
+		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.bytesPerFrame);
+		m_previewBuffer->m_buffer->m_usedBuffers->release();
+	}
+}
+
+void MockCamera::setCalibrationExposureTime(double exposureTime) {
+	m_settings.exposureTime = exposureTime;
+}
+
+/*
+ * Private definitions
+ */
+
+template <typename T>
+int MockCamera::acquireImage(std::byte* buffer) {
+
+	if (buffer == nullptr) {
+		return 0;
+	}
+
+	auto rangeMax{ 0 };
+	if (m_settings.readout.pixelEncoding == L"16 bit") {
+		rangeMax = 65536;
+	} else if (m_settings.readout.pixelEncoding == L"12 bit") {
+		rangeMax = 4096;
+	} else if (m_settings.readout.pixelEncoding == L"8 bit") {
+		rangeMax = 255;
+	} else {
+		rangeMax = 255;
+	}
+
+	// Create test image
+	auto incX{ 0.35 * rangeMax / m_options.ROIWidthLimits[1] * m_settings.roi.binX };
+	auto incY{ 0.35 * rangeMax / m_options.ROIHeightLimits[1] * m_settings.roi.binY };
+
+	auto noiseLvl{ 0.1 };
+	auto scaling{ noiseLvl * rangeMax / RAND_MAX };
+
+	auto typeSize = sizeof(T);
+	auto value = T{};
+	for (gsl::index xx{ 0 }; xx < m_settings.roi.width_binned; xx++) {
+		for (gsl::index yy{ 0 }; yy < m_settings.roi.height_binned; yy++) {
+
+			value = (T)(0.1 * rangeMax + (xx + m_settings.roi.left / m_settings.roi.binX) * incX +
+				(yy + m_settings.roi.top / m_settings.roi.binY) * incY + scaling * std::rand());
+
+			memcpy(&buffer[typeSize * (yy * m_settings.roi.width_binned + xx)], &value, typeSize);
+		}
+	}
+
+	// Sleep for exposure time
+	std::this_thread::sleep_for(std::chrono::milliseconds((int)(1e3 * m_settings.exposureTime)));
+	return 1;
+}
+
+int MockCamera::acquireImage(std::byte* buffer) {
+	if (m_settings.readout.dataType == "unsigned short") {
+		return acquireImage<unsigned short>(buffer);
+	} if (m_settings.readout.dataType == "unsigned char") {
+		return acquireImage<unsigned char>(buffer);
+	}
+	return 0;
+}
+
+void MockCamera::readOptions() {
+	m_options.ROIWidthLimits = {1, 1000};
+	m_options.ROIHeightLimits = { 1, 1000 };
+
+	m_options.pixelEncodings = {L"8 bit", L"12 bit", L"16 bit"};
+
+	m_options.imageBinnings = {L"1x1", L"2x2", L"4x4", L"8x8"};
+
+	emit(optionsChanged(m_options));
+}
+
+void MockCamera::readSettings() {
+	// emit signal that settings changed
+	emit(settingsChanged(m_settings));
+}
+
+void MockCamera::applySettings(CAMERA_SETTINGS settings) {
+	// Don't do anything if an acquisition is running.
+	if (m_isAcquisitionRunning) {
+		return;
+	}
+
 	m_settings = settings;
 
 	auto binning{ 1 };
@@ -85,142 +226,10 @@ void MockCamera::setSettings(CAMERA_SETTINGS settings) {
 
 	// Read back the settings
 	readSettings();
-}
 
-void MockCamera::startPreview() {
-	// don't do anything if an acquisition is running
-	if (m_isAcquisitionRunning) {
-		return;
-	}
-	m_isPreviewRunning = true;
-	m_stopPreview = false;
-	preparePreview();
-	getImageForPreview();
-
-	emit(s_previewRunning(m_isPreviewRunning));
-}
-
-void MockCamera::stopPreview() {
-	m_isPreviewRunning = false;
-	m_stopPreview = false;
-	emit(s_previewRunning(m_isPreviewRunning));
-}
-
-void MockCamera::startAcquisition(CAMERA_SETTINGS settings) {
-	std::lock_guard<std::mutex> lockGuard(m_mutex);
-	// check if currently a preview is running and stop it in case
 	if (m_isPreviewRunning) {
-		stopPreview();
-		m_wasPreviewRunning = true;
-	} else {
-		m_wasPreviewRunning = false;
+		preparePreviewBuffer();
 	}
-	setSettings(settings);
-
-	auto bufferSettings = BUFFER_SETTINGS{ 4, (unsigned int)m_settings.roi.bytesPerFrame, m_settings.readout.dataType, m_settings.roi };
-	m_previewBuffer->initializeBuffer(bufferSettings);
-
-	emit(s_previewBufferSettingsChanged());
-
-	m_isAcquisitionRunning = true;
-	emit(s_acquisitionRunning(m_isAcquisitionRunning));
-}
-
-void MockCamera::stopAcquisition() {
-	m_isAcquisitionRunning = false;
-	emit(s_acquisitionRunning(m_isAcquisitionRunning));
-
-	// Restart the preview if it was running before the acquisition
-	if (m_wasPreviewRunning) {
-		startPreview();
-	}
-}
-
-void MockCamera::getImageForAcquisition(unsigned char* buffer, bool preview) {
-	std::lock_guard<std::mutex> lockGuard(m_mutex);
-
-	acquireImage(buffer);
-
-	if (preview && buffer != nullptr) {
-		// write image to preview buffer
-		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.bytesPerFrame);
-		m_previewBuffer->m_buffer->m_usedBuffers->release();
-	}
-}
-
-void MockCamera::setCalibrationExposureTime(double exposureTime) {
-	m_settings.exposureTime = exposureTime;
-}
-
-/*
- * Private definitions
- */
-
-template <typename T>
-int MockCamera::acquireImage(unsigned char* buffer) {
-
-	if (buffer == nullptr) {
-		return 0;
-	}
-
-	auto rangeMax{ 0 };
-	if (m_settings.readout.pixelEncoding == L"16 bit") {
-		rangeMax = 65536;
-	} else if (m_settings.readout.pixelEncoding == L"12 bit") {
-		rangeMax = 4096;
-	} else if (m_settings.readout.pixelEncoding == L"8 bit") {
-		rangeMax = 255;
-	} else {
-		rangeMax = 255;
-	}
-
-	// Create test image
-	auto incX{ 0.35 * rangeMax / m_options.ROIWidthLimits[1] * m_settings.roi.binX };
-	auto incY{ 0.35 * rangeMax / m_options.ROIHeightLimits[1] * m_settings.roi.binY };
-
-	auto noiseLvl{ 0.1 };
-	auto scaling{ noiseLvl * rangeMax / RAND_MAX };
-
-	auto typeSize = sizeof(T);
-	auto value = T{};
-	for (gsl::index xx{ 0 }; xx < m_settings.roi.width_binned; xx++) {
-		for (gsl::index yy{ 0 }; yy < m_settings.roi.height_binned; yy++) {
-
-			value = (T)(0.1 * rangeMax + (xx + m_settings.roi.left / m_settings.roi.binX) * incX +
-				(yy + m_settings.roi.top / m_settings.roi.binY) * incY + scaling * std::rand());
-
-			memcpy(&buffer[typeSize * (yy * m_settings.roi.width_binned + xx)], &value, typeSize);
-		}
-	}
-
-	// Sleep for exposure time
-	std::this_thread::sleep_for(std::chrono::milliseconds((int)(1e3 * m_settings.exposureTime)));
-	return 1;
-}
-
-int MockCamera::acquireImage(unsigned char* buffer) {
-	if (m_settings.readout.dataType == "unsigned short") {
-		return acquireImage<unsigned short>(buffer);
-	} if (m_settings.readout.dataType == "unsigned char") {
-		return acquireImage<unsigned char>(buffer);
-	}
-	return 0;
-}
-
-void MockCamera::readOptions() {
-	m_options.ROIWidthLimits = {1, 1000};
-	m_options.ROIHeightLimits = { 1, 1000 };
-
-	m_options.pixelEncodings = {L"8 bit", L"12 bit", L"16 bit"};
-
-	m_options.imageBinnings = {L"1x1", L"2x2", L"4x4", L"8x8"};
-
-	emit(optionsChanged(m_options));
-}
-
-void MockCamera::readSettings() {
-	// emit signal that settings changed
-	emit(settingsChanged(m_settings));
 }
 
 void MockCamera::preparePreview() {
@@ -232,6 +241,10 @@ void MockCamera::preparePreview() {
 
 	setSettings(m_settings);
 
+	preparePreviewBuffer();
+}
+
+void MockCamera::preparePreviewBuffer() {
 	auto bufferSettings = BUFFER_SETTINGS{ 5, (unsigned int)m_settings.roi.bytesPerFrame, m_settings.readout.dataType, m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());

@@ -19,18 +19,18 @@ public slots:
 	void connectDevice() override;
 	void disconnectDevice() override;
 
-	void setSettings(CAMERA_SETTINGS) override;
 	void startPreview() override;
 	void stopPreview() override;
 	void startAcquisition(CAMERA_SETTINGS) override;
 	void stopAcquisition() override;
-	void getImageForAcquisition(unsigned char* buffer, bool preview = true) override;
+	void getImageForAcquisition(std::byte* buffer, bool preview = true) override;
 
 private:
-	int acquireImage(unsigned char* buffer) override;
+	int acquireImage(std::byte* buffer) override;
 
 	void readOptions() override;
 	void readSettings() override;
+	void applySettings(CAMERA_SETTINGS settings) override;
 
 	void preparePreview();
 

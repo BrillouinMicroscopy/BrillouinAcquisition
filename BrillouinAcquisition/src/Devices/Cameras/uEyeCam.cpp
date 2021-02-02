@@ -78,89 +78,6 @@ void uEyeCam::disconnectDevice() {
 	emit(connectedDevice(m_isConnected));
 }
 
-void uEyeCam::setSettings(CAMERA_SETTINGS settings) {
-	// Don't do anything if an acquisition is running.
-	if (m_isAcquisitionRunning) {
-		return;
-	}
-
-	// If the preview is currently running, stop it and apply the settings.
-	if (m_isPreviewRunning) {
-		uEye::is_StopLiveVideo(m_camera, IS_FORCE_VIDEO_STOP);
-	}
-	m_settings = settings;
-
-	/*
-	 * Set the exposure time
-	 */
-	auto exposureTemp = (double)1e3 * m_settings.exposureTime;
-	uEye::is_Exposure(m_camera, uEye::IS_EXPOSURE_CMD_SET_EXPOSURE, (void*)&exposureTemp, sizeof(exposureTemp));
-
-	/*
-	 * Set the camera gain
-	 */
-	 //m_settings.gain;
-
-
-	 /*
-	  * Set the pixel format
-	  */
-	  // Set the pixel format, possible values are: PIXEL_FORMAT_RAW8, PIXEL_FORMAT_MONO8, PIXEL_FORMAT_MONO12, PIXEL_FORMAT_MONO16
-	auto pixelFormat{ IS_CM_SENSOR_RAW8 };
-	if (m_settings.readout.pixelEncoding == L"Raw8") {
-		pixelFormat = IS_CM_SENSOR_RAW8;
-	} else if (m_settings.readout.pixelEncoding == L"Mono8") {
-		pixelFormat = IS_CM_MONO8;
-	} else if (m_settings.readout.pixelEncoding == L"Mono12") {
-		pixelFormat = IS_CM_MONO12;
-	} else if (m_settings.readout.pixelEncoding == L"Mono16") {
-		pixelFormat = IS_CM_MONO16;
-	}
-	auto ret = uEye::is_SetColorMode(m_camera, pixelFormat);
-
-	/*
-	 * Set the region of interest
-	 */
-	auto AOI = uEye::IS_RECT{};
-	// Offset x
-	AOI.s32X = m_settings.roi.left;
-	// Offset y
-	AOI.s32Y = m_settings.roi.top;
-	// Width
-	AOI.s32Width = m_settings.roi.width_physical;
-	// Height
-	AOI.s32Height = m_settings.roi.height_physical;
-	// Apply values
-	ret = uEye::is_AOI(m_camera, IS_AOI_IMAGE_SET_AOI, (void*)&AOI, sizeof(AOI));
-
-	/*
-	 * Set trigger mode
-	 */
-	if (m_settings.readout.triggerMode == L"Internal") {
-		ret = uEye::is_SetExternalTrigger(m_camera, IS_SET_TRIGGER_OFF);
-	} else if (m_settings.readout.triggerMode == L"Software") {
-		ret = uEye::is_SetExternalTrigger(m_camera, IS_SET_TRIGGER_SOFTWARE);	// software trigger
-	} else if (m_settings.readout.triggerMode == L"External") {
-		ret = uEye::is_SetExternalTrigger(m_camera, IS_SET_TRIGGER_LO_HI);	// external trigger low high
-	}
-
-	// Read back the settings
-	readSettings();
-
-	// Read changed options
-	readOptions();
-
-	m_settings.roi.width_binned = m_settings.roi.width_physical;
-	m_settings.roi.height_binned = m_settings.roi.height_physical;
-
-	m_settings.roi.bytesPerFrame = m_settings.roi.width_binned * m_settings.roi.height_binned;
-
-	// If the preview was running, start it again.
-	if (m_isPreviewRunning) {
-		uEye::is_CaptureVideo(m_camera, IS_WAIT);
-	}
-}
-
 void uEyeCam::startPreview() {
 	// don't do anything if an acquisition is running
 	if (m_isAcquisitionRunning) {
@@ -224,7 +141,7 @@ void uEyeCam::stopAcquisition() {
 	}
 }
 
-void uEyeCam::getImageForAcquisition(unsigned char* buffer, bool preview) {
+void uEyeCam::getImageForAcquisition(std::byte* buffer, bool preview) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	// Calculate timeout in multiples of 10 ms to be slightly higher than exposure time
 	auto timeout{ (int)(500 * m_settings.exposureTime) };
@@ -245,7 +162,7 @@ void uEyeCam::getImageForAcquisition(unsigned char* buffer, bool preview) {
  * Private definitions
  */
 
-int uEyeCam::acquireImage(unsigned char* buffer) {
+int uEyeCam::acquireImage(std::byte* buffer) {
 
 	// Copy data to provided buffer
 	if (m_imageBuffer != NULL && buffer != nullptr) {
@@ -343,6 +260,98 @@ void uEyeCam::readSettings() {
 
 	// emit signal that settings changed
 	emit(settingsChanged(m_settings));
+}
+
+void uEyeCam::applySettings(CAMERA_SETTINGS settings) {
+	// Don't do anything if an acquisition is running.
+	if (m_isAcquisitionRunning) {
+		return;
+	}
+
+	m_settings = settings;
+
+	// If the preview is currently running, stop it and apply the settings.
+	if (m_isPreviewRunning) {
+		uEye::is_StopLiveVideo(m_camera, IS_FORCE_VIDEO_STOP);
+	}
+
+	/*
+	 * Set the exposure time
+	 */
+	auto exposureTemp = (double)1e3 * m_settings.exposureTime;
+	uEye::is_Exposure(m_camera, uEye::IS_EXPOSURE_CMD_SET_EXPOSURE, (void*)&exposureTemp, sizeof(exposureTemp));
+
+	/*
+	 * Set the camera gain
+	 */
+	 //m_settings.gain;
+
+
+	 /*
+	  * Set the pixel format
+	  */
+	  // Set the pixel format, possible values are: PIXEL_FORMAT_RAW8, PIXEL_FORMAT_MONO8, PIXEL_FORMAT_MONO12, PIXEL_FORMAT_MONO16
+	auto pixelFormat{ IS_CM_SENSOR_RAW8 };
+	if (m_settings.readout.pixelEncoding == L"Raw8") {
+		m_settings.readout.dataType = "unsigned char";
+		pixelFormat = IS_CM_SENSOR_RAW8;
+	} else if (m_settings.readout.pixelEncoding == L"Mono8") {
+		m_settings.readout.dataType = "unsigned char";
+		pixelFormat = IS_CM_MONO8;
+	} else if (m_settings.readout.pixelEncoding == L"Mono12") {
+		m_settings.readout.dataType = "unsigned short";
+		pixelFormat = IS_CM_MONO12;
+	} else if (m_settings.readout.pixelEncoding == L"Mono16") {
+		m_settings.readout.dataType = "unsigned short";
+		pixelFormat = IS_CM_MONO16;
+	} else {
+		m_settings.readout.pixelEncoding = L"Raw8";
+		m_settings.readout.dataType = "unsigned char";
+		pixelFormat = IS_CM_SENSOR_RAW8;
+	}
+	auto ret = uEye::is_SetColorMode(m_camera, pixelFormat);
+
+	/*
+	 * Set the region of interest
+	 */
+	auto AOI = uEye::IS_RECT{};
+	// Offset x
+	AOI.s32X = m_settings.roi.left;
+	// Offset y
+	AOI.s32Y = m_settings.roi.top;
+	// Width
+	AOI.s32Width = m_settings.roi.width_physical;
+	// Height
+	AOI.s32Height = m_settings.roi.height_physical;
+	// Apply values
+	ret = uEye::is_AOI(m_camera, IS_AOI_IMAGE_SET_AOI, (void*)&AOI, sizeof(AOI));
+
+	/*
+	 * Set trigger mode
+	 */
+	if (m_settings.readout.triggerMode == L"Internal") {
+		ret = uEye::is_SetExternalTrigger(m_camera, IS_SET_TRIGGER_OFF);
+	} else if (m_settings.readout.triggerMode == L"Software") {
+		ret = uEye::is_SetExternalTrigger(m_camera, IS_SET_TRIGGER_SOFTWARE);	// software trigger
+	} else if (m_settings.readout.triggerMode == L"External") {
+		ret = uEye::is_SetExternalTrigger(m_camera, IS_SET_TRIGGER_LO_HI);	// external trigger low high
+	}
+
+	// Read back the settings
+	readSettings();
+
+	// Read changed options
+	readOptions();
+
+	m_settings.roi.width_binned = m_settings.roi.width_physical;
+	m_settings.roi.height_binned = m_settings.roi.height_physical;
+
+	m_settings.roi.bytesPerFrame = m_settings.roi.width_binned * m_settings.roi.height_binned;
+
+	// If the preview was running, start it again.
+	if (m_isPreviewRunning) {
+		uEye::is_CaptureVideo(m_camera, IS_WAIT);
+	}
 }
 
 void uEyeCam::preparePreview() {

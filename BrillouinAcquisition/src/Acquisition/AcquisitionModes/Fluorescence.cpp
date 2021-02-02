@@ -218,6 +218,8 @@ void Fluorescence::configureCamera() {
 		cameraType = typeid(**m_camera).name();
 	}
 
+	m_settings.camera = (*m_camera)->getSettings();
+
 	// configure camera for measurement
 	// This needs a proper implementation with user defined values. Probably by a configuration file.
 	m_settings.camera.roi.left = 128;
@@ -237,7 +239,6 @@ void Fluorescence::configureCamera() {
 		m_settings.camera.roi.height_physical = 1024;
 		m_settings.camera.readout.triggerMode = L"Software";
 	}
-	m_settings.camera.readout.pixelEncoding = L"Raw8";
 	m_settings.camera.readout.cycleMode = L"Fixed";
 	m_settings.camera.frameCount = 1;
 }
@@ -254,15 +255,8 @@ std::string Fluorescence::getBinningString() {
 	return binning;
 }
 
-/*
- * Private slots
- */
-
-void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage) {
-	acquire(storage, {});
-}
-
-void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vector<ChannelSettings *> channels) {
+template <typename T>
+void Fluorescence::__acquire(std::unique_ptr <StorageWrapper>& storage, std::vector<ChannelSettings*> channels) {
 	setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 
 	// If the provided channel settings vector is empty, acquire the enabled channels.
@@ -308,11 +302,11 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 		 * See https://www.ptgrey.com/KB/10086
 		 */
 		auto changed{ false };
-		if (((int)(1e3*m_settings.camera.exposureTime) != channel->exposure) || (m_settings.camera.gain != channel->gain)) {
+		if (((int)(1e3 * m_settings.camera.exposureTime) != channel->exposure) || (m_settings.camera.gain != channel->gain)) {
 			changed = true;
 		}
 
-		m_settings.camera.exposureTime = 1e-3*channel->exposure;
+		m_settings.camera.exposureTime = 1e-3 * channel->exposure;
 		m_settings.camera.gain = channel->gain;
 
 		if (changed) {
@@ -340,7 +334,7 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 		hsize_t dims_data[3] = { 1, (hsize_t)m_settings.camera.roi.height_binned, (hsize_t)m_settings.camera.roi.width_binned };
 
 		// read images from camera
-		std::vector<unsigned char> images(m_settings.camera.roi.bytesPerFrame);
+		std::vector<std::byte> images(m_settings.camera.roi.bytesPerFrame);
 
 		// acquire images
 		if (m_camera) {
@@ -348,7 +342,7 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 		}
 
 		// cast the vector to unsigned short
-		std::vector<unsigned char>* images_ = (std::vector<unsigned char> *) &images;
+		auto images_ = (std::vector<T> *) & images;
 
 		// Sometimes the uEye camera returns a black image (only zeros), we try to catch this here by
 		// repeating the acquisition a maximum of 5 times
@@ -359,9 +353,9 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 				(*m_camera)->getImageForAcquisition(&images[0], true);
 			}
 
-			// cast the vector to unsigned short
-			std::vector<unsigned char>* images_ = (std::vector<unsigned char> *) &images;
-			
+			// cast the vector type T
+			auto images_ = (std::vector<T> *) & images;
+
 			sum = simplemath::sum(*images_);
 		}
 
@@ -371,7 +365,7 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 		std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 			.toString(Qt::ISODateWithMs).toStdString();
 		std::string binning = getBinningString();
-		FLUOIMAGE* img = new FLUOIMAGE(imageNumber, rank_data, dims_data, date, channel->name, *images_,
+		auto img = new FLUOIMAGE<T>(imageNumber, rank_data, dims_data, date, channel->name, *images_,
 			m_settings.camera.exposureTime, m_settings.camera.gain, binning);
 
 		QMetaObject::invokeMethod(
@@ -406,4 +400,20 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage, std::vecto
 	loop.exec();
 
 	setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
+}
+
+/*
+ * Private slots
+ */
+
+void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage) {
+	acquire(storage, {});
+}
+
+void Fluorescence::acquire(std::unique_ptr<StorageWrapper>& storage, std::vector<ChannelSettings*> channels) {
+	if (m_settings.camera.readout.dataType == "unsigned short") {
+		__acquire<unsigned short>(storage, channels);
+	} else if (m_settings.camera.readout.dataType == "unsigned char") {
+		__acquire<unsigned char>(storage, channels);
+	}
 }

@@ -19,22 +19,22 @@ public slots:
 	void connectDevice() override;
 	void disconnectDevice() override;
 
-	void setSettings(CAMERA_SETTINGS) override;
 	void startPreview() override;
 	void stopPreview() override;
 	void startAcquisition(CAMERA_SETTINGS) override;
 	void stopAcquisition() override;
-	void getImageForAcquisition(unsigned char* buffer, bool preview = true) override;
+	void getImageForAcquisition(std::byte* buffer, bool preview = true) override;
 
 	void setCalibrationExposureTime(double) override;
 	void setSensorCooling(bool cooling) override;
 	bool getSensorCooling() override;
 
 private:
-	int acquireImage(unsigned char* buffer) override;
+	int acquireImage(std::byte* buffer) override;
 
 	void readOptions() override;
 	void readSettings() override;
+	void applySettings(CAMERA_SETTINGS settings) override;
 
 	bool initialize();
 
@@ -55,6 +55,7 @@ private:
 	QTimer* m_tempTimer{ nullptr };
 	SensorTemperature m_sensorTemperature;
 	AT_64 m_imageStride{ 0 };
+	std::wstring m_outputPixelEncoding{ L"Mono16" };
 
 private slots:
 	void checkSensorTemperature();

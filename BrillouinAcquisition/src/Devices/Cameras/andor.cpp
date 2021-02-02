@@ -59,8 +59,201 @@ void Andor::disconnectDevice() {
 	emit(connectedDevice(m_isConnected));
 }
 
-void Andor::setSettings(CAMERA_SETTINGS settings) {
+void Andor::startPreview() {
+	// don't do anything if an acquisition is running
+	if (m_isAcquisitionRunning) {
+		return;
+	}
+	m_isPreviewRunning = true;
+	m_stopPreview = false;
+	preparePreview();
+	getImageForPreview();
+
+	emit(s_previewRunning(m_isPreviewRunning));
+}
+
+void Andor::stopPreview() {
+	cleanupAcquisition();
+	m_isPreviewRunning = false;
+	m_stopPreview = false;
+	emit(s_previewRunning(m_isPreviewRunning));
+}
+
+void Andor::startAcquisition(CAMERA_SETTINGS settings) {
+	std::lock_guard<std::mutex> lockGuard(m_mutex);
+	// check if currently a preview is running and stop it in case
+	if (m_isPreviewRunning) {
+		stopPreview();
+	}
+
+	setSettings(settings);
+
+	auto bufferSettings = BUFFER_SETTINGS{ 4, (unsigned int)m_settings.roi.bytesPerFrame, m_settings.readout.dataType, m_settings.roi };
+	m_previewBuffer->initializeBuffer(bufferSettings);
+	emit(s_previewBufferSettingsChanged());
+
+	// Start acquisition
+	AT_Command(m_camera, L"AcquisitionStart");
+	AT_InitialiseUtilityLibrary();
+
+	m_isAcquisitionRunning = true;
+	emit(s_acquisitionRunning(m_isAcquisitionRunning));
+}
+
+void Andor::stopAcquisition() {
+	cleanupAcquisition();
+	m_isAcquisitionRunning = false;
+	emit(s_acquisitionRunning(m_isAcquisitionRunning));
+}
+
+void Andor::getImageForAcquisition(std::byte* buffer, bool preview) {
+	std::lock_guard<std::mutex> lockGuard(m_mutex);
+	acquireImage(buffer);
+
+	if (preview) {
+		// write image to preview buffer
+		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.bytesPerFrame);
+		m_previewBuffer->m_buffer->m_usedBuffers->release();
+	}
+}
+
+void Andor::setCalibrationExposureTime(double exposureTime) {
+	m_settings.exposureTime = exposureTime;
+	AT_Command(m_camera, L"AcquisitionStop");
+	// Set the exposure time
+	AT_SetFloat(m_camera, L"ExposureTime", m_settings.exposureTime);
+
+	AT_Command(m_camera, L"AcquisitionStart");
+}
+
+void Andor::setSensorCooling(bool cooling) {
+	auto i_retCode = AT_SetBool(m_camera, L"SensorCooling", (int)cooling);
+	m_isCooling = cooling;
+	emit(cameraCoolingChanged(m_isCooling));
+}
+
+bool Andor::getSensorCooling() {
+	auto szValue = AT_BOOL{};
+	auto i_retCode = AT_GetBool(m_camera, L"SensorCooling", &szValue);
+	return szValue;
+}
+
+/*
+ * Private definitions
+ */
+
+int Andor::acquireImage(std::byte* buffer) {
+	// Pass this buffer to the SDK
+	auto UserBuffer = new unsigned char[m_settings.roi.bytesPerFrame];
+	AT_QueueBuffer(m_camera, UserBuffer, m_settings.roi.bytesPerFrame);
+
+	// Acquire camera images
+	AT_Command(m_camera, L"SoftwareTrigger");
+
+	// Sleep in this thread until data is ready
+	unsigned char* Buffer{ nullptr };
+	auto ret = AT_WaitBuffer(m_camera, &Buffer, &m_settings.roi.bytesPerFrame, 1500 * m_settings.exposureTime);
+	// return if AT_WaitBuffer timed out
+	if (ret != AT_SUCCESS) {
+		return 0;
+	}
+
+	// Process the image
+	//Unpack the 12 bit packed data
+	AT_GetInt(m_camera, L"AOIHeight", &m_settings.roi.height_binned);
+	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width_binned);
+	AT_GetInt(m_camera, L"AOIStride", &m_imageStride);
+
+	AT_ConvertBuffer(
+		Buffer,
+		(AT_U8*)buffer,
+		m_settings.roi.width_binned,
+		m_settings.roi.height_binned,
+		m_imageStride,
+		m_settings.readout.pixelEncoding.c_str(),
+		m_outputPixelEncoding.c_str()
+	);
+
+	delete[] Buffer;
+	return 1;
+}
+
+void Andor::readOptions() {
+
+	AT_GetFloatMin(m_camera, L"ExposureTime", &m_options.exposureTimeLimits[0]);
+	AT_GetFloatMax(m_camera, L"ExposureTime", &m_options.exposureTimeLimits[1]);
+	AT_GetIntMin(m_camera, L"FrameCount", &m_options.frameCountLimits[0]);
+	AT_GetIntMax(m_camera, L"FrameCount", &m_options.frameCountLimits[1]);
+
+	AT_GetIntMin(m_camera, L"AOIHeight", &m_options.ROIHeightLimits[0]);
+	AT_GetIntMax(m_camera, L"AOIHeight", &m_options.ROIHeightLimits[1]);
+
+	AT_GetIntMin(m_camera, L"AOIWidth", &m_options.ROIWidthLimits[0]);
+	AT_GetIntMax(m_camera, L"AOIWidth", &m_options.ROIWidthLimits[1]);
+
+	/*
+	 * We don't offer L"Mono12Packed" and L"Mono32" here for now.
+	 * With L"Mono12Packed" the encoding seems to be broken and
+	 * with L"Mono32" the camera won't accept intermediate stoppings of the acquisition (WTF??),
+	 * so we cannot adjust the exposure time for the calibration.
+	 */
+	m_options.pixelEncodings = { L"Mono12", L"Mono16" };
+
+	emit(optionsChanged(m_options));
+}
+
+void Andor::readSettings() {
+	// general settings
+	AT_GetFloat(m_camera, L"ExposureTime", &m_settings.exposureTime);
+	//AT_GetInt(m_camera, L"FrameCount", &m_settings.frameCount);
+	AT_GetBool(m_camera, L"SpuriousNoiseFilter", (int*)&m_settings.spuriousNoiseFilter);
+
+	// ROI
+	AT_GetInt(m_camera, L"AOIHeight", &m_settings.roi.height_binned);
+	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width_binned);
+	AT_GetInt(m_camera, L"AOILeft", &m_settings.roi.left);
+	AT_GetInt(m_camera, L"AOITop", &m_settings.roi.top);
+	getEnumString(L"AOIBinning", &m_settings.roi.binning);
+	m_settings.roi.width_physical = m_settings.roi.width_binned * m_settings.roi.binX;
+	m_settings.roi.height_physical = m_settings.roi.height_binned * m_settings.roi.binY;
+
+	// readout parameters
+	getEnumString(L"CycleMode", &m_settings.readout.cycleMode);
+	getEnumString(L"Pixel Encoding", &m_settings.readout.pixelEncoding);
+	getEnumString(L"Pixel Readout Rate", &m_settings.readout.pixelReadoutRate);
+	getEnumString(L"SimplePreAmpGainControl", &m_settings.readout.preAmpGain);
+	getEnumString(L"TriggerMode", &m_settings.readout.triggerMode);
+
+	// emit signal that settings changed
+	emit(settingsChanged(m_settings));
+}
+
+void Andor::applySettings(CAMERA_SETTINGS settings) {
+	// Don't do anything if an acquisition is running.
+	if (m_isAcquisitionRunning) {
+		return;
+	}
+
 	m_settings = settings;
+
+	if (m_settings.readout.pixelEncoding == L"Mono12") {
+		m_settings.readout.dataType = "unsigned short";
+		m_outputPixelEncoding = L"Mono16";
+	} else if (m_settings.readout.pixelEncoding == L"Mono12Packed") {
+		m_settings.readout.dataType = "unsigned short";
+		m_outputPixelEncoding = L"Mono16";
+	} else if (m_settings.readout.pixelEncoding == L"Mono16") {
+		m_settings.readout.dataType = "unsigned short";
+		m_outputPixelEncoding = L"Mono16";
+	} else if (m_settings.readout.pixelEncoding == L"Mono32") {
+		m_settings.readout.dataType = "unsigned int";
+		m_outputPixelEncoding = L"Mono32";
+	} else {
+		// Fallback
+		m_settings.readout.pixelEncoding = L"Mono16";
+		m_settings.readout.dataType = "unsigned short";
+		m_outputPixelEncoding = L"Mono16";
+	}
 
 	// Set the pixel Encoding
 	AT_SetEnumeratedString(m_camera, L"Pixel Encoding", m_settings.readout.pixelEncoding.c_str());
@@ -121,159 +314,6 @@ void Andor::setSettings(CAMERA_SETTINGS settings) {
 	readSettings();
 }
 
-void Andor::startPreview() {
-	// don't do anything if an acquisition is running
-	if (m_isAcquisitionRunning) {
-		return;
-	}
-	m_isPreviewRunning = true;
-	m_stopPreview = false;
-	preparePreview();
-	getImageForPreview();
-
-	emit(s_previewRunning(m_isPreviewRunning));
-}
-
-void Andor::stopPreview() {
-	cleanupAcquisition();
-	m_isPreviewRunning = false;
-	m_stopPreview = false;
-	emit(s_previewRunning(m_isPreviewRunning));
-}
-
-void Andor::startAcquisition(CAMERA_SETTINGS settings) {
-	std::lock_guard<std::mutex> lockGuard(m_mutex);
-	// check if currently a preview is running and stop it in case
-	if (m_isPreviewRunning) {
-		stopPreview();
-	}
-
-	setSettings(settings);
-
-	auto bufferSettings = BUFFER_SETTINGS{ 4, (unsigned int)m_settings.roi.bytesPerFrame, "unsigned short", m_settings.roi };
-	m_previewBuffer->initializeBuffer(bufferSettings);
-	emit(s_previewBufferSettingsChanged());
-
-	// Start acquisition
-	AT_Command(m_camera, L"AcquisitionStart");
-	AT_InitialiseUtilityLibrary();
-
-	m_isAcquisitionRunning = true;
-	emit(s_acquisitionRunning(m_isAcquisitionRunning));
-}
-
-void Andor::stopAcquisition() {
-	cleanupAcquisition();
-	m_isAcquisitionRunning = false;
-	emit(s_acquisitionRunning(m_isAcquisitionRunning));
-}
-
-void Andor::getImageForAcquisition(unsigned char* buffer, bool preview) {
-	std::lock_guard<std::mutex> lockGuard(m_mutex);
-	acquireImage(buffer);
-
-	if (preview) {
-		// write image to preview buffer
-		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.bytesPerFrame);
-		m_previewBuffer->m_buffer->m_usedBuffers->release();
-	}
-}
-
-void Andor::setCalibrationExposureTime(double exposureTime) {
-	m_settings.exposureTime = exposureTime;
-	AT_Command(m_camera, L"AcquisitionStop");
-	// Set the exposure time
-	AT_SetFloat(m_camera, L"ExposureTime", m_settings.exposureTime);
-
-	AT_Command(m_camera, L"AcquisitionStart");
-}
-
-void Andor::setSensorCooling(bool cooling) {
-	auto i_retCode = AT_SetBool(m_camera, L"SensorCooling", (int)cooling);
-	m_isCooling = cooling;
-	emit(cameraCoolingChanged(m_isCooling));
-}
-
-bool Andor::getSensorCooling() {
-	auto szValue = AT_BOOL{};
-	auto i_retCode = AT_GetBool(m_camera, L"SensorCooling", &szValue);
-	return szValue;
-}
-
-/*
- * Private definitions
- */
-
-int Andor::acquireImage(unsigned char* buffer) {
-	// Pass this buffer to the SDK
-	auto UserBuffer = new unsigned char[m_settings.roi.bytesPerFrame];
-	AT_QueueBuffer(m_camera, UserBuffer, m_settings.roi.bytesPerFrame);
-
-	// Acquire camera images
-	AT_Command(m_camera, L"SoftwareTrigger");
-
-	// Sleep in this thread until data is ready
-	unsigned char* Buffer{ nullptr };
-	auto ret = AT_WaitBuffer(m_camera, &Buffer, &m_settings.roi.bytesPerFrame, 1500 * m_settings.exposureTime);
-	// return if AT_WaitBuffer timed out
-	if (ret == AT_ERR_TIMEDOUT) {
-		return 0;
-	}
-
-	// Process the image
-	//Unpack the 12 bit packed data
-	AT_GetInt(m_camera, L"AOIHeight", &m_settings.roi.height_binned);
-	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width_binned);
-	AT_GetInt(m_camera, L"AOIStride", &m_imageStride);
-
-	AT_ConvertBuffer(Buffer, buffer, m_settings.roi.width_binned, m_settings.roi.height_binned, m_imageStride, m_settings.readout.pixelEncoding.c_str(), L"Mono16");
-
-	delete[] Buffer;
-	return 1;
-}
-
-void Andor::readOptions() {
-
-	AT_GetFloatMin(m_camera, L"ExposureTime", &m_options.exposureTimeLimits[0]);
-	AT_GetFloatMax(m_camera, L"ExposureTime", &m_options.exposureTimeLimits[1]);
-	AT_GetIntMin(m_camera, L"FrameCount", &m_options.frameCountLimits[0]);
-	AT_GetIntMax(m_camera, L"FrameCount", &m_options.frameCountLimits[1]);
-
-	AT_GetIntMin(m_camera, L"AOIHeight", &m_options.ROIHeightLimits[0]);
-	AT_GetIntMax(m_camera, L"AOIHeight", &m_options.ROIHeightLimits[1]);
-
-	AT_GetIntMin(m_camera, L"AOIWidth", &m_options.ROIWidthLimits[0]);
-	AT_GetIntMax(m_camera, L"AOIWidth", &m_options.ROIWidthLimits[1]);
-
-	emit(optionsChanged(m_options));
-}
-
-void Andor::readSettings() {
-	// general settings
-	AT_GetFloat(m_camera, L"ExposureTime", &m_settings.exposureTime);
-	//AT_GetInt(m_camera, L"FrameCount", &m_settings.frameCount);
-	AT_GetBool(m_camera, L"SpuriousNoiseFilter", (int*)&m_settings.spuriousNoiseFilter);
-
-	// ROI
-	AT_GetInt(m_camera, L"AOIHeight", &m_settings.roi.height_binned);
-	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width_binned);
-	AT_GetInt(m_camera, L"AOILeft", &m_settings.roi.left);
-	AT_GetInt(m_camera, L"AOITop", &m_settings.roi.top);
-	getEnumString(L"AOIBinning", &m_settings.roi.binning);
-	m_settings.roi.width_physical = m_settings.roi.width_binned * m_settings.roi.binX;
-	m_settings.roi.height_physical = m_settings.roi.height_binned * m_settings.roi.binY;
-
-	// readout parameters
-	getEnumString(L"CycleMode", &m_settings.readout.cycleMode);
-	getEnumString(L"Pixel Encoding", &m_settings.readout.pixelEncoding);
-	getEnumString(L"Pixel Readout Rate", &m_settings.readout.pixelReadoutRate);
-	getEnumString(L"SimplePreAmpGainControl", &m_settings.readout.preAmpGain);
-	getEnumString(L"TriggerMode", &m_settings.readout.triggerMode);
-
-	// emit signal that settings changed
-	emit(settingsChanged(m_settings));
-}
-
 bool Andor::initialize() {
 	if (!m_isInitialised) {
 		auto i_retCode = AT_InitialiseLibrary();
@@ -309,7 +349,7 @@ void Andor::preparePreview() {
 
 	setSettings(m_settings);
 
-	auto bufferSettings = BUFFER_SETTINGS{ 5, (unsigned int)m_settings.roi.bytesPerFrame, "unsigned short", m_settings.roi };
+	auto bufferSettings = BUFFER_SETTINGS{ 5, (unsigned int)m_settings.roi.bytesPerFrame, m_settings.readout.dataType, m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);
 	emit(s_previewBufferSettingsChanged());
 

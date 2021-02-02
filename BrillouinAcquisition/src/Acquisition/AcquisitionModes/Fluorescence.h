@@ -55,14 +55,16 @@ private:
 	std::vector<ChannelSettings*> getEnabledChannels();
 	void configureCamera();
 
+	std::string getBinningString();
+
+	template <typename T>
+	void __acquire(std::unique_ptr <StorageWrapper>& storage, std::vector<ChannelSettings*> channels);
+
 	Camera** m_camera{ nullptr };
 
 	FLUORESCENCE_SETTINGS m_settings;
 	FLUORESCENCE_MODE m_currentPreviewChannel{ FLUORESCENCE_MODE::NONE };
 	FLUORESCENCE_MODE m_previousPreviewChannel{ FLUORESCENCE_MODE::NONE };
-
-	std::string getBinningString();
-
 
 private slots:
 	void acquire(std::unique_ptr <StorageWrapper>& storage) override;

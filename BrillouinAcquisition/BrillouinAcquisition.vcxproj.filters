@@ -383,6 +383,9 @@
     <ClInclude Include="GeneratedFiles\ui_ScaleCalibrationDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\h5\h5_helper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="external\h5bm\h5bm.h">
