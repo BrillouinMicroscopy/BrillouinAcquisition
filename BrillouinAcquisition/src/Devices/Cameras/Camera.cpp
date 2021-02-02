@@ -24,10 +24,10 @@ void Camera::setSettings(CAMERA_SETTINGS settings) {
 	}
 
 	// Check that pixel encoding is valid
-	if (std::find(m_options.pixelEncodings.begin(), m_options.pixelEncodings.end(), m_settings.readout.pixelEncoding) ==
+	if (std::find(m_options.pixelEncodings.begin(), m_options.pixelEncodings.end(), settings.readout.pixelEncoding) ==
 		m_options.pixelEncodings.end() && !m_options.pixelEncodings.empty()
 	) {
-		m_settings.readout.pixelEncoding = m_options.pixelEncodings[0];
+		settings.readout.pixelEncoding = m_options.pixelEncodings[0];
 	}
 
 	applySettings(settings);

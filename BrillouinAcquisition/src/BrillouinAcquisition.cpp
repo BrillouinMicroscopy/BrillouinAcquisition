@@ -677,7 +677,6 @@ void BrillouinAcquisition::addListToComboBox(QComboBox* box, std::vector<std::ws
 	if (currentList == list) {
 		return;
 	}
-	box->blockSignals(true);
 	if (clear) {
 		box->clear();
 	}
