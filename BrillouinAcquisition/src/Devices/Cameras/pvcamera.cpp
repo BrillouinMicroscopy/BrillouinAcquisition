@@ -66,16 +66,22 @@ void PVCamera::setSettings(CAMERA_SETTINGS settings) {
 
 	m_settings = settings;
 
+	if (std::find(m_options.pixelEncodings.begin(), m_options.pixelEncodings.end(), m_settings.readout.pixelEncoding) == m_options.pixelEncodings.end() && !m_options.pixelEncodings.empty()) {
+		m_settings.readout.pixelEncoding = m_options.pixelEncodings[0];
+	}
+
 	if (m_settings.readout.pixelEncoding == L"16 bit") {
 		m_settings.readout.dataType = "unsigned short";
 	} else if (m_settings.readout.pixelEncoding == L"12 bit") {
+		m_settings.readout.dataType = "unsigned short";
+	} else if (m_settings.readout.pixelEncoding == L"11 bit") {
 		m_settings.readout.dataType = "unsigned short";
 	} else if (m_settings.readout.pixelEncoding == L"8 bit") {
 		m_settings.readout.dataType = "unsigned char";
 	} else {
 		// Fallback
-		m_settings.readout.pixelEncoding = L"8 bit";
-		m_settings.readout.dataType = "unsigned char";
+		m_settings.readout.pixelEncoding = L"16 bit";
+		m_settings.readout.dataType = "unsigned short";
 	}
 
 	auto binning{ 1 };
