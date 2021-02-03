@@ -29,7 +29,7 @@ void Acquisition::newFile(StoragePath path) {
 	openFile(path, H5F_ACC_TRUNC);
 }
 
-void Acquisition::openFile(StoragePath path, int flag, bool forceOpen) {
+void Acquisition::openFile(const StoragePath& path, int flag, bool forceOpen) {
 	// if an acquisition is running, do nothing
 	if (m_enabledModes != ACQUISITION_MODE::NONE && !forceOpen) {
 		emit(s_enabledModes(m_enabledModes));

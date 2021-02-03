@@ -83,7 +83,7 @@ void Andor::stopPreview() {
 	emit(s_previewRunning(m_isPreviewRunning));
 }
 
-void Andor::startAcquisition(CAMERA_SETTINGS settings) {
+void Andor::startAcquisition(const CAMERA_SETTINGS& settings) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	// check if currently a preview is running and stop it in case
 	if (m_isPreviewRunning) {
@@ -237,7 +237,7 @@ void Andor::readSettings() {
 	emit(settingsChanged(m_settings));
 }
 
-void Andor::applySettings(CAMERA_SETTINGS settings) {
+void Andor::applySettings(const CAMERA_SETTINGS& settings) {
 	// Don't do anything if an acquisition is running.
 	if (m_isAcquisitionRunning) {
 		return;

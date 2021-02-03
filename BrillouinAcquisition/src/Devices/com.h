@@ -12,7 +12,7 @@
 class com : public QSerialPort {
 public:
 	com() {};
-	explicit com(std::string terminator) : m_terminator(terminator) {};
+	explicit com(const std::string& terminator) : m_terminator(terminator) {};
 
 	virtual qint64 writeToDevice(const char* data);
 
@@ -28,7 +28,7 @@ class helper {
 public:
 	static std::string dec2hex(int dec, int digits);
 	static int hex2dec(std::string);
-	static std::string parse(std::string answer, std::string prefix);
+	static std::string parse(std::string answer, const std::string& prefix);
 };
 
 #endif //COM_H

@@ -274,7 +274,7 @@ void ZeissMTB_Erlangen::setElement(DeviceElement element, double position) {
 	emit(elementPositionChanged(element, position));
 }
 
-int ZeissMTB_Erlangen::getElement(DeviceElement element) {
+int ZeissMTB_Erlangen::getElement(const DeviceElement& element) {
 	return -1;
 }
 

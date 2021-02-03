@@ -55,13 +55,13 @@ typedef enum class enDeviceInput {
 class DeviceElement {
 public:
 	DeviceElement() {};
-	explicit DeviceElement(std::string name, int maxOptions, int index) :
+	explicit DeviceElement(const std::string& name, int maxOptions, int index) :
 		name(name), maxOptions(maxOptions), index(index), optionNames(checkNames(maxOptions)) {};
-	DeviceElement(std::string name, int maxOptions, int index, DEVICE_INPUT_TYPE inputType) :
+	DeviceElement(const std::string& name, int maxOptions, int index, DEVICE_INPUT_TYPE inputType) :
 		name(name), maxOptions(maxOptions), index(index), optionNames(checkNames(maxOptions)), inputType(inputType) {};
-	DeviceElement(std::string name, int maxOptions, int index, std::vector<std::string> optionNames) :
+	DeviceElement(const std::string& name, int maxOptions, int index, const std::vector<std::string>& optionNames) :
 		name(name), maxOptions(maxOptions), index(index), optionNames(checkNames(maxOptions, optionNames)) {};
-	DeviceElement(std::string name, int maxOptions, int index, std::vector<std::string> optionNames, DEVICE_INPUT_TYPE inputType) :
+	DeviceElement(const std::string& name, int maxOptions, int index, const std::vector<std::string>& optionNames, DEVICE_INPUT_TYPE inputType) :
 		name(name), maxOptions(maxOptions), index(index), optionNames(checkNames(maxOptions, optionNames)), inputType(inputType) {};
 
 	std::string name{ "" };
@@ -83,10 +83,10 @@ class DeviceElements {
 
 public:
 	DeviceElements() {};
-	explicit DeviceElements(std::vector<DeviceElement> deviceElements) {
+	explicit DeviceElements(const std::vector<DeviceElement>& deviceElements) {
 		m_deviceElements = deviceElements;
 	};
-	void operator=(std::vector<DeviceElement> deviceElements) {
+	void operator=(const std::vector<DeviceElement>& deviceElements) {
 		m_deviceElements = deviceElements;
 	}
 
@@ -104,7 +104,7 @@ private:
 
 class Preset {
 public:
-	Preset(std::string name, ScanPreset index, std::vector<std::vector<double>> positions) :
+	Preset(const std::string& name, ScanPreset index, const std::vector<std::vector<double>>& positions) :
 		name(name), index(index), elementPositions(positions) {};
 
 	std::string name{ "" };
@@ -125,7 +125,7 @@ public:
 	virtual void setPosition(POINT3 position) = 0;
 	// moves the position relative to current position
 	void movePosition(POINT2 distance);
-	void movePosition(POINT3 distance);
+	void movePosition(const POINT3& distance);
 	virtual POINT3 getPosition(PositionType positionType = PositionType::BOTH);
 
 	typedef enum class enScanDevice {
@@ -145,7 +145,7 @@ public:
 
 public slots:
 	virtual void setElement(DeviceElement, double) = 0;
-	virtual int getElement(DeviceElement) = 0;
+	virtual int getElement(const DeviceElement&) = 0;
 	virtual void getElements() = 0;
 	// sets the position relative to the home position m_homePosition
 	void setPositionRelativeX(double position);
@@ -182,10 +182,10 @@ public slots:
 	std::vector<POINT3> getSavedPositionsNormalized();
 	void announceSavedPositionsNormalized();
 	
-	void setScaleCalibration(ScaleCalibrationData scaleCalibration);
+	void setScaleCalibration(const ScaleCalibrationData& scaleCalibration);
 	ScaleCalibrationData getScaleCalibration();
 
-	std::vector<POINT2> getPositionsPix(std::vector<POINT3> positionsMicrometer);
+	std::vector<POINT2> getPositionsPix(const std::vector<POINT3>& positionsMicrometer);
 
 	virtual POINT2 pixToMicroMeter(POINT2 positionPix);
 	virtual POINT2 microMeterToPix(POINT2 positionMicrometer);

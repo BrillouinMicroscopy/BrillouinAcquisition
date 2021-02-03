@@ -12,14 +12,14 @@ class Element : public QObject {
 	Q_OBJECT
 
 public:
-	Element(com* comObject, std::string prefix, std::vector<std::string> versions) : m_comObject(comObject), m_prefix(prefix), m_versions(versions) {};
+	Element(com* comObject, const std::string& prefix, const std::vector<std::string>& versions) : m_comObject(comObject), m_prefix(prefix), m_versions(versions) {};
 	~Element() {};
 	void setDevice(com* device);
 	bool checkCompatibility();
 
 protected:
-	std::string receive(std::string request);
-	void send(std::string message);
+	std::string receive(const std::string& request);
+	void send(const std::string& message);
 	void clear();
 	std::string requestVersion();
 
@@ -52,9 +52,9 @@ public:
 	int getMirror();
 
 private:
-	void setElementPosition(std::string device, int position);
-	int getElementPosition(std::string device);
-	void blockUntilPositionReached(bool block, std::string elementNr);
+	void setElementPosition(const std::string& device, int position);
+	int getElementPosition(const std::string& device);
+	void blockUntilPositionReached(bool block, const std::string& elementNr);
 };
 
 class Focus : public Element {
@@ -98,10 +98,10 @@ public:
 	void stopY();
 
 private:
-	void setPosition(std::string axis, double position);
-	double getPosition(std::string axis);
+	void setPosition(const std::string& axis, double position);
+	double getPosition(const std::string& axis);
 
-	void setVelocity(std::string axis, int velocity);
+	void setVelocity(const std::string& axis, int velocity);
 
 	double m_umperinc{ 0.25 };		// [µm per increment] constant for converting µm to increments of x- and y-position
 	int m_rangeFocus{ 16777215 };	// number of focus increments
@@ -125,7 +125,7 @@ public slots:
 	void connectDevice() override;
 	void disconnectDevice() override;
 	void setElement(DeviceElement element, double position) override;
-	int getElement(DeviceElement element) override;
+	int getElement(const DeviceElement& element) override;
 	void getElements() override;
 
 private:

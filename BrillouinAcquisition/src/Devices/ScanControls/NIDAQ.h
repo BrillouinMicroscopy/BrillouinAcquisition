@@ -40,7 +40,7 @@ public slots:
 	void connectDevice() override;
 	void disconnectDevice() override;
 	void setElement(DeviceElement element, double position) override;
-	int getElement(DeviceElement element) override;
+	int getElement(const DeviceElement& element) override;
 	void getElements() override;
 
 	void setVoltageCalibration(VoltageCalibrationData voltageCalibration) override;

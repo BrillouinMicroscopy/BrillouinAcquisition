@@ -53,7 +53,7 @@ public:
 public slots:
 	virtual void startPreview() = 0;
 	virtual void stopPreview() = 0;
-	virtual void startAcquisition(CAMERA_SETTINGS) = 0;
+	virtual void startAcquisition(const CAMERA_SETTINGS&) = 0;
 	virtual void stopAcquisition() = 0;
 	virtual void getImageForAcquisition(std::byte* buffer, bool preview = true) = 0;
 
@@ -63,14 +63,14 @@ public slots:
 
 	void setSettings(CAMERA_SETTINGS);
 	void setSetting(CAMERA_SETTING, double);
-	void setSetting(CAMERA_SETTING, std::wstring);
+	void setSetting(CAMERA_SETTING, const std::wstring&);
 
 protected:
 	virtual int acquireImage(std::byte* buffer) = 0;
 
 	virtual void readOptions() = 0;
 	virtual void readSettings() = 0;
-	virtual void applySettings(CAMERA_SETTINGS settings) = 0;
+	virtual void applySettings(const CAMERA_SETTINGS& settings) = 0;
 
 	CAMERA_OPTIONS m_options;
 	CAMERA_SETTINGS m_settings;

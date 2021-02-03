@@ -15,7 +15,7 @@ void ScanControl::movePosition(POINT2 distance) {
 	setPosition(newPosition);
 }
 
-void ScanControl::movePosition(POINT3 distance) {
+void ScanControl::movePosition(const POINT3& distance) {
 	auto position = getPosition() + distance;
 	setPosition(position);
 }
@@ -242,7 +242,7 @@ void ScanControl::announceSavedPositionsNormalized() {
 	emit(savedPositionsChanged(savedPositionsNormalized));
 }
 
-void ScanControl::setScaleCalibration(ScaleCalibrationData scaleCalibration) {
+void ScanControl::setScaleCalibration(const ScaleCalibrationData& scaleCalibration) {
 	/*
 	 * In order to prevent having to relocate the scanner position,
 	 * we convert the scanner position to pixel using the old scale calibration
@@ -261,7 +261,7 @@ ScaleCalibrationData ScanControl::getScaleCalibration() {
 	return m_scaleCalibration;
 }
 
-std::vector<POINT2> ScanControl::getPositionsPix(std::vector<POINT3> positionsMicrometer) {
+std::vector<POINT2> ScanControl::getPositionsPix(const std::vector<POINT3>& positionsMicrometer) {
 	// Cache the requested positions so we can re-emit updated positions
 	// in case the scale calibration changes
 	m_AOI_positions = positionsMicrometer;

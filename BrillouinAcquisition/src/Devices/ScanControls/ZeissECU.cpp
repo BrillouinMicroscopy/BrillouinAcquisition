@@ -260,7 +260,7 @@ void ZeissECU::setElement(DeviceElement element, double position) {
 	emit(elementPositionChanged(element, position));
 }
 
-int ZeissECU::getElement(DeviceElement element) {
+int ZeissECU::getElement(const DeviceElement& element) {
 	return -1;
 }
 
@@ -320,12 +320,12 @@ bool Element::checkCompatibility() {
  * Protected definitions
  */
 
-std::string Element::receive(std::string request) {
+std::string Element::receive(const std::string& request) {
 	auto answer = m_comObject->receive(m_prefix + "P" + request);
 	return helper::parse(answer, m_prefix);
 }
 
-void Element::send(std::string message) {
+void Element::send(const std::string& message) {
 	m_comObject->send(m_prefix + "P" + message);
 }
 
@@ -417,11 +417,11 @@ int Stand::getMirror() {
  * Private definitions
  */
 
-void Stand::setElementPosition(std::string device, int position) {
+void Stand::setElementPosition(const std::string& device, int position) {
 	send("CR" + device + "," + std::to_string(position));
 }
 
-int Stand::getElementPosition(std::string device) {
+int Stand::getElementPosition(const std::string& device) {
 	std::string answer = receive("Cr" + device + ",1");
 	if (answer.empty()) {
 		return -1;
@@ -431,7 +431,7 @@ int Stand::getElementPosition(std::string device) {
 	}
 }
 
-void Stand::blockUntilPositionReached(bool block, std::string elementNr) {
+void Stand::blockUntilPositionReached(bool block, const std::string& elementNr) {
 	// don't return until the position or the timeout is reached
 	if (block) {
 		auto count{ 0 };
@@ -555,7 +555,7 @@ void MCU::stopY() {
  * Private definitions
  */
 
-void MCU::setPosition(std::string axis, double position) {
+void MCU::setPosition(const std::string& axis, double position) {
 	position = round(position / m_umperinc);
 	auto inc = positive_modulo(position, m_rangeFocus);
 
@@ -563,7 +563,7 @@ void MCU::setPosition(std::string axis, double position) {
 	send(axis + "T" + pos);
 }
 
-double MCU::getPosition(std::string axis) {
+double MCU::getPosition(const std::string& axis) {
 	auto position = receive(axis + "p");
 	auto pos = helper::hex2dec(position);
 	// The actual travel range of the stage is significantly smaller than the theoretically possible maximum increment value (FFFFFF or 16777215).
@@ -575,7 +575,7 @@ double MCU::getPosition(std::string axis) {
 	return pos * m_umperinc;
 }
 
-void MCU::setVelocity(std::string axis, int velocity) {
+void MCU::setVelocity(const std::string& axis, int velocity) {
 	auto vel = helper::dec2hex(velocity, 6);
 	send(axis + "V" + vel);
 }

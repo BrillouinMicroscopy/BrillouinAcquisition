@@ -66,7 +66,7 @@ public slots:
 	void setZMin(double);
 	void setZMax(double);
 
-	void setSettings(BRILLOUIN_SETTINGS settings);
+	void setSettings(const BRILLOUIN_SETTINGS& settings);
 
 	/*
 	 *	Scan direction order related variables and functions

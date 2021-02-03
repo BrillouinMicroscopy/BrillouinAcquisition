@@ -17,7 +17,7 @@ public slots:
 
 	void startPreview() override;
 	void stopPreview() override;
-	void startAcquisition(CAMERA_SETTINGS) override;
+	void startAcquisition(const CAMERA_SETTINGS&) override;
 	void stopAcquisition() override;
 	void getImageForAcquisition(std::byte* buffer, bool preview = true) override;
 
@@ -31,7 +31,7 @@ private:
 
 	void readOptions() override;
 	void readSettings() override;
-	void applySettings(CAMERA_SETTINGS settings) override;
+	void applySettings(const CAMERA_SETTINGS& settings) override;
 
 	void preparePreview();
 	void preparePreviewBuffer();

@@ -68,7 +68,7 @@ private:
 
 private slots:
 	void acquire(std::unique_ptr <StorageWrapper>& storage) override;
-	void acquire(std::unique_ptr <StorageWrapper>& storage, std::vector<ChannelSettings *> channels);
+	void acquire(std::unique_ptr <StorageWrapper>& storage, const std::vector<ChannelSettings *>& channels);
 
 signals:
 	void s_acqSettingsChanged(FLUORESCENCE_SETTINGS);

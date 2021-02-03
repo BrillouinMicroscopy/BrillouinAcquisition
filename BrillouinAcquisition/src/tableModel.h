@@ -26,14 +26,14 @@ class TableModel : public QAbstractTableModel {
 
 public:
 	explicit TableModel(QObject *parent);
-	TableModel(QObject *parent, std::vector<POINT3> storage);
+	TableModel(QObject *parent, const std::vector<POINT3>& storage);
 	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 	QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
 public slots:
-	void setStorage(std::vector<POINT3> storage);
+	void setStorage(const std::vector<POINT3>& storage);
 
 private:
 	std::vector<POINT3> m_storage;
