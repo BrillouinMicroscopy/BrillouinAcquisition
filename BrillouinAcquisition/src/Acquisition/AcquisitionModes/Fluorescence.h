@@ -62,7 +62,7 @@ private:
 
 	Camera** m_camera{ nullptr };
 
-	FLUORESCENCE_SETTINGS m_settings;
+	FLUORESCENCE_SETTINGS m_settings = FLUORESCENCE_SETTINGS{};
 	FLUORESCENCE_MODE m_currentPreviewChannel{ FLUORESCENCE_MODE::NONE };
 	FLUORESCENCE_MODE m_previousPreviewChannel{ FLUORESCENCE_MODE::NONE };
 
