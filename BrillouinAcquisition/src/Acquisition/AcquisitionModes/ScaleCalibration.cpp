@@ -225,7 +225,7 @@ void ScaleCalibration::writeAttribute(H5::H5Object& parent, std::string name, st
 	attr.close();
 }
 
-void ScaleCalibration::readAttribute(H5::H5Object& parent, std::string name, double* value) {
+void ScaleCalibration::readAttribute(const H5::H5Object& parent, std::string name, double* value) {
 	auto attr = parent.openAttribute(name.c_str());
 	auto type = attr.getDataType();
 	// If this is not a double, return NaN
