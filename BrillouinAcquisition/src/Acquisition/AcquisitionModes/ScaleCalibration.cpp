@@ -201,7 +201,7 @@ POINT2 ScaleCalibration::readPoint(H5::Group group, const std::string& name) {
 		readAttribute(pointGroup, "y", &point.y);
 
 	} catch (H5::GroupIException& exception) {
-		throw exception;
+		throw;
 	}
 
 	return point;
