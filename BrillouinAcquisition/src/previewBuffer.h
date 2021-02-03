@@ -20,7 +20,7 @@ template<class T> class PreviewBuffer {
 
 public:
 	PreviewBuffer() noexcept;
-	PreviewBuffer(BUFFER_SETTINGS bufferSettings);
+	explicit PreviewBuffer(BUFFER_SETTINGS bufferSettings);
 	~PreviewBuffer();
 
 	void initializeBuffer(BUFFER_SETTINGS bufferSettings);

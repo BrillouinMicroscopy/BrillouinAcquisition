@@ -21,7 +21,7 @@ public slots:
 	void stopAcquisition() override;
 	void getImageForAcquisition(std::byte* buffer, bool preview = true) override;
 
-	void setCalibrationExposureTime(double exposureTime);
+	void setCalibrationExposureTime(double exposureTime) override;
 
 private:
 	int acquireImage(std::byte* buffer) override;

@@ -14,7 +14,7 @@ class Acquisition : public QObject {
 	Q_OBJECT
 
 public:
-	Acquisition(QObject *parent);
+	explicit Acquisition(QObject *parent);
 	~Acquisition();
 	ACQUISITION_MODE getEnabledModes();
 	std::unique_ptr <StorageWrapper> m_storage{ nullptr };

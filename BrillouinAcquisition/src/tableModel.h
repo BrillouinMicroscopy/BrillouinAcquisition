@@ -25,7 +25,7 @@ class TableModel : public QAbstractTableModel {
 	Q_OBJECT
 
 public:
-	TableModel(QObject *parent);
+	explicit TableModel(QObject *parent);
 	TableModel(QObject *parent, std::vector<POINT3> storage);
 	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const override;

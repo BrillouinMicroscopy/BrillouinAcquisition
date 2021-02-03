@@ -123,7 +123,7 @@ void ZeissMTB::init() {
 	try {
 		// create an instance of the connection class which can connect to the server
 		m_MTBConnection = IMTBConnectionPtr(CLSID_MTBConnection);
-	} catch (_com_error e) {
+	} catch (_com_error& e) {
 	}
 
 	m_positionTimer = new QTimer();
@@ -199,7 +199,7 @@ void ZeissMTB::connectDevice() {
 				calculateCurrentPositionBounds();
 			}
 
-		} catch (QString e) {
+		} catch (QString& e) {
 			// todo
 		}
 	}
@@ -217,7 +217,7 @@ void ZeissMTB::disconnectDevice() {
 			// logout from MTB
 			try {
 				m_MTBConnection->Logout((BSTR)m_ID);
-			} catch (_com_error e) {
+			} catch (_com_error& e) {
 			}
 
 			m_MTBConnection->Close();

@@ -574,14 +574,14 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	auto positionsX = std::vector<double>(nrPositions);
 	auto positionsY = std::vector<double>(nrPositions);
 	auto positionsZ = std::vector<double>(nrPositions);
-	int ll{ 0 };
+	auto posIndex{ 0 };
 	for (gsl::index ii{ 0 }; ii < m_settings.zSteps; ii++) {
 		for (gsl::index jj{ 0 }; jj < m_settings.xSteps; jj++) {
 			for (gsl::index kk{ 0 }; kk < m_settings.ySteps; kk++) {
-				positionsX[ll] = directionsX[jj] + m_startPosition.x;
-				positionsY[ll] = directionsY[kk] + m_startPosition.y;
-				positionsZ[ll] = directionsZ[ii] + m_startPosition.z;
-				ll++;
+				positionsX[posIndex] = directionsX[jj] + m_startPosition.x;
+				positionsY[posIndex] = directionsY[kk] + m_startPosition.y;
+				positionsZ[posIndex] = directionsZ[ii] + m_startPosition.z;
+				posIndex++;
 			}
 		}
 	}

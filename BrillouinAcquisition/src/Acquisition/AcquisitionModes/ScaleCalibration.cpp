@@ -71,7 +71,7 @@ void ScaleCalibration::load(std::string filepath) {
 
 			// Apply the scale calibration
 			apply();
-		} catch (H5::Exception exception) {
+		} catch (H5::Exception& exception) {
 			emit(s_scaleCalibrationStatus("Could not load the scale calibration", "Please select a valid scale calibration file."));
 		}
 	}
@@ -200,8 +200,8 @@ POINT2 ScaleCalibration::readPoint(H5::Group group, const std::string& name) {
 		// Read y coordinate
 		readAttribute(pointGroup, "y", &point.y);
 
-	} catch (H5::GroupIException exception) {
-		throw exception;
+	} catch (H5::GroupIException& exception) {
+		throw;
 	}
 
 	return point;
@@ -225,7 +225,7 @@ void ScaleCalibration::writeAttribute(H5::H5Object& parent, std::string name, st
 	attr.close();
 }
 
-void ScaleCalibration::readAttribute(H5::H5Object& parent, std::string name, double* value) {
+void ScaleCalibration::readAttribute(const H5::H5Object& parent, std::string name, double* value) {
 	auto attr = parent.openAttribute(name.c_str());
 	auto type = attr.getDataType();
 	// If this is not a double, return NaN
@@ -304,7 +304,7 @@ void ScaleCalibration::__acquire() {
 		while (sum == 0 && 5 > tryCount++) {
 			(*m_camera)->getImageForAcquisition(&(images[iteration])[0], false);
 
-			auto images_ = (std::vector<T> *) &(images[iteration]);
+			images_ = (std::vector<T> *) &(images[iteration]);
 			sum = simplemath::sum(*images_);
 		}
 

@@ -58,7 +58,7 @@ private:
 
 	void writeAttribute(H5::H5Object& parent, std::string name, double value);
 	void writeAttribute(H5::H5Object& parent, std::string name, std::string value);
-	void readAttribute(H5::H5Object& parent, std::string name, double* value);
+	void readAttribute(const H5::H5Object& parent, std::string name, double* value);
 
 	template <typename T>
 	void __acquire();

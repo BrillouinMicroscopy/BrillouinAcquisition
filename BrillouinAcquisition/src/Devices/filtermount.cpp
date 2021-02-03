@@ -36,7 +36,7 @@ void FilterMount::connectDevice() {
 				throw QString("Could not open the serial port.");
 			}
 			m_comObject->clear();
-		} catch (QString e) {
+		} catch (QString& e) {
 			// todo
 		}
 	}
