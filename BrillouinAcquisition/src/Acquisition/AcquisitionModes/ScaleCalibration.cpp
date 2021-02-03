@@ -304,7 +304,7 @@ void ScaleCalibration::__acquire() {
 		while (sum == 0 && 5 > tryCount++) {
 			(*m_camera)->getImageForAcquisition(&(images[iteration])[0], false);
 
-			auto images_ = (std::vector<T> *) &(images[iteration]);
+			images_ = (std::vector<T> *) &(images[iteration]);
 			sum = simplemath::sum(*images_);
 		}
 

@@ -354,7 +354,7 @@ void Fluorescence::__acquire(std::unique_ptr <StorageWrapper>& storage, std::vec
 			}
 
 			// cast the vector type T
-			auto images_ = (std::vector<T> *) & images;
+			images_ = (std::vector<T> *) & images;
 
 			sum = simplemath::sum(*images_);
 		}
