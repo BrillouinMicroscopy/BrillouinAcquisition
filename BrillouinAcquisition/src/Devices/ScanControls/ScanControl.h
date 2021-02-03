@@ -211,7 +211,6 @@ protected:
 	POINT2 m_positionStage{ 0, 0 };			// [µm]	position of the stage (x-y-position)
 	POINT2 m_positionScanner{ 0, 0 };		// [µm]	position of the scanner (x-y-position)
 
-	bool m_isConnected{ false };
 	bool m_isCompatible{ false };
 	POINT3 m_homePosition{ 0, 0, 0 };
 	POINT2 m_startPosition{ 0, 0 };		// [µm]	start position
