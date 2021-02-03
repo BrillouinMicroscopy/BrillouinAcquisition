@@ -394,7 +394,7 @@ void Andor::getEnumString(AT_WC* feature, std::wstring* value) {
 	AT_WC tmpValue[256];
 	AT_GetEnumStringByIndex(m_camera, feature, enumIndex, tmpValue, 256);
 	auto tmp = std::wstring(tmpValue);
-	value = &tmp;
+	*value = tmp;
 }
 
 /*
