@@ -10,9 +10,9 @@ namespace BrillouinAcquisitionUnitTest {
 		public:
 			// Tests for mean()
 			TEST_METHOD(TestSolvingQuartic) {
-				COEFFICIENTS5 coef = {5, 4, 3, 2, -14};
-				std::vector<std::complex<double>> solutions = simplemath::solveQuartic(coef);
-				std::vector<std::complex<double>> expected = {
+				auto coef = COEFFICIENTS5{5, 4, 3, 2, -14};
+				auto solutions = simplemath::solveQuartic(coef);
+				auto expected = std::vector{
 					std::complex<double>(-1.465836978554923, 0.0),
 					std::complex<double>(1.0, 0.0),
 					std::complex<double>(-0.167081510722539, -1.371953080493220),
@@ -25,15 +25,39 @@ namespace BrillouinAcquisitionUnitTest {
 			}
 
 			TEST_METHOD(TestMedianOdd) {
-				std::vector<double> list{ 1, 2, 3, 4, 5 };
+				auto list = std::vector<double>{ 1, 2, 3, 4, 5 };
 				auto med = simplemath::median(std::begin(list), std::end(list));
-				Assert::AreEqual(med, 3.0);
+				Assert::AreEqual(3.0, med);
 			}
 
 			TEST_METHOD(TestMedianEven) {
-				std::vector<double> list{ 1, 2, 3, 4, 5, 6 };
+				auto list = std::vector<double>{ 1, 2, 3, 4, 5, 6 };
 				auto med = simplemath::median(std::begin(list), std::end(list));
-				Assert::AreEqual(med, 3.5);
+				Assert::AreEqual(3.5, med);
+			}
+
+			TEST_METHOD(TestSumDouble) {
+				auto list = std::vector<double>{ 1, 2, 3, 4, 5, 6 };
+				auto sum = simplemath::sum(list);
+				Assert::AreEqual(21.0, sum);
+			}
+
+			TEST_METHOD(TestSumInt) {
+				auto list = std::vector<int>{ -1, 2, 3, 4, 5, -6 };
+				auto sum = simplemath::sum(list);
+				Assert::AreEqual(7, sum);
+			}
+
+			TEST_METHOD(TestAbsSumDouble) {
+				auto list = std::vector<double>{ 1, 2, 3, 4, 5, 6 };
+				auto sum = simplemath::absSum(list);
+				Assert::AreEqual(21.0, sum);
+			}
+
+			TEST_METHOD(TestAbsSumInt) {
+				auto list = std::vector<int>{ -1, 2, 3, 4, 5, -6 };
+				auto sum = simplemath::absSum(list);
+				Assert::AreEqual(21, sum);
 			}
 	};
 }
