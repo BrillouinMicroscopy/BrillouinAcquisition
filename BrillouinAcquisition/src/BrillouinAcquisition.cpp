@@ -685,6 +685,7 @@ void BrillouinAcquisition::addListToComboBox(QComboBox* box, std::vector<std::ws
 	if (currentList == list) {
 		return;
 	}
+	box->blockSignals(true);
 	if (clear) {
 		box->clear();
 	}
@@ -1824,9 +1825,7 @@ void BrillouinAcquisition::updateImageBrillouin() {
 		m_previewRunning = false;
 		return;
 	}
-	if (m_previewRunning) {
-		updateImage(m_andor->m_previewBuffer, &m_BrillouinPlot);
-	}
+	updateImage(m_andor->m_previewBuffer, &m_BrillouinPlot);
 }
 
 void BrillouinAcquisition::updateImageODT() {
@@ -1835,9 +1834,7 @@ void BrillouinAcquisition::updateImageODT() {
 		m_brightfieldPreviewRunning = false;
 		return;
 	}
-	if (m_brightfieldPreviewRunning) {
-		updateImage(m_brightfieldCamera->m_previewBuffer, &m_ODTPlot);
-	}
+	updateImage(m_brightfieldCamera->m_previewBuffer, &m_ODTPlot);
 }
 
 template <typename T>
