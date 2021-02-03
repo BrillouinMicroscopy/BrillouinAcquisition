@@ -100,7 +100,7 @@ void uEyeCam::stopPreview() {
 	emit(s_previewRunning(m_isPreviewRunning));
 }
 
-void uEyeCam::startAcquisition(CAMERA_SETTINGS settings) {
+void uEyeCam::startAcquisition(const CAMERA_SETTINGS& settings) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 	// check if currently a preview is running and stop it in case
 	if (m_isPreviewRunning) {
@@ -263,7 +263,7 @@ void uEyeCam::readSettings() {
 	emit(settingsChanged(m_settings));
 }
 
-void uEyeCam::applySettings(CAMERA_SETTINGS settings) {
+void uEyeCam::applySettings(const CAMERA_SETTINGS& settings) {
 	// Don't do anything if an acquisition is running.
 	if (m_isAcquisitionRunning) {
 		return;

@@ -12,7 +12,7 @@ struct BUFFER_SETTINGS {
 	std::string bufferType{ "unsigned char" };
 	CAMERA_ROI roi;
 	BUFFER_SETTINGS() noexcept {};
-	BUFFER_SETTINGS(int bufferNumber, unsigned int bufferSize, std::string bufferType, CAMERA_ROI roi) : roi(roi), bufferNumber(bufferNumber),
+	BUFFER_SETTINGS(int bufferNumber, unsigned int bufferSize, const std::string& bufferType, const CAMERA_ROI& roi) : roi(roi), bufferNumber(bufferNumber),
 		bufferSize(bufferSize), bufferType(bufferType) {};
 };
 

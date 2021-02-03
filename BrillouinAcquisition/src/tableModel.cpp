@@ -61,11 +61,11 @@ TableModel::TableModel(QObject *parent)
 	:QAbstractTableModel(parent) {
 }
 
-TableModel::TableModel(QObject *parent, std::vector<POINT3> storage)
+TableModel::TableModel(QObject *parent, const std::vector<POINT3>& storage)
 	:QAbstractTableModel(parent), m_storage(storage) {
 }
 
-void TableModel::setStorage(std::vector<POINT3> storage) {
+void TableModel::setStorage(const std::vector<POINT3>& storage) {
 	m_storage = storage;
 
 	QModelIndex topLeft = index(0, 0);

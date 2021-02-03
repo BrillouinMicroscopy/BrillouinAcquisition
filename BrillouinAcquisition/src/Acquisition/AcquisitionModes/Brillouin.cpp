@@ -170,7 +170,7 @@ void Brillouin::setZMax(double zMax) {
 	updatePositions();
 }
 
-void Brillouin::setSettings(BRILLOUIN_SETTINGS settings) {
+void Brillouin::setSettings(const BRILLOUIN_SETTINGS& settings) {
 	m_settings = settings;
 }
 

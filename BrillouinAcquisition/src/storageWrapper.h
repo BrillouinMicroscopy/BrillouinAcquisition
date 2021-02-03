@@ -6,7 +6,7 @@
 class StoragePath {
 public:
 	StoragePath() {};
-	StoragePath(const std::string filename, const std::string folder) : filename(filename), folder(folder) {};
+	StoragePath(const std::string& filename, const std::string& folder) : filename(filename), folder(folder) {};
 
 	std::string filename{ "Brillouin.h5" };	// filename
 	std::string folder{ "." };
@@ -22,7 +22,7 @@ class StorageWrapper : public H5BM {
 public:
 	StorageWrapper(
 		QObject *parent = nullptr,
-		const std::string fullPath = StoragePath{}.fullPath(),//"./Brillouin.h5",
+		const std::string& fullPath = StoragePath{}.fullPath(),//"./Brillouin.h5",
 		int flags = H5F_ACC_RDONLY
 	) noexcept : H5BM(parent, fullPath, flags) {};
 	~StorageWrapper();

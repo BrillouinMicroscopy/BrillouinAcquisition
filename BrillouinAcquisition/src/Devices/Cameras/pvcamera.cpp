@@ -88,7 +88,7 @@ void PVCamera::stopPreview() {
 	emit(s_previewRunning(m_isPreviewRunning));
 }
 
-void PVCamera::startAcquisition(CAMERA_SETTINGS settings) {
+void PVCamera::startAcquisition(const CAMERA_SETTINGS& settings) {
 	prepareAcquisition(settings);
 
 	m_isAcquisitionRunning = true;
@@ -377,7 +377,7 @@ void PVCamera::readSettings() {
 	emit(settingsChanged(m_settings));
 }
 
-void PVCamera::applySettings(CAMERA_SETTINGS settings) {
+void PVCamera::applySettings(const CAMERA_SETTINGS& settings) {
 	// Don't do anything if an acquisition is running.
 	if (m_isAcquisitionRunning) {
 		return;
@@ -716,7 +716,7 @@ void PVCamera::cleanupPreview() {
 	startTempTimer();
 }
 
-void PVCamera::prepareAcquisition(CAMERA_SETTINGS settings) {
+void PVCamera::prepareAcquisition(const CAMERA_SETTINGS& settings) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
 
 	// check if currently a preview is running and stop it in case

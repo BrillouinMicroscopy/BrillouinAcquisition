@@ -249,7 +249,7 @@ void NIDAQ::setElement(DeviceElement element, double position) {
 	emit(elementPositionChanged(element, position));
 }
 
-int NIDAQ::getElement(DeviceElement element) {
+int NIDAQ::getElement(const DeviceElement& element) {
 	switch ((DEVICE_ELEMENT)element.index) {
 		case DEVICE_ELEMENT::BEAMBLOCK:
 			m_elementPositions[element.index] = getBeamBlock();

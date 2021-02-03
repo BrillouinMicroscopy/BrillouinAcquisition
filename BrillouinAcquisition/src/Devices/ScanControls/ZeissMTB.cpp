@@ -264,7 +264,7 @@ void ZeissMTB::setElement(DeviceElement element, double position) {
 	emit(elementPositionChanged(element, position));
 }
 
-int ZeissMTB::getElement(DeviceElement element) {
+int ZeissMTB::getElement(const DeviceElement& element) {
 	return -1;
 }
 

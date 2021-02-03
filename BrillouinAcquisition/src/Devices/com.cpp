@@ -70,7 +70,7 @@ int helper::hex2dec(std::string s) {
 	}
 }
 
-std::string helper::parse(std::string answer, std::string prefix) {
+std::string helper::parse(std::string answer, const std::string& prefix) {
 	std::string pattern = "([a-zA-Z\\d\\s_.]*)\r";
 	pattern = "P" + prefix + pattern;
 	std::regex pieces_regex(pattern);

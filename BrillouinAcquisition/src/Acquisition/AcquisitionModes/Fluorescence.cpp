@@ -410,7 +410,7 @@ void Fluorescence::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	acquire(storage, {});
 }
 
-void Fluorescence::acquire(std::unique_ptr<StorageWrapper>& storage, std::vector<ChannelSettings*> channels) {
+void Fluorescence::acquire(std::unique_ptr<StorageWrapper>& storage, const std::vector<ChannelSettings*>& channels) {
 	if (m_settings.camera.readout.dataType == "unsigned short") {
 		__acquire<unsigned short>(storage, channels);
 	} else if (m_settings.camera.readout.dataType == "unsigned char") {
