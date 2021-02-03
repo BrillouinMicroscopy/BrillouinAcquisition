@@ -71,7 +71,7 @@ void ScaleCalibration::load(std::string filepath) {
 
 			// Apply the scale calibration
 			apply();
-		} catch (H5::Exception exception) {
+		} catch (H5::Exception& exception) {
 			emit(s_scaleCalibrationStatus("Could not load the scale calibration", "Please select a valid scale calibration file."));
 		}
 	}
@@ -200,7 +200,7 @@ POINT2 ScaleCalibration::readPoint(H5::Group group, const std::string& name) {
 		// Read y coordinate
 		readAttribute(pointGroup, "y", &point.y);
 
-	} catch (H5::GroupIException exception) {
+	} catch (H5::GroupIException& exception) {
 		throw exception;
 	}
 

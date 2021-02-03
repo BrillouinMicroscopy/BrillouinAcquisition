@@ -209,7 +209,7 @@ void ZeissECU::connectDevice() {
 				m_isConnected = false;
 			}
 
-		} catch (QString e) {
+		} catch (QString& e) {
 			// todo
 		}
 	}
