@@ -14,18 +14,20 @@ ZeissECU::ZeissECU() noexcept {
 		{ "Tubelens",	3, (int)DEVICE_ELEMENT::TUBELENS },
 		{ "Baseport",	3, (int)DEVICE_ELEMENT::BASEPORT },
 		{ "Sideport",	3, (int)DEVICE_ELEMENT::SIDEPORT },
-		{ "Mirror",		2, (int)DEVICE_ELEMENT::MIRROR }
+		{ "RL Shutter",	2, (int)DEVICE_ELEMENT::RLSHUTTER, { "Close", "Open" } },
+		{ "Mirror",		2, (int)DEVICE_ELEMENT::MIRROR },
+		{ "Hal. Lamp",	0, (int)DEVICE_ELEMENT::LAMP, DEVICE_INPUT_TYPE::SLIDER }
 	};
 
 	m_presets = {
-		{ "Brillouin",		ScanPreset::SCAN_BRILLOUIN,		{ {2}, {}, {1}, {3}, {1}, {2},  {} }	},	// Brillouin
-		{ "Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {2}, {}, {1}, {3}, {1}, {3},  {} }	},	// Calibration
-		{ "Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{ {2}, {}, {1}, {3}, {1}, {2}, {2} }	},	// Brightfield
-		{ "Eyepiece",		ScanPreset::SCAN_EYEPIECE,		{ {2}, {}, {1}, {3}, {2}, {3}, {2} }	},	// Eyepiece
-		{ "Fluo Blue",		ScanPreset::SCAN_EPIFLUOBLUE,	{ {1}, {}, {2}, {3},  {}, {2}, {1} }	},	// Fluorescence blue
-		{ "Fluo Green",		ScanPreset::SCAN_EPIFLUOGREEN,	{ {1}, {}, {3}, {3},  {}, {2}, {1} }	},	// Fluorescence green
-		{ "Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {1}, {}, {4}, {3},  {}, {2}, {1} }	},	// Fluorescence red
-		{ "Laser off",		ScanPreset::SCAN_LASEROFF,		{ {1}, {},  {},  {},  {},  {},  {} }	}	// Laser off
+		{ "Brillouin",		ScanPreset::SCAN_BRILLOUIN,		{ {2}, {}, {1}, {3}, {1}, {2}, {1},  {}, {} }	},	// Brillouin
+		{ "Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {2}, {}, {1}, {3}, {1}, {3}, {1},  {}, {} }	},	// Calibration
+		{ "Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{ {2}, {}, {1}, {3}, {1}, {2}, {1}, {2}, {} }	},	// Brightfield
+		{ "Eyepiece",		ScanPreset::SCAN_EYEPIECE,		{ {2}, {}, {1}, {3}, {2}, {3}, {1}, {2}, {} }	},	// Eyepiece
+		{ "Fluo Blue",		ScanPreset::SCAN_EPIFLUOBLUE,	{ {1}, {}, {2}, {3},  {}, {2}, {2}, {1}, {} }	},	// Fluorescence blue
+		{ "Fluo Green",		ScanPreset::SCAN_EPIFLUOGREEN,	{ {1}, {}, {3}, {3},  {}, {2}, {2}, {1}, {} }	},	// Fluorescence green
+		{ "Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {1}, {}, {4}, {3},  {}, {2}, {2}, {1}, {} }	},	// Fluorescence red
+		{ "Laser off",		ScanPreset::SCAN_LASEROFF,		{ {1}, {},  {},  {},  {},  {}, {1},  {}, {} }	}	// Laser off
 	};
 
 	m_elementPositions = std::vector<double>((int)DEVICE_ELEMENT::COUNT, -1);
@@ -249,8 +251,14 @@ void ZeissECU::setElement(DeviceElement element, double position) {
 	case DEVICE_ELEMENT::SIDEPORT:
 		m_stand->setSideport((int)position, true);
 		break;
+	case DEVICE_ELEMENT::RLSHUTTER:
+		m_stand->setRLShutter((int)position, true);
+		break;
 	case DEVICE_ELEMENT::MIRROR:
 		m_stand->setMirror((int)position, true);
+		break;
+	case DEVICE_ELEMENT::LAMP:
+		m_stand->setLamp(position, true);
 		break;
 	default:
 		break;
@@ -272,7 +280,9 @@ void ZeissECU::getElements() {
 	m_elementPositionsTmp[(int)DEVICE_ELEMENT::TUBELENS] = m_stand->getTubelens();
 	m_elementPositionsTmp[(int)DEVICE_ELEMENT::BASEPORT] = m_stand->getBaseport();
 	m_elementPositionsTmp[(int)DEVICE_ELEMENT::SIDEPORT] = m_stand->getSideport();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::RLSHUTTER] = m_stand->getRLShutter();
 	m_elementPositionsTmp[(int)DEVICE_ELEMENT::MIRROR] = m_stand->getMirror();
+	m_elementPositionsTmp[(int)DEVICE_ELEMENT::LAMP] = m_stand->getLamp();
 	// We only emit changed positions
 	if (m_elementPositionsTmp != m_elementPositions) {
 		m_elementPositions = m_elementPositionsTmp;
@@ -402,6 +412,17 @@ int Stand::getSideport() {
 	return getElementPosition("39");
 }
 
+void Stand::setRLShutter(int position, bool block) {
+	if (position > 0 && position < 4) {
+		setElementPosition("1", position, "K");
+	}
+	blockUntilPositionReached(block, "1", "k");
+}
+
+int Stand::getRLShutter() {
+	return getElementPosition("1", "k");
+}
+
 void Stand::setMirror(int position, bool block) {
 	if (position > 0 && position < 3) {
 		setElementPosition("51", position);
@@ -413,16 +434,29 @@ int Stand::getMirror() {
 	return getElementPosition("51");
 }
 
+void Stand::setLamp(int position, bool block) {
+	if (position > 100) position = 100;
+	if (position < 0) position = 0;
+	position *= 2.55;
+	// Set the voltage
+	setElementPosition("1", position, "V");
+	blockUntilPositionReached(block, "1", "v");
+}
+
+int Stand::getLamp() {
+	return (int)(getElementPosition("1", "v") / 2.55);
+}
+
 /*
  * Private definitions
  */
 
-void Stand::setElementPosition(const std::string& device, int position) {
-	send("CR" + device + "," + std::to_string(position));
+void Stand::setElementPosition(const std::string& device, int position, const std::string& identifier) {
+	send("C" + identifier + device + "," + std::to_string(position));
 }
 
-int Stand::getElementPosition(const std::string& device) {
-	std::string answer = receive("Cr" + device + ",1");
+int Stand::getElementPosition(const std::string& device, const std::string& identifier) {
+	std::string answer = receive("C" + identifier + device + ",1");
 	if (answer.empty()) {
 		return -1;
 	}
@@ -431,7 +465,7 @@ int Stand::getElementPosition(const std::string& device) {
 	}
 }
 
-void Stand::blockUntilPositionReached(bool block, const std::string& elementNr) {
+void Stand::blockUntilPositionReached(bool block, const std::string& elementNr, const std::string& identifier) {
 	// don't return until the position or the timeout is reached
 	if (block) {
 		auto count{ 0 };
