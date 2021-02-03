@@ -36,7 +36,7 @@ private:
 class Stand : public Element {
 	Q_OBJECT
 public:
-	Stand(com* comObject) : Element(comObject, "H", { "AV_V3_17" }) {};
+	explicit Stand(com* comObject) : Element(comObject, "H", { "AV_V3_17" }) {};
 
 	void setReflector(int position, bool check = false);
 	int getReflector();
@@ -60,7 +60,7 @@ private:
 class Focus : public Element {
 
 public:
-	Focus(com* comObject) : Element(comObject, "F", { "ZM_V2_04" }) {};
+	explicit Focus(com* comObject) : Element(comObject, "F", { "ZM_V2_04" }) {};
 
 	void setZ(double position);
 	double getZ();
@@ -83,7 +83,7 @@ private:
 class MCU : public Element {
 
 public:
-	MCU(com* comObject) : Element(comObject, "N", { "MC V2.08" }) {};
+	explicit MCU(com* comObject) : Element(comObject, "N", { "MC V2.08" }) {};
 
 	void setX(double position);
 	double getX();

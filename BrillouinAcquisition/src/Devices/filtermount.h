@@ -8,7 +8,7 @@ class FilterMount: public Device {
 	Q_OBJECT
 
 public:
-	FilterMount(QString comPort) : m_comPort(comPort) {};
+	explicit FilterMount(QString comPort) : m_comPort(comPort) {};
 	~FilterMount();
 
 	void home();

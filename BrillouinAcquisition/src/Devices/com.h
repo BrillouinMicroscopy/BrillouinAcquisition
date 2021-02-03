@@ -12,7 +12,7 @@
 class com : public QSerialPort {
 public:
 	com() {};
-	com(std::string terminator) : m_terminator(terminator) {};
+	explicit com(std::string terminator) : m_terminator(terminator) {};
 
 	virtual qint64 writeToDevice(const char* data);
 

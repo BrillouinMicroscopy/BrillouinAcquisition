@@ -55,7 +55,7 @@ typedef enum class enDeviceInput {
 class DeviceElement {
 public:
 	DeviceElement() {};
-	DeviceElement(std::string name, int maxOptions, int index) :
+	explicit DeviceElement(std::string name, int maxOptions, int index) :
 		name(name), maxOptions(maxOptions), index(index), optionNames(checkNames(maxOptions)) {};
 	DeviceElement(std::string name, int maxOptions, int index, DEVICE_INPUT_TYPE inputType) :
 		name(name), maxOptions(maxOptions), index(index), optionNames(checkNames(maxOptions)), inputType(inputType) {};
@@ -83,7 +83,7 @@ class DeviceElements {
 
 public:
 	DeviceElements() {};
-	DeviceElements(std::vector<DeviceElement> deviceElements) {
+	explicit DeviceElements(std::vector<DeviceElement> deviceElements) {
 		m_deviceElements = deviceElements;
 	};
 	void operator=(std::vector<DeviceElement> deviceElements) {
