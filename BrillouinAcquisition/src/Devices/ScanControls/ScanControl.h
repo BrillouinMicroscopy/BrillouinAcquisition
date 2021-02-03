@@ -144,9 +144,6 @@ public:
 	ScanPreset m_activePresets = ScanPreset::SCAN_NULL;
 
 public slots:
-	virtual void init() = 0;
-	virtual void connectDevice() = 0;
-	virtual void disconnectDevice() = 0;
 	virtual void setElement(DeviceElement, double) = 0;
 	virtual int getElement(DeviceElement) = 0;
 	virtual void getElements() = 0;
