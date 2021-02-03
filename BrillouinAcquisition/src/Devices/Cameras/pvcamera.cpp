@@ -670,6 +670,7 @@ void PVCamera::getImageForPreview() {
 
 		acquireImage(m_previewBuffer->m_buffer->getWriteBuffer());
 		m_previewBuffer->m_buffer->m_usedBuffers->release();
+		emit(s_imageReady());
 	}
 }
 
