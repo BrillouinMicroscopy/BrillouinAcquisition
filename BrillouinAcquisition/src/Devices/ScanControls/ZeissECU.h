@@ -48,13 +48,17 @@ public:
 	int getBaseport();
 	void setSideport(int position, bool check = false);
 	int getSideport();
+	void setRLShutter(int position, bool block = false);
+	int getRLShutter();
 	void setMirror(int position, bool check = false);
 	int getMirror();
+	void setLamp(int position, bool block = false);
+	int getLamp();
 
 private:
-	void setElementPosition(const std::string& device, int position);
-	int getElementPosition(const std::string& device);
-	void blockUntilPositionReached(bool block, const std::string& elementNr);
+	void setElementPosition(const std::string& device, int position, const std::string& identifier = "R");
+	int getElementPosition(const std::string& device, const std::string& identifier = "r");
+	void blockUntilPositionReached(bool block, const std::string& elementNr, const std::string& identifier = "r");
 };
 
 class Focus : public Element {
@@ -149,7 +153,9 @@ private:
 		TUBELENS,
 		BASEPORT,
 		SIDEPORT,
+		RLSHUTTER,
 		MIRROR,
+		LAMP,
 		COUNT
 	};
 };
