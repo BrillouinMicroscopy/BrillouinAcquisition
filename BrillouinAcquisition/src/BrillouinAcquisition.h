@@ -291,6 +291,7 @@ private slots:
 
 	void on_action_Scale_calibration_acquire_triggered();
 	void on_action_Scale_calibration_load_triggered();
+	void loadScaleCalibrationFile();
 
 	void updateScaleCalibrationTranslationValue(POINT2 translation);
 	void updateScaleCalibrationData(ScaleCalibrationData scaleCalibration);

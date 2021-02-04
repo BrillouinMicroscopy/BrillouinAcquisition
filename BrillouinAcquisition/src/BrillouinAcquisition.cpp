@@ -2496,6 +2496,11 @@ void BrillouinAcquisition::setPixToMicrometerY_y(double value) {
 void BrillouinAcquisition::on_action_Scale_calibration_load_triggered() {
 	m_scaleCalibrationFilePath = QFileDialog::getOpenFileName(this, tr("Select scale calibration"),
 		QString::fromStdString(m_scaleCalibrationFilePath), tr("Scale calibration (*.h5)")).toStdString();
+	loadScaleCalibrationFile();
+	writeSettings();
+}
+
+void BrillouinAcquisition::loadScaleCalibrationFile() {
 	QMetaObject::invokeMethod(
 		m_scaleCalibration,
 		[&m_scaleCalibration = m_scaleCalibration, &m_scaleCalibrationFilePath = m_scaleCalibrationFilePath]() {
@@ -2807,6 +2812,8 @@ void BrillouinAcquisition::initScanControl() {
 		},
 		Qt::AutoConnection
 	);
+
+	loadScaleCalibrationFile();
 }
 
 void BrillouinAcquisition::initODT() {
@@ -3889,6 +3896,9 @@ void BrillouinAcquisition::writeSettings() {
 	settings.setValue("brightfield-camera", brightfieldCamera);
 	settings.setValue("stage", stage);
 	settings.endGroup();
+	settings.beginGroup("scale-calibration");
+	settings.setValue("file-path", QString::fromStdString(m_scaleCalibrationFilePath));
+	settings.endGroup();
 }
 
 void BrillouinAcquisition::readSettings() {
@@ -3943,5 +3953,10 @@ void BrillouinAcquisition::readSettings() {
 		m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSECU;
 	}
 
+	settings.endGroup();
+
+	settings.beginGroup("scale-calibration");
+	QVariant filePath = settings.value("file-path");
+	m_scaleCalibrationFilePath = filePath.toString().toStdString();
 	settings.endGroup();
 }
