@@ -171,11 +171,6 @@ void MockCamera::readSettings() {
 }
 
 void MockCamera::applySettings(const CAMERA_SETTINGS& settings) {
-	// Don't do anything if an acquisition is running.
-	if (m_isAcquisitionRunning) {
-		return;
-	}
-
 	m_settings = settings;
 
 	auto binning{ 1 };

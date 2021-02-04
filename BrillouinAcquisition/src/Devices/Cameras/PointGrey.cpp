@@ -238,11 +238,6 @@ void PointGrey::readSettings() {
 }
 
 void PointGrey::applySettings(const CAMERA_SETTINGS& settings) {
-	// Don't do anything if an acquisition is running.
-	if (m_isAcquisitionRunning) {
-		return;
-	}
-
 	m_settings = settings;
 
 	if (m_settings.readout.pixelEncoding == L"Raw8") {

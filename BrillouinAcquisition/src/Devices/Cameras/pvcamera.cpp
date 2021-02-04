@@ -378,11 +378,6 @@ void PVCamera::readSettings() {
 }
 
 void PVCamera::applySettings(const CAMERA_SETTINGS& settings) {
-	// Don't do anything if an acquisition is running.
-	if (m_isAcquisitionRunning) {
-		return;
-	}
-
 	// We have to update the options when we change port and speed
 	auto updateOptions{ false };
 	if (m_settings.readout.pixelReadoutRate != settings.readout.pixelReadoutRate) {
