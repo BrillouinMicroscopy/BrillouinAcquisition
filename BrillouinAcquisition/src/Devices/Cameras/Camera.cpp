@@ -18,11 +18,6 @@ CAMERA_SETTINGS Camera::getSettings() {
  */
 
 void Camera::setSettings(CAMERA_SETTINGS settings) {
-	// Don't do anything if an acquisition is running.
-	if (m_isAcquisitionRunning) {
-		return;
-	}
-
 	// Check that pixel encoding is valid
 	if (std::find(m_options.pixelEncodings.begin(), m_options.pixelEncodings.end(), settings.readout.pixelEncoding) ==
 		m_options.pixelEncodings.end() && !m_options.pixelEncodings.empty()

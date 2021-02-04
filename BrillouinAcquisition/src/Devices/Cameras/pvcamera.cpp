@@ -103,8 +103,11 @@ void PVCamera::stopAcquisition() {
 
 void PVCamera::getImageForAcquisition(std::byte* buffer, bool preview) {
 	std::lock_guard<std::mutex> lockGuard(m_mutex);
-
-	auto i_retCode = PVCam::pl_exp_start_seq(m_camera, m_acquisitionBuffer);
+	
+	// Only write to acquisition buffer if it is valid
+	if (m_acquisitionBuffer) {
+		auto i_retCode = PVCam::pl_exp_start_seq(m_camera, m_acquisitionBuffer);
+	}
 
 	{
 		std::unique_lock<std::mutex> lock(g_EofMutex);
@@ -113,16 +116,18 @@ void PVCamera::getImageForAcquisition(std::byte* buffer, bool preview) {
 			waitTime = (waitTime < 5) ? 5 : waitTime;
 			g_EofCond.wait_for(lock, std::chrono::seconds(waitTime), [this]() {
 				return (g_EofFlag);
-				});
+			});
 		}
 		g_EofFlag = false; // Reset flag
 	}
-
-	memcpy(buffer, m_acquisitionBuffer, m_settings.roi.bytesPerFrame);
-
+	
+	// Only read from acquisition buffer if it is valid
+	if (m_acquisitionBuffer) {
+		memcpy(buffer, m_acquisitionBuffer, m_settings.roi.bytesPerFrame);
+	}
 	PVCam::pl_exp_finish_seq(m_camera, m_acquisitionBuffer, 0);
 
-	if (preview) {
+	if (preview && m_acquisitionBuffer) {
 		// write image to preview buffer
 		memcpy(m_previewBuffer->m_buffer->getWriteBuffer(), buffer, m_settings.roi.bytesPerFrame);
 		m_previewBuffer->m_buffer->m_usedBuffers->release();
@@ -378,11 +383,6 @@ void PVCamera::readSettings() {
 }
 
 void PVCamera::applySettings(const CAMERA_SETTINGS& settings) {
-	// Don't do anything if an acquisition is running.
-	if (m_isAcquisitionRunning) {
-		return;
-	}
-
 	// We have to update the options when we change port and speed
 	auto updateOptions{ false };
 	if (m_settings.readout.pixelReadoutRate != settings.readout.pixelReadoutRate) {
@@ -728,9 +728,24 @@ void PVCamera::prepareAcquisition(const CAMERA_SETTINGS& settings) {
 	// Disable temperature timer if it is running
 	stopTempTimer();
 
+
 	PVCam::pl_cam_register_callback_ex3(m_camera, PVCam::PL_CALLBACK_EOF, (void*)acquisitionCallback, (void*)this);
 	
 	setSettings(settings);
+
+	// For acquisition we use sequential mode and have to set this up explicitly
+	auto camSettings = getCamSettings();
+	auto bufferSize = PVCam::uns32{};
+	PVCam::pl_exp_setup_seq(
+		m_camera,
+		1,
+		1,
+		&camSettings,
+		PVCam::TIMED_MODE,
+		1e3 * m_settings.exposureTime,
+		&bufferSize
+	);
+	m_settings.roi.bytesPerFrame = bufferSize;
 
 	if (m_acquisitionBuffer) {
 		delete[] m_acquisitionBuffer;

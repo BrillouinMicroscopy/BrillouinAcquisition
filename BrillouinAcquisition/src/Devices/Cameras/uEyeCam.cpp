@@ -264,11 +264,6 @@ void uEyeCam::readSettings() {
 }
 
 void uEyeCam::applySettings(const CAMERA_SETTINGS& settings) {
-	// Don't do anything if an acquisition is running.
-	if (m_isAcquisitionRunning) {
-		return;
-	}
-
 	m_settings = settings;
 
 	// If the preview is currently running, stop it and apply the settings.
