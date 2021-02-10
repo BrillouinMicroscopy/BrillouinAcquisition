@@ -297,18 +297,6 @@ void ODT::calculateVoltages(ODT_MODE mode) {
 	}
 }
 
-std::string ODT::getBinningString() {
-	std::string binning{ "1x1" };
-	if (m_cameraSettings.roi.binning == L"8x8") {
-		binning = "8x8";
-	} else if (m_cameraSettings.roi.binning == L"4x4") {
-		binning = "4x4";
-	} else if (m_cameraSettings.roi.binning == L"2x2") {
-		binning = "2x2";
-	}
-	return binning;
-}
-
 template <typename T>
 void ODT::__acquire(std::unique_ptr <StorageWrapper> & storage) {
 	setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
@@ -350,7 +338,6 @@ void ODT::__acquire(std::unique_ptr <StorageWrapper> & storage) {
 
 	int rank_data{ 3 };
 	hsize_t dims_data[3] = { 1, (hsize_t)m_cameraSettings.roi.height_binned, (hsize_t)m_cameraSettings.roi.width_binned };
-	std::string binning = getBinningString();
 	if (m_cameraSettings.roi.bytesPerFrame) {
 		for (gsl::index i{ 0 }; i < m_acqSettings.numberPoints; i++) {
 
@@ -374,8 +361,16 @@ void ODT::__acquire(std::unique_ptr <StorageWrapper> & storage) {
 
 			// cast the image to type T
 			auto images_ = (std::vector<T>*) & images;
-			auto img = new ODTIMAGE<T>((int)i, rank_data, dims_data, date, *images_,
-				m_cameraSettings.exposureTime, m_cameraSettings.gain, binning);
+			auto img = new ODTIMAGE<T>(
+				(int)i,
+				rank_data,
+				dims_data,
+				date,
+				*images_,
+				m_cameraSettings.exposureTime,
+				m_cameraSettings.gain,
+				m_cameraSettings.roi
+			);
 
 			QMetaObject::invokeMethod(
 				storage.get(),

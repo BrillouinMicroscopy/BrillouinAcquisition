@@ -298,6 +298,9 @@ void Andor::applySettings(const CAMERA_SETTINGS& settings) {
 		m_settings.roi.height_physical -= mody;
 	}
 
+	m_settings.roi.bottom = m_options.ROIHeightLimits[1] - m_settings.roi.top - m_settings.roi.height_physical + 2;
+	m_settings.roi.right = m_options.ROIWidthLimits[1] - m_settings.roi.left - m_settings.roi.width_physical + 2;
+
 	AT_SetEnumeratedString(m_camera, L"AOIBinning", m_settings.roi.binning.c_str());
 	AT_SetInt(m_camera, L"AOIWidth", m_settings.roi.width_physical / m_settings.roi.binX);
 	AT_SetInt(m_camera, L"AOILeft", m_settings.roi.left);

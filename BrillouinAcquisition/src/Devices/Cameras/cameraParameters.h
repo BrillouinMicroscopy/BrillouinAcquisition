@@ -17,9 +17,11 @@ struct CAMERA_OPTIONS {
 
 struct CAMERA_ROI {
 	long long left{ 1 };
+	long long right{ 1 };
 	long long width_physical{ 2048 };
 	long long width_binned{ 2048 };
 	long long top{ 1 };
+	long long bottom{ 1 };
 	long long height_physical{ 2048 };
 	long long height_binned{ 2048 };
 	long long binX{ 1 };

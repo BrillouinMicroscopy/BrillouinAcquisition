@@ -346,6 +346,9 @@ void uEyeCam::applySettings(const CAMERA_SETTINGS& settings) {
 	m_settings.roi.width_binned = m_settings.roi.width_physical;
 	m_settings.roi.height_binned = m_settings.roi.height_physical;
 
+	m_settings.roi.bottom = m_options.ROIHeightLimits[1] - m_settings.roi.top - m_settings.roi.height_physical + 2;
+	m_settings.roi.right = m_options.ROIWidthLimits[1] - m_settings.roi.left - m_settings.roi.width_physical + 2;
+
 	m_settings.roi.bytesPerFrame = m_settings.roi.width_binned * m_settings.roi.height_binned;
 
 	// If the preview was running, start it again.
