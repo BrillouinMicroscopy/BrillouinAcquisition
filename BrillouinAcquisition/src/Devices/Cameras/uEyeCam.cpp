@@ -185,14 +185,18 @@ void uEyeCam::readOptions() {
 	m_options.exposureTimeLimits[0] = 1e-3*exposureMin;
 	m_options.exposureTimeLimits[1] = 1e-3*exposureMax;
 
-	auto sizeAOImin = uEye::IS_SIZE_2D{};
-	ret = uEye::is_AOI(m_camera, IS_AOI_IMAGE_GET_SIZE_MIN, (void*)&sizeAOImin, sizeof(sizeAOImin));
-	auto sizeAOImax = uEye::IS_SIZE_2D{};
-	ret = uEye::is_AOI(m_camera, IS_AOI_IMAGE_GET_SIZE_MAX, (void*)&sizeAOImax, sizeof(sizeAOImax));
-	m_options.ROIWidthLimits[0] = sizeAOImin.s32Width;
-	m_options.ROIWidthLimits[1] = sizeAOImax.s32Width;
-	m_options.ROIHeightLimits[0] = sizeAOImin.s32Height;
-	m_options.ROIHeightLimits[1] = sizeAOImax.s32Height;
+	//auto sizeAOImin = uEye::IS_SIZE_2D{};
+	//ret = uEye::is_AOI(m_camera, IS_AOI_IMAGE_GET_SIZE_MIN, (void*)&sizeAOImin, sizeof(sizeAOImin));
+	//auto sizeAOImax = uEye::IS_SIZE_2D{};
+	//ret = uEye::is_AOI(m_camera, IS_AOI_IMAGE_GET_SIZE_MAX, (void*)&sizeAOImax, sizeof(sizeAOImax));
+
+	auto sensorInfo = uEye::SENSORINFO{};
+	ret = uEye::is_GetSensorInfo(m_camera, &sensorInfo);
+
+	m_options.ROIWidthLimits[0] = 1;
+	m_options.ROIWidthLimits[1] = sensorInfo.nMaxWidth;
+	m_options.ROIHeightLimits[0] = 1;
+	m_options.ROIHeightLimits[1] = sensorInfo.nMaxHeight;
 
 	emit(optionsChanged(m_options));
 }
