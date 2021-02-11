@@ -87,8 +87,6 @@ private:
 
 	void calibrate(std::unique_ptr <StorageWrapper>& storage);
 
-	std::string getBinningString();
-
 	std::string getRepetitionFilename();
 
 	BRILLOUIN_SETTINGS m_settings;

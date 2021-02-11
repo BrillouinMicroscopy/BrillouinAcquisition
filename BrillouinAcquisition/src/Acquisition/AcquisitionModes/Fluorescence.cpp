@@ -239,20 +239,17 @@ void Fluorescence::configureCamera() {
 		m_settings.camera.roi.height_physical = 1024;
 		m_settings.camera.readout.triggerMode = L"Software";
 	}
+#ifdef _DEBUG
+	else if (cameraType == "class MockCamera") {
+		m_settings.camera.roi.left = 200;
+		m_settings.camera.roi.top = 150;
+		m_settings.camera.roi.width_physical = 600;
+		m_settings.camera.roi.height_physical = 700;
+		m_settings.camera.readout.triggerMode = L"Software";
+	}
+#endif
 	m_settings.camera.readout.cycleMode = L"Fixed";
 	m_settings.camera.frameCount = 1;
-}
-
-std::string Fluorescence::getBinningString() {
-	std::string binning{ "1x1" };
-	if (m_settings.camera.roi.binning == L"8x8") {
-		binning = "8x8";
-	} else if (m_settings.camera.roi.binning == L"4x4") {
-		binning = "4x4";
-	} else if (m_settings.camera.roi.binning == L"2x2") {
-		binning = "2x2";
-	}
-	return binning;
 }
 
 template <typename T>
@@ -364,9 +361,17 @@ void Fluorescence::__acquire(std::unique_ptr <StorageWrapper>& storage, std::vec
 		// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
 		std::string date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 			.toString(Qt::ISODateWithMs).toStdString();
-		std::string binning = getBinningString();
-		auto img = new FLUOIMAGE<T>(imageNumber, rank_data, dims_data, date, channel->name, *images_,
-			m_settings.camera.exposureTime, m_settings.camera.gain, binning);
+		auto img = new FLUOIMAGE<T>(
+			imageNumber,
+			rank_data,
+			dims_data,
+			date,
+			channel->name,
+			*images_,
+			m_settings.camera.exposureTime,
+			m_settings.camera.gain,
+			m_settings.camera.roi
+		);
 
 		QMetaObject::invokeMethod(
 			storage.get(),

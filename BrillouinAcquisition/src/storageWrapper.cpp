@@ -221,7 +221,7 @@ void StorageWrapper::s_writeQueues() {
 			return;
 		}
 		auto cal = m_calibrationQueue_char.dequeue();
-		setCalibrationData(cal->index, cal->data, cal->rank, cal->dims, cal->sample, cal->shift, cal->date, cal->exposure, cal->gain, cal->binning);
+		setCalibrationData(cal->index, cal->data, cal->rank, cal->dims, cal->sample, cal->shift, cal->date, cal->exposure, cal->gain, cal->roi);
 		//std::string info = "Calibration written " + std::to_string(m_writtenCalibrationsNr);
 		//qInfo(logInfo()) << info.c_str();
 		m_writtenCalibrationsNr++;
@@ -235,7 +235,7 @@ void StorageWrapper::s_writeQueues() {
 			return;
 		}
 		auto cal = m_calibrationQueue_short.dequeue();
-		setCalibrationData(cal->index, cal->data, cal->rank, cal->dims, cal->sample, cal->shift, cal->date, cal->exposure, cal->gain, cal->binning);
+		setCalibrationData(cal->index, cal->data, cal->rank, cal->dims, cal->sample, cal->shift, cal->date, cal->exposure, cal->gain, cal->roi);
 		//std::string info = "Calibration written " + std::to_string(m_writtenCalibrationsNr);
 		//qInfo(logInfo()) << info.c_str();
 		m_writtenCalibrationsNr++;

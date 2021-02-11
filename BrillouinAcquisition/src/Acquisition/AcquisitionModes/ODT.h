@@ -54,8 +54,6 @@ private:
 
 	void calculateVoltages(ODT_MODE);
 
-	std::string getBinningString();
-
 	template <typename T>
 	void __acquire(std::unique_ptr <StorageWrapper>& storage);
 

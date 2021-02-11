@@ -55,8 +55,6 @@ private:
 	std::vector<ChannelSettings*> getEnabledChannels();
 	void configureCamera();
 
-	std::string getBinningString();
-
 	template <typename T>
 	void __acquire(std::unique_ptr <StorageWrapper>& storage, std::vector<ChannelSettings*> channels);
 

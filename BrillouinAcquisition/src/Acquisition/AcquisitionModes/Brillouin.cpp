@@ -336,8 +336,6 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 		}
 	}
 
-	auto binning = getBinningString();
-
 	// the datetime has to be set here, otherwise it would be determined by the time the queue is processed
 	auto date = QDateTime::currentDateTime().toOffsetFromUtc(QDateTime::currentDateTime().offsetFromUtc())
 		.toString(Qt::ISODateWithMs).toStdString();
@@ -355,7 +353,7 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 			date,					// the datetime
 			m_settings.calibrationExposureTime, // the exposure time of the calibration
 			m_settings.camera.gain,
-			binning
+			m_settings.camera.roi
 			);
 
 		QMetaObject::invokeMethod(
@@ -376,7 +374,7 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 			date,					// the datetime
 			m_settings.calibrationExposureTime, // the exposure time of the calibration
 			m_settings.camera.gain,
-			binning
+			m_settings.camera.roi
 			);
 
 		QMetaObject::invokeMethod(
@@ -397,7 +395,7 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 			date,					// the datetime
 			m_settings.calibrationExposureTime, // the exposure time of the calibration
 			m_settings.camera.gain,
-			binning
+			m_settings.camera.roi
 			);
 
 		QMetaObject::invokeMethod(
@@ -475,18 +473,6 @@ void Brillouin::updatePositions() {
 		}
 	}
 	emit(s_orderedPositionsChanged(m_orderedPositionsRelative));
-}
-
-std::string Brillouin::getBinningString() {
-	auto binning = std::string{ "1x1" };
-	if (m_settings.camera.roi.binning == L"8x8") {
-		binning = "8x8";
-	} else if (m_settings.camera.roi.binning == L"4x4") {
-		binning = "4x4";
-	} else if (m_settings.camera.roi.binning == L"2x2") {
-		binning = "2x2";
-	}
-	return binning;
 }
 
 std::string Brillouin::getRepetitionFilename() {
@@ -633,8 +619,6 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 	}
 	Sleep(50);
 
-	auto binning = getBinningString();
-
 	for (gsl::index ll{ 0 }; ll < nrPositions; ll++) {
 
 		// do live calibration if required and possible at the moment
@@ -684,8 +668,18 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 		if (m_settings.camera.readout.dataType == "unsigned short") {
 			// cast the image to unsigned short
 			auto images_ = (std::vector<unsigned short> *) & images;
-			auto img = new IMAGE<unsigned short>(m_orderedIndices[ll].x, m_orderedIndices[ll].y, m_orderedIndices[ll].z, rank_data, dims_data, date, *images_,
-				m_settings.camera.exposureTime, m_settings.camera.gain, binning);
+			auto img = new IMAGE<unsigned short>(
+				m_orderedIndices[ll].x,
+				m_orderedIndices[ll].y,
+				m_orderedIndices[ll].z,
+				rank_data,
+				dims_data,
+				date,
+				*images_,
+				m_settings.camera.exposureTime,
+				m_settings.camera.gain,
+				m_settings.camera.roi
+			);
 
 			QMetaObject::invokeMethod(
 				storage.get(),
@@ -695,8 +689,18 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 		} else if (m_settings.camera.readout.dataType == "unsigned char") {
 			// cast the image to unsigned char
 			auto images_ = (std::vector<unsigned char> *) & images;
-			auto img = new IMAGE<unsigned char>(m_orderedIndices[ll].x, m_orderedIndices[ll].y, m_orderedIndices[ll].z, rank_data, dims_data, date, *images_,
-				m_settings.camera.exposureTime, m_settings.camera.gain, binning);
+			auto img = new IMAGE<unsigned char>(
+				m_orderedIndices[ll].x,
+				m_orderedIndices[ll].y,
+				m_orderedIndices[ll].z,
+				rank_data,
+				dims_data,
+				date,
+				*images_,
+				m_settings.camera.exposureTime,
+				m_settings.camera.gain,
+				m_settings.camera.roi
+			);
 
 			QMetaObject::invokeMethod(
 				storage.get(),
@@ -706,8 +710,18 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 		} else if (m_settings.camera.readout.dataType == "unsigned int") {
 			// cast the image to unsigned char
 			auto images_ = (std::vector<unsigned int> *) & images;
-			auto img = new IMAGE<unsigned int>(m_orderedIndices[ll].x, m_orderedIndices[ll].y, m_orderedIndices[ll].z, rank_data, dims_data, date, *images_,
-				m_settings.camera.exposureTime, m_settings.camera.gain, binning);
+			auto img = new IMAGE<unsigned int>(
+				m_orderedIndices[ll].x,
+				m_orderedIndices[ll].y,
+				m_orderedIndices[ll].z,
+				rank_data,
+				dims_data,
+				date,
+				*images_,
+				m_settings.camera.exposureTime,
+				m_settings.camera.gain,
+				m_settings.camera.roi
+			);
 
 			QMetaObject::invokeMethod(
 				storage.get(),
