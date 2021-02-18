@@ -44,7 +44,7 @@ NIDAQ::NIDAQ() noexcept {
 	 * Initialize the scale calibration
 	 */
 	auto pixelSize = double{ 4.8 };	// [µm]  pixel size
-	auto mag = double{ 58 };		// [1]   magnification
+	auto mag = double{ 57 };		// [1]   magnification
 	auto scale = mag / pixelSize;
 
 	auto scaleCalibration = ScaleCalibrationData{};
