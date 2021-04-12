@@ -149,15 +149,15 @@ bool Andor::getSensorCooling() {
 
 int Andor::acquireImage(std::byte* buffer) {
 	// Pass this buffer to the SDK
-	auto UserBuffer = new unsigned char[m_settings.roi.bytesPerFrame];
-	AT_QueueBuffer(m_camera, UserBuffer, m_settings.roi.bytesPerFrame);
+	auto UserBuffer = new unsigned char[m_bytesPerFrame];
+	AT_QueueBuffer(m_camera, UserBuffer, m_bytesPerFrame);
 
 	// Acquire camera images
 	AT_Command(m_camera, L"SoftwareTrigger");
 
 	// Sleep in this thread until data is ready
 	unsigned char* Buffer{ nullptr };
-	auto ret = AT_WaitBuffer(m_camera, &Buffer, &m_settings.roi.bytesPerFrame, 1500 * m_settings.exposureTime);
+	auto ret = AT_WaitBuffer(m_camera, &Buffer, &m_bytesPerFrame, 1500 * m_settings.exposureTime);
 	// return if AT_WaitBuffer timed out
 	if (ret != AT_SUCCESS) {
 		return 0;
@@ -232,6 +232,14 @@ void Andor::readSettings() {
 	getEnumString(L"Pixel Readout Rate", &m_settings.readout.pixelReadoutRate);
 	getEnumString(L"SimplePreAmpGainControl", &m_settings.readout.preAmpGain);
 	getEnumString(L"TriggerMode", &m_settings.readout.triggerMode);
+
+	// Allocate a buffer
+	// Get the number of bytes required to store one frame
+	auto ImageSizeBytes = AT_64{};
+	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
+	m_bytesPerFrame = static_cast<int>(ImageSizeBytes);
+
+	m_settings.roi.bytesPerFrame = m_settings.roi.height_binned * m_settings.roi.width_binned * 2;
 
 	// emit signal that settings changed
 	emit(settingsChanged(m_settings));
@@ -310,12 +318,6 @@ void Andor::applySettings(const CAMERA_SETTINGS& settings) {
 
 	AT_SetEnumeratedString(m_camera, L"CycleMode", m_settings.readout.cycleMode.c_str());
 	AT_SetEnumeratedString(m_camera, L"TriggerMode", m_settings.readout.triggerMode.c_str());
-
-	// Allocate a buffer
-	// Get the number of bytes required to store one frame
-	auto ImageSizeBytes = AT_64{};
-	AT_GetInt(m_camera, L"ImageSizeBytes", &ImageSizeBytes);
-	m_settings.roi.bytesPerFrame = static_cast<int>(ImageSizeBytes);
 
 	// read back the settings
 	readSettings();
