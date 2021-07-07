@@ -88,8 +88,8 @@ private:
 	double m_gearBoxRatio{ 67 };	// [1]  ratio of the gear box
 	double m_pitch{ 1 };			// [mm] pitch of the lead screw
 
-	double m_mirrorStart{ 0.0 };
-	double m_mirrorEnd{ 14.0 };
+	double m_mirrorStart{ 2.0 };
+	double m_mirrorEnd{ 18.0 };
 
 	// moveable filter mounts
 	FilterMount* m_exFilter{ nullptr };
