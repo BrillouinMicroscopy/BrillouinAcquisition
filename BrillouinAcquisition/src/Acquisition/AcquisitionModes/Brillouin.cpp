@@ -268,6 +268,7 @@ void Brillouin::abortMode(std::unique_ptr <StorageWrapper>& storage) {
 	if (m_scanControl) {
 		(*m_scanControl)->setPreset(ScanPreset::SCAN_LASEROFF);
 		(*m_scanControl)->setPosition(m_startPosition);
+		(*m_scanControl)->enableMeasurementMode(false);
 		QMetaObject::invokeMethod(
 			(*m_scanControl),
 			[&m_scanControl = (*m_scanControl)]() { m_scanControl->startAnnouncing(); },
