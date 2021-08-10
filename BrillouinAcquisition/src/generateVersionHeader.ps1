@@ -2,7 +2,7 @@ Param (
   [String]$Project='.',
   [String]$VERSION_MAJOR = 0,
   [String]$VERSION_MINOR = 2,
-  [String]$VERSION_PATCH = 0,
+  [String]$VERSION_PATCH = 1,
   [String]$VERSION_PRERELEASE = "",
   [String]$Namespace = 'Version',
   [String]$GitRoot,
