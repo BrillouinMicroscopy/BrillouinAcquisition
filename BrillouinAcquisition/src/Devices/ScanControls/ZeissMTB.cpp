@@ -186,8 +186,12 @@ void ZeissMTB::connectDevice() {
 				m_stageY = (IMTBContinualPtr)m_Root->GetComponent("MTBStageAxisY");
 			}
 
-			Thorlabs_FF::FF_Open(m_serialNo_FF2);
-			Thorlabs_FF::FF_StartPolling(m_serialNo_FF2, 200);
+			if (Thorlabs_FF::TLI_BuildDeviceList() == 0) {
+				auto ret = Thorlabs_FF::FF_Open(m_serialNo_FF2);
+				if (ret == 0) {
+					Thorlabs_FF::FF_StartPolling(m_serialNo_FF2, 200);
+				}
+			}
 
 			if (m_isConnected) {
 				setPreset(ScanPreset::SCAN_BRILLOUIN);
