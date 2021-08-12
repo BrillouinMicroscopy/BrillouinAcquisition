@@ -1,3 +1,8 @@
+## 0.2.2 - 2021-08-12
+
+### Fixed
+- Fix connectivity to Thorlabs devices #206
+
 ## 0.2.1 - 2021-08-10
 
 ### Fixed
