@@ -189,8 +189,12 @@ void ZeissECU::connectDevice() {
 			auto parity = m_comObject->parity();
 			auto stopBits = m_comObject->stopBits();
 
-			Thorlabs_FF::FF_Open(m_serialNo_FF2);
-			Thorlabs_FF::FF_StartPolling(m_serialNo_FF2, 200);
+			if (Thorlabs_FF::TLI_BuildDeviceList() == 0) {
+				auto ret = Thorlabs_FF::FF_Open(m_serialNo_FF2);
+				if (ret == 0) {
+					Thorlabs_FF::FF_StartPolling(m_serialNo_FF2, 200);
+				}
+			}
 
 			// check if connected to compatible device
 			auto focus = m_focus->checkCompatibility();

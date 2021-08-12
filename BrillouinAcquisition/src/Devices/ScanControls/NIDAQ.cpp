@@ -159,26 +159,36 @@ void NIDAQ::connectDevice() {
 		ODTControl::connectDevice();
 
 		// Connect to T-Cube Piezo Inertial Controller
-		int ret = Thorlabs_TIM::TIM_Open(m_serialNo_TIM);
-		if (ret == 0) {
-			Thorlabs_TIM::TIM_Enable(m_serialNo_TIM);
-			Thorlabs_TIM::TIM_StartPolling(m_serialNo_TIM, 200);
-			m_isConnected = true;
-			m_isCompatible = true;
-			centerPosition();
-			calculateHomePositionBounds();
-			Thorlabs_TIM::TIM_Home(m_serialNo_TIM, m_channelLowerObjective);
-			m_positionLowerObjective = 0;
+		// Build list of connected device
+		if (Thorlabs_TIM::TLI_BuildDeviceList() == 0) {
+			auto ret = Thorlabs_TIM::TIM_Open(m_serialNo_TIM);
+			if (ret == 0) {
+				Thorlabs_TIM::TIM_Enable(m_serialNo_TIM);
+				Thorlabs_TIM::TIM_StartPolling(m_serialNo_TIM, 200);
+				m_isConnected = true;
+				m_isCompatible = true;
+				centerPosition();
+				calculateHomePositionBounds();
+				Thorlabs_TIM::TIM_Home(m_serialNo_TIM, m_channelLowerObjective);
+				m_positionLowerObjective = 0;
+			}
+
+			ret = Thorlabs_FF::FF_Open(m_serialNo_FF1);
+			if (ret == 0) {
+				Thorlabs_FF::FF_StartPolling(m_serialNo_FF1, 200);
+			}
+
+			ret = Thorlabs_KSC::SC_Open(m_serialNo_KSC);
+			if (ret == 0) {
+				Thorlabs_KSC::SC_StartPolling(m_serialNo_KSC, 200);
+				Thorlabs_KSC::SC_SetOperatingMode(m_serialNo_KSC, Thorlabs_KSC::SC_OperatingModes::SC_Manual);
+			}
+
+			ret = Thorlabs_KDC::CC_Open(m_serialNo_KDC);
+			if (ret == 0) {
+				Thorlabs_KDC::CC_StartPolling(m_serialNo_KDC, 200);
+			}
 		}
-		Thorlabs_FF::FF_Open(m_serialNo_FF1);
-		Thorlabs_FF::FF_StartPolling(m_serialNo_FF1, 200);
-
-		Thorlabs_KSC::SC_Open(m_serialNo_KSC);
-		Thorlabs_KSC::SC_StartPolling(m_serialNo_KSC, 200);
-		Thorlabs_KSC::SC_SetOperatingMode(m_serialNo_KSC, Thorlabs_KSC::SC_OperatingModes::SC_Manual);
-
-		Thorlabs_KDC::CC_Open(m_serialNo_KDC);
-		Thorlabs_KDC::CC_StartPolling(m_serialNo_KDC, 200);
 
 		// Connect filter mounts
 		m_exFilter->connectDevice();
