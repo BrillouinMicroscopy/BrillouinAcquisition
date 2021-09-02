@@ -133,7 +133,10 @@ copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\swresample-2.
 copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\avformat-57.dll" "$(TargetDir)"
 copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\swscale-4.dll" "$(TargetDir)"
 copy "$(ProjectDir)external\fftw\libfftw3-3.dll" "$(TargetDir)"
-copy "$(ProgramW6432)\OpenCV\build\x64\vc15\bin\opencv_world451.dll" "$(TargetDir)"</Command>
+copy "$(ProgramW6432)\OpenCV\build\x64\vc15\bin\opencv_world451.dll" "$(TargetDir)"
+copy "$(ProgramW6432)\IDS\uEye\USB driver package\ueye_api_64.dll" "$(TargetDir)"
+copy "$(SystemRoot)\System32\pvcam64.dll" "$(TargetDir)"
+copy "$(SystemRoot)\System32\nicaiu.dll" "$(TargetDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
