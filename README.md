@@ -26,5 +26,6 @@ Please install the following dependencies to the default paths:
 - HDF Group HDF5 library
 - Photometrics PVCam SDK
 - Carl Zeiss MTB 2011 SDK
+- OpenCV
 
 Build the BrillouinAcquisition project using Visual Studio.
