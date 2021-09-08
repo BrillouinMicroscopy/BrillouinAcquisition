@@ -330,6 +330,9 @@
     <ClCompile Include="src\Devices\Cameras\MockCamera.cpp">
       <Filter>Source Files\Devices\Cameras</Filter>
     </ClCompile>
+    <ClCompile Include="src\Devices\ScanControls\ZeissMTB_Erlangen2.cpp">
+      <Filter>Source Files\Devices\ScanControls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_BrillouinAcquisition.h">
@@ -483,6 +486,9 @@
     </CustomBuild>
     <CustomBuild Include="src\Devices\Cameras\MockCamera.h">
       <Filter>Header Files\Devices\Cameras</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Devices\ScanControls\ZeissMTB_Erlangen2.h">
+      <Filter>Header Files\Devices\ScanControls</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

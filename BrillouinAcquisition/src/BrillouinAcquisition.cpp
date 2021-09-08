@@ -2764,6 +2764,9 @@ void BrillouinAcquisition::initScanControl() {
 		case ScanControl::SCAN_DEVICE::ZEISSMTBERLANGEN:
 			m_scanControl = new ZeissMTB_Erlangen();
 			break;
+		case ScanControl::SCAN_DEVICE::ZEISSMTBERLANGEN2:
+			m_scanControl = new ZeissMTB_Erlangen2();
+			break;
 		default:
 			m_scanControl = new ZeissECU();
 			break;
@@ -3942,6 +3945,9 @@ void BrillouinAcquisition::writeSettings() {
 		case ScanControl::SCAN_DEVICE::ZEISSMTBERLANGEN:
 			stage = "zeiss-mtb-erlangen";
 			break;
+		case ScanControl::SCAN_DEVICE::ZEISSMTBERLANGEN2:
+			stage = "zeiss-mtb-erlangen-2";
+			break;
 		default:
 			stage = "zeiss-ecu";
 			break;
@@ -4009,6 +4015,8 @@ void BrillouinAcquisition::readSettings() {
 		m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSMTB;
 	} else if (stage == "zeiss-mtb-erlangen") {
 		m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSMTBERLANGEN;
+	} else if (stage == "zeiss-mtb-erlangen-2") {
+		m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSMTBERLANGEN2;
 	} else {
 		m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSECU;
 	}
