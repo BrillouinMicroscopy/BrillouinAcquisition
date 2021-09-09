@@ -28,6 +28,8 @@ public slots:
 	int getElement(const DeviceElement& element) override;
 	void getElements() override;
 
+	void emitTrigger() override;
+
 private:
 	bool setElement(IMTBChangerPtr element, int position);
 	int getElement(IMTBChangerPtr element);
@@ -79,6 +81,7 @@ private:
 	bool m_beamBlockOpen{ false };			// current state of the beam block
 
 	TaskHandle DOtaskHandle_BeamBlock{ 0 };
+	TaskHandle DOtaskHandle_TriggerOut{ 0 };
 
 	enum class DEVICE_ELEMENT {
 		BEAMBLOCK,

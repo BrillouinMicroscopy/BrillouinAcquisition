@@ -166,6 +166,17 @@ void ZeissMTB_Erlangen::connectDevice() {
 		// Set digital line to low
 		DAQmxWriteDigitalLines(DOtaskHandle_BeamBlock, 1, false, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
 
+		// Create task for digital trigger signal to Raman camera
+		DAQmxCreateTask("DO_TRIGGER", &DOtaskHandle_TriggerOut);
+		// Configure digital output channel
+		DAQmxCreateDOChan(DOtaskHandle_TriggerOut, "Dev1/Port0/Line4:4", "DO_TRIGGER", DAQmx_Val_ChanForAllLines);
+		// Configure regen mode
+		DAQmxSetWriteAttribute(DOtaskHandle_TriggerOut, DAQmx_Write_RegenMode, DAQmx_Val_DoNotAllowRegen);
+		// Start digital task
+		DAQmxStartTask(DOtaskHandle_TriggerOut);
+		// Set digital line to low
+		DAQmxWriteDigitalLines(DOtaskHandle_TriggerOut, 1, false, 10, DAQmx_Val_GroupByChannel, &m_TTL.low, NULL, NULL);
+
 		try {
 			// Don't crash when MTB server is not running
 			if (!m_MTBConnection) {
@@ -293,6 +304,18 @@ void ZeissMTB_Erlangen::getElements() {
 		checkPresets();
 		emit(elementPositionsChanged(m_elementPositions));
 	}
+}
+
+void ZeissMTB_Erlangen::emitTrigger() {
+	// Stop DAQ tasks
+	DAQmxStopTask(DOtaskHandle_TriggerOut);
+
+	auto triggerSignal = std::vector<uInt8>{ 0, 1, 0 };
+	// Write digital voltages
+	DAQmxWriteDigitalLines(DOtaskHandle_TriggerOut, triggerSignal.size(), false, 10, DAQmx_Val_GroupByChannel, &triggerSignal[0], NULL, NULL);
+
+	// Start DAQ tasks
+	DAQmxStartTask(DOtaskHandle_TriggerOut);
 }
 
 /*

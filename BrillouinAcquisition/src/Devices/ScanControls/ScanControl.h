@@ -193,6 +193,8 @@ public slots:
 	virtual POINT2 microMeterToPix(POINT2 positionMicrometer);
 	POINT2 microMeterToPix(POINT3 positionMicrometer);
 
+	virtual void emitTrigger() {};
+
 protected:
 	virtual void setPresetAfter(ScanPreset presetType);
 

@@ -656,6 +656,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 			auto pointerPos = (int64_t)m_settings.camera.roi.bytesPerFrame * mm;
 
 			if (m_andor) {
+				(*m_scanControl)->emitTrigger();
 				(*m_andor)->getImageForAcquisition(&images[pointerPos]);
 			} else {
 				m_abort = true;
