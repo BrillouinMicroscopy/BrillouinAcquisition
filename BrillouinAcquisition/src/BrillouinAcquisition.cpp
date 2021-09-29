@@ -2271,6 +2271,12 @@ void BrillouinAcquisition::on_action_Scale_calibration_acquire_triggered() {
 	m_scaleCalibrationDialog->setWindowTitle("Scale calibration");
 	m_scaleCalibrationDialog->setWindowModality(Qt::ApplicationModal);
 
+	if (!m_brightfieldCamera) {
+		m_scaleCalibrationDialogUi.button_acquire->setDisabled(true);
+	} else {
+		m_scaleCalibrationDialogUi.button_acquire->setDisabled(false);
+	}
+
 	// Connect close signal
 	auto connection = QWidget::connect(
 		m_scaleCalibrationDialog,
