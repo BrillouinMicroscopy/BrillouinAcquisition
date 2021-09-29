@@ -30,6 +30,14 @@ void ScaleCalibration::startRepetitions() {
 	// reset abort flag
 	m_abort = false;
 
+	// Check that we have camera and scancontrol
+	if (!(*m_camera)) {
+		return;
+	}
+	if (!(*m_scanControl)) {
+		return;
+	}
+
 	/*
 	 * Configure the camera
 	 */
