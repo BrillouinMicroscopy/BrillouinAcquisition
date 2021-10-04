@@ -62,6 +62,7 @@ private slots:
 
 signals:
 	void s_cameraSettingsChanged(CAMERA_SETTINGS);				// emit the camera settings
+	void s_voltageCalibrationStatus(std::string title, std::string message);
 };
 
 #endif //CALIBRATION_H

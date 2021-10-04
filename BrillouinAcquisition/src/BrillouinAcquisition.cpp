@@ -2904,6 +2904,12 @@ void BrillouinAcquisition::initVoltageCalibration() {
 			this,
 			[this](CAMERA_SETTINGS settings) { updateODTCameraSettings(settings); }
 		);
+		connection = QWidget::connect(
+			m_voltageCalibration,
+			&VoltageCalibration::s_voltageCalibrationStatus,
+			this,
+			[this](std::string title, std::string message) { showScaleCalibrationStatus(title, message); }
+		);
 
 		// start Calibration thread
 		m_acquisitionThread.startWorker(m_voltageCalibration);
