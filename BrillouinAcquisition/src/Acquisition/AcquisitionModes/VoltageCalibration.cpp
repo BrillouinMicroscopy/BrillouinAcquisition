@@ -194,28 +194,31 @@ void VoltageCalibration::save() {
 	std::string filepath{ folder + "/_positionCalibration_" };
 	filepath += shortdate + offse + ".h5";
 
+	try {
+		H5::H5File file(&filepath[0], H5F_ACC_TRUNC);
 
-	H5::H5File file(&filepath[0], H5F_ACC_TRUNC);
+		// write date
+		// Create the data space for the attribute.
+		H5::DataSpace attr_dataspace = H5::DataSpace(H5S_SCALAR);
+		// Create new string datatype for attribute
+		H5::StrType strdatatype(H5::PredType::C_S1, fulldate.size());
+		H5::Group root = file.openGroup("/");
+		H5::Attribute attr = root.createAttribute("date", strdatatype, attr_dataspace);
+		H5::DataType type = attr.getDataType();
+		attr.write(strdatatype, &fulldate[0]);
 
-	// write date
-	// Create the data space for the attribute.
-	H5::DataSpace attr_dataspace = H5::DataSpace(H5S_SCALAR);
-	// Create new string datatype for attribute
-	H5::StrType strdatatype(H5::PredType::C_S1, fulldate.size());
-	H5::Group root = file.openGroup("/");
-	H5::Attribute attr = root.createAttribute("date", strdatatype, attr_dataspace);
-	H5::DataType type = attr.getDataType();
-	attr.write(strdatatype, &fulldate[0]);
+		H5::Group maps(file.createGroup("/maps"));
 
-	H5::Group maps(file.createGroup("/maps"));
+		H5::Group group_positions(maps.createGroup("positions"));
+		writeCalibrationMap(group_positions, "x", m_voltageCalibration.positions.x);
+		writeCalibrationMap(group_positions, "y", m_voltageCalibration.positions.y);
 
-	H5::Group group_positions(maps.createGroup("positions"));
-	writeCalibrationMap(group_positions, "x", m_voltageCalibration.positions.x);
-	writeCalibrationMap(group_positions, "y", m_voltageCalibration.positions.y);
-
-	H5::Group group_voltages(maps.createGroup("voltages"));
-	writeCalibrationMap(group_voltages, "Ux", m_voltageCalibration.voltages.Ux);
-	writeCalibrationMap(group_voltages, "Uy", m_voltageCalibration.voltages.Uy);
+		H5::Group group_voltages(maps.createGroup("voltages"));
+		writeCalibrationMap(group_voltages, "Ux", m_voltageCalibration.voltages.Ux);
+		writeCalibrationMap(group_voltages, "Uy", m_voltageCalibration.voltages.Uy);
+	} catch (H5::Exception& exception) {
+		emit(s_voltageCalibrationStatus("Could not save the voltage calibration", "Please select a writable working directory."));
+	}
 }
 
 template <typename T>

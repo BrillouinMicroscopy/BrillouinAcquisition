@@ -128,60 +128,64 @@ void ScaleCalibration::save(std::vector<std::vector<T>> images, std::vector<POIN
 	auto filepath{ folder + "/_scaleCalibration_" };
 	filepath += shortdate + offse + ".h5";
 
-	/*
-	 * Open file for writing, overwrite existing file
-	 */
-	auto file = H5::H5File(&filepath[0], H5F_ACC_TRUNC);
+	try {
+		/*
+		 * Open file for writing, overwrite existing file
+		 */
+		auto file = H5::H5File(&filepath[0], H5F_ACC_TRUNC);
 
-	// write date
-	// Create the data space for the attribute.
-	auto attr_dataspace = H5::DataSpace(H5S_SCALAR);
-	// Create new string datatype for attribute
-	auto strdatatype = H5::StrType(H5::PredType::C_S1, fulldate.size());
-	auto root = file.openGroup("/");
-	auto attr = root.createAttribute("date", strdatatype, attr_dataspace);
-	auto type = attr.getDataType();
-	attr.write(strdatatype, &fulldate[0]);
+		// write date
+		// Create the data space for the attribute.
+		auto attr_dataspace = H5::DataSpace(H5S_SCALAR);
+		// Create new string datatype for attribute
+		auto strdatatype = H5::StrType(H5::PredType::C_S1, fulldate.size());
+		auto root = file.openGroup("/");
+		auto attr = root.createAttribute("date", strdatatype, attr_dataspace);
+		auto type = attr.getDataType();
+		attr.write(strdatatype, &fulldate[0]);
 
-	writePoint(root, "origin", m_scaleCalibration.originPix);
+		writePoint(root, "origin", m_scaleCalibration.originPix);
 
-	writePoint(root, "pixToMicrometerX", m_scaleCalibration.pixToMicrometerX);
-	writePoint(root, "pixToMicrometerY", m_scaleCalibration.pixToMicrometerY);
+		writePoint(root, "pixToMicrometerX", m_scaleCalibration.pixToMicrometerX);
+		writePoint(root, "pixToMicrometerY", m_scaleCalibration.pixToMicrometerY);
 
-	writePoint(root, "micrometerToPixX", m_scaleCalibration.micrometerToPixX);
-	writePoint(root, "micrometerToPixY", m_scaleCalibration.micrometerToPixY);
+		writePoint(root, "micrometerToPixX", m_scaleCalibration.micrometerToPixX);
+		writePoint(root, "micrometerToPixY", m_scaleCalibration.micrometerToPixY);
 
-	// Write images and set positions as attributes
-	auto imageGroup = root.createGroup("images");
-	hsize_t dims[3] = {
-		(hsize_t)m_cameraSettings.frameCount,
-		(hsize_t)m_cameraSettings.roi.height_binned,
-		(hsize_t)m_cameraSettings.roi.width_binned
-	};
-	auto names = std::vector<std::string>{ "origin", "dx", "dy" };
-	auto i = gsl::index{ 0 };
-	for (const auto& image : images) {
-		// Check that we don't run into trouble iterating over two arrays
-		if (i >= names.size()) {
-			continue;
+		// Write images and set positions as attributes
+		auto imageGroup = root.createGroup("images");
+		hsize_t dims[3] = {
+			(hsize_t)m_cameraSettings.frameCount,
+			(hsize_t)m_cameraSettings.roi.height_binned,
+			(hsize_t)m_cameraSettings.roi.width_binned
+		};
+		auto names = std::vector<std::string>{ "origin", "dx", "dy" };
+		auto i = gsl::index{ 0 };
+		for (const auto& image : images) {
+			// Check that we don't run into trouble iterating over two arrays
+			if (i >= names.size()) {
+				continue;
+			}
+			auto dataspace = H5::DataSpace(3, dims, dims);
+			auto type_id = h5_helper::get_memtype<T>();
+			// For some unknown reason using the overloaded function createDataSet(const H5std_string&, const DataType&, const DataSpace&)
+			// only produces corrupted datasets in Debug mode (probably the HDF5 libraries would need to be build in Debug mode as well),
+			// so we have to use the const char* version to better debug it.
+			auto dataset = imageGroup.createDataSet(names[i].c_str(), type_id, dataspace);
+			dataset.write(image.data(), type_id);
+
+			writeAttribute(dataset, "CLASS", "IMAGE");
+			writeAttribute(dataset, "IMAGE_VERSION", "1.2");
+			writeAttribute(dataset, "IMAGE_SUBCLASS", "IMAGE_GRAYSCALE");
+
+			writeAttribute(dataset, "dx", positions[i].x);
+			writeAttribute(dataset, "dy", positions[i].y);
+
+			dataset.close();
+			++i;
 		}
-		auto dataspace = H5::DataSpace(3, dims, dims);
-		auto type_id = h5_helper::get_memtype<T>();
-		// For some unknown reason using the overloaded function createDataSet(const H5std_string&, const DataType&, const DataSpace&)
-		// only produces corrupted datasets in Debug mode (probably the HDF5 libraries would need to be build in Debug mode as well),
-		// so we have to use the const char* version to better debug it.
-		auto dataset = imageGroup.createDataSet(names[i].c_str(), type_id, dataspace);
-		dataset.write(image.data(), type_id);
-
-		writeAttribute(dataset, "CLASS", "IMAGE");
-		writeAttribute(dataset, "IMAGE_VERSION", "1.2");
-		writeAttribute(dataset, "IMAGE_SUBCLASS", "IMAGE_GRAYSCALE");
-
-		writeAttribute(dataset, "dx", positions[i].x);
-		writeAttribute(dataset, "dy", positions[i].y);
-
-		dataset.close();
-		++i;
+	} catch (H5::Exception& exception) {
+		emit(s_scaleCalibrationStatus("Could not save the scale calibration", "Please select a writable working directory."));
 	}
 }
 
