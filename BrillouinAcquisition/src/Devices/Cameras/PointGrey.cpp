@@ -19,11 +19,17 @@ void PointGrey::connectDevice() {
 		
 		auto numCameras = unsigned int{};
 		auto i_retCode = m_busManager.GetNumOfCameras(&numCameras);
+		m_numberCameras = numCameras;
+
+		// Check that we stay within the valid range
+		if (m_cameraNumber > m_numberCameras - 1) {
+			m_cameraNumber = 0;
+		}
 
 		if (numCameras > 0) {
 			// Select camera
 
-			i_retCode = m_busManager.GetCameraFromIndex(0, &m_guid);
+			i_retCode = m_busManager.GetCameraFromIndex((unsigned int)m_cameraNumber, &m_guid);
 
 			i_retCode = m_camera.Connect(&m_guid);
 

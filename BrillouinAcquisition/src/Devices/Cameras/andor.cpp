@@ -37,7 +37,11 @@ void Andor::connectDevice() {
 	// initialize library
 	initialize();
 	if (!m_isConnected && m_isInitialised) {
-		auto i_retCode = AT_Open(0, &m_camera);
+		// Check that we stay within the valid range
+		if (m_cameraNumber > m_numberCameras - 1) {
+			m_cameraNumber = 0;
+		}
+		auto i_retCode = AT_Open(m_cameraNumber, &m_camera);
 		if (i_retCode == AT_SUCCESS) {
 			m_isConnected = true;
 			readOptions();
@@ -335,6 +339,7 @@ bool Andor::initialize() {
 			auto i_numberOfDevices = AT_64{ 0 };
 			// Use system handle as inidivdual handle to the camera hasn't been opened. 
 			auto i_errorCode = AT_GetInt(AT_HANDLE_SYSTEM, L"DeviceCount", &i_numberOfDevices);
+			m_numberCameras = i_numberOfDevices;
 			if (i_numberOfDevices > 0) {
 				m_isInitialised = true;
 			} else {

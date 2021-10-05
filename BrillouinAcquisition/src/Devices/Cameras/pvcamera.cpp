@@ -46,7 +46,11 @@ void PVCamera::connectDevice() {
 	initialize();
 	if (!m_isConnected && m_isInitialised) {
 		char g_Camera0_Name[CAM_NAME_LEN] = "";
-		PVCam::pl_cam_get_name(0, g_Camera0_Name);
+		// Check that we stay within the valid range
+		if (m_cameraNumber > m_numberCameras - 1) {
+			m_cameraNumber = 0;
+		}
+		PVCam::pl_cam_get_name((PVCam::int16)m_cameraNumber, g_Camera0_Name);
 		auto i_retCode = PVCam::pl_cam_open(g_Camera0_Name, &m_camera, PVCam::OPEN_EXCLUSIVE);
 		if (i_retCode == PVCam::PV_OK) {
 			m_isConnected = true;
@@ -508,6 +512,7 @@ bool PVCamera::initialize() {
 		} else {
 			auto i_numberOfCameras = PVCam::int16{ 0 };
 			PVCam::pl_cam_get_total(&i_numberOfCameras);
+			m_numberCameras = (int)i_numberOfCameras;
 			if (i_numberOfCameras > 0) {
 				m_isInitialised = true;
 			} else {

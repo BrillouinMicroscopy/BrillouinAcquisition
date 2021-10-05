@@ -53,6 +53,18 @@ void Camera::setSetting(CAMERA_SETTING setting, const std::wstring& value) {
 	setSettings(m_settings);
 }
 
+int Camera::getCameraNumber() {
+	return m_cameraNumber;
+}
+
+void Camera::setCameraNumber(int cameraNumber) {
+	m_cameraNumber = cameraNumber;
+}
+
+int Camera::getNumberCameras() {
+	return m_numberCameras;
+}
+
 /*
  * Protected slots
  */

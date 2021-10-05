@@ -2049,6 +2049,14 @@ void BrillouinAcquisition::on_camera_playPause_brightfield_clicked() {
 
 void BrillouinAcquisition::on_actionSettings_Stage_triggered() {
 	m_scanControlDropdown->setCurrentIndex((int)m_scanControllerType);
+
+	auto numberCameras_Brillouin = m_andor->getNumberCameras();
+	m_numberCameras_BrillouinDropdown->clear();
+	for (gsl::index i{ 0 }; i < numberCameras_Brillouin; i++) {
+		m_numberCameras_BrillouinDropdown->insertItem(i, QString::number(i));
+	}
+	m_numberCameras_BrillouinDropdown->setCurrentIndex((int)m_andor->getCameraNumber());
+
 	m_settingsDialog->show();
 }
 
@@ -2062,8 +2070,10 @@ void BrillouinAcquisition::saveSettings() {
 		m_cameraType = m_cameraTypeTemporary;
 		initCamera();
 	}
-	if (m_cameraBrillouinType != m_cameraBrillouinTypeTemporary) {
+	if (m_cameraBrillouinType != m_cameraBrillouinTypeTemporary ||
+		m_cameraBrillouinNumber != m_cameraBrillouinNumberTemporary) {
 		m_cameraBrillouinType = m_cameraBrillouinTypeTemporary;
+		m_cameraBrillouinNumber = m_cameraBrillouinNumberTemporary;
 		initCameraBrillouin();
 	}
 	m_settingsDialog->hide();
@@ -2093,34 +2103,63 @@ void BrillouinAcquisition::initSettingsDialog() {
 	m_cameraBrillouinTypeTemporary = m_cameraBrillouinType;
 
 	QWidget* cameraBrillouinWidget = new QWidget();
-	cameraBrillouinWidget->setMinimumHeight(60);
+	cameraBrillouinWidget->setMinimumHeight(120);
 	cameraBrillouinWidget->setMinimumWidth(250);
+	vLayout->addWidget(cameraBrillouinWidget);
+
 	QGroupBox* camBrillouinBox = new QGroupBox(cameraBrillouinWidget);
 	camBrillouinBox->setTitle("Brillouin camera");
 	camBrillouinBox->setMinimumHeight(50);
 	camBrillouinBox->setMinimumWidth(250);
 
-	vLayout->addWidget(cameraBrillouinWidget);
+	QVBoxLayout* vCameraLayout = new QVBoxLayout(camBrillouinBox);
 
-	QHBoxLayout* camBrillouinLayout = new QHBoxLayout(camBrillouinBox);
+	QWidget* cameraTypeWidget = new QWidget();
+	vCameraLayout->addWidget(cameraTypeWidget);
 
-	QLabel* camBrillouionLabel = new QLabel("Currently selected camera");
-	camBrillouinLayout->addWidget(camBrillouionLabel);
+	QHBoxLayout* camBrillouinLayout = new QHBoxLayout(cameraTypeWidget);
 
-	m_cameraBrillouinDropdown = new QComboBox();
-	camBrillouinLayout->addWidget(m_cameraBrillouinDropdown);
+	QLabel* camera_BrillouinLabel = new QLabel("Camera type");
+	camBrillouinLayout->addWidget(camera_BrillouinLabel);
+
+	m_camera_BrillouinDropdown = new QComboBox();
+	camBrillouinLayout->addWidget(m_camera_BrillouinDropdown);
 	gsl::index i{ 0 };
 	for (auto type : CAMERA_BRILLOUIN_DEVICE_NAMES) {
-		m_cameraBrillouinDropdown->insertItem(i, QString::fromStdString(type));
+		m_camera_BrillouinDropdown->insertItem(i, QString::fromStdString(type));
 		i++;
 	}
-	m_cameraBrillouinDropdown->setCurrentIndex((int)m_cameraBrillouinType);
+	m_camera_BrillouinDropdown->setCurrentIndex((int)m_cameraBrillouinType);
+
+	if (m_andor) {
+		QWidget* cameraNumberWidget = new QWidget();
+		vCameraLayout->addWidget(cameraNumberWidget);
+		QHBoxLayout* numberCameras_BrillouinLayout = new QHBoxLayout(cameraNumberWidget);
+
+		QLabel* numberCameras_BrillouinLabel = new QLabel("Camera number");
+		numberCameras_BrillouinLayout->addWidget(numberCameras_BrillouinLabel);
+
+		m_numberCameras_BrillouinDropdown = new QComboBox();
+		numberCameras_BrillouinLayout->addWidget(m_numberCameras_BrillouinDropdown);
+		auto numberCameras_Brillouin = m_andor->getNumberCameras();
+		for (gsl::index i{ 0 }; i < numberCameras_Brillouin; i++) {
+			m_numberCameras_BrillouinDropdown->insertItem(i, QString::number(i));
+		}
+		m_numberCameras_BrillouinDropdown->setCurrentIndex((int)m_andor->getCameraNumber());
+	}
 
 	static QMetaObject::Connection connection = QWidget::connect<void(QComboBox::*)(int)>(
-		m_cameraBrillouinDropdown,
+		m_camera_BrillouinDropdown,
 		&QComboBox::currentIndexChanged,
 		this,
 		[this](int index) { selectCameraBrillouinDevice(index); }
+	);
+
+	connection = QWidget::connect<void(QComboBox::*)(int)>(
+		m_numberCameras_BrillouinDropdown,
+		&QComboBox::currentIndexChanged,
+		this,
+		[this](int index) { selectCameraBrillouinNumber(index); }
 	);
 
 	/*
@@ -2176,7 +2215,7 @@ void BrillouinAcquisition::initSettingsDialog() {
 
 	QHBoxLayout *camLayout = new QHBoxLayout(camBox);
 
-	QLabel *camLabel = new QLabel("Currently selected camera");
+	QLabel *camLabel = new QLabel("Camera type");
 	camLayout->addWidget(camLabel);
 
 	m_cameraDropdown = new QComboBox();
@@ -2244,6 +2283,10 @@ void BrillouinAcquisition::selectCameraDevice(int index) {
 
 void BrillouinAcquisition::selectCameraBrillouinDevice(int index) {
 	m_cameraBrillouinTypeTemporary = (CAMERA_BRILLOUIN_DEVICE)index;
+}
+
+void BrillouinAcquisition::selectCameraBrillouinNumber(int index) {
+	m_cameraBrillouinNumberTemporary = index;
 }
 
 void BrillouinAcquisition::on_action_Voltage_calibration_acquire_triggered() {
@@ -3041,7 +3084,8 @@ void BrillouinAcquisition::initCameraBrillouin() {
 			m_andor = new Andor();
 			break;
 	}
-
+	// Select which camera to connect to
+	m_andor->setCameraNumber(m_cameraBrillouinNumber);
 
 	// slot camera connection
 	static QMetaObject::Connection connection;
@@ -3864,6 +3908,7 @@ void BrillouinAcquisition::writeSettings() {
 			brillouinCamera = "andor";
 			break;
 	}
+	auto brillouinCameraNumber = QString::number(m_cameraBrillouinNumber);
 
 	auto brightfieldCamera = QString{};
 	switch (m_cameraType) {
@@ -3904,6 +3949,7 @@ void BrillouinAcquisition::writeSettings() {
 
 	settings.beginGroup("devices");
 	settings.setValue("brillouin-camera", brillouinCamera);
+	settings.setValue("brillouin-camera-number", brillouinCameraNumber);
 	settings.setValue("brightfield-camera", brightfieldCamera);
 	settings.setValue("stage", stage);
 	settings.endGroup();
@@ -3918,6 +3964,7 @@ void BrillouinAcquisition::readSettings() {
 
 	settings.beginGroup("devices");
 	QVariant BrillouinCam = settings.value("brillouin-camera");
+	QVariant BrillouinCamNumber = settings.value("brillouin-camera-number");
 	QVariant BrightfieldCam = settings.value("brightfield-camera");
 	QVariant stage = settings.value("stage");
 
@@ -3935,6 +3982,8 @@ void BrillouinAcquisition::readSettings() {
 	else {
 		m_cameraBrillouinType = CAMERA_BRILLOUIN_DEVICE::ANDOR;
 	}
+
+	m_cameraBrillouinNumber = BrillouinCamNumber.toInt();
 
 	// Brightfield camera
 	if (BrightfieldCam == "ueye") {
