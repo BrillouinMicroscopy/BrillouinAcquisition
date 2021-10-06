@@ -4,6 +4,9 @@
 #include "../../logger.h"
 #include "filesystem"
 
+#include <chrono>
+#include <thread>
+
 using namespace std::filesystem;
 
 /*
@@ -311,7 +314,7 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 	if (m_scanControl) {
 		(*m_scanControl)->setPreset(ScanPreset::SCAN_CALIBRATION);
 	}
-	Sleep(500);
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
 	auto shift = 5.088; // this is the shift for water
 
@@ -417,7 +420,7 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 	if (m_andor) {
 		(*m_andor)->setCalibrationExposureTime(m_settings.camera.exposureTime);
 	}
-	Sleep(500);
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }
 
 /*
@@ -520,7 +523,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 		m_abort = true;
 		return;
 	}
-	Sleep(500);
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
 	// get current stage position
 	if (m_scanControl) {
@@ -618,7 +621,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 		m_abort = true;
 		return;
 	}
-	Sleep(50);
+	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
 	for (gsl::index ll{ 0 }; ll < nrPositions; ll++) {
 
@@ -634,7 +637,7 @@ void Brillouin::acquire(std::unique_ptr <StorageWrapper>& storage) {
 					m_abort = true;
 					return;
 				}
-				Sleep(100);
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			}
 		}
 

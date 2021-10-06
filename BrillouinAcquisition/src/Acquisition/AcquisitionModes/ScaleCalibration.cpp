@@ -7,6 +7,9 @@
 #include "opencv2/core.hpp"
 #include "opencv2/highgui.hpp"
 
+#include <chrono>
+#include <thread>
+
 /*
  * Public definitions
  */
@@ -260,7 +263,7 @@ void ScaleCalibration::__acquire() {
 	);
 	// Set optical elements for brightfield/Brillouin imaging
 	(*m_scanControl)->setPreset(ScanPreset::SCAN_BRIGHTFIELD);
-	Sleep(500);
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
 	// Get the current stage position
 	m_startPosition = (*m_scanControl)->getPosition();
@@ -295,9 +298,9 @@ void ScaleCalibration::__acquire() {
 		auto positionAbsolute = m_startPosition + POINT3{ position.x, position.y, 0 };
 		// To prevent problems with the hysteresis of the stage, we always move to the desired point coming from lower values.
 		(*m_scanControl)->setPosition(positionAbsolute - POINT3{ hysteresisCompensation, hysteresisCompensation, 0 });
-		Sleep(100);
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		(*m_scanControl)->setPosition(positionAbsolute);
-		Sleep(200);
+		std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
 		/*
 		 * Acquire the camera image

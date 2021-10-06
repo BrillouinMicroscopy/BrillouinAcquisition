@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "pvcamera.h"
 
+#include <chrono>
+#include <thread>
+
 /*
  * Public definitions
  */
@@ -564,7 +567,7 @@ void PVCamera::startTempTimer() {
 		QMetaObject::invokeMethod(this, [this]() { m_tempTimer->start(1000); }, Qt::AutoConnection);
 	}
 	while (!m_tempTimer->isActive()) {
-		Sleep(10);
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 }
 
@@ -573,7 +576,7 @@ void PVCamera::stopTempTimer() {
 		QMetaObject::invokeMethod(this, [this]() { m_tempTimer->stop(); }, Qt::AutoConnection);
 	}
 	while (m_tempTimer->isActive()) {
-		Sleep(10);
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 }
 
@@ -672,7 +675,7 @@ void PVCamera::getImageForPreview() {
 
 		// if no image is ready return immediately
 		if (!m_previewBuffer->m_buffer->m_freeBuffers->tryAcquire()) {
-			Sleep(50);
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
 			return;
 		}
 
