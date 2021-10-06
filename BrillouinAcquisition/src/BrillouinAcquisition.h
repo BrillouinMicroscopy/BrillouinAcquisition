@@ -178,11 +178,14 @@ private:
 	CAMERA_DEVICE m_cameraType{ CAMERA_DEVICE::UEYE };
 	CAMERA_DEVICE m_cameraTypeTemporary = m_cameraType;
 
-	CAMERA_BRILLOUIN_DEVICE m_cameraBrillouinType = CAMERA_BRILLOUIN_DEVICE::PVCAM;
+	CAMERA_BRILLOUIN_DEVICE m_cameraBrillouinType{ CAMERA_BRILLOUIN_DEVICE::PVCAM };
 	CAMERA_BRILLOUIN_DEVICE m_cameraBrillouinTypeTemporary = m_cameraBrillouinType;
+	int m_cameraBrillouinNumber{ 0 };
+	int m_cameraBrillouinNumberTemporary = m_cameraBrillouinNumber;
 	QComboBox* m_scanControlDropdown;
 	QComboBox* m_cameraDropdown;
-	QComboBox* m_cameraBrillouinDropdown;
+	QComboBox* m_camera_BrillouinDropdown;
+	QComboBox* m_numberCameras_BrillouinDropdown;
 	std::string m_voltageCalibrationFilePath;
 	std::string m_scaleCalibrationFilePath;
 
@@ -285,6 +288,7 @@ private slots:
 	void selectScanningDevice(int index);
 	void selectCameraDevice(int index);
 	void selectCameraBrillouinDevice(int index);
+	void selectCameraBrillouinNumber(int index);
 
 	void on_action_Voltage_calibration_acquire_triggered();
 	void on_action_Voltage_calibration_load_triggered();

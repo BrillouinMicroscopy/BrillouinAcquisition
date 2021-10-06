@@ -21,6 +21,8 @@ void MockCamera::connectDevice() {
 	m_isConnected = true;
 	readOptions();
 
+	m_numberCameras = 2;
+
 	emit(connectedDevice(m_isConnected));
 
 	auto sensor = SensorTemperature{ 0, 0, 0, 0, enCameraTemperatureStatus::STABILISED };
@@ -126,6 +128,10 @@ int MockCamera::acquireImage(std::byte* buffer) {
 	auto incY{ 0.35 * rangeMax / m_options.ROIHeightLimits[1] * m_settings.roi.binY };
 
 	auto noiseLvl{ 0.1 };
+	// Virtual camera #2 is more noisy
+	if (m_cameraNumber == 1) {
+		noiseLvl = 0.2;
+	}
 	auto scaling{ noiseLvl * rangeMax / RAND_MAX };
 
 	auto typeSize = sizeof(T);

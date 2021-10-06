@@ -65,12 +65,19 @@ public slots:
 	void setSetting(CAMERA_SETTING, double);
 	void setSetting(CAMERA_SETTING, const std::wstring&);
 
+	int getCameraNumber();
+	void setCameraNumber(int cameraNumber);
+	int getNumberCameras();
+
 protected:
 	virtual int acquireImage(std::byte* buffer) = 0;
 
 	virtual void readOptions() = 0;
 	virtual void readSettings() = 0;
 	virtual void applySettings(const CAMERA_SETTINGS& settings) = 0;
+
+	int m_cameraNumber{ 0 };
+	int m_numberCameras{ 1 };
 
 	CAMERA_OPTIONS m_options;
 	CAMERA_SETTINGS m_settings;

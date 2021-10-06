@@ -17,6 +17,9 @@ uEyeCam::~uEyeCam() {
 void uEyeCam::connectDevice() {
 	if (!m_isConnected) {
 
+		// Select camera number
+		m_camera = (uEye::HCAM)m_cameraNumber;
+
 		auto nRet = uEye::is_InitCamera(&m_camera, NULL);
 		if (nRet == IS_STARTER_FW_UPLOAD_NEEDED) {
 			// Time for the firmware upload = 25 seconds by default
