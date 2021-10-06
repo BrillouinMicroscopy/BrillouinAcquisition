@@ -3,6 +3,9 @@
 #include "VoltageCalibration.h"
 #include "../../simplemath.h"
 
+#include <chrono>
+#include <thread>
+
 /*
  * Public definitions
  */
@@ -262,7 +265,7 @@ void VoltageCalibration::__acquire() {
 
 		// Set first mirror voltage already
 		(*m_ODTControl)->setVoltage(m_acqSettings.voltages[chunkBegin]);
-		Sleep(100);
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 		ACQ_VOLTAGES voltages;
 

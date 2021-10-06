@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "uEyeCam.h"
 
+#include <chrono>
+#include <thread>
+
 /*
  * Public definitions
  */
@@ -116,7 +119,7 @@ void uEyeCam::startAcquisition(const CAMERA_SETTINGS& settings) {
 	setSettings(settings);
 
 	// Wait for camera to really apply settings
-	Sleep(500);
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
 	auto bufferSettings = BUFFER_SETTINGS{ 1, (unsigned int)m_settings.roi.bytesPerFrame, "unsigned char", m_settings.roi };
 	m_previewBuffer->initializeBuffer(bufferSettings);

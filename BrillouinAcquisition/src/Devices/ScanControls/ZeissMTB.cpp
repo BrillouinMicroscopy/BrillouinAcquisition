@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "ZeissMTB.h"
 
+#include <chrono>
+#include <thread>
+
 /*
  * Public definitions
  */
@@ -313,7 +316,7 @@ void ZeissMTB::setBeamBlock(int position) {
 	Thorlabs_FF::FF_MoveToPosition(m_serialNo_FF2, (Thorlabs_FF::FF_Positions)position);
 	auto i{ 0 };
 	while (getBeamBlock() != position && i++ < 10) {
-		Sleep(100);
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 }
 
