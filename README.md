@@ -29,3 +29,13 @@ Please install the following dependencies to the default paths:
 - OpenCV
 
 Build the BrillouinAcquisition project using Visual Studio.
+
+
+# How to cite
+
+If you use BrillouinAcquisition in a scientific publication, please cite it with:
+
+> Raimund Schlüßler and others (2017), BrillouinAcquisition version X.X.X: C++ program for the acquisition of FOB microscopy data sets [Software]. Available at https://github.com/BrillouinMicroscopy/BrillouinAcquisition.
+
+If the journal does not accept ``and others``, you can fill in the missing
+names from the [credits file](https://github.com/BrillouinMicroscopy/BrillouinAcquisition/blob/master/CREDITS).
