@@ -43,7 +43,7 @@
       <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)\$(ProjectName).dll</OutputFile>
       <AdditionalLibraryDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\lib;C:\Program Files %28x86%29\National Instruments\Shared\ExternalCompilerSupport\C\lib64\msvc;C:\Program Files\HDF_Group\HDF5\1.12.1\lib;C:\Program Files\Thorlabs\Kinesis;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</GenerateDebugInformation>
-      <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|x64'">qtmain.lib;Qt5Core.lib;Qt5Widgets.lib;Qt5SerialPort.lib;szip.lib;zlib.lib;hdf5.lib;hdf5_cpp.lib;NIDAQmx.lib;Thorlabs.MotionControl.TCube.InertialMotor.lib;Thorlabs.MotionControl.FilterFlipper.lib;Thorlabs.MotionControl.KCube.DCServo.lib;Thorlabs.MotionControl.KCube.Solenoid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|x64'">qtmain.lib;Qt5Core.lib;Qt5Widgets.lib;Qt5SerialPort.lib;hdf5.lib;hdf5_cpp.lib;NIDAQmx.lib;Thorlabs.MotionControl.TCube.InertialMotor.lib;Thorlabs.MotionControl.FilterFlipper.lib;Thorlabs.MotionControl.KCube.DCServo.lib;Thorlabs.MotionControl.KCube.Solenoid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtMoc>
       <InputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(FullPath)</InputFile>
@@ -98,7 +98,7 @@
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;$(VCInstallDir)UnitTest\lib;C:\Program Files %28x86%29\National Instruments\Shared\ExternalCompilerSupport\C\lib64\msvc;C:\Program Files\HDF_Group\HDF5\1.12.1\lib;C:\Program Files\Thorlabs\Kinesis;..\BrillouinAcquisition\external\fftw;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>qtmaind.lib;libfftw3-3.lib;NIDAQmx.lib;Qt5Cored.lib;Qt5Widgetsd.lib;Qt5SerialPortd.lib;szip.lib;zlib.lib;hdf5.lib;hdf5_cpp.lib;Thorlabs.MotionControl.TCube.InertialMotor.lib;Thorlabs.MotionControl.FilterFlipper.lib;Thorlabs.MotionControl.KCube.DCServo.lib;Thorlabs.MotionControl.KCube.Solenoid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qtmaind.lib;libfftw3-3.lib;NIDAQmx.lib;Qt5Cored.lib;Qt5Widgetsd.lib;Qt5SerialPortd.lib;hdf5.lib;hdf5_cpp.lib;Thorlabs.MotionControl.TCube.InertialMotor.lib;Thorlabs.MotionControl.FilterFlipper.lib;Thorlabs.MotionControl.KCube.DCServo.lib;Thorlabs.MotionControl.KCube.Solenoid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtMoc>
       <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
