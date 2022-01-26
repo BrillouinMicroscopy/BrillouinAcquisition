@@ -84,10 +84,7 @@ void ScanControl::locatePositionScanner(POINT2 positionLaserPix) {
 }
 
 bool ScanControl::supportsCapability(Capabilities capability) {
-	if (std::find(m_capabilities.begin(), m_capabilities.end(), capability) != m_capabilities.end()) {
-		return true;
-	}
-	return false;
+	return std::find(m_capabilities.begin(), m_capabilities.end(), capability) != m_capabilities.end();
 }
 
 void ScanControl::setPositionInPix(POINT2 positionPix) {

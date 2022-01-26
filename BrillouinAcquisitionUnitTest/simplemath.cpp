@@ -59,5 +59,11 @@ namespace BrillouinAcquisitionUnitTest {
 				auto sum = simplemath::absSum(list);
 				Assert::AreEqual(21, sum);
 			}
+
+			TEST_METHOD(TestContains) {
+				auto vector = std::vector<int>{ -1, 2, 3, 4, 5, -6 };
+				Assert::AreEqual(true, simplemath::contains(vector, (int)3));
+				Assert::AreEqual(false, simplemath::contains(vector, (int)1));
+			}
 	};
 }
