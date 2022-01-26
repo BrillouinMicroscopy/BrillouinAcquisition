@@ -80,10 +80,7 @@ public:
 
 	template<typename T>
 	static bool contains(std::vector<T> & vector, const T& value) {
-		if (std::find(vector.begin(), vector.end(), value) != vector.end()) {
-			return true;
-		}
-		return false;
+		return std::find(vector.begin(), vector.end(), value) != vector.end();
 	}
 
 	// See https://stackoverflow.com/questions/37732275/how-to-get-the-sorted-index-of-a-vector
