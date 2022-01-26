@@ -17,7 +17,8 @@ enum class ScanPreset {
 	SCAN_EPIFLUOBLUE	= 0x80,
 	SCAN_EPIFLUOGREEN	= 0x100,
 	SCAN_EPIFLUORED		= 0x200,
-	SCAN_LASEROFF		= 0x800
+	SCAN_LASEROFF		= 0x800,
+	SCAN_CONFOCAL		= 0x1000
 };
 ENABLE_BITMASK_OPERATORS(ScanPreset)
 
@@ -132,9 +133,10 @@ public:
 		ZEISSECU = 0,
 		NIDAQ = 1,
 		ZEISSMTB = 2,
-		ZEISSMTBERLANGEN = 3
+		ZEISSMTBERLANGEN = 3,
+		ZEISSMTBERLANGEN2 = 4
 	} SCAN_DEVICE;
-	inline static std::vector<std::string> SCAN_DEVICE_NAMES = { "Zeiss ECU", "NI-DAQmx", "Zeiss MTB", "Zeiss MTB Erlangen" };
+	inline static std::vector<std::string> SCAN_DEVICE_NAMES = { "Zeiss ECU", "NI-DAQmx", "Zeiss MTB", "Zeiss MTB Erlangen", "Zeiss MTB Erlangen 2" };
 
 	std::vector<DeviceElement> m_deviceElements;
 	std::vector<double> m_elementPositions;

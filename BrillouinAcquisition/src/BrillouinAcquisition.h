@@ -17,6 +17,7 @@
 #include "Devices/ScanControls/ZeissECU.h"
 #include "Devices/ScanControls/ZeissMTB.h"
 #include "Devices/ScanControls/ZeissMTB_Erlangen.h"
+#include "Devices/ScanControls/ZeissMTB_Erlangen2.h"
 #include "Devices/ScanControls/NIDAQ.h"
 
 #include "Acquisition/Acquisition.h"
