@@ -90,9 +90,9 @@ bool ScanControl::supportsCapability(Capabilities capability) {
 void ScanControl::setPositionInPix(POINT2 positionPix) {
 	// This is the wanted position of the laser focus
 	auto positionMicrometer = pixToMicroMeter(positionPix);
-	// We have to add the position of the stage to get to the absolute position
-	positionMicrometer += m_positionStage;
-	setPosition(positionMicrometer);
+	// We have to subtract the position of the scanner to get to the relative movement
+	positionMicrometer -= m_positionScanner;
+	movePosition(positionMicrometer);
 }
 
 void ScanControl::enableMeasurementMode(bool enabled) {

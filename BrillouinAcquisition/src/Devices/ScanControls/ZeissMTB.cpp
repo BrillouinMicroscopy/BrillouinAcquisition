@@ -72,17 +72,18 @@ ZeissMTB::~ZeissMTB() {
 
 void ZeissMTB::setPosition(POINT2 position) {
 	auto success{ false };
-	if (m_stageX && m_stageY) {
-		// We have to subtract the position of the scanner to get the position of the stage.
-		auto positionStage = position - m_positionScanner;
-		if (abs(m_positionStage.x - positionStage.x) > 1e-6) {
-			m_positionStage.x = positionStage.x;
-			success = m_stageX->SetPosition(m_positionStage.x, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
-		}
-		if (abs(m_positionStage.y - positionStage.y) > 1e-6) {
-			m_positionStage.y = positionStage.y;
-			success = m_stageY->SetPosition(m_positionStage.y, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
-		}
+	if (!(m_stageX && m_stageY)) {
+		return;
+	}
+	// We have to subtract the position of the scanner to get the position of the stage.
+	auto positionStage = position - m_positionScanner;
+	if (abs(m_positionStage.x - positionStage.x) > 1e-6) {
+		m_positionStage.x = positionStage.x;
+		success = m_stageX->SetPosition(m_positionStage.x, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+	}
+	if (abs(m_positionStage.y - positionStage.y) > 1e-6) {
+		m_positionStage.y = positionStage.y;
+		success = m_stageY->SetPosition(m_positionStage.y, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 	}
 	calculateCurrentPositionBounds(POINT3{ position.x, position.y, m_positionFocus });
 	announcePositions();
@@ -90,14 +91,32 @@ void ZeissMTB::setPosition(POINT2 position) {
 
 void ZeissMTB::setPosition(POINT3 position) {
 	auto success{ false };
-	if (m_ObjectiveFocus) {
-		// Only set position if it has changed
-		if (abs(m_positionFocus - position.z) > 1e-6) {
-			m_positionFocus = position.z;
-			success = m_ObjectiveFocus->SetPosition(m_positionFocus, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
-		}
+	if (!m_ObjectiveFocus) {
+		return;
+	}
+	// Only set position if it has changed
+	if (abs(m_positionFocus - position.z) > 1e-6) {
+		m_positionFocus = position.z;
+		success = m_ObjectiveFocus->SetPosition(m_positionFocus, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 	}
 	setPosition(POINT2{ position.x, position.y });
+}
+
+void ZeissMTB::movePosition(POINT2 distance) {
+	auto success{ false };
+	if (!(m_stageX && m_stageY)) {
+		return;
+	}
+	if (abs(distance.x) > 1e-6) {
+		m_positionStage.x += distance.x;
+		success = m_stageX->SetPosition(distance.x, "µm", (MTBCmdSetModes)(MTBCmdSetModes::MTBCmdSetModes_Synchronous | MTBCmdSetModes::MTBCmdSetModes_Relative), 500);
+	}
+	if (abs(distance.y) > 1e-6) {
+		m_positionStage.y += distance.y;
+		success = m_stageY->SetPosition(distance.y, "µm", (MTBCmdSetModes)(MTBCmdSetModes::MTBCmdSetModes_Synchronous | MTBCmdSetModes::MTBCmdSetModes_Relative), 500);
+	}
+	calculateCurrentPositionBounds();
+	announcePositions();
 }
 
 POINT3 ZeissMTB::getPosition(PositionType positionType) {
