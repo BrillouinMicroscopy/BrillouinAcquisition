@@ -92,6 +92,16 @@ void ScanControl::setPositionInPix(POINT2 positionPix) {
 	auto positionMicrometer = pixToMicroMeter(positionPix);
 	// We have to subtract the position of the scanner to get to the relative movement
 	positionMicrometer -= m_positionScanner;
+	/**
+	 * Prevent moving more than 1 cm at a time
+	 *
+	 * We don't want the stage to crash the objective into the sample holder.
+	 * This is just for safety in case *something* goes wrong, and should not limit the normal operation.
+	 * The field of view is way smaller, so this check should never trigger normally.
+	 */
+	if (abs(positionMicrometer) > 1e4) {
+		return;
+	}
 	movePosition(positionMicrometer);
 }
 
