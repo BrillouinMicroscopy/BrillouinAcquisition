@@ -125,8 +125,8 @@ public:
 	virtual void setPosition(POINT2 position) = 0;
 	virtual void setPosition(POINT3 position) = 0;
 	// moves the position relative to current position
-	void movePosition(POINT2 distance);
-	void movePosition(const POINT3& distance);
+	virtual void movePosition(POINT2 distance);
+	virtual void movePosition(const POINT3& distance);
 	virtual POINT3 getPosition(PositionType positionType = PositionType::BOTH);
 
 	typedef enum class enScanDevice {
