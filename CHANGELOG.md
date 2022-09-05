@@ -1,3 +1,16 @@
+## 0.3.0 - 2022-09-05
+
+### Added
+- Allow to chose camera number #215
+
+### Changed
+- Move relative when clicking into image #220
+- Code cleanup #216
+
+### Fixed
+- Fix crash for scale calibration without camera #213
+- Don't crash if calibration file cannot be written #214
+
 ## 0.2.2 - 2021-08-12
 
 ### Fixed
