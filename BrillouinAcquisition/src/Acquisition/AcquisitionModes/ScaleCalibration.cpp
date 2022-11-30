@@ -2,7 +2,7 @@
 #include "filesystem"
 #include "ScaleCalibration.h"
 
-#include "../../h5/h5_helper.h"
+#include "src/helper/h5_helper.h"
 
 #include "opencv2/core.hpp"
 #include "opencv2/highgui.hpp"

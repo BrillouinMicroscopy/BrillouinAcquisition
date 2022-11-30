@@ -4,7 +4,7 @@
 #include <gsl/gsl>
 
 extern "C" {
-	#include "../external/unwrap/unwrap2D.h"
+	#include "../../external/unwrap/unwrap2D.h"
 }
 
 class unwrap2Wrapper {

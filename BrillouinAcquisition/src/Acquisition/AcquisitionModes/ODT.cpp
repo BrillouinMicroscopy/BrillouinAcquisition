@@ -1,9 +1,9 @@
 #include "stdafx.h"
-#include "ODT.h"
-#include "../../simplemath.h"
-
 #include <chrono>
 #include <thread>
+
+#include "ODT.h"
+#include "src/lib/math/simplemath.h"
 
 /*
  * Public definitions

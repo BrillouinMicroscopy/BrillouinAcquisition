@@ -1,14 +1,14 @@
 #include "stdafx.h"
 #include "BrillouinAcquisition.h"
 #include <QtWidgets/QApplication>
-#include "logger.h"
-
 #include <QFile>
 #include <QDir>
 #include <QScopedPointer>
 #include <QTextStream>
 #include <QDateTime>
 #include <QLoggingCategory>
+
+#include "src/helper/logger.h"
 
 // Smart pointer for log file
 QScopedPointer<QFile> m_logFile;

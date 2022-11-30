@@ -11,8 +11,8 @@
 #include <gsl/gsl>
 #include "simplemath.h"
 
-#include "../external/fftw/fftw3.h"
-#include "unwrap2Wrapper.h"
+#include "../../../external/fftw/fftw3.h"
+#include "../../wrapper/unwrap2.h"
 #include "xsample.h"
 
 class phase {

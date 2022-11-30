@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Brillouin.h"
-#include "../../simplemath.h"
-#include "../../logger.h"
+#include "src/lib/math/simplemath.h"
+#include "src/helper/logger.h"
 #include "filesystem"
 
 #include <chrono>

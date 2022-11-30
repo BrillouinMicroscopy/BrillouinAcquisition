@@ -1,6 +1,6 @@
 #include "stdafx.h"
-#include "storageWrapper.h"
-#include "logger.h"
+#include "storage.h"
+#include "../helper/logger.h"
 
 
 StorageWrapper::~StorageWrapper() {

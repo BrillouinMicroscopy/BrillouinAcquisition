@@ -4,9 +4,9 @@
 #include <QtCore>
 #include <gsl/gsl>
 
-#include "previewBuffer.h"
+#include "buffer_preview.h"
 #include "external/qcustomplot/qcustomplot.h"
-#include "phase.h"
+#include "math/phase.h"
 
 enum class CustomGradientPreset {
 	gpViridis,

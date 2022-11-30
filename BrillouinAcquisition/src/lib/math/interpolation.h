@@ -5,7 +5,7 @@
 
 #include <complex>
 #include <cmath>
-#include "../external/eigen/Eigen/Dense"
+#include "../../../external/eigen/Eigen/Dense"
 
 template <typename T = double>
 struct WEIGHTS {

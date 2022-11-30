@@ -1,7 +1,8 @@
 #include "stdafx.h"
-#include "NIDAQ.h"
 #include <windows.h>
-#include "..\..\simplemath.h"
+
+#include "NIDAQ.h"
+#include "src/lib/math/simplemath.h"
 
 /*
  * Public definitions

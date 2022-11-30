@@ -1,10 +1,11 @@
 #include "stdafx.h"
+#include "filesystem"
+
 #include "BrillouinAcquisition.h"
 #include "version.h"
-#include "logger.h"
-#include "simplemath.h"
-#include "colormaps.h"
-#include "filesystem"
+#include "helper/logger.h"
+#include "lib/math/simplemath.h"
+#include "lib/colormaps.h"
 
 using namespace std::filesystem;
 

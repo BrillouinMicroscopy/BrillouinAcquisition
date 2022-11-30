@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
-#include "..\BrillouinAcquisition\src\xsample.h"
-#include "..\BrillouinAcquisition\src\simplemath.h"
+#include "../BrillouinAcquisition/src/lib/math/xsample.h"
+#include "../BrillouinAcquisition/src/lib/math/simplemath.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

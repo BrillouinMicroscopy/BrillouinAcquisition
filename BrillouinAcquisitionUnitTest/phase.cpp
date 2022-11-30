@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
-#include "..\BrillouinAcquisition\src\phase.h"
-#include "..\BrillouinAcquisition\external\fftw\fftw3.h"
+#include "../BrillouinAcquisition/src/lib/math/phase.h"
+#include "../BrillouinAcquisition/external/fftw/fftw3.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

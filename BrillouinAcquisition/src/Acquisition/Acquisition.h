@@ -1,8 +1,8 @@
 #ifndef ACQUISITION_H
 #define ACQUISITION_H
 
-#include "../storageWrapper.h"
-#include "../thread.h"
+#include "../wrapper/storage.h"
+#include "../helper/thread.h"
 
 struct REPETITIONS {
 	int count{ 1 };			// [1]		number of repetitions

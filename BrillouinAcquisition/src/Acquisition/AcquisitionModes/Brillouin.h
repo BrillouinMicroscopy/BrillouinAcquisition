@@ -2,9 +2,9 @@
 #define BRILLOUIN_H
 
 #include "AcquisitionMode.h"
-#include "..\..\Devices\Cameras\Camera.h"
-#include "..\..\thread.h"
-#include "..\..\circularBuffer.h"
+#include "../../Devices/Cameras/Camera.h"
+#include "../../helper/thread.h"
+#include "src/lib/buffer_circular.h"
 
 
 struct SCAN_ORDER {

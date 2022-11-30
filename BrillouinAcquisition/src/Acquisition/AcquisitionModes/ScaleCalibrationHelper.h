@@ -1,7 +1,7 @@
 #ifndef SCALECALIBRATIONHELPER_H
 #define SCALECALIBRATIONHELPER_H
 
-#include "../../POINTS.h"
+#include "../../lib/math/points.h"
 
 struct ScaleCalibrationData {
 	POINT2 micrometerToPixX{ 0, 0 };	// [pix/micrometer]

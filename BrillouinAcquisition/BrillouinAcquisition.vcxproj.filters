@@ -58,6 +58,30 @@
     <Filter Include="Source Files\Devices\ScanControls">
       <UniqueIdentifier>{99819167-c51e-418d-a2ae-c78969a36d45}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\lib">
+      <UniqueIdentifier>{783cabc6-a95e-4d29-be64-e415aa09b1fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\lib\math">
+      <UniqueIdentifier>{4187d9b3-5c4e-476f-822b-e12a6cd5da05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\lib">
+      <UniqueIdentifier>{501f6bc6-3d50-4e9f-ae2c-5e9a6a19c3bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\lib\math">
+      <UniqueIdentifier>{bb727d6a-cbd9-4c8c-8d51-1fffb84325a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\helper">
+      <UniqueIdentifier>{934fd064-9339-401e-a7c3-552308638863}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\helper">
+      <UniqueIdentifier>{15b34324-288c-4eeb-bca7-f9e778535e38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\wrapper">
+      <UniqueIdentifier>{49805730-5ac7-4c17-a306-5ac68e94aa04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\wrapper">
+      <UniqueIdentifier>{01deeaac-7504-465c-be9c-3839603a68e2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeneratedFiles\Debug\moc_BrillouinAcquisition.cpp">
@@ -67,12 +91,6 @@
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\qrc_BrillouinAcquisition.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_thread.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_thread.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_andor.cpp">
@@ -114,12 +132,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_Acquisition.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_storageWrapper.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_storageWrapper.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_ZeissECU.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -136,12 +148,6 @@
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_NIDAQ.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_tableModel.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_tableModel.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_PointGrey.cpp">
@@ -174,16 +180,7 @@
     <ClCompile Include="src\BrillouinAcquisition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\logger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\storageWrapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\tableModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="external\qcustomplot\qcustomplot.cpp">
@@ -255,22 +252,7 @@
     <ClCompile Include="src\Acquisition\AcquisitionModes\VoltageCalibration.cpp">
       <Filter>Source Files\Acquisition\AcquisitionModes</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_converter.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_converter.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\converter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="external\unwrap\unwrap2D.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\unwrap2wrapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\xsample.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Devices\Cameras\pvcamera.cpp">
@@ -333,18 +315,57 @@
     <ClCompile Include="src\Devices\ScanControls\ZeissMTB_Erlangen2.cpp">
       <Filter>Source Files\Devices\ScanControls</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ZeissMTB_Erlangen2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ZeissMTB_Erlangen2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\converter.cpp">
+      <Filter>Source Files\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\tableModel.cpp">
+      <Filter>Source Files\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\math\xsample.cpp">
+      <Filter>Source Files\lib\math</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_converter.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_converter.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_tableModel.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_tableModel.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_thread.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_thread.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\helper\logger.cpp">
+      <Filter>Source Files\helper</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_storage.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_storage.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wrapper\storage.cpp">
+      <Filter>Source Files\wrapper</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wrapper\unwrap2.cpp">
+      <Filter>Source Files\wrapper</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GeneratedFiles\ui_BrillouinAcquisition.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="external\h5bm\TypesafeBitmask.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\circularBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\stdafx.h">
@@ -359,35 +380,53 @@
     <ClInclude Include="external\unwrap\unwrap2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\unwrap2Wrapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\xsample.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\interpolation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\simplemath.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\colormaps.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Acquisition\AcquisitionModes\VoltageCalibrationHelper.h">
       <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
-    </ClInclude>
-    <ClInclude Include="src\POINTS.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Acquisition\AcquisitionModes\ScaleCalibrationHelper.h">
       <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_ScaleCalibrationDialog.h">
+    <ClInclude Include="src\lib\buffer_circular.h">
+      <Filter>Header Files\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\buffer_preview.h">
+      <Filter>Header Files\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\colormaps.h">
+      <Filter>Header Files\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\math\interpolation.h">
+      <Filter>Header Files\lib\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\math\phase.h">
+      <Filter>Header Files\lib\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\math\points.h">
+      <Filter>Header Files\lib\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\math\simplemath.h">
+      <Filter>Header Files\lib\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\math\xsample.h">
+      <Filter>Header Files\lib\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\helper\h5_helper.h">
+      <Filter>Header Files\helper</Filter>
+    </ClInclude>
+    <ClInclude Include="src\helper\logger.h">
+      <Filter>Header Files\helper</Filter>
+    </ClInclude>
+    <ClInclude Include="src\wrapper\unwrap2.h">
+      <Filter>Header Files\wrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="src\helper\version.h">
+      <Filter>Header Files\helper</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_BrillouinAcquisition.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\h5\h5_helper.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="GeneratedFiles\ui_ScaleCalibrationDialog.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -397,23 +436,8 @@
     <CustomBuild Include="src\BrillouinAcquisition.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\previewBuffer.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\storageWrapper.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\tableModel.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\thread.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="external\qcustomplot\qcustomplot.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\BrillouinAcquisition.ui">
-      <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="BrillouinAcquisition.qrc">
       <Filter>Resource Files</Filter>
@@ -463,9 +487,6 @@
     <CustomBuild Include="src\Acquisition\AcquisitionModes\VoltageCalibration.h">
       <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\converter.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="src\Devices\Cameras\pvcamera.h">
       <Filter>Header Files\Devices\Cameras</Filter>
     </CustomBuild>
@@ -481,14 +502,29 @@
     <CustomBuild Include="src\Acquisition\AcquisitionModes\ScaleCalibration.h">
       <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\ScaleCalibrationDialog.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="src\Devices\Cameras\MockCamera.h">
       <Filter>Header Files\Devices\Cameras</Filter>
     </CustomBuild>
     <CustomBuild Include="src\Devices\ScanControls\ZeissMTB_Erlangen2.h">
       <Filter>Header Files\Devices\ScanControls</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\lib\converter.h">
+      <Filter>Header Files\lib</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\lib\tableModel.h">
+      <Filter>Header Files\lib</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\helper\thread.h">
+      <Filter>Header Files\helper</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\wrapper\storage.h">
+      <Filter>Header Files\wrapper</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\gui\BrillouinAcquisition.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\gui\ScaleCalibrationDialog.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
