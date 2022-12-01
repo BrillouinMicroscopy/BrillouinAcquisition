@@ -1,7 +1,7 @@
 #ifndef STORAGEWRAPPER_H
 #define STORAGEWRAPPER_H
 
-#include "../../external/h5bm/h5bm.h"
+#include "../lib/h5bm.h"
 
 class StoragePath {
 public:

@@ -2,7 +2,7 @@
 #define SCANCONTROL_H
 
 #include "../Device.h"
-#include "../../../external/h5bm/TypesafeBitmask.h"
+#include "../../lib/TypesafeBitmask.h"
 #include "../../lib/math/points.h"
 #include "../../Acquisition/AcquisitionModes/ScaleCalibrationHelper.h"
 
