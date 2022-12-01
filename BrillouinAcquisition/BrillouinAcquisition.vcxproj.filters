@@ -105,12 +105,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_qcustomplot.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_h5bm.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_h5bm.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_Camera.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -122,9 +116,6 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_Device.cpp">
       <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="external\h5bm\h5bm.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_Acquisition.cpp">
       <Filter>Generated Files</Filter>
@@ -363,11 +354,17 @@
     <ClCompile Include="GeneratedFiles\Release\moc_ZeissMTB_Erlangen2.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\lib\h5bm.cpp">
+      <Filter>Source Files\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_h5bm.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_h5bm.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="external\h5bm\TypesafeBitmask.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -428,11 +425,11 @@
     <ClInclude Include="GeneratedFiles\ui_ScaleCalibrationDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\lib\TypesafeBitmask.h">
+      <Filter>Header Files\lib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="external\h5bm\h5bm.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="src\BrillouinAcquisition.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -525,6 +522,9 @@
     </CustomBuild>
     <CustomBuild Include="src\gui\ScaleCalibrationDialog.ui">
       <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\lib\h5bm.h">
+      <Filter>Header Files\lib</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

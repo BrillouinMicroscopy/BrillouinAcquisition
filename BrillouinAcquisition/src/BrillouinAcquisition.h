@@ -22,7 +22,7 @@
 
 #include "Acquisition/Acquisition.h"
 #include "external/qcustomplot/qcustomplot.h"
-#include "external/h5bm/h5bm.h"
+#include "lib/h5bm.h"
 #include "lib/tableModel.h"
 
 #include "Acquisition/AcquisitionModes/Brillouin.h"
