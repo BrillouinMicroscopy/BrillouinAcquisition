@@ -1,7 +1,8 @@
 #include "stdafx.h"
-#include "NIDAQ.h"
 #include <windows.h>
-#include "..\..\simplemath.h"
+
+#include "NIDAQ.h"
+#include "src/lib/math/simplemath.h"
 
 /*
  * Public definitions
@@ -346,10 +347,10 @@ void NIDAQ::calculateBounds() {
 	auto x = std::vector<double>{ pos0.x, pos1.x, pos2.x, pos3.x };
 	auto y = std::vector<double>{ pos0.y, pos1.y, pos2.y, pos3.y };
 
-	m_absoluteBounds.xMin = simplemath::min(x);
-	m_absoluteBounds.xMax = simplemath::max(x);
-	m_absoluteBounds.yMin = simplemath::min(y);
-	m_absoluteBounds.yMax = simplemath::max(y);
+	m_absoluteBounds.xMin = simplemath::minimum(x);
+	m_absoluteBounds.xMax = simplemath::maximum(x);
+	m_absoluteBounds.yMin = simplemath::minimum(y);
+	m_absoluteBounds.yMax = simplemath::maximum(y);
 }
 
 void NIDAQ::applyPosition() {

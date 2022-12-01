@@ -1,10 +1,11 @@
 #include "stdafx.h"
+#include "filesystem"
+
 #include "BrillouinAcquisition.h"
 #include "version.h"
-#include "logger.h"
-#include "simplemath.h"
-#include "colormaps.h"
-#include "filesystem"
+#include "helper/logger.h"
+#include "lib/math/simplemath.h"
+#include "lib/colormaps.h"
 
 using namespace std::filesystem;
 
@@ -1748,12 +1749,12 @@ void BrillouinAcquisition::updatePlotLimits(PLOT_SETTINGS plotSettings,	CAMERA_O
 	QCPRange yRangeCurrent = plotSettings.plotHandle->yAxis->range();
 
 	QCPRange xRangeNew = QCPRange(
-		floor(simplemath::max({ xRangeCurrent.lower, xRange.lower })),
-		ceil(simplemath::min({ xRangeCurrent.upper, xRange.upper }))
+		floor(simplemath::maximum({ xRangeCurrent.lower, xRange.lower })),
+		ceil(simplemath::minimum({ xRangeCurrent.upper, xRange.upper }))
 	);
 	QCPRange yRangeNew = QCPRange(
-		floor(simplemath::max({ yRangeCurrent.lower, yRange.lower })),
-		ceil(simplemath::min({ yRangeCurrent.upper, yRange.upper }))
+		floor(simplemath::maximum({ yRangeCurrent.lower, yRange.lower })),
+		ceil(simplemath::minimum({ yRangeCurrent.upper, yRange.upper }))
 	);
 
 	plotSettings.plotHandle->xAxis->setRange(xRangeNew);

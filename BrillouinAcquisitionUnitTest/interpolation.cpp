@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
-#include "..\BrillouinAcquisition\src\interpolation.h"
+#include "../BrillouinAcquisition/src/lib/math/interpolation.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

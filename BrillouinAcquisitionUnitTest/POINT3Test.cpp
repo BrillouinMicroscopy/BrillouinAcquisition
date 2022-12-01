@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
-#include "..\BrillouinAcquisition\src\POINTS.h"
+#include "../BrillouinAcquisition/src/lib/math/points.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

@@ -4,7 +4,7 @@
 #include <gsl/gsl>
 #include <string>
 
-#include "../../interpolation.h"
+#include "../../lib/math/interpolation.h"
 
 struct POSITION_MAPS {
 	std::vector<double> x{ 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5 };
@@ -28,7 +28,7 @@ struct VoltageCalibrationData {
 class VoltageCalibrationHelper {
 
 public:
-	static void VoltageCalibrationHelper::calculateCalibrationWeights(VoltageCalibrationData* calibration) {
+	static void calculateCalibrationWeights(VoltageCalibrationData* calibration) {
 		if (calibration->positions.x.size() == 0) {
 			return;
 		}

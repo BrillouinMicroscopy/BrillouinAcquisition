@@ -46,7 +46,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/Zc:externC- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -93,7 +94,8 @@ copy "$(ProgramW6432)\OpenCV\build\x64\vc15\bin\opencv_world453d.dll" "$(TargetD
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/Zc:externC- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -138,10 +140,19 @@ copy "$(SystemRoot)\System32\nicaiu.dll" "$(TargetDir)"</Command>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_VoltageCalibration.cpp">
+    <ClCompile Include="GeneratedFiles\Debug\moc_converter.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_converter.cpp">
+    <ClCompile Include="GeneratedFiles\Debug\moc_storage.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_tableModel.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_thread.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_VoltageCalibration.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_ScaleCalibration.cpp">
@@ -165,10 +176,19 @@ copy "$(SystemRoot)\System32\nicaiu.dll" "$(TargetDir)"</Command>
     <ClCompile Include="GeneratedFiles\Debug\moc_ZeissMTB_Erlangen2.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_VoltageCalibration.cpp">
+    <ClCompile Include="GeneratedFiles\Release\moc_converter.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_converter.cpp">
+    <ClCompile Include="GeneratedFiles\Release\moc_storage.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_tableModel.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_thread.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_VoltageCalibration.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_ScaleCalibration.cpp">
@@ -246,15 +266,6 @@ copy "$(SystemRoot)\System32\nicaiu.dll" "$(TargetDir)"</Command>
     <ClCompile Include="GeneratedFiles\Debug\moc_scancontrol.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_storageWrapper.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_tableModel.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_thread.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_ZeissECU.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -309,15 +320,6 @@ copy "$(SystemRoot)\System32\nicaiu.dll" "$(TargetDir)"</Command>
     <ClCompile Include="GeneratedFiles\Release\moc_scancontrol.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_storageWrapper.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_tableModel.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_thread.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_ZeissECU.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -336,26 +338,40 @@ copy "$(SystemRoot)\System32\nicaiu.dll" "$(TargetDir)"</Command>
     <ClCompile Include="src\Devices\Cameras\uEyeCam.cpp" />
     <ClCompile Include="src\Devices\ScanControls\ZeissMTB_Erlangen.cpp" />
     <ClCompile Include="src\Devices\ScanControls\ZeissMTB_Erlangen2.cpp" />
-    <ClCompile Include="src\logger.cpp" />
+    <ClCompile Include="src\helper\logger.cpp" />
+    <ClCompile Include="src\lib\converter.cpp" />
+    <ClCompile Include="src\lib\math\xsample.cpp" />
+    <ClCompile Include="src\lib\tableModel.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Devices\ScanControls\NIDAQ.cpp" />
     <ClCompile Include="src\Acquisition\AcquisitionModes\ODT.cpp" />
     <ClCompile Include="src\Devices\Cameras\PointGrey.cpp" />
     <ClCompile Include="external\qcustomplot\qcustomplot.cpp" />
     <ClCompile Include="src\Devices\ScanControls\ScanControl.cpp" />
-    <ClCompile Include="src\converter.cpp" />
-    <ClCompile Include="src\tableModel.cpp" />
     <ClCompile Include="src\Devices\ScanControls\ZeissECU.cpp" />
     <ClCompile Include="src\Devices\ScanControls\ZeissMTB.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\storageWrapper.cpp" />
-    <ClCompile Include="src\unwrap2wrapper.cpp" />
-    <ClCompile Include="src\xsample.cpp" />
+    <ClCompile Include="src\wrapper\storage.cpp" />
+    <ClCompile Include="src\wrapper\unwrap2.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GeneratedFiles\ui_BrillouinAcquisition.h" />
+    <ClInclude Include="GeneratedFiles\ui_ScaleCalibrationDialog.h" />
+    <ClInclude Include="src\helper\version.h" />
+    <ClInclude Include="src\wrapper\unwrap2.h" />
+    <CustomBuild Include="src\wrapper\storage.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp" "-fstdafx.h" "-f../../src/wrapper/%(Filename)%(Extension)"  -DUNICODE -DWIN32 -DWIN64 -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions) "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-I.\external\gsl\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I.\external\unwrap2" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTBApi" "-IC:\Program Files\OpenCV\build\include"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp" "-fstdafx.h" "-f../../src/wrapper/%(Filename)%(Extension)"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions) "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I.\external\gsl\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTBApi" "-IC:\Program Files\OpenCV\build\include"</Command>
+    </CustomBuild>
     <CustomBuild Include="src\Devices\Cameras\pvcamera.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>
@@ -396,9 +412,7 @@ copy "$(SystemRoot)\System32\nicaiu.dll" "$(TargetDir)"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp" "-fstdafx.h" "-f../../src/Acquisition/AcquisitionModes/%(Filename)%(Extension)"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions) "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I.\external\gsl\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTBApi"</Command>
     </CustomBuild>
-    <ClInclude Include="GeneratedFiles\ui_ScaleCalibrationDialog.h" />
     <ClInclude Include="src\Acquisition\AcquisitionModes\ScaleCalibrationHelper.h" />
-    <ClInclude Include="src\colormaps.h" />
     <CustomBuild Include="src\Devices\Cameras\MockCamera.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>
@@ -414,30 +428,6 @@ copy "$(SystemRoot)\System32\nicaiu.dll" "$(TargetDir)"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp" "-fstdafx.h" "-f../../src/Devices/ScanControls/%(Filename)%(Extension)"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions) "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.0\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I.\external\gsl\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTBApi" "-IC:\Program Files\OpenCV\build\include"</Command>
-    </CustomBuild>
-    <ClInclude Include="src\h5\h5_helper.h" />
-    <ClInclude Include="src\POINTS.h" />
-    <ClInclude Include="src\unwrap2Wrapper.h" />
-    <ClInclude Include="src\xsample.h" />
-    <CustomBuild Include="src\tableModel.h">
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions)  "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-I.\external\gsl\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I.\external\unwrap2" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTB Api" "-fstdafx.h" "-f../../src/%(Filename)%(Extension)"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Identity)...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions)  "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I.\external\gsl\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTB Api" "-fstdafx.h" "-f../../src/%(Filename)%(Extension)"</Command>
-    </CustomBuild>
-    <CustomBuild Include="src\storageWrapper.h">
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions)  "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-I.\external\gsl\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I.\external\unwrap2" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTB Api" "-fstdafx.h" "-f../../src/%(Filename)%(Extension)"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Identity)...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions)  "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I.\external\gsl\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTB Api" "-fstdafx.h" "-f../../src/%(Filename)%(Extension)"</Command>
     </CustomBuild>
     <CustomBuild Include="src\Devices\Device.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -511,17 +501,6 @@ copy "$(SystemRoot)\System32\nicaiu.dll" "$(TargetDir)"</Command>
     </CustomBuild>
     <ClInclude Include="external\h5bm\TypesafeBitmask.h" />
     <ClInclude Include="external\unwrap\unwrap2D.h" />
-    <ClInclude Include="GeneratedFiles\ui_BrillouinAcquisition.h" />
-    <CustomBuild Include="src\thread.h">
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing thread.h...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions)  "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-I.\external\gsl\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I.\external\unwrap2" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTB Api" "-fstdafx.h" "-f../../src/%(Filename)%(Extension)"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing thread.h...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions)  "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I.\external\gsl\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTB Api" "-fstdafx.h" "-f../../src/%(Filename)%(Extension)"</Command>
-    </CustomBuild>
     <CustomBuild Include="src\BrillouinAcquisition.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing BrillouinAcquisition.h...</Message>
@@ -571,21 +550,6 @@ copy "$(SystemRoot)\System32\nicaiu.dll" "$(TargetDir)"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions)  "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I.\external\gsl\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTB Api" "-fstdafx.h" "-f../../src/Acquisition/AcquisitionModes/%(Filename)%(Extension)"</Command>
-    </CustomBuild>
-    <ClInclude Include="src\circularBuffer.h" />
-    <CustomBuild Include="src\previewBuffer.h">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </Command>
     </CustomBuild>
     <CustomBuild Include="src\Devices\ScanControls\ScanControl.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -650,19 +614,6 @@ copy "$(SystemRoot)\System32\nicaiu.dll" "$(TargetDir)"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions)  "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I.\external\gsl\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTB Api" "-fstdafx.h" "-f../../src/Devices/Cameras/%(Filename)%(Extension)"</Command>
     </CustomBuild>
-    <ClInclude Include="src\interpolation.h" />
-    <CustomBuild Include="src\converter.h">
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions)  "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-I.\external\gsl\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I.\external\unwrap2" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTB Api" "-fstdafx.h" "-f../../src/%(Filename)%(Extension)"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Identity)...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions)  "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I.\external\gsl\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTB Api" "-fstdafx.h" "-f../../src/%(Filename)%(Extension)"</Command>
-    </CustomBuild>
-    <ClInclude Include="src\simplemath.h" />
-    <ClInclude Include="src\logger.h" />
     <CustomBuild Include="external\qcustomplot\qcustomplot.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing qcustomplot.h...</Message>
@@ -673,19 +624,47 @@ copy "$(SystemRoot)\System32\nicaiu.dll" "$(TargetDir)"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions)  "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I.\external\gsl\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTB Api" "-fstdafx.h" "-f../../external/qcustomplot/%(Filename)%(Extension)"</Command>
     </CustomBuild>
-    <ClInclude Include="src\stdafx.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="src\BrillouinAcquisition.ui">
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Uic%27ing %(Identity)...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Uic%27ing %(Identity)...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+    <ClInclude Include="src\helper\h5_helper.h" />
+    <ClInclude Include="src\helper\logger.h" />
+    <CustomBuild Include="src\helper\thread.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp" "-fstdafx.h" "-f../../src/helper/%(Filename)%(Extension)"  -DUNICODE -DWIN32 -DWIN64 -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions) "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-I.\external\gsl\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I.\external\unwrap2" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTBApi" "-IC:\Program Files\OpenCV\build\include"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp" "-fstdafx.h" "-f../../src/helper/%(Filename)%(Extension)"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions) "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I.\external\gsl\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTBApi" "-IC:\Program Files\OpenCV\build\include"</Command>
     </CustomBuild>
+    <ClInclude Include="src\lib\buffer_circular.h" />
+    <ClInclude Include="src\lib\buffer_preview.h" />
+    <ClInclude Include="src\lib\colormaps.h" />
+    <CustomBuild Include="src\lib\converter.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp" "-fstdafx.h" "-f../../src/lib/%(Filename)%(Extension)"  -DUNICODE -DWIN32 -DWIN64 -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions) "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-I.\external\gsl\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I.\external\unwrap2" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTBApi" "-IC:\Program Files\OpenCV\build\include"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp" "-fstdafx.h" "-f../../src/lib/%(Filename)%(Extension)"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions) "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I.\external\gsl\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTBApi" "-IC:\Program Files\OpenCV\build\include"</Command>
+    </CustomBuild>
+    <CustomBuild Include="src\lib\tableModel.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp" "-fstdafx.h" "-f../../src/lib/%(Filename)%(Extension)"  -DUNICODE -DWIN32 -DWIN64 -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions) "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-I.\external\gsl\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I.\external\unwrap2" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTBApi" "-IC:\Program Files\OpenCV\build\include"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp" "-fstdafx.h" "-f../../src/lib/%(Filename)%(Extension)"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DH5_BUILT_AS_DYNAMIC_LIB -DQT_CORE_LIB -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_PRINTSUPPORT_LIB -D%(PreprocessorDefinitions) "-IC:\Program Files\Thorlabs\Kinesis" "-IC:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include" "-IC:\Program Files\Point Grey Research\FlyCapture2\include" "-Ic:\Program Files\IDS\uEye\Develop\include" "-IC:\Program Files\HDF_Group\HDF5\1.12.1\include" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-Ic:\Program Files\Andor SDK3" "-I.\external\gsl\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtSerialPort" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtPrintSupport" "-I$(INHERIT)" "-Ic:\Program Files\Photometrics\PVCamSDK\Inc" "-IC:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTBApi" "-IC:\Program Files\OpenCV\build\include"</Command>
+    </CustomBuild>
+    <ClInclude Include="src\lib\math\interpolation.h" />
+    <ClInclude Include="src\lib\math\phase.h" />
+    <ClInclude Include="src\lib\math\points.h" />
+    <ClInclude Include="src\lib\math\simplemath.h" />
+    <ClInclude Include="src\lib\math\xsample.h" />
+    <ClInclude Include="src\stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="BrillouinAcquisition.qrc">
@@ -706,7 +685,19 @@ copy "$(SystemRoot)\System32\nicaiu.dll" "$(TargetDir)"</Command>
     <Natvis Include="external\eigen\debug\msvc\eigen.natvis" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="src\ScaleCalibrationDialog.ui">
+    <CustomBuild Include="src\gui\BrillouinAcquisition.ui">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="src\gui\ScaleCalibrationDialog.ui">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Uic%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>

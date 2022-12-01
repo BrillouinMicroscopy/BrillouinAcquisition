@@ -226,16 +226,16 @@ void Andor::readSettings() {
 	AT_GetInt(m_camera, L"AOIWidth", &m_settings.roi.width_binned);
 	AT_GetInt(m_camera, L"AOILeft", &m_settings.roi.left);
 	AT_GetInt(m_camera, L"AOITop", &m_settings.roi.top);
-	getEnumString(L"AOIBinning", &m_settings.roi.binning);
+	getEnumString((AT_WC*) L"AOIBinning", &m_settings.roi.binning);
 	m_settings.roi.width_physical = m_settings.roi.width_binned * m_settings.roi.binX;
 	m_settings.roi.height_physical = m_settings.roi.height_binned * m_settings.roi.binY;
 
 	// readout parameters
-	getEnumString(L"CycleMode", &m_settings.readout.cycleMode);
-	getEnumString(L"Pixel Encoding", &m_settings.readout.pixelEncoding);
-	getEnumString(L"Pixel Readout Rate", &m_settings.readout.pixelReadoutRate);
-	getEnumString(L"SimplePreAmpGainControl", &m_settings.readout.preAmpGain);
-	getEnumString(L"TriggerMode", &m_settings.readout.triggerMode);
+	getEnumString((AT_WC*) L"CycleMode", &m_settings.readout.cycleMode);
+	getEnumString((AT_WC*)L"Pixel Encoding", &m_settings.readout.pixelEncoding);
+	getEnumString((AT_WC*)L"Pixel Readout Rate", &m_settings.readout.pixelReadoutRate);
+	getEnumString((AT_WC*)L"SimplePreAmpGainControl", &m_settings.readout.preAmpGain);
+	getEnumString((AT_WC*)L"TriggerMode", &m_settings.readout.triggerMode);
 
 	// Allocate a buffer
 	// Get the number of bytes required to store one frame

@@ -7,7 +7,7 @@
 #include "../Device.h"
 
 #include "cameraParameters.h"
-#include "../../previewBuffer.h"
+#include "../../lib/buffer_preview.h"
 
 typedef enum class enCameraTemperatureStatus {
 	COOLER_OFF,

@@ -3,7 +3,7 @@
 
 #include <gsl/gsl>
 
-#include "thread.h"
+#include "helper/thread.h"
 
 #include "Devices/Cameras/andor.h"
 #include "Devices/Cameras/pvcamera.h"
@@ -23,7 +23,7 @@
 #include "Acquisition/Acquisition.h"
 #include "external/qcustomplot/qcustomplot.h"
 #include "external/h5bm/h5bm.h"
-#include "tableModel.h"
+#include "lib/tableModel.h"
 
 #include "Acquisition/AcquisitionModes/Brillouin.h"
 #include "Acquisition/AcquisitionModes/ODT.h"
@@ -31,7 +31,7 @@
 #include "Acquisition/AcquisitionModes/ScaleCalibration.h"
 #include "Acquisition/AcquisitionModes/VoltageCalibration.h"
 
-#include "converter.h"
+#include "lib/converter.h"
 
 #include <QtWidgets/QMainWindow>
 #include "ui_BrillouinAcquisition.h"
@@ -112,7 +112,7 @@ public:
 
 private:
 	void closeEvent(QCloseEvent* event);
-	QMessageBox::StandardButton BrillouinAcquisition::confirmQuit();
+	QMessageBox::StandardButton confirmQuit();
 
 	void initScanControl();
 	void initODT();

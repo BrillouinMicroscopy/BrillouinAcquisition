@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "filesystem"
 #include "VoltageCalibration.h"
-#include "../../simplemath.h"
+#include "src/lib/math/simplemath.h"
 
 #include <chrono>
 #include <thread>

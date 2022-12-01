@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
-#include "..\BrillouinAcquisition\src\unwrap2Wrapper.h"
-#include "..\BrillouinAcquisition\src\simplemath.h"
+#include "../BrillouinAcquisition/src/wrapper/unwrap2.h"
+#include "../BrillouinAcquisition/src/lib/math/simplemath.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

@@ -11,8 +11,8 @@
 #include <gsl/gsl>
 #include "simplemath.h"
 
-#include "../external/fftw/fftw3.h"
-#include "unwrap2Wrapper.h"
+#include "../../../external/fftw/fftw3.h"
+#include "../../wrapper/unwrap2.h"
 #include "xsample.h"
 
 class phase {
@@ -162,7 +162,7 @@ public:
 		getRawPhase();
 
 		int N = dim_x * dim_y;
-		memcpy(m_background, m_out_IFFT, , sizeof(fftw_complex) * N);
+		memcpy(m_background, m_out_IFFT, sizeof(fftw_complex) * N);
 	}
 
 	/*

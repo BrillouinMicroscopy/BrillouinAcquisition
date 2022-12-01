@@ -1,7 +1,7 @@
 #ifndef SCALECALIBRATIONHELPER_H
 #define SCALECALIBRATIONHELPER_H
 
-#include "../../POINTS.h"
+#include "../../lib/math/points.h"
 
 struct ScaleCalibrationData {
 	POINT2 micrometerToPixX{ 0, 0 };	// [pix/micrometer]
@@ -23,7 +23,7 @@ struct Matrix2{
 class ScaleCalibrationHelper {
 
 public:
-	static void ScaleCalibrationHelper::initializeCalibrationFromMicrometer(ScaleCalibrationData* calibration) {
+	static void initializeCalibrationFromMicrometer(ScaleCalibrationData* calibration) {
 		// Check that the given vectors are actually a basis
 		if (!isBasis(calibration->micrometerToPixX, calibration->micrometerToPixY)) {
 			throw std::exception("Provided vectors are not a basis.");
@@ -37,7 +37,7 @@ public:
 		calibration->pixToMicrometerY = POINT2{ inverted.b, inverted.d };
 	}
 
-	static void ScaleCalibrationHelper::initializeCalibrationFromPixel(ScaleCalibrationData* calibration) {
+	static void initializeCalibrationFromPixel(ScaleCalibrationData* calibration) {
 		// Check that the given vectors are actually a basis
 		if (!isBasis(calibration->pixToMicrometerX, calibration->pixToMicrometerY)) {
 			throw std::exception("Provided vectors are not a basis.");
