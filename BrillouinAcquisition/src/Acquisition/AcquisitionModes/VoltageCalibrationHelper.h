@@ -28,7 +28,7 @@ struct VoltageCalibrationData {
 class VoltageCalibrationHelper {
 
 public:
-	static void VoltageCalibrationHelper::calculateCalibrationWeights(VoltageCalibrationData* calibration) {
+	static void calculateCalibrationWeights(VoltageCalibrationData* calibration) {
 		if (calibration->positions.x.size() == 0) {
 			return;
 		}

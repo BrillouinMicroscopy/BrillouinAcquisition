@@ -315,12 +315,6 @@
     <ClCompile Include="src\Devices\ScanControls\ZeissMTB_Erlangen2.cpp">
       <Filter>Source Files\Devices\ScanControls</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_ZeissMTB_Erlangen2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_ZeissMTB_Erlangen2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\lib\converter.cpp">
       <Filter>Source Files\lib</Filter>
     </ClCompile>
@@ -362,6 +356,12 @@
     </ClCompile>
     <ClCompile Include="src\wrapper\unwrap2.cpp">
       <Filter>Source Files\wrapper</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ZeissMTB_Erlangen2.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ZeissMTB_Erlangen2.cpp">
+      <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -10,15 +10,15 @@ std::string com::receive(std::string request) {
 	request = request + m_terminator;
 	writeToDevice(request.c_str());
 
-	std::string response = "";
+	auto response = std::string{ "" };
 	if (waitForBytesWritten(1000)) {
 		// read response
 		if (waitForReady(1000)) {
-			QByteArray responseData = readAll();
+			auto responseData = readAll();
 			while (waitForReady(50))
 				responseData += readAll();
 
-			response = responseData;
+			response = responseData.toStdString();
 		}
 	}
 

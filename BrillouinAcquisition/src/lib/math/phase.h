@@ -162,7 +162,7 @@ public:
 		getRawPhase();
 
 		int N = dim_x * dim_y;
-		memcpy(m_background, m_out_IFFT, , sizeof(fftw_complex) * N);
+		memcpy(m_background, m_out_IFFT, sizeof(fftw_complex) * N);
 	}
 
 	/*

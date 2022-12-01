@@ -112,7 +112,7 @@ public:
 
 private:
 	void closeEvent(QCloseEvent* event);
-	QMessageBox::StandardButton BrillouinAcquisition::confirmQuit();
+	QMessageBox::StandardButton confirmQuit();
 
 	void initScanControl();
 	void initODT();
