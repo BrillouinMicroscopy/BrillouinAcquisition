@@ -3,4 +3,4 @@
 	url = https://github.com/Microsoft/GSL.git
 [submodule "BrillouinAcquisition/external/eigen"]
 	path = BrillouinAcquisition/external/eigen
-	url = https://github.com/eigenteam/eigen-git-mirror.git
+	url = https://gitlab.com/libeigen/eigen.git
