@@ -40,7 +40,7 @@ namespace BrillouinAcquisitionUnitTest {
 				m_unwrapper->unwrap2DWrapped(&wrapped[0], &output[0], dim_x, dim_y, false, false);
 
 				// Shift values so the that lowest value is zero
-				auto min = simplemath::min(output);
+				auto min = simplemath::minimum(output);
 				for (int jj{ 0 }; jj < dim_x*dim_y; jj++) {
 					output[jj] -= min;
 				}
