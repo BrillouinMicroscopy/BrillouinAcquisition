@@ -84,90 +84,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GeneratedFiles\Debug\moc_BrillouinAcquisition.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_BrillouinAcquisition.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\qrc_BrillouinAcquisition.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_andor.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_andor.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qcustomplot.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qcustomplot.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_Camera.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_Camera.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_Device.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_Device.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_Acquisition.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_Acquisition.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_ZeissECU.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_ZeissECU.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_scancontrol.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_scancontrol.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_NIDAQ.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_NIDAQ.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_PointGrey.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_PointGrey.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_MockCamera.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_Brillouin.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_ODT.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_Brillouin.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_ODT.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AcquisitionMode.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AcquisitionMode.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\BrillouinAcquisition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -188,9 +104,6 @@
     </ClCompile>
     <ClCompile Include="src\Devices\Device.cpp">
       <Filter>Source Files\Devices</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Devices\ScanControls\NIDAQ.cpp">
-      <Filter>Source Files\Devices\ScanControls</Filter>
     </ClCompile>
     <ClCompile Include="src\Devices\Cameras\PointGrey.cpp">
       <Filter>Source Files\Devices\Cameras</Filter>
@@ -222,23 +135,8 @@
     <ClCompile Include="src\Acquisition\AcquisitionModes\Fluorescence.cpp">
       <Filter>Source Files\Acquisition\AcquisitionModes</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_Fluorescence.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_Fluorescence.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_uEyeCam.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_uEyeCam.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Devices\Cameras\uEyeCam.cpp">
       <Filter>Source Files\Devices\Cameras</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_VoltageCalibration.cpp">
-      <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Acquisition\AcquisitionModes\VoltageCalibration.cpp">
       <Filter>Source Files\Acquisition\AcquisitionModes</Filter>
@@ -249,56 +147,17 @@
     <ClCompile Include="src\Devices\Cameras\pvcamera.cpp">
       <Filter>Source Files\Devices\Cameras</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_pvcamera.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_pvcamera.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Devices\ScanControls\ZeissMTB.cpp">
       <Filter>Source Files\Devices\ScanControls</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_ZeissMTB_Erlangen.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_ZeissMTB_Erlangen.cpp">
-      <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Devices\ScanControls\ZeissMTB_Erlangen.cpp">
       <Filter>Source Files\Devices\ScanControls</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_ODTControl.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_ODTControl.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Devices\ScanControls\ODTControl.cpp">
       <Filter>Source Files\Devices\ScanControls</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_ZeissMTB.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_VoltageCalibration.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_filtermount.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_filtermount.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_ZeissMTB.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Acquisition\AcquisitionModes\ScaleCalibration.cpp">
       <Filter>Source Files\Acquisition\AcquisitionModes</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_ScaleCalibration.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_ScaleCalibration.cpp">
-      <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Devices\Cameras\MockCamera.cpp">
       <Filter>Source Files\Devices\Cameras</Filter>
@@ -315,32 +174,8 @@
     <ClCompile Include="src\lib\math\xsample.cpp">
       <Filter>Source Files\lib\math</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_converter.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_converter.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_tableModel.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_tableModel.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_thread.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_thread.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\helper\logger.cpp">
       <Filter>Source Files\helper</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_storage.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_storage.cpp">
-      <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="src\wrapper\storage.cpp">
       <Filter>Source Files\wrapper</Filter>
@@ -348,28 +183,16 @@
     <ClCompile Include="src\wrapper\unwrap2.cpp">
       <Filter>Source Files\wrapper</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_ZeissMTB_Erlangen2.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_ZeissMTB_Erlangen2.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\lib\h5bm.cpp">
       <Filter>Source Files\lib</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_h5bm.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_h5bm.cpp">
-      <Filter>Generated Files</Filter>
+    <ClCompile Include="src\Devices\ScanControls\NIDAQ.cpp">
+      <Filter>Source Files\Devices\ScanControls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\stdafx.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Devices\Cameras\cameraParameters.h">
-      <Filter>Header Files\Devices\Cameras</Filter>
     </ClInclude>
     <ClInclude Include="src\Devices\com.h">
       <Filter>Header Files\Devices</Filter>
@@ -419,113 +242,110 @@
     <ClInclude Include="src\helper\version.h">
       <Filter>Header Files\helper</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_BrillouinAcquisition.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_ScaleCalibrationDialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\lib\TypesafeBitmask.h">
       <Filter>Header Files\lib</Filter>
     </ClInclude>
+    <ClInclude Include="src\Devices\Cameras\cameraParameters.h">
+      <Filter>Header Files\Devices\Cameras</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="src\BrillouinAcquisition.h">
+    <QtMoc Include="src\BrillouinAcquisition.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="external\qcustomplot\qcustomplot.h">
+    </QtMoc>
+    <QtMoc Include="external\qcustomplot\qcustomplot.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="BrillouinAcquisition.qrc">
+    </QtMoc>
+    <QtRcc Include="BrillouinAcquisition.qrc">
       <Filter>Resource Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Devices\Cameras\andor.h">
-      <Filter>Header Files\Devices\Cameras</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Devices\Cameras\Camera.h">
-      <Filter>Header Files\Devices\Cameras</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Devices\Device.h">
-      <Filter>Header Files\Devices</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Devices\ScanControls\NIDAQ.h">
-      <Filter>Header Files\Devices\ScanControls</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Devices\Cameras\PointGrey.h">
-      <Filter>Header Files\Devices\Cameras</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Devices\ScanControls\ScanControl.h">
-      <Filter>Header Files\Devices\ScanControls</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Devices\ScanControls\ZeissECU.h">
-      <Filter>Header Files\Devices\ScanControls</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Acquisition\Acquisition.h">
+    </QtRcc>
+    <QtMoc Include="src\Acquisition\Acquisition.h">
       <Filter>Header Files\Acquisition</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Acquisition\AcquisitionModes\AcquisitionMode.h">
+    </QtMoc>
+    <QtMoc Include="src\Acquisition\AcquisitionModes\AcquisitionMode.h">
       <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Acquisition\AcquisitionModes\Brillouin.h">
+    </QtMoc>
+    <QtMoc Include="src\Acquisition\AcquisitionModes\Brillouin.h">
       <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Acquisition\AcquisitionModes\ODT.h">
+    </QtMoc>
+    <QtMoc Include="src\Acquisition\AcquisitionModes\ODT.h">
       <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Devices\filtermount.h">
+    </QtMoc>
+    <QtMoc Include="src\Devices\filtermount.h">
       <Filter>Header Files\Devices</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Acquisition\AcquisitionModes\Fluorescence.h">
+    </QtMoc>
+    <QtMoc Include="src\Acquisition\AcquisitionModes\Fluorescence.h">
       <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Devices\Cameras\uEyeCam.h">
-      <Filter>Header Files\Devices\Cameras</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Acquisition\AcquisitionModes\VoltageCalibration.h">
+    </QtMoc>
+    <QtMoc Include="src\Acquisition\AcquisitionModes\VoltageCalibration.h">
       <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Devices\Cameras\pvcamera.h">
-      <Filter>Header Files\Devices\Cameras</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Devices\ScanControls\ZeissMTB.h">
-      <Filter>Header Files\Devices\ScanControls</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Devices\ScanControls\ZeissMTB_Erlangen.h">
-      <Filter>Header Files\Devices\ScanControls</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Devices\ScanControls\ODTControl.h">
-      <Filter>Header Files\Devices\ScanControls</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Acquisition\AcquisitionModes\ScaleCalibration.h">
+    </QtMoc>
+    <QtMoc Include="src\Acquisition\AcquisitionModes\ScaleCalibration.h">
       <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Devices\Cameras\MockCamera.h">
-      <Filter>Header Files\Devices\Cameras</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\Devices\ScanControls\ZeissMTB_Erlangen2.h">
-      <Filter>Header Files\Devices\ScanControls</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\lib\converter.h">
+    </QtMoc>
+    <QtMoc Include="src\lib\converter.h">
       <Filter>Header Files\lib</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\lib\tableModel.h">
+    </QtMoc>
+    <QtMoc Include="src\lib\tableModel.h">
       <Filter>Header Files\lib</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\helper\thread.h">
+    </QtMoc>
+    <QtMoc Include="src\helper\thread.h">
       <Filter>Header Files\helper</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\wrapper\storage.h">
+    </QtMoc>
+    <QtMoc Include="src\wrapper\storage.h">
       <Filter>Header Files\wrapper</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\gui\BrillouinAcquisition.ui">
+    </QtMoc>
+    <QtUic Include="src\gui\BrillouinAcquisition.ui">
       <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\gui\ScaleCalibrationDialog.ui">
+    </QtUic>
+    <QtUic Include="src\gui\ScaleCalibrationDialog.ui">
       <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\lib\h5bm.h">
+    </QtUic>
+    <QtMoc Include="src\lib\h5bm.h">
       <Filter>Header Files\lib</Filter>
-    </CustomBuild>
+    </QtMoc>
+    <QtMoc Include="src\Devices\ScanControls\NIDAQ.h">
+      <Filter>Header Files\Devices\ScanControls</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Devices\ScanControls\ODTControl.h">
+      <Filter>Header Files\Devices\ScanControls</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Devices\ScanControls\ScanControl.h">
+      <Filter>Header Files\Devices\ScanControls</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Devices\ScanControls\ZeissECU.h">
+      <Filter>Header Files\Devices\ScanControls</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Devices\ScanControls\ZeissMTB.h">
+      <Filter>Header Files\Devices\ScanControls</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Devices\ScanControls\ZeissMTB_Erlangen.h">
+      <Filter>Header Files\Devices\ScanControls</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Devices\ScanControls\ZeissMTB_Erlangen2.h">
+      <Filter>Header Files\Devices\ScanControls</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Devices\Cameras\andor.h">
+      <Filter>Header Files\Devices\Cameras</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Devices\Cameras\Camera.h">
+      <Filter>Header Files\Devices\Cameras</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Devices\Cameras\MockCamera.h">
+      <Filter>Header Files\Devices\Cameras</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Devices\Cameras\PointGrey.h">
+      <Filter>Header Files\Devices\Cameras</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Devices\Cameras\pvcamera.h">
+      <Filter>Header Files\Devices\Cameras</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Devices\Cameras\uEyeCam.h">
+      <Filter>Header Files\Devices\Cameras</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Devices\Device.h">
+      <Filter>Header Files\Devices</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\BrillouinAcquisition.rc" />
