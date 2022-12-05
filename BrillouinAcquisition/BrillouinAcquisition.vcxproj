@@ -56,7 +56,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;WIN32;WIN64;H5_BUILT_AS_DYNAMIC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;C:\Program Files\Thorlabs\Kinesis;C:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include;c:\Program Files\IDS\uEye\Develop\include\;C:\Program Files\Point Grey Research\FlyCapture2\include;.\external\gsl\include;C:\Program Files\HDF_Group\HDF5\1.12.1\include;.\GeneratedFiles;.\GeneratedFiles\$(ConfigurationName);c:\Program Files\Andor SDK3\;.\external\unwrap2;%(AdditionalIncludeDirectories);c:\Program Files\Photometrics\PVCamSDK\Inc\;C:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTBApi;C:\Program Files\OpenCV\build\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;C:\Program Files\Thorlabs\Kinesis;C:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include;c:\Program Files\IDS\uEye\Develop\include\;C:\Program Files\Point Grey Research\FlyCapture2\include;.\external\gsl\include;C:\Program Files\HDF_Group\HDF5\1.12.1\include;.\GeneratedFiles;.\GeneratedFiles\$(ConfigurationName);c:\Program Files\Andor SDK3\;.\external\unwrap2;%(AdditionalIncludeDirectories);c:\Program Files\Photometrics\PVCamSDK\Inc\;C:\Program Files\Carl Zeiss\MTB 2011 - 3.2.11.0\MTBApi;C:\Program Files\OpenCV\build\include</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -125,7 +125,7 @@ copy "$(ProgramW6432)\OpenCV\build\x64\vc15\bin\opencv_world453d.dll" "$(TargetD
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;H5_BUILT_AS_DYNAMIC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;C:\Program Files\Thorlabs\Kinesis;C:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include;C:\Program Files\Point Grey Research\FlyCapture2\include;c:\Program Files\IDS\uEye\Develop\include\;C:\Program Files\HDF_Group\HDF5\1.12.1\include;.\GeneratedFiles;.\GeneratedFiles\$(ConfigurationName);c:\Program Files\Andor SDK3\;.\external\gsl\include;%(AdditionalIncludeDirectories);c:\Program Files\Photometrics\PVCamSDK\Inc\;C:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTBApi;C:\Program Files\OpenCV\build\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;C:\Program Files\Thorlabs\Kinesis;C:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include;C:\Program Files\Point Grey Research\FlyCapture2\include;c:\Program Files\IDS\uEye\Develop\include\;C:\Program Files\HDF_Group\HDF5\1.12.1\include;.\GeneratedFiles;.\GeneratedFiles\$(ConfigurationName);c:\Program Files\Andor SDK3\;.\external\gsl\include;%(AdditionalIncludeDirectories);c:\Program Files\Photometrics\PVCamSDK\Inc\;C:\Program Files\Carl Zeiss\MTB 2011 - 3.2.11.0\MTBApi;C:\Program Files\OpenCV\build\include</AdditionalIncludeDirectories>
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
