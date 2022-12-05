@@ -591,10 +591,9 @@ void BrillouinAcquisition::cameraODTOptionsChanged(CAMERA_OPTIONS options) {
 	ui->ROILeftODT->setMaximum(options.ROIWidthLimits[1]);
 
 	// block signals to not trigger setting a new value
-	ui->exposureTimeODT->blockSignals(true);
+	const QSignalBlocker blocker(ui->exposureTimeODT);
 	ui->exposureTimeODT->setMinimum(m_cameraOptionsODT.exposureTimeLimits[0]);
 	ui->exposureTimeODT->setMaximum(m_cameraOptionsODT.exposureTimeLimits[1]);
-	ui->exposureTimeODT->blockSignals(false);
 
 	ui->fluoBlueExposure->setMinimum(1e3*m_cameraOptionsODT.exposureTimeLimits[0]);
 	ui->fluoBlueExposure->setMaximum(1e3*m_cameraOptionsODT.exposureTimeLimits[1]);
@@ -618,19 +617,16 @@ void BrillouinAcquisition::showPosition(POINT3 position) {
 	ui->positionY->setText(QString::number(position.y));
 	ui->positionZ->setText(QString::number(position.z));
 	if (!ui->setPositionX->hasFocus()) {
-		ui->setPositionX->blockSignals(true);
+		const QSignalBlocker blocker(ui->setPositionX);
 		ui->setPositionX->setValue(position.x);
-		ui->setPositionX->blockSignals(false);
 	}
 	if (!ui->setPositionY->hasFocus()) {
-		ui->setPositionY->blockSignals(true);
+		const QSignalBlocker blocker(ui->setPositionY);
 		ui->setPositionY->setValue(position.y);
-		ui->setPositionY->blockSignals(false);
 	}
 	if (!ui->setPositionZ->hasFocus()) {
-		ui->setPositionZ->blockSignals(true);
+		const QSignalBlocker blocker(ui->setPositionZ);
 		ui->setPositionZ->setValue(position.z);
-		ui->setPositionZ->blockSignals(false);
 	}
 }
 
@@ -686,14 +682,13 @@ void BrillouinAcquisition::addListToComboBox(QComboBox* box, std::vector<std::ws
 	if (currentList == list) {
 		return;
 	}
-	box->blockSignals(true);
+	const QSignalBlocker blocker(box);
 	if (clear) {
 		box->clear();
 	}
 	std::for_each(list.begin(), list.end(), [box](std::wstring &item) {
 		box->addItem(QString::fromStdWString(item));
 	});
-	box->blockSignals(false);
 }
 
 void BrillouinAcquisition::cameraSettingsChanged(CAMERA_SETTINGS settings) {
@@ -714,12 +709,12 @@ void BrillouinAcquisition::cameraSettingsChanged(CAMERA_SETTINGS settings) {
 }
 
 void BrillouinAcquisition::cameraODTSettingsChanged(CAMERA_SETTINGS settings) {
-	ui->exposureTimeODT->blockSignals(true);
+	const QSignalBlocker blocker1(ui->exposureTimeODT);
 	ui->exposureTimeODT->setValue(settings.exposureTime);
-	ui->exposureTimeODT->blockSignals(false);
-	ui->gainODT->blockSignals(true);
+
+	const QSignalBlocker blocker2(ui->gainODT);
 	ui->gainODT->setValue(settings.gain);
-	ui->gainODT->blockSignals(false);
+
 	//ui->frameCount->setValue(settings.frameCount);
 	ui->ROILeftODT->setValue(settings.roi.left);
 	ui->ROIWidthODT->setValue(settings.roi.width_physical);
@@ -730,12 +725,11 @@ void BrillouinAcquisition::cameraODTSettingsChanged(CAMERA_SETTINGS settings) {
 }
 
 void BrillouinAcquisition::updateODTCameraSettings(CAMERA_SETTINGS settings) {
-	ui->exposureTimeCameraODT->blockSignals(true);
+	const QSignalBlocker blocker1(ui->exposureTimeCameraODT);
 	ui->exposureTimeCameraODT->setValue(settings.exposureTime);
-	ui->exposureTimeCameraODT->blockSignals(false);
-	ui->gainCameraODT->blockSignals(true);
+
+	const QSignalBlocker blocker2(ui->gainCameraODT);
 	ui->gainCameraODT->setValue(settings.gain);
-	ui->gainCameraODT->blockSignals(false);
 }
 
 void BrillouinAcquisition::sensorTemperatureChanged(SensorTemperature sensorTemperature) {
@@ -1360,30 +1354,26 @@ QString BrillouinAcquisition::formatSeconds(int seconds) {
 void BrillouinAcquisition::plotODTVoltages(ODT_SETTINGS settings, ODT_MODE mode) {
 	QCustomPlot *plot = nullptr;
 	switch (mode) {
-		case ODT_MODE::ALGN:
+		case ODT_MODE::ALGN: {
 			plot = ui->alignmentVoltagesODT;
-			ui->alignmentUR_ODT->blockSignals(true);
-			ui->alignmentNumber_ODT->blockSignals(true);
-			ui->alignmentRate_ODT->blockSignals(true);
+			const QSignalBlocker blocker1(ui->alignmentUR_ODT);
+			const QSignalBlocker blocker2(ui->alignmentNumber_ODT);
+			const QSignalBlocker blocker3(ui->alignmentRate_ODT);
 			ui->alignmentUR_ODT->setValue(settings.radialVoltage);
 			ui->alignmentNumber_ODT->setValue(settings.numberPoints);
 			ui->alignmentRate_ODT->setValue(settings.scanRate);
-			ui->alignmentUR_ODT->blockSignals(false);
-			ui->alignmentNumber_ODT->blockSignals(false);
-			ui->alignmentRate_ODT->blockSignals(false);
 			break;
-		case ODT_MODE::ACQ:
+		}
+		case ODT_MODE::ACQ: {
 			plot = ui->acquisitionVoltagesODT;
-			ui->acquisitionUR_ODT->blockSignals(true);
-			ui->acquisitionNumber_ODT->blockSignals(true);
-			ui->acquisitionRate_ODT->blockSignals(true);
+			const QSignalBlocker blocker1(ui->acquisitionUR_ODT);
+			const QSignalBlocker blocker2(ui->acquisitionNumber_ODT);
+			const QSignalBlocker blocker3(ui->acquisitionRate_ODT);
 			ui->acquisitionUR_ODT->setValue(settings.radialVoltage);
 			ui->acquisitionNumber_ODT->setValue(settings.numberPoints);
 			ui->acquisitionRate_ODT->setValue(settings.scanRate);
-			ui->acquisitionUR_ODT->blockSignals(false);
-			ui->acquisitionNumber_ODT->blockSignals(false);
-			ui->acquisitionRate_ODT->blockSignals(false);
 			break;
+		}
 		default:
 			return;
 	}
@@ -1562,14 +1552,12 @@ void BrillouinAcquisition::updatePlot(PLOT_SETTINGS plotSettings) {
 }
 
 void BrillouinAcquisition::updateCLimRange(QSpinBox *lower, QSpinBox *upper, QCPRange range) {
-	lower->blockSignals(true);
+	const QSignalBlocker blocker1(lower);
 	lower->setValue(range.lower);
 	lower->setMaximum(range.upper);
-	lower->blockSignals(false);
-	upper->blockSignals(true);
+	const QSignalBlocker blocker2(upper);
 	upper->setValue(range.upper);
 	upper->setMinimum(range.lower);
-	upper->blockSignals(false);
 }
 
 void BrillouinAcquisition::xAxisRangeChangedODT(const QCPRange &newRange) {
@@ -1650,21 +1638,17 @@ void BrillouinAcquisition::settingsCameraUpdate(int source) {
 	// set values of manual input fields
 	if (source == ROI_SOURCE::PLOT || xChanged) {
 		// dont retrigger a round of checking
-		ui->ROILeft->blockSignals(true);
-		ui->ROIWidth->blockSignals(true);
+		const QSignalBlocker blocker1(ui->ROILeft);
 		ui->ROILeft->setValue(m_deviceSettings.camera.roi.left);
+		const QSignalBlocker blocker2(ui->ROIWidth);
 		ui->ROIWidth->setValue(m_deviceSettings.camera.roi.width_physical);
-		ui->ROILeft->blockSignals(false);
-		ui->ROIWidth->blockSignals(false);
 	}
 	if (source == ROI_SOURCE::PLOT || yChanged) {
 		// dont retrigger a round of checking
-		ui->ROITop->blockSignals(true);
-		ui->ROIHeight->blockSignals(true);
+		const QSignalBlocker blocker1(ui->ROITop);
 		ui->ROITop->setValue(m_deviceSettings.camera.roi.top);
+		const QSignalBlocker blocker2(ui->ROIHeight);
 		ui->ROIHeight->setValue(m_deviceSettings.camera.roi.height_physical);
-		ui->ROITop->blockSignals(false);
-		ui->ROIHeight->blockSignals(false);
 	}
 	// set plot range
 	//ui->customplot->yAxis->setRange(newRange.bounded(1, m_cameraOptions.ROIHeightLimits[1]));
@@ -2429,15 +2413,15 @@ void BrillouinAcquisition::updateScaleCalibrationTranslationValue(POINT2 transla
 void BrillouinAcquisition::updateScaleCalibrationData(ScaleCalibrationData scaleCalibration) {
 	// We have to block the signals so that programmatically setting new values
 	// doesn't trigger a new round of calculations
-	m_scaleCalibrationDialogUi.micrometerToPixX_x->blockSignals(true);
-	m_scaleCalibrationDialogUi.micrometerToPixX_y->blockSignals(true);
-	m_scaleCalibrationDialogUi.micrometerToPixY_x->blockSignals(true);
-	m_scaleCalibrationDialogUi.micrometerToPixY_y->blockSignals(true);
+	const QSignalBlocker blocker1(m_scaleCalibrationDialogUi.micrometerToPixX_x);
+	const QSignalBlocker blocker2(m_scaleCalibrationDialogUi.micrometerToPixX_y);
+	const QSignalBlocker blocker3(m_scaleCalibrationDialogUi.micrometerToPixY_x);
+	const QSignalBlocker blocker4(m_scaleCalibrationDialogUi.micrometerToPixY_y);
 
-	m_scaleCalibrationDialogUi.pixToMicrometerX_x->blockSignals(true);
-	m_scaleCalibrationDialogUi.pixToMicrometerX_y->blockSignals(true);
-	m_scaleCalibrationDialogUi.pixToMicrometerY_x->blockSignals(true);
-	m_scaleCalibrationDialogUi.pixToMicrometerY_y->blockSignals(true);
+	const QSignalBlocker blocker5(m_scaleCalibrationDialogUi.pixToMicrometerX_x);
+	const QSignalBlocker blocker6(m_scaleCalibrationDialogUi.pixToMicrometerX_y);
+	const QSignalBlocker blocker7(m_scaleCalibrationDialogUi.pixToMicrometerY_x);
+	const QSignalBlocker blocker8(m_scaleCalibrationDialogUi.pixToMicrometerY_y);
 
 	m_scaleCalibrationDialogUi.micrometerToPixX_x->setValue(scaleCalibration.micrometerToPixX.x);
 	m_scaleCalibrationDialogUi.micrometerToPixX_y->setValue(scaleCalibration.micrometerToPixX.y);
@@ -2448,16 +2432,6 @@ void BrillouinAcquisition::updateScaleCalibrationData(ScaleCalibrationData scale
 	m_scaleCalibrationDialogUi.pixToMicrometerX_y->setValue(scaleCalibration.pixToMicrometerX.y);
 	m_scaleCalibrationDialogUi.pixToMicrometerY_x->setValue(scaleCalibration.pixToMicrometerY.x);
 	m_scaleCalibrationDialogUi.pixToMicrometerY_y->setValue(scaleCalibration.pixToMicrometerY.y);
-
-	m_scaleCalibrationDialogUi.micrometerToPixX_x->blockSignals(false);
-	m_scaleCalibrationDialogUi.micrometerToPixX_y->blockSignals(false);
-	m_scaleCalibrationDialogUi.micrometerToPixY_x->blockSignals(false);
-	m_scaleCalibrationDialogUi.micrometerToPixY_y->blockSignals(false);
-
-	m_scaleCalibrationDialogUi.pixToMicrometerX_x->blockSignals(false);
-	m_scaleCalibrationDialogUi.pixToMicrometerX_y->blockSignals(false);
-	m_scaleCalibrationDialogUi.pixToMicrometerY_x->blockSignals(false);
-	m_scaleCalibrationDialogUi.pixToMicrometerY_y->blockSignals(false);
 }
 
 void BrillouinAcquisition::closeScaleCalibrationDialog() {
@@ -2716,9 +2690,8 @@ void BrillouinAcquisition::initBeampathButtons() {
 				&QSlider::valueChanged,
 				[=](int value) {
 					setElement(elements[ii], value);
-					intBox->blockSignals(true);
+					const QSignalBlocker blocker(intBox);
 					intBox->setValue(value);
-					intBox->blockSignals(false);
 				}
 			);
 
@@ -2727,9 +2700,8 @@ void BrillouinAcquisition::initBeampathButtons() {
 				&QSpinBox::valueChanged,
 				[=](int value) {
 					setElement(elements[ii], (double)value);
-					slider->blockSignals(true);
+					const QSignalBlocker blocker(slider);
 					slider->setValue(value);
-					slider->blockSignals(false);
 				}
 			);
 
@@ -3332,23 +3304,19 @@ void BrillouinAcquisition::checkElementButtons() {
 			}
 			indButton++;
 		} else if (elements[ii].inputType == DEVICE_INPUT_TYPE::INTBOX) {
-			elementIntBox[indIntBox]->blockSignals(true);
+			const QSignalBlocker blocker(elementIntBox[indIntBox]);
 			elementIntBox[indIntBox]->setValue((int)m_deviceElementPositions[ii]);
-			elementIntBox[indIntBox]->blockSignals(false);
 			indIntBox++;
 		} else if (elements[ii].inputType == DEVICE_INPUT_TYPE::DOUBLEBOX) {
-			elementDoubleBox[indDoubleBox]->blockSignals(true);
+			const QSignalBlocker blocker(elementDoubleBox[indDoubleBox]);
 			elementDoubleBox[indDoubleBox]->setValue((double)m_deviceElementPositions[ii]);
-			elementDoubleBox[indDoubleBox]->blockSignals(false);
 			indDoubleBox++;
 		} else if (elements[ii].inputType == DEVICE_INPUT_TYPE::SLIDER) {
-			elementSlider[indSlider]->blockSignals(true);
+			const QSignalBlocker blocker1(elementSlider[indSlider]);
 			elementSlider[indSlider]->setValue((double)m_deviceElementPositions[ii]);
-			elementSlider[indSlider]->blockSignals(false);
 
-			elementSliderInput[indSlider]->blockSignals(true);
+			const QSignalBlocker blocker2(elementSliderInput[indSlider]);
 			elementSliderInput[indSlider]->setValue((double)m_deviceElementPositions[ii]);
-			elementSliderInput[indSlider]->blockSignals(false);
 			indSlider++;
 		}
 	}
