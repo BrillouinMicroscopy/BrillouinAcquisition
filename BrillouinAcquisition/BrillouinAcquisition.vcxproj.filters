@@ -90,9 +90,6 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="external\qcustomplot\qcustomplot.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -141,9 +138,6 @@
     <ClCompile Include="src\Acquisition\AcquisitionModes\VoltageCalibration.cpp">
       <Filter>Source Files\Acquisition\AcquisitionModes</Filter>
     </ClCompile>
-    <ClCompile Include="external\unwrap\unwrap2D.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Devices\Cameras\pvcamera.cpp">
       <Filter>Source Files\Devices\Cameras</Filter>
     </ClCompile>
@@ -189,6 +183,12 @@
     <ClCompile Include="src\Devices\ScanControls\NIDAQ.cpp">
       <Filter>Source Files\Devices\ScanControls</Filter>
     </ClCompile>
+    <ClCompile Include="external\qcustomplot\qcustomplot.cpp">
+      <Filter>Source Files\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="external\unwrap\unwrap2D.c">
+      <Filter>Source Files\lib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\stdafx.h">
@@ -196,9 +196,6 @@
     </ClInclude>
     <ClInclude Include="src\Devices\com.h">
       <Filter>Header Files\Devices</Filter>
-    </ClInclude>
-    <ClInclude Include="external\unwrap\unwrap2D.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Acquisition\AcquisitionModes\VoltageCalibrationHelper.h">
       <Filter>Header Files\Acquisition\AcquisitionModes</Filter>
@@ -248,12 +245,12 @@
     <ClInclude Include="src\Devices\Cameras\cameraParameters.h">
       <Filter>Header Files\Devices\Cameras</Filter>
     </ClInclude>
+    <ClInclude Include="external\unwrap\unwrap2D.h">
+      <Filter>Header Files\lib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="src\BrillouinAcquisition.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="external\qcustomplot\qcustomplot.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtRcc Include="BrillouinAcquisition.qrc">
@@ -345,6 +342,9 @@
     </QtMoc>
     <QtMoc Include="src\Devices\Device.h">
       <Filter>Header Files\Devices</Filter>
+    </QtMoc>
+    <QtMoc Include="external\qcustomplot\qcustomplot.h">
+      <Filter>Header Files\lib</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
