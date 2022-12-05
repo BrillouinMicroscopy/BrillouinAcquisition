@@ -137,7 +137,7 @@
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_scancontrol.obj">
       <Filter>Source Files\Dependencies</Filter>
     </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_storageWrapper.obj">
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_storage.obj">
       <Filter>Source Files\Dependencies</Filter>
     </Object>
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_thread.obj">
@@ -164,13 +164,13 @@
     <Object Include="..\BrillouinAcquisition\x64\Debug\stdafx.obj">
       <Filter>Source Files\Dependencies</Filter>
     </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\storageWrapper.obj">
+    <Object Include="..\BrillouinAcquisition\x64\Debug\storage.obj">
       <Filter>Source Files\Dependencies</Filter>
     </Object>
     <Object Include="..\BrillouinAcquisition\x64\Debug\unwrap2D.obj">
       <Filter>Source Files\Dependencies</Filter>
     </Object>
-    <Object Include="..\BrillouinAcquisition\x64\Debug\unwrap2wrapper.obj">
+    <Object Include="..\BrillouinAcquisition\x64\Debug\unwrap2.obj">
       <Filter>Source Files\Dependencies</Filter>
     </Object>
     <Object Include="..\BrillouinAcquisition\x64\Debug\VoltageCalibration.obj">

@@ -12,8 +12,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CAF19185-58AE-4015-9476-361D73A9B456}</ProjectGuid>
-    <Keyword>Qt4VSv1.0</Keyword>
+    <Keyword>QtVS_v304</Keyword>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <QtMsBuild Condition="'$(QtMsBuild)'=='' or !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -68,6 +69,14 @@
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
     <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
   </Target>
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <QtInstall>5.15.2</QtInstall>
+    <QtModules>core;gui;widgets;serialport;printsupport</QtModules>
+  </PropertyGroup>
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <QtInstall>5.15.2</QtInstall>
+    <QtModules>core;gui;widgets;serialport;printsupport</QtModules>
+  </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
     <Import Project="$(QtMsBuild)\qt.props" />
   </ImportGroup>
@@ -162,7 +171,7 @@
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_NIDAQ.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_ODTControl.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_scancontrol.obj" />
-    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_storageWrapper.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\moc_storage.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_thread.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_VoltageCalibration.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\moc_ZeissECU.obj" />
@@ -171,9 +180,9 @@
     <Object Include="..\BrillouinAcquisition\x64\Debug\qrc_BrillouinAcquisition.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\scancontrol.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\stdafx.obj" />
-    <Object Include="..\BrillouinAcquisition\x64\Debug\storageWrapper.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\storage.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\unwrap2D.obj" />
-    <Object Include="..\BrillouinAcquisition\x64\Debug\unwrap2wrapper.obj" />
+    <Object Include="..\BrillouinAcquisition\x64\Debug\unwrap2.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\VoltageCalibration.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\xsample.obj" />
     <Object Include="..\BrillouinAcquisition\x64\Debug\ZeissECU.obj" />
