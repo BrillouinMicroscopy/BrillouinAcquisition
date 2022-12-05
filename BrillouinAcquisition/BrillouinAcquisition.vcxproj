@@ -239,7 +239,10 @@ copy "$(SystemRoot)\System32\nicaiu.dll" "$(TargetDir)"</Command>
     </ClCompile>
     <ClCompile Include="src\Acquisition\AcquisitionModes\ODT.cpp" />
     <ClCompile Include="src\Devices\Cameras\PointGrey.cpp" />
-    <ClCompile Include="external\qcustomplot\qcustomplot.cpp" />
+    <ClCompile Include="external\qcustomplot\qcustomplot.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="src\Devices\ScanControls\ScanControl.cpp" />
     <ClCompile Include="src\Devices\ScanControls\ZeissECU.cpp" />
     <ClCompile Include="src\Devices\ScanControls\ZeissMTB.cpp">
