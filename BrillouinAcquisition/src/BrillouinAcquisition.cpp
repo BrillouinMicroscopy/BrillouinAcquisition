@@ -3945,6 +3945,12 @@ void BrillouinAcquisition::writeSettings() {
 	settings.setValue("stage-z-min", m_BrillouinSettings.zMin);
 	settings.setValue("stage-z-max", m_BrillouinSettings.zMax);
 	settings.setValue("stage-z-steps", m_BrillouinSettings.zSteps);
+	settings.setValue("brillouin-pre-calibrate", m_BrillouinSettings.preCalibration);
+	settings.setValue("brillouin-post-calibrate", m_BrillouinSettings.postCalibration);
+	settings.setValue("brillouin-con-calibrate", m_BrillouinSettings.conCalibration);
+	settings.setValue("brillouin-con-calibrate-interval", m_BrillouinSettings.conCalibrationInterval);
+	settings.setValue("brillouin-nr-calibration-images", m_BrillouinSettings.nrCalibrationImages);
+	settings.setValue("brillouin-calibration-exposure-time", m_BrillouinSettings.calibrationExposureTime);
 	settings.endGroup();
 }
 
@@ -4025,5 +4031,11 @@ void BrillouinAcquisition::readSettings() {
 	m_BrillouinSettings.zMin = settings.value("stage-z-min").toInt();
 	m_BrillouinSettings.zMax = settings.value("stage-z-max").toInt();
 	m_BrillouinSettings.zSteps = settings.value("stage-z-steps").toInt();
+	m_BrillouinSettings.preCalibration = settings.value("brillouin-pre-calibrate", m_BrillouinSettings.preCalibration).toBool();
+	m_BrillouinSettings.postCalibration = settings.value("brillouin-post-calibrate", m_BrillouinSettings.postCalibration).toBool();
+	m_BrillouinSettings.conCalibration = settings.value("brillouin-con-calibrate", m_BrillouinSettings.conCalibration).toBool();
+	m_BrillouinSettings.conCalibrationInterval = settings.value("brillouin-con-calibrate-interval", m_BrillouinSettings.conCalibrationInterval).toDouble();
+	m_BrillouinSettings.nrCalibrationImages = settings.value("brillouin-nr-calibration-images", m_BrillouinSettings.nrCalibrationImages).toInt();
+	m_BrillouinSettings.calibrationExposureTime = settings.value("brillouin-calibration-exposure-time", m_BrillouinSettings.calibrationExposureTime).toDouble();
 	settings.endGroup();
 }
