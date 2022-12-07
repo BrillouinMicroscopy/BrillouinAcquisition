@@ -3936,6 +3936,15 @@ void BrillouinAcquisition::writeSettings() {
 	settings.beginGroup("devices-settings");
 	settings.setValue("stage-laser-position-x", m_positionScanner.x);
 	settings.setValue("stage-laser-position-y", m_positionScanner.y);
+	settings.setValue("stage-x-min", m_BrillouinSettings.xMin);
+	settings.setValue("stage-x-max", m_BrillouinSettings.xMax);
+	settings.setValue("stage-x-steps", m_BrillouinSettings.xSteps);
+	settings.setValue("stage-y-min", m_BrillouinSettings.yMin);
+	settings.setValue("stage-y-max", m_BrillouinSettings.yMax);
+	settings.setValue("stage-y-steps", m_BrillouinSettings.ySteps);
+	settings.setValue("stage-z-min", m_BrillouinSettings.zMin);
+	settings.setValue("stage-z-max", m_BrillouinSettings.zMax);
+	settings.setValue("stage-z-steps", m_BrillouinSettings.zSteps);
 	settings.endGroup();
 }
 
@@ -4007,5 +4016,14 @@ void BrillouinAcquisition::readSettings() {
 	auto posX = settings.value("stage-laser-position-x");
 	auto posY = settings.value("stage-laser-position-y");
 	m_positionScanner = POINT2(posX.toDouble(), posY.toDouble());
+	m_BrillouinSettings.xMin = settings.value("stage-x-min").toInt();
+	m_BrillouinSettings.xMax = settings.value("stage-x-max").toInt();
+	m_BrillouinSettings.xSteps = settings.value("stage-x-steps").toInt();
+	m_BrillouinSettings.yMin = settings.value("stage-y-min").toInt();
+	m_BrillouinSettings.yMax = settings.value("stage-y-max").toInt();
+	m_BrillouinSettings.ySteps = settings.value("stage-y-steps").toInt();
+	m_BrillouinSettings.zMin = settings.value("stage-z-min").toInt();
+	m_BrillouinSettings.zMax = settings.value("stage-z-max").toInt();
+	m_BrillouinSettings.zSteps = settings.value("stage-z-steps").toInt();
 	settings.endGroup();
 }
