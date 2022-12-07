@@ -435,6 +435,8 @@ void Brillouin::updatePositions() {
 	m_orderedIndices.resize(nrPositions);
 	// vector indicating if a new line just started and a calibration is allowed
 	m_calibrationAllowed.resize(nrPositions);
+	// Reset its values to false
+	std::fill(m_calibrationAllowed.begin(), m_calibrationAllowed.end(), false);
 
 	// construct directions vector
 	std::vector<std::vector<double>> directions(3);
@@ -447,6 +449,8 @@ void Brillouin::updatePositions() {
 	std::vector<int> indices(3);
 	for (gsl::index ii{ 0 }; ii < directions[2].size(); ii++) {
 		for (gsl::index jj{ 0 }; jj < directions[1].size(); jj++) {
+			// Allow to calibrate if a new line starts
+			m_calibrationAllowed[ll] = true;
 			for (gsl::index kk{ 0 }; kk < directions[0].size(); kk++) {
 
 				// construct indices vector
@@ -466,12 +470,6 @@ void Brillouin::updatePositions() {
 				// fill index vectors
 				m_orderedIndices[ll] = INDEX3{ indices[m_scanOrder.x], indices[m_scanOrder.y], indices[m_scanOrder.z] };
 
-				// set vector element to true if a new line started
-				if (kk == 0) {
-					m_calibrationAllowed[ll] = true;
-				} else {
-					m_calibrationAllowed[ll] = false;
-				}
 				ll++;
 			}
 		}
