@@ -2838,6 +2838,8 @@ void BrillouinAcquisition::initScanControl() {
 	);
 
 	loadScaleCalibrationFile();
+
+	m_scanControl->locatePositionScanner(m_positionScanner);
 }
 
 void BrillouinAcquisition::initODT() {
@@ -3931,6 +3933,10 @@ void BrillouinAcquisition::writeSettings() {
 	settings.beginGroup("scale-calibration");
 	settings.setValue("file-path", QString::fromStdString(m_scaleCalibrationFilePath));
 	settings.endGroup();
+	settings.beginGroup("devices-settings");
+	settings.setValue("stage-laser-position-x", m_positionScanner.x);
+	settings.setValue("stage-laser-position-y", m_positionScanner.y);
+	settings.endGroup();
 }
 
 void BrillouinAcquisition::readSettings() {
@@ -3995,5 +4001,11 @@ void BrillouinAcquisition::readSettings() {
 	settings.beginGroup("scale-calibration");
 	QVariant filePath = settings.value("file-path");
 	m_scaleCalibrationFilePath = filePath.toString().toStdString();
+	settings.endGroup();
+
+	settings.beginGroup("devices-settings");
+	auto posX = settings.value("stage-laser-position-x");
+	auto posY = settings.value("stage-laser-position-y");
+	m_positionScanner = POINT2(posX.toDouble(), posY.toDouble());
 	settings.endGroup();
 }
