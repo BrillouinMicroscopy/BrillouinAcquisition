@@ -2838,6 +2838,8 @@ void BrillouinAcquisition::initScanControl() {
 	);
 
 	loadScaleCalibrationFile();
+
+	m_scanControl->locatePositionScanner(m_positionScanner);
 }
 
 void BrillouinAcquisition::initODT() {
@@ -3931,6 +3933,25 @@ void BrillouinAcquisition::writeSettings() {
 	settings.beginGroup("scale-calibration");
 	settings.setValue("file-path", QString::fromStdString(m_scaleCalibrationFilePath));
 	settings.endGroup();
+	settings.beginGroup("devices-settings");
+	settings.setValue("stage-laser-position-x", m_positionScanner.x);
+	settings.setValue("stage-laser-position-y", m_positionScanner.y);
+	settings.setValue("stage-x-min", m_BrillouinSettings.xMin);
+	settings.setValue("stage-x-max", m_BrillouinSettings.xMax);
+	settings.setValue("stage-x-steps", m_BrillouinSettings.xSteps);
+	settings.setValue("stage-y-min", m_BrillouinSettings.yMin);
+	settings.setValue("stage-y-max", m_BrillouinSettings.yMax);
+	settings.setValue("stage-y-steps", m_BrillouinSettings.ySteps);
+	settings.setValue("stage-z-min", m_BrillouinSettings.zMin);
+	settings.setValue("stage-z-max", m_BrillouinSettings.zMax);
+	settings.setValue("stage-z-steps", m_BrillouinSettings.zSteps);
+	settings.setValue("brillouin-pre-calibrate", m_BrillouinSettings.preCalibration);
+	settings.setValue("brillouin-post-calibrate", m_BrillouinSettings.postCalibration);
+	settings.setValue("brillouin-con-calibrate", m_BrillouinSettings.conCalibration);
+	settings.setValue("brillouin-con-calibrate-interval", m_BrillouinSettings.conCalibrationInterval);
+	settings.setValue("brillouin-nr-calibration-images", m_BrillouinSettings.nrCalibrationImages);
+	settings.setValue("brillouin-calibration-exposure-time", m_BrillouinSettings.calibrationExposureTime);
+	settings.endGroup();
 }
 
 void BrillouinAcquisition::readSettings() {
@@ -3995,5 +4016,26 @@ void BrillouinAcquisition::readSettings() {
 	settings.beginGroup("scale-calibration");
 	QVariant filePath = settings.value("file-path");
 	m_scaleCalibrationFilePath = filePath.toString().toStdString();
+	settings.endGroup();
+
+	settings.beginGroup("devices-settings");
+	auto posX = settings.value("stage-laser-position-x");
+	auto posY = settings.value("stage-laser-position-y");
+	m_positionScanner = POINT2(posX.toDouble(), posY.toDouble());
+	m_BrillouinSettings.xMin = settings.value("stage-x-min").toInt();
+	m_BrillouinSettings.xMax = settings.value("stage-x-max").toInt();
+	m_BrillouinSettings.xSteps = settings.value("stage-x-steps").toInt();
+	m_BrillouinSettings.yMin = settings.value("stage-y-min").toInt();
+	m_BrillouinSettings.yMax = settings.value("stage-y-max").toInt();
+	m_BrillouinSettings.ySteps = settings.value("stage-y-steps").toInt();
+	m_BrillouinSettings.zMin = settings.value("stage-z-min").toInt();
+	m_BrillouinSettings.zMax = settings.value("stage-z-max").toInt();
+	m_BrillouinSettings.zSteps = settings.value("stage-z-steps").toInt();
+	m_BrillouinSettings.preCalibration = settings.value("brillouin-pre-calibrate", m_BrillouinSettings.preCalibration).toBool();
+	m_BrillouinSettings.postCalibration = settings.value("brillouin-post-calibrate", m_BrillouinSettings.postCalibration).toBool();
+	m_BrillouinSettings.conCalibration = settings.value("brillouin-con-calibrate", m_BrillouinSettings.conCalibration).toBool();
+	m_BrillouinSettings.conCalibrationInterval = settings.value("brillouin-con-calibrate-interval", m_BrillouinSettings.conCalibrationInterval).toDouble();
+	m_BrillouinSettings.nrCalibrationImages = settings.value("brillouin-nr-calibration-images", m_BrillouinSettings.nrCalibrationImages).toInt();
+	m_BrillouinSettings.calibrationExposureTime = settings.value("brillouin-calibration-exposure-time", m_BrillouinSettings.calibrationExposureTime).toDouble();
 	settings.endGroup();
 }
