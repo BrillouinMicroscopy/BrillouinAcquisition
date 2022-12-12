@@ -427,7 +427,10 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
  * Construct positions vector with correct order of scan directions
  */
 void Brillouin::updatePositions() {
-	auto nrPositions = m_settings.xSteps * m_settings.ySteps * m_settings.zSteps;
+	// Create a local copy of the settings object to prevent subscript-out-of-range error
+	// due to race-condition.
+	auto settings = m_settings;
+	auto nrPositions = settings.xSteps * settings.ySteps * settings.zSteps;
 
 	// Adjust positions vector
 	m_orderedPositions.resize(nrPositions);
@@ -440,9 +443,9 @@ void Brillouin::updatePositions() {
 
 	// construct directions vector
 	std::vector<std::vector<double>> directions(3);
-	directions[m_scanOrder.x] = simplemath::linspace(m_settings.xMin, m_settings.xMax, m_settings.xSteps);
-	directions[m_scanOrder.y] = simplemath::linspace(m_settings.yMin, m_settings.yMax, m_settings.ySteps);
-	directions[m_scanOrder.z] = simplemath::linspace(m_settings.zMin, m_settings.zMax, m_settings.zSteps);
+	directions[m_scanOrder.x] = simplemath::linspace(settings.xMin, settings.xMax, settings.xSteps);
+	directions[m_scanOrder.y] = simplemath::linspace(settings.yMin, settings.yMax, settings.ySteps);
+	directions[m_scanOrder.z] = simplemath::linspace(settings.zMin, settings.zMax, settings.zSteps);
 
 	int ll{ 0 };
 	std::vector<double> position(3);
