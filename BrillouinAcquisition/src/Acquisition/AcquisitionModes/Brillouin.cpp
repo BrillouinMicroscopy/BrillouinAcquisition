@@ -447,7 +447,7 @@ void Brillouin::updatePositions() {
 	directions[m_scanOrder.y] = simplemath::linspace(settings.yMin, settings.yMax, settings.ySteps);
 	directions[m_scanOrder.z] = simplemath::linspace(settings.zMin, settings.zMax, settings.zSteps);
 
-	int ll{ 0 };
+	gsl::index ll{ 0 };
 	std::vector<double> position(3);
 	std::vector<int> indices(3);
 	for (gsl::index ii{ 0 }; ii < directions[2].size(); ii++) {
