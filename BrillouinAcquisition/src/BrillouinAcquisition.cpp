@@ -1905,6 +1905,7 @@ void BrillouinAcquisition::cameraConnectionChanged(bool isConnected) {
 			},
 			Qt::QueuedConnection
 		);
+		this->restoreCameraSettings();
 	} else {
 		ui->actionConnect_Camera->setText("Connect Camera");
 		ui->actionEnable_Cooling->setText("Enable Cooling");
@@ -1913,6 +1914,27 @@ void BrillouinAcquisition::cameraConnectionChanged(bool isConnected) {
 		ui->camera_playPause->setEnabled(false);
 		ui->camera_singleShot->setEnabled(false);
 	}
+}
+
+void BrillouinAcquisition::restoreCameraSettings() {
+	QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+		"Guck Lab", "Brillouin Acquisition");
+
+	settings.beginGroup("devices-settings");
+	auto left = settings.value("brillouin-camera-roi-left", 1).toInt();
+	this->on_ROILeft_valueChanged(left);
+	auto top = settings.value("brillouin-camera-roi-top", 1).toInt();
+	this->on_ROITop_valueChanged(top);
+	auto width_phsical = settings.value("brillouin-camera-roi-width-physical").toInt();
+	this->on_ROIWidth_valueChanged(width_phsical);
+	auto height_phsical = settings.value("brillouin-camera-roi-height-physical").toInt();
+	this->on_ROIHeight_valueChanged(height_phsical);
+	auto exposureTime = settings.value("brillouin-camera-exposure-time", 0.5).toDouble();
+	ui->exposureTime->setValue(exposureTime);
+	auto frameCount = settings.value("brillouin-camera-frame-count", 2).toInt();
+	ui->frameCount->setValue(frameCount);
+
+	settings.endGroup();
 }
 
 void BrillouinAcquisition::showNoCameraFound() {
@@ -3951,6 +3973,12 @@ void BrillouinAcquisition::writeSettings() {
 	settings.setValue("brillouin-con-calibrate-interval", m_BrillouinSettings.conCalibrationInterval);
 	settings.setValue("brillouin-nr-calibration-images", m_BrillouinSettings.nrCalibrationImages);
 	settings.setValue("brillouin-calibration-exposure-time", m_BrillouinSettings.calibrationExposureTime);
+	settings.setValue("brillouin-camera-roi-left", m_deviceSettings.camera.roi.left);
+	settings.setValue("brillouin-camera-roi-top", m_deviceSettings.camera.roi.top);
+	settings.setValue("brillouin-camera-roi-width-physical", m_deviceSettings.camera.roi.width_physical);
+	settings.setValue("brillouin-camera-roi-height-physical", m_deviceSettings.camera.roi.height_physical);
+	settings.setValue("brillouin-camera-exposure-time", m_BrillouinSettings.camera.exposureTime);
+	settings.setValue("brillouin-camera-frame-count", m_BrillouinSettings.camera.frameCount);
 	settings.endGroup();
 }
 
