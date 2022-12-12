@@ -270,6 +270,7 @@ private slots:
 	// connect camera and react
 	void on_actionConnect_Camera_triggered();
 	void cameraConnectionChanged(bool);
+	void restoreCameraSettings();
 	void showNoCameraFound();
 	// enable camera cooling and react
 	void on_actionEnable_Cooling_triggered();
