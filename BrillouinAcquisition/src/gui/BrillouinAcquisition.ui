@@ -4292,7 +4292,7 @@ border: none;</string>
   <tabstop>addFocusMarker_brightfield</tabstop>
  </tabstops>
  <resources>
-  <include location="../BrillouinAcquisition.qrc"/>
+  <include location="../../BrillouinAcquisition.qrc"/>
  </resources>
  <connections/>
  <buttongroups>
