@@ -213,10 +213,11 @@ std::vector<ChannelSettings*> Fluorescence::getEnabledChannels() {
 
 void Fluorescence::configureCamera() {
 
-	auto cameraType = std::string{};
-	if (m_camera) {
-		cameraType = typeid(**m_camera).name();
+	if (!m_camera) {
+		return;
 	}
+
+	auto cameraType = (std::string)typeid(**m_camera).name();;
 
 	m_settings.camera = (*m_camera)->getSettings();
 
