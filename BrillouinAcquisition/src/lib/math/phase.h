@@ -95,7 +95,7 @@ private:
 
 	template <typename T_in = double>
 	void copyToInput(fftw_complex* dest, T_in* intensity, int dim_x, int dim_y) {
-		for (gsl::index i{ 0 }; i < dim_x * dim_y; i++) {
+		for (gsl::index i{ 0 }; i < (gsl::index)dim_x * dim_y; i++) {
 			dest[i][0] = intensity[i];
 			dest[i][1] = 0.0;
 		}
@@ -104,7 +104,7 @@ private:
 	void getRawPhase() {
 		// Shift background spectrum to center and mask unwanted regions
 		circshift(m_out_FFT, m_dim_x, m_dim_y, -m_max_x, -m_max_y);
-		for (gsl::index jj{ 0 }; jj < m_dim_x * m_dim_y; jj++) {
+		for (gsl::index jj{ 0 }; jj < (gsl::index)m_dim_x * m_dim_y; jj++) {
 			m_out_FFT[jj][0] *= m_mask[jj];
 			m_out_FFT[jj][1] *= m_mask[jj];
 		}
@@ -183,7 +183,7 @@ public:
 		// Calculate magnitude of background image to find the indices of the largest element
 		std::vector<double> background;
 		background.resize((size_t)dim_x * dim_y);
-		for (gsl::index i{ 0 }; i < dim_x * dim_y; i++) {
+		for (gsl::index i{ 0 }; i < (gsl::index)dim_x * dim_y; i++) {
 			background[i] = pow(m_out_FFT[i][0], 2) + pow(m_out_FFT[i][1], 2);
 		}
 
@@ -216,7 +216,7 @@ public:
 		fftw_execute(m_FFT);
 
 		// Calculate the absolute value
-		for (gsl::index i{ 0 }; i < dim_x * dim_y; i++) {
+		for (gsl::index i{ 0 }; i < (gsl::index)dim_x * dim_y; i++) {
 			(*spectrum)[i] = log10(sqrt(pow(m_out_FFT[i][0], 2) + pow(m_out_FFT[i][1], 2)) / ((size_t)dim_x * dim_y));
 		}
 
@@ -277,7 +277,7 @@ public:
 		auto end = std::end(phase_lowRes);
 		auto median = simplemath::median(beg, end);
 
-		for (gsl::index i{ 0 }; i < dim_x_new * dim_y_new; i++) {
+		for (gsl::index i{ 0 }; i < (gsl::index)dim_x_new * dim_y_new; i++) {
 			phaseUnwrapped[i] -= median;
 		}
 
