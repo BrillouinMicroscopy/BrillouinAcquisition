@@ -1,3 +1,16 @@
+## 0.3.2 - 2022-12-14
+
+### Added
+- Save all parameters and restore on program startup #196
+
+### Changed
+- Code cleanup #232 #233 #235
+
+### Fixed
+- Prevent out-of-range error #237
+- Fix possible null-pointer dereference #238
+- Prevent possible arithmetic overflows #239
+
 ## 0.3.1 - 2022-12-05
 
 ### Changed
