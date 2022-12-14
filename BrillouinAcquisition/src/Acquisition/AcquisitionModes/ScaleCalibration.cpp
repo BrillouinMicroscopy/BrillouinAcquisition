@@ -382,8 +382,8 @@ void ScaleCalibration::__acquire() {
 	/*
 	 * Construct the scale calibration
 	 */
-	m_scaleCalibration.micrometerToPixX = { -1 * shiftDx.x / m_Ds.x, shiftDx.y / m_Ds.x };
-	m_scaleCalibration.micrometerToPixY = { -1 * shiftDy.x / m_Ds.y, shiftDy.y / m_Ds.y };
+	m_scaleCalibration.micrometerToPixX = { -1.0 * shiftDx.x / m_Ds.x, shiftDx.y / m_Ds.x };
+	m_scaleCalibration.micrometerToPixY = { -1.0 * shiftDy.x / m_Ds.y, shiftDy.y / m_Ds.y };
 	try {
 		// Can throw an exception (if the provided calibration is invalid):
 		ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
