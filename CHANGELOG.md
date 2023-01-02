@@ -1,3 +1,11 @@
+## 0.3.3 - 2023-01-02
+
+### Changed
+- Code cleanup #242
+
+### Fixed
+- Validate ROI settings correctly #243
+
 ## 0.3.2 - 2022-12-14
 
 ### Added
