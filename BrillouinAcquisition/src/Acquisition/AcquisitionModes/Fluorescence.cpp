@@ -217,7 +217,7 @@ void Fluorescence::configureCamera() {
 		return;
 	}
 
-	auto cameraType = (std::string)typeid(**m_camera).name();;
+	auto cameraType = (std::string)typeid(**m_camera).name();
 
 	m_settings.camera = (*m_camera)->getSettings();
 
