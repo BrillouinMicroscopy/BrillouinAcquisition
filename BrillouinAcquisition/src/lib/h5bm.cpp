@@ -311,7 +311,7 @@ std::vector<double> H5BM::getData(const std::string& name, hid_t parent) {
 std::string H5BM::getDate(std::string name, hid_t parent) {
 	std::string date;
 	try {
-		hid_t dset_id = H5Dopen2(parent, name.c_str(), H5P_DEFAULT);;
+		hid_t dset_id = H5Dopen2(parent, name.c_str(), H5P_DEFAULT);
 		date = getAttribute<std::string>("date", dset_id);
 		closeDataset(dset_id);
 	}
