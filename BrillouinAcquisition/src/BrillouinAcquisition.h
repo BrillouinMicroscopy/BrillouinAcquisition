@@ -207,7 +207,6 @@ private:
 	Thread m_plottingThread;
 
 	Brillouin* m_Brillouin = new Brillouin(nullptr, m_acquisition, &m_andor, &m_scanControl);
-	BRILLOUIN_SETTINGS m_BrillouinSettings;
 	ODT* m_ODT{ nullptr };
 	Fluorescence* m_Fluorescence{ nullptr };
 	VoltageCalibration* m_voltageCalibration{ nullptr };

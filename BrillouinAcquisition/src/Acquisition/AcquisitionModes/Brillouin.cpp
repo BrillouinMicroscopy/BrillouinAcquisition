@@ -129,47 +129,47 @@ void Brillouin::finaliseRepetitions(int nrFinishedRepetitions, int status) {
 }
 
 void Brillouin::setStepNumberX(int steps) {
-	m_settings.xSteps = steps;
+	m_settings.setXSteps(steps);
 	determineScanOrder();
 }
 
 void Brillouin::setStepNumberY(int steps) {
-	m_settings.ySteps = steps;
+	m_settings.setYSteps(steps);
 	determineScanOrder();
 }
 
 void Brillouin::setStepNumberZ(int steps) {
-	m_settings.zSteps = steps;
+	m_settings.setZSteps(steps);
 	determineScanOrder();
 }
 
 void Brillouin::setXMin(double xMin) {
-	m_settings.xMin = xMin;
+	m_settings.setXMin(xMin);
 	updatePositions();
 }
 
 void Brillouin::setXMax(double xMax) {
-	m_settings.xMax = xMax;
+	m_settings.setXMax(xMax);
 	updatePositions();
 }
 
 void Brillouin::setYMin(double yMin) {
-	m_settings.yMin = yMin;
+	m_settings.setYMin(yMin);
 	updatePositions();
 }
 
 void Brillouin::setYMax(double yMax) {
-	m_settings.yMax = yMax;
+	m_settings.setYMax(yMax);
 	updatePositions();
 }
 
 void Brillouin::setZMin(double zMin) {
-	m_settings.zMin = zMin;
+	m_settings.setZMin(zMin);
 	updatePositions();
 }
 
 void Brillouin::setZMax(double zMax) {
-	m_settings.zMax = zMax;
+	m_settings.setZMax(zMax);
 	updatePositions();
 }
 
