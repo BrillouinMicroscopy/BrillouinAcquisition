@@ -1691,33 +1691,33 @@ std::vector<AT_64> BrillouinAcquisition::checkROI(std::vector<AT_64> values, std
  */
  // Binning
 void BrillouinAcquisition::on_binning_currentIndexChanged(const QString& text) {
-	m_BrillouinSettings.camera.roi.binning = text.toStdWString();
+	m_Brillouin->settings.camera.roi.binning = text.toStdWString();
 	applyCameraSettings();
 }
 // Readout parameters
 void BrillouinAcquisition::on_pixelReadoutRate_currentIndexChanged(const QString& text) {
-	m_BrillouinSettings.camera.readout.pixelReadoutRate = text.toStdWString();
+	m_Brillouin->settings.camera.readout.pixelReadoutRate = text.toStdWString();
 	applyCameraSettings();
 }
 
 void BrillouinAcquisition::on_preAmpGain_currentIndexChanged(const QString& text) {
-	m_BrillouinSettings.camera.readout.preAmpGain = text.toStdWString();
+	m_Brillouin->settings.camera.readout.preAmpGain = text.toStdWString();
 	applyCameraSettings();
 }
 
 void BrillouinAcquisition::on_pixelEncoding_currentIndexChanged(const QString& text) {
-	m_BrillouinSettings.camera.readout.pixelEncoding = text.toStdWString();
+	m_Brillouin->settings.camera.readout.pixelEncoding = text.toStdWString();
 	applyCameraSettings();
 }
 
 void BrillouinAcquisition::on_cycleMode_currentIndexChanged(const QString& text) {
-	m_BrillouinSettings.camera.readout.cycleMode = text.toStdWString();
+	m_Brillouin->settings.camera.readout.cycleMode = text.toStdWString();
 	applyCameraSettings();
 }
 
 void BrillouinAcquisition::applyCameraSettings() {
 	if (!m_andor->m_isPreviewRunning && !m_andor->m_isAcquisitionRunning) {
-		m_andor->setSettings(m_BrillouinSettings.camera);
+		m_andor->setSettings(m_Brillouin->settings.camera);
 	}
 }
 
@@ -3389,7 +3389,7 @@ void BrillouinAcquisition::on_actionAbout_triggered() {
 
 void BrillouinAcquisition::on_camera_playPause_clicked() {
 	if (!m_andor->m_isPreviewRunning) {
-		m_andor->setSettings(m_BrillouinSettings.camera);
+		m_andor->setSettings(m_Brillouin->settings.camera);
 		QMetaObject::invokeMethod(
 			m_andor,
 			[&m_andor = m_andor]() {
@@ -3408,11 +3408,11 @@ void BrillouinAcquisition::on_camera_singleShot_clicked() {
 void BrillouinAcquisition::on_BrillouinStart_clicked() {
 	if (m_Brillouin->getStatus() < ACQUISITION_STATUS::STARTED) {
 		// set camera ROI
-		m_BrillouinSettings.camera.roi.top = m_deviceSettings.camera.roi.top;
-		m_BrillouinSettings.camera.roi.left = m_deviceSettings.camera.roi.left;
-		m_BrillouinSettings.camera.roi.width_physical = m_deviceSettings.camera.roi.width_physical;
-		m_BrillouinSettings.camera.roi.height_physical = m_deviceSettings.camera.roi.height_physical;
-		m_Brillouin->setSettings(m_BrillouinSettings);
+		m_Brillouin->settings.camera.roi.top = m_deviceSettings.camera.roi.top;
+		m_Brillouin->settings.camera.roi.left = m_deviceSettings.camera.roi.left;
+		m_Brillouin->settings.camera.roi.width_physical = m_deviceSettings.camera.roi.width_physical;
+		m_Brillouin->settings.camera.roi.height_physical = m_deviceSettings.camera.roi.height_physical;
+		m_Brillouin->setSettings(m_Brillouin->settings);
 		QMetaObject::invokeMethod(
 			m_Brillouin,
 			[&m_Brillouin = m_Brillouin]() {
@@ -3434,74 +3434,74 @@ void BrillouinAcquisition::updateBrillouinSettings() {
 	ui->acquisitionFilename->setText(QString::fromStdString(m_storagePath.filename));
 
 	// AOI settings
-	ui->startX->setValue(m_BrillouinSettings.xMin);
-	ui->startY->setValue(m_BrillouinSettings.yMin);
-	ui->startZ->setValue(m_BrillouinSettings.zMin);
-	ui->endX->setValue(m_BrillouinSettings.xMax);
-	ui->endY->setValue(m_BrillouinSettings.yMax);
-	ui->endZ->setValue(m_BrillouinSettings.zMax);
-	ui->stepsX->setValue(m_BrillouinSettings.xSteps);
-	ui->stepsY->setValue(m_BrillouinSettings.ySteps);
-	ui->stepsZ->setValue(m_BrillouinSettings.zSteps);
+	ui->startX->setValue(m_Brillouin->settings.xMin);
+	ui->startY->setValue(m_Brillouin->settings.yMin);
+	ui->startZ->setValue(m_Brillouin->settings.zMin);
+	ui->endX->setValue(m_Brillouin->settings.xMax);
+	ui->endY->setValue(m_Brillouin->settings.yMax);
+	ui->endZ->setValue(m_Brillouin->settings.zMax);
+	ui->stepsX->setValue(m_Brillouin->settings.xSteps);
+	ui->stepsY->setValue(m_Brillouin->settings.ySteps);
+	ui->stepsZ->setValue(m_Brillouin->settings.zSteps);
 
 	// calibration settings
-	ui->preCalibration->setChecked(m_BrillouinSettings.preCalibration);
-	ui->postCalibration->setChecked(m_BrillouinSettings.postCalibration);
-	ui->conCalibration->setChecked(m_BrillouinSettings.conCalibration);
-	ui->conCalibrationInterval->setValue(m_BrillouinSettings.conCalibrationInterval);
-	ui->nrCalibrationImages->setValue(m_BrillouinSettings.nrCalibrationImages);
-	ui->calibrationExposureTime->setValue(m_BrillouinSettings.calibrationExposureTime);
-	ui->sampleSelection->setCurrentText(QString::fromStdString(m_BrillouinSettings.sample));
+	ui->preCalibration->setChecked(m_Brillouin->settings.preCalibration);
+	ui->postCalibration->setChecked(m_Brillouin->settings.postCalibration);
+	ui->conCalibration->setChecked(m_Brillouin->settings.conCalibration);
+	ui->conCalibrationInterval->setValue(m_Brillouin->settings.conCalibrationInterval);
+	ui->nrCalibrationImages->setValue(m_Brillouin->settings.nrCalibrationImages);
+	ui->calibrationExposureTime->setValue(m_Brillouin->settings.calibrationExposureTime);
+	ui->sampleSelection->setCurrentText(QString::fromStdString(m_Brillouin->settings.sample));
 
 	// repetition settings
-	ui->repetitionCount->setValue(m_BrillouinSettings.repetitions.count);
-	ui->repetitionInterval->setValue(m_BrillouinSettings.repetitions.interval);
-	ui->repetitionNewFile->setChecked(m_BrillouinSettings.repetitions.filePerRepetition);
+	ui->repetitionCount->setValue(m_Brillouin->settings.repetitions.count);
+	ui->repetitionInterval->setValue(m_Brillouin->settings.repetitions.interval);
+	ui->repetitionNewFile->setChecked(m_Brillouin->settings.repetitions.filePerRepetition);
 }
 
 void BrillouinAcquisition::on_startX_valueChanged(double value) {
-	m_BrillouinSettings.xMin = value;
 	m_Brillouin->setXMin(value);
+	updateBrillouinSettings();
 }
 
 void BrillouinAcquisition::on_startY_valueChanged(double value) {
-	m_BrillouinSettings.yMin = value;
 	m_Brillouin->setYMin(value);
+	updateBrillouinSettings();
 }
 
 void BrillouinAcquisition::on_startZ_valueChanged(double value) {
-	m_BrillouinSettings.zMin = value;
 	m_Brillouin->setZMin(value);
+	updateBrillouinSettings();
 }
 
 void BrillouinAcquisition::on_endX_valueChanged(double value) {
-	m_BrillouinSettings.xMax = value;
 	m_Brillouin->setXMax(value);
+	updateBrillouinSettings();
 }
 
 void BrillouinAcquisition::on_endY_valueChanged(double value) {
-	m_BrillouinSettings.yMax = value;
 	m_Brillouin->setYMax(value);
+	updateBrillouinSettings();
 }
 
 void BrillouinAcquisition::on_endZ_valueChanged(double value) {
-	m_BrillouinSettings.zMax = value;
 	m_Brillouin->setZMax(value);
+	updateBrillouinSettings();
 }
 
 void BrillouinAcquisition::on_stepsX_valueChanged(int value) {
-	m_BrillouinSettings.xSteps = value;
 	m_Brillouin->setStepNumberX(value);
+	updateBrillouinSettings();
 }
 
 void BrillouinAcquisition::on_stepsY_valueChanged(int value) {
-	m_BrillouinSettings.ySteps = value;
 	m_Brillouin->setStepNumberY(value);
+	updateBrillouinSettings();
 }
 
 void BrillouinAcquisition::on_stepsZ_valueChanged(int value) {
-	m_BrillouinSettings.zSteps = value;
 	m_Brillouin->setStepNumberZ(value);
+	updateBrillouinSettings();
 }
 
 void BrillouinAcquisition::on_showOverlay_stateChanged(int show) {
@@ -3565,32 +3565,32 @@ void BrillouinAcquisition::update_AOI_preview() {
 }
 
 void BrillouinAcquisition::on_preCalibration_stateChanged(int state) {
-	m_BrillouinSettings.preCalibration = (bool)state;
+	m_Brillouin->settings.preCalibration = (bool)state;
 }
 
 void BrillouinAcquisition::on_postCalibration_stateChanged(int state) {
-	m_BrillouinSettings.postCalibration = (bool)state;
+	m_Brillouin->settings.postCalibration = (bool)state;
 }
 
 void BrillouinAcquisition::on_conCalibration_stateChanged(int state) {
-	m_BrillouinSettings.conCalibration = (bool)state;
+	m_Brillouin->settings.conCalibration = (bool)state;
 }
 
 
 void BrillouinAcquisition::on_sampleSelection_currentIndexChanged(const QString &text) {
-	m_BrillouinSettings.sample = text.toStdString();
+	m_Brillouin->settings.sample = text.toStdString();
 }
 
 void BrillouinAcquisition::on_conCalibrationInterval_valueChanged(double value) {
-	m_BrillouinSettings.conCalibrationInterval = value;
+	m_Brillouin->settings.conCalibrationInterval = value;
 }
 
 void BrillouinAcquisition::on_nrCalibrationImages_valueChanged(int value) {
-	m_BrillouinSettings.nrCalibrationImages = value;
+	m_Brillouin->settings.nrCalibrationImages = value;
 }
 
 void BrillouinAcquisition::on_calibrationExposureTime_valueChanged(double value) {
-	m_BrillouinSettings.calibrationExposureTime = value;
+	m_Brillouin->settings.calibrationExposureTime = value;
 }
 
 /*
@@ -3598,28 +3598,28 @@ void BrillouinAcquisition::on_calibrationExposureTime_valueChanged(double value)
  */
 
 void BrillouinAcquisition::on_repetitionCount_valueChanged(int count) {
-	m_BrillouinSettings.repetitions.count = count;
+	m_Brillouin->settings.repetitions.count = count;
 }
 
 void BrillouinAcquisition::on_repetitionInterval_valueChanged(double interval) {
-	m_BrillouinSettings.repetitions.interval = interval;
+	m_Brillouin->settings.repetitions.interval = interval;
 }
 
 void BrillouinAcquisition::on_repetitionNewFile_stateChanged(int checked) {
-	m_BrillouinSettings.repetitions.filePerRepetition = (bool)checked;
+	m_Brillouin->settings.repetitions.filePerRepetition = (bool)checked;
 }
 
 void BrillouinAcquisition::showRepProgress(int repNumber, int timeToNext) {
-	ui->repetitionProgress->setValue(100 * ((double)repNumber + 1) / m_BrillouinSettings.repetitions.count);
+	ui->repetitionProgress->setValue(100 * ((double)repNumber + 1) / m_Brillouin->settings.repetitions.count);
 
 	QString string;
 	if (timeToNext > 0) {
 		string = formatSeconds(timeToNext) + " to next repetition.";
 	} else if (timeToNext > -2) {
-		if (repNumber < m_BrillouinSettings.repetitions.count) {
-			string.sprintf("Measuring repetition %1.0d of %1.0d.", repNumber + 1, m_BrillouinSettings.repetitions.count);
+		if (repNumber < m_Brillouin->settings.repetitions.count) {
+			string.sprintf("Measuring repetition %1.0d of %1.0d.", repNumber + 1, m_Brillouin->settings.repetitions.count);
 		} else {
-			string.sprintf("Finished %1.0d repetitions.", m_BrillouinSettings.repetitions.count);
+			string.sprintf("Finished %1.0d repetitions.", m_Brillouin->settings.repetitions.count);
 		}
 	} else {
 		string.sprintf("Finished %1.0d repetitions.", repNumber);
@@ -3762,11 +3762,11 @@ void BrillouinAcquisition::scanOrderChanged(SCAN_ORDER scanOrder) {
 }
 
 void BrillouinAcquisition::on_exposureTime_valueChanged(double value) {
-	m_BrillouinSettings.camera.exposureTime = value;
+	m_Brillouin->settings.camera.exposureTime = value;
 }
 
 void BrillouinAcquisition::on_frameCount_valueChanged(int value) {
-	m_BrillouinSettings.camera.frameCount = value;
+	m_Brillouin->settings.camera.frameCount = value;
 }
 
 StoragePath BrillouinAcquisition::splitFilePath(QString fullPath) {
@@ -3958,27 +3958,27 @@ void BrillouinAcquisition::writeSettings() {
 	settings.beginGroup("devices-settings");
 	settings.setValue("stage-laser-position-x", m_positionScanner.x);
 	settings.setValue("stage-laser-position-y", m_positionScanner.y);
-	settings.setValue("stage-x-min", m_BrillouinSettings.xMin);
-	settings.setValue("stage-x-max", m_BrillouinSettings.xMax);
-	settings.setValue("stage-x-steps", m_BrillouinSettings.xSteps);
-	settings.setValue("stage-y-min", m_BrillouinSettings.yMin);
-	settings.setValue("stage-y-max", m_BrillouinSettings.yMax);
-	settings.setValue("stage-y-steps", m_BrillouinSettings.ySteps);
-	settings.setValue("stage-z-min", m_BrillouinSettings.zMin);
-	settings.setValue("stage-z-max", m_BrillouinSettings.zMax);
-	settings.setValue("stage-z-steps", m_BrillouinSettings.zSteps);
-	settings.setValue("brillouin-pre-calibrate", m_BrillouinSettings.preCalibration);
-	settings.setValue("brillouin-post-calibrate", m_BrillouinSettings.postCalibration);
-	settings.setValue("brillouin-con-calibrate", m_BrillouinSettings.conCalibration);
-	settings.setValue("brillouin-con-calibrate-interval", m_BrillouinSettings.conCalibrationInterval);
-	settings.setValue("brillouin-nr-calibration-images", m_BrillouinSettings.nrCalibrationImages);
-	settings.setValue("brillouin-calibration-exposure-time", m_BrillouinSettings.calibrationExposureTime);
+	settings.setValue("stage-x-min", m_Brillouin->settings.xMin);
+	settings.setValue("stage-x-max", m_Brillouin->settings.xMax);
+	settings.setValue("stage-x-steps", m_Brillouin->settings.xSteps);
+	settings.setValue("stage-y-min", m_Brillouin->settings.yMin);
+	settings.setValue("stage-y-max", m_Brillouin->settings.yMax);
+	settings.setValue("stage-y-steps", m_Brillouin->settings.ySteps);
+	settings.setValue("stage-z-min", m_Brillouin->settings.zMin);
+	settings.setValue("stage-z-max", m_Brillouin->settings.zMax);
+	settings.setValue("stage-z-steps", m_Brillouin->settings.zSteps);
+	settings.setValue("brillouin-pre-calibrate", m_Brillouin->settings.preCalibration);
+	settings.setValue("brillouin-post-calibrate", m_Brillouin->settings.postCalibration);
+	settings.setValue("brillouin-con-calibrate", m_Brillouin->settings.conCalibration);
+	settings.setValue("brillouin-con-calibrate-interval", m_Brillouin->settings.conCalibrationInterval);
+	settings.setValue("brillouin-nr-calibration-images", m_Brillouin->settings.nrCalibrationImages);
+	settings.setValue("brillouin-calibration-exposure-time", m_Brillouin->settings.calibrationExposureTime);
 	settings.setValue("brillouin-camera-roi-left", m_deviceSettings.camera.roi.left);
 	settings.setValue("brillouin-camera-roi-top", m_deviceSettings.camera.roi.top);
 	settings.setValue("brillouin-camera-roi-width-physical", m_deviceSettings.camera.roi.width_physical);
 	settings.setValue("brillouin-camera-roi-height-physical", m_deviceSettings.camera.roi.height_physical);
-	settings.setValue("brillouin-camera-exposure-time", m_BrillouinSettings.camera.exposureTime);
-	settings.setValue("brillouin-camera-frame-count", m_BrillouinSettings.camera.frameCount);
+	settings.setValue("brillouin-camera-exposure-time", m_Brillouin->settings.camera.exposureTime);
+	settings.setValue("brillouin-camera-frame-count", m_Brillouin->settings.camera.frameCount);
 	settings.endGroup();
 }
 
@@ -4050,20 +4050,20 @@ void BrillouinAcquisition::readSettings() {
 	auto posX = settings.value("stage-laser-position-x");
 	auto posY = settings.value("stage-laser-position-y");
 	m_positionScanner = POINT2(posX.toDouble(), posY.toDouble());
-	m_BrillouinSettings.xMin = settings.value("stage-x-min").toInt();
-	m_BrillouinSettings.xMax = settings.value("stage-x-max").toInt();
-	m_BrillouinSettings.xSteps = settings.value("stage-x-steps").toInt();
-	m_BrillouinSettings.yMin = settings.value("stage-y-min").toInt();
-	m_BrillouinSettings.yMax = settings.value("stage-y-max").toInt();
-	m_BrillouinSettings.ySteps = settings.value("stage-y-steps").toInt();
-	m_BrillouinSettings.zMin = settings.value("stage-z-min").toInt();
-	m_BrillouinSettings.zMax = settings.value("stage-z-max").toInt();
-	m_BrillouinSettings.zSteps = settings.value("stage-z-steps").toInt();
-	m_BrillouinSettings.preCalibration = settings.value("brillouin-pre-calibrate", m_BrillouinSettings.preCalibration).toBool();
-	m_BrillouinSettings.postCalibration = settings.value("brillouin-post-calibrate", m_BrillouinSettings.postCalibration).toBool();
-	m_BrillouinSettings.conCalibration = settings.value("brillouin-con-calibrate", m_BrillouinSettings.conCalibration).toBool();
-	m_BrillouinSettings.conCalibrationInterval = settings.value("brillouin-con-calibrate-interval", m_BrillouinSettings.conCalibrationInterval).toDouble();
-	m_BrillouinSettings.nrCalibrationImages = settings.value("brillouin-nr-calibration-images", m_BrillouinSettings.nrCalibrationImages).toInt();
-	m_BrillouinSettings.calibrationExposureTime = settings.value("brillouin-calibration-exposure-time", m_BrillouinSettings.calibrationExposureTime).toDouble();
+	m_Brillouin->settings.setXMin(settings.value("stage-x-min", m_Brillouin->settings.xMin).toInt());
+	m_Brillouin->settings.setXMax(settings.value("stage-x-max", m_Brillouin->settings.xMax).toInt());
+	m_Brillouin->settings.setXSteps(settings.value("stage-x-steps", m_Brillouin->settings.xSteps).toInt());
+	m_Brillouin->settings.setYMin(settings.value("stage-y-min", m_Brillouin->settings.yMin).toInt());
+	m_Brillouin->settings.setYMax(settings.value("stage-y-max", m_Brillouin->settings.yMax).toInt());
+	m_Brillouin->settings.setYSteps(settings.value("stage-y-steps", m_Brillouin->settings.ySteps).toInt());
+	m_Brillouin->settings.setZMin(settings.value("stage-z-min", m_Brillouin->settings.zMin).toInt());
+	m_Brillouin->settings.setZMax(settings.value("stage-z-max", m_Brillouin->settings.zMax).toInt());
+	m_Brillouin->settings.setZSteps(settings.value("stage-z-steps", m_Brillouin->settings.zSteps).toInt());
+	m_Brillouin->settings.preCalibration = settings.value("brillouin-pre-calibrate", m_Brillouin->settings.preCalibration).toBool();
+	m_Brillouin->settings.postCalibration = settings.value("brillouin-post-calibrate", m_Brillouin->settings.postCalibration).toBool();
+	m_Brillouin->settings.conCalibration = settings.value("brillouin-con-calibrate", m_Brillouin->settings.conCalibration).toBool();
+	m_Brillouin->settings.conCalibrationInterval = settings.value("brillouin-con-calibrate-interval", m_Brillouin->settings.conCalibrationInterval).toDouble();
+	m_Brillouin->settings.nrCalibrationImages = settings.value("brillouin-nr-calibration-images", m_Brillouin->settings.nrCalibrationImages).toInt();
+	m_Brillouin->settings.calibrationExposureTime = settings.value("brillouin-calibration-exposure-time", m_Brillouin->settings.calibrationExposureTime).toDouble();
 	settings.endGroup();
 }

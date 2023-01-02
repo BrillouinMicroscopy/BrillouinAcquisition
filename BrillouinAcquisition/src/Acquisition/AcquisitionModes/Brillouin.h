@@ -15,30 +15,132 @@ struct SCAN_ORDER {
 };
 
 struct BRILLOUIN_SETTINGS {
-	// calibration parameters
-	std::string sample{ "Methanol & Water" };
-	bool preCalibration{ true };				// do pre calibration
-	bool postCalibration{ true };				// do post calibration
-	bool conCalibration{ true };				// do continuous calibration
-	double conCalibrationInterval{ 10 };		// interval of continuous calibrations
-	int nrCalibrationImages{ 10 };				// number of calibration images
-	double calibrationExposureTime{ 1 };		// exposure time for calibration images
+	private:
+		// ROI parameters
+		double m_xMin{ 0 };		// [µm]	x minimum value
+		double m_xMax{ 10 };	// [µm]	x maximum value
+		int m_xSteps{ 3 };		// [1]	x steps
+		double m_yMin{ 0 };		// [µm]	y minimum value
+		double m_yMax{ 10 };	// [µm]	y maximum value
+		int m_ySteps{ 3 };		// [1]	y steps
+		double m_zMin{ 0 };		// [µm]	z minimum value
+		double m_zMax{ 0 };		// [µm]	z maximum value
+		int m_zSteps{ 1 };		// [1]	z steps
 
-	// repetition parameters
-	REPETITIONS repetitions;
+		// ROI limits
+		std::tuple<double, double> m_xyzLim{ -1000000, 1000000 };
+		std::tuple<int, int> m_stepsLim{ 1, 100000 };
 
-	// ROI parameters
-	double xMin{ 0 };	// [µm]	x minimum value
-	double xMax{ 10 };	// [µm]	x maximum value
-	int xSteps{ 3 };	// [1]	x steps
-	double yMin{ 0 };	// [µm]	y minimum value
-	double yMax{ 10 };	// [µm]	y maximum value
-	int ySteps{ 3 };	// [1]	y steps
-	double zMin{ 0 };	// [µm]	z minimum value
-	double zMax{ 0 };	// [µm]	z maximum value
-	int zSteps{ 1 };	// [1]	z steps
+		template <typename T>
+		void checkLimits(T &value, std::tuple<T, T> limits) {
+			if (value < std::get<0>(limits)) {
+				value = std::get<0>(limits);
+			}
+			if (value > std::get<1>(limits)) {
+				value = std::get<1>(limits);
+			}
+		};
 
-	CAMERA_SETTINGS camera;
+	public:
+		BRILLOUIN_SETTINGS& operator=(const BRILLOUIN_SETTINGS& settings) {
+			m_xMin = settings.xMin;
+			m_xMax = settings.xMax;
+			m_xSteps = settings.xSteps;
+			m_yMin = settings.yMin;
+			m_yMax = settings.yMax;
+			m_ySteps = settings.ySteps;
+			m_zMin = settings.zMin;
+			m_zMax = settings.zMax;
+			m_zSteps = settings.zSteps;
+			sample = settings.sample;
+			preCalibration = settings.preCalibration;
+			postCalibration = settings.postCalibration;
+			conCalibration = settings.conCalibration;
+			conCalibrationInterval = settings.conCalibrationInterval;
+			nrCalibrationImages = settings.nrCalibrationImages;
+			calibrationExposureTime = settings.calibrationExposureTime;
+			repetitions = settings.repetitions;
+			camera = settings.camera;
+			return *this;
+		}
+		// calibration parameters
+		std::string sample{ "Methanol & Water" };
+		bool preCalibration{ true };				// do pre calibration
+		bool postCalibration{ true };				// do post calibration
+		bool conCalibration{ true };				// do continuous calibration
+		double conCalibrationInterval{ 10 };		// interval of continuous calibrations
+		int nrCalibrationImages{ 10 };				// number of calibration images
+		double calibrationExposureTime{ 1 };		// exposure time for calibration images
+
+		// repetition parameters
+		REPETITIONS repetitions;
+
+		// ROI parameters
+		const double& xMin{ m_xMin };
+		void setXMin(double xMin) {
+			checkLimits(xMin, m_xyzLim);
+			m_xMin = xMin;
+			if (m_xMax < m_xMin) {
+				m_xMax = m_xMin;
+			}
+		};
+		const double& xMax{ m_xMax };
+		void setXMax(double xMax) {
+			checkLimits(xMax, m_xyzLim);
+			m_xMax = xMax;
+			if (m_xMax < m_xMin) {
+				m_xMin = m_xMax;
+			}
+		};
+		const int& xSteps{ m_xSteps };
+		void setXSteps(int xSteps) {
+			checkLimits(xSteps, m_stepsLim);
+			m_xSteps = xSteps;
+		};
+		const double& yMin = m_yMin;
+		void setYMin(double yMin) {
+			checkLimits(yMin, m_xyzLim);
+			m_yMin = yMin;
+			if (m_yMax < m_yMin) {
+				m_yMax = m_yMin;
+			}
+		};
+		const double& yMax = m_yMax;
+		void setYMax(double yMax) {
+			checkLimits(yMax, m_xyzLim);
+			m_yMax = yMax;
+			if (m_yMax < m_yMin) {
+				m_yMin = m_yMax;
+			}
+		};
+		const int& ySteps = m_ySteps;
+		void setYSteps(int ySteps) {
+			checkLimits(ySteps, m_stepsLim);
+			m_ySteps = ySteps;
+		};
+		const double& zMin = m_zMin;
+		void setZMin(double zMin) {
+			checkLimits(zMin, m_xyzLim);
+			m_zMin = zMin;
+			if (m_zMax < m_zMin) {
+				m_zMax = m_zMin;
+			}
+		};
+		const double& zMax = m_zMax;
+		void setZMax(double zMax) {
+			checkLimits(zMax, m_xyzLim);
+			m_zMax = zMax;
+			if (m_zMax < m_zMin) {
+				m_zMin = m_zMax;
+			}
+		};
+		const int& zSteps = m_zSteps;
+		void setZSteps(int zSteps) {
+			checkLimits(zSteps, m_stepsLim);
+			m_zSteps = zSteps;
+		};
+
+		CAMERA_SETTINGS camera;
 };
 
 class Brillouin : public AcquisitionMode {
@@ -47,6 +149,8 @@ class Brillouin : public AcquisitionMode {
 public:
 	Brillouin(QObject* parent, Acquisition* acquisition, Camera** andor, ScanControl** scanControl);
 	~Brillouin();
+
+	BRILLOUIN_SETTINGS& settings{ m_settings };
 
 public slots:
 	void startRepetitions() override;
