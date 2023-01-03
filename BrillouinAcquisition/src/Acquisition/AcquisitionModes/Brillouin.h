@@ -28,16 +28,16 @@ struct BRILLOUIN_SETTINGS {
 		int m_zSteps{ 1 };		// [1]	z steps
 
 		// ROI limits
-		std::tuple<double, double> m_xyzLim{ -1000000, 1000000 };
-		std::tuple<int, int> m_stepsLim{ 1, 100000 };
+		std::vector<double> m_xyzLim{ -1000000, 1000000 };
+		std::vector<int> m_stepsLim{ 1, 100000 };
 
 		template <typename T>
-		void checkLimits(T &value, std::tuple<T, T> limits) {
-			if (value < std::get<0>(limits)) {
-				value = std::get<0>(limits);
+		void checkLimits(T &value, std::vector<T> limits) {
+			if (value < limits[0]) {
+				value = limits[0];
 			}
-			if (value > std::get<1>(limits)) {
-				value = std::get<1>(limits);
+			if (value > limits[1]) {
+				value = limits[1];
 			}
 		};
 
