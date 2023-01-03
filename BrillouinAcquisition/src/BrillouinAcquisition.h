@@ -123,13 +123,13 @@ private:
 	void initCameraBrillouin();
 
 	void checkElementButtons();
-	void addListToComboBox(QComboBox*, std::vector<std::wstring>, bool clear = true);
+	void addListToComboBox(QComboBox*, const std::vector<std::wstring>&);
 
 	template <typename T>
 	void updateImage(PreviewBuffer<T>* previewBuffer, PLOT_SETTINGS* plotSettings);
 
 	template<typename T>
-	void plotting(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<T> unpackedBuffer);
+	void plotting(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, const std::vector<T>& unpackedBuffer);
 
 	Ui::BrillouinAcquisitionClass* ui;
 	ScanControl::SCAN_DEVICE m_scanControllerType = ScanControl::SCAN_DEVICE::ZEISSECU;
@@ -257,7 +257,7 @@ private slots:
 	void on_rangeUpper_valueChanged(int);
 	void on_rangeLowerODT_valueChanged(int);
 	void on_rangeUpperODT_valueChanged(int);
-	void updatePlot(PLOT_SETTINGS plotSettings);
+	void updatePlot(const PLOT_SETTINGS& plotSettings);
 	void updateCLimRange(QSpinBox*, QSpinBox*, QCPRange);
 
 	void initializeLaserPositionLocation();
@@ -323,18 +323,18 @@ private slots:
 	void initBeampathButtons();
 
 	void on_BrillouinStart_clicked();
-	void microscopeElementPositionsChanged(std::vector<double>);
+	void microscopeElementPositionsChanged(const std::vector<double>&);
 	void microscopeElementPositionChanged(DeviceElement element, double position);
 	void on_camera_playPause_clicked();
 
 	void updateImageBrillouin();
 	void updateImageODT();
 
-	void plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<unsigned char> unpackedBuffer);
-	void plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<unsigned short> unpackedBuffer);
-	void plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<double> unpackedBuffer);
-	void plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<float> unpackedBuffer);
-	void plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<int> unpackedBuffer);
+	void plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, const std::vector<unsigned char>& unpackedBuffer);
+	void plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, const std::vector<unsigned short>& unpackedBuffer);
+	void plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, const std::vector<double>& unpackedBuffer);
+	void plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, const std::vector<float>& unpackedBuffer);
+	void plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, const std::vector<int>& unpackedBuffer);
 
 	void initializePlot(PLOT_SETTINGS plotSettings);
 
@@ -368,32 +368,32 @@ private slots:
 
 	void applyCameraSettings();
 
-	void setColormap(QCPColorGradient*, CustomGradientPreset);
-	void applyColorMap(QCPColorGradient* gradient, std::vector<std::vector<double>> colorMap);
+	void setColormap(QCPColorGradient*, const CustomGradientPreset&);
+	void applyColorMap(QCPColorGradient* gradient, const std::vector<std::vector<double>>& colorMap);
 	void setElement(DeviceElement element, double position);
 	void setPreset(ScanPreset preset);
-	void updatePlotLimits(PLOT_SETTINGS plotSettings, CAMERA_OPTIONS options, CAMERA_ROI roi);
+	void updatePlotLimits(const PLOT_SETTINGS& plotSettings, const CAMERA_OPTIONS& options, const CAMERA_ROI& roi);
 	void showPreviewRunning(bool);
 	void showBrightfieldPreviewRunning(bool isRunning);
-	void showFluorescencePreviewRunning(FLUORESCENCE_MODE mode);
+	void showFluorescencePreviewRunning(const FLUORESCENCE_MODE& mode);
 	void startPreview(bool);
 	void startBrightfieldPreview(bool isRunning);
-	void cameraSettingsChanged(CAMERA_SETTINGS);
-	void cameraODTSettingsChanged(CAMERA_SETTINGS settings);
-	void updateODTCameraSettings(CAMERA_SETTINGS settings);
-	void sensorTemperatureChanged(SensorTemperature);
+	void cameraSettingsChanged(const CAMERA_SETTINGS&);
+	void cameraODTSettingsChanged(const CAMERA_SETTINGS& settings);
+	void updateODTCameraSettings(const CAMERA_SETTINGS& settings);
+	void sensorTemperatureChanged(const SensorTemperature&);
 	void initializeODTVoltagePlot(QCustomPlot* plot);
-	void plotODTVoltages(ODT_SETTINGS settings, ODT_MODE mode);
-	void plotODTVoltage(VOLTAGE2 voltage, ODT_MODE mode);
-	void cameraOptionsChanged(CAMERA_OPTIONS);
-	void cameraODTOptionsChanged(CAMERA_OPTIONS options);
+	void plotODTVoltages(const ODT_SETTINGS& settings, const ODT_MODE& mode);
+	void plotODTVoltage(const VOLTAGE2& voltage, const ODT_MODE& mode);
+	void cameraOptionsChanged(const CAMERA_OPTIONS&);
+	void cameraODTOptionsChanged(const CAMERA_OPTIONS& options);
 	void showAcqPosition(POINT3, int);
 	void showPosition(POINT3);
 	void setHomePositionBounds(BOUNDS);
 	void setCurrentPositionBounds(BOUNDS bounds);
 	void showCalibrationInterval(int);
 	void showCalibrationRunning(bool);
-	void updateFilename(std::string);
+	void updateFilename(const std::string&);
 
 	void showEnabledModes(ACQUISITION_MODE mode);
 	void showBrillouinStatus(ACQUISITION_STATUS state);
@@ -420,10 +420,10 @@ private slots:
 	void on_gainCameraODT_valueChanged(double gain);
 	void on_pixelEncodingODT_currentIndexChanged(const QString& text);
 
-	void on_camera_displayMode_currentIndexChanged(const QString &text);
+	void on_camera_displayMode_currentIndexChanged(const QString& text);
 	void on_setBackground_clicked();
 
-	void applyGradient(PLOT_SETTINGS plotSettings);
+	void applyGradient(const PLOT_SETTINGS& plotSettings);
 
 	/*
 	 * Fluorescence slots
@@ -455,7 +455,7 @@ private slots:
 	void on_fluoRedGain_valueChanged(double gain);
 	void on_fluoBrightfieldGain_valueChanged(double gain);
 	// Settings changed slot
-	void updateFluorescenceSettings(FLUORESCENCE_SETTINGS settings);
+	void updateFluorescenceSettings(const FLUORESCENCE_SETTINGS& settings);
 
 
 	QString formatSeconds(int seconds);
@@ -486,8 +486,8 @@ private slots:
 	void on_stepsY_valueChanged(int);
 	void on_stepsZ_valueChanged(int);
 	void on_showOverlay_stateChanged(int);
-	void AOI_changed(std::vector<POINT3> orderedPositions);
-	void on_scaleCalibrationChanged(std::vector<POINT2> positions);
+	void AOI_changed(const std::vector<POINT3>& orderedPositions);
+	void on_scaleCalibrationChanged(const std::vector<POINT2>& positions);
 	void update_AOI_preview();
 
 	// live calibration

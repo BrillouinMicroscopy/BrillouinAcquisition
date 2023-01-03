@@ -530,7 +530,7 @@ void BrillouinAcquisition::setPreset(ScanPreset preset) {
 		Qt::QueuedConnection);
 }
 
-void BrillouinAcquisition::cameraOptionsChanged(CAMERA_OPTIONS options) {
+void BrillouinAcquisition::cameraOptionsChanged(const CAMERA_OPTIONS& options) {
 	m_cameraOptions.ROIHeightLimits = options.ROIHeightLimits;
 	m_cameraOptions.ROIWidthLimits = options.ROIWidthLimits;
 
@@ -563,7 +563,7 @@ void BrillouinAcquisition::cameraOptionsChanged(CAMERA_OPTIONS options) {
 	ui->ROILeft->setValue(1);
 }
 
-void BrillouinAcquisition::cameraODTOptionsChanged(CAMERA_OPTIONS options) {
+void BrillouinAcquisition::cameraODTOptionsChanged(const CAMERA_OPTIONS& options) {
 	m_cameraOptionsODT.exposureTimeLimits = options.exposureTimeLimits;
 
 	m_cameraOptionsODT.ROIHeightLimits = options.ROIHeightLimits;
@@ -673,7 +673,7 @@ void BrillouinAcquisition::showCalibrationRunning(bool isCalibrating) {
 	}
 }
 
-void BrillouinAcquisition::addListToComboBox(QComboBox* box, std::vector<std::wstring> list, bool clear) {
+void BrillouinAcquisition::addListToComboBox(QComboBox* box, const std::vector<std::wstring>& list) {
 	// Check whether we have to do anything
 	std::vector< std::wstring > currentList(box->count());
 	for (gsl::index i{ 0 }; i < currentList.size(); i++) {
@@ -683,15 +683,13 @@ void BrillouinAcquisition::addListToComboBox(QComboBox* box, std::vector<std::ws
 		return;
 	}
 	const QSignalBlocker blocker(box);
-	if (clear) {
-		box->clear();
-	}
-	std::for_each(list.begin(), list.end(), [box](std::wstring &item) {
+	box->clear();
+	for (auto &item : list) {
 		box->addItem(QString::fromStdWString(item));
-	});
+	}
 }
 
-void BrillouinAcquisition::cameraSettingsChanged(CAMERA_SETTINGS settings) {
+void BrillouinAcquisition::cameraSettingsChanged(const CAMERA_SETTINGS& settings) {
 	ui->exposureTime->setValue(settings.exposureTime);
 	ui->frameCount->setValue(settings.frameCount);
 	//ui->ROILeft->setValue(settings.roi.left);
@@ -708,7 +706,7 @@ void BrillouinAcquisition::cameraSettingsChanged(CAMERA_SETTINGS settings) {
 	ui->pixelEncoding->setCurrentText(QString::fromStdWString(settings.readout.pixelEncoding));
 }
 
-void BrillouinAcquisition::cameraODTSettingsChanged(CAMERA_SETTINGS settings) {
+void BrillouinAcquisition::cameraODTSettingsChanged(const CAMERA_SETTINGS& settings) {
 	const QSignalBlocker blocker1(ui->exposureTimeODT);
 	ui->exposureTimeODT->setValue(settings.exposureTime);
 
@@ -724,7 +722,7 @@ void BrillouinAcquisition::cameraODTSettingsChanged(CAMERA_SETTINGS settings) {
 	ui->pixelEncodingODT->setCurrentText(QString::fromStdWString(settings.readout.pixelEncoding));
 }
 
-void BrillouinAcquisition::updateODTCameraSettings(CAMERA_SETTINGS settings) {
+void BrillouinAcquisition::updateODTCameraSettings(const CAMERA_SETTINGS& settings) {
 	const QSignalBlocker blocker1(ui->exposureTimeCameraODT);
 	ui->exposureTimeCameraODT->setValue(settings.exposureTime);
 
@@ -732,7 +730,7 @@ void BrillouinAcquisition::updateODTCameraSettings(CAMERA_SETTINGS settings) {
 	ui->gainCameraODT->setValue(settings.gain);
 }
 
-void BrillouinAcquisition::sensorTemperatureChanged(SensorTemperature sensorTemperature) {
+void BrillouinAcquisition::sensorTemperatureChanged(const SensorTemperature& sensorTemperature) {
 	ui->sensorTemp->setValue(sensorTemperature.temperature);
 	if (sensorTemperature.status == enCameraTemperatureStatus::COOLER_OFF ||
 		sensorTemperature.status == enCameraTemperatureStatus::FAULT || sensorTemperature.status == enCameraTemperatureStatus::DRIFT) {
@@ -1081,7 +1079,7 @@ void BrillouinAcquisition::on_fluoBrightfieldGain_valueChanged(double gain) {
 	m_Fluorescence->setGain(FLUORESCENCE_MODE::BRIGHTFIELD, gain);
 }
 
-void BrillouinAcquisition::updateFluorescenceSettings(FLUORESCENCE_SETTINGS settings) {
+void BrillouinAcquisition::updateFluorescenceSettings(const FLUORESCENCE_SETTINGS& settings) {
 	bool disableStart{ true };
 	if (settings.blue.enabled || settings.red.enabled || settings.green.enabled || settings.brightfield.enabled) {
 		disableStart = false;
@@ -1351,7 +1349,7 @@ QString BrillouinAcquisition::formatSeconds(int seconds) {
 	return string;
 }
 
-void BrillouinAcquisition::plotODTVoltages(ODT_SETTINGS settings, ODT_MODE mode) {
+void BrillouinAcquisition::plotODTVoltages(const ODT_SETTINGS& settings, const ODT_MODE& mode) {
 	QCustomPlot *plot = nullptr;
 	switch (mode) {
 		case ODT_MODE::ALGN: {
@@ -1395,7 +1393,7 @@ void BrillouinAcquisition::plotODTVoltages(ODT_SETTINGS settings, ODT_MODE mode)
 	plot->replot();
 }
 
-void BrillouinAcquisition::plotODTVoltage(VOLTAGE2 voltage, ODT_MODE mode) {
+void BrillouinAcquisition::plotODTVoltage(const VOLTAGE2& voltage, const ODT_MODE& mode) {
 	QCustomPlot *plot;
 	switch (mode) {
 		case ODT_MODE::ALGN:
@@ -1470,7 +1468,7 @@ void BrillouinAcquisition::initializePlot(PLOT_SETTINGS plotSettings) {
 	plotSettings.plotHandle->rescaleAxes();
 }
 
-void BrillouinAcquisition::applyGradient(PLOT_SETTINGS plotSettings) {
+void BrillouinAcquisition::applyGradient(const PLOT_SETTINGS& plotSettings) {
 	QCPColorGradient gradient = QCPColorGradient();
 	setColormap(&gradient, plotSettings.gradient);
 	plotSettings.colorMap->setGradient(gradient);
@@ -1545,7 +1543,7 @@ void BrillouinAcquisition::on_rangeUpperODT_valueChanged(int value) {
 	updatePlot(m_ODTPlot);
 }
 
-void BrillouinAcquisition::updatePlot(PLOT_SETTINGS plotSettings) {
+void BrillouinAcquisition::updatePlot(const PLOT_SETTINGS& plotSettings) {
 	plotSettings.colorMap->setDataRange(plotSettings.cLim);
 	plotSettings.plotHandle->replot();
 	updateCLimRange(plotSettings.lowerBox, plotSettings.upperBox, plotSettings.cLim);
@@ -1722,7 +1720,7 @@ void BrillouinAcquisition::applyCameraSettings() {
 }
 
 
-void BrillouinAcquisition::updatePlotLimits(PLOT_SETTINGS plotSettings,	CAMERA_OPTIONS options, CAMERA_ROI roi) {
+void BrillouinAcquisition::updatePlotLimits(const PLOT_SETTINGS& plotSettings,	const CAMERA_OPTIONS& options, const CAMERA_ROI& roi) {
 	// set the properties of the colormap to the correct values of the preview buffer
 	plotSettings.colorMap->data()->setSize(roi.width_binned, roi.height_binned);
 	QCPRange xRange = QCPRange(roi.left, roi.left + roi.width_physical - 1);
@@ -1763,7 +1761,7 @@ void BrillouinAcquisition::showBrightfieldPreviewRunning(bool isRunning) {
 	startBrightfieldPreview(isRunning);
 }
 
-void BrillouinAcquisition::showFluorescencePreviewRunning(FLUORESCENCE_MODE mode) {
+void BrillouinAcquisition::showFluorescencePreviewRunning(const FLUORESCENCE_MODE& mode) {
 	// reset all preview buttons
 	ui->fluoBluePreview->setText("Preview");
 	ui->fluoGreenPreview->setText("Preview");
@@ -1832,28 +1830,28 @@ void BrillouinAcquisition::updateImage(PreviewBuffer<T>* previewBuffer, PLOT_SET
 	);
 }
 
-void BrillouinAcquisition::plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<unsigned char> unpackedBuffer) {
+void BrillouinAcquisition::plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, const std::vector<unsigned char>& unpackedBuffer) {
 	plotting(plotSettings, dim_x, dim_y, unpackedBuffer);
 }
 
-void BrillouinAcquisition::plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<unsigned short> unpackedBuffer) {
+void BrillouinAcquisition::plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, const std::vector<unsigned short>& unpackedBuffer) {
 	plotting(plotSettings, dim_x, dim_y, unpackedBuffer);
 }
 
-void BrillouinAcquisition::plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<double> unpackedBuffer) {
+void BrillouinAcquisition::plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, const std::vector<double>& unpackedBuffer) {
 	plotting(plotSettings, dim_x, dim_y, unpackedBuffer);
 }
 
-void BrillouinAcquisition::plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<float> unpackedBuffer) {
+void BrillouinAcquisition::plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, const std::vector<float>& unpackedBuffer) {
 	plotting(plotSettings, dim_x, dim_y, unpackedBuffer);
 }
 
-void BrillouinAcquisition::plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<int> unpackedBuffer) {
+void BrillouinAcquisition::plot(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, const std::vector<int>& unpackedBuffer) {
 	plotting(plotSettings, dim_x, dim_y, unpackedBuffer);
 }
 
 template <typename T>
-void BrillouinAcquisition::plotting(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, std::vector<T> unpackedBuffer) {
+void BrillouinAcquisition::plotting(PLOT_SETTINGS* plotSettings, long long dim_x, long long dim_y, const std::vector<T>& unpackedBuffer) {
 	// images are given row by row, starting at the top left
 	int tIndex{ 0 };
 	for (gsl::index yIndex{ 0 }; yIndex < dim_y; ++yIndex) {
@@ -3291,7 +3289,7 @@ void BrillouinAcquisition::initCamera() {
 	);
 }
 
-void BrillouinAcquisition::microscopeElementPositionsChanged(std::vector<double> positions) {
+void BrillouinAcquisition::microscopeElementPositionsChanged(const std::vector<double>& positions) {
 	m_deviceElementPositions = positions;
 	checkElementButtons();
 }
@@ -3425,7 +3423,7 @@ void BrillouinAcquisition::on_BrillouinStart_clicked() {
 	}
 }
 
-void BrillouinAcquisition::updateFilename(std::string filename) {
+void BrillouinAcquisition::updateFilename(const std::string& filename) {
 	m_storagePath.filename = filename;
 	updateBrillouinSettings();
 }
@@ -3512,7 +3510,7 @@ void BrillouinAcquisition::on_showOverlay_stateChanged(int show) {
 /*
  * React when the ordered positions have changed
  */
-void BrillouinAcquisition::AOI_changed(std::vector<POINT3> orderedPositions) {
+void BrillouinAcquisition::AOI_changed(const std::vector<POINT3>& orderedPositions) {
 	if (m_scanControl) {
 		m_positionsMicrometer = orderedPositions;
 		m_positionsPixel = m_scanControl->getPositionsPix(m_positionsMicrometer);
@@ -3523,7 +3521,7 @@ void BrillouinAcquisition::AOI_changed(std::vector<POINT3> orderedPositions) {
 /*
  * React when the scancontrol settings have changed, e.g. the start position was adjusted
  */
-void BrillouinAcquisition::on_scaleCalibrationChanged(std::vector<POINT2> positions) {
+void BrillouinAcquisition::on_scaleCalibrationChanged(const std::vector<POINT2>& positions) {
 	m_positionsPixel = positions;
 	update_AOI_preview();
 }
@@ -3853,7 +3851,7 @@ void BrillouinAcquisition::on_actionClose_Acquisition_triggered() {
 	}
 }
 
-void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradientPreset preset) {
+void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, const CustomGradientPreset& preset) {
 	gradient->clearColorStops();
 	switch (preset) {
 		case CustomGradientPreset::gpViridis: {
@@ -3874,12 +3872,9 @@ void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, CustomGradien
 	}
 }
 
-void BrillouinAcquisition::applyColorMap(QCPColorGradient* gradient, std::vector<std::vector<double>> colorMap) {
-	auto index{ 0 };
-	auto position{ 0.0 };
-	for (auto it = std::begin(colorMap); it != std::end(colorMap); ++it) {
-		gradient->setColorStopAt((double)index / colorMap.size(), QColor((int)255*(*it)[0], (int)255*(*it)[1], (int)255*(*it)[2]));
-		++index;
+void BrillouinAcquisition::applyColorMap(QCPColorGradient* gradient, const std::vector<std::vector<double>>& colorMap) {
+	for (gsl::index index{ 0 }; auto& color : colorMap) {
+		gradient->setColorStopAt((double)index++ / colorMap.size(), QColor((int)255 * color[0], (int)255 * color[1], (int)255 * color[2]));
 	}
 }
 
