@@ -3873,11 +3873,8 @@ void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, const CustomG
 }
 
 void BrillouinAcquisition::applyColorMap(QCPColorGradient* gradient, const std::vector<std::vector<double>>& colorMap) {
-	auto index{ 0 };
-	auto position{ 0.0 };
-	for (auto it = std::begin(colorMap); it != std::end(colorMap); ++it) {
-		gradient->setColorStopAt((double)index / colorMap.size(), QColor((int)255*(*it)[0], (int)255*(*it)[1], (int)255*(*it)[2]));
-		++index;
+	for (gsl::index index{ 0 }; auto& color : colorMap) {
+		gradient->setColorStopAt((double)index++ / colorMap.size(), QColor((int)255 * color[0], (int)255 * color[1], (int)255 * color[2]));
 	}
 }
 
