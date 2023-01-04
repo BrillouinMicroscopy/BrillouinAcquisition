@@ -9,8 +9,8 @@
  * Public definitions
  */
 
-ODT::ODT(QObject* parent, Acquisition* acquisition, Camera** camera, ODTControl** ODTControl)
-	: AcquisitionMode(parent, acquisition, (ScanControl**)ODTControl), m_camera(camera), m_ODTControl(ODTControl) {
+ODT::ODT(QObject* parent, Acquisition* acquisition, Camera*& camera, ODTControl*& ODTControl)
+	: AcquisitionMode(parent, acquisition, (ScanControl*&)ODTControl), m_camera(camera), m_ODTControl(ODTControl) {
 }
 
 ODT::~ODT() {
@@ -56,7 +56,7 @@ void ODT::startRepetitions() {
 	m_abort = false;
 
 	// configure camera for measurement
-	CAMERA_SETTINGS settings = (*m_camera)->getSettings();
+	CAMERA_SETTINGS settings = m_camera->getSettings();
 	// set ROI and readout parameters to default ODT values, exposure time and gain will be kept
 	settings.roi.left = 128;
 	settings.roi.top = 0;
@@ -68,10 +68,10 @@ void ODT::startRepetitions() {
 	settings.exposureTime = m_cameraSettings.exposureTime;
 	settings.gain = m_cameraSettings.gain;
 
-	(*m_camera)->startAcquisition(settings);
+	m_camera->startAcquisition(settings);
 
 	// read back the applied settings
-	m_cameraSettings = (*m_camera)->getSettings();
+	m_cameraSettings = m_camera->getSettings();
 
 	m_acquisition->newRepetition(ACQUISITION_MODE::ODT);
 
@@ -82,7 +82,7 @@ void ODT::startRepetitions() {
 	centerAlignment();
 
 	// configure camera for preview
-	(*m_camera)->stopAcquisition();
+	m_camera->stopAcquisition();
 
 	m_acquisition->disableMode(ACQUISITION_MODE::ODT);
 }
@@ -113,18 +113,18 @@ void ODT::startAlignment() {
 		m_algnRunning = true;
 
 		// configure camera exposure and gain
-		CAMERA_SETTINGS settings = (*m_camera)->getSettings();
+		CAMERA_SETTINGS settings = m_camera->getSettings();
 		settings.exposureTime = m_cameraSettings.exposureTime;
 		settings.gain = m_cameraSettings.gain;
 		QMetaObject::invokeMethod(
-			(*m_camera),
-			[&m_camera = (*m_camera), settings]() { m_camera->setSettings(settings); }, Qt::AutoConnection
+			m_camera,
+			[camera = m_camera, settings]() { camera->setSettings(settings); }, Qt::AutoConnection
 		);
 
 		// move to ODT configuration
-		(*m_ODTControl)->setPreset(ScanPreset::SCAN_ODT);
+		m_ODTControl->setPreset(ScanPreset::SCAN_ODT);
 		// stop querying the element positions, because querying the filter mounts block the thread quite long
-		(*m_ODTControl)->stopAnnouncingElementPosition();
+		m_ODTControl->stopAnnouncingElementPosition();
 		// start the timer
 		if (!m_algnTimer->isActive()) {
 			m_algnTimer->start(1e3 / (m_algnSettings.scanRate * m_algnSettings.numberPoints));
@@ -136,7 +136,7 @@ void ODT::startAlignment() {
 			m_algnTimer->stop();
 		}
 		// start querying the element positions again
-		(*m_ODTControl)->startAnnouncingElementPosition();
+		m_ODTControl->startAnnouncingElementPosition();
 		m_acquisition->disableMode(ACQUISITION_MODE::ODT);
 		setAcquisitionStatus(ACQUISITION_STATUS::STOPPED);
 	}
@@ -144,7 +144,7 @@ void ODT::startAlignment() {
 
 void ODT::centerAlignment() {
 	if (!m_algnRunning && (m_status < ACQUISITION_STATUS::RUNNING)) {
-		(*m_ODTControl)->setVoltage({ 0, 0 });
+		m_ODTControl->setVoltage({ 0, 0 });
 
 		// announce mirror voltage
 		emit(s_mirrorVoltageChanged({ 0, 0 }, ODT_MODE::ALGN));
@@ -195,8 +195,8 @@ void ODT::setCameraSetting(CAMERA_SETTING type, double value) {
 	// Apply camera settings immediately if alignment is running
 	if (m_algnRunning) {
 		QMetaObject::invokeMethod(
-			(*m_camera),
-			[&m_camera = (*m_camera), type, value]() { m_camera->setSetting(type, value); },
+			m_camera,
+			[camera = m_camera, type, value]() { camera->setSetting(type, value); },
 			Qt::AutoConnection
 		);
 	}
@@ -311,10 +311,10 @@ void ODT::__acquire(std::unique_ptr <StorageWrapper> & storage) {
 	);
 
 	// move to ODT configuration
-	(*m_ODTControl)->setPreset(ScanPreset::SCAN_ODT);
+	m_ODTControl->setPreset(ScanPreset::SCAN_ODT);
 
 	// Set first mirror voltage already
-	(*m_ODTControl)->setVoltage(m_acqSettings.voltages[0]);
+	m_ODTControl->setVoltage(m_acqSettings.voltages[0]);
 	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 	writeScaleCalibration(storage, ACQUISITION_MODE::ODT);
@@ -337,7 +337,7 @@ void ODT::__acquire(std::unique_ptr <StorageWrapper> & storage) {
 		std::fill_n(voltages.mirror.begin() + i * samplesPerAngle + (size_t)m_acqSettings.numberPoints * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i].Uy);
 	}
 	// Apply voltages to NIDAQ board
-	(*m_ODTControl)->setAcquisitionVoltages(voltages);
+	m_ODTControl->setAcquisitionVoltages(voltages);
 
 	int rank_data{ 3 };
 	hsize_t dims_data[3] = { 1, (hsize_t)m_cameraSettings.roi.height_binned, (hsize_t)m_cameraSettings.roi.width_binned };
@@ -353,7 +353,7 @@ void ODT::__acquire(std::unique_ptr <StorageWrapper> & storage) {
 			}
 
 			// acquire images
-			(*m_camera)->getImageForAcquisition(&images[0], false);
+			m_camera->getImageForAcquisition(&images[0], false);
 
 
 			// store images
@@ -422,7 +422,7 @@ void ODT::nextAlgnPosition() {
 	}
 	VOLTAGE2 voltage = m_algnSettings.voltages[m_algnPositionIndex];
 	// set new voltage to galvo mirrors
-	(*m_ODTControl)->setVoltage(voltage);
+	m_ODTControl->setVoltage(voltage);
 
 	// announce mirror voltage
 	emit(s_mirrorVoltageChanged(voltage, ODT_MODE::ALGN));

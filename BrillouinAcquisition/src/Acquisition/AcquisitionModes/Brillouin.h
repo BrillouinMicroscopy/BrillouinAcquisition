@@ -147,7 +147,7 @@ class Brillouin : public AcquisitionMode {
 	Q_OBJECT
 
 public:
-	Brillouin(QObject* parent, Acquisition* acquisition, Camera** andor, ScanControl** scanControl);
+	Brillouin(QObject* parent, Acquisition* acquisition, Camera*& andor, ScanControl*& scanControl);
 	~Brillouin();
 
 	BRILLOUIN_SETTINGS& settings{ m_settings };
@@ -195,7 +195,7 @@ private:
 
 	BRILLOUIN_SETTINGS m_settings;
 	SCAN_ORDER m_scanOrder;
-	Camera** m_andor{ nullptr };
+	Camera*& m_andor;
 	bool m_running{ false };				// is acquisition currently running
 	POINT3 m_startPosition{ 0, 0, 0 };
 

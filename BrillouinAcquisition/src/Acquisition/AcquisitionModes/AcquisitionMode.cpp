@@ -5,7 +5,7 @@
  * Public definitions
  */
 
-AcquisitionMode::AcquisitionMode(QObject *parent, Acquisition *acquisition, ScanControl **scanControl)
+AcquisitionMode::AcquisitionMode(QObject *parent, Acquisition *acquisition, ScanControl*& scanControl)
 	: QObject(parent), m_acquisition(acquisition), m_scanControl(scanControl) {
 }
 
@@ -30,10 +30,10 @@ void AcquisitionMode::setAcquisitionStatus(ACQUISITION_STATUS status) {
 }
 
 void AcquisitionMode::writeScaleCalibration(std::unique_ptr <StorageWrapper>& storage, ACQUISITION_MODE mode) {
-	auto scaleCalibration = (*m_scanControl)->getScaleCalibration();
+	auto scaleCalibration = m_scanControl->getScaleCalibration();
 
-	auto positionStage = (*m_scanControl)->getPosition(PositionType::STAGE);
-	auto positionScanner = (*m_scanControl)->getPosition(PositionType::SCANNER);
+	auto positionStage = m_scanControl->getPosition(PositionType::STAGE);
+	auto positionScanner = m_scanControl->getPosition(PositionType::SCANNER);
 
 	storage->setScaleCalibration(mode, { scaleCalibration, positionStage, positionScanner });
 }

@@ -18,7 +18,7 @@ class ScaleCalibration : public AcquisitionMode {
 	Q_OBJECT
 
 public:
-	ScaleCalibration(QObject* parent, Acquisition* acquisition, Camera** camera, ScanControl** scanControl);
+	ScaleCalibration(QObject* parent, Acquisition* acquisition, Camera*& camera, ScanControl*& scanControl);
 	~ScaleCalibration();
 
 public slots:
@@ -64,7 +64,7 @@ private:
 	void __acquire();
 
 	CAMERA_SETTINGS m_cameraSettings;
-	Camera** m_camera{ nullptr };
+	Camera*& m_camera;
 	POINT3 m_startPosition{ 0, 0, 0 };
 
 	ScaleCalibrationData m_scaleCalibration;

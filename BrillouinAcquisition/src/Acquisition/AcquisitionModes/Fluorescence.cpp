@@ -5,7 +5,7 @@
  * Public definitions
  */
 
-Fluorescence::Fluorescence(QObject* parent, Acquisition* acquisition, Camera** camera, ScanControl** scanControl)
+Fluorescence::Fluorescence(QObject* parent, Acquisition* acquisition, Camera*& camera, ScanControl*& scanControl)
 	: AcquisitionMode(parent, acquisition, scanControl), m_camera(camera) {}
 
 Fluorescence::~Fluorescence() {
@@ -48,7 +48,7 @@ void Fluorescence::startRepetitions(std::vector<FLUORESCENCE_MODE> modes) {
 	if (m_currentPreviewChannel != FLUORESCENCE_MODE::NONE) {
 		m_currentPreviewChannel = FLUORESCENCE_MODE::NONE;
 		if (m_camera) {
-			(*m_camera)->stopPreview();
+			m_camera->stopPreview();
 		}
 	}
 
@@ -88,8 +88,8 @@ void Fluorescence::setExposure(FLUORESCENCE_MODE mode, int exposure) {
 		m_settings.camera.exposureTime = 1e-3 * channel->exposure;
 		if (m_camera) {
 			QMetaObject::invokeMethod(
-				(*m_camera),
-				[&m_camera = (*m_camera), channel]() { m_camera->setSetting(CAMERA_SETTING::EXPOSURE, 1e-3 * channel->exposure); },
+				m_camera,
+				[camera = m_camera, channel]() { camera->setSetting(CAMERA_SETTING::EXPOSURE, 1e-3 * channel->exposure); },
 				Qt::AutoConnection
 			);
 		}
@@ -105,8 +105,8 @@ void Fluorescence::setGain(FLUORESCENCE_MODE mode, int gain) {
 		m_settings.camera.gain = channel->gain;
 		if (m_camera) {
 			QMetaObject::invokeMethod(
-				(*m_camera),
-				[&m_camera = (*m_camera), channel]() { m_camera->setSetting(CAMERA_SETTING::GAIN, channel->gain); },
+				m_camera,
+				[camera = m_camera, channel]() { camera->setSetting(CAMERA_SETTING::GAIN, channel->gain); },
 				Qt::AutoConnection
 			);
 		}
@@ -120,32 +120,32 @@ void Fluorescence::startStopPreview(FLUORESCENCE_MODE mode) {
 		m_currentPreviewChannel = FLUORESCENCE_MODE::NONE;
 		if (m_camera) {
 			QMetaObject::invokeMethod(
-				(*m_camera),
-				[&m_camera = (*m_camera)]() { m_camera->stopPreview(); },
+				m_camera,
+				[camera = m_camera]() { camera->stopPreview(); },
 				Qt::AutoConnection
 			);
 		}
 	} else {
 		// if preview is already running, stop it first
-		if (m_camera && (*m_camera)->m_isPreviewRunning) {
-			(*m_camera)->stopPreview();
+		if (m_camera && m_camera->m_isPreviewRunning) {
+			m_camera->stopPreview();
 		}
 		m_currentPreviewChannel = mode;
 		ChannelSettings* channel = getChannelSettings(mode);
 
 		// move to Fluorescence configuration
 		if (m_scanControl) {
-			(*m_scanControl)->setPreset(channel->preset);
+			m_scanControl->setPreset(channel->preset);
 		}
 
 		// start image acquisition
 		m_settings.camera.exposureTime = 1e-3 * channel->exposure;
 		m_settings.camera.gain = channel->gain;
 		if (m_camera) {
-			(*m_camera)->setSettings(m_settings.camera);
+			m_camera->setSettings(m_settings.camera);
 			QMetaObject::invokeMethod(
-				(*m_camera),
-				[&m_camera = (*m_camera)]() { m_camera->startPreview(); },
+				m_camera,
+				[camera = m_camera]() { camera->startPreview(); },
 				Qt::AutoConnection
 			);
 		}
@@ -217,9 +217,9 @@ void Fluorescence::configureCamera() {
 		return;
 	}
 
-	auto cameraType = (std::string)typeid(**m_camera).name();
+	auto cameraType = (std::string)typeid(*m_camera).name();
 
-	m_settings.camera = (*m_camera)->getSettings();
+	m_settings.camera = m_camera->getSettings();
 
 	// configure camera for measurement
 	// This needs a proper implementation with user defined values. Probably by a configuration file.
@@ -289,7 +289,7 @@ void Fluorescence::__acquire(std::unique_ptr <StorageWrapper>& storage, std::vec
 
 		// move to Fluorescence configuration
 		if (m_scanControl) {
-			(*m_scanControl)->setPreset(channel->preset);
+			m_scanControl->setPreset(channel->preset);
 		}
 
 		/*
@@ -310,24 +310,24 @@ void Fluorescence::__acquire(std::unique_ptr <StorageWrapper>& storage, std::vec
 		if (changed) {
 			m_settings.camera.frameCount = 2;
 			if (m_camera) {
-				(*m_camera)->startAcquisition(m_settings.camera);
+				m_camera->startAcquisition(m_settings.camera);
 				// Settings might change after acquisition start (e.g. binning size and bytes per frame)
-				m_settings.camera = (*m_camera)->getSettings();
-				(*m_camera)->getImageForAcquisition(nullptr, false);
-				(*m_camera)->getImageForAcquisition(nullptr, false);
-				(*m_camera)->stopAcquisition();
+				m_settings.camera = m_camera->getSettings();
+				m_camera->getImageForAcquisition(nullptr, false);
+				m_camera->getImageForAcquisition(nullptr, false);
+				m_camera->stopAcquisition();
 			}
 		}
 
 		// start image acquisition
 		m_settings.camera.frameCount = 1;
 		if (m_camera) {
-			(*m_camera)->startAcquisition(m_settings.camera);
+			m_camera->startAcquisition(m_settings.camera);
 		}
 
 		// Settings might change after acquisition start (e.g. binning size and bytes per frame)
 		if (m_camera) {
-			m_settings.camera = (*m_camera)->getSettings();
+			m_settings.camera = m_camera->getSettings();
 		}
 		hsize_t dims_data[3] = { 1, (hsize_t)m_settings.camera.roi.height_binned, (hsize_t)m_settings.camera.roi.width_binned };
 
@@ -336,7 +336,7 @@ void Fluorescence::__acquire(std::unique_ptr <StorageWrapper>& storage, std::vec
 
 		// acquire images
 		if (m_camera) {
-			(*m_camera)->getImageForAcquisition(&images[0], true);
+			m_camera->getImageForAcquisition(&images[0], true);
 		}
 
 		// cast the vector to unsigned short
@@ -348,7 +348,7 @@ void Fluorescence::__acquire(std::unique_ptr <StorageWrapper>& storage, std::vec
 		int i{ 0 };
 		while (sum == 0 && 5 > i++) {
 			if (m_camera) {
-				(*m_camera)->getImageForAcquisition(&images[0], true);
+				m_camera->getImageForAcquisition(&images[0], true);
 			}
 
 			// cast the vector type T
@@ -382,7 +382,7 @@ void Fluorescence::__acquire(std::unique_ptr <StorageWrapper>& storage, std::vec
 
 		// configure camera for preview
 		if (m_camera) {
-			(*m_camera)->stopAcquisition();
+			m_camera->stopAcquisition();
 		}
 		imageNumber++;
 		double percentage = 100 * (double)imageNumber / channels.size();

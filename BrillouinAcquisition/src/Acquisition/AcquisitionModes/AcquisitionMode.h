@@ -23,7 +23,7 @@ class AcquisitionMode : public QObject {
 	Q_OBJECT
 
 public:
-	AcquisitionMode(QObject *parent, Acquisition *acquisition, ScanControl** scanControl);
+	AcquisitionMode(QObject *parent, Acquisition* acquisition, ScanControl*& scanControl);
 	~AcquisitionMode();
 
 	bool m_abort{ false };
@@ -44,7 +44,7 @@ protected:
 
 	ACQUISITION_STATUS m_status{ ACQUISITION_STATUS::DISABLED };
 	Acquisition* m_acquisition{ nullptr };
-	ScanControl** m_scanControl{ nullptr };
+	ScanControl*& m_scanControl;
 
 private slots:
 	virtual void acquire(std::unique_ptr <StorageWrapper> & storage) = 0;

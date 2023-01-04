@@ -2873,7 +2873,7 @@ void BrillouinAcquisition::initODT() {
 			ui->acquisitionModeTabs->removeTab(tabIndexODT);
 		}
 	} else {
-		m_ODT = new ODT(nullptr, m_acquisition, &m_brightfieldCamera, (ODTControl**)&m_scanControl);
+		m_ODT = new ODT(nullptr, m_acquisition, m_brightfieldCamera, (ODTControl*&)m_scanControl);
 		ui->acquisitionModeTabs->insertTab(1, ui->ODT, "ODT");
 
 		static QMetaObject::Connection connection;
@@ -2935,7 +2935,7 @@ void BrillouinAcquisition::initVoltageCalibration() {
 	if (!m_scanControl->supportsCapability(Capabilities::VoltageCalibration)) {
 		ui->menu_Voltage_calibration->menuAction()->setVisible(false);
 	} else {
-		m_voltageCalibration = new VoltageCalibration(nullptr, m_acquisition, &m_brightfieldCamera, (ODTControl**)&m_scanControl);
+		m_voltageCalibration = new VoltageCalibration(nullptr, m_acquisition, m_brightfieldCamera, (ODTControl*&)m_scanControl);
 		ui->menu_Voltage_calibration->menuAction()->setVisible(true);
 
 		static QMetaObject::Connection connection;
@@ -2967,7 +2967,7 @@ void BrillouinAcquisition::initScaleCalibration() {
 
 	// Initialize scaleCalibration if it is not running already.
 	if (!m_scaleCalibration) {
-		m_scaleCalibration = new ScaleCalibration(nullptr, m_acquisition, &m_brightfieldCamera, &m_scanControl);
+		m_scaleCalibration = new ScaleCalibration(nullptr, m_acquisition, m_brightfieldCamera, m_scanControl);
 		// start Calibration thread
 		m_acquisitionThread.startWorker(m_scaleCalibration);
 
@@ -3016,7 +3016,7 @@ void BrillouinAcquisition::initFluorescence() {
 			ui->acquisitionModeTabs->removeTab(tabIndexFluorescence);
 		}
 	} else {
-		m_Fluorescence = new Fluorescence(nullptr, m_acquisition, &m_brightfieldCamera, &m_scanControl);
+		m_Fluorescence = new Fluorescence(nullptr, m_acquisition, m_brightfieldCamera, m_scanControl);
 		ui->acquisitionModeTabs->insertTab(2, ui->Fluorescence, "Fluorescence");
 
 		static QMetaObject::Connection connection;

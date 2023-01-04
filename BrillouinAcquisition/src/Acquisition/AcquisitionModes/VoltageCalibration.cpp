@@ -10,8 +10,8 @@
  * Public definitions
  */
 
-VoltageCalibration::VoltageCalibration(QObject* parent, Acquisition* acquisition, Camera** camera, ODTControl** ODTControl)
-	: AcquisitionMode(parent, acquisition, (ScanControl**)ODTControl), m_camera(camera), m_ODTControl(ODTControl) {
+VoltageCalibration::VoltageCalibration(QObject* parent, Acquisition* acquisition, Camera*& camera, ODTControl*& ODTControl)
+	: AcquisitionMode(parent, acquisition, (ScanControl*&)ODTControl), m_camera(camera), m_ODTControl(ODTControl) {
 }
 
 VoltageCalibration::~VoltageCalibration() {}
@@ -29,12 +29,12 @@ void VoltageCalibration::startRepetitions() {
 	// reset abort flag
 	m_abort = false;
 
-	CAMERA_OPTIONS cameraOptions = (*m_camera)->getOptions();
+	CAMERA_OPTIONS cameraOptions = m_camera->getOptions();
 
 	/*
 	 * Configure the camera
 	 */
-	m_cameraSettings = (*m_camera)->getSettings();
+	m_cameraSettings = m_camera->getSettings();
 	// set ROI and readout parameters to default Brillouin values, exposure time and gain will be kept
 	if (m_cameraSettings.exposureTime > 0.003) {
 		m_cameraSettings.exposureTime = 0.003;
@@ -47,9 +47,9 @@ void VoltageCalibration::startRepetitions() {
 	m_cameraSettings.readout.triggerMode = L"External";
 	m_cameraSettings.readout.cycleMode = L"Continuous";
 	m_cameraSettings.frameCount = (long long)m_acqSettings.Ux_steps * m_acqSettings.Uy_steps;
-	(*m_camera)->setSettings(m_cameraSettings);
+	m_camera->setSettings(m_cameraSettings);
 
-	m_cameraSettings = (*m_camera)->getSettings();
+	m_cameraSettings = m_camera->getSettings();
 
 	// start repetition
 	acquire();
@@ -101,7 +101,7 @@ void VoltageCalibration::load(std::string filepath) {
 
 	VoltageCalibrationHelper::calculateCalibrationWeights(&m_voltageCalibration);
 
-	(*m_ODTControl)->setVoltageCalibration(m_voltageCalibration);
+	m_ODTControl->setVoltageCalibration(m_voltageCalibration);
 }
 
 /*
@@ -229,8 +229,8 @@ void VoltageCalibration::__acquire() {
 	setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 
 	// move to Brillouin configuration
-	(*m_ODTControl)->setPreset(ScanPreset::SCAN_BRILLOUIN);
-	(*m_ODTControl)->setLEDLamp(false);
+	m_ODTControl->setPreset(ScanPreset::SCAN_BRILLOUIN);
+	m_ODTControl->setLEDLamp(false);
 
 	std::vector<double> Ux_valid;
 	std::vector<double> Uy_valid;
@@ -254,7 +254,7 @@ void VoltageCalibration::__acquire() {
 
 	for (gsl::index chunk{ 0 }; chunk < nrChunks; chunk++) {
 
-		(*m_camera)->startAcquisition(m_cameraSettings);
+		m_camera->startAcquisition(m_cameraSettings);
 
 		int chunkBegin = chunk * nrImages;
 		int chunkEnd = (chunk + 1) * nrImages - 1;
@@ -264,7 +264,7 @@ void VoltageCalibration::__acquire() {
 		int chunkSize = chunkEnd - chunkBegin + 1;
 
 		// Set first mirror voltage already
-		(*m_ODTControl)->setVoltage(m_acqSettings.voltages[chunkBegin]);
+		m_ODTControl->setVoltage(m_acqSettings.voltages[chunkBegin]);
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 		ACQ_VOLTAGES voltages;
@@ -285,7 +285,7 @@ void VoltageCalibration::__acquire() {
 			std::fill_n(voltages.mirror.begin() + i * samplesPerAngle + (size_t)chunkSize * samplesPerAngle, samplesPerAngle, m_acqSettings.voltages[i + chunkBegin].Uy);
 		}
 		// Apply voltages to NIDAQ board
-		(*m_ODTControl)->setAcquisitionVoltages(voltages);
+		m_ODTControl->setAcquisitionVoltages(voltages);
 
 		int rank_data{ 3 };
 		hsize_t dims_data[3] = { 1, (hsize_t)m_cameraSettings.roi.height_binned, (hsize_t)m_cameraSettings.roi.width_binned };
@@ -302,7 +302,7 @@ void VoltageCalibration::__acquire() {
 
 				// acquire images
 				int64_t pointerPos = (int64_t)m_cameraSettings.roi.bytesPerFrame * mm;
-				(*m_camera)->getImageForAcquisition(&images[pointerPos], false);
+				m_camera->getImageForAcquisition(&images[pointerPos], false);
 			}
 
 			// cast the image to type T
@@ -315,7 +315,7 @@ void VoltageCalibration::__acquire() {
 				int y = m_cameraSettings.roi.height_binned - floor(index / m_cameraSettings.roi.width_binned);
 				int x = index % m_cameraSettings.roi.width_binned;
 
-				POINT2 pos = (*m_ODTControl)->pixToMicroMeter({ (double)x, (double)y });
+				POINT2 pos = m_ODTControl->pixToMicroMeter({ (double)x, (double)y });
 
 				Ux_valid.push_back(m_acqSettings.voltages[i + chunkBegin].Ux);
 				Uy_valid.push_back(m_acqSettings.voltages[i + chunkBegin].Uy);
@@ -324,7 +324,7 @@ void VoltageCalibration::__acquire() {
 			}
 		}
 
-		(*m_camera)->stopAcquisition();
+		m_camera->stopAcquisition();
 	}
 
 	// Construct spatial calibration object
@@ -339,9 +339,9 @@ void VoltageCalibration::__acquire() {
 	VoltageCalibrationHelper::calculateCalibrationWeights(&m_voltageCalibration);
 
 	save();
-	(*m_ODTControl)->setVoltageCalibration(m_voltageCalibration);
+	m_ODTControl->setVoltageCalibration(m_voltageCalibration);
 
-	(*m_ODTControl)->setPreset(ScanPreset::SCAN_BRILLOUIN);
+	m_ODTControl->setPreset(ScanPreset::SCAN_BRILLOUIN);
 
 	setAcquisitionStatus(ACQUISITION_STATUS::FINISHED);
 }
