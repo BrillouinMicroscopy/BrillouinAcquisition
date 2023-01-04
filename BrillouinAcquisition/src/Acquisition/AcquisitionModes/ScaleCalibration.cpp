@@ -14,7 +14,7 @@
  * Public definitions
  */
 
-ScaleCalibration::ScaleCalibration(QObject* parent, Acquisition* acquisition, Camera** camera, ScanControl** scanControl)
+ScaleCalibration::ScaleCalibration(QObject* parent, Acquisition* acquisition, Camera*& camera, ScanControl*& scanControl)
 	: AcquisitionMode(parent, acquisition, scanControl), m_camera(camera) {
 }
 
@@ -34,26 +34,26 @@ void ScaleCalibration::startRepetitions() {
 	m_abort = false;
 
 	// Check that we have camera and scancontrol
-	if (!(*m_camera)) {
+	if (!m_camera) {
 		return;
 	}
-	if (!(*m_scanControl)) {
+	if (!m_scanControl) {
 		return;
 	}
 
 	/*
 	 * Configure the camera
 	 */
-	m_cameraSettings = (*m_camera)->getSettings();
+	m_cameraSettings = m_camera->getSettings();
 
 	m_cameraSettings.roi.left = 1000;
 	m_cameraSettings.roi.top = 800;
 	m_cameraSettings.roi.width_physical = 1000;
 	m_cameraSettings.roi.height_physical = 1000;
 	m_cameraSettings.frameCount = 1;
-	(*m_camera)->setSettings(m_cameraSettings);
+	m_camera->setSettings(m_cameraSettings);
 
-	m_cameraSettings = (*m_camera)->getSettings();
+	m_cameraSettings = m_camera->getSettings();
 
 	acquire();
 
@@ -97,11 +97,11 @@ void ScaleCalibration::abortMode(std::unique_ptr <StorageWrapper>& storage) {}
 void ScaleCalibration::abortMode() {
 	m_acquisition->disableMode(ACQUISITION_MODE::SCALECALIBRATION);
 
-	(*m_scanControl)->setPosition(m_startPosition);
+	m_scanControl->setPosition(m_startPosition);
 
 	QMetaObject::invokeMethod(
-		(*m_scanControl),
-		[&m_scanControl = (*m_scanControl)]() { m_scanControl->startAnnouncing(); },
+		m_scanControl,
+		[scanControl = m_scanControl]() { scanControl->startAnnouncing(); },
 		Qt::AutoConnection
 	);
 
@@ -257,16 +257,16 @@ void ScaleCalibration::__acquire() {
 	setAcquisitionStatus(ACQUISITION_STATUS::STARTED);
 
 	QMetaObject::invokeMethod(
-		(*m_scanControl),
-		[&m_scanControl = (*m_scanControl)]() { m_scanControl->stopAnnouncing(); },
+		m_scanControl,
+		[scanControl = m_scanControl]() { scanControl->stopAnnouncing(); },
 		Qt::AutoConnection
 	);
 	// Set optical elements for brightfield/Brillouin imaging
-	(*m_scanControl)->setPreset(ScanPreset::SCAN_BRIGHTFIELD);
+	m_scanControl->setPreset(ScanPreset::SCAN_BRIGHTFIELD);
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
 	// Get the current stage position
-	m_startPosition = (*m_scanControl)->getPosition();
+	m_startPosition = m_scanControl->getPosition();
 
 	/*
 	 * We acquire three images here, one at the origin, and one each shifted in x- and y-direction.
@@ -281,7 +281,7 @@ void ScaleCalibration::__acquire() {
 		image.resize(m_cameraSettings.roi.bytesPerFrame);
 	}
 
-	(*m_camera)->startAcquisition(m_cameraSettings);
+	m_camera->startAcquisition(m_cameraSettings);
 
 	auto iteration{ 0 };
 	emit(s_scaleCalibrationAcquisitionProgress(iteration));
@@ -297,9 +297,9 @@ void ScaleCalibration::__acquire() {
 		 */
 		auto positionAbsolute = m_startPosition + POINT3{ position.x, position.y, 0 };
 		// To prevent problems with the hysteresis of the stage, we always move to the desired point coming from lower values.
-		(*m_scanControl)->setPosition(positionAbsolute - POINT3{ hysteresisCompensation, hysteresisCompensation, 0 });
+		m_scanControl->setPosition(positionAbsolute - POINT3{ hysteresisCompensation, hysteresisCompensation, 0 });
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		(*m_scanControl)->setPosition(positionAbsolute);
+		m_scanControl->setPosition(positionAbsolute);
 		std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
 		/*
@@ -307,7 +307,7 @@ void ScaleCalibration::__acquire() {
 		 */
 
 		 // acquire images
-		(*m_camera)->getImageForAcquisition(&(images[iteration])[0], false);
+		m_camera->getImageForAcquisition(&(images[iteration])[0], false);
 
 		// Sometimes the uEye camera returns a black image (only zeros), we try to catch this here by
 		// repeating the acquisition a maximum of 5 times
@@ -317,7 +317,7 @@ void ScaleCalibration::__acquire() {
 		auto sum = simplemath::sum(*images_);
 		auto tryCount{ 0 };
 		while (sum == 0 && 5 > tryCount++) {
-			(*m_camera)->getImageForAcquisition(&(images[iteration])[0], false);
+			m_camera->getImageForAcquisition(&(images[iteration])[0], false);
 
 			images_ = (std::vector<T> *) &(images[iteration]);
 			sum = simplemath::sum(*images_);
@@ -328,7 +328,7 @@ void ScaleCalibration::__acquire() {
 	}
 
 	// Stop the camera acquisition
-	(*m_camera)->stopAcquisition();
+	m_camera->stopAcquisition();
 
 	// Create input matrices for OpenCV from camera images
 	auto imagesCV = std::vector<cv::Mat>(images.size());
@@ -402,10 +402,10 @@ void ScaleCalibration::__acquire() {
 	/*
 	 * Cleanup the acquisition mode
 	 */
-	(*m_scanControl)->setPosition(m_startPosition);
+	m_scanControl->setPosition(m_startPosition);
 	QMetaObject::invokeMethod(
-		(*m_scanControl),
-		[&m_scanControl = (*m_scanControl)]() { m_scanControl->startAnnouncing(); },
+		m_scanControl,
+		[scanControl = m_scanControl]() { scanControl->startAnnouncing(); },
 		Qt::AutoConnection
 	);
 
@@ -428,7 +428,7 @@ void ScaleCalibration::acquire() {
 
 void ScaleCalibration::initialize() {
 	// Get the current scale calibration from the scanControl
-	m_scaleCalibration = (*m_scanControl)->getScaleCalibration();
+	m_scaleCalibration = m_scanControl->getScaleCalibration();
 
 	// Emit it to the main GUI thread
 	emit(s_scaleCalibrationAcquisitionProgress(0.0));
@@ -440,7 +440,7 @@ void ScaleCalibration::apply() {
 	try {
 		ScaleCalibrationHelper::initializeCalibrationFromMicrometer(&m_scaleCalibration);
 		ScaleCalibrationHelper::initializeCalibrationFromPixel(&m_scaleCalibration);
-		(*m_scanControl)->setScaleCalibration(m_scaleCalibration);
+		m_scanControl->setScaleCalibration(m_scaleCalibration);
 		emit(s_closeScaleCalibrationDialog());
 	} catch (std::exception& e) {
 		emit(s_scaleCalibrationStatus("Cannot apply scale calibration", "The provided scale calibration is invalid."));

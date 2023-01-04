@@ -35,7 +35,7 @@ class Fluorescence : public AcquisitionMode {
 	Q_OBJECT
 
 public:
-	Fluorescence(QObject *parent, Acquisition *acquisition, Camera **camera, ScanControl **scanControl);
+	Fluorescence(QObject* parent, Acquisition* acquisition, Camera*& camera, ScanControl*& scanControl);
 	~Fluorescence();
 
 public slots:
@@ -58,7 +58,7 @@ private:
 	template <typename T>
 	void __acquire(std::unique_ptr <StorageWrapper>& storage, std::vector<ChannelSettings*> channels);
 
-	Camera** m_camera{ nullptr };
+	Camera*& m_camera;
 
 	FLUORESCENCE_SETTINGS m_settings = FLUORESCENCE_SETTINGS{};
 	FLUORESCENCE_MODE m_currentPreviewChannel{ FLUORESCENCE_MODE::NONE };

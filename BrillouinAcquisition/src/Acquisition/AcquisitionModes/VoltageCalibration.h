@@ -24,7 +24,7 @@ class VoltageCalibration : public AcquisitionMode {
 	Q_OBJECT
 
 public:
-	VoltageCalibration(QObject* parent, Acquisition* acquisition, Camera** camera, ODTControl** ODTControl);
+	VoltageCalibration(QObject* parent, Acquisition* acquisition, Camera*& camera, ODTControl*& ODTControl);
 	~VoltageCalibration();
 
 public slots:
@@ -49,8 +49,8 @@ private:
 
 	CALIBRATION_SETTINGS m_acqSettings{};
 	CAMERA_SETTINGS m_cameraSettings{ 0.002, 0 };
-	Camera** m_camera{ nullptr };
-	ODTControl** m_ODTControl{ nullptr };
+	Camera*& m_camera;
+	ODTControl*& m_ODTControl;
 
 	double m_minimalIntensity{ 100 };		// [1] minimum peak intensity for valid peaks
 
