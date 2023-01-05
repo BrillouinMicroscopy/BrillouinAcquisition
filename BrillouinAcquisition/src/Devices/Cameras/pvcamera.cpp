@@ -35,13 +35,15 @@ PVCamera::~PVCamera() {
 void PVCamera::init() {
 	// create timers and connect their signals
 	// after moving camera to another thread
-	m_tempTimer = new QTimer();
-	auto connection = QWidget::connect(
-		m_tempTimer,
-		&QTimer::timeout,
-		this,
-		&PVCamera::checkSensorTemperature
-	);
+	if (!m_tempTimer) {
+		m_tempTimer = new QTimer();
+		auto connection = QWidget::connect(
+			m_tempTimer,
+			&QTimer::timeout,
+			this,
+			&PVCamera::checkSensorTemperature
+		);
+	}
 }
 
 void PVCamera::connectDevice() {

@@ -130,34 +130,45 @@ void ZeissECU::setDevice(com* device) {
  */
 
 void ZeissECU::init() {
-	m_comObject = new com();
+	if (!m_comObject) {
+		m_comObject = new com();
+		auto connection = QWidget::connect(
+			m_comObject,
+			&com::errorOccurred,
+			this,
+			&ZeissECU::errorHandler
+		);
+	}
 
-	m_focus = new Focus(m_comObject);
-	m_mcu = new MCU(m_comObject);
-	m_stand = new Stand(m_comObject);
+	if (!m_focus) {
+		m_focus = new Focus(m_comObject);
+	}
+	if (!m_mcu) {
+		m_mcu = new MCU(m_comObject);
+	}
+	if (!m_stand) {
+		m_stand = new Stand(m_comObject);
+	}
 
-	auto connection = QWidget::connect(
-		m_comObject,
-		&com::errorOccurred,
-		this,
-		&ZeissECU::errorHandler
-	);
+	if (!m_positionTimer) {
+		m_positionTimer = new QTimer();
+		auto connection = QWidget::connect(
+			m_positionTimer,
+			&QTimer::timeout,
+			this,
+			&ZeissECU::announcePosition
+		);
+	}
 
-	m_positionTimer = new QTimer();
-	connection = QWidget::connect(
-		m_positionTimer,
-		&QTimer::timeout,
-		this,
-		&ZeissECU::announcePosition
-	);
-
-	m_elementPositionTimer = new QTimer();
-	connection = QWidget::connect(
-		m_elementPositionTimer,
-		&QTimer::timeout,
-		this,
-		&ZeissECU::getElements
-	);
+	if (!m_elementPositionTimer) {
+		m_elementPositionTimer = new QTimer();
+		auto connection = QWidget::connect(
+			m_elementPositionTimer,
+			&QTimer::timeout,
+			this,
+			&ZeissECU::getElements
+		);
+	}
 	calculateHomePositionBounds();
 }
 

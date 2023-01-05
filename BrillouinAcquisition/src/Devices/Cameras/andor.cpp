@@ -24,13 +24,15 @@ Andor::~Andor() {
 void Andor::init() {
 	// create timers and connect their signals
 	// after moving andor to another thread
-	m_tempTimer = new QTimer();
-	auto connection = QWidget::connect(
-		m_tempTimer,
-		&QTimer::timeout,
-		this,
-		&Andor::checkSensorTemperature
-	);
+	if (!m_tempTimer) {
+		m_tempTimer = new QTimer();
+		auto connection = QWidget::connect(
+			m_tempTimer,
+			&QTimer::timeout,
+			this,
+			&Andor::checkSensorTemperature
+		);
+	}
 }
 
 void Andor::connectDevice() {
