@@ -147,22 +147,25 @@ void ZeissMTB::init() {
 		m_MTBConnection = IMTBConnectionPtr(CLSID_MTBConnection);
 	} catch (_com_error& e) {
 	}
-
-	m_positionTimer = new QTimer();
-	auto connection = QWidget::connect(
-		m_positionTimer,
-		&QTimer::timeout,
-		this,
-		&ZeissMTB::announcePosition
+	if (!m_positionTimer) {
+		m_positionTimer = new QTimer();
+		auto connection = QWidget::connect(
+			m_positionTimer,
+			&QTimer::timeout,
+			this,
+			&ZeissMTB::announcePosition
 		);
+	}
 
-	m_elementPositionTimer = new QTimer();
-	connection = QWidget::connect(
-		m_elementPositionTimer,
-		&QTimer::timeout,
-		this,
-		&ZeissMTB::getElements
-	);
+	if (!m_elementPositionTimer) {
+		m_elementPositionTimer = new QTimer();
+		auto connection = QWidget::connect(
+			m_elementPositionTimer,
+			&QTimer::timeout,
+			this,
+			&ZeissMTB::getElements
+		);
+	}
 	calculateHomePositionBounds();
 }
 
@@ -176,7 +179,7 @@ void ZeissMTB::connectDevice() {
 			/*
 			 * Connect to Zeiss MTB Server
 			 */
-			m_MTBConnection->Login("en", &m_ID);
+			auto res = m_MTBConnection->Login("en", &m_ID);
 			// get MTB root (forcing an internal QueryInterface() on IMTBRoot!)
 			m_Root = (IUnknown*)(m_MTBConnection->GetRoot((BSTR)m_ID));
 			m_isConnected = true;

@@ -147,25 +147,30 @@ void ZeissMTB_Erlangen::init() {
 		m_MTBConnection = IMTBConnectionPtr(CLSID_MTBConnection);
 	} catch (_com_error& e) {
 	}
+	if (!m_Mirror) {
+		m_Mirror = new FilterMount("COM5");
+		m_Mirror->init();
+	}
 
-	m_Mirror = new FilterMount("COM5");
-	m_Mirror->init();
+	if (!m_positionTimer) {
+		m_positionTimer = new QTimer();
+		auto connection = QWidget::connect(
+			m_positionTimer,
+			&QTimer::timeout,
+			this,
+			&ZeissMTB_Erlangen::announcePosition
+		);
+	}
 
-	m_positionTimer = new QTimer();
-	auto connection = QWidget::connect(
-		m_positionTimer,
-		&QTimer::timeout,
-		this,
-		&ZeissMTB_Erlangen::announcePosition
-	);
-
-	m_elementPositionTimer = new QTimer();
-	connection = QWidget::connect(
-		m_elementPositionTimer,
-		&QTimer::timeout,
-		this,
-		&ZeissMTB_Erlangen::getElements
-	);
+	if (!m_elementPositionTimer) {
+		m_elementPositionTimer = new QTimer();
+		auto connection = QWidget::connect(
+			m_elementPositionTimer,
+			&QTimer::timeout,
+			this,
+			&ZeissMTB_Erlangen::getElements
+		);
+	}
 	calculateHomePositionBounds();
 }
 

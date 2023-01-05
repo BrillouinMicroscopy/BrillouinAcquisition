@@ -140,18 +140,24 @@ POINT2 NIDAQ::voltageToPosition(VOLTAGE2 voltage) {
 void NIDAQ::init() {
 	calculateHomePositionBounds();
 
-	m_exFilter = new FilterMount("COM3");
-	m_exFilter->init();
-	m_emFilter = new FilterMount("COM6");
-	m_emFilter->init();
+	if (!m_exFilter) {
+		m_exFilter = new FilterMount("COM3");
+		m_exFilter->init();
+	}
+	if (!m_emFilter) {
+		m_emFilter = new FilterMount("COM6");
+		m_emFilter->init();
+	}
 
-	m_elementPositionTimer = new QTimer();
-	QMetaObject::Connection connection = QWidget::connect(
-		m_elementPositionTimer,
-		&QTimer::timeout,
-		this,
-		&NIDAQ::getElements
-	);
+	if (!m_elementPositionTimer) {
+		m_elementPositionTimer = new QTimer();
+		auto connection = QWidget::connect(
+			m_elementPositionTimer,
+			&QTimer::timeout,
+			this,
+			&NIDAQ::getElements
+		);
+	}
 }
 
 void NIDAQ::connectDevice() {
