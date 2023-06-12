@@ -1,3 +1,8 @@
+## 0.3.4 - 2023-06-12
+
+### Changed
+- Use tubelens 1 for Eyepiece preset c800decc537bc79e8b385860a4b9307af2fdc95b
+
 ## 0.3.3 - 2023-01-02
 
 ### Changed
