@@ -26,7 +26,7 @@ ZeissMTB::ZeissMTB() noexcept {
 		{ "Brillouin",		ScanPreset::SCAN_BRILLOUIN,		{ {2}, {}, {1}, {3}, {1}, {2}, {1},  {}, {} }	},	// Brillouin
 		{ "Calibration",	ScanPreset::SCAN_CALIBRATION,	{ {2}, {}, {1}, {3}, {1}, {3}, {1},  {}, {} }	},	// Calibration
 		{ "Brightfield",	ScanPreset::SCAN_BRIGHTFIELD,	{  {}, {}, {1}, {3}, {1}, {2}, {1}, {2}, {} }	},	// Brightfield
-		{ "Eyepiece",		ScanPreset::SCAN_EYEPIECE,		{ {1}, {}, {1}, {3}, {2}, {3}, {1}, {2}, {} }	},	// Eyepiece
+		{ "Eyepiece",		ScanPreset::SCAN_EYEPIECE,		{ {1}, {}, {1}, {1}, {2}, {3}, {1}, {2}, {} }	},	// Eyepiece
 		{ "Fluo Blue",		ScanPreset::SCAN_EPIFLUOBLUE,	{ {1}, {}, {2}, {3},  {}, {2}, {2}, {1}, {} }	},	// Fluorescence blue
 		{ "Fluo Green",		ScanPreset::SCAN_EPIFLUOGREEN,	{ {1}, {}, {3}, {3},  {}, {2}, {2}, {1}, {} }	},	// Fluorescence green
 		{ "Fluo Red",		ScanPreset::SCAN_EPIFLUORED,	{ {1}, {}, {4}, {3},  {}, {2}, {2}, {1}, {} }	},	// Fluorescence red
