@@ -11,15 +11,15 @@
 ZeissMTB::ZeissMTB() noexcept {
 
 	m_deviceElements = {
-		{ "Beam Block",	2, (int)DEVICE_ELEMENT::BEAMBLOCK, { "Close", "Open" } },
-		{ "Objective",	6, (int)DEVICE_ELEMENT::OBJECTIVE },
-		{ "Reflector",	5, (int)DEVICE_ELEMENT::REFLECTOR },
-		{ "Tubelens",	3, (int)DEVICE_ELEMENT::TUBELENS },
-		{ "Baseport",	3, (int)DEVICE_ELEMENT::BASEPORT },
-		{ "Sideport",	3, (int)DEVICE_ELEMENT::SIDEPORT },
-		{ "RL Shutter",	2, (int)DEVICE_ELEMENT::RLSHUTTER, { "Close", "Open" } },
-		{ "Mirror",		2, (int)DEVICE_ELEMENT::MIRROR },
-		{ "Hal. Lamp",	0, (int)DEVICE_ELEMENT::LAMP, DEVICE_INPUT_TYPE::SLIDER }
+		DeviceElement { "Beam Block",	2, (int)DEVICE_ELEMENT::BEAMBLOCK, { "Close", "Open" } },
+		DeviceElement { "Objective",	6, (int)DEVICE_ELEMENT::OBJECTIVE },
+		DeviceElement { "Reflector",	5, (int)DEVICE_ELEMENT::REFLECTOR },
+		DeviceElement { "Tubelens",	3, (int)DEVICE_ELEMENT::TUBELENS },
+		DeviceElement { "Baseport",	3, (int)DEVICE_ELEMENT::BASEPORT },
+		DeviceElement { "Sideport",	3, (int)DEVICE_ELEMENT::SIDEPORT },
+		DeviceElement { "RL Shutter",	2, (int)DEVICE_ELEMENT::RLSHUTTER, { "Close", "Open" } },
+		DeviceElement { "Mirror",		2, (int)DEVICE_ELEMENT::MIRROR },
+		DeviceElement { "Hal. Lamp",	0, (int)DEVICE_ELEMENT::LAMP, DEVICE_INPUT_TYPE::SLIDER }
 	};
 
 	m_presets = {
@@ -79,11 +79,11 @@ void ZeissMTB::setPosition(POINT2 position) {
 	auto positionStage = position - m_positionScanner;
 	if (abs(m_positionStage.x - positionStage.x) > 1e-6) {
 		m_positionStage.x = positionStage.x;
-		success = m_stageX->SetPosition(m_positionStage.x, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		success = m_stageX->SetPosition(m_positionStage.x, "ï¿½m", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 	}
 	if (abs(m_positionStage.y - positionStage.y) > 1e-6) {
 		m_positionStage.y = positionStage.y;
-		success = m_stageY->SetPosition(m_positionStage.y, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		success = m_stageY->SetPosition(m_positionStage.y, "ï¿½m", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 	}
 	calculateCurrentPositionBounds(POINT3{ position.x, position.y, m_positionFocus });
 	announcePositions();
@@ -97,7 +97,7 @@ void ZeissMTB::setPosition(POINT3 position) {
 	// Only set position if it has changed
 	if (abs(m_positionFocus - position.z) > 1e-6) {
 		m_positionFocus = position.z;
-		success = m_ObjectiveFocus->SetPosition(m_positionFocus, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		success = m_ObjectiveFocus->SetPosition(m_positionFocus, "ï¿½m", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 	}
 	setPosition(POINT2{ position.x, position.y });
 }
@@ -109,11 +109,11 @@ void ZeissMTB::movePosition(POINT2 distance) {
 	}
 	if (abs(distance.x) > 1e-6) {
 		m_positionStage.x += distance.x;
-		success = m_stageX->SetPosition(distance.x, "µm", (MTBCmdSetModes)(MTBCmdSetModes::MTBCmdSetModes_Synchronous | MTBCmdSetModes::MTBCmdSetModes_Relative), 500);
+		success = m_stageX->SetPosition(distance.x, "ï¿½m", (MTBCmdSetModes)(MTBCmdSetModes::MTBCmdSetModes_Synchronous | MTBCmdSetModes::MTBCmdSetModes_Relative), 500);
 	}
 	if (abs(distance.y) > 1e-6) {
 		m_positionStage.y += distance.y;
-		success = m_stageY->SetPosition(distance.y, "µm", (MTBCmdSetModes)(MTBCmdSetModes::MTBCmdSetModes_Synchronous | MTBCmdSetModes::MTBCmdSetModes_Relative), 500);
+		success = m_stageY->SetPosition(distance.y, "ï¿½m", (MTBCmdSetModes)(MTBCmdSetModes::MTBCmdSetModes_Synchronous | MTBCmdSetModes::MTBCmdSetModes_Relative), 500);
 	}
 	calculateCurrentPositionBounds();
 	announcePositions();
@@ -122,11 +122,11 @@ void ZeissMTB::movePosition(POINT2 distance) {
 POINT3 ZeissMTB::getPosition(PositionType positionType) {
 	// Update the positions from the hardware
 	if (m_stageX && m_stageY) {
-		m_positionStage.x = m_stageX->GetPosition("µm");
-		m_positionStage.y = m_stageY->GetPosition("µm");
+		m_positionStage.x = m_stageX->GetPosition("ï¿½m");
+		m_positionStage.y = m_stageY->GetPosition("ï¿½m");
 	}
 	if (m_ObjectiveFocus) {
-		m_positionFocus = m_ObjectiveFocus->GetPosition("µm");
+		m_positionFocus = m_ObjectiveFocus->GetPosition("ï¿½m");
 	}
 
 	// Return the current position
