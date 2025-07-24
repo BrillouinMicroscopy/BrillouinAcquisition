@@ -25,92 +25,39 @@
     <EXTERNAL_UNWRAP2_DIR>..\BrillouinAcquisition\external\unwrap2</EXTERNAL_UNWRAP2_DIR>
     <GENERATED_FILES_DIR>..\BrillouinAcquisition\GeneratedFiles</GENERATED_FILES_DIR>
   </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(Configuration)'=='Debug' and '$(Platform)'=='x64'">
-    <!-- Include directories -->
+
+  <!-- Common paths for both Debug and Release -->
+  <PropertyGroup>
     <ThirdPartyIncludes>
       .;
       $(THORLABS_DIR);
       $(NI_EXTCOMPILER_DIR)\include;
       $(IDS_UEYE_DIR)\include;
       $(POINT_GREY_DIR)\include;
-      $(EXTERNAL_GSL_DIR)\include;
       $(HDF5_DIR)\include;
       $(ANDOR_SDK_DIR);
       $(PHOTOMETRICS_PVCAM_DIR)\Inc;
       $(CARL_ZEISS_MTB_DIR)\MTBApi;
       $(OPENCV_DIR)\include;
       $(QTDIR)\include;
-      $(EXTERNAL_UNWRAP2_DIR);
+      $(EXTERNAL_GSL_DIR)\include;
       $(GENERATED_FILES_DIR);
       $(GENERATED_FILES_DIR)\$(ConfigurationName);
     </ThirdPartyIncludes>
 
-    <!-- Library directories -->
     <ThirdPartyLibDirs>
       $(NI_EXTCOMPILER_DIR)\lib64\msvc;
       $(HDF5_DIR)\lib;
       $(THORLABS_DIR);
       $(POINT_GREY_DIR)\lib64\vs2015;
       $(IDS_UEYE_DIR)\Lib;
+      $(PHOTOMETRICS_PVCAM_DIR)\Lib\amd64;
+      $(OPENCV_DIR)\x64\vc16\lib;
+      $(QTDIR)\bin;
       $(EXTERNAL_FFTW_DIR);
-      $(PHOTOMETRICS_PVCAM_DIR)\Lib\amd64;
-      $(OPENCV_DIR)\x64\vc16\lib;
-      $(QTDIR)\bin;
+      $(EXTERNAL_UNWRAP2_DIR);
     </ThirdPartyLibDirs>
 
-    <!-- Library dependencies -->
-    <ThirdPartyLibs>
-		$(ANDOR_SDK_DIR)\atcorem.lib;
-		$(ANDOR_SDK_DIR)\atutilitym.lib;
-		libfftw3-3.lib;
-		$(POINT_GREY_DIR)\lib64\vs2015\FlyCapture2d_v140.lib;
-		$(IDS_UEYE_DIR)\Lib\uEye_api_64.lib;
-		hdf5.lib;
-		hdf5_cpp.lib;
-		NIDAQmx.lib;
-		Thorlabs.MotionControl.TCube.InertialMotor.lib;
-		Thorlabs.MotionControl.FilterFlipper.lib;
-		Thorlabs.MotionControl.KCube.DCServo.lib;
-		Thorlabs.MotionControl.KCube.Solenoid.lib;
-		pvcam64.lib;
-		opencv_world470d.lib;
-	</ThirdPartyLibs>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)'=='Release' and '$(Platform)'=='x64'">
-    <!-- Include directories -->
-    <ThirdPartyIncludes>
-      .;
-      $(THORLABS_DIR);
-      $(NI_EXTCOMPILER_DIR)\include;
-      $(POINT_GREY_DIR)\include;
-      $(IDS_UEYE_DIR)\include;
-      $(HDF5_DIR)\include;
-      $(ANDOR_SDK_DIR);
-      $(PHOTOMETRICS_PVCAM_DIR)\Inc;
-      $(CARL_ZEISS_MTB_DIR)\MTBApi;
-      $(OPENCV_DIR)\include;
-      $(QTDIR)\include;
-      $(EXTERNAL_GSL_DIR)\include;
-      $(GENERATED_FILES_DIR);
-      $(GENERATED_FILES_DIR)\$(ConfigurationName);
-    </ThirdPartyIncludes>
-
-    <!-- Library directories -->
-    <ThirdPartyLibDirs>
-      $(NI_EXTCOMPILER_DIR)\lib64\msvc;
-      $(HDF5_DIR)\lib;
-      $(THORLABS_DIR);
-      $(POINT_GREY_DIR)\lib64\vs2015;
-      $(IDS_UEYE_DIR)\Lib;
-      .\external\fftw;
-      $(PHOTOMETRICS_PVCAM_DIR)\Lib\amd64;
-      $(OPENCV_DIR)\x64\vc16\lib;
-      $(QTDIR)\bin;
-    </ThirdPartyLibDirs>
-    
-    <!-- Library dependencies -->
     <ThirdPartyLibs>
       $(ANDOR_SDK_DIR)\atcorem.lib;
       $(ANDOR_SDK_DIR)\atutilitym.lib;
@@ -125,7 +72,30 @@
       Thorlabs.MotionControl.KCube.DCServo.lib;
       Thorlabs.MotionControl.KCube.Solenoid.lib;
       pvcam64.lib;
-      opencv_world470.lib
+    </ThirdPartyLibs>
+  </PropertyGroup>
+
+  <!-- Differences specific to Debug build -->
+  <PropertyGroup Condition="'$(Configuration)'=='Debug' and '$(Platform)'=='x64'">
+    <ThirdPartyIncludes>
+      $(ThirdPartyIncludes);
+    </ThirdPartyIncludes>
+
+    <ThirdPartyLibs>
+      $(ThirdPartyLibs);
+      opencv_world470d.lib;
+    </ThirdPartyLibs>
+  </PropertyGroup>
+
+  <!-- Differences specific to Release build -->
+  <PropertyGroup Condition="'$(Configuration)'=='Release' and '$(Platform)'=='x64'">
+    <ThirdPartyIncludes>
+      $(ThirdPartyIncludes);
+    </ThirdPartyIncludes>
+
+    <ThirdPartyLibs>
+      $(ThirdPartyLibs);
+      opencv_world470.lib;
     </ThirdPartyLibs>
   </PropertyGroup>
 
