@@ -3873,8 +3873,11 @@ void BrillouinAcquisition::setColormap(QCPColorGradient *gradient, const CustomG
 }
 
 void BrillouinAcquisition::applyColorMap(QCPColorGradient* gradient, const std::vector<std::vector<double>>& colorMap) {
-	for (gsl::index index{ 0 }; auto& color : colorMap) {
-		gradient->setColorStopAt((double)index++ / colorMap.size(), QColor((int)255 * color[0], (int)255 * color[1], (int)255 * color[2]));
+	auto index{ 0 };
+	auto position{ 0.0 };
+	for (auto it = std::begin(colorMap); it != std::end(colorMap); ++it) {
+		gradient->setColorStopAt((double)index / colorMap.size(), QColor((int)255 * (*it)[0], (int)255 * (*it)[1], (int)255 * (*it)[2]));
+		++index;
 	}
 }
 
@@ -4044,7 +4047,7 @@ void BrillouinAcquisition::readSettings() {
 	settings.beginGroup("devices-settings");
 	auto posX = settings.value("stage-laser-position-x");
 	auto posY = settings.value("stage-laser-position-y");
-	m_positionScanner = POINT2(posX.toDouble(), posY.toDouble());
+	// m_positionScanner = POINT2(posX.toDouble(), posY.toDouble());
 	m_Brillouin->settings.setXMin(settings.value("stage-x-min", m_Brillouin->settings.xMin).toInt());
 	m_Brillouin->settings.setXMax(settings.value("stage-x-max", m_Brillouin->settings.xMax).toInt());
 	m_Brillouin->settings.setXSteps(settings.value("stage-x-steps", m_Brillouin->settings.xSteps).toInt());
