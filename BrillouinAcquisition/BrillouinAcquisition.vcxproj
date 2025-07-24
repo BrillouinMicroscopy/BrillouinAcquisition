@@ -17,6 +17,10 @@
 		<QtMsBuild Condition="'$(QtMsBuild)'=='' or !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
 	</PropertyGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+
+	<!-- Import common libraries and include settings -->
+    <Import Project="..\commonProps\ThirdPartyPaths.props" />
+
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
 		<ConfigurationType>Application</ConfigurationType>
 		<PlatformToolset>v143</PlatformToolset>
@@ -42,13 +46,17 @@
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
 		<OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
 	</PropertyGroup>
+    <!-- Use Qt settings from .props file -->
 	<PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-		<QtInstall>qt_5_15_2</QtInstall>
-		<QtModules>core;gui;widgets;serialport;printsupport</QtModules>
+		<AdditionalIncludeDirectories>$(QtInstallDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+  		<AdditionalLibraryDirectories>$(QtInstallDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+  		<QtModules>$(QtModules)</QtModules>
 	</PropertyGroup>
+	<!-- Use Qt settings from .props file -->
 	<PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-		<QtInstall>qt_5_15_2</QtInstall>
-		<QtModules>core;gui;widgets;serialport;printsupport</QtModules>
+		<AdditionalIncludeDirectories>$(QtInstallDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+  		<AdditionalLibraryDirectories>$(QtInstallDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+  		<QtModules>$(QtModules)</QtModules>
 	</PropertyGroup>
 	<ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
 		<Import Project="$(QtMsBuild)\qt.props" />
@@ -56,7 +64,8 @@
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
 		<ClCompile>
 			<PreprocessorDefinitions>UNICODE;WIN32;WIN64;H5_BUILT_AS_DYNAMIC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>C:\Program Files\Thorlabs\Kinesis;C:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include;C:\Program Files\Point Grey Research\FlyCapture2\include;c:\Program Files\IDS\uEye\Develop\include\;C:\Program Files\HDF_Group\HDF5\1.12.1\include;.\GeneratedFiles;.\GeneratedFiles\Debug;c:\Program Files\Andor SDK3\;.\external\gsl\include;C:\Users\ralajan\Downloads\BrillouinMicroscopy\OpenCV\470\opencv\build\include;C:\Qt\5.15.2\msvc2019_64;C:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTBApi;c:\Program Files\Photometrics\PVCamSDK\Inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<!-- Use paths from .props file -->
+			<AdditionalIncludeDirectories>$(ThirdPartyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<Optimization>Disabled</Optimization>
 			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
 			<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -71,15 +80,41 @@
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
-			<AdditionalLibraryDirectories>C:\Program Files %28x86%29\National Instruments\Shared\ExternalCompilerSupport\C\lib64\msvc;C:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\lib64\msvc;C:\Program Files\HDF_Group\HDF5\1.12.1\lib;C:\Program Files\Thorlabs\Kinesis;c:\Program Files\Point Grey Research\FlyCapture2\lib64\vs2015\;c:\Program Files\IDS\uEye\Develop\Lib\;.\external\fftw;c:\Program Files\Photometrics\PVCamSDK\Lib\amd64\;C:\Users\ralajan\Downloads\BrillouinMicroscopy\OpenCV\470\opencv\build\x64\vc16\lib;C:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTBApi;C:\Qt\5.15.2\msvc2019_64\lib;C:\Program Files\Andor SDK3\atcorem.lib;C:\Program Files\Andor SDK3\atutilitym.lib</AdditionalLibraryDirectories>
+			<!-- Use paths from .props file -->
+			<AdditionalLibraryDirectories>$(ThirdPartyLibDirs);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<AdditionalDependencies>c:\Program Files\Andor SDK3\atcorem.lib;c:\Program Files\Andor SDK3\atutilitym.lib;libfftw3-3.lib;c:\Program Files\Point Grey Research\FlyCapture2\lib64\vs2015\FlyCapture2_v140.lib;c:\Program Files\IDS\uEye\Develop\Lib\uEye_api_64.lib;hdf5.lib;hdf5_cpp.lib;NIDAQmx.lib;Thorlabs.MotionControl.TCube.InertialMotor.lib;Thorlabs.MotionControl.FilterFlipper.lib;Thorlabs.MotionControl.KCube.DCServo.lib;Thorlabs.MotionControl.KCube.Solenoid.lib;C:\Program Files\Photometrics\PVCamSDK\Lib\amd64\pvcam64.lib;opencv_world470d.lib</AdditionalDependencies>
+			<!-- Use paths from .props file -->
+			<AdditionalDependencies>$(ThirdPartyLibs);%(AdditionalDependencies)</AdditionalDependencies>
 		</Link>
 		<PreBuildEvent>
 			<Command>powershell -ExecutionPolicy ByPass -File "$(SolutionDir)BrillouinAcquisition\src\generateVersionHeader.ps1"</Command>
 		</PreBuildEvent>
 		<PostBuildEvent>
+			<!-- Use paths from .props file -->
 			<Command>
+			$(QTDIR)\bin\windeployqt.exe $(TargetDir)
+			copy "$(ProgramW6432)\Andor SDK3\atcore.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Andor SDK3\atutility.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Andor SDK3\atblkbx.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Andor SDK3\atcl_bitflow.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Andor SDK3\atdevregcam.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Andor SDK3\atdevsimcam.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\HDF_Group\HDF5\1.12.1\bin\hdf5.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\HDF_Group\HDF5\1.12.1\bin\hdf5_cpp.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Thorlabs\Kinesis\Thorlabs.MotionControl.TCube.InertialMotor.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Thorlabs\Kinesis\Thorlabs.MotionControl.DeviceManager.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Thorlabs\Kinesis\Thorlabs.MotionControl.FilterFlipper.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Thorlabs\Kinesis\Thorlabs.MotionControl.KCube.DCServo.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Thorlabs\Kinesis\Thorlabs.MotionControl.KCube.Solenoid.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\FlyCapture2d_v140.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\libiomp5md.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\avcodec-57.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\avutil-55.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\swresample-2.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\avformat-57.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\swscale-4.dll" "$(TargetDir)"
+			copy "$(ProjectDir)external\fftw\libfftw3-3.dll" "$(TargetDir)"
+			copy "C:\Users\ralajan\Downloads\BrillouinMicroscopy\OpenCV\470\opencv\build\x64\vc16\bin\opencv_world470d.dll" "$(TargetDir)"
 			</Command>
 		</PostBuildEvent>
 		<QtMoc>
@@ -105,7 +140,8 @@
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
 		<ClCompile>
 			<PreprocessorDefinitions>UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;H5_BUILT_AS_DYNAMIC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>C:\Program Files\Thorlabs\Kinesis;C:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\include;C:\Program Files\Point Grey Research\FlyCapture2\include;c:\Program Files\IDS\uEye\Develop\include\;C:\Program Files\HDF_Group\HDF5\1.12.1\include;.\GeneratedFiles;.\GeneratedFiles\Release;c:\Program Files\Andor SDK3\;.\external\gsl\include;C:\Users\ralajan\Downloads\BrillouinMicroscopy\OpenCV\470\opencv\build\include;C:\Qt\5.15.2\msvc2019_64;C:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTBApi;c:\Program Files\Photometrics\PVCamSDK\Inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<!-- Use paths from .props file -->
+			<AdditionalIncludeDirectories>$(ThirdPartyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<DebugInformationFormat />
 			<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
 			<TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -119,15 +155,45 @@
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
-			<AdditionalLibraryDirectories>C:\Program Files %28x86%29\National Instruments\Shared\ExternalCompilerSupport\C\lib64\msvc;C:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C\lib64\msvc;C:\Program Files\HDF_Group\HDF5\1.12.1\lib;C:\Program Files\Thorlabs\Kinesis;c:\Program Files\Point Grey Research\FlyCapture2\lib64\vs2015\;c:\Program Files\IDS\uEye\Develop\Lib\;.\external\fftw;c:\Program Files\Photometrics\PVCamSDK\Lib\amd64\;C:\Users\ralajan\Downloads\BrillouinMicroscopy\OpenCV\470\opencv\build\x64\vc16\lib;C:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTBApi;C:\Qt\5.15.2\msvc2019_64\lib;C:\Program Files\Andor SDK3\atcorem.lib;C:\Program Files\Andor SDK3\atutilitym.lib</AdditionalLibraryDirectories>
+			<!-- Use paths from .props file -->
+			<AdditionalLibraryDirectories>$(ThirdPartyLibDirs);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
 			<GenerateDebugInformation>false</GenerateDebugInformation>
-			<AdditionalDependencies>c:\Program Files\Andor SDK3\atcorem.lib;c:\Program Files\Andor SDK3\atutilitym.lib;libfftw3-3.lib;c:\Program Files\Point Grey Research\FlyCapture2\lib64\vs2015\FlyCapture2_v140.lib;c:\Program Files\IDS\uEye\Develop\Lib\uEye_api_64.lib;hdf5.lib;hdf5_cpp.lib;NIDAQmx.lib;Thorlabs.MotionControl.TCube.InertialMotor.lib;Thorlabs.MotionControl.FilterFlipper.lib;Thorlabs.MotionControl.KCube.DCServo.lib;Thorlabs.MotionControl.KCube.Solenoid.lib;C:\Program Files\Photometrics\PVCamSDK\Lib\amd64\pvcam64.lib;opencv_world470.lib</AdditionalDependencies>
+			<!-- Use paths from .props file -->
+			<AdditionalDependencies>$(ThirdPartyLibs);%(AdditionalDependencies)</AdditionalDependencies>
 		</Link>
 		<PreBuildEvent>
 			<Command>powershell -ExecutionPolicy ByPass -File "$(SolutionDir)BrillouinAcquisition\src\generateVersionHeader.ps1"</Command>
 		</PreBuildEvent>
 		<PostBuildEvent>
 			<Command>
+			<!-- These commands copy the required .dll files to the target location after build -->
+			<!-- These files are important during run time of the application. -->
+			<!-- Edit these file paths according to your installation  -->
+			$(QTDIR)\bin\windeployqt.exe $(TargetDir)
+			copy "$(ProgramW6432)\Andor SDK3\atcore.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Andor SDK3\atutility.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Andor SDK3\atblkbx.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Andor SDK3\atcl_bitflow.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Andor SDK3\atdevregcam.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\HDF_Group\HDF5\1.12.1\bin\hdf5.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\HDF_Group\HDF5\1.12.1\bin\hdf5_cpp.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Thorlabs\Kinesis\Thorlabs.MotionControl.TCube.InertialMotor.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Thorlabs\Kinesis\Thorlabs.MotionControl.DeviceManager.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Thorlabs\Kinesis\Thorlabs.MotionControl.FilterFlipper.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Thorlabs\Kinesis\Thorlabs.MotionControl.KCube.DCServo.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Thorlabs\Kinesis\Thorlabs.MotionControl.KCube.Solenoid.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\FlyCapture2_v140.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\libiomp5md.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\avcodec-57.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\avutil-55.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\swresample-2.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\avformat-57.dll" "$(TargetDir)"
+			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\swscale-4.dll" "$(TargetDir)"
+			copy "$(ProjectDir)external\fftw\libfftw3-3.dll" "$(TargetDir)"
+			copy "C:\Users\ralajan\Downloads\BrillouinMicroscopy\OpenCV\470\opencv\build\x64\vc16\bin\opencv_world470.dll" "$(TargetDir)"
+			copy "C:\Program Files\IDS\uEye\USB driver package\ueye_api_64.dll" "$(TargetDir)"
+			copy "$(SystemRoot)\System32\pvcam64.dll" "$(TargetDir)"
+			copy "$(SystemRoot)\System32\nicaiu.dll" "$(TargetDir)"
 			</Command>
 		</PostBuildEvent>
 		<QtMoc>
