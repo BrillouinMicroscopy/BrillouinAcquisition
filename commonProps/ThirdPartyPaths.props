@@ -7,6 +7,11 @@
     <QtModules>core;gui;widgets;serialport;printsupport</QtModules>
   </PropertyGroup>
 
+   <!-- Define output TargetDir based on configuration & platform -->
+  <PropertyGroup>
+    <TargetDir>..\$(Platform)\$(Configuration)\</TargetDir>
+  </PropertyGroup>
+
   <PropertyGroup Label="ThirdPartyPaths">
     <!-- Hardcoded absolute paths; adjust if your installs differ -->
     <QTDIR>C:\Qt\5.15.x\5.15.2\msvc2019_64</QTDIR>
@@ -14,7 +19,7 @@
     <HDF5_DIR>C:\Program Files\HDF_Group\HDF5\1.12.1</HDF5_DIR>
     <THORLABS_DIR>C:\Program Files\Thorlabs\Kinesis</THORLABS_DIR>
     <NI_EXTCOMPILER_DIR>C:\Program Files (x86)\National Instruments\Shared\ExternalCompilerSupport\C</NI_EXTCOMPILER_DIR>
-    <IDS_UEYE_DIR>c:\Program Files\IDS\uEye\Develop</IDS_UEYE_DIR>
+    <IDS_UEYE_DIR>c:\Program Files\IDS\uEye</IDS_UEYE_DIR>
     <POINT_GREY_DIR>C:\Program Files\Point Grey Research\FlyCapture2</POINT_GREY_DIR>
     <PHOTOMETRICS_PVCAM_DIR>c:\Program Files\Photometrics\PVCamSDK</PHOTOMETRICS_PVCAM_DIR>
     <CARL_ZEISS_MTB_DIR>C:\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2</CARL_ZEISS_MTB_DIR>
@@ -32,7 +37,7 @@
       .;
       $(THORLABS_DIR);
       $(NI_EXTCOMPILER_DIR)\include;
-      $(IDS_UEYE_DIR)\include;
+      $(IDS_UEYE_DIR)\Develop\include;
       $(POINT_GREY_DIR)\include;
       $(HDF5_DIR)\include;
       $(ANDOR_SDK_DIR);
@@ -50,7 +55,7 @@
       $(HDF5_DIR)\lib;
       $(THORLABS_DIR);
       $(POINT_GREY_DIR)\lib64\vs2015;
-      $(IDS_UEYE_DIR)\Lib;
+      $(IDS_UEYE_DIR)\Develop\Lib;
       $(PHOTOMETRICS_PVCAM_DIR)\Lib\amd64;
       $(OPENCV_DIR)\x64\vc16\lib;
       $(QTDIR)\bin;
@@ -63,7 +68,7 @@
       $(ANDOR_SDK_DIR)\atutilitym.lib;
       libfftw3-3.lib;
       $(POINT_GREY_DIR)\lib64\vs2015\FlyCapture2_v140.lib;
-      $(IDS_UEYE_DIR)\Lib\uEye_api_64.lib;
+      $(IDS_UEYE_DIR)\Develop\Lib\uEye_api_64.lib;
       hdf5.lib;
       hdf5_cpp.lib;
       NIDAQmx.lib;
@@ -83,6 +88,7 @@
 
     <ThirdPartyLibs>
       $(ThirdPartyLibs);
+      <!-- OpenCV debug DLL file -->
       opencv_world470d.lib;
     </ThirdPartyLibs>
   </PropertyGroup>
@@ -95,8 +101,64 @@
 
     <ThirdPartyLibs>
       $(ThirdPartyLibs);
+      <!-- OpenCV normal DLL file -->
       opencv_world470.lib;
     </ThirdPartyLibs>
   </PropertyGroup>
+
+
+  <!-- POST BUILD COMMANDS -->
+  <PropertyGroup Label="PostBuildCmdsCommon">
+    <!-- Common copy commands for both Debug and Release -->
+    <PostBuildCmdsCommon>
+			copy "$(ANDOR_SDK_DIR)\atcore.dll" $(TargetDir)
+			copy "$(ANDOR_SDK_DIR)\atutility.dll" $(TargetDir)
+			copy "$(ANDOR_SDK_DIR)\atblkbx.dll" $(TargetDir)
+			copy "$(ANDOR_SDK_DIR)\atcl_bitflow.dll" $(TargetDir)
+			copy "$(ANDOR_SDK_DIR)\atdevregcam.dll" $(TargetDir)
+			copy "$(HDF5_DIR)\bin\hdf5.dll" $(TargetDir)
+			copy "$(HDF5_DIR)\bin\hdf5_cpp.dll" $(TargetDir)
+			copy "$(THORLABS_DIR)\Thorlabs.MotionControl.TCube.InertialMotor.dll" $(TargetDir)
+			copy "$(THORLABS_DIR)\Thorlabs.MotionControl.DeviceManager.dll" $(TargetDir)
+			copy "$(THORLABS_DIR)\Thorlabs.MotionControl.FilterFlipper.dll" $(TargetDir)
+			copy "$(THORLABS_DIR)\Thorlabs.MotionControl.KCube.DCServo.dll" $(TargetDir)
+			copy "$(THORLABS_DIR)\Thorlabs.MotionControl.KCube.Solenoid.dll" $(TargetDir)
+			copy "$(POINT_GREY_DIR)\bin64\vs2015\FlyCapture2_v140.dll" $(TargetDir)
+			copy "$(POINT_GREY_DIR)\bin64\vs2015\libiomp5md.dll" $(TargetDir)
+			copy "$(POINT_GREY_DIR)\bin64\vs2015\avcodec-57.dll" $(TargetDir)
+			copy "$(POINT_GREY_DIR)\bin64\vs2015\avutil-55.dll" $(TargetDir)
+			copy "$(POINT_GREY_DIR)\bin64\vs2015\swresample-2.dll" $(TargetDir)
+			copy "$(POINT_GREY_DIR)\bin64\vs2015\avformat-57.dll" $(TargetDir)
+			copy "$(POINT_GREY_DIR)\bin64\vs2015\swscale-4.dll" $(TargetDir)
+			copy "$(EXTERNAL_FFTW_DIR)\libfftw3-3.dll" $(TargetDir)
+    </PostBuildCmdsCommon>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Debug' and '$(Platform)'=='x64'">
+    <!-- Additional copy commands for Debug -->
+    <PostBuildCmdsDebug>
+      copy "$(OPENCV_DIR)\x64\vc16\bin\opencv_world470d.dll" $(TargetDir)
+    </PostBuildCmdsDebug>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release' and '$(Platform)'=='x64'">
+    <!-- Additional copy commands for Release, if needed -->
+    <PostBuildCmdsRelease>
+      copy "$(OPENCV_DIR)\x64\vc16\bin\opencv_world470.dll" $(TargetDir)
+			copy "$(IDS_UEYE_DIR)\USB driver package\ueye_api_64.dll" $(TargetDir)
+			copy "$(SystemRoot)\System32\pvcam64.dll" $(TargetDir)
+			copy "$(SystemRoot)\System32\nicaiu.dll" $(TargetDir)
+    </PostBuildCmdsRelease>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PostBuildCommand>
+      <!-- Command to copy all the Qt DLLs to the target directory  -->
+      "$(QTDIR)\bin\windeployqt.exe" $(TargetDir)
+      $(PostBuildCmdsCommon)
+      $(PostBuildCmdsDebug)
+      $(PostBuildCmdsRelease)
+    </PostBuildCommand>
+</PropertyGroup>
 
 </Project>

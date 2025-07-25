@@ -91,31 +91,7 @@
 		</PreBuildEvent>
 		<PostBuildEvent>
 			<!-- Use paths from .props file -->
-			<Command>
-			$(QTDIR)\bin\windeployqt.exe $(TargetDir)
-			copy "$(ProgramW6432)\Andor SDK3\atcore.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Andor SDK3\atutility.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Andor SDK3\atblkbx.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Andor SDK3\atcl_bitflow.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Andor SDK3\atdevregcam.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Andor SDK3\atdevsimcam.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\HDF_Group\HDF5\1.12.1\bin\hdf5.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\HDF_Group\HDF5\1.12.1\bin\hdf5_cpp.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Thorlabs\Kinesis\Thorlabs.MotionControl.TCube.InertialMotor.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Thorlabs\Kinesis\Thorlabs.MotionControl.DeviceManager.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Thorlabs\Kinesis\Thorlabs.MotionControl.FilterFlipper.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Thorlabs\Kinesis\Thorlabs.MotionControl.KCube.DCServo.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Thorlabs\Kinesis\Thorlabs.MotionControl.KCube.Solenoid.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\FlyCapture2d_v140.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\libiomp5md.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\avcodec-57.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\avutil-55.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\swresample-2.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\avformat-57.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\swscale-4.dll" "$(TargetDir)"
-			copy "$(ProjectDir)external\fftw\libfftw3-3.dll" "$(TargetDir)"
-			copy "C:\Users\ralajan\Downloads\BrillouinMicroscopy\OpenCV\470\opencv\build\x64\vc16\bin\opencv_world470d.dll" "$(TargetDir)"
-			</Command>
+			<Command>$(PostBuildCommand)</Command>
 		</PostBuildEvent>
 		<QtMoc>
 			<ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
@@ -165,36 +141,8 @@
 			<Command>powershell -ExecutionPolicy ByPass -File "$(SolutionDir)BrillouinAcquisition\src\generateVersionHeader.ps1"</Command>
 		</PreBuildEvent>
 		<PostBuildEvent>
-			<Command>
-			<!-- These commands copy the required .dll files to the target location after build -->
-			<!-- These files are important during run time of the application. -->
-			<!-- Edit these file paths according to your installation  -->
-			$(QTDIR)\bin\windeployqt.exe $(TargetDir)
-			copy "$(ProgramW6432)\Andor SDK3\atcore.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Andor SDK3\atutility.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Andor SDK3\atblkbx.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Andor SDK3\atcl_bitflow.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Andor SDK3\atdevregcam.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\HDF_Group\HDF5\1.12.1\bin\hdf5.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\HDF_Group\HDF5\1.12.1\bin\hdf5_cpp.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Thorlabs\Kinesis\Thorlabs.MotionControl.TCube.InertialMotor.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Thorlabs\Kinesis\Thorlabs.MotionControl.DeviceManager.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Thorlabs\Kinesis\Thorlabs.MotionControl.FilterFlipper.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Thorlabs\Kinesis\Thorlabs.MotionControl.KCube.DCServo.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Thorlabs\Kinesis\Thorlabs.MotionControl.KCube.Solenoid.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\FlyCapture2_v140.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\libiomp5md.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\avcodec-57.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\avutil-55.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\swresample-2.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\avformat-57.dll" "$(TargetDir)"
-			copy "$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\swscale-4.dll" "$(TargetDir)"
-			copy "$(ProjectDir)external\fftw\libfftw3-3.dll" "$(TargetDir)"
-			copy "C:\Users\ralajan\Downloads\BrillouinMicroscopy\OpenCV\470\opencv\build\x64\vc16\bin\opencv_world470.dll" "$(TargetDir)"
-			copy "C:\Program Files\IDS\uEye\USB driver package\ueye_api_64.dll" "$(TargetDir)"
-			copy "$(SystemRoot)\System32\pvcam64.dll" "$(TargetDir)"
-			copy "$(SystemRoot)\System32\nicaiu.dll" "$(TargetDir)"
-			</Command>
+		    <!-- Use paths from .props file -->
+			<Command>$(PostBuildCommand)</Command>
 		</PostBuildEvent>
 		<QtMoc>
 			<ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
