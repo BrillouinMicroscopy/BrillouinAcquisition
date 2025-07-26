@@ -11,15 +11,15 @@
 ZeissECU::ZeissECU() noexcept {
 
 	m_deviceElements = {
-		{ "Beam Block",	2, (int)DEVICE_ELEMENT::BEAMBLOCK, { "Close", "Open" } },
-		{ "Objective",	6, (int)DEVICE_ELEMENT::OBJECTIVE },
-		{ "Reflector",	5, (int)DEVICE_ELEMENT::REFLECTOR },
-		{ "Tubelens",	3, (int)DEVICE_ELEMENT::TUBELENS },
-		{ "Baseport",	3, (int)DEVICE_ELEMENT::BASEPORT },
-		{ "Sideport",	3, (int)DEVICE_ELEMENT::SIDEPORT },
-		{ "RL Shutter",	2, (int)DEVICE_ELEMENT::RLSHUTTER, { "Close", "Open" } },
-		{ "Mirror",		2, (int)DEVICE_ELEMENT::MIRROR },
-		{ "Hal. Lamp",	0, (int)DEVICE_ELEMENT::LAMP, DEVICE_INPUT_TYPE::SLIDER }
+		DeviceElement { "Beam Block",	2, (int)DEVICE_ELEMENT::BEAMBLOCK, { "Close", "Open" } },
+		DeviceElement { "Objective",	6, (int)DEVICE_ELEMENT::OBJECTIVE },
+		DeviceElement { "Reflector",	5, (int)DEVICE_ELEMENT::REFLECTOR },
+		DeviceElement { "Tubelens",	3, (int)DEVICE_ELEMENT::TUBELENS },
+		DeviceElement { "Baseport",	3, (int)DEVICE_ELEMENT::BASEPORT },
+		DeviceElement { "Sideport",	3, (int)DEVICE_ELEMENT::SIDEPORT },
+		DeviceElement { "RL Shutter",	2, (int)DEVICE_ELEMENT::RLSHUTTER, { "Close", "Open" } },
+		DeviceElement { "Mirror",		2, (int)DEVICE_ELEMENT::MIRROR },
+		DeviceElement { "Hal. Lamp",	0, (int)DEVICE_ELEMENT::LAMP, DEVICE_INPUT_TYPE::SLIDER }
 	};
 
 	m_presets = {

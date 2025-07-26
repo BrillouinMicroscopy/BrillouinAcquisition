@@ -8,12 +8,12 @@
 ZeissMTB_Erlangen2::ZeissMTB_Erlangen2() noexcept {
 
 	m_deviceElements = {
-		{ "Objective",			6, (int)DEVICE_ELEMENT::OBJECTIVE },
-		{ "Reflector",			4, (int)DEVICE_ELEMENT::REFLECTOR,	{ "IR", "Green", "Red", "Blue" } },
-		{ "Sideport",			3, (int)DEVICE_ELEMENT::SIDEPORT,	{ "Eyepiece", "Left", "Right" } },
-		{ "RL Shutter",			2, (int)DEVICE_ELEMENT::RLSHUTTER,	{ "Close", "Open" } },
-		{ "Mirror",				2, (int)DEVICE_ELEMENT::MIRROR,		{ "Brillouin", "Calibration"}},
-		{ "LED illumination",	2, (int)DEVICE_ELEMENT::LEDLAMP,	{ "Off", "On" } }
+		DeviceElement { "Objective",			6, (int)DEVICE_ELEMENT::OBJECTIVE },
+		DeviceElement { "Reflector",			4, (int)DEVICE_ELEMENT::REFLECTOR,	{ "IR", "Green", "Red", "Blue" } },
+		DeviceElement { "Sideport",			3, (int)DEVICE_ELEMENT::SIDEPORT,	{ "Eyepiece", "Left", "Right" } },
+		DeviceElement { "RL Shutter",			2, (int)DEVICE_ELEMENT::RLSHUTTER,	{ "Close", "Open" } },
+		DeviceElement { "Mirror",				2, (int)DEVICE_ELEMENT::MIRROR,		{ "Brillouin", "Calibration"}},
+		DeviceElement { "LED illumination",	2, (int)DEVICE_ELEMENT::LEDLAMP,	{ "Off", "On" } }
 	};
 
 	m_presets = {
@@ -33,7 +33,7 @@ ZeissMTB_Erlangen2::ZeissMTB_Erlangen2() noexcept {
 	/*
 	 * Initialize the scale calibration with default values (determined for a 20x objective)
 	 */
-	auto scale = double{ 0.235674 };					// [µm/pix] image scale
+	auto scale = double{ 0.235674 };					// [ï¿½m/pix] image scale
 
 	auto scaleCalibration = ScaleCalibrationData{};
 	scaleCalibration.pixToMicrometerX = { 0, scale };	// camera x axis is stage y axis
@@ -75,11 +75,11 @@ void ZeissMTB_Erlangen2::setPosition(POINT2 position) {
 	auto positionStage = position - m_positionScanner;
 	if (abs(m_positionStage.x - positionStage.x) > 1e-6) {
 		m_positionStage.x = positionStage.x;
-		success = m_stageX->SetPosition(m_positionStage.x, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		success = m_stageX->SetPosition(m_positionStage.x, "ï¿½m", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 	}
 	if (abs(m_positionStage.y - positionStage.y) > 1e-6) {
 		m_positionStage.y = positionStage.y;
-		success = m_stageY->SetPosition(m_positionStage.y, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		success = m_stageY->SetPosition(m_positionStage.y, "ï¿½m", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 	}
 	calculateCurrentPositionBounds(POINT3{ position.x, position.y, m_positionFocus });
 	announcePositions();
@@ -93,7 +93,7 @@ void ZeissMTB_Erlangen2::setPosition(POINT3 position) {
 	// Only set position if it has changed
 	if (abs(m_positionFocus - position.z) > 1e-6) {
 		m_positionFocus = position.z;
-		success = m_ObjectiveFocus->SetPosition(m_positionFocus, "µm", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
+		success = m_ObjectiveFocus->SetPosition(m_positionFocus, "ï¿½m", MTBCmdSetModes::MTBCmdSetModes_Synchronous, 500);
 	}
 	setPosition(POINT2{ position.x, position.y });
 }
@@ -105,11 +105,11 @@ void ZeissMTB_Erlangen2::movePosition(POINT2 distance) {
 	}
 	if (abs(distance.x) > 1e-6) {
 		m_positionStage.x += distance.x;
-		success = m_stageX->SetPosition(distance.x, "µm", (MTBCmdSetModes)(MTBCmdSetModes::MTBCmdSetModes_Synchronous | MTBCmdSetModes::MTBCmdSetModes_Relative), 500);
+		success = m_stageX->SetPosition(distance.x, "ï¿½m", (MTBCmdSetModes)(MTBCmdSetModes::MTBCmdSetModes_Synchronous | MTBCmdSetModes::MTBCmdSetModes_Relative), 500);
 	}
 	if (abs(distance.y) > 1e-6) {
 		m_positionStage.y += distance.y;
-		success = m_stageY->SetPosition(distance.y, "µm", (MTBCmdSetModes)(MTBCmdSetModes::MTBCmdSetModes_Synchronous | MTBCmdSetModes::MTBCmdSetModes_Relative), 500);
+		success = m_stageY->SetPosition(distance.y, "ï¿½m", (MTBCmdSetModes)(MTBCmdSetModes::MTBCmdSetModes_Synchronous | MTBCmdSetModes::MTBCmdSetModes_Relative), 500);
 	}
 	calculateCurrentPositionBounds();
 	announcePositions();
@@ -117,11 +117,11 @@ void ZeissMTB_Erlangen2::movePosition(POINT2 distance) {
 
 POINT3 ZeissMTB_Erlangen2::getPosition(PositionType positionType) {
 	if (m_stageX && m_stageY) {
-		m_positionStage.x = m_stageX->GetPosition("µm");
-		m_positionStage.y = m_stageY->GetPosition("µm");
+		m_positionStage.x = m_stageX->GetPosition("ï¿½m");
+		m_positionStage.y = m_stageY->GetPosition("ï¿½m");
 	}
 	if (m_ObjectiveFocus) {
-		m_positionFocus = m_ObjectiveFocus->GetPosition("µm");
+		m_positionFocus = m_ObjectiveFocus->GetPosition("ï¿½m");
 	}
 
 	// Return the current position
