@@ -2,11 +2,11 @@ Param (
   [String]$Project='.',
   [String]$VERSION_MAJOR = 0,
   [String]$VERSION_MINOR = 3,
-  [String]$VERSION_PATCH = 4,
+  [String]$VERSION_PATCH = 5,
   [String]$VERSION_PRERELEASE = "",
   [String]$Namespace = 'Version',
   [String]$GitRoot,
-  $Author = "Raimund Schlüßler",
+  $Author = "Raimund Schlï¿½ï¿½ler",
   $AuthorEmail = "raimund.schluessler@tu-dresden.de",
   [String]$HeaderFile = "src/version.h",
   [String]$VerPrefix = "https://github.com/BrillouinMicroscopy/BrillouinAcquisition/commit/"
