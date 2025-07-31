@@ -17,14 +17,14 @@ struct SCAN_ORDER {
 struct BRILLOUIN_SETTINGS {
 	private:
 		// ROI parameters
-		double m_xMin{ 0 };		// [µm]	x minimum value
-		double m_xMax{ 10 };	// [µm]	x maximum value
+		double m_xMin{ 0 };		// [Âµm]	x minimum value
+		double m_xMax{ 10 };	// [Âµm]	x maximum value
 		int m_xSteps{ 3 };		// [1]	x steps
-		double m_yMin{ 0 };		// [µm]	y minimum value
-		double m_yMax{ 10 };	// [µm]	y maximum value
+		double m_yMin{ 0 };		// [Âµm]	y minimum value
+		double m_yMax{ 10 };	// [Âµm]	y maximum value
 		int m_ySteps{ 3 };		// [1]	y steps
-		double m_zMin{ 0 };		// [µm]	z minimum value
-		double m_zMax{ 0 };		// [µm]	z maximum value
+		double m_zMin{ 0 };		// [Âµm]	z minimum value
+		double m_zMax{ 0 };		// [Âµm]	z maximum value
 		int m_zSteps{ 1 };		// [1]	z steps
 
 		// ROI limits

@@ -68,7 +68,7 @@ private:
 	POINT3 m_startPosition{ 0, 0, 0 };
 
 	ScaleCalibrationData m_scaleCalibration;
-	POINT2 m_Ds{ 10.0, 10.0 };	// [µm]	shift in x- and y-direction
+	POINT2 m_Ds{ 10.0, 10.0 };	// [Âµm]	shift in x- and y-direction
 
 signals:
 	void s_Ds_changed(POINT2);
