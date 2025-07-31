@@ -1,3 +1,11 @@
+## 0.3.5 - 2025-07-31
+
+### Added
+- Simplify project compilation with .props file
+
+### Fixed
+- Use correct zeiss SDK character (µm) to fix encoding issue
+
 ## 0.3.4 - 2023-06-12
 
 ### Changed

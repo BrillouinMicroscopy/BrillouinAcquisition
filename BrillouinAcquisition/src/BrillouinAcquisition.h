@@ -172,7 +172,7 @@ private:
 	bool m_locatePositionScanner{ false };
 
 	QCPCurve* m_positionsMarker{ nullptr };
-	std::vector<POINT3> m_positionsMicrometer;	// [µm]		Positions to raster, relative to current start point
+	std::vector<POINT3> m_positionsMicrometer;	// [Âµm]		Positions to raster, relative to current start point
 	std::vector<POINT2> m_positionsPixel;		// [pix]	Positions to raster
 	bool m_showPositions{ true };
 
