@@ -23,12 +23,12 @@ enum class ScanPreset {
 ENABLE_BITMASK_OPERATORS(ScanPreset)
 
 struct BOUNDS {
-	double xMin{ -1e3 };	// [µm] minimal x-value
-	double xMax{ 1e3 };		// [µm] maximal x-value
-	double yMin{ -1e3 };	// [µm] minimal y-value
-	double yMax{ 1e3 };		// [µm] maximal y-value
-	double zMin{ -1e3 };	// [µm] minimal z-value
-	double zMax{ 1e3 };		// [µm] maximal z-value
+	double xMin{ -1e3 };	// [Âµm] minimal x-value
+	double xMax{ 1e3 };		// [Âµm] maximal x-value
+	double yMin{ -1e3 };	// [Âµm] minimal y-value
+	double yMax{ 1e3 };		// [Âµm] maximal y-value
+	double zMin{ -1e3 };	// [Âµm] minimal z-value
+	double zMax{ 1e3 };		// [Âµm] maximal z-value
 };
 
 enum class Capabilities {
@@ -206,13 +206,13 @@ protected:
 
 	std::vector<Capabilities> m_capabilities;
 
-	double m_positionFocus{ 0 };			// [µm]	position of the focus (z-position)
-	POINT2 m_positionStage{ 0, 0 };			// [µm]	position of the stage (x-y-position)
-	POINT2 m_positionScanner{ 0, 0 };		// [µm]	position of the scanner (x-y-position)
+	double m_positionFocus{ 0 };			// [Âµm]	position of the focus (z-position)
+	POINT2 m_positionStage{ 0, 0 };			// [Âµm]	position of the stage (x-y-position)
+	POINT2 m_positionScanner{ 0, 0 };		// [Âµm]	position of the scanner (x-y-position)
 
 	bool m_isCompatible{ false };
 	POINT3 m_homePosition{ 0, 0, 0 };
-	POINT2 m_startPosition{ 0, 0 };		// [µm]	start position
+	POINT2 m_startPosition{ 0, 0 };		// [Âµm]	start position
 
 	ScaleCalibrationData m_scaleCalibration;
 

@@ -3,6 +3,7 @@
 
 #include "AcquisitionMode.h"
 #include "../../Devices/Cameras/Camera.h"
+#include "../../Devices/EOM.h" 
 #include "../../helper/thread.h"
 #include "src/lib/buffer_circular.h"
 
@@ -59,6 +60,8 @@ struct BRILLOUIN_SETTINGS {
 			conCalibrationInterval = settings.conCalibrationInterval;
 			nrCalibrationImages = settings.nrCalibrationImages;
 			calibrationExposureTime = settings.calibrationExposureTime;
+			eomFrequencyInput = settings.eomFrequencyInput;
+			eomAttenuationInput = settings.eomAttenuationInput;
 			repetitions = settings.repetitions;
 			camera = settings.camera;
 			return *this;
@@ -71,6 +74,8 @@ struct BRILLOUIN_SETTINGS {
 		double conCalibrationInterval{ 10 };		// interval of continuous calibrations
 		int nrCalibrationImages{ 10 };				// number of calibration images
 		double calibrationExposureTime{ 1 };		// exposure time for calibration images
+		double eomFrequencyInput{ 4.0 };
+		double eomAttenuationInput{ 3.5 };
 
 		// repetition parameters
 		REPETITIONS repetitions;

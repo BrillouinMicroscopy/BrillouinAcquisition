@@ -131,6 +131,10 @@ BrillouinAcquisition::BrillouinAcquisition(QWidget *parent) noexcept :
 		this,
 		[this](std::vector<POINT3> orderedPositions) { AOI_changed(orderedPositions); }
 	);
+	// slot to show EOM options
+	connection = QWidget::connect(
+		ui->sampleSelection, QOverload<int>::of(&QComboBox::currentIndexChanged),
+        this, [this](int) { showEOMOptions(); });
 
 	m_Brillouin->determineScanOrder();
 
@@ -1195,6 +1199,8 @@ void BrillouinAcquisition::showBrillouinStatus(ACQUISITION_STATUS status) {
 	ui->sampleSelection->setDisabled(running);
 	ui->nrCalibrationImages->setDisabled(running);
 	ui->calibrationExposureTime->setDisabled(running);
+	ui->eomFrequencyInput->setDisabled(running);
+	ui->eomAttenuationInput->setDisabled(running);
 	ui->repetitionInterval->setDisabled(running);
 	ui->repetitionCount->setDisabled(running);
 }
@@ -1349,6 +1355,21 @@ QString BrillouinAcquisition::formatSeconds(int seconds) {
 	return string;
 }
 
+void BrillouinAcquisition::showEOMOptions() {
+	bool isEOM = (ui->sampleSelection->currentText() == "EOM");
+	if (isEOM) {
+		ui->eomFrequencyLabel->setEnabled(true);
+		ui->eomFrequencyInput->setEnabled(true);
+		ui->eomAttenuationLabel->setEnabled(true);
+		ui->eomAttenuationInput->setEnabled(true);
+	} else {
+		ui->eomFrequencyLabel->setEnabled(false);
+		ui->eomFrequencyInput->setEnabled(false);
+		ui->eomAttenuationLabel->setEnabled(false);
+		ui->eomAttenuationInput->setEnabled(false);
+	}
+}
+
 void BrillouinAcquisition::plotODTVoltages(const ODT_SETTINGS& settings, const ODT_MODE& mode) {
 	QCustomPlot *plot = nullptr;
 	switch (mode) {
@@ -1387,7 +1408,7 @@ void BrillouinAcquisition::plotODTVoltages(const ODT_SETTINGS& settings, const O
 	// scale the axis appropriately
 	plot->xAxis->setRange(-1.1*settings.radialVoltage, 1.1*settings.radialVoltage);
 	plot->yAxis->setRange(-1.1*settings.radialVoltage, 1.1*settings.radialVoltage);
-	
+
 	// set the aspect ratio
 	//plot->yAxis->setScaleRatio(plot->xAxis, 1.0); // somehow makes it worse
 	plot->replot();
@@ -1749,6 +1770,16 @@ void BrillouinAcquisition::showPreviewRunning(bool isRunning) {
 	} else {
 		ui->camera_playPause->setText("Play");
 	}
+
+	// If EOM selected set the attenuation voltage from user input else set
+	// the default.
+	if (m_Brillouin->settings.sample == "EOM") {
+		EOM::writeAttenuationVoltageToDAQ(m_Brillouin->settings.eomAttenuationInput);
+	}
+	else {
+		EOM::writeAttenuationVoltageToDAQ(5.0);
+	}
+
 	startPreview(isRunning);
 }
 
@@ -3450,6 +3481,8 @@ void BrillouinAcquisition::updateBrillouinSettings() {
 	ui->nrCalibrationImages->setValue(m_Brillouin->settings.nrCalibrationImages);
 	ui->calibrationExposureTime->setValue(m_Brillouin->settings.calibrationExposureTime);
 	ui->sampleSelection->setCurrentText(QString::fromStdString(m_Brillouin->settings.sample));
+	ui->eomFrequencyInput->setValue(m_Brillouin->settings.eomFrequencyInput);
+	ui->eomAttenuationInput->setValue(m_Brillouin->settings.eomAttenuationInput);
 
 	// repetition settings
 	ui->repetitionCount->setValue(m_Brillouin->settings.repetitions.count);
@@ -3589,6 +3622,13 @@ void BrillouinAcquisition::on_nrCalibrationImages_valueChanged(int value) {
 
 void BrillouinAcquisition::on_calibrationExposureTime_valueChanged(double value) {
 	m_Brillouin->settings.calibrationExposureTime = value;
+}
+
+void BrillouinAcquisition::on_eomFrequencyInput_valueChanged(double value) {
+	m_Brillouin->settings.eomFrequencyInput = value;
+}
+void BrillouinAcquisition::on_eomAttenuationInput_valueChanged(double value) {
+	m_Brillouin->settings.eomAttenuationInput = value;
 }
 
 /*
@@ -3970,6 +4010,8 @@ void BrillouinAcquisition::writeSettings() {
 	settings.setValue("brillouin-con-calibrate", m_Brillouin->settings.conCalibration);
 	settings.setValue("brillouin-con-calibrate-interval", m_Brillouin->settings.conCalibrationInterval);
 	settings.setValue("brillouin-nr-calibration-images", m_Brillouin->settings.nrCalibrationImages);
+	settings.setValue("brillouin-eom-frequency-input", m_Brillouin->settings.eomFrequencyInput);
+	settings.setValue("brillouin-eom-attenuation-input", m_Brillouin->settings.eomAttenuationInput);
 	settings.setValue("brillouin-calibration-exposure-time", m_Brillouin->settings.calibrationExposureTime);
 	settings.setValue("brillouin-camera-roi-left", m_deviceSettings.camera.roi.left);
 	settings.setValue("brillouin-camera-roi-top", m_deviceSettings.camera.roi.top);
@@ -4047,7 +4089,7 @@ void BrillouinAcquisition::readSettings() {
 	settings.beginGroup("devices-settings");
 	auto posX = settings.value("stage-laser-position-x");
 	auto posY = settings.value("stage-laser-position-y");
-	m_positionScanner = POINT2(posX.toDouble(), posY.toDouble());
+	// m_positionScanner = POINT2(posX.toDouble(), posY.toDouble());
 	m_Brillouin->settings.setXMin(settings.value("stage-x-min", m_Brillouin->settings.xMin).toInt());
 	m_Brillouin->settings.setXMax(settings.value("stage-x-max", m_Brillouin->settings.xMax).toInt());
 	m_Brillouin->settings.setXSteps(settings.value("stage-x-steps", m_Brillouin->settings.xSteps).toInt());
@@ -4063,5 +4105,7 @@ void BrillouinAcquisition::readSettings() {
 	m_Brillouin->settings.conCalibrationInterval = settings.value("brillouin-con-calibrate-interval", m_Brillouin->settings.conCalibrationInterval).toDouble();
 	m_Brillouin->settings.nrCalibrationImages = settings.value("brillouin-nr-calibration-images", m_Brillouin->settings.nrCalibrationImages).toInt();
 	m_Brillouin->settings.calibrationExposureTime = settings.value("brillouin-calibration-exposure-time", m_Brillouin->settings.calibrationExposureTime).toDouble();
+	m_Brillouin->settings.eomFrequencyInput = settings.value("brillouin-eom-frequency-input", m_Brillouin->settings.eomFrequencyInput).toDouble();
+	m_Brillouin->settings.eomAttenuationInput = settings.value("brillouin-eom-attenuation-input", m_Brillouin->settings.eomAttenuationInput).toDouble();
 	settings.endGroup();
 }

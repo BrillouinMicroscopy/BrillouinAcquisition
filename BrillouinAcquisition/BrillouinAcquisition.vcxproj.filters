@@ -189,6 +189,9 @@
     <ClCompile Include="external\unwrap\unwrap2D.c">
       <Filter>Source Files\lib</Filter>
     </ClCompile>
+    <ClCompile Include="src\Devices\EOM.cpp">
+      <Filter>Source Files\Devices</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\stdafx.h">
@@ -352,5 +355,8 @@
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="external\eigen\debug\msvc\eigen.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\..\..\Program Files\Carl Zeiss\MTB 2011 - 2.15.0.2\MTBApi\MTBApi.tlb" />
   </ItemGroup>
 </Project>

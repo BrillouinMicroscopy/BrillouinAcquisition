@@ -35,8 +35,8 @@ template <typename T>
 struct CALIBRATION {
 public:
 	CALIBRATION(int index, const std::vector<T>& data, int rank, hsize_t *dims, const std::string& sample, double shift, const std::string& date,
-		double exposure = 0, double gain = 1, const CAMERA_ROI& roi = CAMERA_ROI{}) :
-		index(index), data(data), rank(rank), dims(dims), sample(sample), shift(shift), date(date), exposure(exposure), gain(gain), roi(roi) {};
+		double exposure = 0, double gain = 1, const CAMERA_ROI& roi = CAMERA_ROI{}, const std::vector<double>& frequencies = {}, const std::vector<double>& voltages = {}) :
+		index(index), data(data), rank(rank), dims(dims), sample(sample), shift(shift), date(date), exposure(exposure), gain(gain), roi(roi), frequencies(frequencies), voltages(voltages) {};
 
 	const int index;
 	const std::vector<T> data;
@@ -48,6 +48,8 @@ public:
 	const double exposure;
 	const double gain;
 	const CAMERA_ROI roi;
+	const std::vector<double> frequencies; // Optional EOM frequencies
+	const std::vector<double> voltages;    // Optional EOM voltages
 };
 
 template <typename T>
@@ -266,7 +268,8 @@ public:
 	// calibration data
 	template <typename T>
 	void setCalibrationData(int index, const std::vector<T>& data, const int rank, const hsize_t *dims, const std::string& sample,
-		double shift, const std::string& date = "now", double exposure = 0, double gain = 1, const CAMERA_ROI& roi = CAMERA_ROI{});
+		double shift, const std::string& date = "now", double exposure = 0, double gain = 1, const CAMERA_ROI& roi = CAMERA_ROI{},
+		const std::vector<double>& frequencies = {}, const std::vector<double>& voltages = {});
 	std::vector<double> getCalibrationData(int index);
 	std::string getCalibrationDate(int index);
 	std::string getCalibrationSample(int index);
@@ -461,8 +464,19 @@ void H5BM::setPayloadData(int indX, int indY, int indZ, const std::vector<T>& da
 
 template <typename T>
 void H5BM::setCalibrationData(int index, const std::vector<T>& data, const int rank, const hsize_t * dims, const std::string& sample,
-	double shift, const std::string& date, double exposure, double gain, const CAMERA_ROI& roi) {
+	double shift, const std::string& date, double exposure, double gain, const CAMERA_ROI& roi, const std::vector<double>& frequencies, const std::vector<double>& voltages) {
 	setData(data, std::to_string(index), m_Brillouin.groups->calibrationData, rank, dims, date, sample, shift, "", exposure, gain, roi);
+	// NEW: optional frequency array
+    if (!frequencies.empty()) {
+        hsize_t freq_dim[1] = { static_cast<hsize_t>(frequencies.size()) };
+        setData(frequencies, "frequencies", m_Brillouin.groups->calibrationData, 1, freq_dim, date, sample, shift);
+    }
+
+    // NEW: optional voltage array
+    if (!voltages.empty()) {
+        hsize_t volt_dim[1] = { static_cast<hsize_t>(voltages.size()) };
+		setData(voltages, "voltages", m_Brillouin.groups->calibrationData, 1, volt_dim, date, sample, shift);
+    }
 }
 
 template <typename T>

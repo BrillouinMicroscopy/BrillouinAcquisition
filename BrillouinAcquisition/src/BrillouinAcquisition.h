@@ -19,6 +19,7 @@
 #include "Devices/ScanControls/ZeissMTB_Erlangen.h"
 #include "Devices/ScanControls/ZeissMTB_Erlangen2.h"
 #include "Devices/ScanControls/NIDAQ.h"
+#include "Devices/EOM.h" 
 
 #include "Acquisition/Acquisition.h"
 #include "external/qcustomplot/qcustomplot.h"
@@ -498,7 +499,10 @@ private slots:
 	void on_conCalibrationInterval_valueChanged(double);
 	void on_nrCalibrationImages_valueChanged(int);
 	void on_calibrationExposureTime_valueChanged(double);
-
+	void on_eomFrequencyInput_valueChanged(double);
+	void on_eomAttenuationInput_valueChanged(double);
+	void showEOMOptions();
+    
 	// repetitions
 	void on_repetitionCount_valueChanged(int);
 	void on_repetitionInterval_valueChanged(double);
