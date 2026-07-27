@@ -3703,6 +3703,19 @@ void BrillouinAcquisition::updateSavedPositions() {
 	ui->tableView->show();
 }
 
+
+void BrillouinAcquisition::on_zigzagScanRadioButton_toggled(bool checked) {
+	if (checked) {
+		m_Brillouin->setScanMode(ScanMode::ZigZag);
+	}
+}
+
+void BrillouinAcquisition::on_snakeScanRadioButton_toggled(bool checked) {
+	if (checked) {
+		m_Brillouin->setScanMode(ScanMode::Snake);
+	}
+}
+
 void BrillouinAcquisition::on_scanDirAutoCheckbox_stateChanged(int automatical) {
 	m_Brillouin->setScanOrderAuto((bool)automatical);
 }

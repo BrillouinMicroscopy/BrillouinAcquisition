@@ -9,9 +9,14 @@
 
 struct SCAN_ORDER {
 	bool automatical{ true };
-	int x{ 0 };	// first scan in x-direction
-	int y{ 1 };	// then in y-direction
-	int z{ 2 };	// scan in z-direction last
+	int x{ 0 }; // first scan in x-direction
+	int y{ 1 }; // then in y-direction
+	int z{ 2 }; // scan in z-direction last
+};
+
+enum class ScanMode {
+	ZigZag,
+	Snake
 };
 
 struct BRILLOUIN_SETTINGS {
@@ -182,6 +187,8 @@ public slots:
 
 	void setScanOrderAuto(bool automatical);
 
+	void setScanMode(ScanMode mode);
+
 	void determineScanOrder();
 
 	std::vector<POINT3> getOrderedPositions();
@@ -195,6 +202,7 @@ private:
 
 	BRILLOUIN_SETTINGS m_settings;
 	SCAN_ORDER m_scanOrder;
+	ScanMode m_scanMode{ ScanMode::ZigZag };
 	Camera*& m_andor;
 	bool m_running{ false };				// is acquisition currently running
 	POINT3 m_startPosition{ 0, 0, 0 };

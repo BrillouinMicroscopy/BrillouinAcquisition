@@ -426,6 +426,11 @@ void Brillouin::calibrate(std::unique_ptr <StorageWrapper>& storage) {
 /*
  * Construct positions vector with correct order of scan directions
  */
+void Brillouin::setScanMode(ScanMode mode) {
+    m_scanMode = mode;
+    updatePositions();
+}
+
 void Brillouin::updatePositions() {
 	// Create a local copy of the settings object to prevent subscript-out-of-range error
 	// due to race-condition.
@@ -451,18 +456,24 @@ void Brillouin::updatePositions() {
 	std::vector<double> position(3);
 	std::vector<int> indices(3);
 	for (gsl::index ii{ 0 }; ii < directions[2].size(); ii++) {
+		bool reverseY = false; // Track reverse direction for Y-axis
 		for (gsl::index jj{ 0 }; jj < directions[1].size(); jj++) {
 			// Allow to calibrate if a new line starts
 			m_calibrationAllowed[ll] = true;
-			for (gsl::index kk{ 0 }; kk < directions[0].size(); kk++) {
 
+            std::vector<double> xDirection = directions[0];
+            if (m_scanMode == ScanMode::Snake && reverseY) {
+                std::reverse(xDirection.begin(), xDirection.end());
+            }
+
+			for (gsl::index kk{ 0 }; kk < xDirection.size(); kk++) {
 				// construct indices vector
-				indices[0] = kk;
+				indices[0] = reverseY ? (xDirection.size() - 1 - kk) : kk;
 				indices[1] = jj;
 				indices[2] = ii;
 
 				// construct position vector
-				position[0] = directions[0][kk];
+				position[0] = xDirection[kk];
 				position[1] = directions[1][jj];
 				position[2] = directions[2][ii];
 
@@ -475,9 +486,13 @@ void Brillouin::updatePositions() {
 
 				ll++;
 			}
-		}
-	}
-	emit(s_orderedPositionsChanged(m_orderedPositionsRelative));
+
+            if (m_scanMode == ScanMode::Snake) {
+                reverseY = !reverseY;
+            }
+        }
+    }
+    emit(s_orderedPositionsChanged(m_orderedPositionsRelative));
 }
 
 std::string Brillouin::getRepetitionFilename() {

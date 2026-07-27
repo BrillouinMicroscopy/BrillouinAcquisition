@@ -518,6 +518,8 @@ private slots:
 	/*
 	 *	Scan direction order related functions
 	 */
+	void on_zigzagScanRadioButton_toggled(bool);
+	void on_snakeScanRadioButton_toggled(bool);
 	void on_scanDirAutoCheckbox_stateChanged(int);
 	void on_buttonGroup_buttonClicked(int);
 	void on_buttonGroup_2_buttonClicked(int);
